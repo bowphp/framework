@@ -1,0 +1,32 @@
+{
+    "name": "papac/snoopframework",
+    "description": "The Snoop Framework",
+    "keywords": ["framework", "snoopframework"],
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/papac/snoopframework/issues",
+        "source": "https://github.com/papac/snoopframework"
+    },
+    "authors": [
+        {
+            "name": "Franck Dakia",
+            "email": "dakiafranck@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "kylekatarnls/jade-php": "^1.3",
+        "twig/twig": "^1.23",
+        "mustache/mustache": "^2.9"
+    },
+    "autoload": {
+        "files": [
+            "src/Core/Util/helpers.php",
+            "src/Core/Views/helpers.php"
+        ],
+        "psr-4": {
+            "System\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
