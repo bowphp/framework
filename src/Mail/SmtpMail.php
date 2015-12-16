@@ -1,16 +1,18 @@
 <?php
 
 
-namespace System;
-
-    /**
-     * Class SmtpMail
-     * @package System
-     */
 /**
  * Class SmtpMail
- * @package System
+ * 
+ * @package System\Mail
  */
+
+namespace System\Mail;
+
+use ErrorException;
+use System\Exception\SocketException;
+use System\Exception\SnoopSmptException;
+
 class SmtpMail implements IHeader
 {
 
@@ -134,7 +136,7 @@ class SmtpMail implements IHeader
         $this->sock = fsockopen($url, $port, $errno, $errstr, 50);
 
         if ($this->sock === null) {
-            throw new Exception\SOCKException(__METHOD__."(): can not connect to {$url}:{$port}", E_USER_ERROR);
+            throw new Exception\SocketException(__METHOD__."(): can not connect to {$url}:{$port}", E_USER_ERROR);
         }
 
         stream_set_timeout($this->sock, 20, 0);
@@ -150,7 +152,7 @@ class SmtpMail implements IHeader
             $this->write("STARTTLS", 220);
             $secured = stream_socket_enable_crypto($this->connection, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
             if (!$secured) {
-                throw new \ErrorException(__METHOD__."(): Can not secure you connection with tls.", 1);
+                throw new ErrorException(__METHOD__."(): Can not secure you connection with tls.", 1);
             }
             $this->write("EHLO $host", $code=250);
         }
@@ -195,7 +197,7 @@ class SmtpMail implements IHeader
         if ($code) {
             $response = $this->read();
             if (!in_array((int) $response, (array) $code, true)) {
-                throw new Exception\SnoopSmptException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", 1);
+                throw new SnoopSmptException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", 1);
             }
         }
     }

@@ -6,7 +6,7 @@ use System\Interfaces\CollectionAccess;
 
 class RequestData implements CollectionAccess
 {
-	private $data;
+	private $data = [];
 	private static $instance = null;
 
 	private function __construct($method)
@@ -22,7 +22,7 @@ class RequestData implements CollectionAccess
 
 	private function __clone(){}
 
-	public static function loader($method) {
+	public function loader($method) {
 		if (self::$instance === null) {
 			self::$instance = new self($method);
 		}
@@ -56,7 +56,7 @@ class RequestData implements CollectionAccess
 	 * @return mixed
 	 */
 	public function get($key = null) {
-		if (is_string($key)) {
+		if (!is_null($key)) {
 			return $this->isKey($key) ? $this->data[$key] : false;
 		}
 		return $this->data;
@@ -72,6 +72,25 @@ class RequestData implements CollectionAccess
 	{
 		unset($this->data[$key]);
 		return $this;
+	}
+
+	/**
+	 * removeSession, supprime un entree dans la
+	 * table de session.
+	 * @param string $key
+	 * @return self
+	 */
+	public function add($key, $data, $next = false)
+	{
+		if($this->isKey($key)) {
+			if ($next) {
+				array_push($this->data[$key], $data);
+			} else {
+				$this->data[$key] = $data;
+			}
+		} else {
+			$this->data[$key] = $data;
+		}
 	}
 
 }

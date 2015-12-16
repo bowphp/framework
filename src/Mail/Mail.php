@@ -7,7 +7,9 @@
  * @package System
  */
 
-namespace System;
+namespace System\Mail;
+
+use InvalidArgumentException;
 
 class Mail
 {
@@ -303,7 +305,7 @@ class Mail
 	public function message($message)
 	{
 		if (!is_string($message)) {
-			throw new \InavlidArgumentException(__METHOD__."() parameter most be string " . gettype($message) . "given", 1);
+			throw new InvalidArgumentException(__METHOD__."() parameter most be string " . gettype($message) . "given", 1);
 		}
 		$this->message = $message;
 		return $this;

@@ -2,10 +2,23 @@
 
 namespace System\Http;
 
+use Jade;
+use ErrorException;
+use Mustache_Engine;
+use Twig_Autoloader;
+use Twig_Environment;
+use Twig_Loader_Array;
 use System\Core\Snoop;
+use InvalidArgumentException;
+use System\Exception\ResponseException;
 
 class Response
 {
+	/**
+	 * Liste de code http valide pour l'application
+	 * Sauf que l'utilisateur poura lui meme redefinir
+	 * ces code s'il utilise la fonction header de php
+	 */
 	private static $header = [
 		200 => "OK",
 		301 => "Moved Permanently",
@@ -17,8 +30,38 @@ class Response
 		500 => "Internal Server Error"
 	];
 
+	/**
+	 * Nampespace par defaut des controllers de l'application
+	 * 
+	 * @var string
+	 */
+	private $controllerNamespace = "App\Http\MyController";
+	
+	/**
+	 * Namespace par defaut des middleware de l'application
+	 * 
+	 * @var string 
+	 */
+	private $middlewareNameSpace = "App\Http\Middleware";
+	
+	/**
+	 * Le nom du moteur de template par
+	 * 
+	 * @var string
+	 */
     private $engine = null;
+    
+    /**
+     * Singleton
+     * @var self
+     */
     private static $instance = null;
+    
+    /**
+     * Instance de l'application
+     * 
+     * @var \System\Core\Snoop
+     */
     private $app;
 
     private function __construct(Snoop $app)
@@ -36,6 +79,8 @@ class Response
 
 	/**
 	 * Modifie les entétes http
+	 * 
+	 * 
 	 * @param string $key
 	 * @param string $value
 	 * @return self
@@ -47,6 +92,8 @@ class Response
 	}
     /**
      * redirect, permet de lancer une redirection vers l'url passer en paramêtre
+     * 
+     * 
      * @param string $path
      */
     public function redirect($path)
@@ -58,6 +105,9 @@ class Response
 
     /**
      * redirectTo404, redirige vers 404
+     * 
+     * 
+     * @return self
      */
     public function redirectTo404()
     {
@@ -67,9 +117,12 @@ class Response
 
 	/**
 	 * Modifie les entétes http
+	 * 
+	 * 
 	 * @param int $code
+	 * @return void
 	 */
-	public function setResponseCode($code)
+	public function setCode($code)
 	{
 		if (in_array((int) $code, array_keys(self::$header), true)) {
 			header(self::$header[$code], true, $code);
@@ -81,29 +134,35 @@ class Response
 	}
 
 	/**
+	 * Response de type JSON
+	 * 
+	 * 
 	 * @param mixed $data
+	 * @return void
 	 */
-	public function sendToJson($data)
+	public function json($data)
 	{
-		header("Content-Type: application/json; charset=utf-8");
-		$this->kill(json_encode($data));
+		$this->setHeader("Content-Type", "application/json; charset=utf-8");
+		$this->app->kill(json_encode($data));
 	}
 
 	/**
 	 * render, require $filename
+	 * 
+	 * 
 	 * @param string $filename
 	 * @param mixed|null $bind
 	 * @return \System\Snoop
 	 */
-	public function requireView($filename, $bind = null)
+	public function view($filename, $bind = null)
 	{
 		if (is_string($bind)) {
 			$bind = new \StdClass($bind);
 		} else if (is_array($bind)) {
 			$bind = (object) $bind;
 		}
-		if ($this->views !== null) {
-			$filename = $this->views ."/".$filename;
+		if ($this->app->get("views") !== null) {
+			$filename = $this->app->get("views") ."/".$filename;
 		}
 		// Render du fichier demander.
 		require $filename;
@@ -112,67 +171,89 @@ class Response
 
 	/**
 	 * render, require $filename
+	 * 
+	 * 
 	 * @param string $filename
 	 * @param mixed|null $bind
-	 * @return \System\Snoop
-	 */
-	public function requireFile($filename, $bind = null)
-	{
-		$bind = (object) $bind;
-		require $filename;
-		return $this;
-	}
-
-	/**
-	 * render, require $filename
-	 * @param string $filename
-	 * @param mixed|null $bind
-	 * @return \System\Snoop
+	 * @return self
 	 */
 	public function render($filename, $bind = null)
 	{
-		if ($this->views !== null) {
-			$filename = $this->views . "/". $filename;
+		$filename = preg_replace("/@|#/", "/", $filename);
+		$filename .= ".tpl.php";
+		
+		if ($this->app->get("views") !== null) {
+			$filename = $this->app->get("views") . "/template/" . $filename;
 		}
+		
 		$template = $this->templateLoader($filename);
+
 		if ($bind === null) {
 			$bind = [];
 		}
-		if ($this->engine == "twig") {
-			echo $template->render("template", $bind);
-		} else if ($this->engine == "mustache") {
-			echo $template->render(file_get_contents($filename), $bind);
-		} else if ($this->engine == "jade") {
+		if ($this->app->get("engine") == "twig") {
+	
+			$this->send($template->render("template", $bind));
 
-        }
+		} else if (in_array($this->app->get("engine"), ["mustache", "jade"])) {
+
+			$this->send($template->render(file_get_contents($filename), $bind));
+		
+		}
 		return $this;
 	}
 
 	/**
 	 * templateLoader, charge le moteur template a utiliser.
-	 * @param null $filename
-	 * @return \Mustache_Engine|null|\Twig_Environment
-	 * @throws \ErrorException
+	 * 
+	 * 
+	 * @param string|null $filename
+	 * @throws ErrorException
+	 * @return Mustache_Engine|null|Twig_Environment
 	 */
-	private function templateLoader($filename = null)
+	private function templateLoader($filename)
 	{
-		if ($this->engine === null || !in_array($this->engine, ["twig", "mustache"], true)) {
-			throw new \ErrorException("Erreur: template n'est pas définir");
+		if ($this->app->get("engine") === null) {
+			if (!in_array($this->app->get("engine"), ["twig", "mustache", "jade"])) {
+				throw new ErrorException("Erreur: template n'est pas définir");
+			}
 		}
 		$tpl = null;
+		if ($this->app->get("engine") == "twig") {
 
-		if ($this->engine == "twig") {
-			require_once 'vendor/twig/twig/lib/Twig/Autoloader.php';
-			\Twig_Autoloader::register();
+			// require dirname(dirname(__DIR__)) . "/../vendor/twig/twig/lib/Twig/Autoloader.php";
+			// Twig_Autoloader::register();
 
-			$loader = new \Twig_Loader_Array([
+			$loader = new Twig_Loader_Array([
 				'template' => file_get_contents($filename)
 			]);
-			$tpl = new \Twig_Environment($loader);
-		} else {
-			$tpl = new \Mustache_Engine();
+
+			$tpl = new Twig_Environment($loader);
+		
+		} else if ($this->app->get("engine") == "mustache") {
+			
+			$tpl = new Mustache_Engine();
+
+		} else if ($this->app->get("engine") == "jade") {
+
+			$tpl = new Jade([
+				'prettyprint' => true,
+				'extension' => '.cache.jade',
+				'cache' => $this->app->get("cache")
+			]);
 		}
 		return $tpl;
+	}
+
+	public function send($data, $stop = false)
+	{
+		if (is_array($data) || is_object($data)) {
+			$data = json_encode($data);
+		}
+		echo $data;
+		if ($stop) {
+			$this->app->kill();
+		}
 	}
 
 }

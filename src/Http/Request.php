@@ -67,7 +67,7 @@ class Request
 	 *
 	 * @return boolean
 	 */
-	public function isXhr()
+	public static function ajax()
 	{
 		if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
 			$xhrObj = strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]);
