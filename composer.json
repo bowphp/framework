@@ -23,7 +23,7 @@
             "src/Core/Util/helpers.php",
             "src/Core/Views/helpers.php"
         ],
-        "psr-4": {
+        "psr-0": {
             "System\\": "src/"
         }
     },
