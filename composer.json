@@ -14,9 +14,6 @@
         }
     ],
     "require-dev": {
-        "kylekatarnls/jade-php": "^1.3",
-        "twig/twig": "^1.23",
-        "mustache/mustache": "^2.9"
     },
     "autoload": {
         "files": [
