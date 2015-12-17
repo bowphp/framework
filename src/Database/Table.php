@@ -362,13 +362,6 @@ class Table
         return $this->addAggregat("sum", $column);
     }
 
-    /**
-     * @param $column
-     */
-    public function count($column)
-    {
-        return $this->addAggregat("count", $count);
-    }
 
     /**
      * @param $column
@@ -387,7 +380,7 @@ class Table
     }
 
     /**
-     * @param ...$column
+     * @param $column
      */
     public function concat($column)
     {
@@ -402,13 +395,13 @@ class Table
         return $this;
     }
 
+    // Actionner
     /**
      * Action get, seulement sur la requete de type select
      * 
      * @param $limit
      * @return array|object|
      */
-    // Actionner
     public function get($limit = null)
     {
         $sql = "select";
@@ -424,6 +417,14 @@ class Table
             return $this->connection->query($sql)->$fetch();
         }
         return null;
+    }
+
+    /**
+     * @param $column
+     */
+    public function count($column = "*")
+    {
+        return (int) $this->connection->query("select count($column) from " . $this->tableName)->fetchColumn();
     }
 
     /**
