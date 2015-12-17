@@ -2,6 +2,7 @@
 
 namespace System\Http;
 
+use ErrorException;
 use System\Interfaces\CollectionAccess;
 
 class RequestData implements CollectionAccess
@@ -9,6 +10,11 @@ class RequestData implements CollectionAccess
 	private $data = [];
 	private static $instance = null;
 
+	/**
+	 * Contructeur privé
+	 *
+	 * @param $method
+	 */
 	private function __construct($method)
 	{
 		if ($method == "GET") {
@@ -20,17 +26,28 @@ class RequestData implements CollectionAccess
 		}
 	}
 
+	/**
+	 * Fonction magic __clone en private
+	 */
 	private function __clone(){}
 
-	public function loader($method) {
+	/**
+	 * Factory permettant de charger les différentes collections
+	 *
+	 * @param $method
+	 * @return self
+	 */
+	public static function loader($method)
+	{
 		if (self::$instance === null) {
 			self::$instance = new self($method);
 		}
 		return self::$instance;
 	}
+
 	/**
-	 * isKey, verifie l'existance d'un
-	 * cle dans le table de session
+	 * isKey, verifie l'existance d'un clé dans la collection de session
+	 *
 	 * @param string $key
 	 * @return boolean
 	 */
@@ -39,7 +56,8 @@ class RequestData implements CollectionAccess
 	}
 
 	/**
-	 * filessessionIsEmpty
+	 * IsEmpty, vérifie si une collection est vide.
+	 *
 	 *	@return boolean
 	 */
 	public function IsEmpty()
@@ -48,10 +66,8 @@ class RequestData implements CollectionAccess
 	}
 
 	/**
-	 * session, permet de manipuler le donnee
-	 * de session.
-	 * permet de recuperer d'une valeur ou
-	 * la collection de valeur.
+	 * get, permet de recuperer d'une valeur ou la collection de valeur.
+	 *
 	 * @param string $key=null
 	 * @return mixed
 	 */
@@ -63,8 +79,8 @@ class RequestData implements CollectionAccess
 	}
 
 	/**
-	 * removeSession, supprime un entree dans la
-	 * table de session.
+	 * remove, supprime un entree dans la collection
+	 *
 	 * @param string $key
 	 * @return self
 	 */
@@ -75,9 +91,11 @@ class RequestData implements CollectionAccess
 	}
 
 	/**
-	 * removeSession, supprime un entree dans la
-	 * table de session.
+	 * add, ajouté une entrée dans la collection
+	 *
 	 * @param string $key
+	 * @param mixed $data
+	 * @param bool $next
 	 * @return self
 	 */
 	public function add($key, $data, $next = false)
@@ -90,6 +108,24 @@ class RequestData implements CollectionAccess
 			}
 		} else {
 			$this->data[$key] = $data;
+		}
+	}
+
+	/**
+	 * set, modifier une entree dans la collection
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 * @throws ErrorException
+	 * @return self
+	 */
+	public function set($key, $value)
+	{
+		if ($this->isKey($key)) {
+			$this->data[$key] = $value;
+			return $this;
+		} else {
+			throw new ErrorException("Clé non définie", E_NOTICE);
 		}
 	}
 

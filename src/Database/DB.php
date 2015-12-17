@@ -3,25 +3,50 @@
 namespace System\Database;
 
 use PDO;
-use Exception;
 use PDOStatement;
+use PDOException;
 use ErrorException;
 use System\Support\Util;
 use System\Support\Logger;
 use System\Support\Security;
+use InvalidArgumentException;
 use System\Exception\ConnectionException;
 
 class DB
 {
+    /**
+     * Instance de DB
+     *
+     * @var null
+     */
     private static $db = null;
-    private static $query = null;
+    /**
+     * Configuration
+     *
+     * @var array
+     */
     private static $config;
+    /***
+     * Liste des constances d'execution de Requete SQL.
+     * Pour le system de de base de donnee ultra minimalise de snoop.
+     */
+    const SELECT = 1;
+    const UPDATE = 2;
+    const DELETE = 3;
+    const INSERT = 4;
 
-    private static function loadConfiguration()
+    public static function loadConfiguration($config)
     {
-        return static::$config = require dirname(dirname(dirname(__DIR__))) . "/configuration/db.php";
+        return static::$config = (object) $config;
     }
 
+    /**
+     * connection
+     *
+     * @param null $option
+     * @param null $cb
+     * @return null
+     */
     public static function connection($option = null, $cb = null)
     {
         if (static::$db instanceof PDO) {
@@ -40,7 +65,7 @@ class DB
         /**
          * Essaie de connection
          */
-        $t = static::loadConfiguration();
+        $t = static::$config;
 
         if (is_int($t)) {
             Util::launchCallBack($cb, [new ErrorException("Le fichier db.php est mal configurer")]);
@@ -74,10 +99,9 @@ class DB
 	/**
 	 * switchTo, permet de ce connecter a une autre base de donnee.
      *
-     * 
 	 * @param string $enterKey
 	 * @param callable $cb
-	 * @return \System\Snoop
+	 * @return void
 	 */
 	public static function switchTo($enterKey, $cb)
 	{
@@ -88,9 +112,15 @@ class DB
 			static::$db = null;
 			static::connection($enterKey, $cb);
 		}
-		return $this;
 	}
 
+    /**
+     * execute une requete update
+     *
+     * @param $sqlstatement
+     * @param array $bind
+     * @return bool
+     */
     public static function update($sqlstatement, $bind = [])
     {
         static::verifyConnection();
@@ -105,41 +135,68 @@ class DB
         return false;
     }
 
+    /**
+     * execute une requete select
+     *
+     * @param $sqlstatement
+     * @param array $bind
+     * @return mixed|null
+     */
     public static function select($sqlstatement, $bind = [])
     {
         static::verifyConnection();
         if (preg_match("/^select\s[\w\d_()*`]+\sfrom\s[\w\d_`]+.+$/i", $sqlstatement)) {
             $pdostatement = static::$db->prepare($sqlstatement);
             $pdostatement->execute($bind);
-            $data = $pdostatement->fetchAll();
+            $fetch = "fetchAll";
             if (count($data) == 1) {
-                return Security::sanitaze($data[0]);
-            } else {
-                return Security::sanitaze(array_values($data));
-            }
+               $fetch = "fetch";
+            } 
+            return Security::sanitaze($pdostatement->$fetch());
         }
         return null;
     }
 
+    /**
+     * execute une requete insert
+     *
+     * @param $sqlstatement
+     * @param array $bind
+     * @return null
+     */
     public static function insert($sqlstatement, $bind = [])
     {
         static::verifyConnection();
         if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)\svalues\(.+\)|\s?set\s(.+)+)$/i", $sqlstatement)) {
             $pdostatement = static::$db->prepare($sqlstatement);
-            return $pdostatement->execute(Security::sanitaze($bind, true));
+            static::bind($pdostatement, $bind);
+            return $pdostatement->execute();
         }
         return null;
     }
 
+    /**
+     * execute une requete de type DROP|CREATE TABLE|TRAUNCATE|ALTER TABLE
+     *
+     * @param $sqlstatement
+     * @return bool
+     */
     public static function statement($sqlstatement)
     {
         static::verifyConnection();
-        if (preg_match("/^(drop|alter|truncate|create\stable)\s.+$/i", $sqlstatement)) {
+        if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+$/i", $sqlstatement)) {
             return (bool) static::$db->exec($sqlstatement);
         }
         return false;
     }
 
+    /**
+     * execute une requete delete
+     *
+     * @param $sqlstatement
+     * @param array $bind
+     * @return bool
+     */
     public static function delete($sqlstatement, $bind = [])
     {
         static::verifyConnection();
@@ -155,6 +212,12 @@ class DB
         return false;
     }
 
+    /**
+     * Charge le factory Table
+     *
+     * @param $tableName
+     * @return mixed
+     */
     public static function table($tableName)
     {
         static::verifyConnection();
@@ -164,7 +227,6 @@ class DB
     /**
      * rangeField, fonction permettant de sécuriser les données.
      *
-     * 
      * @param array $data, les données à sécuriser
      * @return array $field
      */
@@ -187,6 +249,13 @@ class DB
         return $field;
     }
 
+    /**
+     * Execute PDOStatement::bindValue sur une instance de PDOStatement passer en paramètre
+     *
+     * @param PDOStatement $pdoStatement
+     * @param $data
+     * @return PDOStatement
+     */
     private static function bind(PDOStatement &$pdoStatement, $data)
     {
         foreach ($data as $key => $value) {
@@ -223,7 +292,6 @@ class DB
 	/**
 	 * Formateur de donnee. key => :value
 	 *
-     * 
 	 * @param array $data
 	 * @return array $resultat
 	 */
@@ -238,7 +306,7 @@ class DB
 
     /**
      * Insertion des données dans la DB
-     * ====================== MODEL ======================
+     * ====================== USAGE ======================
      *	$options = [
      *		"query" => [
      *			"table" => "nomdelatable",
@@ -247,7 +315,6 @@ class DB
      *		],
      *		"data" => "les données a insérer."
      *	];
-     * 
      * 
      * @param array $options
      * @param bool|false $return
@@ -280,12 +347,11 @@ class DB
             $debug = $pdoStatement->debugDumpParams();
             Logger::error(__METHOD__."(): Query fails, [SQL: {$debug}]");
         }
-        return $this;
     }
 
     /**
      * Lancement du debut d'un transaction
-     * 
+     *
      * @var void
      */
     public static function transaction()
@@ -329,7 +395,7 @@ class DB
         }
     }
     /**
-     * Recupere l'identifiant de la derniere enregistrement.
+     * Récupère l'identifiant de la derniere enregistrement.
      * 
      * @return int
      */
@@ -340,7 +406,7 @@ class DB
     }
 
     /**
-     * Recupere la derniere erreur sur la l'object PDO
+     * Récupère la derniere erreur sur la l'object PDO
      * 
      * @return array
      */
@@ -349,6 +415,207 @@ class DB
         return [
             "pdo" => static::$db->errorInfo()
         ];
+    }
+
+    /**
+     * makeQuery, fonction permettant de générer des SQL Statement à la volé.
+     *
+     * @param array $options, ensemble d'information
+     * @param callable $cb = null
+     * @return string $query, la SQL Statement résultant
+     */
+    public static function makeQuery($options, $cb = null)
+    {
+        /** NOTE:
+         *	 | - where
+         *	 | - order
+         *	 | - limit | take.
+         *	 | - grby
+         *	 | - join
+         *
+         *	 Si vous spécifiez un join veillez définir des alias
+         *	 $options = [
+         *	 	"type" => SELECT,
+         * 		"table" => "table",
+         *	 	"join" => [
+         * 			"otherTable" => "otherTable",
+         *	 		"on" => [
+         *	 			"T.id",
+         *	 			"O.parentId"
+         *	 		]
+         *	 	],
+         *	 	"where" => "R.r_num = " . $currentRegister,
+         *	 	"order" => ["column", true],
+         *	 	"limit" => "1, 5",
+         *	 	"grby" => "column"
+         *	 ];
+         */
+        $query = "";
+        switch ($options['type']) {
+            /**
+             * Niveau équivalant à un quelconque SQL Statement de type:
+             *  _________________
+             * | SELECT ? FROM ? |
+             *  -----------------
+             */
+            case self::SELECT:
+                /**
+                 * Initialisation de variable à usage simple
+                 */
+                $join  = '';
+                $where = '';
+                $order = '';
+                $limit = '';
+                $grby  = '';
+                $between = '';
+
+                if (isset($options["join"])) {
+                    $join = " INNER JOIN " . $options['join']["otherTable"] . " ON " . implode(" = ", $options['join']['on']);
+                }
+                /*
+                 * Vérification de l'existance d'un clause:
+                 * _______
+                 *| WHERE |
+                 * -------
+                 */
+                if (isset($options['where'])) {
+                    $where = " WHERE " . $options['where'];
+                }
+                /*
+                 *Vérification de l'existance d'un clause:
+                 * __________
+                 *| ORDER BY |
+                 * ----------
+                 */
+                if (isset($options['-order'])) {
+                    $order = " ORDER BY " . (is_array($options['-order']) ? implode(", ", $options["-order"]) : $options["-order"]) . " DESC";
+                } else if (isset($options['+order'])) {
+                    $order = " ORDER BY " . (is_array($options['+order']) ? implode(", ", $options["+order"]) : $options["+order"]) . " ASC";
+                }
+
+                /*
+                 * Vérification de l'existance d'un clause:
+                 * _______
+                 *| LIMIT |
+                 * -------
+                 */
+                if (isset($options['limit']) || isset($options["take"])) {
+                    if (isset($options['limit'])) {
+                        $param = $options['limit'];
+                    } else {
+                        $param = $options['take'];
+                    }
+                    $param = is_array($param) ? implode(", ", $param) : $param;
+                    $limit = " LIMIT " . $param;
+                }
+
+                /**
+                 * Vérification de l'existance d'un clause:
+                 * ----------
+                 *| GROUP BY |
+                 * ----------
+                 */
+                if (isset($options->grby)) {
+                    $grby = " GROUP BY " . $options['grby'];
+                }
+                if (isset($options["data"])) {
+                    if (is_array($options["data"])) {
+                        $data = implode(", ", $options['data']);
+                    } else {
+                        $data = $options['data'];
+                    }
+                } else {
+                    $data = "*";
+                }
+                /**
+                 * Vérification de l'existance d'un clause:
+                 * ----------
+                 *| BETWEEN  |
+                 * ----------
+                 */
+
+                if (isset($options["between"])) {
+                    $between = $options[0] . " NOT BETWEEN " . implode(" AND ", $options["between"]);
+                } else if (isset($options["-between"])) {
+                    $between = $options[0] . " BETWEEN " . implode(" AND ", $options["between"][1]);
+                }
+
+                /**
+                 * Edition de la SQL Statement facultatif.
+                 * construction de la SQL Statement finale.
+                 */
+                $query = "SELECT " . $data . " FROM " . $options['table'] . $join . $where . ($where !== "" ? $between : "") . $order . $limit . $grby;
+                break;
+            /**
+             * Niveau équivalant à un quelconque
+             * SQL Statement de type:
+             * _____________
+             *| INSERT INTO |
+             * -------------
+             */
+            case self::INSERT:
+                /**
+                 * Sécurisation de donnée.
+                 */
+                $field = self::rangeField($options['data']);
+                /**
+                 * Edition de la SQL Statement facultatif.
+                 */
+                $query = "INSERT INTO " . $options['table'] . " SET " . $field;
+                break;
+            /**
+             * Niveau équivalant à un quelconque
+             * SQL Statement de type:
+             * ________
+             *| UPDATE |
+             * --------
+             */
+            case self::UPDATE:
+                /**
+                 * Sécurisation de donnée.
+                 */
+                $field = self::rangeField($options['data']);
+                /**
+                 * Edition de la SQL Statement facultatif.
+                 */
+                $query = "UPDATE " . $options['table'] . " SET " . $field . " WHERE " . $options['where'];
+                break;
+            /**
+             * Niveau équivalant à un quelconque
+             * SQL Statement de type:
+             * _____________
+             *| DELETE FROM |
+             * -------------
+             */
+            case self::DELETE:
+                /**
+                 * Edition de la SQL Statement facultatif.
+                 */
+                $query = "DELETE FROM " . implode(", ", $options['table']) . " WHERE " . $options['where'];
+                break;
+        }
+        /**
+         * Vérification de l'existance de la fonction de callback
+         */
+        if ($cb !== null) {
+            /** NOTE:
+             * Execution de la fonction de rappel,
+             * qui récupère une erreur ou la query
+             * pour évantuel vérification
+             */
+            call_user_func($cb, isset($query) ? $query : E_ERROR);
+        }
+        return $query;
+    }
+    /**
+     * retourne l'instance de pdo
+     *
+     * @return PDO
+     */
+    public static function pdo()
+    {
+        static::verifyConnection();
+        return static::$db;
     }
 
 }

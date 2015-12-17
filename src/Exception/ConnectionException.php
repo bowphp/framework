@@ -4,4 +4,5 @@ namespace System\Exception;
 
 use ErrorException;
 
-class RouterException extends ErrorException {}
+class ConnectionException extends ErrorException
+{}

@@ -1,58 +1,69 @@
 <?php
 
-
-/**
- * Class SmtpMail
- * 
- * @package System\Mail
- */
-
 namespace System\Mail;
 
 use ErrorException;
+use System\Exception\SmtpException;
 use System\Exception\SocketException;
-use System\Exception\SnoopSmptException;
 
 class SmtpMail implements IHeader
 {
 
-    private static $inst = null;
-    private $connection = null;
-    private $sep;
     /**
-     * @return self
-     */
-    private function __construct()
-    {
-        if (self::$inst !== null) {
-            if (defined('PHP_EOL')) {
-                $this->sep = PHP_EOL;
-            } else {
-                $this->sep = (strpos(PHP_OS, 'WIN') === false) ? "\n" : "\r\n";
-            }
-            self::$inst = new self;
-        }
-
-        return self::$inst;
-    }
-
-    private function __clone(){}
-
-    /**
-     * @return SmtpMail
-     */
-    public static function load()
-    {
-        return self::__construct();
-    }
-
-    /**
+     * socket de connection
+     *
      * @var null
      */
     private $sock = null;
 
     /**
+     *
+     * @var null|SmtpMail
+     */
+    private static $inst = null;
+
+    /**
+     *
+     * @var null
+     */
+    private $connection = null;
+
+    /**
+     *
+     * @var string
+     */
+    private $sep;
+
+    /**
+     * @return self
+     */
+    private function __construct()
+    {
+        if (defined('PHP_EOL')) {
+            $this->sep = PHP_EOL;
+        } else {
+            $this->sep = (strpos(PHP_OS, 'WIN') === false) ? "\n" : "\r\n";
+        }
+    }
+
+    private function __clone(){}
+
+    /**
+     * factory charge un instance de la classe.
+     *
+     * @return SmtpMail
+     */
+    public static function load()
+    {
+        if (self::$inst !== null) {
+            self::$inst = new self;
+        }
+        return self::$inst;
+    }
+
+    /**
      * @param string $mail
+     * @param string $name
      * @return self
      */
     public function addCc($mail, $name = null) {
@@ -61,6 +72,7 @@ class SmtpMail implements IHeader
 
     /**
      * @param string $mail
+     * @param string $name
      * @return self
      */
     public function addBcc($mail, $name = null) {
@@ -69,6 +81,7 @@ class SmtpMail implements IHeader
 
     /**
      * @param string $mail
+     * @param string $name
      * @return self
      */
     public function addReplayTo($mail, $name = null) {
@@ -77,6 +90,7 @@ class SmtpMail implements IHeader
 
     /**
      * @param string $mail
+     * @param string $name
      * @return self
      */
     public function addReturnPath($mail, $name = null) {
@@ -85,6 +99,8 @@ class SmtpMail implements IHeader
 
     /**
      * @param string $mail
+     * @param $name
+     * @param bool $smtp
      * @return self
      */
     public function to($mail, $name = null, $smtp = false) {
@@ -93,6 +109,7 @@ class SmtpMail implements IHeader
 
     /**
      * @param string $mail
+     * @param string $name
      * @return self
      */
     public function from($mail, $name) {
@@ -100,6 +117,8 @@ class SmtpMail implements IHeader
     }
 
     /**
+     * Lance l'envoie de mail
+     *
      * @param callable $cb=null
      * @return self
      */
@@ -108,15 +127,18 @@ class SmtpMail implements IHeader
         return $this;
     }
 
+
     /**
-     * @param string $url
-     * @param string|null $username
-     * @param string|null $password
+     * permet de se connecté a un serveur smpt
+     *
+     * @param $url
+     * @param null $username
+     * @param null $password
      * @param bool|false $secure
      * @param bool|false $tls
-     * @throws \ErrorException
-     * @throws Exception\SOCKException
-     * @throws Exception\SnoopSmptException
+     * @throws ErrorException
+     * @throws SocketException
+     * @throws SmtpException
      */
     public function connection($url, $username = null, $password = null, $secure = false, $tls = false)
     {
@@ -136,7 +158,7 @@ class SmtpMail implements IHeader
         $this->sock = fsockopen($url, $port, $errno, $errstr, 50);
 
         if ($this->sock === null) {
-            throw new Exception\SocketException(__METHOD__."(): can not connect to {$url}:{$port}", E_USER_ERROR);
+            throw new SocketException(__METHOD__."(): can not connect to {$url}:{$port}", E_USER_ERROR);
         }
 
         stream_set_timeout($this->sock, 20, 0);
@@ -165,12 +187,20 @@ class SmtpMail implements IHeader
 
     }
 
+    /**
+     * déconnection
+     */
     private function disconnect()
     {
         fclose($this->connection);
         $this->connection = null;
     }
 
+    /**
+     * Lire le flux de connection courrant.
+     *
+     * @return string
+     */
     private function read()
     {
         $s = "";
@@ -186,10 +216,12 @@ class SmtpMail implements IHeader
     }
 
     /**
-     * @param $command
-     * @param $code
+     * Lance une commande SMPT
+     *
+     * @param string $command
+     * @param int $code
      * @param null $message
-     * @throws Exception\SnoopSmptException
+     * @throws SmtpException
      */
     private function write($command, $code, $message = null)
     {
@@ -197,7 +229,7 @@ class SmtpMail implements IHeader
         if ($code) {
             $response = $this->read();
             if (!in_array((int) $response, (array) $code, true)) {
-                throw new SnoopSmptException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", 1);
+                throw new SmtpException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", 1);
             }
         }
     }

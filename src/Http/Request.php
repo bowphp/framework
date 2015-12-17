@@ -2,20 +2,19 @@
 
 namespace System\Http;
 
-use System\Core\Snoop;
-use System\Http\RequestData;
+use System\Core\Application;
 
 class Request
 {
 	private static $instance = null;
 	private $app;
 
-	private function __construct(Snoop $app)
+	private function __construct(Application $app)
 	{
 		$this->app = $app;
 	}
 
-	public static function load(Snoop $app)
+	public static function load(Application $app)
 	{
 		if (self::$instance === null) {
 			self::$instance = new self($app);
@@ -24,7 +23,8 @@ class Request
 	}
 
 	/**
-	 * retourne uri revoyer par GET.
+	 * retourne uri envoyer par client.
+	 *
 	 * @param string $path=""
 	 * @return string
 	 */
@@ -40,6 +40,7 @@ class Request
 
 	/**
 	 * Retourne la methode de la requete.
+	 *
 	 * @return string
 	 */
 	public function method()
@@ -47,16 +48,31 @@ class Request
 		return $_SERVER["REQUEST_METHOD"];
 	}
 
+	/**
+	 * Charge la factory RequestData pour le POST
+	 *
+	 * @return RequestData
+	 */
     public static function body()
     {
         return RequestData::loader("POST");
     }
 
+	/**
+	 * Charge la factory RequestData pour le GET
+	 *
+	 * @return RequestData
+	 */
     public static function param()
     {
         return RequestData::loader("GET");
     }
 
+	/**
+	 * Charge la factory RequestData pour le FILES
+	 *
+	 * @return RequestData
+	 */
     public static function files()
     {
         return RequestData::loader("FILES");
@@ -106,6 +122,5 @@ class Request
 	{
 		return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 	}
-
 
 }

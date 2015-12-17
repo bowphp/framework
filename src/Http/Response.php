@@ -4,13 +4,11 @@ namespace System\Http;
 
 use Jade;
 use ErrorException;
-use Mustache_Engine;
-use Twig_Autoloader;
-use Twig_Environment;
-use Twig_Loader_Array;
-use System\Core\Snoop;
-use InvalidArgumentException;
-use System\Exception\ResponseException;
+use System\Core\Application;
+use Twig_Autoloader as Tiwg_A;
+use Mustache_Engine as Mustache;
+use Twig_Environment as Twig_Env;
+use Twig_Loader_Array as Twig_Load;
 
 class Response
 {
@@ -29,27 +27,6 @@ class Response
 		403 => "Forbidden",
 		500 => "Internal Server Error"
 	];
-
-	/**
-	 * Nampespace par defaut des controllers de l'application
-	 * 
-	 * @var string
-	 */
-	private $controllerNamespace = "App\Http\MyController";
-	
-	/**
-	 * Namespace par defaut des middleware de l'application
-	 * 
-	 * @var string 
-	 */
-	private $middlewareNameSpace = "App\Http\Middleware";
-	
-	/**
-	 * Le nom du moteur de template par
-	 * 
-	 * @var string
-	 */
-    private $engine = null;
     
     /**
      * Singleton
@@ -60,16 +37,16 @@ class Response
     /**
      * Instance de l'application
      * 
-     * @var \System\Core\Snoop
+     * @var \System\Core\Application
      */
     private $app;
 
-    private function __construct(Snoop $app)
+    private function __construct(Application $app)
     {
         $this->app = $app;
     }
 
-    public static function load(Snoop $app)
+    public static function load(Application $app)
     {
         if (self::$instance === null) {
             self::$instance = new self($app);
@@ -79,8 +56,7 @@ class Response
 
 	/**
 	 * Modifie les entétes http
-	 * 
-	 * 
+	 *
 	 * @param string $key
 	 * @param string $value
 	 * @return self
@@ -92,51 +68,46 @@ class Response
 	}
     /**
      * redirect, permet de lancer une redirection vers l'url passer en paramêtre
-     * 
-     * 
+     *
      * @param string $path
      */
     public function redirect($path)
     {
         echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
-        header("Location: " . $this->getRoot() . $path, true, 301);
+        header("Location: " . $this->app->get("root") . $path, true, 301);
         $this->app->kill();
     }
 
     /**
      * redirectTo404, redirige vers 404
-     * 
-     * 
+     *
      * @return self
      */
     public function redirectTo404()
     {
-        $this->setResponseCode(404);
+        $this->setCode(404);
         return $this;
     }
 
 	/**
 	 * Modifie les entétes http
 	 * 
-	 * 
 	 * @param int $code
-	 * @return void
+	 * @return bool|void
 	 */
 	public function setCode($code)
 	{
 		if (in_array((int) $code, array_keys(self::$header), true)) {
 			header(self::$header[$code], true, $code);
+			return true;
 		} else {
-			if (self::$logLevel == "prod") {
-				self::log("Can't set header.");
-			}
+			return false;
 		}
 	}
 
 	/**
 	 * Response de type JSON
-	 * 
-	 * 
+	 *
 	 * @param mixed $data
 	 * @return void
 	 */
@@ -149,18 +120,12 @@ class Response
 	/**
 	 * render, require $filename
 	 * 
-	 * 
 	 * @param string $filename
 	 * @param mixed|null $bind
-	 * @return \System\Snoop
+	 * @return \System\Core\Application
 	 */
 	public function view($filename, $bind = null)
 	{
-		if (is_string($bind)) {
-			$bind = new \StdClass($bind);
-		} else if (is_array($bind)) {
-			$bind = (object) $bind;
-		}
 		if ($this->app->get("views") !== null) {
 			$filename = $this->app->get("views") ."/".$filename;
 		}
@@ -171,8 +136,7 @@ class Response
 
 	/**
 	 * render, require $filename
-	 * 
-	 * 
+	 *
 	 * @param string $filename
 	 * @param mixed|null $bind
 	 * @return self
@@ -185,7 +149,7 @@ class Response
 		if ($this->app->get("views") !== null) {
 			$filename = $this->app->get("views") . "/template/" . $filename;
 		}
-		
+		// Chargement du template.
 		$template = $this->templateLoader($filename);
 
 		if ($bind === null) {
@@ -209,7 +173,7 @@ class Response
 	 * 
 	 * @param string|null $filename
 	 * @throws ErrorException
-	 * @return Mustache_Engine|null|Twig_Environment
+	 * @return Mustache_Engine|Twig_Environment|Jade|null
 	 */
 	private function templateLoader($filename)
 	{
@@ -220,19 +184,19 @@ class Response
 		}
 		$tpl = null;
 		if ($this->app->get("engine") == "twig") {
-
+			// TODO: Lancement du loader du template twig en case d'erreur.
 			// require dirname(dirname(__DIR__)) . "/../vendor/twig/twig/lib/Twig/Autoloader.php";
-			// Twig_Autoloader::register();
+			// Twig_A::register();
 
-			$loader = new Twig_Loader_Array([
+			$loader = new Twig_Load([
 				'template' => file_get_contents($filename)
 			]);
 
-			$tpl = new Twig_Environment($loader);
+			$tpl = new Twig_Env($loader);
 		
 		} else if ($this->app->get("engine") == "mustache") {
 			
-			$tpl = new Mustache_Engine();
+			$tpl = new Mustache();
 
 		} else if ($this->app->get("engine") == "jade") {
 
@@ -245,6 +209,12 @@ class Response
 		return $tpl;
 	}
 
+	/**
+	 * Equivalant a un echo
+	 *
+	 * @param $data
+	 * @param bool|false $stop
+	 */
 	public function send($data, $stop = false)
 	{
 		if (is_array($data) || is_object($data)) {

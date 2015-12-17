@@ -42,6 +42,13 @@ Class Route
 	private $with;
 
 	/**
+	 * Liste de namespace.
+	 *
+	 * @var $with
+	 */
+	private $names = [];
+
+	/**
 	 * Contructeur
 	 *
 	 * @param string $path
@@ -119,10 +126,13 @@ Class Route
 	 */
 	public function call(Request $req, Response $res, $names)
 	{
-		require_once $names["namespace"]["autoload"] . ".php";
-		\App\AppAutoload::register();
-
 		array_unshift($this->match, $req, $res);
+		$this->names = $names;
+		if (!isset($this->names["namespace"])) {
+			return $this->next($this->cb, $this->match);
+		}
+		// require $this->names["namespace"]["autoload"] . ".php";
+		// \App\AppAutoload::register();
 		$middleware_is_defined = false;
 
 		if (is_array($this->cb)) {
@@ -132,7 +142,7 @@ Class Route
 				} else if (is_callable($this->cb[0])) {
 					$cb = $this->cb[0];
 				} else if (is_string($this->cb[0])) {
-					$cb = $this->loalController($names["namespace"]["controller"]);
+					$cb = $this->loadController($this->cb[0]);
 				}
 			} else {
 				if (count($this->cb) == 2) {
@@ -145,9 +155,11 @@ Class Route
 						if (is_callable($this->cb)) {
 							$cb = $this->cb;
 						} else {
-							$cb = $this->loalController($names["namespace"]["controller"]);
+							$cb = $this->loadlController($this->cb);
 						}
 					}
+				} else {
+					$this->next($this->cb, $this->match);
 				}
 			}
 		} else {
@@ -155,16 +167,17 @@ Class Route
 				$cb = $this->cb;
 			} else {
 				if (is_string($this->cb)) {
-					$cb = $this->loalController($names["namespace"]["controller"]);
+					$cb = $this->loadController($this->cb);
 				}
 			}
 		}
 
 		if ($middleware_is_defined) {
-			if (!in_array($this->cb["middleware"], $names["middleware"])) {
+
+			if (!in_array($this->cb["middleware"], $this->names["middleware"])) {
 				throw new RouterException($this->cb["middleware"] . " n'est pas un middleware definir.");
 			}
-			$middleware = $names["namespace"]["middleware"] . "\\" . ucfirst($this->cb["middleware"]);
+			$middleware = $this->names["namespace"]["middleware"] . "\\" . ucfirst($this->cb["middleware"]);
 			if (class_exists($middleware)) {
 				$instance = new $middleware();
 				$handler = [$instance, "handler"];
@@ -180,12 +193,55 @@ Class Route
 		if (isset($cb)) {
 			return call_user_func_array($cb, $this->match);
 		}
+
 	}
 
-	public function loalController($controllerNamespace)
+	/**
+	 * Next, lance successivement une liste de fonction.
+	 *
+	 * @param array $arr
+	 * @param array $arg
+	 * @return mixed|void
+	 */
+	private function next($arr, $arg)
 	{
-		list($class, $method) = explode(".", $this->cb);
-		$class = $controllerNamespace . "\\" . ucfirst($class);
+		if (is_callable($arr)) {
+			return call_user_func_array($arr, $arg);
+		}
+
+		if (is_array($arr)) {
+			array_reduce($arr, function($next, $cb) {
+				if (is_null($next)) {
+					if (is_string($cb)) {
+						$cb = $this->loadController($cb);
+					}
+					return call_user_func_array($cb, $arg);
+				} else {
+					if ($next == true) {
+						if (is_string($cb)) {
+							$cb = $this->loadController($cb);
+						}
+						return call_user_func_array($cb, $arg);
+					} else {
+						die();
+					}
+				}
+				return $next;
+			});
+		}
+	}
+
+	/**
+	 * Charge les controllers
+	 * 
+	 * @param string $cbName
+	 * @return mixed
+	 */
+	public function loadController($cbName)
+	{
+		list($class, $method) = explode(".", $cbName);
+		$class = $this->names["namespace"]["controller"] . "\\" . ucfirst($class);
 		return [new $class(), $method];
 	}
+
 }

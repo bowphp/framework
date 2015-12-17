@@ -12,34 +12,19 @@
 
 namespace System\Core;
 
-use System\Support\Logger;
+use Closure;
 use System\Database\DB;
 use System\Support\Util;
-use System\Http\Response;
 use System\Http\Request;
+use System\Http\Response;
+use System\Support\Logger;
+use InvalidArgumentException;
 
-class Snoop
+class Application
 {
-	/***
-	 * Liste des constances
-	 * d'execution de Requete
-	 * SQL. Pour le system de
-	 * de base de donnee ultra
-	 * minimalise de snoop.
-	 */
-	const SELECT = 1;
-	const UPDATE = 2;
-	const DELETE = 3;
-	const INSERT = 4;
 
 	/**
-	 * Collecteur de route.
-	 *
-	 * @var array
-	 */
-	private static $routes = [];
-	/**
-	 * Definition de contrainte sur un route.
+	 * Définition de contrainte sur un route.
 	 *
 	 * @var array
 	 */ 
@@ -51,7 +36,7 @@ class Snoop
 	 */
 	private $branch = "";
 	/**
-	 * Represente le chemin vers la vue.
+	 * Répresente le chemin vers la vue.
 	 * 
 	 * @var null|string
 	 */
@@ -63,19 +48,19 @@ class Snoop
 	 */
 	private $engine = null;
 	/**
-	 * Repertoire de cache
+	 * Répertoire de cache
 	 * 
 	 * @var string
 	 */
 	private $cache = null;
 	/**
-	 * Represente de la racine de l'application
+	 * Répresente de la racine de l'application
 	 *
 	 * @var string
 	 */
 	private $root = "";
 	/**
-	 * Epresente le dossier public
+	 * Répresente le dossier public
 	 *
 	 * @var string
 	 */
@@ -92,6 +77,52 @@ class Snoop
 	 * @var null|callable
 	 */
 	private $error404 = null;
+
+	/**
+	 *
+	 * @var string
+	 */ 
+	private $logDirecotoryName = "";
+
+	/**
+	 * 
+	 * @var string 
+	 */
+	private $method = "";
+
+	/**
+	 * 
+	 * @var string
+	 */
+	private $currentMethod = "";
+	
+	/**
+	 * Les des namespaces
+	 * 
+	 * @var array
+	 */
+	private $names = [];
+
+	/**
+	 *
+	 * @var string
+	 */
+	private $currentRoute = "";
+	
+	/**
+	 * Patter Singleton
+	 * 
+	 * @var null
+	 */
+	private $appname = null;
+	
+	/**
+	 * Patter Singleton
+	 * 
+	 * @var string
+	 */
+	private $loglevel = "dev";
+
 	/**
 	 * Patter Singleton
 	 * 
@@ -99,35 +130,37 @@ class Snoop
 	 */
 	private static $inst = null;
 
-	private static $mail = null;
+	/**
+	 * Collecteur de route.
+	 *
+	 * @var array
+	 */
+	private static $routes = [];
 
-	private static $appname = null;
-
-	private static $loglevel = "dev";
-
-	private $logFileName = "";
-
-	private $method = "";
-
-	private $currentMethod = "";
-
-	private $names = [];
 
 	/**
 	 * Private construction
+	 *
+	 * @param $config
 	 */
 	private function __construct($config)
 	{
+		if (empty($config)) {
+			 $this->method = $this->request()->method();
+			return null;
+		}
         if (isset($config->timezone)) {
             Util::settimezone($config->timezone);
         }
-		static::$appname = $config->appname;
+		$this->appname = $config->appname;
 		$this->logDirecotoryName = $config->logDirecotoryName;
 		$this->views = $config->views;
 		$this->engine = $config->template;
 		$this->cache = $config->cacheFolder;
 		$this->names = $config->names;
-        static::$loglevel = isset($config->loglevel) ? $config->loglevel : static::$loglevel;
+		$this->type = $config->type;
+		$this->config = $config;
+        $this->loglevel = isset($config->loglevel) ? $config->loglevel : $this->loglevel;
         $this->method = $this->request()->method();
 
 	}
@@ -139,7 +172,7 @@ class Snoop
 	/**
 	 * Pattern Singleton.
 	 * 
-	 * 
+	 * @param array|object $config
 	 * @return self
 	 */
 	public static function loader($config)
@@ -151,27 +184,8 @@ class Snoop
 	}
 
 	/**
-	 * Pattern singleton et factory.
-	 * 
-	 * 
-	 * @param boolean $smtp=false
-	 * @return Mail
-	 */
-	public static function mailFactory($smtp = false)
-	{
-		if (static::$mail === null) {
-			if ($smtp === true) {
-				static::$mail = SmtpMail::load();
-			} else {
-				static::$mail = Mail::load();
-			}
-		}
-		return static::$mail;
-	}
-	/**
 	 * mount, ajout un branchement.
-	 * 
-	 * 
+	 *
 	 * @param string $branchName
 	 * @param callable|null $middelware
 	 * @return self
@@ -187,8 +201,7 @@ class Snoop
 
 	/**
 	 * Unmount, détruit le branchement en cour.
-	 * 
-	 * 
+	 *
 	 * @return self
 	 */
 	public function unmount()
@@ -199,11 +212,10 @@ class Snoop
 
 	/**
 	 * get, route de type GET
-	 * 
-	 * 
+	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * @return self
+	 * @return self|string
 	 */
 	public function get($path, $cb = null)
 	{
@@ -219,8 +231,7 @@ class Snoop
 
 	/**
 	 * any, route de tout type GET|POST|DELETE|PUT
-	 * 
-	 * 
+	 *
 	 * @param string $path
 	 * @param callable $cb
 	 * @return self
@@ -237,8 +248,7 @@ class Snoop
 
 	/**
 	 * any, route de tout type DELETE
-	 * 
-	 * 
+	 *
 	 * @param string $path
 	 * @param callable $cb
 	 * @return self
@@ -250,8 +260,7 @@ class Snoop
 
 	/**
 	 * any, route de tout type UPDATE
-	 * 
-	 * 
+	 *
 	 * @param string $path
 	 * @param callable $cb
 	 * @return self
@@ -263,8 +272,7 @@ class Snoop
 
 	/**
 	 * any, route de tout type PUT
-	 * 
-	 * 
+	 *
 	 * @param string $path
 	 * @param callable $cb
 	 * @return self
@@ -276,8 +284,7 @@ class Snoop
 
 	/**
 	 * any, route de tout type PUT
-	 * 
-	 * 
+	 *
 	 * @param string $path
 	 * @param callable $cb
 	 * @return self
@@ -290,8 +297,7 @@ class Snoop
 	/**
 	 * to404, Charge le fichier 404 en cas de non
 	 * validite de la requete
-	 * 
-	 * 
+	 *
 	 * @param callable $cb
 	 * @return self
 	 */
@@ -303,25 +309,26 @@ class Snoop
 
 	/**
 	 * any, route de tout type PUT
-	 * 
-	 * 
+	 *
+	 * @param array $match
+	 * @param string $path
 	 * @param callable $cb
 	 * @return self
 	 */
-	public function match($match, $middleware, $cb)
+	public function match($match, $path, $cb)
 	{
-		if (in_array($this->method, $match)) {
-
+		foreach($match as $value) {
+			if ($this->method === strtoupper($value)) {
+				$this->routeLoader($path, $this->method, $cb);
+			}
 		}
-		$this->error404 = $cb;
 		return $this;
 	}
 
 	/**
 	 * addHttpVerbe, permet d'ajout les autres verbes https
 	 * PUT, DELETE, UPDATE, HEAD
-	 * 
-	 * 
+	 *
 	 * @param string $method
 	 * @param string $path
 	 * @param callable $cb
@@ -340,7 +347,6 @@ class Snoop
 	/**
 	 * post, route de type POST
 	 *
-	 * 
 	 * @param string $path
 	 * @param callable $cb
 	 * @return self
@@ -356,8 +362,7 @@ class Snoop
 
 	/**
 	 * routeLoader, lance le chargement d'une route.
-	 * 
-	 * 
+	 *
 	 * @param string $method
 	 * @param string $path
 	 * @param callable|array $cb
@@ -376,7 +381,7 @@ class Snoop
 	 * 
 	 * 
 	 * @param array $otherRule
-	 * @return \System\Snoop
+	 * @return self
 	 */
 	public function where(array $otherRule)
 	{
@@ -402,12 +407,11 @@ class Snoop
 		$this->response()->setHeader("X-Powered-By", "Snoop Framework");
 		$error = true;
 		if (isset(static::$routes[$this->method])) {
-			
 			foreach (static::$routes[$this->method] as $key => $route) {	
 				if (isset($this->with[$this->method][$route->getPath()])) {
 					$with = $this->with[$this->method][$route->getPath()];
 				} else {
-					$with =  [];
+					$with = [];
 				}
 				if ($route->match($this->request()->uri($this->root), $with)) {
 
@@ -458,11 +462,10 @@ class Snoop
 
 	/**
 	 * Set, permet de rédéfinir la configuartion
-	 * 
-	 * 
+	 *
 	 * @param string $key
 	 * @param string $value
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function set($key, $value)
 	{
@@ -478,8 +481,7 @@ class Snoop
 	/**
 	 * body, retourne les informations du POST ou une seule si un clé est
 	 * passée paramètre
-	 * 
-	 * 
+	 *
 	 * @param string $key=null
 	 * @return array
 	 */
@@ -494,8 +496,7 @@ class Snoop
 
 	/**
 	 * isBodyKey, vérifie si de Snoop::body contient la clé definie.
-	 * 
-	 * 
+	 *
 	 * @param mixed $key
 	 * @return mixed $key
 	 */
@@ -506,8 +507,7 @@ class Snoop
 
 	/**
 	 * bodyIsEmpty, vérifie si le tableau $_POST est vide.
-	 * 
-	 * 
+	 *
 	 *	@return boolean
 	 */
 	public function bodyIsEmpty()
@@ -517,8 +517,7 @@ class Snoop
 
 	/**
 	 * Param, retourne les informations du GET ou une seule si un clé est
-	 * 
-	 * 
+	 *
 	 * passée paramètre
 	 * @param string $key=null
 	 * @return array
@@ -533,8 +532,7 @@ class Snoop
 
 	/**
 	 * isParamKey, vérifie si de Snoop::param contient la cle definie.
-	 * 
-	 * 
+	 *
 	 * @param string|int $key
 	 * @return mixed
 	 */
@@ -545,8 +543,7 @@ class Snoop
 
 	/**
 	 * paramIsEmpty, vérifie si le tableau $_GET est vide.
-	 * 
-	 * 
+	 *
 	 *	@return boolean
 	 */
 	public function paramIsEmpty()
@@ -556,8 +553,7 @@ class Snoop
 
 	/**
 	 * files, retourne les informations du $_FILES
-	 * 
-	 * 
+	 *
 	 * @param string|null $key
 	 * @return mixed
 	 */
@@ -571,8 +567,7 @@ class Snoop
 
 	/**
 	 * isParamKey, vérifie si Snoop::files contient la clé définie.
-	 * 
-	 * 
+	 *
 	 * @param string|int $key
 	 * @return mixed
 	 */
@@ -583,6 +578,7 @@ class Snoop
 
 	/**
 	 * filesIsEmpty, vérifie si le tableau $_FILES est vide.
+	 *
 	 *	@return boolean
 	 */
 	public function filesIsEmpty()
@@ -592,7 +588,6 @@ class Snoop
 
 	/**
 	 * currentRoot, retourne la route courante
-	 * 
 	 * 
 	 * @return string
 	 */
@@ -604,8 +599,7 @@ class Snoop
 	/**
 	 * Res, retourne une instance de Response
 	 * 
-	 * 
-	 * @return \System\Response\Response
+	 * @return \System\Http\Response
 	 */
 	private function response()
 	{
@@ -615,8 +609,7 @@ class Snoop
 	/**
 	 * Req, retourne une instance de Request
 	 * 
-	 * 
-	 * @return \System\Request\Request
+	 * @return \System\Http\Request
 	 */
 	private function request()
 	{
@@ -625,7 +618,6 @@ class Snoop
 
 	/**
 	 * Logeur d'erreur.
-	 * 
 	 * 
 	 * @param string $message
 	 */

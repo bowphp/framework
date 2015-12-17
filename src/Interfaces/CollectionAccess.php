@@ -5,53 +5,54 @@ namespace System\Interfaces;
 interface CollectionAccess
 {
     /**
-     * isKey, verifie l'existance d'un
-     * cle dans la table
-     * 
-     * 
+     * isKey, verifie l'existance d'un clé dans la collection de session
+     *
      * @param string $key
      * @return boolean
      */
     public function isKey($key);
 
     /**
-     *  IsEmpty
+     * IsEmpty, vérifie si une collection est vide.
+     *
      *	@return boolean
      */
     public function IsEmpty();
 
     /**
-     * get, permet de manipuler le donnee
-     * d'un tableau.
-     * permet de recuperer d'une valeur ou
-     * la collection de valeur.
-     * 
-     * 
+     * get, permet de recuperer d'une valeur ou la collection de valeur.
+     *
      * @param string $key=null
      * @return mixed
      */
     public function get($key = null);
 
     /**
-     * addSession, permet d'ajout une value
-     * dans le tableau.
-     * 
-     * 
-     * @param string|int $key
-     * @param mixed $data
-     * @param boolean $next=null
-     * @throws \InvalidArgumentException
+     * add, ajouté une entrée dans la collection
+     *
+     * @param string $key
+     * @param $data
+     * @param bool $next
+     * @return self
      */
-    public function add($key, $data, $next = null);
+    public function add($key, $data, $next = false);
+
 
     /**
-     * remove, supprime un entree dans la
-     * table
-     * 
-     * 
+     * remove, supprime une entree dans la collection
+     *
      * @param string $key
      * @return self
      */
     public function remove($key);
+
+    /**
+     * set, modifier une entree dans la collection
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
+    public function set($key, $value);
 
 }

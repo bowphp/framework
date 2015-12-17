@@ -13,27 +13,71 @@ use InvalidArgumentException;
 
 class Mail
 {
-	// Liste des entetes
+	/**
+	 * Liste des entêtes
+	 *
+	 * @var array
+	 */
 	private $headers = [];
-	// definir le desitinataire
+	/**
+	 * definir le desitinataire
+	 *
+	 * @var null
+	 */
 	private $to = null;
-	// definir l'object du mail
+	/**
+	 * definir l'object du mail
+	 *
+	 * @var null
+	 */
 	private $subject = null;
-	// definir le message
+	/**
+	 * @var null
+	 */
+	private $form = null;
+	/**
+	 * definir le message
+	 *
+	 * @var null
+	 */
 	private $message = null;
-	// permet de compter le nombre content-type
+	/**
+	 * permet de compter le nombre content-type
+	 *
+	 * @var int
+	 */
 	private $part = 0;
-	// definir le type de retoure chariot CRLF ou LF
+	/**
+	 * definir le type de retoure chariot CRLF ou LF
+	 *
+	 * @var string
+	 */
 	private $sep;
-	// definir le frontiere entre les contenus.
+	/**
+	 * definir le frontiere entre les contenus.
+	 *
+	 * @var string
+	 */
 	private $boundary;
-	// Singleton de mail
+	/**
+	 * Singleton de mail
+	 *
+	 * @var null
+	 */
 	private static $mail = null;
+	/**
+	 * fromDefined
+	 *
+	 * @var bool
+	 */
+	private $fromDefined = false;
 
 	/**
 	 * addHeader, Ajout une entête
-	 * @param string $head
-	 * @param self
+	 *
+	 * @param string $key
+	 * @param string $value
+	 * @return self
 	 */
 	public function addHeader($key, $value)
 	{
@@ -51,7 +95,8 @@ class Mail
 	}
 
 	/**
-	 * addFeatureHeader, permet d'ajout une entete
+	 * addFeatureHeader, permet d'ajout une entête
+	 *
 	 * @param string $key
 	 * @param string $value
 	 * @return self
@@ -80,7 +125,8 @@ class Mail
 	}
 
 	/**
-	 * formdtHeader, formateur d'entete smtp
+	 * formatHeader, formateur d'entete smtp
+	 *
 	 * @return string
 	 */
 	public function formatHeader()
@@ -112,7 +158,8 @@ class Mail
 	}
 
 	/**
-	 * getHeader, retourne les entetes definies.
+	 * getHeader, retourne les entêtes définies.
+	 *
 	 * @return string
 	 */
 	public function getHeader()
@@ -121,10 +168,12 @@ class Mail
 	}
 
 	/**
-	 * to, definir le receveur
+	 * to, definir le récépteur
+	 *
 	 * @param string $to
-	 * @param string $to=null
-	 * @param Mail
+	 * @param string $name
+	 * @param bool $smtp
+	 * @return self
 	 */
 	public function to($to, $name = null, $smtp = false)
 	{
@@ -143,7 +192,8 @@ class Mail
 	}
 
 	/**
-	 * Formaté l'email recu.
+	 * Formaté l'email récu.
+	 *
 	 * @param  string
 	 * @param  string
 	 * @return array
@@ -159,8 +209,9 @@ class Mail
 
 	/**
 	 * addFile, Permet d'ajout un fichier d'attachement
+	 *
 	 * @param string $file
-	 * @param Mail
+	 * @return self
 	 */
 	public function addFile($file)
 	{
@@ -177,10 +228,11 @@ class Mail
 	}
 
 	/**
-	 * subject, Definit le suject du mail
+	 * subject, Définit le suject du mail
+	 *
 	 * @param string $subject
-	 * @param string $smtp=false
-	 * @param Mail
+	 * @param bool $smtp
+	 * @return Mail
 	 */
 	public function subject($subject, $smtp = false)
 	{
@@ -193,18 +245,24 @@ class Mail
 	}
 
 	/**
-	 * from, Definir l'expediteur du mail
+	 * from, Definir l'expéditeur du mail
+	 *
 	 * @param string $from
 	 * @param string $name=null
+	 * @param bool $smtp
 	 * @return self
 	 */
 	public function from($from, $name = null, $smtp = false)
 	{
 		$from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
-		if (!isset($this->fromDefined)) {
-			$this->addHeader("From", $from);
+		if ($smtp === true) {
+			$this->form = $from;
 		} else {
-			$this->fromDefined = true;
+			if ($this->fromDefined === false) {
+				$this->addHeader("From", $from);
+			} else {
+				$this->fromDefined = true;
+			}
 		}
 		return $this;
 	}
@@ -224,7 +282,7 @@ class Mail
 
 	/**
 	 * toText, Definir le corps du message
-	 * @param string text
+	 * @param string $text
 	 * @return self
 	 */
 	public function toText($text = null)
@@ -299,7 +357,7 @@ class Mail
 
 	/**
 	 * Message, definir le corps du message
-	 * @param string text
+	 * @param string $message
 	 * @return self
 	 */
 	public function message($message)
@@ -343,7 +401,7 @@ class Mail
 		} else {
 			$this->sep = (strpos(PHP_OS, 'WIN') === false) ? "\n" : "\r\n";
 		}
-		$this->boundary = "__snoop-Diagnostic.ci-" . md5(date("r", time()));
+		$this->boundary = "__snoop-framework-" . md5(date("r", time()));
 		$this->headers = ["top" => [], "bottom" => []];
 		$this->addHeader("MIME-Version", "1.0");
 		$this->addHeader("X-Mailer",  "Snoop Framework");
@@ -352,7 +410,7 @@ class Mail
 
 	/**
 	 * load, charger la classe MAil en mode singleton
-	 * @return new Mail
+	 * @return self
 	 */
 	public static function load()
 	{

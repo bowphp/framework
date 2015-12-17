@@ -1,7 +1,7 @@
 <?php
 
 
-namespace System;
+namespace System\Mail;
 
 
 interface IHeader
