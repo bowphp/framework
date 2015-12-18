@@ -121,16 +121,11 @@ class DB
      * @param array $bind
      * @return bool
      */
-    public static function update($sqlstatement, $bind = [])
+    public static function update($sqlstatement, array $bind = [])
     {
         static::verifyConnection();
         if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sqlstatement)) {
-            if (count($bind) == 0) {
-                return static::$db->exec($sqlstatement);
-            } else {
-                $pdostatement = static::$db->prepare($sqlstatement);
-                return $pdostatement->execute(Security::sanitaze($bind, true));
-            }
+             return static::executePrepareQuery($sqlstatement, $bind);
         }
         return false;
     }
@@ -142,14 +137,14 @@ class DB
      * @param array $bind
      * @return mixed|null
      */
-    public static function select($sqlstatement, $bind = [])
+    public static function select($sqlstatement, array $bind = [])
     {
         static::verifyConnection();
         if (preg_match("/^select\s[\w\d_()*`]+\sfrom\s[\w\d_`]+.+$/i", $sqlstatement)) {
             $pdostatement = static::$db->prepare($sqlstatement);
             $pdostatement->execute($bind);
             $fetch = "fetchAll";
-            if (count($data) == 1) {
+            if ($pdostatement->rowCount() == 1) {
                $fetch = "fetch";
             } 
             return Security::sanitaze($pdostatement->$fetch());
@@ -164,13 +159,11 @@ class DB
      * @param array $bind
      * @return null
      */
-    public static function insert($sqlstatement, $bind = [])
+    public static function insert($sqlstatement, array $bind = [])
     {
         static::verifyConnection();
         if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)\svalues\(.+\)|\s?set\s(.+)+)$/i", $sqlstatement)) {
-            $pdostatement = static::$db->prepare($sqlstatement);
-            static::bind($pdostatement, $bind);
-            return $pdostatement->execute();
+            return static::executePrepareQuery($sqlstatement, $bind);
         }
         return null;
     }
@@ -185,7 +178,7 @@ class DB
     {
         static::verifyConnection();
         if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+$/i", $sqlstatement)) {
-            return (bool) static::$db->exec($sqlstatement);
+            return static::$db->exec($sqlstatement);
         }
         return false;
     }
@@ -197,17 +190,11 @@ class DB
      * @param array $bind
      * @return bool
      */
-    public static function delete($sqlstatement, $bind = [])
+    public static function delete($sqlstatement, array $bind = [])
     {
         static::verifyConnection();
         if (preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+$/i", $sqlstatement)) {
-            if (count($bind) == 0) {
-                return (bool) static::$db->exec($sqlstatement);
-            } else {
-                $pdostatement = static::$db->prepare($sqlstatement);
-                static::bind($pdostatement, $bind);
-                return (bool) $pdostatement->execute();
-            }
+            return static::executePrepareQuery($sqlstatement, $bind);
         }
         return false;
     }
@@ -256,7 +243,7 @@ class DB
      * @param $data
      * @return PDOStatement
      */
-    private static function bind(PDOStatement &$pdoStatement, $data)
+    private static function bind(PDOStatement &$pdoStatement, array $data = [])
     {
         foreach ($data as $key => $value) {
 			if ($value === "NULL") {
@@ -402,7 +389,7 @@ class DB
     public static function lastInsertId()
     {
         static::verifyConnection();
-        return static::$db->lastInsertId();
+        return (int) static::$db->lastInsertId();
     }
 
     /**
@@ -607,6 +594,7 @@ class DB
         }
         return $query;
     }
+    
     /**
      * retourne l'instance de pdo
      *
@@ -616,6 +604,14 @@ class DB
     {
         static::verifyConnection();
         return static::$db;
+    }
+
+    private static function executePrepareQuery($sqlstatement, array $bind = [])
+    {
+        $pdostatement = static::$db->prepare($sqlstatement);
+        static::bind($pdostatement, $bind);
+        $pdostatement->execute();
+        return $pdostatement->rowCount();
     }
 
 }

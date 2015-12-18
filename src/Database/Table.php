@@ -3,6 +3,7 @@
 namespace System\Database;
 
 use System\Exception\TableException;
+use System\Support\Security;
 
 class Table
 {
@@ -17,27 +18,35 @@ class Table
     /**
      * @var string
      */
-    private static $select = null;
+    private $select = null;
     /**
      * @var string
      */
-    private static $where = null;
+    private $where = null;
     /**
      * @var string
      */
-    private static $group_by = null;
+    private $join = null;
     /**
      * @var string
      */
-    private static $join = null;
+    private $limit = null;
     /**
      * @var string
      */
-    private static $limit = null;
+    private $group = null;
     /**
      * @var string
      */
-    private static $aggregats = [];
+    private $insert = null;
+    /**
+     * @var string
+     */
+    private $havin = null;
+    /**
+     * @var string
+     */
+    private $order = null;
     /**
      * @var null
      */
@@ -105,10 +114,10 @@ class Table
             }
         }
 
-        if (static::$where == null) {
-            static::$where = "$column $comp $value";
+        if ($this->where == null) {
+            $this->where = "$column $comp $value";
         } else {
-            static::$where .= " $boolean $column $comp $value";
+            $this->where .= " $boolean $column $comp $value";
         }
         return $this;
     }
@@ -121,7 +130,7 @@ class Table
      */
     public function orWhere($column, $comp, $value = null)
     {
-        if (is_null(static::$where)) {
+        if (is_null($this->where)) {
             throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un where avant", E_ERROR);
         }
         $this->where("$column", $comp, $value, "or");
@@ -134,10 +143,10 @@ class Table
      */
     public function whereNull($column, $boolean = "and")
     {
-        if (!is_null(static::$where)) {
-            static::$where = "$column is null";
+        if (!is_null($this->where)) {
+            $this->where = "$column is null";
         } else {
-            static::$where = " $boolean $column is null";
+            $this->where = " $boolean $column is null";
         }
         return $this;
     }
@@ -148,10 +157,10 @@ class Table
      */
     public function whereNotNull($column, $boolean = "and")
     {
-        if (is_null(static::$where)) {
-            static::$where = "$column is not null";
+        if (is_null($this->where)) {
+            $this->where = "$column is not null";
         } else {
-            static::$where .= " $boolean $column is not null";
+            $this->where .= " $boolean $column is not null";
         }
         return $this;
     }
@@ -172,14 +181,14 @@ class Table
             $range = [$range[0], $range[0]];
         }
         $between = implode(" and ", $range);
-        if (is_null(static::$where)) {
+        if (is_null($this->where)) {
             if ($boolean == "not" || $boolean == "and not") {
-                static::$where = "not $column between " . $between;
+                $this->where = "not $column between " . $between;
             } else {
-                static::$where = "$column between " . $between;
+                $this->where = "$column between " . $between;
             }
         } else {
-            static::$where .= " $boolean $column is not null";
+            $this->where .= " $boolean $column is not null";
         }
         return $this;
     }
@@ -211,14 +220,14 @@ class Table
             $range = [$range[0], $range[0]];
         }
         $in = implode(", ", $range);
-        if (is_null(static::$where)) {
+        if (is_null($this->where)) {
             if ($between == "not" || $between == "and not") {
-                static::$where = "not $column in ($in)";
+                $this->where = "not $column in ($in)";
             } else {
-                static::$where .= " and not $column in ($in)";
+                $this->where .= " and not $column in ($in)";
             }
         } else {
-            static::$where .= " $boolean $column in ($in)";
+            $this->where .= " $boolean $column in ($in)";
         }
         return $this;
     }
@@ -229,7 +238,7 @@ class Table
      * @return $this
      */
     public function whereNotIn($column, array $range)
-    {   if (is_null(static::$where)) {
+    {   if (is_null($this->where)) {
             throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un whereIn avant", E_ERROR);
         }
         $this->whereIn($column, $range, "and not");
@@ -308,7 +317,9 @@ class Table
      */
     public function jump($offset = 0)
     {
-        $this->jump = $offset;
+    	if (is_null($this->limit)) {
+	        $this->limit = "$offset,";
+    	}
         return $this;
     }
 
@@ -320,7 +331,14 @@ class Table
      */
     public function take($limit)
     {
-        $this->limit = $limit;
+    	if (is_null($this->limit)) {
+	        $this->limit = $limit;
+    	} else {
+    		if (preg_match("/^([\d]+),$/", $this->limit, $match)) {
+    			array_shift($match);
+    			$this->limit = "{$match[0]}, $limit";
+    		}
+    	}
         return $this;
     }
     // Les Aggregats
@@ -331,7 +349,7 @@ class Table
      */
     public function max($column)
     {
-        return $this->addAggregat("max", $column);
+        return $this->executeAgregat("max", $column);
     }
 
     /**
@@ -341,7 +359,7 @@ class Table
      */
     public function min($column)
     {
-        return $this->addAggregat("min", $column);
+        return $this->executeAgregat("min", $column);
     }
 
     /**
@@ -351,7 +369,7 @@ class Table
      */
     public function avg($column)
     {
-        return $this->addAggregat("avg", $column);
+        return $this->executeAgregat("avg", $column);
     }
 
     /**
@@ -359,40 +377,26 @@ class Table
      */
     public function sum($column)
     {
-        return $this->addAggregat("sum", $column);
-    }
-
-
-    /**
-     * @param $column
-     */
-    public function upper($column)
-    {
-        return $this->addAggregat("upper", $column);
+        return $this->executeAgregat("sum", $column);
     }
 
     /**
-     * @param $column
+     * Lance en interne les requetes utilistance les aggregats.
+     * 
+     * @param $aggregat
+     * @param string $column
+     * @return null|int
      */
-    public function lower($column)
+    private function executeAgregat($aggregat, $column)
     {
-        return $this->addAggregat("lower", $column);
-    }
-
-    /**
-     * @param $column
-     */
-    public function concat($column)
-    {
-
-    }
-
-    private function addAggregat($name, $value)
-    {
-        if (!isset(static::$aggregats[$name])) {
-            static::$aggregats[$name] = $value;
-        }
-        return $this;
+        $sql = "select $aggregat($column) from " . $this->tableName;
+    	if (!is_null($this->where)) {
+    		$sql .= " " . $this->where;
+    		$this->where = null;
+    	}
+    	$s = $this->connection->prepare($sql);
+    	$s->execute();
+    	return (int) $s->fetchColumn();
     }
 
     // Actionner
@@ -402,21 +406,51 @@ class Table
      * @param $limit
      * @return array|object|
      */
-    public function get($limit = null)
+    public function get()
     {
-        $sql = "select";
+        $sql = "select ";
         $fetch = "fetchAll";
-        if (is_null(static::$select)) {
-            $sql .= " * from " . $this->tableName;
-            if (is_int($limit)) {
-                if ($limit === 1) {
-                    $fetch = "fetch";
-                } 
-                $sql .= " limit " . (int) $limit;
-            }
-            return $this->connection->query($sql)->$fetch();
+       	// Ajout de la clause select
+        if (is_null($this->select)) {
+            $sql .= "* from " . $this->tableName;
+        } else {
+        	$sql .= $this->select . " from ";
+        	$this->select = null;
         }
-        return null;
+        // Ajout de la clause join
+        if (!is_null($this->join)) {
+        	$sql .= " join " . $this->join;
+        	$this->join = null;
+        }
+        // Ajout de la clause where
+        if (!is_null($this->where)) {
+        	$sql .= " where " . $this->where;
+        	$this->where = null;
+        }
+        // Ajout de la clause order
+        if (!is_null($this->order)) {
+        	$sql .= " order by " . $this->order;
+        	$this->order = null;
+        }
+        // Ajout de la clause limit
+        if (!is_null($this->limit)) {
+	        $sql .= " limit " . $this->limit;
+	        $this->limit = null;
+        }
+        // Ajout de la clause group
+        if (!is_null($this->group)) {
+        	$sql .= " group by " . $this->group;
+        	$this->group = null;
+        }
+        // execution de requete.
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+
+        if ($stmt->rowCount() <= 1) {
+        	$fetch = "fetch";
+        }
+
+        return Security::sanitaze($stmt->$fetch());
     }
 
     /**
@@ -430,17 +464,45 @@ class Table
     /**
      * Action update
      */
-    public function update()
+    public function update(array $data = [])
     {
+		$sql = "update " . $this->tableName . " set ";
+		$i = 0;
+		foreach ($data as $key => $value) {
+			Security::sanitaze($value, true);
+			if ($i > 0) {
+				$sql .= ", ";
+			}
+			$sql .= "$key = :$key";
+			$i++;
+		}
 
+		if (!is_null($this->where)) {
+			$sql .= " where " . $this->where;
+		}
+
+		$stmt = $this->connection->prepare($sql);
+		$stmt->execute($data);
+		$this->where = null;
+		
+		return $stmt->rowCount();
     }
 
     /**
      * Action delete
      */
-    public function delete()
+    public function delete(array $where = [])
     {
+		$sql = "delete from " . $this->tableName;
+		$i = 0;
 
+		if (!is_null($this->where)) {
+			$sql .= " where " . $this->where;
+		}
+		$stmt = $this->connection->prepare($sql);
+		$stmt->execute($where);
+		$this->where = null;
+		return $stmt->rowCount();
     }
 
     /**
@@ -451,7 +513,7 @@ class Table
      */
     public function increment($column, $step = 1)
     {
-
+    	return $this;
     }
 
 
@@ -471,16 +533,7 @@ class Table
      */
     public function truncate()
     {
-        if (is_null(static::$select) && is_null(static::$where) 
-            && is_null(static::$group) && is_null(static::$group_by)
-            && is_null(static::$join) && is_null(static::$order)
-            && is_null(static::$havin) && is_null(static::$update)
-            && is_null(static::$delete) && is_null(static::$insert)) {
-
-            return $this->connection->exec("truncate " . $this->tableName);
-        } else {
-            // Throws
-        }
+        return (bool) $this->connection->exec("truncate " . $this->tableName);
     }
     /**
      * Action insert
@@ -516,16 +569,7 @@ class Table
      */
     public function drop()
     {
-        if (is_null(static::$select) && is_null(static::$where) 
-            && is_null(static::$group) && is_null(static::$group_by)
-            && is_null(static::$join) && is_null(static::$order)
-            && is_null(static::$havin) && is_null(static::$update)
-            && is_null(static::$delete) && is_null(static::$insert)) {
-
-            return $this->connection->exec("drop " . $this->tableName);
-        } else {
-            // Throws
-        }
+        return (bool) $this->connection->exec("drop table " . $this->tableName);
     }
 
     /**

@@ -13,19 +13,17 @@ $request = \System\Http\Request::load($app);
 if (!function_exists("db")) {
 	function db() {
 		DB::loadConfiguration([
-			"fetch" => PDO::FETCH_OBJ,
-			"connections" => [
-				"default" => [
-					"scheme" => "mysql",
-					"host" => "localhost",
-					"user" => "test",
-					"pass" => "test",
-					"dbname" => "test",
-					"port" => "",
-					"socket" => ""
-				]
-			]
-		]);
+		"fetch" => PDO::FETCH_OBJ,
+		"connections" => [
+			"default" => [
+				"scheme" => "mysql",
+				"host" => "localhost",
+				"user" => "root",
+				"pass" => "papac1010",
+				"dbname" => "jadci",
+				"port" => "",
+				"socket" => ""
+		]]]);
 		return DB::class;
 	}
 }
@@ -42,7 +40,7 @@ if (!function_exists("view")) {
 
 if (!function_exists("table")) {
 	function table($tableName) {
-		return db::table($tableName);
+		return DB::table($tableName);
 	}
 }
 
@@ -57,9 +55,15 @@ if (!function_exists("querymaker")) {
 	}
 }
 
+if (!function_exists("lastinsertid")) {
+	function lastinsertid() {
+		global $db;
+		return $db::lastInsertId();
+	}
+}
+
 if (!function_exists("queryresponse")) {
-	function queryresponse($method, $param)
-	{
+	function queryresponse($method, $param) {
 		global $response;
 		$param = array_slice(func_get_args(), 1);
 		if (method_exists($response, $method)) {
@@ -173,20 +177,6 @@ if (!function_exists("store")) {
 	}
 }
 
-if (!function_exists("curljson")) {
-	function curljson($url, $array = false) {
-		$ch = curl_init($url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		$data = curl_exec($ch);
-		if ($array == true) {
-			curl_close($ch);
-			return $data;
-		}
-		curl_close($ch);
-		return json_encode($data);
-	}
-}
-
 if (!function_exists("curlarray")) {
 	function curlarray($url) {
 		return curljson($url, true);
@@ -228,9 +218,35 @@ if (!function_exists("secure")) {
 }
 
 if (!function_exists("response")) {
-	function response($template, $data, $code = 200) {
+	function response($template = null, $data = null, $code = 200) {
+		if (is_null($template)) {
+			global $response;
+			return $response;
+		}
 		statuscode($code);
 		queryresponse("render", $template, $data);
 	}
 }
 
+if (!function_exists("setheader")) {
+	function setheader($key, $value) {
+		queryresponse("setHeader", $key, $value);
+	}
+}
+
+if (!function_exists("send")) {
+	function send($data) {
+		queryresponse("send", $data);
+	}
+}
+
+if (!function_exists("curljson")) {
+	function curljson($url, $array = false) {
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$data = curl_exec($ch);
+		curl_close($ch);
+		setheader("content-type", "application/json; charset=utf-8");
+		send($data);
+	}
+}

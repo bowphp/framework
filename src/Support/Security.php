@@ -80,8 +80,8 @@ class Security
 				}
 			}
 		} else if (is_string($data)) {
-			if (preg_match($rNum, $value)) {
-				$data = (int) $value;
+			if (preg_match($rNum, $data)) {
+				$data = (int) $data;
 			} else {
 				$data = static::$method($data);
 			}
