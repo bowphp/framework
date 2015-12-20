@@ -61,6 +61,7 @@ class Util
 			// On retourne l'element dé-sérialisé
 			return unserialize($serializedData);
 		}
+
 		return $serializedData;
 	}
 
@@ -131,6 +132,7 @@ class Util
 		if (is_callable($cb)) {
 			return call_user_func_array($cb, is_array($param) ? $param : [$param]);
 		}
+
 		return null;
 	}
 
@@ -144,11 +146,13 @@ class Util
 	public static function filtre($opts, $cb)
 	{
 		$r = [];
+
 		foreach ($opts as $key => $value) {
 			if (call_user_func_array($cb, [$value, $key])) {
 				array_push($r, $value);
 			}
 		}
+
 		return $r;
 	}
 
@@ -190,11 +194,14 @@ class Util
 	public static function convertDateToLetter($dateString)
 	{
 		$formData = array_reverse(explode("-", $dateString));
+
 		$r = trim(static::convertDate($formData[0])." ". static::getMonth((int)$formData[1])) . " " . trim(static::convertDate($formData[2]));
 		$p = explode(" ", $r);
+
 		if (strtolower($p[0]) == "un") {
 			$p[0] = "permier";
 		}
+
 		return trim(implode(" ", $p));
 	}
 
@@ -209,11 +216,14 @@ class Util
 		if (func_num_args() == 0) {
 			throw new InvalidArgumentException("Vous devez donner un paramtre à la function", 1);
 		}
+
 		$arr = func_get_args();
 		ob_start();
+
 		foreach ($arr as $key => $value) {
 			var_dump($value);
 		}
+
 		$content = ob_get_clean();
 		$content = preg_replace("~\s?\{\n\s?\}~i", " is empty", $content);
 		$content = preg_replace("~(string|int|object|stdclass|bool|double|float|array)~i", "<span style=\"color: rgba(255, 0, 0, 0.5); font-style: italic\">&lt;$1&gt;</span>", $content);
@@ -236,11 +246,13 @@ class Util
 	public static function it($message, $cb = null)
 	{
 		echo "<h2>{$message}</h2>";
+
 		if (is_callable($cb)) {
 			call_user_func_array($cb, [self::class]);
 		} else {
 			self::debug(array_slice(func_get_args(), 1, func_num_args()));
 		}
+
 	}
 	
 	/**
@@ -251,6 +263,7 @@ class Util
 	public static function convertDate($nombre)
 	{
 		$nombre = (int) $nombre;
+
 		if ($nombre === 0) {
 			return "zéro";
 		}
@@ -319,6 +332,7 @@ class Util
 	{
 		$mount = explode(" ", $str);
 		$str = $mount[0] . " " . static::$angMounth[$mount[1]] . " " . $mount[2];
+
 		return date("Y-m-d", strtotime($str));
 	}
 
@@ -337,6 +351,7 @@ class Util
 					$value = ucfirst($value);
 					$month = static::$month;
 				} else {
+
 					return null;
 				}
 			} else {
@@ -349,8 +364,10 @@ class Util
 				}
 				$month = array_values(static::$month);
 			}
+
 			return $month[$value];
 		}
+
 		return null;
 	}
 
@@ -363,9 +380,11 @@ class Util
 	public function add2points(array $data)
 	{
 		$resultat = [];
+
 		foreach ($data as $key => $value) {
 			$resultat[$value] = ":$value";
 		}
+
 		return $resultat;
 	}
 
@@ -379,11 +398,13 @@ class Util
 		if (static::$sep !== null) {
 			return static::$sep;
 		}
+
 		if (defined('PHP_EOL')) {
 			static::$sep = PHP_EOL;
 		} else {
 			static::$sep = (strpos(PHP_OS, 'WIN') === false) ? "\n" : "\r\n";
 		}
+
 		return static::$sep;
 	}
 

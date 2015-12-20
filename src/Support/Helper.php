@@ -1,5 +1,6 @@
 <?php
 
+require dirname(__DIR__) . "/ApplicationAutoload.php";
 \System\ApplicationAutoload::register();
 
 use System\Database\DB;
@@ -172,14 +173,20 @@ if (!function_exists("c_csrf")) {
 }
 
 if (!function_exists("store")) {
-	function store(array $file) {
+	function store(array $file, $filename = null, $dirname = null) {
+		if (!is_null($filename) && is_string($filename)) {
+			\System\Support\Resource::setUploadFileName($filename);
+			if (!is_null($dirname)) {
+				\System\Support\Resource::setUploadDir($dirname);
+			}
+		}
 		\System\Support\Resource::uploadFile($file);
 	}
 }
 
 if (!function_exists("curlarray")) {
 	function curlarray($url) {
-		return curljson($url, true);
+		curljson($url, true);
 	}
 }
 

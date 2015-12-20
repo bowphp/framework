@@ -7,6 +7,12 @@
         "issues": "https://github.com/papac/snoopframework/issues",
         "source": "https://github.com/papac/snoopframework"
     },
+    "require-dev": {
+        "kylekatarnls/jade-php": "^1.3",
+        "twig/twig": "^1.23",
+        "twig/extensions": "^1.3",
+        "mustache/mustache": "^2.9"
+    },
     "authors": [
         {
             "name": "Franck Dakia",
@@ -15,7 +21,7 @@
     ],
     "autoload": {
         "files": [
-            "src/Core/Util/helpers.php"
+            "src/Support/Helper.php"
         ],
         "psr-0": {
             "System\\": "src/"
