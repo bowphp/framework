@@ -13,17 +13,13 @@
             "email": "dakiafranck@gmail.com"
         }
     ],
-    "require-dev": {
-    },
     "autoload": {
         "files": [
-            "src/Core/Util/helpers.php",
-            "src/Core/Views/helpers.php"
+            "src/Core/Util/helpers.php"
         ],
         "psr-0": {
             "System\\": "src/"
         }
     },
-    "minimum-stability": "dev",
-    "require": {}
+    "minimum-stability": "dev"
 }
