@@ -137,7 +137,6 @@ Class Route
 	{
 		
 		$params = [];
-		var_dump($this->key);
 		foreach ($this->key as $key => $value) {
 			$params[$value] = $this->match[$key];
 		}

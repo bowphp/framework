@@ -20,9 +20,6 @@
         }
     ],
     "autoload": {
-        "files": [
-            "src/Support/Helper.php"
-        ],
         "psr-0": {
             "System\\": "src/"
         }
