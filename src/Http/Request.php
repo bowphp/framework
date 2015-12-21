@@ -2,23 +2,55 @@
 
 namespace System\Http;
 
+use StdClass;
 use System\Core\Application;
 
 class Request
 {
+	/**
+	 * Variable d'instance
+	 * 
+	 * @var null
+	 */
 	private static $instance = null;
+	
+	/**
+	 * Variable d'application
+	 * 
+	 * @var Application
+	 */
 	private $app;
 
+	/**
+	 * Variable de paramètre 
+	 * 
+	 * @var object
+	 */
+	public $params;
+
+	/**
+	 * Constructeur
+	 * 
+	 * @param Application $app
+	 */
 	private function __construct(Application $app)
 	{
 		$this->app = $app;
+		$this->params = new StdClass();
 	}
 
+	/**
+	 * Singletion loader
+	 * 
+	 * @param Application $app
+	 * @return null|self
+	 */
 	public static function load(Application $app)
 	{
 		if (self::$instance === null) {
 			self::$instance = new self($app);
 		}
+
 		return self::$instance;
 	}
 
@@ -35,6 +67,21 @@ class Request
 		} else {
 			$uri = $_SERVER["REQUEST_URI"];
 		}
+
+		return str_replace($path, "", $uri);
+	}
+
+
+	/**
+	 * retourne path envoyer par client.
+	 *
+	 * @param string $path=""
+	 * @return string
+	 */
+	public function path($path = "")
+	{
+		$uri = str_replace($_SERVER["HTTP_HOST"], "", $this->uri());
+
 		return str_replace($path, "", $uri);
 	}
 
@@ -63,7 +110,7 @@ class Request
 	 *
 	 * @return RequestData
 	 */
-    public static function param()
+    public static function query()
     {
         return RequestData::loader("GET");
     }
@@ -83,7 +130,7 @@ class Request
 	 *
 	 * @return boolean
 	 */
-	public static function ajax()
+	public function ajax()
 	{
 		if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
 			$xhrObj = strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]);
@@ -91,6 +138,7 @@ class Request
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -99,7 +147,7 @@ class Request
 	 *
 	 * @return string
 	 */
-	public function clientAddress()
+	public function address()
 	{
 		return $_SERVER["REMOTE_ADDR"];
 	}
@@ -108,7 +156,7 @@ class Request
 	 *
 	 * @return string
 	 */
-	public function clientPort()
+	public function port()
 	{
 		return $_SERVER["REMOTE_PORT"];
 	}
@@ -118,7 +166,7 @@ class Request
 	 *
 	 * @return string
 	 */
-	public function requestReferer()
+	public function referer()
 	{
 		return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 	}

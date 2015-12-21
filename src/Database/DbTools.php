@@ -1,8 +1,10 @@
 <?php
 
 namespace System\Database;
+
 use PDO;
 use PDOStatement;
+use System\Support\Security;
 
 abstract class DbTools
 {

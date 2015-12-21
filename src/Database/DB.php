@@ -16,6 +16,18 @@ use System\Exception\ConnectionException;
 class DB extends DbTools
 {
     /**
+     * Information sur les erreurs de pdoStement
+     * 
+     * @var array
+     */
+    private static $currentPdoStementErrorInfo = [];
+    /**
+     * Information sur les erreurs de pdo
+     * 
+     * @var array
+     */
+    private static $currentPdoErrorInfo = [];
+    /**
      * Instance de DB
      *
      * @var null
@@ -100,6 +112,7 @@ class DB extends DbTools
         }
 
         Util::launchCallBack($cb, false);
+        
         return static::class;
 
     }
@@ -159,6 +172,9 @@ class DB extends DbTools
             $fetch = "fetchAll";
             $pdostatement->execute();
 
+            static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
+            static::$currentPdoErrorInfo = static::$db->errorInfo();
+
             if ($pdostatement->rowCount() == 1) {
                $fetch = "fetch";
             }
@@ -181,7 +197,22 @@ class DB extends DbTools
         static::verifyConnection();
 
         if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)\svalues\(.+\)|\s?set\s(.+)+)$/i", $sqlstatement)) {
-            return static::executePrepareQuery($sqlstatement, $bind);
+            $r = 0;
+            if (count($bind) > 0) {
+
+                $is_array = true;
+               
+                foreach ($bind as $key => $value) {
+                    if (is_array($value)) {
+                        $r += static::executePrepareQuery($sqlstatement, $value);
+                    }
+                }
+
+            } else {
+                static::executePrepareQuery($sqlstatement, $bind);
+            }
+
+            return $r;
         }
 
         return null;
@@ -198,7 +229,9 @@ class DB extends DbTools
         static::verifyConnection();
 
         if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+$/i", $sqlstatement)) {
-            return static::$db->exec($sqlstatement);
+            $r = static::$db->exec($sqlstatement);
+            static::$currentPdoErrorInfo = static::$db->errorInfo();
+            return $r;
         }
 
         return false;
@@ -351,7 +384,8 @@ class DB extends DbTools
     public static function getLastErreur()
     {
         return [
-            "pdo" => static::$db->errorInfo()
+            "pdo" => static::$currentPdoErrorInfo,
+            "stmt" => static::$currentPdoStementErrorInfo
         ];
     }
 
@@ -556,8 +590,13 @@ class DB extends DbTools
     private static function executePrepareQuery($sqlstatement, array $bind = [])
     {
         $pdostatement = static::$db->prepare($sqlstatement);
+        
         static::bind($pdostatement, $bind);
         $pdostatement->execute();
+        var_dump($pdostatement->errorInfo());
+        static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
+        static::$currentPdoErrorInfo = static::$db->errorInfo();
+
         return $pdostatement->rowCount();
     }
 
