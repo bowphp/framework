@@ -13,10 +13,12 @@ class ApplicationAutoload
 	 * @param $class
 	 * @return void
 	 */
-	private static function load($class) {
+	private static function load($class)
+	{
 		$class = str_replace("\\", "/", $class);
 		$class = preg_replace("~System/~", "src/", $class);
 		$class = dirname(__DIR__). "/" . $class . ".php";
+
 		if (is_file($class)) {
 			require $class;
 		}
@@ -27,7 +29,8 @@ class ApplicationAutoload
 	 *
 	 * @return void
 	 */
-	public static function register() {
+	public static function register()
+	{
 		spl_autoload_register([__CLASS__, 'load']);
 	}
 

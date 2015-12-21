@@ -39,10 +39,7 @@ class RequestData implements CollectionAccess
 	 */
 	public static function loader($method)
 	{
-		if (self::$instance === null) {
-			self::$instance = new self($method);
-		}
-		return self::$instance;
+		return new self($method);
 	}
 
 	/**
@@ -52,7 +49,7 @@ class RequestData implements CollectionAccess
 	 * @return boolean
 	 */
 	public function isKey($key) {
-		return isset($this->get()[$key]) && !empty($this->get()[$key]);
+		return isset($this->get()[$key]);
 	}
 
 	/**

@@ -75,7 +75,7 @@ class Response
     public function redirect($path)
     {
         echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
-        header("Location: " . $this->app->get("root") . $path, true, 301);
+        header("Location: " . $this->app->get("root") . $path);
         $this->app->kill();
     }
 
@@ -184,7 +184,7 @@ class Response
 	 * 
 	 * @param string|null $filename
 	 * @throws ErrorException
-	 * @return Mustache_Engine|Twig_Environment|Jade|null
+	 * @return Mustache|Twig_Env|Jade|null
 	 */
 	private function templateLoader($filename)
 	{

@@ -3,27 +3,55 @@
 
 namespace System\Support;
 
+use InvalidArgumentException;
+
 class Resource
 {
 	/**
-	 * Liste des constantes d'erreur
-	 * pour l'upload de fichier.
+	 * Liste des constantes d'erreur pour l'upload de fichier.
 	 */
 	const ERROR = 5;
 	const SUCCESS = 7;
 	const WARNING = 6;
+	/**
+	 * Variable de configuration
+	 * 
+	 * @var array
+	 */
 	private static $config = [];
+	/**
+	 * Répertoire de stockage
+	 * 
+	 * @var null
+	 */
 	private static $storageDir = null;
-	// Répertoire par defaut de upload
-	private static $uploadDir = "/public";
-	// Taille par defaut d'un fichier
+	/**
+	 * Répertoire par defaut de upload
+	 * 
+	 * @var public
+	 */
+	private static $uploadDir = "public";
+	/**
+	 * Taille par defaut d'un fichier
+	 * 
+	 * @var int
+	 */
 	private static $fileSize = 20000000;
-	// Nom d'un fichier
+	/**
+	 * Nom d'un fichier
+	 * 
+	 * @var null
+	 */
 	private static $uploadFileName = null;
-	// Liste des extensions par defaut
-	private $fileExtension = ["png", "jpg"];
+	/**
+	 * Liste des extensions par defaut
+	 * 
+	 * @var array
+	 */ 
+	private static $fileExtension = ["png", "jpg"];
     /**
 	 * Modifier le nom par defaut du file uploader.
+	 * 
 	 * @param string $filename
 	 * @return self
 	 */
@@ -34,7 +62,9 @@ class Resource
 	}
 
 	/**
-	 * @param $extension
+	 * Modifie la liste des extension valide
+	 * 
+	 * @param mixed $extension
 	 * @return $this
 	 */
 	public static function setFileExtension($extension)
@@ -49,6 +79,7 @@ class Resource
 
 	/**
 	 * setUploadedDir, fonction permettant de redefinir le repertoir d'upload
+	 * 
 	 * @param string:path, le chemin du dossier de l'upload
 	 * @throws \InvalidArgumentException
 	 * @return \System\Snoop
@@ -58,13 +89,14 @@ class Resource
 		if (is_string($path)) {
 			self::$uploadDir = $path;
 		} else {
-			throw new \InvalidArgumentException("L'argument donnée a la fontion doit etre un entier");
+			throw new InvalidArgumentException("L'argument donnée a la fontion doit etre un entier");
 		}
 		return $this;
 	}
 
 	/**
 	 * Modifie la taille prédéfinie de l'image a uploader.
+	 * 
 	 * @param integer $size
 	 * @throws \InvalidArgumentException
 	 * @return \System\Snoop
@@ -74,7 +106,7 @@ class Resource
 		if (is_int($size)) {
 			self::$fileSize = $size;
 		} else {
-			throw new \InvalidArgumentException("L'argument donnée à la fonction doit être de type entier");
+			throw new InvalidArgumentException("L'argument donnée à la fonction doit être de type entier");
 		}
 		return $this;
 	}
@@ -85,15 +117,15 @@ class Resource
 	 * @param array $file information sur le fichier, $_FILES
 	 * @param callable|null $cb
 	 * @param string $hash=null
-	 * @return \System\Snoop
+	 * @return \System\Application
 	 */
 	public static function uploadFile($file, $cb = null, $hash = null)
 	{
 		if (!is_object($file) && !is_array($file)) {
-			Util::launchCallBack($cb, [new \InvalidArgumentException("Parametre invalide <pre>" . var_export($file, true) ."</pre>. Elle doit etre un tableau ou un object StdClass")]);
+			Util::launchCallBack($cb, [new InvalidArgumentException("Parametre invalide <pre>" . var_export($file, true) ."</pre>. Elle doit etre un tableau ou un object StdClass")]);
 		}
 		if (empty($file)) {
-			Util::launchCallBack($cb, [new \InvalidArgumentException("Le fichier a uploader n'existe pas")]);
+			Util::launchCallBack($cb, [new InvalidArgumentException("Le fichier a uploader n'existe pas")]);
 		}
 		if (is_array($file)) {
 			$file = (object) $file;
@@ -114,7 +146,7 @@ class Resource
 			if ($file->error === 0) {
 				if ($file->size <= self::$fileSize) {
 					$pathInfo = (object) pathinfo($file->name);
-					if (in_array($pathInfo->extension, $this->fileExtension)) {
+					if (in_array($pathInfo->extension, static::$fileExtension)) {
 						if ($hash !== null) {
 							if (self::$uploadFileName !== null) {
 								$filename = hash($hash, self::$uploadFileName);
@@ -170,20 +202,36 @@ class Resource
 		return $this;
 	}
 
+	/**
+	 * Ecrire dans le fichier spécifier
+	 * 
+	 * @param string $file
+	 * @param string $content
+	 */
     public static function put($file, $content)
     {
         if (is_file(realpath($file))) {
-            return file_get_contents(self::$storageDir."/".$file, )
-        } else {
-
+            return file_get_contents(self::$storageDir."/".$file, $content);
         }
     }
 
+	/**
+	 * Ecrire à la suite d'un fichier spécifier
+	 * 
+	 * @param string $file
+	 * @param string $content
+	 */
     public static function append($file, $content)
     {
         self::write(self::open($file, "a"), $content);
     }
 
+	/**
+	 * Ecrire au début d'un fichier spécifier
+	 * 
+	 * @param string $file
+	 * @param string $content
+	 */
     public static function preappend($file, $content)
     {
         $tmp_content = file_get_contents($file);
@@ -191,21 +239,43 @@ class Resource
         self::append($file, $tmp_content);
     }
 
+	/**
+	 * Supprimer un fichier
+	 * 
+	 * @param string $file
+	 * @param string $content
+	 */
     public static function delete($file)
     {
         unlink($file);
     }
 
-    public static function files($dirname)
+	/**
+	 * Alias sur readInDir
+	 * 
+	 * @param string $filename
+	 */
+    public static function files($filename)
     {
-        return self::readIndir($dirname, "file");
+        return self::readIndir($filename, "file");
     }
 
+	/**
+	 * Alias sur readInDir
+	 * 
+	 * @param string $dirname
+	 */
     public static function directories($dirname)
     {
-        return self::readIndir($files, "dir");
+        return self::readIndir($dirname, "dir");
     }
 
+	/**
+	 * Crée un répertoire
+	 * 
+	 * @param string $file
+	 * @param bool $recursive
+	 */
     public static function makeDirectory($files, $recursive = false)
     {
         if ($recursive === true) {
@@ -215,42 +285,80 @@ class Resource
         }
     }
 
+	/**
+	 * Supprime un répertoire.
+	 * 
+	 * @param string $file
+	 * @param bool $recursive
+	 */
     public static function deleteDirectory($file, $recursive)
     {
 		return null;
     }
 
-    public static configure($config = ["resource" => "local"])
+	/**
+	 * Lance la configuration
+	 * 
+	 * @param object $config
+	 */
+    public static function configure($config)
     {
-        if (is_string($config)) {
-            self::$storageDir = $config;
-        } else {
-			if ($config["resource"] == "local") {
-				self::$config = require dirname(__DIR__) . "/../configuration/storage.php";
-				self::$storageDir = self::$config["local"];
-			}
-        }
+    	static::$fileExtension = $config->uploadFileExtension;
+    	$c = $config->uploadConfiguration;
+
+    	if ($c->type === "folder") {
+    		static::$uploadDir = $c->config["folder"]["dirname"];
+    	} else {
+    		// Todo: ftp workflow
+    	}
+        
     }
 
-    private static isConfigured()
+	/**
+	 * Verifie la configuration
+	 * 
+	 * @return bool
+	 */
+    private static function isConfigured()
     {
         return self::$storageDir !== null ? true : false;
     }
 
-    private static open($file, $mod)
+	/**
+	 * Ouvrie un fichier
+	 * 
+	 * @param string $file
+	 * @param string $mod
+	 * 
+	 * @return resource
+	 */
+    private static function open($file, $mod)
 	{
         $rFile = fopen($file, $mod);
         return $rFile;
     }
 
-    private static closeFile($rFile)
+	/**
+	 * Ferme un resource fichier
+	 * 
+	 * @param resource $rFile
+	 */
+    private static function closeFile($rFile)
     {
         if (is_resource($rFile)) {
             fclose($rFile);
         }
     }
 
-    private function readIndir($dirname, $type = "file")
+	/**
+	 * Lire dans le répertoire spécifier
+	 * 
+	 * @param string $dirname
+	 * @param string $type
+	 * 
+	 * @return array
+	 */
+    private static function readIndir($dirname, $type = "file")
     {
         $files = [];
         $method = "is_file";
@@ -260,7 +368,7 @@ class Resource
         }
         while($file = readdir($dir)) {
             if ($method($file)) {
-                if (!in_array($file, [".", ".."] ) {
+                if (!in_array($file, [".", ".."])) {
                     array_push($files, $file);
                 }
             }
@@ -268,37 +376,5 @@ class Resource
         closedir($dir);
         return $files;
     }
-
-	/**
-	 * files, retourne les informations du $_FILES
-	 * @param string|null $key
-	 * @return mixed
-	 */
-	public function files($key = null)
-	{
-		if ($key !== null) {
-			return isset($_FILES[$key]) ? (object) $_FILES[$key] : false;
-		}
-		return $_FILES;
-	}
-
-	/**
-	 * isParamKey, vérifie si Snoop::files contient la clé définie.
-	 * @param string|int $key
-	 * @return mixed
-	 */
-	public function isFilesKey($key)
-	{
-		return isset($_FILES[$key]) && !empty($_FILES[$key]);
-	}
-
-	/**
-	 * filesIsEmpty, vérifie si le tableau $_FILES est vide.
-	 *	@return boolean
-	 */
-	public function filesIsEmpty()
-	{
-		return empty($_FILES);
-	}
 
 }

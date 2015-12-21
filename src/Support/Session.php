@@ -1,9 +1,9 @@
 <?php
 
-namespace System\Support\Session;
-use System\Interface\CollectionAccess;
+namespace System\Support;
 
-class Session implements CollectionAccess
+
+class Session
 {
 
 	/**
@@ -25,7 +25,7 @@ class Session implements CollectionAccess
 	 * @return boolean
 	 */
 	public static function isKey($key) {
-		return isset($this->get()[$key]) && !empty($this->get()[$key]);
+		return isset(static::get()[$key]) && !empty(static::get()[$key]);
 	}
 
 	/**
@@ -48,9 +48,9 @@ class Session implements CollectionAccess
 	 * @return mixed
 	 */
 	public static function get($key = null) {
-		$this->start();
+		static::start();
 		if (is_string($key)) {
-			return $this->isKey($key) ? $_SESSION[$key] : false;
+			return static::isKey($key) ? $_SESSION[$key] : false;
 		}
 		return $_SESSION;
 	}
@@ -66,12 +66,12 @@ class Session implements CollectionAccess
 	 * @throws \InvalidArgumentException
 	 */
 	public static function add($key, $data, $next = null) {
-		$this->start();
+		static::start();
 		if (!is_string($key)) {
 			throw new \InvalidArgumentException("La clé doit être un chaine.", E_ERROR);
 		}
 		if ($next === true) {
-			if ($this->isKey($key)) {
+			if (static::isKey($key)) {
 				array_push($_SESSION[$key], $data);
 			} else {
 				$_SESSION[$key] = $data;
@@ -98,7 +98,7 @@ class Session implements CollectionAccess
 	/**
 	 * disconnect, permet vider le cache session
 	 */
-	public static function disconnect()
+	public static function stop()
 	{
 		self::start();
 		session_destroy();
