@@ -9,6 +9,7 @@ use Twig_Autoloader as Tiwg_A;
 use Mustache_Engine as Mustache;
 use Twig_Environment as Twig_Env;
 use Twig_Loader_Array as Twig_Load;
+use System\Exception\ViewException;
 
 class Response
 {
@@ -127,8 +128,18 @@ class Response
 	public function view($filename, $bind = null)
 	{
 		if ($this->app->get("views") !== null) {
-			$filename = $this->app->get("views") ."/".$filename;
+			
+			$filename = $this->app->get("views") ."/". $filename . ".php";
+			
+			if (!file_exists($filename)) {
+				$filename = $this->app->get("views") ."/". $filename . ".html";			
+			}
 		}
+
+		if (!file_exists($filename)) {
+			throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
+		}
+ 
 		// Render du fichier demander.
 		require $filename;
 		return $this;
@@ -184,9 +195,6 @@ class Response
 		}
 		$tpl = null;
 		if ($this->app->get("engine") == "twig") {
-			// TODO: Lancement du loader du template twig en case d'erreur.
-			// require dirname(dirname(__DIR__)) . "/../vendor/twig/twig/lib/Twig/Autoloader.php";
-			// Twig_A::register();
 
 			$loader = new Twig_Load([
 				'template' => file_get_contents($filename)

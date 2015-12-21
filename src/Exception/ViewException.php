@@ -4,4 +4,4 @@ namespace System\Exception;
 
 use ErrorException;
 
-class SmtpException extends ErrorException {}
+class ViewException extends ErrorException {};

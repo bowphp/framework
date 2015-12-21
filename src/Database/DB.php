@@ -124,7 +124,7 @@ class DB extends DbTools
 	 * @param callable $cb
 	 * @return void
 	 */
-	public static function switchTo($enterKey, $cb)
+	public static function switchTo($enterKey, $cb = null)
 	{
         static::verifyConnection();
 
@@ -197,19 +197,24 @@ class DB extends DbTools
         static::verifyConnection();
 
         if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)\svalues\(.+\)|\s?set\s(.+)+)$/i", $sqlstatement)) {
-            $r = 0;
-            if (count($bind) > 0) {
 
-                $is_array = true;
+            $r = 0;
+            $is_2_m_array = true;
+
+            if (count($bind) > 0) {
                
                 foreach ($bind as $key => $value) {
                     if (is_array($value)) {
                         $r += static::executePrepareQuery($sqlstatement, $value);
+                    } else {
+                        $is_2_m_array = false;
                     }
                 }
 
-            } else {
-                static::executePrepareQuery($sqlstatement, $bind);
+            } 
+
+            if (!$is_2_m_array) {
+                $r = static::executePrepareQuery($sqlstatement, $bind);
             }
 
             return $r;
@@ -593,7 +598,7 @@ class DB extends DbTools
         
         static::bind($pdostatement, $bind);
         $pdostatement->execute();
-        var_dump($pdostatement->errorInfo());
+
         static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
         static::$currentPdoErrorInfo = static::$db->errorInfo();
 
