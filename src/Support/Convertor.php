@@ -8,17 +8,23 @@ class Convertor
 
 	/**
 	 * Permettant de convertie des chiffres en letter
+	 * 
 	 * @param string $nombre
+	 * 
 	 * @return string
 	 */
 	public static function convertDate($nombre)
 	{
 		$nombre = (int) $nombre;
+
 		if ($nombre === 0) {
+		
 			return "zéro";
+		
 		}
+		
 		/**
-		 * Definition des elements de convertion.
+		 * Définition des éléments de convertion.
 		 */
 		$nombreEnLettre = [
 			"unite" => [
@@ -32,6 +38,7 @@ class Convertor
 				"soixante", "soixante",  "quatre-vingt", "quatre-vingt"
 			]
 		];
+		
 		/**
 		 * Calcule des:
 		 * - Unité
@@ -43,33 +50,43 @@ class Convertor
 		$dixaine = ($nombre % 100 - $unite) / 10;
 		$cent = ($nombre % 1000 - $nombre % 100) / 100;
 		$millieme = ($nombre % 10000 - $nombre % 1000) / 1000;
+		
 		/**
-		 * Calcule des unites
+		 * Calcule des unités
 		 */
 		$unitsOut = ($unite === 1 && $dixaine > 0 && $dixaine !== 8 ? 'et-' : '') . $nombreEnLettre['unite'][$unite];
 
 		$tensOut = "";
 		$centsOut = "";
+		
 		/**
 		 * Calcule des dixaines
 		 */
 		if ($dixaine === 1 && $unite > 0) {
+			
 			$tensOut = $nombreEnLettre["unite"][10 + $unite];
 			$unitsOut = "";
+
 		} else if ($dixaine === 7 || $dixaine === 9) {
+			
 			$tensOut = $nombreEnLettre["ten"][$dixaine] . '-' . ($dixaine === 7 && $unite === 1 ? "et-" : "") . $nombreEnLettre["unite"][10 + $unite];
 			$unitsOut = "";
+
 		} else {
+
 			$tensOut = $nombreEnLettre["ten"][$dixaine];
+		
 		}
+		
 		/**
-		 * Calcule des cemtaines
+		 * Calcul des cenaines
 		 */
 		$tensOut .= ($unite === 0 && $dixaine === 8 ? "s": "");
 		$centsOut = ($cent > 1 ? $nombreEnLettre["unite"][(int)$cent].' ' : '').($cent > 0 ? 'cent' : '').($cent > 1 && $dixaine == 0 && $unite == 0 ? '' : '');
 		$tmp = $centsOut.($centsOut && $tensOut ? ' ': '').$tensOut.(($centsOut && $unitsOut) || ($tensOut && $unitsOut) ? '-': '').$unitsOut;
+		
 		/**
-		 * Retourne avec les millieme associer.
+		 * Retourne avec les millièmes associés.
 		 */
 		return ($millieme === 1 ? "mil":($millieme > 1 ? $nombreEnLettre["unite"][(int) $millieme]." mil" : "")).($millieme ? " ".$tmp : $tmp);
 	}

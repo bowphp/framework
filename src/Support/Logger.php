@@ -44,9 +44,12 @@ class Logger
 
     }
 
-    public static function run($logDirectories) {
+    public static function run($logDirectories)
+    {
+
         set_error_handler([__CLASS__, 'errorHandler']);
         set_exception_handler([__CLASS__, "exceptionHandler"]);
+    
     }
 
     public static function log($message)
@@ -56,41 +59,58 @@ class Logger
 
     public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
     {
+
         $type = "error";
+        
         switch ((int) $errno) {
+            
             case E_ERROR:
             case E_USER_ERROR:
                 $type = "fatal";
                 break;
+        
             case E_WARNING:
             case E_USER_WARNING:
                 $type = "warning";
                 break;
+        
             case E_NOTICE:
             case E_USER_NOTICE:
                 $type = "notice";
+        
                 break;
         }
+
         static::$type("[$type] $errstr at line $errline in $errfile");
+    
     }
 
-    public function exceptionHandler(Exception $e) {
+    public function exceptionHandler(Exception $e)
+    {
+
         $type = "error";
+        
         switch ($e->getCode()) {
+
             case E_ERROR:
             case E_USER_ERROR:
                 $type = "fatal";
                 break;
+        
             case E_WARNING:
             case E_USER_WARNING:
                 $type = "warning";
                 break;
+        
             case E_NOTICE:
             case E_USER_NOTICE:
                 $type = "notice";
                 break;
+        
         }
+
         static::$type("[$type]: " . $e->getMessage() . " at line " . $e->getLine() . " in " . $e->getFile());
+    
     }
 
     private static function format($message)

@@ -3,7 +3,11 @@
 namespace System\Support;
 
 
-class Session
+use InvalidArgumentException;
+use System\Interfaces\CollectionAccessStatic;
+
+
+class Session implements CollectionAccessStatic
 {
 
 	/**
@@ -11,25 +15,30 @@ class Session
 	 */
 	public static function start()
 	{
+		
 		if (PHP_SESSION_ACTIVE != session_status()) {
+
 			session_start();
+		
 		}
+
 	}
 
 	/**
-	 * isKey, verifie l'existance d'un
-	 * cle dans le table de session
-	 * 
+     * has, vérifie l'existance une clé dans la colléction de session
 	 * 
 	 * @param string $key
+	 * 
 	 * @return boolean
 	 */
-	public static function isKey($key) {
+	public static function has($key)
+	{
 		return isset(static::get()[$key]) && !empty(static::get()[$key]);
 	}
 
 	/**
-	 * filessessionIsEmpty
+     * isEmpty, vérifie si une colléction est vide.
+	 * 
 	 *	@return boolean
 	 */
 	public static function IsEmpty()
@@ -38,70 +47,87 @@ class Session
 	}
 
 	/**
-	 * session, permet de manipuler le donnee
-	 * de session.
-	 * permet de recuperer d'une valeur ou
-	 * la collection de valeur.
-	 * 
+     * get, permet de récupérer une valeur ou la colléction de valeur.
 	 * 
 	 * @param string $key=null
+	 * 
 	 * @return mixed
 	 */
-	public static function get($key = null) {
+	public static function get($key = null)
+	{
 		static::start();
+		
 		if (is_string($key)) {
-			return static::isKey($key) ? $_SESSION[$key] : false;
+		
+			return static::has($key) ? $_SESSION[$key] : false;
+		
 		}
+		
 		return $_SESSION;
 	}
 
 	/**
-	 * addSession, permet d'ajout une value
-	 * dans le tableau de session.
-	 * 
+     * add, ajoute une entrée dans la colléction
 	 * 
 	 * @param string|int $key
 	 * @param mixed $data
 	 * @param boolean $next=null
-	 * @throws \InvalidArgumentException
+	 * 
+	 * @throws InvalidArgumentException
 	 */
 	public static function add($key, $data, $next = null) {
+		
 		static::start();
+
 		if (!is_string($key)) {
-			throw new \InvalidArgumentException("La clé doit être un chaine.", E_ERROR);
+		
+			throw new InvalidArgumentException("La clé doit être un chaine.", E_ERROR);
+		
 		}
+
 		if ($next === true) {
-			if (static::isKey($key)) {
+		
+			if (static::has($key)) {
+			
 				array_push($_SESSION[$key], $data);
+			
 			} else {
+			
 				$_SESSION[$key] = $data;
+			
 			}
+		
 		} else {
+
 			$_SESSION[$key] = $data;
+		
 		}
+
 	}
 
 	/**
-	 * removeSession, supprime un entree dans la
-	 * table de session.
-	 * 
+     * remove, supprime une entrée dans la colléction
 	 * 
 	 * @param string $key
+	 * 
 	 * @return self
 	 */
 	public static function remove($key)
 	{
 		unset($_SESSION[$key]);
+
 		return $this;
 	}
 
 	/**
-	 * disconnect, permet vider le cache session
+	 * disconnect, permet vider le cache de session
 	 */
 	public static function stop()
 	{
+		
 		self::start();
 		session_destroy();
 		session_unset();
+
 	}
 }

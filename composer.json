@@ -17,6 +17,10 @@
         {
             "name": "Franck Dakia",
             "email": "dakiafranck@gmail.com"
+        },
+        {
+            "name": "Etchien Boa",
+            "email": "geekroot9@gmail.com"
         }
     ],
     "autoload": {

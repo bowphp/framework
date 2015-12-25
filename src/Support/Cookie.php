@@ -3,85 +3,102 @@
 
 namespace System\Support;
 
-use System\Interfaces\CollectionAccess;
-
-
-class Cookie implements CollectionAccess
+class Cookie
 {
-	
-	public static function loadCookie()
-	{
-        return true;
-	}
-
-    public function read()
-	{
-        return true;
-	}
+    /**
+     * @static self
+     */
+	private static $instance = null;
 
     /**
-     * isKey, verifie l'existance d'un
-     * cle dans la table
-     * 
+     * @access private
+     */
+    private function __construct() {}
+
+    /**
+     * @access private
+     */
+    private function __clone() {}
+
+    /**
+     * has, vérifie l'existance une clé dans la colléction de session
      * 
      * @param string $key
+     * 
      * @return boolean
      */
-    public function isKey($key)
+    public static function has($key)
     {
-
+        return isset($_COOKIE[$key]);
     }
 
     /**
-     *  IsEmpty
-     *	@return boolean
+     * isEmpty, vérifie si une colléction est vide.
+     * 
+     * @return boolean
      */
-    public function IsEmpty()
+    public static function IsEmpty()
     {
-
+        return empty($_COOKIE);
     }
 
     /**
-     * get, permet de manipuler le donnee
-     * d'un tableau.
-     * permet de recuperer d'une valeur ou
-     * la collection de valeur.
-     * 
-     * 
+     * get, permet de récupérer une valeur ou la colléction de valeur de cookie.
+     *
      * @param string $key=null
+     * 
      * @return mixed
      */
-    public function get($key = null)
+    public static function get($key = null)
     {
+
+        if (static::has($key)) {
+
+            return $_COOKIE[$key];
+
+        }
+
+        return $_COOKIE;
 
     }
 
     /**
-     * addSession, permet d'ajout une value
-     * dans le tableau.
-     * 
+     * add, permet d'ajouter une value dans le tableau de cookie.
      * 
      * @param string|int $key
      * @param mixed $data
-     * @param boolean $next=null
-     * @throws \InvalidArgumentException
+     * @param int $time=3600
+     * @param string $path=null
+     * @param string $domain=null
+     * @param bool $secure=false
+     * @param bool $http=false
+     * 
      */
-    public function add($key, $data, $next = null)
+    public static function add($key, $data, $time = 3600, $path = null, $domain = null, $secure = false, $http = true)
     {
-
+        return setcookie($key, "$data", $time, $path, $domain, $secure, $http);
     }
 
     /**
-     * remove, supprime un entree dans la
-     * table
-     * 
+     * remove, supprime une entrée dans la table
      * 
      * @param string $key
+     * 
      * @return self
      */
-    public function remove($key)
+    public static function remove($key)
     {
+        $old = false;
 
+        if (static::has($key)) {
+        
+            $old = $_COOKIE[$key];
+        
+        }
+
+        unset($_COOKIE[$key]);
+
+        return $old;
     }
 
 }

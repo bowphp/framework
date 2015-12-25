@@ -10,10 +10,11 @@ abstract class DbTools
 {
 
     /**
-     * Execute PDOStatement::bindValue sur une instance de PDOStatement passer en paramètre
+     * Éxécute PDOStatement::bindValue sur une instance de PDOStatement passé en paramètre
      *
      * @param PDOStatement $pdoStatement
      * @param $data
+     * 
      * @return PDOStatement
      */
     protected static function bind(PDOStatement $pdoStatement, array $data = [])
@@ -38,7 +39,7 @@ abstract class DbTools
 
             } else {
                 /**
-                 * On force la valeur en entier ou en reel.
+                 * On force la valeur en entier ou en réél.
                  */
                 if(is_int($value)) {
                     $value = (int) $value;
@@ -61,6 +62,7 @@ abstract class DbTools
      * rangeField, fonction permettant de sécuriser les données.
      *
      * @param array $data, les données à sécuriser
+     * 
      * @return string $field
      */
     protected static function rangeField($data)
@@ -81,10 +83,12 @@ abstract class DbTools
          */
         return $field;
     }
+    
     /**
-     * Formateur de donnee. key => :value
+     * Formateur de donnée. key => :value
      *
      * @param array $data
+     * 
      * @return array $resultat
      */
     protected function add2points(array $data)

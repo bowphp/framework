@@ -2,15 +2,17 @@
 
 namespace System\Http;
 
+
 use StdClass;
 use System\Core\Application;
+
 
 class Request
 {
 	/**
 	 * Variable d'instance
 	 * 
-	 * @var null
+	 * @static self
 	 */
 	private static $instance = null;
 	
@@ -22,7 +24,8 @@ class Request
 	private $app;
 
 	/**
-	 * Variable de paramètre 
+	 * Variable de paramètre issue de url définie par l'utilisateur
+	 * e.g /users/:id . alors params serait params->id == une la value suivant /users/1
 	 * 
 	 * @var object
 	 */
@@ -48,10 +51,13 @@ class Request
 	public static function load(Application $app)
 	{
 		if (self::$instance === null) {
+
 			self::$instance = new self($app);
+		
 		}
 
 		return self::$instance;
+	
 	}
 
 	/**
@@ -62,27 +68,31 @@ class Request
 	 */
 	public function uri($path = "")
 	{
+
 		if ($pos = strpos($_SERVER["REQUEST_URI"], "?")) {
+		
 			$uri = substr($_SERVER["REQUEST_URI"], 0, $pos);
+		
 		} else {
+		
 			$uri = $_SERVER["REQUEST_URI"];
+		
 		}
 
 		return str_replace($path, "", $uri);
+	
 	}
 
 
 	/**
-	 * retourne path envoyer par client.
+	 * retourne path envoyé par client.
 	 *
 	 * @param string $path=""
 	 * @return string
 	 */
-	public function path($path = "")
+	public function url($path = "")
 	{
-		$uri = str_replace($_SERVER["HTTP_HOST"], "", $this->uri());
-
-		return str_replace($path, "", $uri);
+		return $_SERVER["HTTP_HOST"] . "/" . $this->uri();
 	}
 
 	/**
@@ -126,20 +136,27 @@ class Request
     }
 
 	/**
-	 * Verifie si on n'est dans le cas d'un requête XHR.
+	 * Vérifie si on n'est dans le cas d'un requête AJAX.
 	 *
 	 * @return boolean
 	 */
 	public function ajax()
 	{
+
 		if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
+		
 			$xhrObj = strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]);
+		
 			if ($xhrObj == "xmlhttprequest" || $xhrObj == "activexobject") {
+		
 				return true;
+			
 			}
+		
 		}
 
 		return false;
+	
 	}
 
 	/**
@@ -162,9 +179,9 @@ class Request
 	}
 
 	/**
-	 * Retourne la provenance de la requête courant.
+	 * Retourne la provenance de la requête courante.
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	public function referer()
 	{

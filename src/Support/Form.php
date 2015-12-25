@@ -14,6 +14,7 @@ class Form
      * @param string $name
      * @param string $value=""
      * @param string $placeholder=null
+     * 
      * @return void
      */
     public static function text($name, $value = "", $placeholder = null)
@@ -27,6 +28,7 @@ class Form
      * @param string $name
      * @param string $value=""
      * @param string $placeholder=null
+     * 
      * @return void
      */
     public static function password($name, $value = "", $placeholder = null)
@@ -41,6 +43,7 @@ class Form
      * @param string $name
      * @param string $value=""
      * @param string $placeholder=null
+     * 
      * @return void
      */
     public static function hidden($name, $value = "", $placeholder = null)
@@ -52,6 +55,7 @@ class Form
      * Ajout le tag <input type="file">
      *
      * @param string $name
+     * 
      * @return void
      */
     public static function file($name)
@@ -63,6 +67,7 @@ class Form
      * Ajout le tag <input type="submit">
      *
      * @param string $value
+     * 
      * @return void
      */
     public static function submit($value)
@@ -75,6 +80,7 @@ class Form
      *
      * @param string $name
      * @param string $text
+     * 
      * @return void
      */
     public static function textarea($name, $text = "")
@@ -88,6 +94,7 @@ class Form
      * @param string $name
      * @param bool $checked=false
      * @param string $value=""
+     * 
      * @return void
      */
     public static function checkbox($name, $checked = false,  $value = "")
@@ -101,6 +108,7 @@ class Form
      * @param string $name
      * @param bool $checked=false
      * @param string $value
+     * 
      * @return void
      */
     public static function radio($name, $checked = false, $value = "")
@@ -112,6 +120,7 @@ class Form
      * Ajout le tag <fieldset>
      *
      * @param null|string $legend
+     * 
      * @return void
      */
     public static function addFieldSet($legend = null)
@@ -123,7 +132,7 @@ class Form
     }
 
     /**
-     * Fermeture du table fieldset
+     * Ferméture du tag fieldset
      *
      * @return void
      */
@@ -133,21 +142,7 @@ class Form
     }
 
     /**
-     * Creation definitive du formulaire.
-     *
-     * @param $method
-     * @param $action
-     * @param string $id
-     * @param bool|false $enctype
-     * @return void
-     */
-    public static function done($method, $action, $enctype = false, $id = "form")
-    {
-        echo "<form id=\"$id\" method=\"{$method}\" action=\"{$action}\" ".($enctype === true ? 'enctype="multipart/form-data"': "").">". self::$form . "</form>";
-    }
-
-    /**
-     * Ajout un retoure chariot de la collection de balise
+     * Ajout un retoure chariot de la collétion de balise
      *
      * @return void
      */
@@ -161,6 +156,7 @@ class Form
      *
      * @param string $name
      * @param string|null $for=null
+     * 
      * @return void
      */
     public static function label($name, $for = null)
@@ -168,4 +164,19 @@ class Form
         self::$form .= "<label ". ($for !== null ? "for={$for}": "") .">" . $name . "</label>";
     }
 
+    /**
+     * Creation définitive du formulaire.
+     *
+     * @param $method
+     * @param $action
+     * @param string $id
+     * @param bool|false $enctype
+     * 
+     * @return void
+     */
+    public static function done($method, $action, $enctype = false, $id = "form")
+    {
+        echo "<form id=\"$id\" method=\"{$method}\" action=\"{$action}\" ".($enctype === true ? 'enctype="multipart/form-data"': "").">". self::$form . "</form>";
+    }
+    
 }

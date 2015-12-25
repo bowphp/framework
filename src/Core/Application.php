@@ -1,16 +1,18 @@
 <?php
 
 /**
- * @author diagnostic sarl, <info@diagnostic-ci.com>
- * create and maintener by diagnostic developpers teams:
- * - Etchien Boa
- * - Dakia Franck
- * - Zokora Elvis
- * @+- 10/06/2015 fast web app building
- * @package Snoope
+ * @author DIAGNOSTIC sarl, <info@diagnostic-ci.com>
+ * 
+ * Create and maintener by diagnostic developpers teams:
+ * 
+ * @author Etchien Boa <geekroot9@gmail.com>
+ * @author Dakia Franck <dakiafranck@gmail.com>
+ * 
+ * @package System\Core
  */
 
 namespace System\Core;
+
 
 use Closure;
 use System\Database\DB;
@@ -19,6 +21,7 @@ use System\Http\Request;
 use System\Http\Response;
 use System\Support\Logger;
 use InvalidArgumentException;
+
 
 class Application
 {
@@ -29,48 +32,49 @@ class Application
 	 * @var array
 	 */ 
 	private $with = [];
+
 	/**
 	 * Branchement global sur un liste de route
 	 * 
 	 * @var string
 	 */
 	private $branch = "";
+	
 	/**
 	 * Répresente le chemin vers la vue.
 	 * 
 	 * @var null|string
 	 */
 	private $views = null;
+	
 	/**
-	 * Systeme de template
+	 * Définie le systeme de template
 	 *
 	 * @var string|null
 	 */
 	private $engine = null;
+	
 	/**
 	 * Répertoire de cache
 	 * 
 	 * @var string
 	 */
 	private $cache = null;
+	
 	/**
-	 * Répresente de la racine de l'application
+	 * Répresente la racine de l'application
 	 *
 	 * @var string
 	 */
 	private $root = "";
+	
 	/**
 	 * Répresente le dossier public
 	 *
 	 * @var string
 	 */
 	private $public = "";
-	/**
-	 * Enregistre la route courante
-	 *
-	 * @var string
-	 */
-	private $currentRoot = "";
+	
 	/**
 	 * Fonction lancer en cas d'erreur.
 	 * 
@@ -79,18 +83,21 @@ class Application
 	private $error404 = null;
 
 	/**
+	 * Répertoire de log d'erreur
 	 *
 	 * @var string
 	 */ 
 	private $logDirecotoryName = "";
 
 	/**
+	 * Enrégistre l"information sur la methode de la requête http envoyé
 	 * 
 	 * @var string 
 	 */
 	private $method = "";
 
 	/**
+	 * Method Http courrente.
 	 * 
 	 * @var string
 	 */
@@ -104,7 +111,8 @@ class Application
 	private $names = [];
 
 	/**
-	 *
+	 * Enrégistre l'information la courent courrente
+	 * 
 	 * @var string
 	 */
 	private $currentRoute = "";
@@ -137,21 +145,28 @@ class Application
 	 */
 	private static $routes = [];
 
-
 	/**
 	 * Private construction
 	 *
-	 * @param $config
+	 * @param object $config
 	 */
 	private function __construct($config)
 	{
+		
 		if (empty($config)) {
-			 $this->method = $this->request()->method();
+
+			$this->method = $this->request()->method();
+	
 			return null;
+	
 		}
+        
         if (isset($config->timezone)) {
+    
             Util::settimezone($config->timezone);
+    
         }
+
 		$this->appname = $config->appname;
 		$this->logDirecotoryName = $config->logDirecotoryName;
 		$this->views = $config->views;
@@ -164,6 +179,7 @@ class Application
         $this->method = $this->request()->method();
 
 	}
+
 	/**
 	 * Private __clone
 	 */
@@ -173,41 +189,55 @@ class Application
 	 * Pattern Singleton.
 	 * 
 	 * @param array|object $config
+	 * 
 	 * @return self
 	 */
 	public static function loader($config)
 	{
+
 		if (static::$inst === null) {
+	
 			static::$inst = new self($config);
+	
 		}
+
 		return static::$inst;
+	
 	}
 
 	/**
-	 * mount, ajout un branchement.
+	 * mount, ajoute un branchement.
 	 *
 	 * @param string $branchName
 	 * @param callable|null $middelware
+	 * 
 	 * @return self
 	 */
 	public function mount($branchName, $middelware = null)
 	{
 		if ($middelware !== null) {
+	
 			call_user_func($middelware, [$this->request(), $this->response()]);
+	
 		}
+		
 		$this->branch .= $branchName;
+
 		return $this;
 	}
 
 	/**
-	 * Unmount, détruit le branchement en cour.
+	 * unmount, détruit le branchement en cour.
 	 *
 	 * @return self
 	 */
 	public function unmount()
 	{
+
 		$this->branch = "";
+
 		return $this;
+	
 	}
 
 	/**
@@ -215,18 +245,25 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self|string
 	 */
 	public function get($path, $cb = null)
 	{
 		if ($cb == null) {
+
 			$prop = $path;
+			
 			if (property_exists($this, $prop)) {
+	
 				return $this->$prop;
+	
 			}
+
 		}
-		$this->currentRoot = $this->branch . $path;
-		return $this->routeLoader("GET", $this->currentRoot, $cb);
+		
+		return $this->routeLoader("GET", $this->branch . $path, $cb);
+	
 	}
 
 	/**
@@ -234,16 +271,20 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function any($path, $cb)
 	{
+
 		$this->post($path, $cb)
 		->delete($path, $cb)
 		->put($path, $cb)
 		->update($path, $cb)
 		->get($path, $cb);
+
 		return $this;
+
 	}
 
 	/**
@@ -251,6 +292,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function delete($path, $cb)
@@ -263,6 +305,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function update($path, $cb)
@@ -275,6 +318,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function put($path, $cb)
@@ -287,6 +331,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function head($path, $cb)
@@ -299,11 +344,13 @@ class Application
 	 * validite de la requete
 	 *
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function to404($cb)
 	{
 		$this->error404 = $cb;
+
 		return $this;
 	}
 
@@ -313,34 +360,48 @@ class Application
 	 * @param array $match
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function match($match, $path, $cb)
 	{
+		
 		foreach($match as $value) {
+
 			if ($this->method === strtoupper($value)) {
+
 				$this->routeLoader($path, $this->method, $cb);
+			
 			}
+
 		}
+
 		return $this;
 	}
 
 	/**
-	 * addHttpVerbe, permet d'ajout les autres verbes https
-	 * PUT, DELETE, UPDATE, HEAD
+	 * addHttpVerbe, permet d'ajouter les autres verbes http
+	 * [PUT, DELETE, UPDATE, HEAD]
 	 *
 	 * @param string $method
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	private function addHttpVerbe($method, $path, $cb)
 	{
+		
 		if ($this->isBodyKey("method")) {
+
 			if ($this->body("method") === $method) {
+	
 				$this->routeLoader($this->method, $this->branch . $path, $cb);
+	
 			}
+
 		}
+
 		return $this;
 	}
 
@@ -349,6 +410,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
+	 * 
 	 * @return self
 	 */
 	public function post($path, $cb)
@@ -356,8 +418,8 @@ class Application
 		if ($this->isBodyKey("method")) {
 			return $this;
 		}
-		$this->currentRoot = $this->branch . $path;
-		return $this->routeLoader("POST", $this->currentRoot, $cb);
+		
+		return $this->routeLoader("POST", $this->branch . $path, $cb);
 	}
 
 	/**
@@ -366,34 +428,43 @@ class Application
 	 * @param string $method
 	 * @param string $path
 	 * @param callable|array $cb
+	 * 
 	 * @return self
 	 */
 	private function routeLoader($method, $path, $cb)
 	{
+		
 		static::$routes[$method][] = new Route($path, $cb);
+
 		$this->currentRoute = $path;
 		$this->currentMethod = $method;
+
 		return $this;
 	}
 
 	/**
-	 * Lance une personnalistaion de route.
-	 * 
+	 * Lance une personnalisation de route.
 	 * 
 	 * @param array $otherRule
+	 * 
 	 * @return self
 	 */
 	public function where(array $otherRule)
 	{
 		if (empty($this->with)) {
+		
 			$this->with[$this->currentMethod] = [];
 			$this->with[$this->currentMethod][$this->currentRoute] = $otherRule;
+		
 		} else {
+			
 			$this->with[$this->currentMethod] = array_merge(
 				$this->with[$this->currentMethod], 
 				[$this->currentRoute => $otherRule]
 			);
+
 		}
+
 		return $this;
 	}
 
@@ -404,60 +475,95 @@ class Application
 	 */
 	public function run()
 	{
+		
 		$this->response()->setHeader("X-Powered-By", "Snoop Framework");
 		$error = true;
+
 		if (isset(static::$routes[$this->method])) {
+			
 			foreach (static::$routes[$this->method] as $key => $route) {	
+				
 				if (isset($this->with[$this->method][$route->getPath()])) {
+	
 					$with = $this->with[$this->method][$route->getPath()];
+	
 				} else {
+	
 					$with = [];
+	
 				}
+
 				if ($route->match($this->request()->uri($this->root), $with)) {
 
-					$route->call($this->request(), $this->response(), $this->names);
+					$route->call($this->request(), $this->names);
 					$error = false;
+
 				}
+
 			}
 
 		} else {
+	
 			$error = false;
+	
 		}
 
 		if ($error) {
+			
 			$this->response()->setCode(404);
+
 			if ($this->error404 !== null && is_callable($this->error404)) {
+	
 				call_user_func($this->error404);
+	
 			}
+
 			static::log("[404] route -" . $this->request()->uri() . "- non definie");
+		
 		}
+		
+		return $error;
+	
 	}
 
 	/**
 	 * Kill process
 	 *
-	 * 
 	 * @param string $message=""
 	 * @param int|bool $status
 	 * @param bool $log=false
+	 * 
 	 * @return void
 	 */
-	public function kill($message = "", $status = 200, $log = false)
+	public function kill($message = null, $status = 200, $log = false)
 	{
+
 		if (is_bool($status) && $status == true) {
+	
 			$log = $status;
+	
 		} else {
+	
 			$this->response()->setCode($status);
+	
 		}
-		if (!is_string($message)) {
-			$message = null;
-		}
+
 		if ($log) {
+	
 			$this->log($message);
+	
 		} else {
-			echo $message;
+	
+			if (is_string($message)) {
+	
+				echo $message;
+	
+			}
+	
 		}
+
 		die();
+	
 	}
 
 	/**
@@ -465,39 +571,54 @@ class Application
 	 *
 	 * @param string $key
 	 * @param string $value
+	 * 
 	 * @throws InvalidArgumentException
 	 */
 	public function set($key, $value)
 	{
+		
 		if (in_array($key, ["views", "engine", "public", "root"])) {
+			
 			if (property_exists($this, $key)) {
+	
 				$this->$key = $value;
+	
 			}
+
 		} else {
+	
 			throw new InvalidArgumentException("Le premier argument n'est pas un argument de configuration");
+	
 		}
+
 	}
 
 	/**
-	 * body, retourne les informations du POST ou une seule si un clé est
-	 * passée paramètre
+	 * body, retourne les informations du POST ou une seule si un clé est passée en paramètre
 	 *
 	 * @param string $key=null
+	 * 
 	 * @return array
 	 */
 	public function body($key = null)
 	{
 
+	
 		if ($key !== null) {
+
 			return $this->isBodyKey($key) ? $_POST[$key] : false;
+
 		}
+
 		return $_POST;
+
 	}
 
 	/**
-	 * isBodyKey, vérifie si de Snoop::body contient la clé definie.
+	 * isBodyKey, vérifie si le tableau $_POST contient la clé definie.
 	 *
 	 * @param mixed $key
+	 * 
 	 * @return mixed $key
 	 */
 	public function isBodyKey($key)
@@ -516,24 +637,28 @@ class Application
 	}
 
 	/**
-	 * Param, retourne les informations du GET ou une seule si un clé est
-	 *
-	 * passée paramètre
+	 * Param, retourne les informations du GET ou une seule si une clé est passée en paramètre
+	 * 
 	 * @param string $key=null
+	 * 
 	 * @return array
 	 */
 	public function param($key = null)
 	{
 		if ($key !== null) {
+
 			return $this->isParamKey($key) ? $_GET[$key] : false;
+		
 		}
+
 		return $_GET;
 	}
 
 	/**
-	 * isParamKey, vérifie si de Snoop::param contient la cle definie.
+	 * isParamKey, vérifie si le tablau $_GET contient la clé definie.
 	 *
 	 * @param string|int $key
+	 * 
 	 * @return mixed
 	 */
 	public function isParamKey($key)
@@ -555,20 +680,25 @@ class Application
 	 * files, retourne les informations du $_FILES
 	 *
 	 * @param string|null $key
+	 * 
 	 * @return mixed
 	 */
 	public function files($key = null)
 	{
 		if ($key !== null) {
+
 			return isset($_FILES[$key]) ? (object) $_FILES[$key] : false;
+		
 		}
+
 		return $_FILES;
 	}
 
 	/**
-	 * isParamKey, vérifie si Snoop::files contient la clé définie.
+	 * isParamKey, vérifie si le tableau $_FILES contient la clé définie.
 	 *
 	 * @param string|int $key
+	 * 
 	 * @return mixed
 	 */
 	public function isFilesKey($key)
@@ -587,17 +717,7 @@ class Application
 	}
 
 	/**
-	 * currentRoot, retourne la route courante
-	 * 
-	 * @return string
-	 */
-	public function currentRoot()
-	{
-		return $this->currentRoot;
-	}
-
-	/**
-	 * Res, retourne une instance de Response
+	 * response, retourne une instance de la classe Response
 	 * 
 	 * @return \System\Http\Response
 	 */
@@ -607,7 +727,7 @@ class Application
 	}
 
 	/**
-	 * Req, retourne une instance de Request
+	 * request, retourne une instance de la classe Request
 	 * 
 	 * @return \System\Http\Request
 	 */
@@ -623,11 +743,16 @@ class Application
 	 */
 	private function log($message)
 	{
+
 		$f_log = fopen($this->logDirecotoryName . "/error.log", "a+");
+
 		if ($f_log != null) {
+
 			fprintf($f_log, "[%s] - %s:%d: %s\n", date("Y-m-d H:i:s"), $_SERVER['REMOTE_ADDR'], $_SERVER["REMOTE_PORT"], $message);
 			fclose($f_log);
+
 		}
+
 	}
 
 }

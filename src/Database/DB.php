@@ -2,6 +2,7 @@
 
 namespace System\Database;
 
+
 use PDO;
 use StdClass;
 use PDOStatement;
@@ -12,6 +13,7 @@ use System\Support\Logger;
 use System\Support\Security;
 use InvalidArgumentException;
 use System\Exception\ConnectionException;
+
 
 class DB extends DbTools
 {
@@ -39,6 +41,12 @@ class DB extends DbTools
      * @var array
      */
     private static $config;
+    /**
+     * Configuration
+     *
+     * @var array
+     */
+    private static $zone = null;
     /***
      * Liste des constances d'execution de Requete SQL.
      * Pour le system de de base de donnee ultra minimalise de snoop.
@@ -48,13 +56,18 @@ class DB extends DbTools
     const DELETE = 3;
     const INSERT = 4;
 
+    /**
+     * Charger la configuration
+     *
+     * @param object $config
+     */
     public static function loadConfiguration($config)
     {
         return static::$config = (object) $config;
     }
 
     /**
-     * connection
+     * connection, lance la connection sur la DB
      *
      * @param null $option
      * @param null $cb
@@ -65,39 +78,46 @@ class DB extends DbTools
         if (static::$db instanceof PDO) {
             return null;
         }
+
         if ($option !== null) {
+
             if (is_string($option)) {
-                $zone = $option;
-            } else {
-                $zone = "default";
+                static::$zone = $option;
+            } else if (is_callable($option)) {
+                static::$zone = "default";
                 $cb = $option;
             }
+
         } else {
-            $zone = "default";
+            static::$zone = "default";
         }
+
         /**
-         * Essaie de connection
+         * Essaie de la connection
          */
         $t = static::$config;
 
         if (! $t instanceof StdClass) {
-            Util::launchCallBack($cb, [new ErrorException("Le fichier db.php est mal configurer")]);
+            Util::launchCallBack($cb, [new ConnectionException("Le fichier db.php est mal configurer")]);
         }
 
-        $c = isset($t->connections[$zone]) ? $t->connections[$zone] : null;
+        $c = isset($t->connections[static::$zone]) ? $t->connections[static::$zone] : null;
 
         if (is_null($c)) {
-            Util::launchCallBack($cb, [new ErrorException("La clé '$zone' n'est pas définir dans l'entre db.php")]);
+            Util::launchCallBack($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre db.php")]);
         }
 
         $db = null;
 
         try {
-            // Construction de l'objet PDO
+            
+            // Construction de la dsn
             $dns = $c["scheme"] . ":host=" . $c['host'] . ($c['port'] !== '' ? ":" . $c['port'] : "") . ";dbname=". $c['dbname'];
+            
             if ($c["scheme"] == "pgsql") {
                 $dns = str_replace(";", " ", $dns);
             }
+            
             // Connection à la base de donnée.
             static::$db = new PDO($dns, $c['user'], $c['pass'], [
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES UTF8",
@@ -108,7 +128,7 @@ class DB extends DbTools
             /**
              * Lancement d'exception
              */
-            Util::launchCallBack($cb, [$e]);
+            $Util::launchCallBack($cb, [$e]);
         }
 
         Util::launchCallBack($cb, false);
@@ -138,7 +158,17 @@ class DB extends DbTools
 	}
 
     /**
-     * execute une requete update
+     * currentZone, retourne la zone courante.
+     * 
+     * @return string|null
+     */
+    public static function currentZone()
+    {
+        return static::$zone;
+    }
+
+    /**
+     * éxécute une requête update
      *
      * @param $sqlstatement
      * @param array $bind
@@ -156,7 +186,7 @@ class DB extends DbTools
     }
 
     /**
-     * execute une requete select
+     * éxécute une requête select
      *
      * @param $sqlstatement
      * @param array $bind
@@ -186,7 +216,7 @@ class DB extends DbTools
     }
 
     /**
-     * execute une requete insert
+     * éxécute une requête insert
      *
      * @param $sqlstatement
      * @param array $bind
@@ -224,7 +254,7 @@ class DB extends DbTools
     }
 
     /**
-     * execute une requete de type DROP|CREATE TABLE|TRAUNCATE|ALTER TABLE
+     * éxécute une requête de type DROP|CREATE TABLE|TRAUNCATE|ALTER TABLE
      *
      * @param $sqlstatement
      * @return bool
@@ -243,7 +273,7 @@ class DB extends DbTools
     }
 
     /**
-     * execute une requete delete
+     * eéxécute une requête delete
      *
      * @param $sqlstatement
      * @param array $bind
@@ -269,25 +299,28 @@ class DB extends DbTools
     public static function table($tableName)
     {
         static::verifyConnection();
+
         return Table::load($tableName, static::$db);
     }
 
     /**
-     * Insertion des données dans la DB
-     * ====================== USAGE ======================
+     * Insertion des données dans la DB avec la method query
+     * ====================== USAGE ========================
      *	$options = [
      *		"query" => [
      *			"table" => "nomdelatable",
      *			"type" => INSERT|SELECT|DELETE|UPDATE,
-     *			"data" => $data2pointAdded
+     *			"data" => [ les informations a mettre ici dépendent de la requête que l'utilisateur veux faire. ]
      *		],
-     *		"data" => "les données a insérer."
+     *		"data" => [ "les données a insérer." ]
      *	];
      * 
      * @param array $options
      * @param bool|false $return
      * @param bool|false $lastInsertId
+     * 
      * @throws \ErrorException
+     * 
      * @return array|self|\StdClass
      */
     public static function query(array $options, $return = false, $lastInsertId = false)
@@ -314,6 +347,7 @@ class DB extends DbTools
                 if ($lastInsertId == false) {
                     return empty($data) ? null : Security::sanitaze($data);
                 }
+
                 return static::$db->lastInsertId();
             }
 
@@ -322,6 +356,7 @@ class DB extends DbTools
             $debug = $pdoStatement->debugDumpParams();
             Logger::error(__METHOD__."(): Query fails, [SQL: {$debug}]");
         }
+
         return false;
     }
 
@@ -378,6 +413,7 @@ class DB extends DbTools
     public static function lastInsertId()
     {
         static::verifyConnection();
+
         return (int) static::$db->lastInsertId();
     }
 
@@ -399,6 +435,7 @@ class DB extends DbTools
      *
      * @param array $options, ensemble d'information
      * @param callable $cb = null
+     * 
      * @return string $query, la SQL Statement résultant
      */
     private static function makeQuery($options, $cb = null)
@@ -427,7 +464,9 @@ class DB extends DbTools
          *	 	"grby" => "column"
          *	 ];
          */
+
         $query = "";
+        
         switch ($options['type']) {
             /**
              * Niveau équivalant à un quelconque SQL Statement de type:
@@ -492,15 +531,19 @@ class DB extends DbTools
                  *| GROUP BY |
                  * ----------
                  */
+                
                 if (isset($options->grby)) {
                     $grby = " GROUP BY " . $options['grby'];
                 }
+
                 if (isset($options["data"])) {
+
                     if (is_array($options["data"])) {
                         $data = implode(", ", $options['data']);
                     } else {
                         $data = $options['data'];
                     }
+
                 } else {
                     $data = "*";
                 }
@@ -511,9 +554,9 @@ class DB extends DbTools
                  * ----------
                  */
 
-                if (isset($options["between"])) {
+                if (isset($options["-between"])) {
                     $between = $options[0] . " NOT BETWEEN " . implode(" AND ", $options["between"]);
-                } else if (isset($options["-between"])) {
+                } else if (isset($options["between"])) {
                     $between = $options[0] . " BETWEEN " . implode(" AND ", $options["between"][1]);
                 }
 
@@ -582,6 +625,7 @@ class DB extends DbTools
              */
             call_user_func($cb, isset($query) ? $query : E_ERROR);
         }
+
         return $query;
     }
 

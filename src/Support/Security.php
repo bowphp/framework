@@ -2,89 +2,138 @@
 
 namespace System\Support;
 
-use System\Support\Session;
 
 class Security
 {
 
-
-	private static $tokenCsrfExpirateTime;
 	/**
-	 * Stoper les attaques de types xss
+	 * @static int
+	 */
+	private static $tokenCsrfExpirateTime;
+
+	/**
+	 * Stopeur les attaques de types xss
 	 *
 	 * @param array $verifyData
 	 * @param array $enableData
 	 */
 	public static function attaqueStoper($verifyData, $enableData)
 	{
+		
 		$errorList = '';
 		$error = false;
+		
 		foreach ($verifyData as $key => $value) {
+
 			if (!in_array($key, $enableData)) {
+			
 				$error = true;
 				$errorList .= "<li><u><strong>" . $key . "</strong></u> not defined</li>";
+			
 			}
+
 		}
+
 		/**
 		 * Vérification d'erreur
 		 */
 		if ($error) {
+
 			echo '<div style="border-radius: 3px; border: 1px solid #eee; background: tomato; padding: 10px; ">';
 			echo "<h1>Attaque stoped</h1>";
 			echo "<ul style=\"color: white\">";
 			echo $errorList;
 			echo "</ul>";
 			echo "</div>";
+
 			// On arrête tout.
-			$this->kill();
+			die();
+		
 		}
+
 	}
 
 	/**
-	 * Securise les donnes
+	 * Sécurise les données
 	 * 
-	 * @param string|array|\StdClass
+	 * @param mixed $data
 	 * @param bool $secure
+	 * 
 	 * @return mixed
 	 */
 	public static function sanitaze($data, $secure = false)
 	{
-		if ($secure) {
+		
+		if ($secure === true) {
+		
 			$method = "secureString";
+		
 		} else {
+		
 			$method = "sanitazeString";
+		
 		}
+		
 		$rNum = "/^\d+$/";
+
 		if (is_array($data)) {
+			
 			foreach ($data as $key => $value) {
+
 				if (is_string($value)) {
+
 					if (preg_match($rNum, $value)) {
+					
 						$data[$key] = (int) $value;
 						continue;
+					
 					}
+					
 					$data[$key] = static::$method($value);
+				
 				} else if (is_object($value)) {
+					
 					$data[$key] = static::sanitaze($value);
+				
 				}
+
 			}
+
 		} else if (is_object($data)) {
+			
 			foreach ($data as $key => $value) {
+			
 				if (is_string($value)) {
+				
 					if (preg_match($rNum, $value)) {
+				
 						$data->$key = (int) $value;
 						continue;
+				
 					}
+				
 					$data->$key = static::$method($value);
+				
 				} else if (is_array($value)) {
+				
 					$data->$key  = static::sanitaze($value);
+				
 				}
+
 			}
+
 		} else if (is_string($data)) {
+			
 			if (preg_match($rNum, $data)) {
+
 				$data = (int) $data;
+			
 			} else {
+			
 				$data = static::$method($data);
+			
 			}
+
 		}
 
 		return $data;
@@ -124,10 +173,15 @@ class Security
 	public static function createTokenCsrf($time = null)
 	{
 		if (!Session::isKey("csrf")) {
+
 			if (is_int($time)) {
+			
 				static::$tokenCsrfExpirateTime = $time;
+			
 			}
+
 			Session::add("csrf", (object) ["token" => static::generateTokenCsrf(), "expirate" => time() + static::$tokenCsrfExpirateTime]);
+		
 		}
 	}
 
@@ -157,10 +211,15 @@ class Security
 	public static function tokenCsrfTimeIsExpirate($time)
 	{
 		if (Session::isKey("csrf")) {
+
 			if (static::getTokenCsrf()->expirate >= (int) $time) {
+			
 				return true;
+			
 			}
+
 		}
+
 		return false;
 	}
 
@@ -172,14 +231,23 @@ class Security
 	 */
 	public static function verifyTokenCsrf($token, $time = null)
 	{
+		
 		$status = false;
+		
 		if (Session::isKey("csrf") && $token === static::getTokenCsrf()->token) {
+
 			$status = true;
+			
 			if ($time !== null && is_int($time)) {
+			
 				$status = $status && static::tokenCsrfTimeIsExpirate($time);
+			
 			}
+
 		}
+
 		return $status;
+	
 	}
 
 	/**
