@@ -101,17 +101,19 @@ class Table extends DbTools
      */
     public function select($column = null) {
 
-        if (func_num_args() > 1) {
-
-            $column = implode(", ", func_get_args());
-
-        }
-
         if (is_array($column)) {
 
             $column = implode(", ", $column);
 
+        } else {
+
+            if (func_num_args() >= 1) {
+
+                $column = implode(", ", func_get_args());
+
+            }
         }
+
 
         if (!is_null($column)) {
 
@@ -566,7 +568,7 @@ class Table extends DbTools
             
             }
 
-            $this->group = "order by $column $type";
+            $this->order = "order by $column $type";
 
         }
 
@@ -710,7 +712,7 @@ class Table extends DbTools
 
         } else {
         
-        	$sql .= $this->select . " from ";
+        	$sql .= $this->select . " from " . $this->tableName;
         	$this->select = null;
         
         }
@@ -734,7 +736,7 @@ class Table extends DbTools
         // Ajout de la clause order
         if (!is_null($this->order)) {
        
-        	$sql .= " order by " . $this->order;
+        	$sql .= " " . $this->order;
         	$this->order = null;
        
         }

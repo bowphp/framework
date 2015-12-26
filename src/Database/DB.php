@@ -128,7 +128,7 @@ class DB extends DbTools
             /**
              * Lancement d'exception
              */
-            $Util::launchCallBack($cb, [$e]);
+            Util::launchCallBack($cb, [$e]);
         }
 
         Util::launchCallBack($cb, false);
@@ -149,12 +149,15 @@ class DB extends DbTools
         static::verifyConnection();
 
 		if (!is_string($enterKey)) {
-			Util::launchCallBack($cb, [new InvalidArgumentException("parametre invalide")]);
-		} else {
+		
+        	Util::launchCallBack($cb, [new InvalidArgumentException("parametre invalide")]);
+		
+        } else {
+
 			static::$db = null;
 			static::connection($enterKey, $cb);
-		}
-
+		
+        }
 	}
 
     /**
@@ -195,7 +198,8 @@ class DB extends DbTools
     public static function select($sqlstatement, array $bind = [])
     {
         static::verifyConnection();
-        if (preg_match("/^select\s[\w\d_()*`]+\sfrom\s[\w\d_`]+.+$/i", $sqlstatement)) {
+
+        if (preg_match("/^select\s.+?\sfrom\s.+?$/i", $sqlstatement)) {
 
             $pdostatement = static::$db->prepare($sqlstatement);
             static::bind($pdostatement, $bind);
@@ -234,17 +238,25 @@ class DB extends DbTools
             if (count($bind) > 0) {
                
                 foreach ($bind as $key => $value) {
+
                     if (is_array($value)) {
+                    
                         $r += static::executePrepareQuery($sqlstatement, $value);
+                    
                     } else {
+                    
                         $is_2_m_array = false;
+                    
                     }
+
                 }
 
             } 
 
             if (!$is_2_m_array) {
+
                 $r = static::executePrepareQuery($sqlstatement, $bind);
+            
             }
 
             return $r;
@@ -264,8 +276,10 @@ class DB extends DbTools
         static::verifyConnection();
 
         if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+$/i", $sqlstatement)) {
+            
             $r = static::$db->exec($sqlstatement);
             static::$currentPdoErrorInfo = static::$db->errorInfo();
+
             return $r;
         }
 
@@ -634,6 +648,7 @@ class DB extends DbTools
      *
      * @param $sqlstatement
      * @param array $bind
+     * 
      * @return mixed
      */
     private static function executePrepareQuery($sqlstatement, array $bind = [])
@@ -646,7 +661,10 @@ class DB extends DbTools
         static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
         static::$currentPdoErrorInfo = static::$db->errorInfo();
 
-        return $pdostatement->rowCount();
+        $r = $pdostatement->rowCount();
+        $pdostatement->closeCursor();
+
+        return $r;
     }
 
 }

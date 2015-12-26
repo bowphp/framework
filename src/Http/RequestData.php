@@ -2,7 +2,7 @@
 
 namespace System\Http;
 
-
+use Closure;
 use ErrorException;
 use System\Interfaces\CollectionAccess;
 
@@ -174,6 +174,28 @@ class RequestData implements CollectionAccess
 		
 		}
 
+	}
+
+	/**
+	 * each, parcourir les entrées de la colléction
+	 *
+	 * @param Closure $cb
+	 * 
+	 * @return void
+	 */
+	public function each(Closure $cb)
+	{
+		if ($this->isEmpty()) {
+		
+			return call_user_func_array($cb, null);
+		
+		}
+
+		foreach($this->data as $key => $value) {
+
+			call_user_func_array($cb, [$key, $value]);
+		
+		}
 	}
 
 }
