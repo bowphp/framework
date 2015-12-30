@@ -858,8 +858,7 @@ class Table extends DbTools
      */
     public function increment($column, $step = 1)
     {
-        $this->crement($column, $step, "+");
-    	return $this;
+        return $this->crement($column, $step, "+");
     }
 
 
@@ -873,7 +872,7 @@ class Table extends DbTools
      */
     public function decrement($column, $step = 1)
     {
-        $this->crement($column, $step, "-");
+        return $this->crement($column, $step, "-");
     }
 
     /**

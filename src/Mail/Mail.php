@@ -10,6 +10,7 @@
 
 namespace System\Mail;
 
+
 use System\Suppport\Util;
 use InvalidArgumentException;
 
@@ -214,6 +215,7 @@ class Mail
 	 * @param string $to
 	 * @param string $name
 	 * @param bool $smtp
+	 * 
 	 * @return self
 	 */
 	public function to($to, $name = null, $smtp = false)
