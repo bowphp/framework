@@ -1,10 +1,10 @@
 <?php
 
-namespace System\Http;
+namespace Snoop\Http;
 
 use Closure;
 use ErrorException;
-use System\Interfaces\CollectionAccess;
+use Snoop\Interfaces\CollectionAccess;
 
 
 class RequestData implements CollectionAccess

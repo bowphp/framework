@@ -1,15 +1,15 @@
 <?php
 
-namespace System\Mail;
+namespace Snoop\Mail;
 
 
 use ErrorException;
-use System\Support\Util;
-use System\Exception\SmtpException;
-use System\Exception\SocketException;
+use Snoop\Support\Util;
+use Snoop\Exception\SmtpException;
+use Snoop\Exception\SocketException;
 
 
-class SmtpMail
+class SmtpMail extends Message
 {
 
     /**
@@ -20,61 +20,29 @@ class SmtpMail
     private $sock = null;
 
     /**
-     * Singleton
-     * 
-     * @var null|SmtpMail
-     */
-    private static $inst = null;
-
-    /**
-     * Variable de connection
-     * 
-     * @var null
-     */
-    private $connection = null;
-
-    /**
-     * Séparateur
-     * 
-     * @var string
-     */
-    private $sep;
-
-    /**
      * Constructor
+     * 
+     * @param array $param
      * 
      * @return self
      */
-    private function __construct()
+    public function __construct(array $param)
     {
-        if (defined('PHP_EOL')) {
-        
-            $this->sep = PHP_EOL;
-        
-        } else {
+        if (!isset($param["secure"])) {
+            $param["secure"] = false;
 
-            $this->sep = (strpos(PHP_OS, 'WIN') === false) ? "\n" : "\r\n";
-        
+            if (!isset($param["tls"])) {
+                $param["tls"] = false;
+            }
         }
+        $this->url = $param["server"];
+        $this->username = $param["username"];
+        $this->password = $param["password"];
+        $this->secure = $param["secure"];
+        $this->tls = $param["tls"];
     }
 
     private function __clone() {}
-
-    /**
-     * factory charge un instance de la classe.
-     *
-     * @return SmtpMail
-     */
-    public static function load()
-    {
-        if (self::$inst !== null) {
-
-            self::$inst = new static::class;
-        
-        }
-
-        return self::$inst;
-    }
 
 
     /**
@@ -85,9 +53,19 @@ class SmtpMail
      */
     public function send($cb = null)
     {
-        $status = parent::send($this->message);
-        
-        Util::launchcallback($cb, $status);
+        $this->connection();
+
+        $data = "mail from: " . $this->username;
+        $data .= "rcpt to: " . implode(Util::sep(), $this->to);
+        $data .= "Subject: " . $this->subject;
+        $data .= "data " . $this->message;
+        $data .= $this->formatHeader();
+        $data .= ".";
+        echo $data;
+
+        $this->write($data);
+
+        Util::launchCallback($cb, $status);
         
         $this->disconnect();
         
@@ -108,8 +86,15 @@ class SmtpMail
      * @throws SocketException
      * @throws SmtpException
      */
-    public function connection($url, $username = null, $password = null, $secure = false, $tls = false)
+    private function connection()
     {
+
+        $url = $this->url;
+        $username = $this->username;
+        $password = $this->password;
+        $secure = $this->secure;
+        $tls = $this->tls;
+
         @list($url, $port) = explode(":", $url, 2);
 
         if (!isset($port)) {
@@ -125,34 +110,39 @@ class SmtpMail
         if ($secure === true) {
         
             $url = "ssl://{$url}";
-            $port = 586;
+            $port = 465;
         
         }
 
         $this->sock = fsockopen($url, $port, $errno, $errstr, $timeout=50);
 
-        if ($this->sock === null) {
+        if ($this->sock == null) {
         
             throw new SocketException(__METHOD__."(): can not connect to {$url}:{$port}", E_USER_ERROR);
         
         }
 
         stream_set_timeout($this->sock, 20, 0);
-        $this->read();
+        $code = $this->read();
 
         $host = isset($_SERVER['HTTP_HOST']) && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-        $this->write("EHLO $host", 250);
-
-        if ((int) $this->read() != 250) {
         
-            $this->write("EHLO $host", $code=250);
+        if ($code == 220) {
+
+            $code = $this->write("EHLO $host", 250);
+
+            if ($code != 250) {
+
+                $this->write("EHLO $host", $code=250);
+            
+            }
         
         }
 
         if ($tls === true) {
             
             $this->write("STARTTLS", $code=220);
-            $secured = stream_socket_enable_crypto($this->connection, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            $secured = stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
             
             if (!$secured) {
             
@@ -166,6 +156,7 @@ class SmtpMail
         if ($username !== null && $password !== null) {
             
             $this->write("AUTH LOGIN", 334);
+            echo "Logging";
             $this->write(base64_encode($username), $code=334, "username");
             $this->write(base64_encode($password), $code=235, "password");
         
@@ -177,8 +168,9 @@ class SmtpMail
      */
     private function disconnect()
     {
-        fclose($this->connection);
-        $this->connection = null;
+        $this->write("QUIT" . Util::sep());
+        fclose($this->sock);
+        $this->sock = null;
     }
 
     /**
@@ -188,16 +180,19 @@ class SmtpMail
      */
     private function read()
     {
-        $s = "";
-        
-        while (!feof($this->connection)) {
-            
-            if (($line = fgets($this->connection, 1e3) != null)) {
+        $s = null;
+
+        while (!feof($this->sock)) {
+           
+            if (($line = fgets($this->sock, 1e3)) != null) {
                 
-                $s .= $line;
+                echo $line;
                 
                 if (substr($line, 3, 1) == " ") {
+
+                    $s = (int) substr($line, 0, 3);
                     break;
+
                 }
 
             }
@@ -213,23 +208,31 @@ class SmtpMail
      * @param string $command
      * @param int $code
      * @param null $message
+     * 
      * @throws SmtpException
      */
-    private function write($command, $code, $message = null)
+    private function write($command, $code = null, $message = null)
     {
-        fwrite($this->connection, $command . $this->sep);
+        $command = $command . Util::sep();
+        fwrite($this->sock, $command, m_strlen($command));
         
-        if ($code) {
+        $response = null;
+
+        if ($code !== null) {
 
             $response = $this->read();
             
-            if (!in_array((int) $response, (array) $code, true)) {
-            
+            var_dump($response);
+
+            if (!in_array($response, (array) $code, true)) {
+               
                 throw new SmtpException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", 1);
             
             }
-        
+
         }
+
+        return $response;
     }
 
 }

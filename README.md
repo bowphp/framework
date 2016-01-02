@@ -2,4 +2,4 @@
 
 The Snoop Framework
 
-[Go to the documentation page.](http://papac.github.io/snoop "documentation")
+[Go to documentation page.](http://papac.github.io/snoop "documentation")

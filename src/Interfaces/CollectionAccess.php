@@ -1,6 +1,6 @@
 <?php
 
-namespace System\Interfaces;
+namespace Snoop\Interfaces;
 
 interface CollectionAccess
 {

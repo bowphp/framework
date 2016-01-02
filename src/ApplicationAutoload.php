@@ -3,7 +3,7 @@
 /**
  * SnoopAutoload, systeme de Chargement automatique des classes.
  */
-namespace System;
+namespace Snoop;
 
 class ApplicationAutoload
 {
@@ -16,7 +16,7 @@ class ApplicationAutoload
 	private static function load($class)
 	{
 		$class = str_replace("\\", "/", $class);
-		$class = preg_replace("~System/~", "src/", $class);
+		$class = preg_replace("~Snoop/~", "src/", $class);
 		$class = dirname(__DIR__). "/" . $class . ".php";
 
 		if (is_file($class)) {

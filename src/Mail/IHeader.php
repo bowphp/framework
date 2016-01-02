@@ -1,7 +1,7 @@
 <?php
 
 
-namespace System\Mail;
+namespace Snoop\Mail;
 
 use Message;
 

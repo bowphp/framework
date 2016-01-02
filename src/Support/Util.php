@@ -1,7 +1,7 @@
 <?php
 
 
-namespace System\Support;
+namespace Snoop\Support;
 
 
 use DateTime;
@@ -60,7 +60,7 @@ class Util
 	 * 
 	 * @return mixed
 	 */
-	public static function disSerialization($filePath)
+	public static function deSerialization($filePath)
 	{
 		// Ouverture du fichier de sérialisation.
 		$serializedData = @file_get_contents($filePath);
@@ -517,6 +517,18 @@ class Util
 
 		return static::$sep;
 	
+	}
+
+	/**
+	 * slugify créateur de slug en utilisant un chaine simple.
+	 * 
+	 * @param string $str
+	 * 
+	 * @return string
+	 */
+	public function slugify($str)
+	{
+		return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
 	}
 
 }

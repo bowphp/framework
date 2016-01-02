@@ -1,9 +1,8 @@
 <?php
 
 
-namespace System\Support;
+namespace Snoop\Support;
 
-use System\Interfaces\CollectionAccess;
 
 class Collection
 {

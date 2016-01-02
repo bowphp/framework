@@ -1,10 +1,10 @@
 <?php
 
-namespace System\Database;
+namespace Snoop\Database;
 
 use PDO;
 use PDOStatement;
-use System\Support\Security;
+use Snoop\Support\Security;
 
 abstract class DbTools
 {

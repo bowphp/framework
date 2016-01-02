@@ -1,10 +1,10 @@
 <?php
 
 
-namespace System\Database;
+namespace Snoop\Database;
 
 use Closure;
-use System\Database\Model;
+use Snoop\Database\Model;
 
 class Schema
 {

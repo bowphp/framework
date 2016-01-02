@@ -1,9 +1,10 @@
 <?php
 
 
-namespace System\Support;
+namespace Snoop\Support;
 
 use InvalidArgumentException;
+
 
 class Resource
 {

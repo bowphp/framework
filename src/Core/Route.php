@@ -5,11 +5,11 @@
  * @version 0.0.1
  */
 
-namespace System\Core;
+namespace Snoop\Core;
 
 
-use System\Http\Request;
-use System\Exception\RouterException;
+use Snoop\Http\Request;
+use Snoop\Exception\RouterException;
 
 
 Class Route

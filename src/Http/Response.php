@@ -1,16 +1,15 @@
 <?php
 
-namespace System\Http;
+namespace Snoop\Http;
 
 
-use Jade;
 use ErrorException;
-use System\Core\Application;
+use Snoop\Core\Application;
 use Twig_Autoloader as Tiwg_A;
 use Mustache_Engine as Mustache;
 use Twig_Environment as Twig_Env;
 use Twig_Loader_Array as Twig_Load;
-use System\Exception\ViewException;
+use Snoop\Exception\ViewException;
 
 
 class Response
@@ -41,7 +40,7 @@ class Response
     /**
      * Instance de l'application
      * 
-     * @var \System\Core\Application
+     * @var \Snoop\Core\Application
      */
     private $app;
 
@@ -163,7 +162,7 @@ class Response
 	 * @param string $filename
 	 * @param mixed|null $bind
 	 * 
-	 * @return \System\Core\Application
+	 * @return \Snoop\Core\Application
 	 */
 	public function view($filename, $bind = null)
 	{
@@ -271,13 +270,6 @@ class Response
 			
 			$tpl = new Mustache();
 
-		} else if ($this->app->get("engine") == "jade") {
-
-			$tpl = new Jade([
-				'prettyprint' => true,
-				'extension' => '.cache.jade',
-				'cache' => $this->app->get("cache")
-			]);
 		}
 
 		return $tpl;

@@ -1,6 +1,6 @@
 <?php
 
-namespace System\Support;
+namespace Snoop\Support;
 
 class Form
 {

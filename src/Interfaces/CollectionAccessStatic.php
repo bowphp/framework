@@ -1,7 +1,7 @@
 <?php
 
 
-namespace System\Interfaces;
+namespace Snoop\Interfaces;
 
 
 interface CollectionAccessStatic

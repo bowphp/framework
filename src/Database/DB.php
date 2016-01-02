@@ -345,33 +345,26 @@ class DB extends DbTools
         $pdoStatement = static::$db->prepare($sqlStatement);
 
         static::bind($pdoStatement, isset($options["data"]) ? $options["data"] : []);
+
         $pdoStatement->execute();
 
-        if ($pdoStatement->execute()) {
-
-            if ($pdoStatement->rowCount() === 0) {
-                $data = null;
-            } else if ($pdoStatement->rowCount() === 1) {
-                $data = $pdoStatement->fetch();
-            } else {
-                $data = $pdoStatement->fetchAll();
-            }
-
-            if ($return == true) {
-                if ($lastInsertId == false) {
-                    return empty($data) ? null : Security::sanitaze($data);
-                }
-
-                return static::$db->lastInsertId();
-            }
-
+        if ($pdoStatement->rowCount() === 0) {
+            $data = null;
+        } else if ($pdoStatement->rowCount() === 1) {
+            $data = $pdoStatement->fetch();
         } else {
-
-            $debug = $pdoStatement->debugDumpParams();
-            Logger::error(__METHOD__."(): Query fails, [SQL: {$debug}]");
+            $data = $pdoStatement->fetchAll();
         }
 
-        return false;
+        if ($return == true) {
+            if ($lastInsertId == false) {
+                return empty($data) ? null : Security::sanitaze($data);
+            }
+
+            return static::$db->lastInsertId();
+        }
+
+        return $data;
     }
 
     /**

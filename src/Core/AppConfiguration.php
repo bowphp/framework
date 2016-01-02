@@ -1,8 +1,8 @@
 <?php
 
-namespace System\Core;
+namespace Snoop\Core;
 
-use System\Interfaces\CollectionAccess;
+use Snoop\Interfaces\CollectionAccess;
 
 
 class AppConfiguration implements CollectionAccess

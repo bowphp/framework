@@ -1,10 +1,12 @@
 <?php
 
-namespace System\Support;
+
+namespace Snoop\Support;
 
 use Exception;
-use System\Support\Resource;
-use System\Http\Resquest;
+use Snoop\Support\Resource;
+use Snoop\Http\Resquest;
+
 
 class Logger
 {

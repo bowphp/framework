@@ -8,10 +8,9 @@
         "source": "https://github.com/papac/snoopframework"
     },
     "require-dev": {
-        "kylekatarnls/jade-php": "^1.3",
         "twig/twig": "^1.23",
-        "twig/extensions": "^1.3",
-        "mustache/mustache": "^2.9"
+        "mustache/mustache": "^2.9",
+        "monolog/monolog": "^1.17"
     },
     "authors": [
         {
@@ -25,7 +24,7 @@
     ],
     "autoload": {
         "psr-0": {
-            "System\\": "src/"
+            "Snoop\\": "src/"
         }
     },
     "minimum-stability": "dev"

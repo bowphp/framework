@@ -8,18 +8,18 @@
  * @author Etchien Boa <geekroot9@gmail.com>
  * @author Dakia Franck <dakiafranck@gmail.com>
  * 
- * @package System\Core
+ * @package Snoop\Core
  */
 
-namespace System\Core;
+namespace Snoop\Core;
 
 
 use Closure;
-use System\Database\DB;
-use System\Support\Util;
-use System\Http\Request;
-use System\Http\Response;
-use System\Support\Logger;
+use Snoop\Database\DB;
+use Snoop\Support\Util;
+use Snoop\Http\Request;
+use Snoop\Http\Response;
+use Snoop\Support\Logger;
 use InvalidArgumentException;
 
 
@@ -719,7 +719,7 @@ class Application
 	/**
 	 * response, retourne une instance de la classe Response
 	 * 
-	 * @return \System\Http\Response
+	 * @return \Snoop\Http\Response
 	 */
 	private function response()
 	{
@@ -729,7 +729,7 @@ class Application
 	/**
 	 * request, retourne une instance de la classe Request
 	 * 
-	 * @return \System\Http\Request
+	 * @return \Snoop\Http\Request
 	 */
 	private function request()
 	{

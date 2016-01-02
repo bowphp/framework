@@ -1,10 +1,10 @@
 <?php
 
-namespace System\Database;
+namespace Snoop\Database;
 
 
-use System\Support\Security;
-use System\Exception\TableException;
+use Snoop\Support\Security;
+use Snoop\Exception\TableException;
 
 
 class Table extends DbTools

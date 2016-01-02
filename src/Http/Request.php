@@ -1,10 +1,10 @@
 <?php
 
-namespace System\Http;
+namespace Snoop\Http;
 
 
 use StdClass;
-use System\Core\Application;
+use Snoop\Core\Application;
 
 
 class Request
