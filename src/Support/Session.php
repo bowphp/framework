@@ -109,14 +109,10 @@ class Session implements CollectionAccessStatic
      * remove, supprime une entrée dans la colléction
 	 * 
 	 * @param string $key
-	 * 
-	 * @return self
 	 */
 	public static function remove($key)
 	{
 		unset($_SESSION[$key]);
-
-		return $this;
 	}
 
 	/**

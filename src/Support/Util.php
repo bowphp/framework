@@ -274,7 +274,7 @@ class Util
 	
 		if (func_num_args() == 0) {
 	
-			throw new InvalidArgumentException("Vous devez donner un paramtre à la function", 1);
+			throw new InvalidArgumentException("Vous devez donner un paramètre à la fonction", E_ERROR);
 	
 		}
 
@@ -284,6 +284,7 @@ class Util
 		foreach ($arr as $key => $value) {
 	
 			var_dump($value);
+			echo "\n";
 	
 		}
 

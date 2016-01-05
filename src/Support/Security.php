@@ -230,7 +230,7 @@ class Security
 	 * @param int $time[optional]
 	 * @return boolean
 	 */
-	public static function verifyTokenCsrf($token, $time = null)
+	public static function verifyTokenCsrf($token, $strict = false)
 	{
 		
 		$status = false;
@@ -239,9 +239,9 @@ class Security
 
 			$status = true;
 			
-			if ($time !== null && is_int($time)) {
+			if ($strict !== true) {
 			
-				$status = $status && static::tokenCsrfTimeIsExpirate($time);
+				$status = $status && static::tokenCsrfTimeIsExpirate(time());
 			
 			}
 
