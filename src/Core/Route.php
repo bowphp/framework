@@ -34,7 +34,7 @@ Class Route
 	 *
 	 * @var array
 	 */
-	private $key;
+	private $key = [];
 
 	/**
 	 * Liste de paramaters qui on matcher
@@ -93,7 +93,7 @@ Class Route
 	{
 
 		$this->with = $with;
-		
+
 		if (preg_match("~(.+)/$~", $url, $match)) {
 		
 			$url = end($match);
@@ -107,15 +107,15 @@ Class Route
 		}
 
 		if (count(explode("/", $this->path)) != count(explode("/", $url))) {
-		
+
 			return false;
 		
 		}
+		
+		$path = $url;
 
-        $path = "";
-		
 		if (empty($this->with)) {
-		
+			
 			$path = preg_replace("~:\w+~", "([^\s]+)", $this->path);
 			preg_match_all("~:([\w]+)~", $this->path, $this->key);
 
@@ -128,7 +128,7 @@ Class Route
 
                 $tmpPath =  $this->path;
                 $this->key = $match[1];
-				
+
 				foreach ($match[1] as $key => $value) {
 
                     if (array_key_exists($value, $this->with)) {
@@ -157,7 +157,7 @@ Class Route
 		
 			array_shift($match);
 			$this->match = str_replace("/", "", $match);
-		
+			
 			return true;
 		}
 

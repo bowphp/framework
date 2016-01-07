@@ -21,6 +21,11 @@ class RequestData implements CollectionAccess
 	private static $instance = null;
 
 	/**
+	 * @static string
+	 */
+	private static $last_method = '';
+
+	/**
 	 * Contructeur privé
 	 *
 	 * @param $method
@@ -41,6 +46,7 @@ class RequestData implements CollectionAccess
 			$this->data = $_FILES;
 		}
 
+		static::$last_method = $method;
 	}
 
 	/**
@@ -57,7 +63,15 @@ class RequestData implements CollectionAccess
 	 */
 	public static function loader($method)
 	{
-		return new self($method);
+		if ($method == static::$last_method) {
+
+			return static::$instance;
+
+		} else {
+
+			return new self($method);
+
+		}
 	}
 
 	/**

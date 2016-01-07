@@ -6,7 +6,7 @@ use PDO;
 use PDOStatement;
 use Snoop\Support\Security;
 
-abstract class DbTools
+abstract class DatabaseTools
 {
 
     /**

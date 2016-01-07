@@ -1,6 +1,6 @@
 <?php
 
-namespace System\Database;
+namespace Snoop\Database;
 
 
 use PDO;
@@ -8,14 +8,14 @@ use StdClass;
 use PDOStatement;
 use PDOException;
 use ErrorException;
-use System\Support\Util;
-use System\Support\Logger;
-use System\Support\Security;
+use Snoop\Support\Util;
+use Snoop\Support\Logger;
+use Snoop\Support\Security;
 use InvalidArgumentException;
-use System\Exception\ConnectionException;
+use Snoop\Exception\ConnectionException;
 
 
-class DB extends DbTools
+class Database extends DatabaseTools
 {
     /**
      * Information sur les erreurs de pdoStement
@@ -230,7 +230,7 @@ class DB extends DbTools
     {
         static::verifyConnection();
 
-        if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)\svalues\(.+\)|\s?set\s(.+)+)$/i", $sqlstatement)) {
+        if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)\svalues\s?\(.+\)|\s?set\s(.+)+)$/i", $sqlstatement)) {
 
             $r = 0;
             $is_2_m_array = true;
@@ -251,9 +251,13 @@ class DB extends DbTools
 
                 }
 
-            } 
+                if (!$is_2_m_array) {
 
-            if (!$is_2_m_array) {
+                    $r += static::executePrepareQuery($sqlstatement, $bind);
+                
+                }
+
+            } else {
 
                 $r = static::executePrepareQuery($sqlstatement, $bind);
             
@@ -291,6 +295,7 @@ class DB extends DbTools
      *
      * @param $sqlstatement
      * @param array $bind
+     * 
      * @return bool
      */
     public static function delete($sqlstatement, array $bind = [])
@@ -308,6 +313,7 @@ class DB extends DbTools
      * Charge le factory Table
      *
      * @param $tableName
+     * 
      * @return mixed
      */
     public static function table($tableName)
@@ -349,19 +355,31 @@ class DB extends DbTools
         $pdoStatement->execute();
 
         if ($pdoStatement->rowCount() === 0) {
+            
             $data = null;
+
         } else if ($pdoStatement->rowCount() === 1) {
+            
             $data = $pdoStatement->fetch();
+        
         } else {
+            
             $data = $pdoStatement->fetchAll();
+
         }
 
         if ($return == true) {
+
             if ($lastInsertId == false) {
-                return empty($data) ? null : Security::sanitaze($data);
+            
+                $data = empty($data) ? null : Security::sanitaze($data);
+            
+            } else {
+
+                $data = static::$db->lastInsertId();
+            
             }
 
-            return static::$db->lastInsertId();
         }
 
         return $data;
@@ -409,7 +427,10 @@ class DB extends DbTools
     private static function verifyConnection()
     {
         if (! (static::$db instanceof PDO)) {
-            throw new ConnectionException("Connection non initialisé.", E_ERROR);
+
+            static::connection();
+            
+            // throw new ConnectionException("Connection non initialisé.", E_ERROR);
         }
     }
     /**

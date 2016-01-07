@@ -284,7 +284,7 @@ class Util
 		foreach ($arr as $key => $value) {
 	
 			var_dump($value);
-			echo "\n";
+			echo "\n\n";
 	
 		}
 

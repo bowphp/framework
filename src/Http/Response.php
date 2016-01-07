@@ -164,16 +164,21 @@ class Response
 	 * 
 	 * @return \Snoop\Core\Application
 	 */
-	public function view($filename, $bind = null)
+	public function loadFile($filename, $bind = null)
 	{
+		$filename = preg_replace("/@|#|\./", "/", $filename);
 
 		if ($this->app->get("views") !== null) {
 			
-			$filename = $this->app->get("views") ."/". $filename . ".php";
+			$tmp = $this->app->get("views") ."/". $filename . ".php";
 			
-			if (!file_exists($filename)) {
+			if (!file_exists($tmp)) {
 			
 				$filename = $this->app->get("views") ."/". $filename . ".html";			
+			
+			} else {
+
+				$filename = $tmp;
 			
 			}
 		
@@ -200,15 +205,15 @@ class Response
 	 * 
 	 * @return self
 	 */
-	public function render($filename, $bind = null)
+	public function view($filename, $bind = null, $code = 200)
 	{
 
-		$filename = preg_replace("/@|#/", "/", $filename);
-		$filename .= ".tpl.php";
+		$filename = preg_replace("/@|#|\./", "/", $filename);
+		$filename .= ".php";
 		
 		if ($this->app->get("views") !== null) {
 		
-			$filename = $this->app->get("views") . "/template/" . $filename;
+			$filename = $this->app->get("views") . "/" . $filename;
 		
 		}
 
@@ -220,6 +225,8 @@ class Response
 			$bind = [];
 		
 		}
+
+		$this->setCode($code);
 
 		if ($this->app->get("engine") == "twig") {
 	

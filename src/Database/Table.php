@@ -7,7 +7,7 @@ use Snoop\Support\Security;
 use Snoop\Exception\TableException;
 
 
-class Table extends DbTools
+class Table extends DatabaseTools
 {
     /**
      * @var string
@@ -697,9 +697,11 @@ class Table extends DbTools
     /**
      * Action get, seulement sur la requete de type select
      *
+     * @param callable $cb
+     * 
      * @return mixed
      */
-    public function get()
+    public function get($cb = null)
     {
         
         $sql = "select ";
@@ -767,69 +769,82 @@ class Table extends DbTools
        
         }
 
-        return Security::sanitaze($stmt->$fetch());
+        $data = Security::sanitaze($stmt->$fetch());
+
+        if (is_callable($cb)) {
+        	return call_user_func_array($cb, [$data]);
+        }
+        
+        return $data;
     }
 
     /**
      * count
      * 
      * @param string $column
+     * @param callable $cb=null
      * 
      * @return int
      */
-    public function count($column = "*")
+    public function count($column = "*", $cb = null)
     {
-        return (int) $this->connection->query("select count($column) from " . $this->tableName)->fetchColumn();
+    	if (is_callable($column)) {
+    		$cb = $column;
+    		$column = "*";
+    	}
+
+    	$count = (int) $this->connection->query("select count($column) from " . $this->tableName)->fetchColumn();
+
+    	if (is_callable($cb)) {
+    		call_user_func_array($cb, [$count]);
+    	}
+
+        return  $count;
     }
 
     /**
      * Action update
      *
-     * @param $data
+     * @param array $data
+     * @param callable $cb
      * 
      * @return int
      */
-    public function update(array $data = [])
+    public function update(array $data = [], $cb = null)
     {
 		$sql = "update " . $this->tableName . " set ";
-		$i = 0;
-
-		foreach ($data as $key => $value) {
-
-            $data[$key] = Security::sanitaze($value, true);
-
-            if ($i > 0) {
-
-				$sql .= ", ";
-
-			}
-
-			$sql .= "$key = :$key";
-			$i++;
-		}
+		$data = Security::sanitaze($data, true);
+		$sql .= parent::rangeField(parent::add2points(array_keys($data)));
 
 		if (!is_null($this->where)) {
 
 			$sql .= " where " . $this->where;
+			$this->where = null;
 
 		}
 
 		$stmt = $this->connection->prepare($sql);
-		$stmt->execute($data);
+		static::bind($stmt, $data);
+		$stmt->execute();
 
-		$this->where = null;
-		
-		return $stmt->rowCount();
+		$r = $stmt->rowCount();
+
+		if (is_callable($cb)) {
+        	return call_user_func_array($cb, [$r]);
+        }
+
+		return $r;
     }
 
     /**
      * Action delete
      *
      * @param array $where
+     * @param callable $cb
      * 
      * @return int
      */
-    public function delete(array $where = [])
+    public function delete($where = [], $cb = null)
     {
 
 		$sql = "delete from " . $this->tableName;
@@ -837,15 +852,28 @@ class Table extends DbTools
 		if (!is_null($this->where)) {
 
 			$sql .= " where " . $this->where;
+	        $this->where = null;
 
 		}
 
 		$stmt = $this->connection->prepare($sql);
-		$stmt->execute($where);
+
+		if (is_callable($where)) {
+			$cb = $where;
+			$where = [];
+		}
+
+		static::bind($stmt, $where);
+		$stmt->execute();
 		
-        $this->where = null;
+		$data = $stmt->rowCount();
+
+        if (is_callable($cb)) {
+        	return call_user_func_array($cb, [$data]);
+        }
+
+        return $data;
 		
-        return $stmt->rowCount();
     }
 
     /**
@@ -918,9 +946,13 @@ class Table extends DbTools
     {
         $sql = "insert into " . $this->tableName . " set ";
         $values = Security::sanitaze($values, true);
-        $sql .= parent::rangeField($values);
+        $sql .= parent::rangeField(parent::add2points(array_keys($values)));
 
-        return (int) $this->connection->exec($sql);
+        $stmt = $this->connection->prepare($sql);
+        $this->bind($stmt, $values);
+        $stmt->execute();
+
+        return (int) $stmt->rowCount();
     }
 
     /**
@@ -979,9 +1011,7 @@ class Table extends DbTools
     private static function isComporaisonOperator($comp)
     {
         if (in_array($comp, ["=", ">", "<", ">=", "=<", "<>", "!="])) {
-
             return true;
-            
         }
 
         return false;
