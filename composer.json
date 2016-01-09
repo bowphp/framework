@@ -7,7 +7,7 @@
         "issues": "https://github.com/papac/snoopframework/issues",
         "source": "https://github.com/papac/snoopframework"
     },
-    "require-dev": {
+    "require": {
         "twig/twig": "^1.23",
         "mustache/mustache": "^2.9",
         "monolog/monolog": "^1.17"
