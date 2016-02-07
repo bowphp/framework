@@ -60,7 +60,7 @@ class RequestData implements CollectionAccess
 		if ($method == static::$last_method) {
 			return static::$instance;
 		} else {
-			return new self($method);
+			return static::$instance = new self($method);
 		}
 	}
 

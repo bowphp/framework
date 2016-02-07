@@ -37,7 +37,12 @@ class Application
 	 * @var string
 	 */
 	private $branch = "";
-	
+
+	/**
+	 * @var string
+	 */
+	private $specialMethod = null;
+
 	/**
 	 * Répresente le chemin vers la vue.
 	 * 
@@ -246,7 +251,13 @@ class Application
 	 */
 	public function post($path, $cb)
 	{
-		if ($this->req->body()->has("method")) {
+		$body = $this->req->body();
+
+		if ($body->has("method")) {
+			$this->specialMethod = $method = strtoupper($body->get("method"));
+			if (in_array($method, ["DELETE", "PUT", "UPDATE"])) {
+				$this->addHttpVerbe($method, $this->branch . $path, $cb);
+			}
 			return $this;
 		}
 		
@@ -368,15 +379,20 @@ class Application
 	private function addHttpVerbe($method, $path, $cb)
 	{
 		$body = $this->req->body();
-		
+		$flag = true;
+
 		if ($body !== null) {
 			if ($body->has("method")) {
 				if ($body->get("method") === $method) {
 					$this->routeLoader($this->req->method(), $this->branch . $path, $cb);
 				}
-			} else {
-				$this->routeLoader($method, $this->branch . $path, $cb);
+
+				$flag = false;
 			}
+		}
+
+		if ($flag) {
+			$this->routeLoader($method, $this->branch . $path, $cb);
 		}
 
 		return $this;
@@ -442,11 +458,19 @@ class Application
 		}
 
 		$this->branch = "";
+		$method = $this->req->method();
 
-		if (isset(static::$routes[$this->req->method()])) {
-			foreach (static::$routes[$this->req->method()] as $key => $route) {	
-				if (isset($this->with[$this->req->method()][$route->getPath()])) {
-					$with = $this->with[$this->req->method()][$route->getPath()];
+		if ($method == "POST") {
+			if ($this->specialMethod !== null) {
+				$method = $this->specialMethod;
+			}
+		}
+
+		if (isset(static::$routes[$method])) {
+			foreach (static::$routes[$method] as $key => $route) {	
+
+				if (isset($this->with[$method][$route->getPath()])) {
+					$with = $this->with[$method][$route->getPath()];
 				} else {
 					$with = [];
 				}
