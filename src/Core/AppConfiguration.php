@@ -1,46 +1,233 @@
 <?php
 
-namespace Snoop\Core;
+namespace Bow\Core;
 
-use Snoop\Interfaces\CollectionAccess;
-
-
-class AppConfiguration implements CollectionAccess
+class AppConfiguration
 {
+    /**
+     * Patter Singleton
+     * 
+     * @var string
+     */
+    private $loglevel = "dev";
 
-    public function load($class, $config)
+    /**
+     * Définie le systeme de template
+     *
+     * @var string|null
+     */
+    private $engine = null;
+
+    /**
+     * Répresente le chemin vers la vue.
+     * 
+     * @var null|string
+     */
+    private $views = null;
+
+    /**
+     * Répertoire de log d'erreur
+     *
+     * @var string
+     */ 
+    private $logDirecotoryName = "";
+
+    public function __construct($config)
     {
-        call_user_func([$class, "configure"], $config);
+        $this->appname = $config->appname;
+        $this->logDirecotoryName = $config->logDirecotoryName;
+        $this->views = $config->views;
+        $this->engine = $config->template;
+        $this->cache = $config->cacheFolder;
+        $this->names = $config->names;
+        $this->timezone = $config->timezone;
+        $this->loglevel = $config->loglevel;
+        $this->tokenExpirateTime = $config->tokenExpirateTime;
+        $this->renderEngine = $config->template;
+        $this->cacheFolder = $config->cacheFolder;
     }
 
-    public function isKey($key)
+    /**
+     * setAppName
+     * 
+     * @param string $newAppName
+     * @return string
+     */
+    public function setAppname($newAppName)
     {
-        // TODO: Implement isKey() method.
+        $old = $newAppName;
+
+        if (is_string($newAppName)) {
+            $this->appname = $newAppName;
+        }
+
+        return $old;
     }
 
-    public function IsEmpty()
+    /**
+     * getViewPath retourne configuration du path du repertoire du cache
+     * 
+     * @return string
+     */
+    public function setViewpath($viewPath)
     {
-        // TODO: Implement IsEmpty() method.
+        $old = $this->views;
+
+        if (realpath($viewPath)) {
+            $this->views = $viewPath;
+        }
+
+        return $old;
     }
 
-    public function get($key = null)
+    /**
+     * getViewPath retourne configuration du path du repertoire du cache
+     * 
+     * @return string
+     */
+    public function getAppnamespace()
     {
-        // TODO: Implement get() method.
+        return $this->names;
     }
 
-    public function add($key, $data, $next = false)
+    /**
+     * getViewPath retourne configuration du path du repertoire du cache
+     * 
+     * @return string
+     */
+    public function setPublicpath($newPublicPath)
     {
-        // TODO: Implement add() method.
+        $old = $this->public;
+
+        if ($newPublicPath) {
+            $this->public = $newPublicPath;
+        }
+
+        return $old;
     }
 
-    public function remove($key)
+    /**
+     * getViewPath retourne configuration du path du repertoire du cache
+     * 
+     * @return string
+     */
+    public function getPublicpath($newPublicPath)
     {
-        // TODO: Implement remove() method.
+        return  $this->public;
     }
 
-    public function set($key, $value)
+    /**
+     * getViewPath retourne configuration du path du repertoire du cache
+     * 
+     * @return string
+     */
+    public function getViewpath()
     {
-        // TODO: Implement set() method.
+        return $this->views;
     }
 
+    /**
+     * setCachePath
+     * 
+     * @param string $newCachePath
+     * @return string
+     */
+    public function setCachepath($newCachePath)
+    {
+        $old = $newCachePath;
+
+        if (realpath($newCachePath)) {
+            $this->cache = $newCachePath;
+        }
+
+        return $newCachePath;
+    }
+
+    /**
+     * getCachePath retourne configuration du path du repertoire du cache
+     * 
+     * @return string
+     */
+    public function getCachepath()
+    {
+        return $this->cache;
+    }
+    
+    /**
+     * setLogPath configuration du path du repertoir de log
+     * 
+     * @return string
+     */
+    public function setLogpath($newLogPath)
+    {
+        $old = $this->logDirecotoryName;
+        
+        if (realpath($newLogPath)) {
+            $this->logDirecotoryName = $newLogPath;
+        }
+
+        return $old;
+    }
+
+    /**
+     * getLogPath retourne la configuration du path du repertoir de log
+     * 
+     * @return string
+     */
+    public function getLogpath()
+    {
+        return $this->logDirecotoryName;
+    }
+
+    /**
+     * getTimezone retourne la configuration de la TL
+     * 
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->timezone;
+    }
+
+    /**
+     * getNamespace retourne la configuration des namespaces
+     * 
+     * @return array
+     */
+    public function getNamespace()
+    {
+        return $this->names;
+    }
+
+    /**
+     * getNamespace retourne la configuration des namespaces
+     * 
+     * @return array
+     */
+    public function getEngine()
+    {
+        return $this->engine;
+    }
+
+    /**
+     * getNamespace retourne la configuration des namespaces
+     * 
+     * @return array
+     */
+    public function getRootpath()
+    {
+        return $this->root;
+    }
+
+    /**
+     * getNamespace retourne la configuration des namespaces
+     * 
+     * @return array
+     */
+    public function setRootpath($newRoot)
+    {
+        $old = $this->root;
+        $this->root = $newRoot;
+        return $old;
+    }
 }

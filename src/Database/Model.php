@@ -5,7 +5,7 @@ namespace Bow\Database;
 use Bow\Support\Collection;
 use Bow\Exception\ModelException;
 
-class Schema
+class Model
 {
 	/**
 	 * fields list
@@ -104,7 +104,7 @@ class Schema
 	 * 
 	 * @return $this
 	 */
-	public function int($field, $size = 11, $null = false, $default = null)
+	public function integer($field, $size = 11, $null = false, $default = null)
 	{
 		return $this->loadWhole("int", $field, $size, $null, $default);
 	}
@@ -119,7 +119,7 @@ class Schema
 	 * 
 	 * @return $this
 	 */
-	public function bigint($field, $size = 20, $null = false, $default = null)
+	public function biginteger($field, $size = 20, $null = false, $default = null)
 	{
 		return $this->loadWhole("bigint", $field, $size, $null, $default);
 	}
@@ -205,7 +205,7 @@ class Schema
 	 * 
 	 * @return $this
 	 */
-	public function longint($field, $size = 20, $null = false, $default = null)
+	public function longinteger($field, $size = 20, $null = false, $default = null)
 	{
 		return $this->loadWhole("longint", $field, $size, $null, $default);
 	}
@@ -236,7 +236,7 @@ class Schema
 	 * 
 	 * @param $this
 	 */ 
-	public function char($field, $size = 1, $null = false, $default = null)
+	public function character($field, $size = 1, $null = false, $default = null)
 	{
 		if ($size > 4294967295) {
 

@@ -1,20 +1,20 @@
 <?php
 
-namespace Snoop\Http;
+namespace Bow\Http;
 
 
 use ErrorException;
-use Snoop\Core\Application;
+use Bow\Core\AppConfiguration;
+use Bow\Exception\ViewException;
+
 use Twig_Autoloader as Tiwg_A;
 use Mustache_Engine as Mustache;
 use Twig_Environment as Twig_Env;
 use Twig_Loader_Array as Twig_Load;
-use Snoop\Exception\ViewException;
 
 
 class Response
 {
-
 	/**
 	 * Liste de code http valide pour l'application
 	 * Sauf que l'utilisateur poura lui même rédéfinir
@@ -42,31 +42,27 @@ class Response
      * 
      * @var \Snoop\Core\Application
      */
-    private $app;
+    private $config;
 
-    private function __construct(Application $app)
+    private function __construct(AppConfiguration $appConfig)
     {
-        $this->app = $app;
+        $this->config = $appConfig;
     }
 
     /**
      * Singleton loader
      * 
-     * @param Application $app
+     * @param AppConfiguration $appConfig
      * 
      * @return self
      */
-    public static function load(Application $app)
+    public static function configure(AppConfiguration $appConfig)
     {
-
         if (self::$instance === null) {
-        
-            self::$instance = new self($app);
-        
+            self::$instance = new self($appConfig);
         }
 
         return self::$instance;
-    
     }
 
 	/**
@@ -79,11 +75,9 @@ class Response
 	 */
 	public function setHeader($key, $value)
 	{
-
 		header("$key: $value");
 
 		return $this;
-	
 	}
     
     /**
@@ -93,12 +87,10 @@ class Response
      */
     public function redirect($path)
     {
-
         echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
-        header("Location: " . $this->app->get("root") . $path);
+        header("Location: " . $this->getRootpath() . $path, true, 301);
 
         die();
-    
     }
 
     /**
@@ -108,11 +100,8 @@ class Response
      */
     public function redirectTo404()
     {
-
         $this->setCode(404);
-
         return $this;
-    
     }
 
 	/**
@@ -124,19 +113,16 @@ class Response
 	 */
 	public function setCode($code)
 	{
+		$r = true;
 
 		if (in_array((int) $code, array_keys(self::$header), true)) {
-		
 			header(self::$header[$code], true, $code);
-		
 			return true;
-		
 		} else {
-		
-			return false;
-		
+			$r = false;
 		}
-	
+
+		return $r;
 	}
 
 	/**
@@ -149,11 +135,9 @@ class Response
 	 */
 	public function json($data, $code = 200)
 	{
-
-		$this->setHeader("Content-Type", "application/json; charset=utf-8");
+		$this->setHeader("Content-Type", "application/json; charset=UTF-8");
 		$this->setCode($code);
-		$this->app->kill(json_encode($data));
-	
+		die(json_encode($data));
 	}
 
 	/**
@@ -164,37 +148,28 @@ class Response
 	 * 
 	 * @return \Snoop\Core\Application
 	 */
-	public function loadFile($filename, $bind = null)
+	public function sendFile($filename, $bind = [])
 	{
 		$filename = preg_replace("/@|#|\./", "/", $filename);
 
-		if ($this->app->get("views") !== null) {
-			
-			$tmp = $this->app->get("views") ."/". $filename . ".php";
-			
+		if ($this->config->getViewpath() !== null) {
+			$tmp = $this->config->getViewpath() ."/". $filename . ".php";
 			if (!file_exists($tmp)) {
-			
-				$filename = $this->app->get("views") ."/". $filename . ".html";			
-			
+				$filename = $this->config->getViewpath() ."/". $filename . ".html";			
 			} else {
-
 				$filename = $tmp;
-			
 			}
-		
 		}
 
 		if (!file_exists($filename)) {
-		
 			throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
-		
 		}
- 
+
+ 		extract($bind);
 		// Render du fichier demandé.
 		require $filename;
 
 		return $this;
-	
 	}
 
 	/**
@@ -207,35 +182,26 @@ class Response
 	 */
 	public function view($filename, $bind = null, $code = 200)
 	{
-
 		$filename = preg_replace("/@|#|\./", "/", $filename);
 		$filename .= ".php";
 		
-		if ($this->app->get("views") !== null) {
-		
-			$filename = $this->app->get("views") . "/" . $filename;
-		
+		if ($this->config->getViewpath() !== null) {
+			$filename = $this->config->getViewpath() . "/" . $filename;
 		}
 
 		// Chargement du template.
 		$template = $this->templateLoader($filename);
 
 		if ($bind === null) {
-		
 			$bind = [];
-		
 		}
 
 		$this->setCode($code);
 
-		if ($this->app->get("engine") == "twig") {
-	
+		if ($this->config->getEngine() == "twig") {
 			$this->send($template->render("template", $bind));
-
-		} else if (in_array($this->app->get("engine"), ["mustache", "jade"])) {
-
+		} else if (in_array($this->config->getEngine(), ["mustache", "jade"])) {
 			$this->send($template->render(file_get_contents($filename), $bind));
-		
 		}
 
 		return $this;
@@ -253,19 +219,15 @@ class Response
 	 */
 	private function templateLoader($filename)
 	{
-		if ($this->app->get("engine") === null) {
-		
-			if (!in_array($this->app->get("engine"), ["twig", "mustache", "jade"])) {
-		
+		if ($this->config->getEngine() === null) {
+			if (!in_array($this->config->getEngine(), ["twig", "mustache", "jade"])) {
 				throw new ErrorException("Erreur: template n'est pas définir");
-		
 			}
-		
 		}
 
 		$tpl = null;
 
-		if ($this->app->get("engine") == "twig") {
+		if ($this->config->getEngine() == "twig") {
 
 			$loader = new Twig_Load([
 				'template' => file_get_contents($filename)
@@ -273,14 +235,11 @@ class Response
 
 			$tpl = new Twig_Env($loader);
 		
-		} else if ($this->app->get("engine") == "mustache") {
-			
+		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new Mustache();
-
 		}
 
 		return $tpl;
-	
 	}
 
 	/**
@@ -292,21 +251,14 @@ class Response
 	 */
 	public function send($data, $stop = false)
 	{
-
 		if (is_array($data) || is_object($data)) {
-		
 			$data = json_encode($data);
-		
 		}
 
 		echo $data;
 
 		if ($stop) {
-		
-			$this->app->kill();
-		
+			die();
 		}
-	
 	}
-
 }

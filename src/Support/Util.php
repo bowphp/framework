@@ -1,17 +1,16 @@
 <?php
 
 
-namespace Snoop\Support;
+namespace Bow\Support;
 
 
 use DateTime;
-use ErrorException;
 use InvalidArgumentException;
+use Bow\Exception\UtilException;
 
 
 class Util
 {
-
 	/**
 	 * définir le type de retoure chariot CRLF ou LF
 	 *
@@ -20,7 +19,13 @@ class Util
 	private static $sep;
 
 	/**
+	 * @var array
+	 */
+	private static $names = [];
+
+	/**
 	 * Configuration de date en francais.
+	 * @var array
 	 */
 	private static $angMounth = [
 		"Jan"  => "Jan", "Fév"  => "Feb",
@@ -30,13 +35,17 @@ class Util
 		"Sept" => "Sep", "Oct"  => "Oct",
 		"Nov"  => "Nov", "Déc"  => "Dec"
 	];
+
+	/**
+	 * @var array
+	 */
 	private static $month = [
-		"Jan"  => "Janvier", "Fév"  => "Fevrier",
-		"Mars" => "Mars", "Avr"  => "Avril",
-		"Mai"  => "Mai", "Juin" => "Juin",
-		"Juil" => "Juillet", "Août" => "Août",
+		"Jan"  => "Janvier",  "Fév"  => "Fevrier",
+		"Mars" => "Mars",     "Avr"  => "Avril",
+		"Mai"  => "Mai",      "Juin" => "Juin",
+		"Juil" => "Juillet",  "Août" => "Août",
 		"Sept" => "Septembre", "Oct" => "Octobre",
-		"Nov"  => "Novembre", "Déc" => "Décembre"
+		"Nov"  => "Novembre",  "Déc" => "Décembre"
 	];
 
 	/**
@@ -74,57 +83,14 @@ class Util
 	}
 
 	/**
-	 * différence entre deux date
-	 *
-	 * @param string $datenaiss
-	 * @param boolean $age
-	 * 
-	 * @return array
-	 */
-	public static function dateDiff($datenaiss, $age = false)
-	{
-		$date1 = date_create();
-		$date2 = date_create($datenaiss);
-
-		if ($date1 !== false && $date2 !== false) {
-			
-			$diff = date_diff($date1, $date2);
-			
-			if ($diff->format("%R") === "-") {
-				
-				if ($age === true) {
-
-					return $diff->y;
-				
-				}
-				
-				$error = true;
-			
-			} else {
-				
-				$error = true;
-			
-			}
-
-		} else {
-			
-			$error = true;
-		
-		}
-
-		return $error;
-	
-	}
-
-	/**
-	 * diffEntre2Date, faire la différence entre deux dates
+	 * dateDifference, faire la différence entre deux dates
 	 *
 	 * @param DateTime $date1
 	 * @param DateTime $date2
 	 * 
 	 * @return DateTime|void
 	 */
-	public static function diffEntre2Date($date1, $date2)
+	public static function dateDifference($date1, $date2)
 	{
 		return date_diff(date_create($date1), date_create($date2));
 	}
@@ -136,37 +102,209 @@ class Util
 	 * 
 	 * @throws \ErrorException
 	 */
-	public static function setTimeZone($zone)
+	public static function setTimezone($zone)
 	{
 		if (count(explode("/", $zone)) != 2) {
-	
-			throw new ErrorException("La definition de la zone est invalide");
-	
+			throw new UtilException("La definition de la zone est invalide");
 		}
 	
 		date_default_timezone_set($zone);
-	
 	}
 
 	/**
 	 * Lanceur de callback
 	 *
 	 * @param callable $cb
-	 * @param mixed @param[optional]
+	 * @param mixed param[optional]
+	 * @param mixed names[optional]
 	 * 
 	 * @return mixed
 	 */
-	public static function launchCallBack($cb, $param = null)
+	public static function launchCallback($cb, $param = null, array $names = [])
 	{
-	
+		$middleware_is_defined = false;
+
+		if (!isset($names["namespace"])) {
+			return self::next($cb, $param);
+		}
+
+		self::$names = $names;
+		$param = is_array($param) ? $param : [$param];
+		
+		// Chargement de l'autoload
+		require $names["namespace"]["autoload"] . ".php";
+		$autoload = $names["app_autoload"];
+		$autoload::register();
+
 		if (is_callable($cb)) {
-	
-			return call_user_func_array($cb, is_array($param) ? $param : [$param]);
-	
+			return call_user_func_array($cb, $param);
+		}
+		else if (is_array($cb)) {
+			// on détermine le nombre d'élément du tableau.
+			if (count($cb) == 1) {
+				if (isset($cb["middleware"])) {
+					// On active Le mode de chargement de middleware.
+					$middleware_is_defined = true;
+					$middleware = $cb["middleware"];
+				} else if (isset($cb[0])) {
+					if (is_callable($cb[0])) {
+						$cb = $cb[0];
+					} else if (is_string($cb[0])) {
+						$cb = self::loadController($cb[0]);
+					}
+				}
+			}
+			else {
+				// la taille est égale à 2
+				if (count($cb) == 2) {
+					// la clé middleware est t-elle définir
+					if (isset($cb["middleware"])) {
+						// on active Le mode de chargement de middleware.
+						$middleware_is_defined = true;
+						$middleware = array_shift($cb);
+						if (is_string($cb[0])) {
+							$cb = self::loadController($cb[0]);
+						} else {
+							$cb = $cb[0];
+						}
+					}
+					else {
+						$middleware_is_defined = true;
+						$middleware = array_shift($cb);
+						if (is_callable($cb)) {
+							$cb = $cb;
+						} else {
+							$cb = self::loadController($cb);
+						}
+					}
+				}
+				else {
+					// TODO: execution recurcive.
+					// $this->next($cb, $param);
+				}
+			}
+		}
+		else {
+			if (is_callable($cb)) {
+				$cb = $cb;
+			} else {
+				if (is_string($cb)) {
+					$cb = self::loadController($cb);
+				}
+			}
+		}
+		// vrification de l'activation du middlware.
+		if ($middleware_is_defined) {
+			// Status permettant de bloquer la suite du programme.
+			$status = true;
+			if (is_string($middleware)) {
+				if (!in_array($middleware, $names["middleware"])) {
+					throw new RouterException($cb["middleware"] . " n'est pas un middleware definir.");
+				}
+				else {
+					// Chargement du middleware
+					$classMiddleware = $names["namespace"]["middleware"] . "\\" . ucfirst($middleware);
+					// On vérifie si le middleware définie est une middleware valide.
+					if (class_exists($classMiddleware)) {
+						$instance = new $classMiddleware();
+						$handler = [$instance, "handler"];
+					} else {
+						$handler = $middleware;
+					}
+					// Lancement du middleware.
+					$status = call_user_func_array($handler, $param);
+				}
+			// Le middelware est un callback. les middleware peuvent etre
+			// definir comme des callback par l'utilisteur
+			}
+			else if (is_callable($middleware)) {
+				$status = call_user_func_array($middleware, $param);
+			}
+			// On arrêt tout en case de status false.
+			if ($status == false) {
+				die();
+			}
+		}
+		// Verification de l'existance d'une fonction a appélée.
+		if (isset($cb)) {
+			return call_user_func_array($cb, $param);
 		}
 
 		return null;
-	
+	}
+
+	/**
+	 * Next, lance successivement une liste de fonction.
+	 *
+	 * @param array|callable $arr
+	 * @param array|callable $arg
+	 * 
+	 * @return mixed|void
+	 */
+	private static function next($arr, $arg)
+	{
+		if (is_callable($arr)) {
+
+			return call_user_func_array($arr, $arg);
+				
+		}
+		else if (is_array($arr)) {
+			// Lancement de la procedure de lancement recursive.
+			array_reduce($arr, function($next, $cb) use ($arg) {
+				// $next est-il null
+				if (is_null($next)) {
+					// On lance la loader de controller si $cb est un String
+					if (is_string($cb)) {
+						$cb = self::loadController($cb);
+					}
+
+					return call_user_func_array($cb, $arg);
+				}
+				else {
+					// $next est-il a true.
+					if ($next == true) {
+						// On lance la loader de controller si $cb est un String
+						if (is_string($cb)) {
+							$cb = self::loadController($cb);
+						}
+					
+						return call_user_func_array($cb, $arg);
+					
+					} else {
+						// Kill
+						die();
+					}
+				}
+
+				return $next;
+			});
+		} else {
+			// On lance la loader de controller si $cb est un String
+			$cb = self::loadController($arr);
+			if (is_array($cb)) {
+				return call_user_func_array($cb, $arg);
+			}
+		}
+	}
+
+	/**
+	 * Charge les controlleurs
+	 * 
+	 * @param string $controllerName. Utilisant la dot notation
+	 * 
+	 * @return array
+	 */
+	private static function loadController($controllerName)
+	{
+		// Récupération de la classe et de la methode à lancer.
+		if (is_null($controllerName)) {
+			return null;
+		}
+		
+		list($class, $method) = preg_split("#\.|@#", $controllerName);
+		$class = self::$names["namespace"]["controller"] . "\\" . ucfirst($class);
+
+		return [new $class(), $method];
 	}
 
 	/**
@@ -179,21 +317,15 @@ class Util
 	 */
 	public static function filtre($opts, $cb)
 	{
-
 		$r = [];
 
 		foreach ($opts as $key => $value) {
-	
 			if (call_user_func_array($cb, [$value, $key])) {
-	
 				array_push($r, $value);
-	
 			}
-	
 		}
 
 		return $r;
-	
 	}
 
 	/**
@@ -205,7 +337,6 @@ class Util
 	 */
 	public static function convertHourToLetter($hour)
 	{
-		
 		$hourPart = explode(":", $hour);
 		$heures = trim(static::convertDate($hourPart[0])) . " heure";
 		$minutes = trim(static::convertDate($hourPart[1])) . " minute";
@@ -213,28 +344,21 @@ class Util
 		
 		// accord des heures.
 		if ($hourPart[0] > 1) {
-		
 			$heures .= "s";
-		
 		}
 		
 		// accord des minutes
 		if ($hourPart[1] > 1) {
-		
 			$minutes .= "s";
-		
 		}
 		
 		// Ajout de secondes
 		if (isset($hourPart[2]) && $hourPart[2] > 0) {
-		
 			$secondes =  " " . trim(static::convertDate($hourPart[2])) . " secondes";
-		
 		}
 
 		// Retourne
 		return trim(strtolower($heures . " " . $minutes . $secondes));
-	
 	}
 
 	/**
@@ -246,20 +370,16 @@ class Util
 	 */
 	public static function convertDateToLetter($dateString)
 	{
-	
 		$formData = array_reverse(explode("-", $dateString));
 
 		$r = trim(static::convertDate($formData[0])." ". static::getMonth((int)$formData[1])) . " " . trim(static::convertDate($formData[2]));
 		$p = explode(" ", $r);
 
 		if (strtolower($p[0]) == "un") {
-	
 			$p[0] = "permier";
-	
 		}
 
 		return trim(implode(" ", $p));
-	
 	}
 
 	/**
@@ -271,21 +391,16 @@ class Util
 	 */
 	public static function debug()
 	{
-	
 		if (func_num_args() == 0) {
-	
 			throw new InvalidArgumentException("Vous devez donner un paramètre à la fonction", E_ERROR);
-	
 		}
 
 		$arr = func_get_args();
 		ob_start();
 
 		foreach ($arr as $key => $value) {
-	
 			var_dump($value);
 			echo "\n\n";
-	
 		}
 
 		$content = ob_get_clean();
@@ -299,7 +414,6 @@ class Util
 		$content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
 		
 		echo $content;
-	
 	}
 
 	/**
@@ -319,7 +433,6 @@ class Util
 		} else {
 			self::debug(array_slice(func_get_args(), 1, func_num_args()));
 		}
-
 	}
 	
 	/**
@@ -400,7 +513,6 @@ class Util
 		 * Retourne avec les millieme associer.
 		 */
 		return ($millieme === 1 ? "mil":($millieme > 1 ? $nombreEnLettre["unite"][(int) $millieme]." mil" : "")).($millieme ? " ".$tmp : $tmp);
-	
 	}
 
 	/**
@@ -412,12 +524,10 @@ class Util
 	 */
 	public function makeSimpleValideDate($str)
 	{
-
 		$mount = explode(" ", $str);
 		$str = $mount[0] . " " . static::$angMounth[$mount[1]] . " " . $mount[2];
 
 		return date("Y-m-d", strtotime($str));
-	
 	}
 
 	/**
@@ -435,14 +545,10 @@ class Util
 
 				// définition du tableau composants les mois  avec key en string
 				if (strlen($value) == 3) {
-			
 					$value = ucfirst($value);
 					$month = static::$month;
-			
 				} else {
-
 					return null;
-			
 				}
 
 			} else {
@@ -451,13 +557,9 @@ class Util
 			
 				// définition du tableau composants les mois
 				if ($value > 0 && $value <= 12) {
-			
 					$value -= 1;
-			
 				} else {
-			
 					return null;
-			
 				}
 
 				$month = array_values(static::$month);
@@ -469,7 +571,6 @@ class Util
 		}
 
 		return null;
-	
 	}
 
 	/**
@@ -484,13 +585,10 @@ class Util
 		$resultat = [];
 
 		foreach ($data as $key => $value) {
-		
 			$resultat[$value] = ":$value";
-		
 		}
 
 		return $resultat;
-	
 	}
 
 	/**
@@ -501,23 +599,16 @@ class Util
 	public static function sep()
 	{
 		if (static::$sep !== null) {
-		
 			return static::$sep;
-		
 		}
 
 		if (defined('PHP_EOL')) {
-		
 			static::$sep = PHP_EOL;
-		
 		} else {
-		
 			static::$sep = (strpos(PHP_OS, 'WIN') === false) ? "\n" : "\r\n";
-		
 		}
 
 		return static::$sep;
-	
 	}
 
 	/**
@@ -531,5 +622,4 @@ class Util
 	{
 		return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
 	}
-
 }

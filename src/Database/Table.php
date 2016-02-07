@@ -1,10 +1,10 @@
 <?php
 
-namespace Snoop\Database;
+namespace Bow\Database;
 
 
-use Snoop\Support\Security;
-use Snoop\Exception\TableException;
+use Bow\Support\Security;
+use Bow\Exception\TableException;
 
 
 class Table extends DatabaseTools
@@ -85,9 +85,7 @@ class Table extends DatabaseTools
     public static function load($tableName, $connection)
     {
         if (self::$instance === null) {
-
             self::$instance = new self($tableName, $connection);
-
         }
 
         return self::$instance;
@@ -102,23 +100,15 @@ class Table extends DatabaseTools
     public function select($column = null) {
 
         if (is_array($column)) {
-
             $column = implode(", ", $column);
-
         } else {
-
             if (func_num_args() >= 1) {
-
                 $column = implode(", ", func_get_args());
-
             }
         }
 
-
         if (!is_null($column)) {
-
             $this->select = $column;
-
         }
 
         return $this;
@@ -139,28 +129,18 @@ class Table extends DatabaseTools
     public function where($column, $comp = "=", $value = null, $boolean = "and")
     {
         if (!static::isComporaisonOperator($comp)) {
-
             $value = $comp;
             $comp = "=";
-
         } else {
-
             if (is_null($value)) {
-
                 throw new TableException(__METHOD__."(), valeur non définir", E_ERROR);
-
             }
-
         }
 
         if ($this->where == null) {
-
             $this->where = "$column $comp $value";
-
         } else {
-
             $this->where .= " $boolean $column $comp $value";
-
         }
 
         return $this;
@@ -180,9 +160,7 @@ class Table extends DatabaseTools
     public function orWhere($column, $comp = "=", $value = null)
     {
         if (is_null($this->where)) {
-
             throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un where avant", E_ERROR);
-
         }
 
         $this->where("$column", $comp, $value, "or");
@@ -202,13 +180,9 @@ class Table extends DatabaseTools
     {
 
         if (!is_null($this->where)) {
-
             $this->where = "$column is null";
-
         } else {
-
             $this->where = " $boolean $column is null";
-
         }
 
         return $this;
@@ -226,13 +200,9 @@ class Table extends DatabaseTools
     {
 
         if (is_null($this->where)) {
-
             $this->where = "$column is not null";
-
         } else {
-
             $this->where .= " $boolean $column is not null";
-
         }
 
         return $this;
@@ -253,35 +223,23 @@ class Table extends DatabaseTools
     {
 
         if (count($range) > 2) {
-
             $range = array_slice($range, 0, 2);
-
         } else {
-
             if (count($range) == 0) {
-
                 throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
             }
-
             $range = [$range[0], $range[0]];
         }
 
         $between = implode(" and ", $range);
 
         if (is_null($this->where)) {
-
             if ($boolean == "not" || $boolean == "and not") {
-
                 $this->where = "not $column between " . $between;
-
             } else {
-
                 $this->where = "$column between " . $between;
-
             }
-
         } else {
-
             $this->where .= " $boolean $column is not null";
         }
 
@@ -316,15 +274,11 @@ class Table extends DatabaseTools
     public function whereIn($column, array $range, $boolean = "and")
     {
         if (count($range) > 2) {
-
             $range = array_slice($range, 0, 2);
-
         } else {
 
             if (count($range) == 0) {
-
                 throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
-            
             }
 
             $range = [$range[0], $range[0]];
@@ -333,19 +287,12 @@ class Table extends DatabaseTools
         $in = implode(", ", $range);
 
         if (is_null($this->where)) {
-
             if ($boolean == "not" || $boolean == "and not") {
-
                 $this->where = "not $column in ($in)";
-
             } else {
-
                 $this->where .= " and not $column in ($in)";
-
             }
-
         } else {
-
             $this->where .= " $boolean $column in ($in)";
         }
 
@@ -365,9 +312,7 @@ class Table extends DatabaseTools
     public function whereNotIn($column, array $range)
     {   
         if (is_null($this->where)) {
-
             throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un whereIn avant", E_ERROR);
-
         }
 
         $this->whereIn($column, $range, "and not");
@@ -385,13 +330,9 @@ class Table extends DatabaseTools
     public function join($table)
     {
         if (is_null($this->join)) {
-
             $this->join = "inner join $table";
-
         } else {
-
             $this->join .= ", $table";
-
         }
 
         return $this;
@@ -409,21 +350,13 @@ class Table extends DatabaseTools
     public function leftJoin($table)
     {
         if (is_null($this->join)) {
-            
             $this->join = "left join $table";
-
         } else {
-
             if (!preg_match("/^(inner|right)\sjoin\s.*/", $this->join)) {
-
                 $this->join .= ", $table";
-
             } else {
-
                 throw new TableException("la clause inner join est dèja activé.", E_ERROR);
-
             }
-
         }
 
         return $this;
@@ -439,21 +372,13 @@ class Table extends DatabaseTools
     public function rightJoin($table)
     {
         if (is_null($this->join)) {
-
             $this->join = "right join $table";
-
         } else {
-            
             if (!preg_match("/^(inner|left)\sjoin\s.*/", $this->join)) {
-
                 $this->join .= ", $table";
-
             } else {
-
                 throw new TableException("la clause inner join est dèja activé.", E_ERROR);
-
             }
-
         }
         return $this;
     }
@@ -473,21 +398,15 @@ class Table extends DatabaseTools
     public function on($colum1, $comp = "=", $colum2)
     {
         if (is_null($this->join)) {
-
             throw new TableException("la clause inner join est dèja activé.", E_ERROR);
-
         }
 
         if (!$this->isComporaisonOperator($comp)) {
-
             $colum2 = $comp;
-
         }
 
         if (!preg_match("/on/i", $this->join)) {
-
             $this->join .= " on $colum1 $comp $colum2";
-
         }
 
         return $this;
@@ -508,25 +427,17 @@ class Table extends DatabaseTools
     public function orOn($column, $comp = "=", $value)
     {
         if (is_null($this->join)) {
-
             throw new TableException("la clause inner join est dèja activé.", E_ERROR);
-
         }
 
         if (!$this->isComporaisonOperator($comp)) {
-
             $value = $comp;
-
         }
 
         if (preg_match("/on/i", $this->join)) {
-            
             $this->join .= " or $column $comp $value";
-
         } else {
-
             throw new TableException("la clause on n'est pas activé.", E_ERROR);
-
         }
 
         return $this;
@@ -539,12 +450,10 @@ class Table extends DatabaseTools
      * 
      * @return $this
      */
-    public function groupBy($column)
+    public function group($column)
     {
         if (is_null($this->group)) {
-
             $this->group = "group $column";
-
         }
 
         return $this;
@@ -558,7 +467,7 @@ class Table extends DatabaseTools
      * 
      * @return $this
      */
-    public function orderBy($column, $type = "asc")
+    public function order($column, $type = "asc")
     {
         if (is_null($this->order)) {
             
@@ -585,9 +494,7 @@ class Table extends DatabaseTools
     public function jump($offset = 0)
     {
     	if (is_null($this->limit)) {
-	    
             $this->limit = "$offset,";
-    	
         }
 
         return $this;
@@ -603,19 +510,14 @@ class Table extends DatabaseTools
     public function take($limit)
     {
     	if (is_null($this->limit)) {
-	    
             $this->limit = $limit;
-    	
         } else {
-
     		if (preg_match("/^([\d]+),$/", $this->limit, $match)) {
-    		
             	array_shift($match);
     			$this->limit = "{$match[0]}, $limit";
-    		
             }
-
     	}
+        
         return $this;
     }
 
@@ -681,10 +583,8 @@ class Table extends DatabaseTools
         $sql = "select $aggregat($column) from " . $this->tableName;
     	
         if (!is_null($this->where)) {
-
     		$sql .= " " . $this->where;
     		$this->where = null;
-    	
         }
     	
         $s = $this->connection->prepare($sql);
@@ -709,54 +609,40 @@ class Table extends DatabaseTools
 
        	// Ajout de la clause select
         if (is_null($this->select)) {
-        
             $sql .= "* from " . $this->tableName;
-
         } else {
-        
         	$sql .= $this->select . " from " . $this->tableName;
         	$this->select = null;
-        
         }
 
         // Ajout de la clause join
         if (!is_null($this->join)) {
-        
         	$sql .= " join " . $this->join;
         	$this->join = null;
-        
         }
 
         // Ajout de la clause where
         if (!is_null($this->where)) {
-
         	$sql .= " where " . $this->where;
         	$this->where = null;
-        
         }
 
         // Ajout de la clause order
         if (!is_null($this->order)) {
-       
         	$sql .= " " . $this->order;
         	$this->order = null;
-       
         }
 
         // Ajout de la clause limit
         if (!is_null($this->limit)) {
-	   
             $sql .= " limit " . $this->limit;
 	        $this->limit = null;
-       
         }
 
         // Ajout de la clause group
         if (!is_null($this->group)) {
-       
         	$sql .= " group by " . $this->group;
         	$this->group = null;
-       
         }
 
         // execution de requete.
@@ -764,9 +650,7 @@ class Table extends DatabaseTools
         $stmt->execute();
 
         if ($stmt->rowCount() <= 1) {
-       
         	$fetch = "fetch";
-       
         }
 
         $data = Security::sanitaze($stmt->$fetch());
@@ -817,10 +701,8 @@ class Table extends DatabaseTools
 		$sql .= parent::rangeField(parent::add2points(array_keys($data)));
 
 		if (!is_null($this->where)) {
-
 			$sql .= " where " . $this->where;
 			$this->where = null;
-
 		}
 
 		$stmt = $this->connection->prepare($sql);
@@ -850,10 +732,8 @@ class Table extends DatabaseTools
 		$sql = "delete from " . $this->tableName;
 
 		if (!is_null($this->where)) {
-
 			$sql .= " where " . $this->where;
 	        $this->where = null;
-
 		}
 
 		$stmt = $this->connection->prepare($sql);

@@ -1,10 +1,10 @@
 <?php
 
-namespace Snoop\Http;
+namespace Bow\Http;
 
 
 use StdClass;
-use Snoop\Core\Application;
+use Bow\Core\Application;
 
 
 class Request
@@ -15,13 +15,6 @@ class Request
 	 * @static self
 	 */
 	private static $instance = null;
-	
-	/**
-	 * Variable d'application
-	 * 
-	 * @var Application
-	 */
-	private $app;
 
 	/**
 	 * Variable de paramètre issue de url définie par l'utilisateur
@@ -36,28 +29,24 @@ class Request
 	 * 
 	 * @param Application $app
 	 */
-	private function __construct(Application $app)
+	private function __construct()
 	{
-		$this->app = $app;
 		$this->params = new StdClass();
 	}
 
 	/**
 	 * Singletion loader
 	 * 
-	 * @param Application $app
+	 * @param AppConfiguration $app
 	 * @return null|self
 	 */
-	public static function load(Application $app)
+	public static function configure()
 	{
 		if (self::$instance === null) {
-
-			self::$instance = new self($app);
-		
+			self::$instance = new self();
 		}
 
 		return self::$instance;
-	
 	}
 
 	/**
@@ -68,19 +57,13 @@ class Request
 	 */
 	public function uri($path = "")
 	{
-
 		if ($pos = strpos($_SERVER["REQUEST_URI"], "?")) {
-		
 			$uri = substr($_SERVER["REQUEST_URI"], 0, $pos);
-		
 		} else {
-		
 			$uri = $_SERVER["REQUEST_URI"];
-		
 		}
 
 		return str_replace($path, "", $uri);
-	
 	}
 
 
@@ -112,7 +95,7 @@ class Request
 	 */
     public static function body()
     {
-        return RequestData::loader("POST");
+        return RequestData::configure("POST");
     }
 
 	/**
@@ -122,7 +105,7 @@ class Request
 	 */
     public static function query()
     {
-        return RequestData::loader("GET");
+        return RequestData::configure("GET");
     }
 
 	/**
@@ -132,7 +115,7 @@ class Request
 	 */
     public static function files()
     {
-        return RequestData::loader("FILES");
+        return RequestData::configure("FILES");
     }
 
 	/**
@@ -142,21 +125,14 @@ class Request
 	 */
 	public function ajax()
 	{
-
 		if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-		
 			$xhrObj = strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]);
-		
 			if ($xhrObj == "xmlhttprequest" || $xhrObj == "activexobject") {
-		
 				return true;
-			
 			}
-		
 		}
 
 		return false;
-	
 	}
 
 	/**
@@ -187,5 +163,4 @@ class Request
 	{
 		return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 	}
-
 }

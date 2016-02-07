@@ -8,24 +8,22 @@
  * @author Etchien Boa <geekroot9@gmail.com>
  * @author Dakia Franck <dakiafranck@gmail.com>
  * 
- * @package Snoop\Core
+ * @package Bow\Core
  */
 
-namespace Snoop\Core;
+namespace Bow\Core;
 
 
 use Closure;
-use Snoop\Database\DB;
-use Snoop\Support\Util;
-use Snoop\Http\Request;
-use Snoop\Http\Response;
-use Snoop\Support\Logger;
+use Bow\Support\Util;
+use Bow\Http\Request;
+use Bow\Http\Response;
+use Bow\Support\Logger;
 use InvalidArgumentException;
 
 
 class Application
 {
-
 	/**
 	 * Définition de contrainte sur un route.
 	 *
@@ -102,14 +100,6 @@ class Application
 	 * @var string
 	 */
 	private $currentMethod = "";
-	
-	/**
-	 * Les des namespaces
-	 * 
-	 * @var array
-	 */
-	private $names = [];
-
 	/**
 	 * Enrégistre l'information la courent courrente
 	 * 
@@ -146,38 +136,27 @@ class Application
 	private static $routes = [];
 
 	/**
+	 * @var Request
+	 */
+	private $req;
+
+	/**
 	 * Private construction
 	 *
 	 * @param object $config
 	 */
 	private function __construct($config)
 	{
-		
-		if (empty($config)) {
+		$this->req = $this->request()->method();
 
-			$this->method = $this->request()->method();
-	
-			return null;
-	
+		if (!empty($config)) {
+			$this->config = new AppConfiguration($config);
+	        $this->req = $this->request();
+	        
+	        if (isset($config->timezone)) {
+	            Util::setTimezone($this->config->getTimezone());
+	        }
 		}
-        
-        if (isset($config->timezone)) {
-    
-            Util::settimezone($config->timezone);
-    
-        }
-
-		$this->appname = $config->appname;
-		$this->logDirecotoryName = $config->logDirecotoryName;
-		$this->views = $config->views;
-		$this->engine = $config->template;
-		$this->cache = $config->cacheFolder;
-		$this->names = $config->names;
-		$this->type = $config->type;
-		$this->config = $config;
-        $this->loglevel = isset($config->loglevel) ? $config->loglevel : $this->loglevel;
-        $this->method = $this->request()->method();
-
 	}
 
 	/**
@@ -192,36 +171,35 @@ class Application
 	 * 
 	 * @return self
 	 */
-	public static function loader($config)
+	public static function configure($config)
 	{
-
 		if (static::$inst === null) {
-	
 			static::$inst = new self($config);
-	
 		}
 
 		return static::$inst;
-	
 	}
 
 	/**
 	 * mount, ajoute un branchement.
 	 *
 	 * @param string $branchName
-	 * @param callable|null $middelware
+	 * @param callable $cb
 	 * 
 	 * @return self
 	 */
-	public function mount($branchName, $middelware = null)
+	public function group($branchName, $cb)
 	{
-		if ($middelware !== null) {
-	
-			call_user_func($middelware, [$this->request(), $this->response()]);
-	
+		$next = true;
+		$this->branch = $branchName;
+		if (is_array($cb)) {
+			Util::launchCallback($cb, $this->req, $this->config->getNamespace());
+		} else {
+			if (!is_callable($cb)) {
+				throw new ApplicationException("Callback are not define", 1);
+			}
+			call_user_func_array($cb, [$this->req]);
 		}
-		
-		$this->branch .= $branchName;
 
 		return $this;
 	}
@@ -231,13 +209,11 @@ class Application
 	 *
 	 * @return self
 	 */
-	public function unmount()
+	public function ungroup()
 	{
-
 		$this->branch = "";
 
 		return $this;
-	
 	}
 
 	/**
@@ -251,19 +227,30 @@ class Application
 	public function get($path, $cb = null)
 	{
 		if ($cb == null) {
-
 			$prop = $path;
-			
 			if (property_exists($this, $prop)) {
-	
 				return $this->$prop;
-	
 			}
-
 		}
 		
 		return $this->routeLoader("GET", $this->branch . $path, $cb);
-	
+	}
+
+	/**
+	 * post, route de type POST
+	 *
+	 * @param string $path
+	 * @param callable $cb
+	 * 
+	 * @return self
+	 */
+	public function post($path, $cb)
+	{
+		if ($this->req->body()->has("method")) {
+			return $this;
+		}
+		
+		return $this->routeLoader("POST", $this->branch . $path, $cb);
 	}
 
 	/**
@@ -276,15 +263,9 @@ class Application
 	 */
 	public function any($path, $cb)
 	{
-
-		$this->post($path, $cb)
-		->delete($path, $cb)
-		->put($path, $cb)
-		->update($path, $cb)
-		->get($path, $cb);
+		$this->post($path, $cb)->delete($path, $cb)->put($path, $cb)->update($path, $cb)->get($path, $cb);
 
 		return $this;
-
 	}
 
 	/**
@@ -297,7 +278,7 @@ class Application
 	 */
 	public function delete($path, $cb)
 	{
-		return $this->addHttpVerbe("_DELETE", $path, $cb);
+		return $this->addHttpVerbe("DELETE", $path, $cb);
 	}
 
 	/**
@@ -310,7 +291,7 @@ class Application
 	 */
 	public function update($path, $cb)
 	{
-		return $this->addHttpVerbe("_UPDATE", $path, $cb);
+		return $this->addHttpVerbe("UPDATE", $path, $cb);
 	}
 
 	/**
@@ -323,7 +304,7 @@ class Application
 	 */
 	public function put($path, $cb)
 	{
-		return $this->addHttpVerbe("_PUT", $path, $cb);
+		return $this->addHttpVerbe("PUT", $path, $cb);
 	}
 
 	/**
@@ -336,7 +317,7 @@ class Application
 	 */
 	public function head($path, $cb)
 	{
-		return $this->addHttpVerbe("_HEAD", $path, $cb);
+		return $this->addHttpVerbe("HEAD", $path, $cb);
 	}
 
 	/**
@@ -363,17 +344,12 @@ class Application
 	 * 
 	 * @return self
 	 */
-	public function match($match, $path, $cb)
+	public function match(array $methods, $path, $cb)
 	{
-		
-		foreach($match as $value) {
-
-			if ($this->method === strtoupper($value)) {
-
-				$this->routeLoader($path, $this->method, $cb);
-			
+		foreach($methods as $method) {
+			if ($this->req->method() === strtoupper($method)) {
+				$this->routeLoader($path, $this->req->method(), $cb);
 			}
-
 		}
 
 		return $this;
@@ -391,35 +367,19 @@ class Application
 	 */
 	private function addHttpVerbe($method, $path, $cb)
 	{
+		$body = $this->req->body();
 		
-		if ($this->isBodyKey("method")) {
-
-			if ($this->body("method") === $method) {
-	
-				$this->routeLoader($this->method, $this->branch . $path, $cb);
-	
+		if ($body !== null) {
+			if ($body->has("method")) {
+				if ($body->get("method") === $method) {
+					$this->routeLoader($this->req->method(), $this->branch . $path, $cb);
+				}
+			} else {
+				$this->routeLoader($method, $this->branch . $path, $cb);
 			}
-
 		}
 
 		return $this;
-	}
-
-	/**
-	 * post, route de type POST
-	 *
-	 * @param string $path
-	 * @param callable $cb
-	 * 
-	 * @return self
-	 */
-	public function post($path, $cb)
-	{
-		if ($this->isBodyKey("method")) {
-			return $this;
-		}
-		
-		return $this->routeLoader("POST", $this->branch . $path, $cb);
 	}
 
 	/**
@@ -433,7 +393,6 @@ class Application
 	 */
 	private function routeLoader($method, $path, $cb)
 	{
-		
 		static::$routes[$method][] = new Route($path, $cb);
 
 		$this->currentRoute = $path;
@@ -452,17 +411,15 @@ class Application
 	public function where(array $otherRule)
 	{
 		if (empty($this->with)) {
-		
 			$this->with[$this->currentMethod] = [];
 			$this->with[$this->currentMethod][$this->currentRoute] = $otherRule;
-		
 		} else {
-			
-			$this->with[$this->currentMethod] = array_merge(
-				$this->with[$this->currentMethod], 
-				[$this->currentRoute => $otherRule]
-			);
-
+			if (array_key_exists($this->currentMethod, $this->with)) {
+				$this->with[$this->currentMethod] = array_merge(
+					$this->with[$this->currentMethod], 
+					[$this->currentRoute => $otherRule]
+				);
+			}
 		}
 
 		return $this;
@@ -471,99 +428,44 @@ class Application
 	/**
 	 * Lanceur de l'application
 	 * 
-	 * @return void
-	 */
-	public function run()
-	{
-		
-		$this->response()->setHeader("X-Powered-By", "Snoop Framework");
-		$error = true;
-
-		if (isset(static::$routes[$this->method])) {
-			
-			foreach (static::$routes[$this->method] as $key => $route) {	
-				
-				if (isset($this->with[$this->method][$route->getPath()])) {
-	
-					$with = $this->with[$this->method][$route->getPath()];
-	
-				} else {
-	
-					$with = [];
-	
-				}
-
-				if ($route->match($this->request()->uri($this->root), $with)) {
-
-					$route->call($this->request(), $this->names);
-					$error = false;
-
-				}
-
-			}
-
-		} else {
-	
-			$error = false;
-	
-		}
-
-		if ($error) {
-			
-			$this->response()->setCode(404);
-
-			if ($this->error404 !== null && is_callable($this->error404)) {
-	
-				call_user_func($this->error404);
-	
-			}
-
-			static::log("[404] route -" . $this->request()->uri() . "- non definie");
-		
-		}
-		
-		return $error;
-	
-	}
-
-	/**
-	 * Kill process
-	 *
-	 * @param string $message=""
-	 * @param int|bool $status
-	 * @param bool $log=false
+	 * @param callable|null $cb
 	 * 
 	 * @return void
 	 */
-	public function kill($message = null, $status = 200, $log = false)
+	public function run($cb = null)
 	{
+		$this->response()->setHeader("X-Powered-By", "Bow Framework");
+		$error = true;
 
-		if (is_bool($status) && $status == true) {
-	
-			$log = $status;
-	
-		} else {
-	
-			$this->response()->setCode($status);
-	
+		if (is_callable($cb)) {
+			call_user_func_array($cb, [$this->req]);
 		}
 
-		if ($log) {
-	
-			$this->log($message);
-	
-		} else {
-	
-			if (is_string($message)) {
-	
-				echo $message;
-	
+		$this->branch = "";
+
+		if (isset(static::$routes[$this->req->method()])) {
+			foreach (static::$routes[$this->req->method()] as $key => $route) {	
+				if (isset($this->with[$this->req->method()][$route->getPath()])) {
+					$with = $this->with[$this->req->method()][$route->getPath()];
+				} else {
+					$with = [];
+				}
+
+				if ($route->match($this->req->uri($this->root), $with)) {
+					$route->call($this->req, $this->config->getNamespace());
+					$error = false;
+				}
 			}
-	
 		}
 
-		die();
-	
+		if ($error) {
+			$this->response()->setCode(404);
+			if ($this->error404 !== null && is_callable($this->error404)) {
+				call_user_func($this->error404);
+			}
+		}
+
+		return $error;
 	}
 
 	/**
@@ -576,183 +478,66 @@ class Application
 	 */
 	public function set($key, $value)
 	{
-		
-		if (in_array($key, ["views", "engine", "public", "root"])) {
-			
-			if (property_exists($this, $key)) {
-	
-				$this->$key = $value;
-	
+		if (in_array($key, ["view", "engine", "public", "root"])) {
+			switch ($key) {
+				case "view":
+					$method = "setViewPath";
+					break;
+				case "engine":
+					$method = "setViewEngine";
+					break;
+				case "public":
+					$method = "setPublicPath";
+					break;
+				case "root":
+					$method = "setRootPath";
+					break;
+			}
+
+			if (method_exists($this->config, $method)) {
+				$this->config->$method($value);
 			}
 
 		} else {
-	
 			throw new InvalidArgumentException("Le premier argument n'est pas un argument de configuration");
-	
 		}
-
-	}
-
-	/**
-	 * body, retourne les informations du POST ou une seule si un clé est passée en paramètre
-	 *
-	 * @param string $key=null
-	 * 
-	 * @return array
-	 */
-	public function body($key = null)
-	{
-
-	
-		if ($key !== null) {
-
-			return $this->isBodyKey($key) ? $_POST[$key] : false;
-
-		}
-
-		return $_POST;
-
-	}
-
-	/**
-	 * isBodyKey, vérifie si le tableau $_POST contient la clé definie.
-	 *
-	 * @param mixed $key
-	 * 
-	 * @return mixed $key
-	 */
-	public function isBodyKey($key)
-	{
-		return isset($_POST[$key]) && !empty($_POST[$key]);
-	}
-
-	/**
-	 * bodyIsEmpty, vérifie si le tableau $_POST est vide.
-	 *
-	 *	@return boolean
-	 */
-	public function bodyIsEmpty()
-	{
-		return empty($_POST);
-	}
-
-	/**
-	 * Param, retourne les informations du GET ou une seule si une clé est passée en paramètre
-	 * 
-	 * @param string $key=null
-	 * 
-	 * @return array
-	 */
-	public function param($key = null)
-	{
-		if ($key !== null) {
-
-			return $this->isParamKey($key) ? $_GET[$key] : false;
-		
-		}
-
-		return $_GET;
-	}
-
-	/**
-	 * isParamKey, vérifie si le tablau $_GET contient la clé definie.
-	 *
-	 * @param string|int $key
-	 * 
-	 * @return mixed
-	 */
-	public function isParamKey($key)
-	{
-		return isset($_GET[$key]) && !empty($key);
-	}
-
-	/**
-	 * paramIsEmpty, vérifie si le tableau $_GET est vide.
-	 *
-	 *	@return boolean
-	 */
-	public function paramIsEmpty()
-	{
-		return empty($_GET);
-	}
-
-	/**
-	 * files, retourne les informations du $_FILES
-	 *
-	 * @param string|null $key
-	 * 
-	 * @return mixed
-	 */
-	public function files($key = null)
-	{
-		if ($key !== null) {
-
-			return isset($_FILES[$key]) ? (object) $_FILES[$key] : false;
-		
-		}
-
-		return $_FILES;
-	}
-
-	/**
-	 * isParamKey, vérifie si le tableau $_FILES contient la clé définie.
-	 *
-	 * @param string|int $key
-	 * 
-	 * @return mixed
-	 */
-	public function isFilesKey($key)
-	{
-		return isset($_FILES[$key]) && !empty($_FILES[$key]);
-	}
-
-	/**
-	 * filesIsEmpty, vérifie si le tableau $_FILES est vide.
-	 *
-	 *	@return boolean
-	 */
-	public function filesIsEmpty()
-	{
-		return empty($_FILES);
 	}
 
 	/**
 	 * response, retourne une instance de la classe Response
 	 * 
-	 * @return \Snoop\Http\Response
+	 * @return Response
 	 */
-	private function response()
+	public function response()
 	{
-		return Response::load($this);
+		return Response::configure($this->config);
 	}
 
 	/**
 	 * request, retourne une instance de la classe Request
 	 * 
-	 * @return \Snoop\Http\Request
+	 * @return Request
 	 */
-	private function request()
+	public function request()
 	{
-		return Request::load($this);
+		return Request::configure();
 	}
 
 	/**
-	 * Logeur d'erreur.
+	 * __call fonction magic php
 	 * 
-	 * @param string $message
+	 * @param string $method
+	 * @param array $param
+	 * 
+	 * @return mixed
 	 */
-	private function log($message)
+	public function __call($method, $param)
 	{
-
-		$f_log = fopen($this->logDirecotoryName . "/error.log", "a+");
-
-		if ($f_log != null) {
-
-			fprintf($f_log, "[%s] - %s:%d: %s\n", date("Y-m-d H:i:s"), $_SERVER['REMOTE_ADDR'], $_SERVER["REMOTE_PORT"], $message);
-			fclose($f_log);
-
+		if (method_exists($this->config, $method)) {
+			return $this->config->$method($param[0]);
+		} else {
+			throw new ApplicationException("$method not exists.", 1);
 		}
-
 	}
 
 }

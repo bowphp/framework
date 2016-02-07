@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Snoop\Support;
+namespace Bow\Support;
 
 
 class Security
@@ -11,6 +11,21 @@ class Security
 	 * @static int
 	 */
 	private static $tokenCsrfExpirateTime;
+	
+	/**
+	 * @var string
+	 */
+	private static $key = "";
+
+	/**
+	 * setKey modifie la clé de cryptage
+	 * 
+	 * @param string $key
+	 */
+	public static function setkey($key)
+	{
+		self::$key = $key;
+	}
 
 	/**
 	 * Stopeur les attaques de types xss
@@ -20,19 +35,14 @@ class Security
 	 */
 	public static function attaqueStoper($verifyData, $enableData)
 	{
-		
 		$errorList = '';
 		$error = false;
 		
 		foreach ($verifyData as $key => $value) {
-
 			if (!in_array($key, $enableData)) {
-			
 				$error = true;
 				$errorList .= "<li><u><strong>" . $key . "</strong></u> not defined</li>";
-			
 			}
-
 		}
 
 		/**
@@ -49,9 +59,7 @@ class Security
 
 			// On arrête tout.
 			die();
-		
 		}
-
 	}
 
 	/**
@@ -66,15 +74,12 @@ class Security
 	{
 		
 		if ($secure === true) {
-		
 			$method = "secureString";
-		
 		} else {
-		
 			$method = "sanitazeString";
-		
 		}
 		
+		// strict integer regex 
 		$rNum = "/^\d+$/";
 
 		if (is_array($data)) {
@@ -82,57 +87,37 @@ class Security
 			foreach ($data as $key => $value) {
 
 				if (is_string($value)) {
-
 					if (preg_match($rNum, $value)) {
-					
 						$data[$key] = (int) $value;
 						continue;
-					
 					}
-					
 					$data[$key] = static::$method($value);
-				
 				} else if (is_object($value)) {
-					
 					$data[$key] = static::sanitaze($value);
-				
 				}
 
 			}
 
 		} else if (is_object($data)) {
-			
+
 			foreach ($data as $key => $value) {
-			
 				if (is_string($value)) {
-				
 					if (preg_match($rNum, $value)) {
-				
 						$data->$key = (int) $value;
 						continue;
-				
 					}
-				
 					$data->$key = static::$method($value);
-				
 				} else if (is_array($value)) {
-				
 					$data->$key  = static::sanitaze($value);
-				
 				}
-
 			}
 
 		} else if (is_string($data)) {
-			
-			if (preg_match($rNum, $data)) {
 
+			if (preg_match($rNum, $data)) {
 				$data = (int) $data;
-			
 			} else {
-			
 				$data = static::$method($data);
-			
 			}
 
 		}
@@ -157,6 +142,7 @@ class Security
 	/**
 	 * secureString, fonction permettant de nettoyer
 	 * une chaine de caractère des caractères ',<tag>,&nbsp;
+	 * 
 	 * @param string $data
 	 * @return string
 	 * @author Franck Dakia <dakiafranck@gmail.com>
@@ -174,15 +160,13 @@ class Security
 	public static function createTokenCsrf($time = null)
 	{
 		if (!Session::isKey("csrf")) {
-
 			if (is_int($time)) {
-			
 				static::$tokenCsrfExpirateTime = $time;
-			
 			}
-
-			Session::add("csrf", (object) ["token" => static::generateTokenCsrf(), "expirate" => time() + static::$tokenCsrfExpirateTime]);
-		
+			Session::add("csrf", (object) [
+				"token" => static::generateTokenCsrf(), 
+				"expirate" => time() + static::$tokenCsrfExpirateTime
+			]);
 		}
 	}
 
@@ -212,13 +196,9 @@ class Security
 	public static function tokenCsrfTimeIsExpirate($time)
 	{
 		if (Session::isKey("csrf")) {
-
 			if (static::getTokenCsrf()->expirate >= (int) $time) {
-			
 				return true;
-			
 			}
-
 		}
 
 		return false;
@@ -232,23 +212,16 @@ class Security
 	 */
 	public static function verifyTokenCsrf($token, $strict = false)
 	{
-		
 		$status = false;
 		
 		if (Session::isKey("csrf") && $token === static::getTokenCsrf()->token) {
-
 			$status = true;
-			
 			if ($strict !== true) {
-			
 				$status = $status && static::tokenCsrfTimeIsExpirate(time());
-			
 			}
-
 		}
 
 		return $status;
-	
 	}
 
 	/**
@@ -257,6 +230,37 @@ class Security
 	public static function killTokenCsrf()
 	{
 		Session::remove("csrf");
+	}
+
+	/**
+	 * crypt
+	 * 
+	 * @param string $data
+	 * @return string
+	 */
+	public static function encrypt($data)
+	{
+		echo utf8_encode($data) . "\n";
+		$iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
+		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+		$encrypted_data = mcrypt_encrypt(MCRYPT_BLOWFISH, self::$key, utf8_encode($data), MCRYPT_MODE_CBC, $iv);
+
+	 	return $encrypted_data;
+	}
+
+	/**
+	 * decrypt
+	 * 
+	 * @param string $encrypted_data
+	 * @return string
+	 */
+	public static function decrypt($encrypted_data)
+	{
+		$iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
+		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+		$decrypted_data = mcrypt_decrypt(MCRYPT_BLOWFISH, self::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
+
+		return $decrypted_data;
 	}
 
 }

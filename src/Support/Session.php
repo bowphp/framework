@@ -1,10 +1,11 @@
 <?php
 
-namespace Snoop\Support;
+
+namespace Bow\Support;
 
 
 use InvalidArgumentException;
-use Snoop\Interfaces\CollectionAccessStatic;
+use Bow\Interfaces\CollectionAccessStatic;
 
 
 class Session implements CollectionAccessStatic

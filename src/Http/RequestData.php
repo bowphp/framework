@@ -1,10 +1,10 @@
 <?php
 
-namespace Snoop\Http;
+namespace Bow\Http;
 
 use Closure;
 use ErrorException;
-use Snoop\Interfaces\CollectionAccess;
+use Bow\Interfaces\CollectionAccess;
 
 
 class RequestData implements CollectionAccess
@@ -32,17 +32,11 @@ class RequestData implements CollectionAccess
 	 */
 	private function __construct($method)
 	{
-
 		if ($method == "GET") {
-
 			$this->data = $_GET;
-		
 		} else if ($method == "POST") {
-		
 			$this->data = $_POST;
-		
 		} else if ($method == "FILES") {
-		
 			$this->data = $_FILES;
 		}
 
@@ -61,16 +55,12 @@ class RequestData implements CollectionAccess
 	 * 
 	 * @return self
 	 */
-	public static function loader($method)
+	public static function configure($method)
 	{
 		if ($method == static::$last_method) {
-
 			return static::$instance;
-
 		} else {
-
 			return new self($method);
-
 		}
 	}
 
@@ -105,14 +95,11 @@ class RequestData implements CollectionAccess
 	 */
 	public function get($key = null)
 	{
-
 		if (!is_null($key)) {
-		
 			return $this->has($key) ? $this->data[$key] : false;
 		}
 
 		return $this->data;
-	
 	}
 
 	/**
@@ -124,11 +111,9 @@ class RequestData implements CollectionAccess
 	 */
 	public function remove($key)
 	{
-
 		unset($this->data[$key]);
 		
 		return $this;
-	
 	}
 
 	/**
@@ -142,25 +127,15 @@ class RequestData implements CollectionAccess
 	 */
 	public function add($key, $data, $next = false)
 	{
-
 		if($this->has($key)) {
-		
 			if ($next) {
-		
 				array_push($this->data[$key], $data);
-		
 			} else {
-		
 				$this->data[$key] = $data;
-		
 			}
-		
 		} else {
-		
 			$this->data[$key] = $data;
-		
 		}
-
 	}
 
 	/**
@@ -175,19 +150,13 @@ class RequestData implements CollectionAccess
 	 */
 	public function set($key, $value)
 	{
-
 		if ($this->has($key)) {
-		
 			$this->data[$key] = $value;
-		
-			return $this;
-		
 		} else {
-		
 			throw new ErrorException("Clé non définie", E_NOTICE);
-		
 		}
-
+		
+		return $this;
 	}
 
 	/**
@@ -200,16 +169,11 @@ class RequestData implements CollectionAccess
 	public function each(Closure $cb)
 	{
 		if ($this->isEmpty()) {
-		
 			return call_user_func_array($cb, null);
-		
 		}
 
 		foreach($this->data as $key => $value) {
-
 			call_user_func_array($cb, [$key, $value]);
-		
 		}
 	}
-
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Snoop\Database;
+namespace Bow\Database;
 
 
 use PDO;
@@ -8,11 +8,11 @@ use StdClass;
 use PDOStatement;
 use PDOException;
 use ErrorException;
-use Snoop\Support\Util;
-use Snoop\Support\Logger;
-use Snoop\Support\Security;
+use Bow\Support\Util;
+use Bow\Support\Logger;
+use Bow\Support\Security;
 use InvalidArgumentException;
-use Snoop\Exception\ConnectionException;
+use Bow\Exception\ConnectionException;
 
 
 class Database extends DatabaseTools
@@ -49,7 +49,7 @@ class Database extends DatabaseTools
     private static $zone = null;
     /***
      * Liste des constances d'execution de Requete SQL.
-     * Pour le system de de base de donnee ultra minimalise de snoop.
+     * Pour le system de de base de donnee ultra minimalise de Bow.
      */
     const SELECT = 1;
     const UPDATE = 2;
@@ -61,7 +61,7 @@ class Database extends DatabaseTools
      *
      * @param object $config
      */
-    public static function loadConfiguration($config)
+    public static function configure($config)
     {
         return static::$config = (object) $config;
     }
@@ -98,13 +98,13 @@ class Database extends DatabaseTools
         $t = static::$config;
 
         if (! $t instanceof StdClass) {
-            Util::launchCallBack($cb, [new ConnectionException("Le fichier db.php est mal configurer")]);
+            Util::launchCallback($cb, [new ConnectionException("Le fichier db.php est mal configurer")]);
         }
 
         $c = isset($t->connections[static::$zone]) ? $t->connections[static::$zone] : null;
 
         if (is_null($c)) {
-            Util::launchCallBack($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre db.php")]);
+            Util::launchCallback($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre db.php")]);
         }
 
         $db = null;
@@ -128,10 +128,10 @@ class Database extends DatabaseTools
             /**
              * Lancement d'exception
              */
-            Util::launchCallBack($cb, [$e]);
+            Util::launchCallback($cb, [$e]);
         }
 
-        Util::launchCallBack($cb, false);
+        Util::launchCallback($cb, false);
         
         return static::class;
 
@@ -150,7 +150,7 @@ class Database extends DatabaseTools
 
 		if (!is_string($enterKey)) {
 		
-        	Util::launchCallBack($cb, [new InvalidArgumentException("parametre invalide")]);
+        	Util::launchCallback($cb, [new InvalidArgumentException("parametre invalide")]);
 		
         } else {
 
@@ -238,23 +238,15 @@ class Database extends DatabaseTools
             if (count($bind) > 0) {
                
                 foreach ($bind as $key => $value) {
-
                     if (is_array($value)) {
-                    
                         $r += static::executePrepareQuery($sqlstatement, $value);
-                    
                     } else {
-                    
                         $is_2_m_array = false;
-                    
                     }
-
                 }
 
                 if (!$is_2_m_array) {
-
                     $r += static::executePrepareQuery($sqlstatement, $bind);
-                
                 }
 
             } else {
@@ -280,10 +272,9 @@ class Database extends DatabaseTools
         static::verifyConnection();
 
         if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+$/i", $sqlstatement)) {
-            
             $r = static::$db->exec($sqlstatement);
             static::$currentPdoErrorInfo = static::$db->errorInfo();
-
+            
             return $r;
         }
 
@@ -355,31 +346,19 @@ class Database extends DatabaseTools
         $pdoStatement->execute();
 
         if ($pdoStatement->rowCount() === 0) {
-            
             $data = null;
-
         } else if ($pdoStatement->rowCount() === 1) {
-            
             $data = $pdoStatement->fetch();
-        
         } else {
-            
             $data = $pdoStatement->fetchAll();
-
         }
 
         if ($return == true) {
-
             if ($lastInsertId == false) {
-            
                 $data = empty($data) ? null : Security::sanitaze($data);
-            
             } else {
-
                 $data = static::$db->lastInsertId();
-            
             }
-
         }
 
         return $data;
@@ -427,10 +406,7 @@ class Database extends DatabaseTools
     private static function verifyConnection()
     {
         if (! (static::$db instanceof PDO)) {
-
             static::connection();
-            
-            // throw new ConnectionException("Connection non initialisé.", E_ERROR);
         }
     }
     /**
@@ -679,6 +655,17 @@ class Database extends DatabaseTools
         $pdostatement->closeCursor();
 
         return $r;
+    }
+
+    /**
+     * pdo, retourne l'instance de la connection.
+     * 
+     * @return PDO
+     */
+    public static function pdo()
+    {
+        static::verifyConnection();
+        return static::$db;
     }
 
 }

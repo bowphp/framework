@@ -1,12 +1,12 @@
 <?php
 
-namespace Snoop\Mail;
+namespace Bow\Mail;
 
 
 use ErrorException;
-use Snoop\Support\Util;
-use Snoop\Exception\SmtpException;
-use Snoop\Exception\SocketException;
+use Bow\Support\Util;
+use Bow\Exception\SmtpException;
+use Bow\Exception\SocketException;
 
 
 class SmtpMail extends Message

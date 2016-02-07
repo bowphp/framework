@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Snoop\Support;
+namespace Bow\Support;
 
 class Cookie
 {
@@ -76,7 +76,7 @@ class Cookie
      */
     public static function add($key, $data, $time = 3600, $path = null, $domain = null, $secure = false, $http = true)
     {
-        return setcookie($key, "$data", $time, $path, $domain, $secure, $http);
+        return setcookie($key, $data, $time, $path, $domain, $secure, $http);
     }
 
     /**

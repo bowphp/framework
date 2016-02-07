@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Snoop\Support;
+namespace Bow\Support;
 
 
 class Collection
@@ -22,9 +22,13 @@ class Collection
      * @param string $key
      * @return boolean
      */
-    public function has($key)
-    {
-    	return isset($this->data[$key]);
+    public function has($value, $val = false)
+    {   
+        if ($val === true) {
+        	return isset(array_flip($this->data)[$value]);
+        }
+
+        return isset($this->data[$value]);
     }
 
     /**
@@ -48,9 +52,7 @@ class Collection
     {
 
     	if ($this->has($key)) {
-	    
         	return $this->data[$key];
-    	
         }
 
     	return $this->data;
@@ -65,17 +67,13 @@ class Collection
      * 
      * @return $this
      */
-    public function add($key, $data = null, $next = false)
+    public function add($key, $data = null)
     {
         if ($data !== null) {
-        	
             $this->data[$key] = $data;
-            
         } else {
-
             $data = $key;
             $this->data[] = $data; 
-
         }
 
         return $this;
@@ -91,15 +89,13 @@ class Collection
      */
     public function remove($key)
     {
-
     	unset($this->data[$key]);
     
         return $this;
-    
     }
 
     /**
-     * set, modifie une entrée dans la colléction
+     * set, modifie une entrée dans la colléction ou l'ajout si non
      *
      * @param string $key
      * @param mixed $value
@@ -122,7 +118,7 @@ class Collection
     }
 
     /**
-     * each
+     * each parcour l'ensemble des valeurs de la collection
      * 
      * @param callable $cb
      * 
@@ -131,9 +127,7 @@ class Collection
     public function each($cb)
     {
     	foreach ($this->data as $key => $value) {
-    	
         	call_user_func_array($cb, [$key, $value]);
-    	
         }
 
         return $this;
@@ -147,9 +141,7 @@ class Collection
     public function map($cb)
     {
     	foreach ($this->data as $key => $value) {
-
     		$this->data[$key] = call_user_func_array($cb, [$key, $value]);
-    	
         }
 
         return $this;
@@ -167,13 +159,9 @@ class Collection
     	$r = [];
 
     	foreach ($this->data as $key => $value) {
-    		
             if (call_user_func_array($cb, [$key, $value])) {
-    		
             	$r[] = $this->data[$key];
-    		
             }
-
     	}
 
     	return $r;
@@ -182,22 +170,20 @@ class Collection
     /**
      * Fill
      * 
-     * @param mixed $num
+     * @param mixed $data
      * @param int $offset
      * 
      * @return array
      */
-    public function fill($num, $offset)
+    public function fill($data, $offset)
     {
-    	$r = [];
+    	$old = $this->data;
 
     	for($i = 0; $i < $offset; $i++) {
-    	
-        	$this->data[$i] = $num;
-    	
+        	$this->data[$i] = $data;
         }
     	
-        return $r;
+        return $old;
     }
 
     /**
@@ -209,26 +195,13 @@ class Collection
      */
     public function reduce($cb)
     {
-
-    	$i = 0;
     	$next = null;
 
     	foreach ($this->data as $key => $value) {
-    		
-    		if ($i === 0) {
-    	
-        		$next = call_user_func_array($cb, [$next, $value, $key, $this->data]);
-    	
-        	} else {
-    	
-        		$next = call_user_func_array($cb, [$next, $value, $key, $this->data]);
-    	
-        	}
-
+    		$next = call_user_func_array($cb, [$next, $value, $key, $this->data]);
     	}
 
         return $this;
-    	
     }
 
     /**
@@ -242,6 +215,16 @@ class Collection
     }
 
     /**
+     * keys retourne la liste des clés de la collection
+     * 
+     * @return array
+     */
+    public function keys()
+    {
+        return array_keys($this->data);
+    }
+
+    /**
      * Sum
      * 
      * @param callable $cb
@@ -250,23 +233,17 @@ class Collection
      */
     public function sum($cb = null)
     {
-    	
         $sum = 0;
 
     	foreach ($this->data as $key => $value) {
-    	
         	$sum += $value;
-    	
         }
 
         if ($cb !== null) {
-
             call_user_func_array($cb, [$sum]);
-
         }
 
     	return $sum;
-    
     }
 
     /**
@@ -276,17 +253,39 @@ class Collection
      */
     public function reverse()
     {
-
         $r = [];
-
+        
         for($i = $this->count(); $i > 0; --$i) {
-
             $r[] = $this->data[$i];
-
         }
 
         return $r;
-
     }
 
+    public function update($key, $data, $overide = false)
+    {
+        if ($this->has($key)) {
+            if (is_array($this->data[$key])) {
+                if ($overide === true) {
+                    $this->data[$key] = $data;
+                } else {
+                    $this->data[$key] = array_merge($this->data[$key], $data);
+                }
+            } else {
+                $this->data[$key] = $data;
+            }
+        }
+    }
+
+    /**
+     * yieldify, lance un générateur
+     * 
+     * @return array
+     */
+    public function yieldify()
+    {
+        foreach ($this->data as $key => $value) {
+            yield ["value" => $value, "key" => $key];
+        }
+    }
 }

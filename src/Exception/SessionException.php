@@ -1,6 +1,6 @@
 <?php
 
-namespace Snoop\Exception;
+namespace Bow\Exception;
 
 use ErrorException;
 

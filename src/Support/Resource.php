@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Snoop\Support;
+namespace Bow\Support;
 
 use InvalidArgumentException;
 
@@ -69,13 +69,9 @@ class Resource
 	public static function setFileExtension($extension)
 	{
 		if (is_array($extension)) {
-		
 			static::$fileExtension = $extension;
-		
 		} else {
-
 			static::$fileExtension = func_get_args();
-		
 		}
 	}
 
@@ -88,13 +84,9 @@ class Resource
 	public static function setUploadDir($path)
 	{
 		if (is_string($path)) {
-		
 			self::$uploadDir = $path;
-		
 		} else {
-		
 			throw new InvalidArgumentException("L'argument donnée a la fontion doit etre un entier");
-		
 		}
 	}
 
@@ -107,13 +99,9 @@ class Resource
 	public static function setFileSize($size)
 	{
 		if (is_int($size)) {
-		
 			self::$fileSize = $size;
-		
 		} else {
-		
 			throw new InvalidArgumentException("L'argument donnée à la fonction doit être de type entier");
-		
 		}
 	}
 
@@ -128,15 +116,11 @@ class Resource
 	public static function store($file, $cb = null, $hash = null)
 	{
 		if (!is_object($file) && !is_array($file)) {
-		
 			Util::launchCallBack($cb, [new InvalidArgumentException("Parametre invalide <pre>" . var_export($file, true) ."</pre>. Elle doit etre un tableau ou un object StdClass")]);
-		
 		}
 		
 		if (empty($file)) {
-		
 			Util::launchCallBack($cb, [new InvalidArgumentException("Le fichier a uploader n'existe pas")]);
-		
 		}
 		
 		$file = (object) $file;
@@ -148,19 +132,13 @@ class Resource
 			$end = array_pop($dirPart);
 			
 			if ($end == "") {
-		
 				self::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart);
-		
 			} else {
-		
 				self::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart) .DIRECTORY_SEPARATOR. $end;
-		
 			}
 
 			if (!is_dir(self::$uploadDir)) {
-		
 				@mkdir(self::$uploadDir, 0766);
-		
 			}
 
 			// Si le fichier est bien uploader, avec aucune error
@@ -173,29 +151,17 @@ class Resource
 					if (in_array($pathInfo->extension, static::$fileExtension)) {
 						
 						if ($hash !== null) {
-							
 							if (self::$uploadFileName !== null) {
-		
 								$filename = hash($hash, self::$uploadFileName);
-		
 							} else {
-		
 								$filename = hash($hash, uniqid(rand(null, true)));
-		
 							}
-
 						} else {
-							
 							if (self::$uploadFileName !== null) {
-		
 								$filename = self::$uploadFileName;
-		
 							} else {
-		
 								$filename = $pathInfo->filename;
-		
 							}
-
 						}
 
 						move_uploaded_file($file->tmp_name, self::$uploadDir . "/" . $filename . '.' . $pathInfo->extension);
@@ -205,52 +171,40 @@ class Resource
 							"status" => self::SUCCESS,
 							"message" => "File Uploaded"
 						];
-
 					} else {
-						
 						# Status, extension du fichier
 						$status = [
 							"status" => self::ERROR,
 							"message" => "Availabe File, verify file type"
 						];
-
 					}
-
 				} else {
-					
 					# Status, la taille est invalide
 					$status = [
 						"status" => self::ERROR,
 						"message" => "File is more big, max size " . self::$fileSize. " octets."
 					];
-
 				}
 
 			} else {
-				
 				# Status, fichier erroné.
 				$status = [
 					"status" => self::ERROR,
 					"message" => "Le fichier possède des erreurs"
 				];
-
 			}
 
 		} else {
-			
 			# Status, fichier non uploadé
 			$status = [
 				"status" => self::ERROR,
 				"message" => "Le fichier n'a pas pus être uploader"
 			];
-
 		}
 
 		if ($cb !== null) {
-			
 			call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null, isset($ext) ? $ext : null]);
 		} else {
-
 			return $status;
 		}
 
@@ -266,9 +220,7 @@ class Resource
     public static function put($file, $content)
     {
         if (is_file(realpath($file))) {
-        
             return file_get_contents(self::$storageDir . "/" . $file, $content);
-        
         }
 
         return null;
@@ -339,13 +291,9 @@ class Resource
     public static function makeDirectory($files, $recursive = false)
     {
         if ($recursive === true) {
-
             $status = @mkdir($files, 0777, true);
-        
         } else {
-        
             $status = @mkdir($files, 0777);
-        
         }
     }
 
@@ -371,13 +319,9 @@ class Resource
     	$c = $config->uploadConfiguration;
 
     	if ($c->type === "folder") {
-    	
     		static::$uploadDir = $c->config["folder"]["dirname"];
-    	
     	} else {
-    	
     		// Todo: ftp workflow
-    	
     	}
     }
 
@@ -414,9 +358,7 @@ class Resource
     private static function closeFile($rFile)
     {
         if (is_resource($rFile)) {
-        
             fclose($rFile);
-        
         }
     }
 
@@ -435,23 +377,15 @@ class Resource
         $dir = readdir($dirname);
         
         if ($type == "dir") {
-        
             $method = "is_dir";
-        
         }
         
         while($file = readdir($dir)) {
-        
             if ($method($file)) {
-        
                 if (!in_array($file, [".", ".."])) {
-        
                     array_push($files, $file);
-        
                 }
-        
             }
-        
         }
 
         closedir($dir);

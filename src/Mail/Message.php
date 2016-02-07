@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Snoop\Mail;
+namespace Bow\Mail;
 
-use Snoop\Support\Util;
+use Bow\Support\Util;
 
 class Message
 {

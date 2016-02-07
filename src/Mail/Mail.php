@@ -5,13 +5,13 @@
  * 
  * @author Frank Dakia <dakiafranck@gmail.com>
  * 
- * @package System
+ * @package Bow
  */
 
-namespace Snoop\Mail;
+namespace Bow\Mail;
 
 
-use Snoop\Support\Util;
+use Bow\Support\Util;
 use InvalidArgumentException;
 
 
@@ -49,9 +49,9 @@ class Mail extends Message
 	private function __construct()
 	{
 
-		$this->boundary = "__snoop-framework-" . md5(date("r", time()));
+		$this->boundary = "__Bow-framework-" . md5(date("r", time()));
 		$this->addHeader("MIME-Version", "1.0");
-		$this->addHeader("X-Mailer",  "Snoop Framework");
+		$this->addHeader("X-Mailer",  "Bow Framework");
 		$this->addHeader("Date", date("r"));
 	
 	}

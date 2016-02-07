@@ -1,10 +1,10 @@
 <?php
 
-namespace Snoop\Database;
+namespace Bow\Database;
 
 use PDO;
 use PDOException;
-use Snoop\Support\Util;
+use Bow\Support\Util;
 
 class Connection
 {

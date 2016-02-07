@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Snoop\Support;
+namespace Bow\Support;
 
 
 class Convertor
