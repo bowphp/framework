@@ -293,19 +293,6 @@ class Application
 	}
 
 	/**
-	 * any, route de tout type UPDATE
-	 *
-	 * @param string $path
-	 * @param callable $cb
-	 * 
-	 * @return self
-	 */
-	public function update($path, $cb)
-	{
-		return $this->addHttpVerbe("UPDATE", $path, $cb);
-	}
-
-	/**
 	 * any, route de tout type PUT
 	 *
 	 * @param string $path
@@ -505,16 +492,16 @@ class Application
 		if (in_array($key, ["view", "engine", "public", "root"])) {
 			switch ($key) {
 				case "view":
-					$method = "setViewPath";
+					$method = "setViewpath";
 					break;
 				case "engine":
-					$method = "setViewEngine";
+					$method = "setEngine";
 					break;
 				case "public":
-					$method = "setPublicPath";
+					$method = "setPublicpath";
 					break;
 				case "root":
-					$method = "setRootPath";
+					$method = "setRootpath";
 					break;
 			}
 
@@ -563,5 +550,4 @@ class Application
 			throw new ApplicationException("$method not exists.", 1);
 		}
 	}
-
 }
