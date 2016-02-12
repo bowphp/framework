@@ -12,6 +12,11 @@ class AppConfiguration
     private $loglevel = "dev";
 
     /**
+     * @var AppConfiguration
+     */
+    private static $instance;
+
+    /**
      * Définie le systeme de template
      *
      * @var string|null
@@ -32,7 +37,7 @@ class AppConfiguration
      */ 
     private $logDirecotoryName = "";
 
-    public function __construct($config)
+    private function __construct($config)
     {
         $this->appname = $config->appname;
         $this->logDirecotoryName = $config->logDirecotoryName;
@@ -45,6 +50,29 @@ class AppConfiguration
         $this->tokenExpirateTime = $config->tokenExpirateTime;
         $this->renderEngine = $config->template;
         $this->cacheFolder = $config->cacheFolder;
+    }
+
+    private function __clone(){}
+
+    /**
+     * takeInstance singleton
+     * @param array $config
+     * @return self
+     */
+    public static function configure($config) {
+        if (! static::$instance instanceof AppConfiguration) {
+            static::$instance = new self($config);
+        }
+
+        return static::$instance;
+    }
+    /**
+     * takeInstance singleton
+     * @param array $config
+     * @return self
+     */
+    public static function takeInstance() {
+        return static::$instance;
     }
 
     /**

@@ -150,18 +150,15 @@ class Application
 	 *
 	 * @param object $config
 	 */
-	private function __construct($config)
+	private function __construct(AppConfiguration $config)
 	{
 		$this->req = $this->request()->method();
-
-		if (!empty($config)) {
-			$this->config = new AppConfiguration($config);
-	        $this->req = $this->request();
-	        
-	        if (isset($config->timezone)) {
-	            Util::setTimezone($this->config->getTimezone());
-	        }
-		}
+		$this->config = $config;
+        $this->req = $this->request();
+        
+        if (isset($config->timezone)) {
+            Util::setTimezone($this->config->getTimezone());
+        }
 	}
 
 	/**
@@ -173,13 +170,12 @@ class Application
 	 * Pattern Singleton.
 	 * 
 	 * @param array|object $config
-	 * 
 	 * @return self
 	 */
-	public static function configure($config)
+	public static function configure(AppConfiguration $config)
 	{
 		if (static::$inst === null) {
-			static::$inst = new self($config);
+			static::$inst = new static($config);
 		}
 
 		return static::$inst;
@@ -190,7 +186,6 @@ class Application
 	 *
 	 * @param string $branchName
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	public function group($branchName, $cb)
@@ -226,7 +221,6 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * 
 	 * @return self|string
 	 */
 	public function get($path, $cb = null)
@@ -246,7 +240,6 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	public function post($path, $cb)
@@ -269,7 +262,6 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	public function any($path, $cb)
@@ -284,7 +276,6 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	public function delete($path, $cb)
@@ -297,7 +288,6 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	public function put($path, $cb)
@@ -323,7 +313,6 @@ class Application
 	 * validite de la requete
 	 *
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	public function to404($cb)
@@ -339,7 +328,6 @@ class Application
 	 * @param array $match
 	 * @param string $path
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	public function match(array $methods, $path, $cb)
@@ -360,7 +348,6 @@ class Application
 	 * @param string $method
 	 * @param string $path
 	 * @param callable $cb
-	 * 
 	 * @return self
 	 */
 	private function addHttpVerbe($method, $path, $cb)
@@ -373,7 +360,6 @@ class Application
 				if ($body->get("method") === $method) {
 					$this->routeLoader($this->req->method(), $this->branch . $path, $cb);
 				}
-
 				$flag = false;
 			}
 		}
@@ -391,7 +377,6 @@ class Application
 	 * @param string $method
 	 * @param string $path
 	 * @param callable|array $cb
-	 * 
 	 * @return self
 	 */
 	private function routeLoader($method, $path, $cb)
@@ -408,7 +393,6 @@ class Application
 	 * Lance une personnalisation de route.
 	 * 
 	 * @param array $otherRule
-	 * 
 	 * @return self
 	 */
 	public function where(array $otherRule)
@@ -432,7 +416,6 @@ class Application
 	 * Lanceur de l'application
 	 * 
 	 * @param callable|null $cb
-	 * 
 	 * @return void
 	 */
 	public function run($cb = null)
@@ -484,7 +467,6 @@ class Application
 	 *
 	 * @param string $key
 	 * @param string $value
-	 * 
 	 * @throws InvalidArgumentException
 	 */
 	public function set($key, $value)
@@ -506,7 +488,7 @@ class Application
 			}
 
 			if (method_exists($this->config, $method)) {
-				$this->config->$method($value);
+				return $this->config->$method($value);
 			}
 
 		} else {
@@ -539,13 +521,12 @@ class Application
 	 * 
 	 * @param string $method
 	 * @param array $param
-	 * 
 	 * @return mixed
 	 */
 	public function __call($method, $param)
 	{
 		if (method_exists($this->config, $method)) {
-			return $this->config->$method($param[0]);
+			return call_user_func_array([$this->config, $method], $param);
 		} else {
 			throw new ApplicationException("$method not exists.", 1);
 		}
