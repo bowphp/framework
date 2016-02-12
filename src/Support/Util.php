@@ -13,7 +13,6 @@ class Util
 {
 	/**
 	 * définir le type de retoure chariot CRLF ou LF
-	 *
 	 * @var string
 	 */
 	private static $sep;
@@ -53,7 +52,6 @@ class Util
 	 * 
 	 * @param string $file
 	 * @param mixed $args
-	 * 
 	 * @return string
 	 */
 	public static function serialization($file, $args)
@@ -66,7 +64,6 @@ class Util
 	 * UnBuildSerializationVariable, fonction permettant de récrier la variable sérialisé
 	 *
 	 * @param string $filePath
-	 * 
 	 * @return mixed
 	 */
 	public static function deSerialization($filePath)
@@ -76,7 +73,7 @@ class Util
 
 		if (is_string($serializedData)) {
 			// On retourne l'element dé-sérialisé
-			return unserialize($serializedData);
+			return @unserialize($serializedData);
 		}
 
 		return $serializedData;
@@ -87,7 +84,6 @@ class Util
 	 *
 	 * @param DateTime $date1
 	 * @param DateTime $date2
-	 * 
 	 * @return DateTime|void
 	 */
 	public static function dateDifference($date1, $date2)
@@ -105,7 +101,7 @@ class Util
 	public static function setTimezone($zone)
 	{
 		if (count(explode("/", $zone)) != 2) {
-			throw new UtilException("La definition de la zone est invalide");
+			throw new UtilException("La définition de la zone est invalide");
 		}
 	
 		date_default_timezone_set($zone);
@@ -117,19 +113,18 @@ class Util
 	 * @param callable $cb
 	 * @param mixed param[optional]
 	 * @param mixed names[optional]
-	 * 
 	 * @return mixed
 	 */
 	public static function launchCallback($cb, $param = null, array $names = [])
 	{
-		$middleware_is_defined = false;
-
+		$middleware_is_defined = false;	
+		$param = is_array($param) ? $param : [$param];
+		
 		if (!isset($names["namespace"])) {
-			return self::next($cb, $param);
+			return static::next($cb, $param);
 		}
 
-		self::$names = $names;
-		$param = is_array($param) ? $param : [$param];
+		static::$names = $names;
 		
 		// Chargement de l'autoload
 		require $names["namespace"]["autoload"] . ".php";
@@ -150,7 +145,7 @@ class Util
 					if (is_callable($cb[0])) {
 						$cb = $cb[0];
 					} else if (is_string($cb[0])) {
-						$cb = self::loadController($cb[0]);
+						$cb = static::loadController($cb[0]);
 					}
 				}
 			}
@@ -163,7 +158,7 @@ class Util
 						$middleware_is_defined = true;
 						$middleware = array_shift($cb);
 						if (is_string($cb[0])) {
-							$cb = self::loadController($cb[0]);
+							$cb = static::loadController($cb[0]);
 						} else {
 							$cb = $cb[0];
 						}
@@ -174,7 +169,7 @@ class Util
 						if (is_callable($cb)) {
 							$cb = $cb;
 						} else {
-							$cb = self::loadController($cb);
+							$cb = static::loadController($cb);
 						}
 					}
 				}
@@ -185,11 +180,9 @@ class Util
 			}
 		}
 		else {
-			if (is_callable($cb)) {
-				$cb = $cb;
-			} else {
+			if (!is_callable($cb)) {
 				if (is_string($cb)) {
-					$cb = self::loadController($cb);
+					$cb = static::loadController($cb);
 				}
 			}
 		}
@@ -238,15 +231,12 @@ class Util
 	 *
 	 * @param array|callable $arr
 	 * @param array|callable $arg
-	 * 
 	 * @return mixed|void
 	 */
 	private static function next($arr, $arg)
 	{
 		if (is_callable($arr)) {
-
 			return call_user_func_array($arr, $arg);
-				
 		}
 		else if (is_array($arr)) {
 			// Lancement de la procedure de lancement recursive.
@@ -255,7 +245,7 @@ class Util
 				if (is_null($next)) {
 					// On lance la loader de controller si $cb est un String
 					if (is_string($cb)) {
-						$cb = self::loadController($cb);
+						$cb = static::loadController($cb);
 					}
 
 					return call_user_func_array($cb, $arg);
@@ -265,13 +255,11 @@ class Util
 					if ($next == true) {
 						// On lance la loader de controller si $cb est un String
 						if (is_string($cb)) {
-							$cb = self::loadController($cb);
+							$cb = static::loadController($cb);
 						}
 					
 						return call_user_func_array($cb, $arg);
-					
 					} else {
-						// Kill
 						die();
 					}
 				}
@@ -280,7 +268,7 @@ class Util
 			});
 		} else {
 			// On lance la loader de controller si $cb est un String
-			$cb = self::loadController($arr);
+			$cb = static::loadController($arr);
 			if (is_array($cb)) {
 				return call_user_func_array($cb, $arg);
 			}
@@ -302,7 +290,7 @@ class Util
 		}
 		
 		list($class, $method) = preg_split("#\.|@#", $controllerName);
-		$class = self::$names["namespace"]["controller"] . "\\" . ucfirst($class);
+		$class = static::$names["namespace"]["controller"] . "\\" . ucfirst($class);
 
 		return [new $class(), $method];
 	}
@@ -312,7 +300,6 @@ class Util
 	 *
 	 * @param array $opts
 	 * @param callable $cb
-	 * 
 	 * @return array $r, collection de donnée élus après le tri.
 	 */
 	public static function filtre($opts, $cb)
@@ -332,88 +319,110 @@ class Util
 	 * convertHourToLetter, convert une heure en letter Format: HH:MM:SS
 	 * 
 	 * @param string $hour
-	 * 
 	 * @return string
 	 */
-	public static function convertHourToLetter($hour)
+	public static function hourToLetter($hour)
 	{
-		$hourPart = explode(":", $hour);
-		$heures = trim(static::convertDate($hourPart[0])) . " heure";
-		$minutes = trim(static::convertDate($hourPart[1])) . " minute";
-		$secondes = "";
-		
-		// accord des heures.
-		if ($hourPart[0] > 1) {
-			$heures .= "s";
+		if (!is_string($heure)) {
+			return null;
 		}
-		
-		// accord des minutes
-		if ($hourPart[1] > 1) {
-			$minutes .= "s";
-		}
-		
-		// Ajout de secondes
-		if (isset($hourPart[2]) && $hourPart[2] > 0) {
-			$secondes =  " " . trim(static::convertDate($hourPart[2])) . " secondes";
+
+		if (preg_match("/[0-9]{1,2}(:[0-9]{1,2}){1,2}/", $heure)) {
+			$hourPart = explode(":", $hour);
+			$heures   = static::number2Letter($hourPart[0]) . " heure";
+			$minutes  = static::number2Letter($hourPart[1]) . " minute";
+			$secondes = " ";
+			
+			// accord des heures.
+			if ($hourPart[0] > 1) {
+				$heures .= "s";
+			}
+			
+			// accord des minutes
+			if ($hourPart[1] > 1) {
+				$minutes .= "s";
+			}
+			
+			// Ajout de secondes
+			if (isset($hourPart[2]) && $hourPart[2] > 0) {
+				$secondes .= static::number2Letter($hourPart[2]) . " secondes";
+			}
 		}
 
 		// Retourne
-		return trim(strtolower($heures . " " . $minutes . $secondes));
+		return strtolower($heures . " " . $minutes . $secondes);
 	}
 
 	/**
 	 * convertDateToLetter, convert une date sous forme de letter
 	 * 
 	 * @param string $dateString
-	 *
 	 * @return string
 	 */
-	public static function convertDateToLetter($dateString)
+	public static function dateToLetter($dateString)
 	{
-		$formData = array_reverse(explode("-", $dateString));
+		if (preg_match("/^([0-9]{2,4})(?:-|\/)([0-9]{1,2})(?:-|\/)([0-9]{1,2})$/", $dateString, $m)) {
+			array_shift($m);
+			$r = static::number2Letter($m[2]). " ". static::toMonth((int) $m[1]) . " " . static::number2Letter($m[0]);
+		} else if (preg_match("/^([0-9]{1,2})(?:-|\/)([0-9]{1,2})(?:-|\/)([0-9]{2,4})$/", $dateString, $m)) {
+			array_shift($m);
+			$r = static::number2Letter($m[0]) . " ". static::toMonth((int) $m[1]) . " " . static::number2Letter($m[2]);
+		} else {
+			$dateString = date("Y-m-d", strtotime($dateString));
+			$m = explode("-", $dateString);
+			$r = static::number2Letter($m[2]). " ". static::toMonth((int) $m[1]) . " " . static::number2Letter($m[0]);
+		}
 
-		$r = trim(static::convertDate($formData[0])." ". static::getMonth((int)$formData[1])) . " " . trim(static::convertDate($formData[2]));
 		$p = explode(" ", $r);
 
 		if (strtolower($p[0]) == "un") {
 			$p[0] = "permier";
 		}
 
-		return trim(implode(" ", $p));
+		return strtolower(trim(implode(" ", $p)));
 	}
 
 	/**
 	 * Lance un var_dump sur les variables passées en parametre.
 	 * 
 	 * @throws InvalidArgumentException
-	 * 
 	 * @return void
 	 */
 	public static function debug()
 	{
 		if (func_num_args() == 0) {
-			throw new InvalidArgumentException("Vous devez donner un paramètre à la fonction", E_ERROR);
+			throw new InvalidArgumentException(__METHOD__ ."(): Vous devez donner un paramètre à la fonction", E_ERROR);
 		}
 
 		$arr = func_get_args();
 		ob_start();
 
 		foreach ($arr as $key => $value) {
+			$len = "";
+			if (is_array($value) || is_object($value)) {
+				$len = ':len=' . count($value);
+			} else if (is_string($value)) {
+				$len = ":len=" . strlen($value);
+			}
+			echo gettype($value) . $len . ' <span id="toggle" class="show" style="border:1px solid #eee; padding:0.1px 0.2px;font-size:10px;color:#888"> > </span><div style="position: relative;left:30px;top:5px"><div class="contains">';
 			var_dump($value);
+			echo '</div></div>';
 			echo "\n\n";
 		}
 
 		$content = ob_get_clean();
 		$content = preg_replace("~\s?\{\n\s?\}~i", " is empty", $content);
-		$content = preg_replace("~(string|int|object|stdclass|bool|double|float|array)~i", "<span style=\"color: rgba(255, 0, 0, 0.5); font-style: italic\">&lt;$1&gt;</span>", $content);
+		$content = preg_replace("~(string|int|object|stdclass|bool|double|float|array)~i", "<span style=\"color: rgba(255, 0, 0, 0.9); font-style: italic\">$1</span>", $content);
 		$content = preg_replace('~\((\d+)\)~im', "<span style=\"color: #498\">(len=$1)</span>", $content);
 		$content = preg_replace('~\s(".+")~im', "<span style=\"color: #458\"> value($1)</span>", $content);
 		$content = preg_replace("~(=>)(\n\s+?)+~im", "<span style=\"color: #754\"> is</span>", $content);
 		$content = preg_replace("~(is</span>)\s+~im", "$1 ", $content);
-		$content = preg_replace("~\[(.+)\]~im", "<span style=\"color:#666\"><span style=\"color: red\">key:</span>$1<span style=\"color: red\"></span></span>", $content);
+		$content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: red\">{</span>$1<span style=\"color: red\">}</span></span>", $content);
+		$content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: red\">{</span>$1<span style=\"color: red\">}</span></span>", $content);
 		$content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
 		
 		echo $content;
+		echo '<script type="text/javascript">'.file_get_contents(__DIR__ . "/tools/debug.js").'</script>';
 	}
 
 	/**
@@ -421,7 +430,6 @@ class Util
 	 * 
 	 * @param string $message
 	 * @param callable $cb=null
-	 *	
 	 * @return void
 	 */
 	public static function it($message, $cb = null)
@@ -429,9 +437,9 @@ class Util
 		echo "<h2>{$message}</h2>";
 
 		if (is_callable($cb)) {
-			call_user_func_array($cb, [self::class]);
+			call_user_func_array($cb, [static::class]);
 		} else {
-			self::debug(array_slice(func_get_args(), 1, func_num_args()));
+			static::debug(array_slice(func_get_args(), 1, func_num_args()));
 		}
 	}
 	
@@ -439,10 +447,9 @@ class Util
 	 * Permettant de convertie des chiffres en letter
 	 * 
 	 * @param string $nombre
-	 * 
 	 * @return string
 	 */
-	public static function convertDate($nombre)
+	public static function number2Letter($nombre)
 	{
 		$nombre = (int) $nombre;
 
@@ -487,19 +494,13 @@ class Util
 		 * Calcule des dixaines
 		 */
 		if ($dixaine === 1 && $unite > 0) {
-
 			$tensOut = $nombreEnLettre["unite"][10 + $unite];
 			$unitsOut = "";
-		
 		} else if ($dixaine === 7 || $dixaine === 9) {
-		
 			$tensOut = $nombreEnLettre["ten"][$dixaine] . '-' . ($dixaine === 7 && $unite === 1 ? "et-" : "") . $nombreEnLettre["unite"][10 + $unite];
 			$unitsOut = "";
-		
 		} else {
-		
 			$tensOut = $nombreEnLettre["ten"][$dixaine];
-		
 		}
 
 		/**
@@ -516,33 +517,15 @@ class Util
 	}
 
 	/**
-	 * makothereSimpleValideDate
-	 *
-	 * @param string $str
-	 * 
-	 * @return string
-	 */
-	public function makeSimpleValideDate($str)
-	{
-		$mount = explode(" ", $str);
-		$str = $mount[0] . " " . static::$angMounth[$mount[1]] . " " . $mount[2];
-
-		return date("Y-m-d", strtotime($str));
-	}
-
-	/**
 	 * permettant de convertir mois en lettre.
 	 *
 	 * @param  string | integer $value
-	 * 
 	 * @return string|null
 	 */
-	public static function getMonth($value)
+	public static function toMonth($value)
 	{
 		if (!empty($value)) {
-			
 			if (is_string($value)) {
-
 				// définition du tableau composants les mois  avec key en string
 				if (strlen($value) == 3) {
 					$value = ucfirst($value);
@@ -550,11 +533,8 @@ class Util
 				} else {
 					return null;
 				}
-
 			} else {
-
 				$value = (int) $value;
-			
 				// définition du tableau composants les mois
 				if ($value > 0 && $value <= 12) {
 					$value -= 1;
@@ -563,11 +543,9 @@ class Util
 				}
 
 				$month = array_values(static::$month);
-
 			}
 
 			return $month[$value];
-		
 		}
 
 		return null;
@@ -577,7 +555,6 @@ class Util
 	 * Formateur de donnée. key => :value
 	 *
 	 * @param array $data
-	 * 
 	 * @return array $resultat
 	 */
 	public function add2points(array $data)
@@ -615,7 +592,6 @@ class Util
 	 * slugify créateur de slug en utilisant un chaine simple.
 	 * 
 	 * @param string $str
-	 * 
 	 * @return string
 	 */
 	public function slugify($str)

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Bow\Support;
 
 class Cookie
@@ -51,15 +50,11 @@ class Cookie
      */
     public static function get($key = null)
     {
-
         if (static::has($key)) {
-
             return $_COOKIE[$key];
-
         }
 
         return $_COOKIE;
-
     }
 
     /**
@@ -91,14 +86,11 @@ class Cookie
         $old = false;
 
         if (static::has($key)) {
-        
             $old = $_COOKIE[$key];
-        
         }
 
         unset($_COOKIE[$key]);
 
         return $old;
     }
-
 }

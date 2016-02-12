@@ -54,11 +54,11 @@ class Resource
 	 * Modifier le nom par defaut du file uploader.
 	 * 
 	 * @param string $filename
-	 * @return self
+	 * @return static
 	 */
 	public static function setUploadFileName($filename)
 	{
-		self::$uploadFileName = $filename;
+		static::$uploadFileName = $filename;
 	}
 
 	/**
@@ -66,7 +66,7 @@ class Resource
 	 * 
 	 * @param mixed $extension
 	 */
-	public static function setFileExtension($extension)
+	public static function setUploadFileExtension($extension)
 	{
 		if (is_array($extension)) {
 			static::$fileExtension = $extension;
@@ -81,10 +81,10 @@ class Resource
 	 * @param string:path, le chemin du dossier de l'upload
 	 * @throws InvalidArgumentException
 	 */
-	public static function setUploadDir($path)
+	public static function setUploadDirectory($path)
 	{
 		if (is_string($path)) {
-			self::$uploadDir = $path;
+			static::$uploadDir = $path;
 		} else {
 			throw new InvalidArgumentException("L'argument donnée a la fontion doit etre un entier");
 		}
@@ -96,10 +96,10 @@ class Resource
 	 * @param integer $size
 	 * @throws InvalidArgumentException
 	 */
-	public static function setFileSize($size)
+	public static function setUploadFilesize($size)
 	{
 		if (is_int($size)) {
-			self::$fileSize = $size;
+			static::$fileSize = $size;
 		} else {
 			throw new InvalidArgumentException("L'argument donnée à la fonction doit être de type entier");
 		}
@@ -128,68 +128,68 @@ class Resource
 		// Si le fichier est bien dans le répertoire tmp de PHP
 		if (is_uploaded_file($file->tmp_name)) {
 			
-			$dirPart = explode("/", self::$uploadDir);
+			$dirPart = explode("/", static::$uploadDir);
 			$end = array_pop($dirPart);
 			
 			if ($end == "") {
-				self::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart);
+				static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart);
 			} else {
-				self::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart) .DIRECTORY_SEPARATOR. $end;
+				static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart) .DIRECTORY_SEPARATOR. $end;
 			}
 
-			if (!is_dir(self::$uploadDir)) {
-				@mkdir(self::$uploadDir, 0766);
+			if (!is_dir(static::$uploadDir)) {
+				@mkdir(static::$uploadDir, 0766);
 			}
 
 			// Si le fichier est bien uploader, avec aucune error
 			if ($file->error === 0) {
 
-				if ($file->size <= self::$fileSize) {
+				if ($file->size <= static::$fileSize) {
 					
 					$pathInfo = (object) pathinfo($file->name);
 		
 					if (in_array($pathInfo->extension, static::$fileExtension)) {
 						
 						if ($hash !== null) {
-							if (self::$uploadFileName !== null) {
-								$filename = hash($hash, self::$uploadFileName);
+							if (static::$uploadFileName !== null) {
+								$filename = hash($hash, static::$uploadFileName);
 							} else {
 								$filename = hash($hash, uniqid(rand(null, true)));
 							}
 						} else {
-							if (self::$uploadFileName !== null) {
-								$filename = self::$uploadFileName;
+							if (static::$uploadFileName !== null) {
+								$filename = static::$uploadFileName;
 							} else {
 								$filename = $pathInfo->filename;
 							}
 						}
 
-						move_uploaded_file($file->tmp_name, self::$uploadDir . "/" . $filename . '.' . $pathInfo->extension);
+						move_uploaded_file($file->tmp_name, static::$uploadDir . "/" . $filename . '.' . $pathInfo->extension);
 						
 						// Status, fichier uploadé
 						$status = [
-							"status" => self::SUCCESS,
+							"status" => static::SUCCESS,
 							"message" => "File Uploaded"
 						];
 					} else {
 						# Status, extension du fichier
 						$status = [
-							"status" => self::ERROR,
+							"status" => static::ERROR,
 							"message" => "Availabe File, verify file type"
 						];
 					}
 				} else {
 					# Status, la taille est invalide
 					$status = [
-						"status" => self::ERROR,
-						"message" => "File is more big, max size " . self::$fileSize. " octets."
+						"status" => static::ERROR,
+						"message" => "File is more big, max size " . static::$fileSize. " octets."
 					];
 				}
 
 			} else {
 				# Status, fichier erroné.
 				$status = [
-					"status" => self::ERROR,
+					"status" => static::ERROR,
 					"message" => "Le fichier possède des erreurs"
 				];
 			}
@@ -197,7 +197,7 @@ class Resource
 		} else {
 			# Status, fichier non uploadé
 			$status = [
-				"status" => self::ERROR,
+				"status" => static::ERROR,
 				"message" => "Le fichier n'a pas pus être uploader"
 			];
 		}
@@ -217,13 +217,15 @@ class Resource
 	 * @param string $file
 	 * @param string $content
 	 */
-    public static function put($file, $content)
+    private static function write($resource, $content)
     {
-        if (is_file(realpath($file))) {
-            return file_get_contents(self::$storageDir . "/" . $file, $content);
-        }
+    	if (is_resource($resource)) {
+	        fwrite($resource, $content);
+    	} else {
 
-        return null;
+    	}
+
+        return false;
     }
 
 	/**
@@ -234,7 +236,7 @@ class Resource
 	 */
     public static function append($file, $content)
     {
-        self::write(self::open($file, "a"), $content);
+        static::write(static::open($file, "a"), $content);
     }
 
 	/**
@@ -247,8 +249,8 @@ class Resource
     {
         $tmp_content = file_get_contents($file);
         
-        self::put($file, $content);
-        self::append($file, $tmp_content);
+        static::put($file, $content);
+        static::append($file, $tmp_content);
     }
 
 	/**
@@ -259,7 +261,7 @@ class Resource
 	 */
     public static function delete($file)
     {
-        @unlink($file);
+        return @unlink($file);
     }
 
 	/**
@@ -269,7 +271,7 @@ class Resource
 	 */
     public static function files($filename)
     {
-        return self::readIndir($filename, "file");
+        return static::readIndir($filename, "file");
     }
 
 	/**
@@ -279,7 +281,7 @@ class Resource
 	 */
     public static function directories($dirname)
     {
-        return self::readIndir($dirname, "dir");
+        return static::readIndir($dirname, "dir");
     }
 
 	/**
@@ -288,7 +290,7 @@ class Resource
 	 * @param string $file
 	 * @param bool $recursive
 	 */
-    public static function makeDirectory($files, $recursive = false)
+    public static function mkdir($files, $recursive = false)
     {
         if ($recursive === true) {
             $status = @mkdir($files, 0777, true);
@@ -303,7 +305,7 @@ class Resource
 	 * @param string $file
 	 * @param bool $recursive
 	 */
-    public static function deleteDirectory($file, $recursive = false)
+    public static function rmdir($file, $recursive = false)
     {
 		return null;
     }
@@ -313,15 +315,17 @@ class Resource
 	 * 
 	 * @param object $config
 	 */
-    public static function configure($config)
+    public static function configure($config = null)
     {
-    	static::$fileExtension = $config->uploadFileExtension;
-    	$c = $config->uploadConfiguration;
+    	if ($config !== null) {
+	    	static::$fileExtension = $config->uploadFileExtension;
+	    	$c = $config->uploadConfiguration;
 
-    	if ($c->type === "folder") {
-    		static::$uploadDir = $c->config["folder"]["dirname"];
-    	} else {
-    		// Todo: ftp workflow
+	    	if ($c->type === "folder") {
+	    		static::$uploadDir = $c->config["folder"]["dirname"];
+	    	} else {
+	    		// Todo: ftp workflow
+	    	}
     	}
     }
 
@@ -332,7 +336,7 @@ class Resource
 	 */
     private static function isConfigured()
     {
-        return self::$storageDir !== null ? true : false;
+        return static::$storageDir !== null ? true : false;
     }
 
 	/**
@@ -374,7 +378,7 @@ class Resource
     {
         $files = [];
         $method = "is_file";
-        $dir = readdir($dirname);
+        $dir = opendir($dirname);
         
         if ($type == "dir") {
             $method = "is_dir";
@@ -383,7 +387,7 @@ class Resource
         while($file = readdir($dir)) {
             if ($method($file)) {
                 if (!in_array($file, [".", ".."])) {
-                    array_push($files, $file);
+                    array_push($files, realpath($file));
                 }
             }
         }

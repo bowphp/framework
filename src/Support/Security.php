@@ -6,7 +6,6 @@ namespace Bow\Support;
 
 class Security
 {
-
 	/**
 	 * @static int
 	 */
@@ -49,14 +48,12 @@ class Security
 		 * Vérification d'erreur
 		 */
 		if ($error) {
-
 			echo '<div style="border-radius: 3px; border: 1px solid #eee; background: tomato; padding: 10px; ">';
 			echo "<h1>Attaque stoped</h1>";
 			echo "<ul style=\"color: white\">";
 			echo $errorList;
 			echo "</ul>";
 			echo "</div>";
-
 			// On arrête tout.
 			die();
 		}
@@ -72,7 +69,6 @@ class Security
 	 */
 	public static function sanitaze($data, $secure = false)
 	{
-		
 		if ($secure === true) {
 			$method = "secureString";
 		} else {
@@ -83,9 +79,7 @@ class Security
 		$rNum = "/^\d+$/";
 
 		if (is_array($data)) {
-			
 			foreach ($data as $key => $value) {
-
 				if (is_string($value)) {
 					if (preg_match($rNum, $value)) {
 						$data[$key] = (int) $value;
@@ -95,11 +89,8 @@ class Security
 				} else if (is_object($value)) {
 					$data[$key] = static::sanitaze($value);
 				}
-
 			}
-
 		} else if (is_object($data)) {
-
 			foreach ($data as $key => $value) {
 				if (is_string($value)) {
 					if (preg_match($rNum, $value)) {
@@ -111,15 +102,12 @@ class Security
 					$data->$key  = static::sanitaze($value);
 				}
 			}
-
 		} else if (is_string($data)) {
-
 			if (preg_match($rNum, $data)) {
 				$data = (int) $data;
 			} else {
 				$data = static::$method($data);
 			}
-
 		}
 
 		return $data;
