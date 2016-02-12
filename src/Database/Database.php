@@ -80,14 +80,12 @@ class Database extends DatabaseTools
         }
 
         if ($option !== null) {
-
             if (is_string($option)) {
                 static::$zone = $option;
             } else if (is_callable($option)) {
                 static::$zone = "default";
                 $cb = $option;
             }
-
         } else {
             static::$zone = "default";
         }
@@ -110,12 +108,13 @@ class Database extends DatabaseTools
         $db = null;
 
         try {
-            
             // Construction de la dsn
             $dns = $c["scheme"] . ":host=" . $c['host'] . ($c['port'] !== '' ? ":" . $c['port'] : "") . ";dbname=". $c['dbname'];
             
             if ($c["scheme"] == "pgsql") {
                 $dns = str_replace(";", " ", $dns);
+            } else if ($c["scheme"] === "sqlite") {
+                $dns = "sqlite:" . $c["dbname"];
             }
             
             // Connection à la base de donnée.
@@ -134,7 +133,6 @@ class Database extends DatabaseTools
         Util::launchCallback($cb, false);
         
         return static::class;
-
     }
 
 	/**
@@ -149,14 +147,10 @@ class Database extends DatabaseTools
         static::verifyConnection();
 
 		if (!is_string($enterKey)) {
-		
         	Util::launchCallback($cb, [new InvalidArgumentException("parametre invalide")]);
-		
         } else {
-
 			static::$db = null;
 			static::connection($enterKey, $cb);
-		
         }
 	}
 
@@ -182,7 +176,7 @@ class Database extends DatabaseTools
         static::verifyConnection();
 
         if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sqlstatement)) {
-             return static::executePrepareQuery($sqlstatement, $bind);
+            return static::executePrepareQuery($sqlstatement, $bind);
         }
 
         return false;
@@ -236,7 +230,6 @@ class Database extends DatabaseTools
             $is_2_m_array = true;
 
             if (count($bind) > 0) {
-               
                 foreach ($bind as $key => $value) {
                     if (is_array($value)) {
                         $r += static::executePrepareQuery($sqlstatement, $value);
@@ -250,9 +243,7 @@ class Database extends DatabaseTools
                 }
 
             } else {
-
                 $r = static::executePrepareQuery($sqlstatement, $bind);
-            
             }
 
             return $r;
@@ -286,7 +277,6 @@ class Database extends DatabaseTools
      *
      * @param $sqlstatement
      * @param array $bind
-     * 
      * @return bool
      */
     public static function delete($sqlstatement, array $bind = [])
@@ -304,7 +294,6 @@ class Database extends DatabaseTools
      * Charge le factory Table
      *
      * @param $tableName
-     * 
      * @return mixed
      */
     public static function table($tableName)
@@ -439,7 +428,6 @@ class Database extends DatabaseTools
      *
      * @param array $options, ensemble d'information
      * @param callable $cb = null
-     * 
      * @return string $query, la SQL Statement résultant
      */
     private static function makeQuery($options, $cb = null)
@@ -638,7 +626,6 @@ class Database extends DatabaseTools
      *
      * @param $sqlstatement
      * @param array $bind
-     * 
      * @return mixed
      */
     private static function executePrepareQuery($sqlstatement, array $bind = [])

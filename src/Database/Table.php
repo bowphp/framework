@@ -15,6 +15,11 @@ class Table extends DatabaseTools
     private $tableName;
 
     /**
+     * @var string
+     */
+    private static $_tableName;
+
+    /**
      * @var \PDO
      */
     private $connection;
@@ -68,10 +73,10 @@ class Table extends DatabaseTools
     private function __construct($tableName, $connection)
     {
         $this->connection = $connection;
-        $this->tableName = $tableName;
+        $this->tableName = self::$_tableName = $tableName;
     }
 
-    // fonction magic __clone en <<private>> 
+    // fonction magic __clone
     private function __clone() {}
 
     /**
@@ -84,7 +89,7 @@ class Table extends DatabaseTools
      */
     public static function load($tableName, $connection)
     {
-        if (self::$instance === null) {
+        if (self::$instance === null || self::$_tableName != $tableName) {
             self::$instance = new self($tableName, $connection);
         }
 
@@ -897,4 +902,25 @@ class Table extends DatabaseTools
         return false;
     }
 
+    /**
+     * paginate 
+     * 
+     * @param integer $n
+     * @param integer $current
+     * @return array|StdClass
+     */
+    public function paginate($n, $current = 0)
+    {
+        --$current;
+
+        if ($current < 0) {
+            $current = 0;
+        } else {
+            if ($current > 0) {
+                $current *= $n;
+            }
+        }
+
+        return $this->jump($current)->take($n)->get();
+    }
 }
