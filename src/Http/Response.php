@@ -2,16 +2,11 @@
 
 namespace Bow\Http;
 
-
 use ErrorException;
+use Twig_Environment;
+use Twig_Loader_Filesystem;
 use Bow\Core\AppConfiguration;
 use Bow\Exception\ViewException;
-
-use Twig_Autoloader as Tiwg_A;
-use Mustache_Engine as Mustache;
-use Twig_Environment as Twig_Env;
-use Twig_Loader_Array as Twig_Load;
-
 
 class Response
 {
@@ -39,7 +34,6 @@ class Response
     
     /**
      * Instance de l'application
-     * 
      * @var \Snoop\Core\Application
      */
     private $config;
@@ -53,7 +47,6 @@ class Response
      * Singleton loader
      * 
      * @param AppConfiguration $appConfig
-     * 
      * @return self
      */
     public static function configure(AppConfiguration $appConfig)
@@ -70,7 +63,6 @@ class Response
 	 *
 	 * @param string $key
 	 * @param string $value
-	 * 
 	 * @return self
 	 */
 	public function setHeader($key, $value)
@@ -95,7 +87,6 @@ class Response
 
     /**
      * redirectTo404, redirige vers 404
-     *
      * @return self
      */
     public function redirectTo404()
@@ -108,7 +99,6 @@ class Response
 	 * Modifie les entétes http
 	 * 
 	 * @param int $code
-	 * 
 	 * @return bool|void
 	 */
 	public function setCode($code)
@@ -130,8 +120,6 @@ class Response
 	 *
 	 * @param mixed $data
 	 * @param int $code
-	 * 
-	 * @return void
 	 */
 	public function json($data, $code = 200)
 	{
@@ -145,7 +133,6 @@ class Response
 	 * 
 	 * @param string $filename
 	 * @param mixed|null $bind
-	 * 
 	 * @return \Snoop\Core\Application
 	 */
 	public function sendFile($filename, $bind = [])
@@ -177,7 +164,6 @@ class Response
 	 *
 	 * @param string $filename
 	 * @param array $bind
-	 * 
 	 * @return self
 	 */
 	public function view($filename, $bind = null, $code = 200)
@@ -186,20 +172,25 @@ class Response
 		$filename .= ".php";
 		
 		if ($this->config->getViewpath() !== null) {
-			$filename = $this->config->getViewpath() . "/" . $filename;
+			if (!is_file($this->config->getViewpath() . "/" . $filename)) {
+				throw new ResponseException("$filename not found.");
+			}
+		} else {
+			if (!is_file($filename)) {
+				throw new ResponseException("$filename not found.");
+			}
 		}
-
-		// Chargement du template.
-		$template = $this->templateLoader($filename);
 
 		if ($bind === null) {
 			$bind = [];
 		}
 
+		// Chargement du template.
+		$template = $this->templateLoader($filename);
 		$this->setCode($code);
 
 		if ($this->config->getEngine() == "twig") {
-			$this->send($template->render("template", $bind));
+			$this->send($template->render($filename, $bind));
 		} else if (in_array($this->config->getEngine(), ["mustache", "jade"])) {
 			$this->send($template->render(file_get_contents($filename), $bind));
 		}
@@ -212,12 +203,10 @@ class Response
 	 * 
 	 * 
 	 * @param string|null $filename
-	 * 
 	 * @throws ErrorException
-	 * 
 	 * @return Mustache|Twig_Env|Jade|null
 	 */
-	private function templateLoader($filename)
+	private function templateLoader()
 	{
 		if ($this->config->getEngine() === null) {
 			if (!in_array($this->config->getEngine(), ["twig", "mustache", "jade"])) {
@@ -229,12 +218,10 @@ class Response
 
 		if ($this->config->getEngine() == "twig") {
 
-			$loader = new Twig_Load([
-				'template' => file_get_contents($filename)
-			]);
-
-			$tpl = new Twig_Env($loader);
-		
+		    $loader = new Twig_Loader_Filesystem($this->config->getViewpath());
+		    $tpl = new Twig_Environment($loader, array(
+		        'cache' => $this->config->getCachepath()
+		    ));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new Mustache();
 		}
@@ -246,7 +233,6 @@ class Response
 	 * Equivalant à un echo, sauf qu'il termine l'application quand $stop = true
 	 *
 	 * @param $data
-	 * 
 	 * @param bool|false $stop
 	 */
 	public function send($data, $stop = false)

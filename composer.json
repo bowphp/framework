@@ -9,8 +9,9 @@
     },
     "require": {
         "twig/twig": "^1.23",
-        "psr/log": "1.0.0",
-        "symfony/filesystem": "^3.0",
+        "psr/log": "1.0.0"
+    },
+    "require-dev": {
         "phpunit/phpunit": "^4.8"
     },
     "authors": [
