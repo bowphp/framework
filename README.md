@@ -1,5 +1,6 @@
-# snoop Framework
+# Bow
+The Bow Framework [documentation](http://papac.github.com)
 
-The Snoop Framework
+N'ésitez pas commencez maintenant. :)
 
-[Go to documentation page.](http://papac.github.io/snoop "documentation")
+[![start](http://papac.github.com/public/img/1382900391.gif "start bow framework")](http://papac.github.com)
