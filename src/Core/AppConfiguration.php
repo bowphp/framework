@@ -52,10 +52,6 @@ class AppConfiguration
     /**
      * @var string
      */
-    private $loglevel;
-    /**
-     * @var string
-     */
     private $tokenExpirateTime;
     /**
      * @var string
@@ -160,7 +156,8 @@ class AppConfiguration
 
     /**
      * getViewPath retourne configuration du path du repertoire du cache
-     * 
+     *
+     * @param string $viewPath
      * @return string
      */
     public function setViewpath($viewPath)
@@ -276,27 +273,5 @@ class AppConfiguration
     public function getEngine()
     {
         return $this->engine;
-    }
-
-    /**
-     * getNamespace retourne la configuration des namespaces
-     * 
-     * @return array
-     */
-    public function getRootpath()
-    {
-        return $this->root;
-    }
-
-    /**
-     * getNamespace retourne la configuration des namespaces
-     * 
-     * @return array
-     */
-    public function setRootpath($newRoot)
-    {
-        $old = $this->root;
-        $this->root = $newRoot;
-        return $old;
     }
 }
