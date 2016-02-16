@@ -475,15 +475,11 @@ class Table extends DatabaseTools
     public function order($column, $type = "asc")
     {
         if (is_null($this->order)) {
-            
             if (!in_array($type, ["asc", "desc"])) {
-            
                 $type = "asc";
-            
             }
 
             $this->order = "order by $column $type";
-
         }
 
         return $this;
@@ -584,7 +580,6 @@ class Table extends DatabaseTools
      */
     private function executeAgregat($aggregat, $column)
     {
-
         $sql = "select $aggregat($column) from " . $this->tableName;
     	
         if (!is_null($this->where)) {
@@ -608,7 +603,6 @@ class Table extends DatabaseTools
      */
     public function get($cb = null)
     {
-        
         $sql = "select ";
         $fetch = "fetchAll";
 
@@ -733,7 +727,6 @@ class Table extends DatabaseTools
      */
     public function delete($where = [], $cb = null)
     {
-
 		$sql = "delete from " . $this->tableName;
 
 		if (!is_null($this->where)) {
@@ -758,7 +751,6 @@ class Table extends DatabaseTools
         }
 
         return $data;
-		
     }
 
     /**

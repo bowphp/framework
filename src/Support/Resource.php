@@ -1,10 +1,8 @@
 <?php
 
-
 namespace Bow\Support;
 
 use InvalidArgumentException;
-
 
 class Resource
 {
@@ -29,7 +27,7 @@ class Resource
 	/**
 	 * Répertoire par defaut de upload
 	 * 
-	 * @var public
+	 * @var string
 	 */
 	private static $uploadDir = "public";
 	/**
@@ -143,13 +141,9 @@ class Resource
 
 			// Si le fichier est bien uploader, avec aucune error
 			if ($file->error === 0) {
-
 				if ($file->size <= static::$fileSize) {
-					
 					$pathInfo = (object) pathinfo($file->name);
-		
 					if (in_array($pathInfo->extension, static::$fileExtension)) {
-						
 						if ($hash !== null) {
 							if (static::$uploadFileName !== null) {
 								$filename = hash($hash, static::$uploadFileName);
@@ -163,7 +157,7 @@ class Resource
 								$filename = $pathInfo->filename;
 							}
 						}
-
+						// Déplacement du fichier tmp vers le dossier d'upload
 						move_uploaded_file($file->tmp_name, static::$uploadDir . "/" . $filename . '.' . $pathInfo->extension);
 						
 						// Status, fichier uploadé
@@ -172,14 +166,14 @@ class Resource
 							"message" => "File Uploaded"
 						];
 					} else {
-						# Status, extension du fichier
+						// status, extension du fichier
 						$status = [
 							"status" => static::ERROR,
 							"message" => "Availabe File, verify file type"
 						];
 					}
 				} else {
-					# Status, la taille est invalide
+					// status, la taille est invalide
 					$status = [
 						"status" => static::ERROR,
 						"message" => "File is more big, max size " . static::$fileSize. " octets."
@@ -187,7 +181,7 @@ class Resource
 				}
 
 			} else {
-				# Status, fichier erroné.
+				// status, fichier erroné.
 				$status = [
 					"status" => static::ERROR,
 					"message" => "Le fichier possède des erreurs"
@@ -195,7 +189,7 @@ class Resource
 			}
 
 		} else {
-			# Status, fichier non uploadé
+			// status, fichier non uploadé
 			$status = [
 				"status" => static::ERROR,
 				"message" => "Le fichier n'a pas pus être uploader"
@@ -214,18 +208,20 @@ class Resource
 	/**
 	 * Ecrire dans le fichier spécifier
 	 * 
-	 * @param string $file
+	 * @param string $resource
 	 * @param string $content
+	 * @return boolean
 	 */
     private static function write($resource, $content)
     {
+		$status = true;
     	if (is_resource($resource)) {
-	        fwrite($resource, $content);
+	        $status = fwrite($resource, $content);
     	} else {
 
     	}
 
-        return false;
+        return $status;
     }
 
 	/**
@@ -257,7 +253,7 @@ class Resource
 	 * Supprimer un fichier
 	 * 
 	 * @param string $file
-	 * @param string $content
+	 * @return boolean
 	 */
     public static function delete($file)
     {
@@ -268,6 +264,7 @@ class Resource
 	 * Alias sur readInDir
 	 * 
 	 * @param string $filename
+	 * @return array
 	 */
     public static function files($filename)
     {
@@ -278,6 +275,7 @@ class Resource
 	 * Alias sur readInDir
 	 * 
 	 * @param string $dirname
+	 * @return array
 	 */
     public static function directories($dirname)
     {
@@ -287,8 +285,9 @@ class Resource
 	/**
 	 * Crée un répertoire
 	 * 
-	 * @param string $file
+	 * @param string $files
 	 * @param bool $recursive
+	 * @return boolean
 	 */
     public static function mkdir($files, $recursive = false)
     {
@@ -297,6 +296,8 @@ class Resource
         } else {
             $status = @mkdir($files, 0777);
         }
+
+		return $status;
     }
 
 	/**
@@ -304,6 +305,7 @@ class Resource
 	 * 
 	 * @param string $file
 	 * @param bool $recursive
+	 * @return boolean
 	 */
     public static function rmdir($file, $recursive = false)
     {
@@ -330,7 +332,7 @@ class Resource
     }
 
 	/**
-	 * Verifie la configuration
+	 * Vérifie la configuration
 	 * 
 	 * @return bool
 	 */
@@ -344,7 +346,6 @@ class Resource
 	 * 
 	 * @param string $file
 	 * @param string $mod
-	 * 
 	 * @return resource
 	 */
     private static function open($file, $mod)
@@ -361,7 +362,7 @@ class Resource
 	 */
     private static function closeFile($rFile)
     {
-        if (is_resource($rFile)) {
+        if (is_resource($rFile) && get_resource_type($rFile) === "file") {
             fclose($rFile);
         }
     }
@@ -396,5 +397,4 @@ class Resource
     
         return $files;
     }
-
 }

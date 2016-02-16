@@ -5,7 +5,7 @@ namespace Bow\Mail;
 
 use Bow\Support\Util;
 
-class Message
+abstract class Message
 {
 
 	/**
@@ -13,27 +13,24 @@ class Message
 	 *
 	 * @var array
 	 */
-	protected $headers = ["top" => [], "bottum" => []];
+	protected $headers = ["top" => [], "bottom" => []];
 	/**
 	 * définir le destinataire
-	 *
-	 * @var null
+	 * @var string
 	 */
 	protected $to = null;
 	/**
-	 * definir l'object du mail
-	 *
-	 * @var null
+	 * définir l'object du mail
+	 * @var string
 	 */
 	protected $subject = null;
 	/**
-	 * @var null
+	 * @var string
 	 */
 	protected $form = null;
 	/**
-	 * definir le message
-	 *
-	 * @var null
+	 * définir le message
+	 * @var string
 	 */
 	protected $message = null;
 	/**
@@ -43,7 +40,7 @@ class Message
 	 */
 	private $part = 0;
 	/**
-	 * definir le frontiere entre les contenus.
+	 * définir le frontière entre les contenus.
 	 *
 	 * @var string
 	 */
@@ -51,15 +48,19 @@ class Message
 	/**
 	 * Singleton de mail
 	 *
-	 * @var null
+	 * @var self
 	 */
 	protected static $mail = null;
 	/**
 	 * fromDefined
 	 *
-	 * @var bool
+	 * @var boolean
 	 */
 	protected $fromDefined = false;
+    /**
+     * @var string
+     */
+    protected $sep;
 
 	/**
 	 * addHeader, Ajout une entête
@@ -70,27 +71,20 @@ class Message
 	 */
 	public function addHeader($key, $value)
 	{
-		if (array_key_exists($key, $this->headers["top"])) {
+        $top = $this->headers["top"];
 
-			if (!is_array($this->headers["top"][$key])) {
-			
-				$old = $this->headers["top"][$key];
-				$this->headers["top"][$key] = [$old, $value];
-			
+		if (array_key_exists($key, $top)) {
+			if (!is_array($top[$key])) {
+				$old = $top[$key];
+                $top[$key] = [$old, $value];
 			} else {
-			
-				array_push($this->headers["top"][$key], $value);
-			
+				array_push($top[$key], $value);
 			}
-
 		} else {
-			
-			$this->headers["top"][$key] = $value;
-		
+            $top[$key] = $value;
 		}
 		
 		return $this;
-	
 	}
 
 	/**
@@ -103,33 +97,22 @@ class Message
 	 */
 	private function addFeatureHeader($key, $value)
 	{
-		
 		if (strtolower($key) == "content-type") {
-		
 			$this->headers["bottom"][$this->part] = [];
 			$this->part++;
-		
 		}
 
 		if ($key == "data") {
-
 			$value = preg_replace("@\n$@", "", $value);
 			$data = $this->sep . $this->sep. $value;
-		
 		} else {
-		
 			$data = "$key: $value";
-		
 		}
 
 		if (($this->part - 1) === -1) {
-
 			array_push($this->headers["bottom"][$this->part], $data);
-		
 		} else {
-		
 			array_push($this->headers["bottom"][$this->part - 1], $data);
-		
 		}
 
 		return $this;
@@ -149,36 +132,25 @@ class Message
 		$form = "";
 
 		foreach ($this->headers["top"] as $key => $value) {
-
 			$form .= "$key: $value" . $sep;
-
 		}
 
 		if ($content_length == 1) {
-
 			foreach ($this->headers["bottom"] as $value) {
 				foreach ($value as $v) {
 					$form .= $v . $sep;
 				}
 			}
-
 		} else {
-
 			$form .= "Content-Type: multipart/mixed; boundary=\"{$this->boundary}\"{$sep}{$sep}";
 			$form .= $this->boundary . $sep;
 
 			foreach ($this->headers["bottom"] as $value) {
-
 				foreach ($value as $key => $v) {
-
 					$form .= $v . $sep;
-
 				}
-
 				$form .= $this->boundary . $sep;
-
 			}
-
 		}
 
 		return $form;
@@ -195,7 +167,7 @@ class Message
 	}
 
 	/**
-	 * to, definir le récépteur
+	 * to, définir le récépteur
 	 *
 	 * @param string $to
 	 * @param string $name
@@ -208,21 +180,13 @@ class Message
 		$to = $this->formatEmail($to, $name);
 
 		if ($smtp === true) {
-
 			$this->addFeatureHeader("To", $to);
-
 		} else {
-
 			if ($this->to !== null) {
-
 				$this->to .= ", ";
-
 			} else {
-
 				$this->to = $to;
-
 			}
-
 		}
 
 		return $this;
@@ -238,17 +202,11 @@ class Message
 	 */
 	private function formatEmail($email, $name)
 	{
-
 		if (!$name && preg_match('#^(.+) +<(.*)>\z#', $email, $matches)) {
-
 			return [$matches[2] => $matches[1]];
-		
 		} else {
-			
 			return [$email => $name];
-		
 		}
-
 	}
 
 	/**
@@ -260,11 +218,8 @@ class Message
 	 */
 	public function addFile($file)
 	{
-		
 		if (!is_file($file)) {
-
 			trigger_error("Ce n'est pas une fichier.", E_USER_ERROR);
-		
 		}
 
 		$content = file_get_contents($file);
@@ -276,7 +231,6 @@ class Message
 		$this->addFeatureHeader("data", chunk_split(base64_encode($content)));
 		
 		return $this;
-	
 	}
 
 	/**
@@ -285,27 +239,21 @@ class Message
 	 * @param string $subject
 	 * @param bool $smtp
 	 * 
-	 * @return Mail
+	 * @return self
 	 */
 	public function subject($subject, $smtp = false)
 	{
-
 		if ($smtp === true) {
-		
 			$this->addHeader("Subject", $subject);
-		
 		} else {
-		
 			$this->subject = $subject;
-		
 		}
 
 		return $this;
-
 	}
 
 	/**
-	 * from, Definir l'expéditeur du mail
+	 * from, définir l'expéditeur du mail
 	 *
 	 * @param string $from
 	 * @param string $name=null
@@ -315,54 +263,41 @@ class Message
 	 */
 	public function from($from, $name = null, $smtp = false)
 	{
-		
 		$from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
 
 		if ($smtp === true) {
-		
 			$this->form = $from;
-		
 		} else {
-		
 			if ($this->fromDefined === false) {
-		
 				$this->addHeader("From", $from);
-		
 			} else {
-		
 				$this->fromDefined = true;
-		
 			}
-		
 		}
 		
 		return $this;
-	
 	}
 
 	/**
-	 * toHtml, Definir le type de contenu en text/html
+	 * toHtml, définir le type de contenu en text/html
+     *
 	 * @param string $html=null
 	 * @return self
 	 */
 	public function toHtml($html = null)
 	{
-
 		$this->addFeatureHeader("Content-Type", "text/html; charset=utf-8");
 		$this->addFeatureHeader("Content-Transfer-Encoding", "8bit");
 
 		if (is_string($html)) {
-
 			$this->addFeatureHeader("data", $html);
-		
 		}
 		
 		return $this;
-	
 	}
 
 	/**
-	 * toText, Definir le corps du message
+	 * toText, définir le corps du message
 	 * 
 	 * @param string $text
 	 * 
@@ -370,18 +305,14 @@ class Message
 	 */
 	public function toText($text = null)
 	{
-
 		$this->addFeatureHeader("Content-Type", "text/plain; charset=utf-8");
 		$this->addFeatureHeader("Content-Transfer-Encoding", "8bit");
 
 		if (is_string($text)) {
-
 			$this->addFeatureHeader("data", $text);
-		
 		}
 		
 		return $this;
-
 	}
 
 	/**
@@ -394,10 +325,10 @@ class Message
 	 */
 	public function addBcc($mail, $name = null)
 	{
-
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 		$this->addHeader("Bcc", $mail);
-	
+
+		return $this;
 	}
 
 	/**
@@ -410,12 +341,10 @@ class Message
 	 */
 	public function addCc($mail, $name = null)
 	{
-		
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 		$this->addHeader("Cc", $mail);
 
 		return $this;
-
 	}
 
 	/**
@@ -428,12 +357,10 @@ class Message
 	 */
 	public function addReplyTo($mail, $name = null)
 	{
-	
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 		$this->addHeader("Replay-To", $mail);
 	
 		return $this;
-	
 	}
 
 	/**
@@ -446,12 +373,10 @@ class Message
 	 */
 	public function addReturnPath($mail, $name = null)
 	{
-
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 		$this->addHeader("Return-Path", $mail);
 		
 		return $this;
-	
 	}
 
 	/**
@@ -463,31 +388,33 @@ class Message
 	 */
 	public function addPriority($priority)
 	{
-
 		$this->addHeader('X-Priority', (int) $priority);
 		
 		return $this;
-	
 	}
 
 	/**
-	 * Message, definir le corps du message
+	 * Message, définir le corps du message
 	 * @param string $message
+	 * @throws \InvalidArgumentException
 	 * @return self
 	 */
 	public function message($message)
 	{
-		
 		if (!is_string($message)) {
-
-			throw new InvalidArgumentException(__METHOD__."() parameter most be string " . gettype($message) . "given", 1);
-		
+			throw new \InvalidArgumentException(__METHOD__."() paramèter most be string " . gettype($message) . "given", 1);
 		}
 
 		$this->message = $message;
 		
 		return $this;
-	
 	}
-	
+
+    /**
+     * send, envoie de mail.
+     *
+     * @param callable|null $cb
+     * @return mixed
+     */
+    abstract public function send($cb = null);
 }

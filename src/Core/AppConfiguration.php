@@ -29,14 +29,48 @@ class AppConfiguration
      * @var null|string
      */
     private $views = null;
-
     /**
-     * Répertoire de log d'erreur
-     *
      * @var string
-     */ 
-    private $logDirecotoryName = "";
+     */
+    private $appname;
+    /**
+     * @var string
+     */
+    private $logDirecotoryName;
+    /**
+     * @var string
+     */
+    private $cache;
+    /**
+     * @var string
+     */
+    private $names;
+    /**
+     * @var string
+     */
+    private $timezone;
+    /**
+     * @var string
+     */
+    private $loglevel;
+    /**
+     * @var string
+     */
+    private $tokenExpirateTime;
+    /**
+     * @var string
+     */
+    private $renderEngine;
+    /**
+     * @var string
+     */
+    private $cacheFolder;
+    /**
+     * @var string
+     */
+    private $app_key = "Eda4WhAyMDE2LTAyLTE2IDIwOjM2OjE0";
 
+    // singleton constructor.
     private function __construct($config)
     {
         $this->appname = $config->appname;
@@ -50,8 +84,15 @@ class AppConfiguration
         $this->tokenExpirateTime = $config->tokenExpirateTime;
         $this->renderEngine = $config->template;
         $this->cacheFolder = $config->cacheFolder;
+
+        if (is_file($config->cipher)) {
+            $this->app_key = file_get_contents($config->cipher);
+        }
     }
 
+    /**
+     * Ferméture de la fonction magic __clone pour optimizer le singleton
+     */
     private function __clone(){}
 
     /**
@@ -66,13 +107,38 @@ class AppConfiguration
 
         return static::$instance;
     }
+
     /**
      * takeInstance singleton
-     * @param array $config
      * @return self
      */
     public static function takeInstance() {
         return static::$instance;
+    }
+
+    /**
+     * Retourne Application key
+     *
+     * @return string
+     */
+    public function getAppkey()
+    {
+        return $this->app_key;
+    }
+    /**
+     * configure, Application key
+     * @param string $key
+     * @return string
+     */
+    public function setAppkey($key)
+    {
+        $old = $this->app_key;
+
+        if (! is_array($key) && is_object($key)) {
+            $this->app_key = $key;
+        }
+
+        return $old;
     }
 
     /**
@@ -123,32 +189,6 @@ class AppConfiguration
      * 
      * @return string
      */
-    public function setPublicpath($newPublicPath)
-    {
-        $old = $this->public;
-
-        if ($newPublicPath) {
-            $this->public = $newPublicPath;
-        }
-
-        return $old;
-    }
-
-    /**
-     * getViewPath retourne configuration du path du repertoire du cache
-     * 
-     * @return string
-     */
-    public function getPublicpath($newPublicPath)
-    {
-        return  $this->public;
-    }
-
-    /**
-     * getViewPath retourne configuration du path du repertoire du cache
-     * 
-     * @return string
-     */
     public function getViewpath()
     {
         return $this->views;
@@ -162,13 +202,13 @@ class AppConfiguration
      */
     public function setCachepath($newCachePath)
     {
-        $old = $newCachePath;
+        $old = $this->cache;
 
         if (realpath($newCachePath)) {
             $this->cache = $newCachePath;
         }
 
-        return $newCachePath;
+        return $old;
     }
 
     /**
@@ -182,8 +222,9 @@ class AppConfiguration
     }
     
     /**
-     * setLogPath configuration du path du repertoir de log
-     * 
+     * setLogPath configuration du path du répertoir de log
+     *
+     * @param string $newLogPath
      * @return string
      */
     public function setLogpath($newLogPath)
@@ -198,7 +239,7 @@ class AppConfiguration
     }
 
     /**
-     * getLogPath retourne la configuration du path du repertoir de log
+     * getLogPath retourne la configuration du path du répertoir de log
      * 
      * @return string
      */

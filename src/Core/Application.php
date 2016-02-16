@@ -14,7 +14,6 @@
 namespace Bow\Core;
 
 
-use Closure;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
@@ -44,39 +43,12 @@ class Application
 	private $specialMethod = null;
 
 	/**
-	 * Répresente le chemin vers la vue.
-	 * 
-	 * @var null|string
-	 */
-	private $views = null;
-	
-	/**
-	 * Définie le systeme de template
-	 *
-	 * @var string|null
-	 */
-	private $engine = null;
-	
-	/**
-	 * Répertoire de cache
-	 * 
-	 * @var string
-	 */
-	private $cache = null;
-	
-	/**
 	 * Répresente la racine de l'application
 	 *
 	 * @var string
 	 */
 	private $root = "";
-	
-	/**
-	 * Répresente le dossier public
-	 *
-	 * @var string
-	 */
-	private $public = "";
+
 	
 	/**
 	 * Fonction lancer en cas d'erreur.
@@ -196,7 +168,7 @@ class Application
 			Util::launchCallback($cb, $this->req, $this->config->getNamespace());
 		} else {
 			if (!is_callable($cb)) {
-				throw new ApplicationException("Callback are not define", 1);
+				throw new ApplicationException(__METHOD__ . "(): callback are not define", 1);
 			}
 			call_user_func_array($cb, [$this->req]);
 		}
@@ -446,6 +418,7 @@ class Application
 				}
 
 				if ($route->match($this->req->uri($this->root), $with)) {
+					$this->currentRoot = $route->getPath();
 					$route->call($this->req, $this->config->getNamespace());
 					$error = false;
 				}
@@ -530,5 +503,10 @@ class Application
 		} else {
 			throw new ApplicationException("$method not exists.", 1);
 		}
+	}
+
+	public function url()
+	{
+		return $this->currentRoot;
 	}
 }

@@ -27,27 +27,29 @@ class Model
 	private $primary = null;
 	/**
 	 * last define field
-	 * 
 	 * @var bool
 	 */
 	private $lastField = null;
 	/**
 	 * Table name
-	 * 
 	 * @var bool
 	 */
 	private $table = null;
 	/**
 	 * Sql Statement
-	 * 
 	 * @var string
 	 */ 
 	private $sqlStement = null;
+    /**
+     * @var string
+     */
 	private $engine = "MyIsam";
+    /**
+     * @var string
+     */
 	private $character = "UTF8";
 	/**
 	 * define the auto increment field
-	 * 
 	 * @var bool
 	 */
 	private $autoincrement = null;
@@ -57,11 +59,9 @@ class Model
 	 */
 	public function __construct()
 	{
-		
 		$this->fields  = new Collection;
 
 		return $this;
-
 	}
 
 	/**
@@ -77,17 +77,7 @@ class Model
 	/**
 	 * setEngine, set the model engine name
 	 * 
-	 * @param $table
-	 */
-	public function setTableName($engine)
-	{
-		$this->engine = $engine;
-	}
-
-	/**
-	 * setEngine, set the model engine name
-	 * 
-	 * @param $table
+	 * @param $character
 	 */
 	public function setCharacter($character)
 	{
@@ -131,13 +121,13 @@ class Model
 	 * @param int $size
 	 * @param bool $null
 	 * @param null|string $default
-	 * 
+	 * @throws ModelException
 	 * @return $this
 	 */
 	public function varchar($field, $size = 255, $null = false, $default = null)
 	{
 		if ($size > 255) {
-			throw new Exception("Error Processing Request", 1);
+			throw new ModelException("Error Processing Request", 1);
 		}
 
 		return $this->loadWhole("varchar", $field, $size, $null, $default);
@@ -148,7 +138,6 @@ class Model
 	 * 
 	 * @param string $field
 	 * @param bool $null
-	 * @param bool $default
 	 * 
 	 * @return $this
 	 */ 
@@ -165,9 +154,9 @@ class Model
 	 * datetime
 	 * 
 	 * @param string $field
-	 * @param string|null $null
+	 * @param boolean $null
 	 * 
-	 * @param $this
+	 * @return $this
 	 */ 
 	public function datetime($field, $null = false)
 	{
@@ -182,9 +171,9 @@ class Model
 	 * timestamp
 	 * 
 	 * @param string $field
-	 * @param string|null $null
+	 * @param boolean $null
 	 * 
-	 * @param $this
+	 * @return $this
 	 */ 
 	public function timestamp($field, $null = false)
 	{
@@ -214,9 +203,9 @@ class Model
 	 * text
 	 * 
 	 * @param string $field
-	 * @param bool $null
+	 * @param boolean $null
 	 * 
-	 * @param $this
+	 * @return $this
 	 */ 
 	public function text($field, $null = false)
 	{
@@ -233,8 +222,8 @@ class Model
 	 * @param string $field
 	 * @param bool $null
 	 * @param string|null $default
-	 * 
-	 * @param $this
+	 * @throws ModelException
+	 * @return $this
 	 */ 
 	public function character($field, $size = 1, $null = false, $default = null)
 	{
@@ -249,33 +238,24 @@ class Model
 
 	/**
 	 * autoincrement
-	 * 
+	 *
+	 * @param string|null $field
+	 * @throws ModelException
 	 * @return $this
 	 */ 
-	public function autoincrement($filed = null)
+	public function autoincrement($field = null)
 	{
 		if ($this->autoincrement === null) {
-
 			if ($this->lastField !== null) {
-				
 				if (in_array($this->lastField->method, ["int", "longint", "bigint"])) {
-				
 					$this->autoincrement = $this->lastField;
-				
 				} else {
-				
 					throw new ModelException("Cannot add autoincrement to " . $this->lastField->method, 1);
-
 				}
-			
 			} else {
-			
-				if ($filed) {
-			
-					$this->int($filed);
-			
+				if ($field) {
+					$this->int($field);
 				}
-			
 			}
 		}
 
@@ -284,20 +264,17 @@ class Model
 
 	/**
 	 * primary
-	 * 
+	 *
+	 * @throws ModelException
 	 * @return $this
 	 */
 	public function primary()
 	{
-		if ($this->primary === null) {
-
-			return $this->addIndexes("primary");
-
-		} else {
-
+		if ($this->primary !== null) {
 			throw new ModelException("Primary key has already defined", 1);
-			
 		}
+
+		return $this->addIndexes("primary");
 	}
 
 	/**
@@ -305,7 +282,7 @@ class Model
 	 * 
 	 * @return $this
 	 */
-	public function indexe($field = null)
+	public function indexe()
 	{
 		return $this->addIndexes("indexe");
 	}
@@ -324,36 +301,33 @@ class Model
 	 * addIndexes
 	 * 
 	 * @param string $indexType
-	 * 
-	 * @return
+	 * @throws ModelException
+	 * @return self
 	 */
 	private function addIndexes($indexType)
 	{
 		if ($this->lastField !== null) {
-
 			$last = $this->lastField;
 			$this->fields->get($last->method)->update($last->field, [$indexType => true]);
-
-			return $this;
-
 		} else {
-
 			throw new ModelException("Cannot assign {$indexType}. Because field are not defined.", 1);
-			
 		}
+
+        return $this;
 	}
 
 	/**
 	 * addField
-	 * 
+	 * @param string $method
+     * @param string $field
+     * @param string $data
+     * @throws ModelExecption
 	 * @return $this
 	 */
 	private function addField($method, $field, $data)
 	{
 		if (!method_exists($this, $method)) {
-
-			throw new Exception("Error Processing Request", 1);
-		
+			throw new ModelExecption("Error Processing Request", 1);
 		}
 
 		if (!$this->fields->has($method)) {
@@ -361,7 +335,6 @@ class Model
 		}
 
 		if (!$this->fields->get($method)->has($field)) {
-
 			// default index are at false
 			$data["primary"] = false;
 			$data["unique"] = false;
@@ -383,35 +356,25 @@ class Model
 	 * @param bool $null
 	 * @param null|string $default
 	 * 
-	 * @return $this
+	 * @return self
 	 */
 	private function loadWhole($method, $field, $size = 20, $null = false, $default = null)
 	{
 
 		if (is_bool($size)) {
-
 			$null = $size;
 			$size = 11;
-		
 		} else {
-			
 			if (is_string($size)) {
-			
 				$default = $size;
 				$size = 11;
 				$null = false;
-			
 			} else {
-				
 				if (is_string($null)) {
-
 					$default = $null;
 					$null = false;
-				
 				}
-
 			}
-
 		}
 
 		$this->addField($method, $field, [
@@ -431,15 +394,14 @@ class Model
 	private function stringify()
 	{
 		$this->fields->each(function ($type, $value) {
-
 			switch ($type) {
 				case 'varchar':
 				case 'char':
-					$value->each(function($filed, $info) use ($type) {
+					$value->each(function($info, $field) use ($type) {
 						$info = (object) $info;
 						$null = $this->getNullType($info->null);
 
-						$this->sqlStement .= " `$filed` $type(" . $info->size .") $null";
+						$this->sqlStement .= " `$field` $type(" . $info->size .") $null";
 
 						if ($info->default) {
 							$this->sqlStement .= " default '" . $info->default . "'";
@@ -526,17 +488,15 @@ class Model
 					});
 					break;
 			}
-
 		});
-		
-		if ($this->sqlStement !== null) {
 
-			return "create table `". $this->table ."`($this->sqlStement)engine=" . $this->engine . " default charset=" . $this->character .";";	
-		
+        $sql = null;
+
+		if ($this->sqlStement !== null) {
+            $sql = "create table `". $this->table ."`($this->sqlStement)engine=" . $this->engine . " default charset=" . $this->character .";";
 		}
 
-		return null;
-
+		return $sql;
 	}
 
 	/**
@@ -570,16 +530,11 @@ class Model
 		$statement = $this->stringify();
 
 		if (is_string($statement)) {
-
 			$status = $db->exec($statement);
-		
 		} else {
-
 			$status = false;
-
 		}
 
 		return $status;
 	}
-
 }

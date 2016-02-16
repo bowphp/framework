@@ -111,8 +111,8 @@ class Util
 	 * Lanceur de callback
 	 *
 	 * @param callable $cb
-	 * @param mixed param[optional]
-	 * @param mixed names[optional]
+	 * @param mixed $param
+	 * @param array $names
 	 * @return mixed
 	 */
 	public static function launchCallback($cb, $param = null, array $names = [])
@@ -127,9 +127,10 @@ class Util
 		static::$names = $names;
 		
 		// Chargement de l'autoload
-		require $names["namespace"]["autoload"] . ".php";
+		@require $names["namespace"]["autoload"] . ".php";
 		$autoload = $names["app_autoload"];
-		$autoload::register();
+		@$autoload::register();
+		$middleware = null;
 
 		if (is_callable($cb)) {
 			return call_user_func_array($cb, $param);
@@ -166,15 +167,13 @@ class Util
 					else {
 						$middleware_is_defined = true;
 						$middleware = array_shift($cb);
-						if (is_callable($cb)) {
-							$cb = $cb;
-						} else {
+						if (!is_callable($cb)) {
 							$cb = static::loadController($cb);
 						}
 					}
 				}
 				else {
-					// TODO: execution recurcive.
+					// TODO: execution récurcive.
 					// $this->next($cb, $param);
 				}
 			}
@@ -186,7 +185,7 @@ class Util
 				}
 			}
 		}
-		// vrification de l'activation du middlware.
+		// vérification de l'activation du middlware.
 		if ($middleware_is_defined) {
 			// Status permettant de bloquer la suite du programme.
 			$status = true;
@@ -207,8 +206,8 @@ class Util
 					// Lancement du middleware.
 					$status = call_user_func_array($handler, $param);
 				}
-			// Le middelware est un callback. les middleware peuvent etre
-			// definir comme des callback par l'utilisteur
+			// Le middleware est un callback. les middleware peuvent être
+			// définir comme des callback par l'utilisteur
 			}
 			else if (is_callable($middleware)) {
 				$status = call_user_func_array($middleware, $param);
@@ -323,11 +322,11 @@ class Util
 	 */
 	public static function hourToLetter($hour)
 	{
-		if (!is_string($heure)) {
+		if (!is_string($hour)) {
 			return null;
 		}
 
-		if (preg_match("/[0-9]{1,2}(:[0-9]{1,2}){1,2}/", $heure)) {
+		if (preg_match("/[0-9]{1,2}(:[0-9]{1,2}){1,2}/", $hour)) {
 			$hourPart = explode(":", $hour);
 			$heures   = static::number2Letter($hourPart[0]) . " heure";
 			$minutes  = static::number2Letter($hourPart[1]) . " minute";
@@ -347,10 +346,12 @@ class Util
 			if (isset($hourPart[2]) && $hourPart[2] > 0) {
 				$secondes .= static::number2Letter($hourPart[2]) . " secondes";
 			}
+
+			return strtolower($heures . " " . $minutes . $secondes);
 		}
 
 		// Retourne
-		return strtolower($heures . " " . $minutes . $secondes);
+		return null;
 	}
 
 	/**
@@ -383,7 +384,7 @@ class Util
 	}
 
 	/**
-	 * Lance un var_dump sur les variables passées en parametre.
+	 * Lance un var_dump sur les variables passées en paramètre.
 	 * 
 	 * @throws InvalidArgumentException
 	 * @return void
@@ -444,7 +445,7 @@ class Util
 	}
 	
 	/**
-	 * Permettant de convertie des chiffres en letter
+	 * Permettant de convertir des chiffres en letter
 	 * 
 	 * @param string $nombre
 	 * @return string
@@ -504,7 +505,7 @@ class Util
 		}
 
 		/**
-		 * Calcule des cemtaines
+		 * Calcule des centaines
 		 */
 		$tensOut .= ($unite === 0 && $dixaine === 8 ? "s": "");
 		$centsOut = ($cent > 1 ? $nombreEnLettre["unite"][(int)$cent].' ' : '').($cent > 0 ? 'cent' : '').($cent > 1 && $dixaine == 0 && $unite == 0 ? '' : '');

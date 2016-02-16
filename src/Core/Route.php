@@ -50,13 +50,6 @@ Class Route
 	private $with;
 
 	/**
-	 * Liste de namespace.
-	 *
-	 * @var $with
-	 */
-	private $names = [];
-
-	/**
 	 * Contructeur
 	 *
 	 * @param string $path
@@ -64,11 +57,9 @@ Class Route
 	 */
 	public function __construct($path, $cb)
 	{
-
 		$this->cb = $cb;
 		$this->path = $path;
 		$this->match = [];
-	
 	}
 
 	/**
@@ -85,12 +76,11 @@ Class Route
 	 * match, vérifie si le path de la REQUEST est conforme à celle définir par le routeur
 	 * 
 	 * @param string $url
-	 * 
+	 * @param array $with
      * @return bool.
 	 */
 	public function match($url, $with)
 	{
-
 		$this->with = $with;
 
 		if (preg_match("~(.+)/$~", $url, $match)) {
@@ -108,36 +98,29 @@ Class Route
 		$path = $url;
 
 		if (empty($this->with)) {
-			
 			$path = preg_replace("~:\w+~", "([^\s]+)", $this->path);
 			preg_match_all("~:([\w]+)~", $this->path, $this->key);
 			array_shift($this->key);
 			$this->key = $this->key[0];
-		
 		} else {
 
 			if (preg_match_all("~:([\w]+)~", $this->path, $match)) {
-
                 $tmpPath =  $this->path;
                 $this->key = $match[1];
 
 				foreach ($match[1] as $key => $value) {
-
                     if (array_key_exists($value, $this->with)) {
                         $tmpPath = preg_replace("~:$value~", "(" . $this->with[$value] . ")", $tmpPath);
                     }
-
                 }
 
                 // En case la path différent on récupère, on récupère celle dans $tmpPath
                 if ($tmpPath !== $this->path) {
                     $path = $tmpPath;
                 }
-
 			}
 
 			$this->with = [];
-		
 		}
 
 		// Vérifcation de url
@@ -154,9 +137,7 @@ Class Route
 	 * Fonction permettant de lancer les fonctions de rappel.
 	 * 
 	 * @param Request $req
-	 * @param Response $res
-	 * @param array $namespace
-	 * 
+	 * @param array $names
 	 * @return mixed
 	 */
 	public function call(Request $req, $names)

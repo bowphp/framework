@@ -63,7 +63,7 @@ class SmtpMail extends Message
         $data .= ".";
         echo $data;
 
-        $this->write($data);
+        $status = $this->write($data);
 
         Util::launchCallback($cb, $status);
         
@@ -76,19 +76,12 @@ class SmtpMail extends Message
     /**
      * permet de se connecté a un serveur smpt
      *
-     * @param $url
-     * @param null $username
-     * @param null $password
-     * @param bool|false $secure
-     * @param bool|false $tls
-     * 
      * @throws ErrorException
      * @throws SocketException
      * @throws SmtpException
      */
     private function connection()
     {
-
         $url = $this->url;
         $username = $this->username;
         $password = $this->password;
@@ -98,28 +91,20 @@ class SmtpMail extends Message
         @list($url, $port) = explode(":", $url, 2);
 
         if (!isset($port)) {
-        
             $port = 25;
-        
         } else {
-        
             $port = (int) $port;
-        
         }
 
         if ($secure === true) {
-        
             $url = "ssl://{$url}";
             $port = 465;
-        
         }
 
         $this->sock = fsockopen($url, $port, $errno, $errstr, $timeout=50);
 
         if ($this->sock == null) {
-        
             throw new SocketException(__METHOD__."(): can not connect to {$url}:{$port}", E_USER_ERROR);
-        
         }
 
         stream_set_timeout($this->sock, 20, 0);
@@ -128,15 +113,10 @@ class SmtpMail extends Message
         $host = isset($_SERVER['HTTP_HOST']) && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
         
         if ($code == 220) {
-
             $code = $this->write("EHLO $host", 250);
-
             if ($code != 250) {
-
                 $this->write("EHLO $host", $code=250);
-            
             }
-        
         }
 
         if ($tls === true) {
@@ -145,21 +125,17 @@ class SmtpMail extends Message
             $secured = stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
             
             if (!$secured) {
-            
                 throw new ErrorException(__METHOD__."(): Can not secure you connection with tls.", 1);
-            
             }
 
             $this->write("EHLO $host", $code=250);
         }
 
         if ($username !== null && $password !== null) {
-            
             $this->write("AUTH LOGIN", 334);
             echo "Logging";
             $this->write(base64_encode($username), $code=334, "username");
             $this->write(base64_encode($password), $code=235, "password");
-        
         }
     }
 
@@ -182,21 +158,14 @@ class SmtpMail extends Message
     {
         $s = null;
 
-        while (!feof($this->sock)) {
-           
+        for (; !feof($this->sock); ) {
             if (($line = fgets($this->sock, 1e3)) != null) {
-                
                 echo $line;
-                
                 if (substr($line, 3, 1) == " ") {
-
                     $s = (int) substr($line, 0, 3);
                     break;
-
                 }
-
             }
-
         }
 
         return $s;
@@ -210,29 +179,23 @@ class SmtpMail extends Message
      * @param null $message
      * 
      * @throws SmtpException
+     * @return string
      */
     private function write($command, $code = null, $message = null)
     {
         $command = $command . Util::sep();
-        fwrite($this->sock, $command, m_strlen($command));
+        fwrite($this->sock, $command, strlen($command));
         
         $response = null;
 
         if ($code !== null) {
-
             $response = $this->read();
-            
             var_dump($response);
-
             if (!in_array($response, (array) $code, true)) {
-               
                 throw new SmtpException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", 1);
-            
             }
-
         }
 
         return $response;
     }
-
 }

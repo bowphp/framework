@@ -169,7 +169,7 @@ class RequestData implements CollectionAccess
 	public function each(Closure $cb)
 	{
 		if ($this->isEmpty()) {
-			return call_user_func_array($cb, null);
+			return call_user_func_array($cb, [null, null]);
 		}
 
 		foreach($this->data as $key => $value) {

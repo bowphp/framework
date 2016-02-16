@@ -48,8 +48,8 @@ class Database extends DatabaseTools
      */
     private static $zone = null;
     /***
-     * Liste des constances d'execution de Requete SQL.
-     * Pour le system de de base de donnee ultra minimalise de Bow.
+     * Liste des constantes d'execution de Requete SQL.
+     * Pour le system de de base de donnée ultra minimalise de Bow.
      */
     const SELECT = 1;
     const UPDATE = 2;
@@ -60,6 +60,7 @@ class Database extends DatabaseTools
      * Charger la configuration
      *
      * @param object $config
+     * @return array
      */
     public static function configure($config)
     {
@@ -136,7 +137,7 @@ class Database extends DatabaseTools
     }
 
 	/**
-	 * switchTo, permet de ce connecter a une autre base de donnee.
+	 * switchTo, permet de ce connecter a une autre base de donnée.
      *
 	 * @param string $enterKey
 	 * @param callable $cb
@@ -147,7 +148,7 @@ class Database extends DatabaseTools
         static::verifyConnection();
 
 		if (!is_string($enterKey)) {
-        	Util::launchCallback($cb, [new InvalidArgumentException("parametre invalide")]);
+        	Util::launchCallback($cb, [new InvalidArgumentException("paramètre invalide")]);
         } else {
 			static::$db = null;
 			static::connection($enterKey, $cb);
@@ -167,7 +168,7 @@ class Database extends DatabaseTools
     /**
      * éxécute une requête update
      *
-     * @param $sqlstatement
+     * @param string $sqlstatement
      * @param array $bind
      * @return bool
      */
@@ -399,7 +400,7 @@ class Database extends DatabaseTools
         }
     }
     /**
-     * Récupère l'identifiant de la derniere enregistrement.
+     * Récupère l'identifiant de la dernière enregistrement.
      * 
      * @return int
      */
@@ -411,7 +412,7 @@ class Database extends DatabaseTools
     }
 
     /**
-     * Récupère la derniere erreur sur la l'object PDO
+     * Récupère la dernière erreur sur la l'object PDO
      * 
      * @return array
      */
@@ -442,15 +443,15 @@ class Database extends DatabaseTools
          *	 Si vous spécifiez un join veillez définir des alias
          *	 $options = [
          *	 	"type" => SELECT,
-         * 		"table" => "table",
+         * 		"table" => "table as T",
          *	 	"join" => [
-         * 			"otherTable" => "otherTable",
+         * 			"otherTable" => "otherTable as O",
          *	 		"on" => [
          *	 			"T.id",
          *	 			"O.parentId"
          *	 		]
          *	 	],
-         *	 	"where" => "R.r_num = " . $currentRegister,
+         *	 	"where" => "T.id = 1",
          *	 	"order" => ["column", true],
          *	 	"limit" => "1, 5",
          *	 	"grby" => "column"
@@ -490,7 +491,7 @@ class Database extends DatabaseTools
                     $where = " WHERE " . $options['where'];
                 }
                 /*
-                 *Vérification de l'existance d'un clause:
+                 * Vérification de l'existance d'un clause:
                  * __________
                  *| ORDER BY |
                  * ----------
@@ -654,5 +655,4 @@ class Database extends DatabaseTools
         static::verifyConnection();
         return static::$db;
     }
-
 }

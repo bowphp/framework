@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SnoopAutoload, systeme de Chargement automatique des classes.
+ * BowAutoload, systeme de Chargement automatique des classes.
  */
 namespace Bow;
 

@@ -16,13 +16,9 @@ class Session implements CollectionAccessStatic
 	 */
 	public static function start()
 	{
-		
 		if (PHP_SESSION_ACTIVE != session_status()) {
-
 			session_start();
-		
 		}
-
 	}
 
 	/**
@@ -57,13 +53,15 @@ class Session implements CollectionAccessStatic
 	public static function get($key = null)
 	{
 		static::start();
-		
-		if (is_string($key)) {
-		
-			return static::has($key) ? $_SESSION[$key] : false;
-		
+
+		if ($key !== null) {
+			if (static::has($key)) {
+				return $_SESSION[$key];
+			} else {
+				return null;
+			}
 		}
-		
+
 		return $_SESSION;
 	}
 
@@ -75,56 +73,93 @@ class Session implements CollectionAccessStatic
 	 * @param boolean $next=null
 	 * 
 	 * @throws InvalidArgumentException
+	 * @return void
 	 */
-	public static function add($key, $data, $next = null) {
-		
+	public static function add($key, $data, $next = null)
+	{
 		static::start();
 
 		if (!is_string($key)) {
-		
 			throw new InvalidArgumentException("La clé doit être un chaine.", E_ERROR);
-		
 		}
 
 		if ($next === true) {
-		
 			if (static::has($key)) {
-			
 				array_push($_SESSION[$key], $data);
-			
 			} else {
-			
 				$_SESSION[$key] = $data;
-			
 			}
-		
 		} else {
-
 			$_SESSION[$key] = $data;
-		
 		}
-
 	}
 
 	/**
      * remove, supprime une entrée dans la colléction
 	 * 
 	 * @param string $key
+	 * @return void
 	 */
 	public static function remove($key)
 	{
 		unset($_SESSION[$key]);
 	}
 
+    /**
+     * set
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+	public static function set($key, $value)
+	{
+        $old = null;
+
+        if (static::has($key)) {
+            $old = $_SERVER[$key];
+            $_SERVER[$key] = $value;
+        }
+
+        return $old;
+	}
+
+    /**
+     * flash
+     *
+     * @param $key
+     * @param null $message
+     * @return mixed
+     */
+    public function fash($key, $message = null)
+    {
+        if (!static::has("application_flash")) {
+            $_SERVER["application_flash"] = new Collection();
+        }
+
+        if ($message === null) {
+            return $_SERVER["application_flash"]->get($key);
+        } else {
+            $_SERVER["application_flash"]->add($key, $message);
+        }
+
+        return null;
+    }
+
+    /**
+     * reFlash
+     */
+    public function reFlash()
+    {
+        unset($_SERVER["application_flash"]);
+    }
+
 	/**
 	 * disconnect, permet vider le cache de session
 	 */
 	public static function stop()
 	{
-		
 		self::start();
 		session_destroy();
 		session_unset();
-
 	}
 }

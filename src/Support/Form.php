@@ -142,7 +142,7 @@ class Form
     }
 
     /**
-     * Ajout un retoure chariot de la collétion de balise
+     * Ajout un retoure chariot de la colléction de balise
      *
      * @return void
      */
@@ -178,5 +178,4 @@ class Form
     {
         echo "<form id=\"$id\" method=\"{$method}\" action=\"{$action}\" ".($enctype === true ? 'enctype="multipart/form-data"': "").">". self::$form . "</form>";
     }
-    
 }

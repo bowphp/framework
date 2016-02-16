@@ -34,7 +34,7 @@ class Response
     
     /**
      * Instance de l'application
-     * @var \Snoop\Core\Application
+     * @var AppConfiguration
      */
     private $config;
 
@@ -132,8 +132,9 @@ class Response
 	 * view, require $filename
 	 * 
 	 * @param string $filename
-	 * @param mixed|null $bind
-	 * @return \Snoop\Core\Application
+	 * @param array $bind
+	 * @throws ViewException
+	 * @return self
 	 */
 	public function sendFile($filename, $bind = [])
 	{
@@ -153,7 +154,7 @@ class Response
 		}
 
  		extract($bind);
-		// Render du fichier demandé.
+		// Rendu du fichier demandé.
 		require $filename;
 
 		return $this;
@@ -164,6 +165,8 @@ class Response
 	 *
 	 * @param string $filename
 	 * @param array $bind
+	 * @param integer $code=200
+	 * @throws ViewException
 	 * @return self
 	 */
 	public function view($filename, $bind = null, $code = 200)
@@ -173,11 +176,11 @@ class Response
 		
 		if ($this->config->getViewpath() !== null) {
 			if (!is_file($this->config->getViewpath() . "/" . $filename)) {
-				throw new ResponseException("$filename not found.");
+				throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
 			}
 		} else {
 			if (!is_file($filename)) {
-				throw new ResponseException("$filename not found.");
+				throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
 			}
 		}
 
@@ -201,10 +204,8 @@ class Response
 	/**
 	 * templateLoader, charge le moteur template à utiliser.
 	 * 
-	 * 
-	 * @param string|null $filename
 	 * @throws ErrorException
-	 * @return Mustache|Twig_Env|Jade|null
+	 * @return Mustache|Twig_Evironement
 	 */
 	private function templateLoader()
 	{

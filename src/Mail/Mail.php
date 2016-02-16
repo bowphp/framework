@@ -22,23 +22,19 @@ class Mail extends Message
 	 * send, Envoie le mail
 	 * 
 	 * @param callable|null $cb
-	 * 
+	 * @throws InvalidArgumentException
 	 * @return self
 	 */
 	public function send($cb = null)
 	{
 		if (empty($this->to) || empty($this->subject) || empty($this->message)) {
-
-			trigger_error(__METHOD__. "(): an error comming because your don't given the following parameter: SENDER, SUBJECT or MESSAGE.", E_USER_ERROR);
-		
+			throw new InvalidArgumentException(__METHOD__. "(): an error comming because your don't given the following parameter: SENDER, SUBJECT or MESSAGE.", E_USER_ERROR);
 		}
-
 		$status = mail(implode(Util::sep(), $this->to), $this->subject, $this->message, $this->formatHeader());
 
 		Util::launchCallback($cb, $status);
 
 		return $status;
-	
 	}
 
 	/**
@@ -48,32 +44,24 @@ class Mail extends Message
 
 	private function __construct()
 	{
-
-		$this->boundary = "__Bow-framework-" . md5(date("r", time()));
+		$this->boundary = "__Bow-Framework-" . md5(date("r", time()));
 		$this->addHeader("MIME-Version", "1.0");
 		$this->addHeader("X-Mailer",  "Bow Framework");
 		$this->addHeader("Date", date("r"));
-	
 	}
 
 	/**
-	 * load, charge la classe Mail en mode singléton
+	 * takeInstance, charge la classe Mail en mode singléton
 	 * 
 	 * @return self
 	 */
-	public static function load()
+	public static function takeInstance()
 	{
-
 		if (self::$mail !== null) {
-
 			return self::$mail;
-		
 		}
-		
 		self::$mail = new self;
 		
 		return self::$mail;
-	
 	}
-
 }

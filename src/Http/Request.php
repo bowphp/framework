@@ -26,8 +26,6 @@ class Request
 
 	/**
 	 * Constructeur
-	 * 
-	 * @param Application $app
 	 */
 	private function __construct()
 	{
@@ -36,8 +34,6 @@ class Request
 
 	/**
 	 * Singletion loader
-	 * 
-	 * @param AppConfiguration $app
 	 * @return null|self
 	 */
 	public static function configure()
@@ -66,16 +62,24 @@ class Request
 		return str_replace($path, "", $uri);
 	}
 
+	/**
+	 * retourne path envoyé par client.
+	 *
+	 * @return string
+	 */
+	public function hostname()
+	{
+		return $_SERVER["HTTP_HOST"];
+	}
 
 	/**
 	 * retourne path envoyé par client.
 	 *
-	 * @param string $path=""
 	 * @return string
 	 */
-	public function url($path = "")
+	public function pathname()
 	{
-		return $_SERVER["HTTP_HOST"] . "/" . $this->uri();
+		return "/" . $this->uri();
 	}
 
 	/**

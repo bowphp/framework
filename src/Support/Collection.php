@@ -30,15 +30,16 @@ class Collection
      * has, vérifie l'existance une clé dans la colléction de session
      *
      * @param string $key
+     * @param bool $val
      * @return boolean
      */
-    public function has($value, $val = false)
+    public function has($key, $val = false)
     {   
         if ($val === true) {
-        	return isset(array_flip($this->storage)[$value]);
+        	return isset(array_flip($this->storage)[$key]);
         }
 
-        return isset($this->storage[$value]);
+        return isset($this->storage[$key]);
     }
 
     /**
@@ -63,6 +64,10 @@ class Collection
 
     	if ($this->has($key)) {
         	return $this->storage[$key];
+        } else {
+            if ($key !== null) {
+                return null;
+            }
         }
 
     	return $this->storage;
@@ -73,7 +78,6 @@ class Collection
      *
      * @param string $key
      * @param $data
-     * @param bool $next
      * 
      * @return $this
      */
@@ -115,7 +119,6 @@ class Collection
     public function set($key, $value)
     {
     	if ($this->has($key)) {
-    		
             $old = $this->storage[$key];
     		$this->storage[$key] = $value;
 
@@ -137,7 +140,7 @@ class Collection
     public function each($cb)
     {
     	foreach ($this->storage as $key => $value) {
-        	call_user_func_array($cb, [$key, $value]);
+        	call_user_func_array($cb, [$value, $key]);
         }
 
         return $this;
@@ -145,13 +148,14 @@ class Collection
 
     /**
      * map
-     * 
+     *
+     * @param callable $cb
      * @return $this
      */
     public function map($cb)
     {
     	foreach ($this->storage as $key => $value) {
-    		$this->storage[$key] = call_user_func_array($cb, [$key, $value]);
+    		$this->storage[$key] = call_user_func_array($cb, [$value, $key]);
         }
 
         return $this;
@@ -169,7 +173,7 @@ class Collection
     	$r = [];
 
     	foreach ($this->storage as $key => $value) {
-            if (call_user_func_array($cb, [$key, $value])) {
+            if (call_user_func_array($cb, [$value, $key])) {
             	$r[] = $this->storage[$key];
             }
     	}
@@ -201,7 +205,7 @@ class Collection
      * 
      * @param callable $cb
      * 
-     * @return $this
+     * @return self
      */
     public function reduce($cb)
     {
@@ -273,6 +277,8 @@ class Collection
     }
 
     /**
+     * update, met à jour une valeur existant dans la collection
+     *
      * @param string|integer $key
      * @param mixed $data
      * @param boolean $overide 

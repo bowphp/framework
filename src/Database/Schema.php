@@ -43,11 +43,16 @@ class Schema
 	 * @var string
 	 */ 
 	private $sqlStement = null;
+	/**
+	 * @var string
+	 */
 	private $engine = "MyIsam";
+	/**
+	 * @var string
+	 */
 	private $character = "UTF8";
 	/**
 	 * define the auto increment field
-	 * 
 	 * @var bool
 	 */
 	private $autoincrement = null;
@@ -57,16 +62,13 @@ class Schema
 	 */
 	public function __construct()
 	{
-		
 		$this->fields  = new Collection;
 
 		return $this;
-
 	}
 
 	/**
 	 * setTableName, set the model table name
-	 * 
 	 * @param $table
 	 */
 	public function setTableName($table)
@@ -76,18 +78,7 @@ class Schema
 
 	/**
 	 * setEngine, set the model engine name
-	 * 
-	 * @param $table
-	 */
-	public function setTableName($engine)
-	{
-		$this->engine = $engine;
-	}
-
-	/**
-	 * setEngine, set the model engine name
-	 * 
-	 * @param $table
+	 * @param $character
 	 */
 	public function setCharacter($character)
 	{
@@ -239,9 +230,7 @@ class Schema
 	public function char($field, $size = 1, $null = false, $default = null)
 	{
 		if ($size > 4294967295) {
-
 			throw new ModelException("Char, max size is 4294967295", 1);
-
 		}
 
 		return $this->loadWhole("char", $field, $size, $null, $default);
@@ -255,25 +244,15 @@ class Schema
 	public function autoincrement($filed = null)
 	{
 		if ($this->autoincrement === null) {
-
 			if ($this->lastField !== null) {
-				
 				if (in_array($this->lastField->method, ["int", "longint", "bigint"])) {
-				
 					$this->autoincrement = $this->lastField;
-				
 				} else {
-				
 					throw new ModelException("Cannot add autoincrement to " . $this->lastField->method, 1);
-
 				}
-			
 			} else {
-			
 				if ($filed) {
-			
 					$this->int($filed);
-			
 				}
 			
 			}
@@ -290,13 +269,9 @@ class Schema
 	public function primary()
 	{
 		if ($this->primary === null) {
-
 			return $this->addIndexes("primary");
-
 		} else {
-
 			throw new ModelException("Primary key has already defined", 1);
-			
 		}
 	}
 
@@ -330,17 +305,13 @@ class Schema
 	private function addIndexes($indexType)
 	{
 		if ($this->lastField !== null) {
-
 			$last = $this->lastField;
 			$this->fields->get($last->method)->update($last->field, [$indexType => true]);
-
-			return $this;
-
 		} else {
-
 			throw new ModelException("Cannot assign {$indexType}. Because field are not defined.", 1);
-			
 		}
+
+		return $this;
 	}
 
 	/**
@@ -351,9 +322,7 @@ class Schema
 	private function addField($method, $field, $data)
 	{
 		if (!method_exists($this, $method)) {
-
 			throw new Exception("Error Processing Request", 1);
-		
 		}
 
 		if (!$this->fields->has($method)) {
@@ -361,14 +330,12 @@ class Schema
 		}
 
 		if (!$this->fields->get($method)->has($field)) {
-
 			// default index are at false
 			$data["primary"] = false;
 			$data["unique"] = false;
 			$data["indexe"] = false;
 			$this->fields->get($method)->add($field, $data);
 			$this->lastField = (object) ["method" => $method, "field" => $field];
-
 		}
 
 		return $this;
@@ -387,31 +354,20 @@ class Schema
 	 */
 	private function loadWhole($method, $field, $size = 20, $null = false, $default = null)
 	{
-
 		if (is_bool($size)) {
-
 			$null = $size;
 			$size = 11;
-		
 		} else {
-			
 			if (is_string($size)) {
-			
 				$default = $size;
 				$size = 11;
 				$null = false;
-			
 			} else {
-				
 				if (is_string($null)) {
-
 					$default = $null;
 					$null = false;
-				
 				}
-
 			}
-
 		}
 
 		$this->addField($method, $field, [
@@ -430,16 +386,16 @@ class Schema
 	 */
 	private function stringify()
 	{
-		$this->fields->each(function ($type, $value) {
+		$this->fields->each(function ($type, Collection $value) {
 
 			switch ($type) {
 				case 'varchar':
 				case 'char':
-					$value->each(function($filed, $info) use ($type) {
+					$value->each(function($info, $field) use ($type) {
 						$info = (object) $info;
 						$null = $this->getNullType($info->null);
 
-						$this->sqlStement .= " `$filed` $type(" . $info->size .") $null";
+						$this->sqlStement .= " `$field` $type(" . $info->size .") $null";
 
 						if ($info->default) {
 							$this->sqlStement .= " default '" . $info->default . "'";
@@ -459,8 +415,7 @@ class Schema
 				case "int":
 				case "bigint":
 				case "logint":
-					$value->each(function ($field, $info) use ($type) {
-						
+					$value->each(function ($info, $field) use ($type) {
 						$info = (object) $info;
 						$null = $this->getNullType($info->null);
 						$this->sqlStement .= "`$field` $type($info->size) $null";
@@ -470,12 +425,10 @@ class Schema
 						}
 
 						if ($this->autoincrement !== null) {
-						
 							if ($this->autoincrement->method == $type
 								&& $this->autoincrement->field == $field) {
 								$this->sqlStement .= " auto_increment";
 							}
-
 							$this->autoincrement = null;
 						}
 
@@ -487,13 +440,12 @@ class Schema
 								$this->sqlStement .= " unique";
 							}
 						}
-
 					});
 					break;
 					
 				case "date":
 				case "datetime":
-					$value->each(function($field, $info) use ($type){
+					$value->each(function($info, $field) use ($type){
 						$info = (object) $info;
 						$null = $this->getNullType($info->null);
 						$this->sqlStement .= " `$field` $type $null";
@@ -510,7 +462,7 @@ class Schema
 					break;
 
 				case "timestamp":
-					$value->each(function($field, $info) use ($type){
+					$value->each(function($info, $field) use ($type){
 						$info = (object) $info;
 						$null = $this->getNullType($info->null);
 						$this->sqlStement .= " `$field` $type $null";
@@ -530,13 +482,10 @@ class Schema
 		});
 		
 		if ($this->sqlStement !== null) {
-
-			return "create table `". $this->table ."`($this->sqlStement)engine=" . $this->engine . " default charset=" . $this->character .";";	
-		
+			return "create table `". $this->table ."`($this->sqlStement)engine=" . $this->engine . " default charset=" . $this->character .";";
 		}
 
 		return null;
-
 	}
 
 	/**
@@ -568,18 +517,12 @@ class Schema
 	public function __invoke(\PDO $db)
 	{
 		$statement = $this->stringify();
-
 		if (is_string($statement)) {
-
 			$status = $db->exec($statement);
-		
 		} else {
-
 			$status = false;
-
 		}
 
 		return $status;
 	}
-
 }
