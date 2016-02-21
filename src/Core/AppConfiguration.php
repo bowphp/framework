@@ -2,6 +2,8 @@
 
 namespace Bow\Core;
 
+use Bow\Support\Util;
+
 class AppConfiguration
 {
     /**
@@ -78,7 +80,7 @@ class AppConfiguration
         $this->loglevel = $config->loglevel;
         $this->tokenExpirateTime = $config->tokenExpirateTime;
 
-        if ($config->approot) {
+        if (isset($config->approot)) {
             $this->approot = $config->approot;
         }
         if (is_file($config->cipher)) {
