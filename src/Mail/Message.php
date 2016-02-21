@@ -402,7 +402,7 @@ abstract class Message
 	public function message($message)
 	{
 		if (!is_string($message)) {
-			throw new \InvalidArgumentException(__METHOD__."() paramèter most be string " . gettype($message) . "given", 1);
+			throw new \InvalidArgumentException(__METHOD__."() parameter most be string " . gettype($message) . "given", 1);
 		}
 
 		$this->message = $message;

@@ -48,7 +48,6 @@ class Application
 	 * @var string
 	 */
 	private $root = "";
-
 	
 	/**
 	 * Fonction lancer en cas d'erreur.
@@ -58,45 +57,17 @@ class Application
 	private $error404 = null;
 
 	/**
-	 * Répertoire de log d'erreur
-	 *
-	 * @var string
-	 */ 
-	private $logDirecotoryName = "";
-
-	/**
-	 * Enrégistre l"information sur la methode de la requête http envoyé
-	 * 
-	 * @var string 
-	 */
-	private $method = "";
-
-	/**
-	 * Method Http courrente.
+	 * Method Http courrante.
 	 * 
 	 * @var string
 	 */
 	private $currentMethod = "";
 	/**
-	 * Enrégistre l'information la courent courrente
+	 * Enrégistre l'information la route courrante
 	 * 
 	 * @var string
 	 */
-	private $currentRoute = "";
-	
-	/**
-	 * Patter Singleton
-	 * 
-	 * @var null
-	 */
-	private $appname = null;
-	
-	/**
-	 * Patter Singleton
-	 * 
-	 * @var string
-	 */
-	private $loglevel = "dev";
+	private $currentPath = "";
 
 	/**
 	 * Patter Singleton
@@ -118,19 +89,19 @@ class Application
 	private $req;
 
 	/**
+	 * @var AppConfiguration|null
+	 */
+	private $config = null;
+	/**
 	 * Private construction
 	 *
-	 * @param object $config
+	 * @param AppConfiguration $config
 	 */
 	private function __construct(AppConfiguration $config)
 	{
 		$this->req = $this->request()->method();
 		$this->config = $config;
         $this->req = $this->request();
-        
-        if (isset($config->timezone)) {
-            Util::setTimezone($this->config->getTimezone());
-        }
 	}
 
 	/**
@@ -141,7 +112,7 @@ class Application
 	/**
 	 * Pattern Singleton.
 	 * 
-	 * @param array|object $config
+	 * @param AppConfiguration $config
 	 * @return self
 	 */
 	public static function configure(AppConfiguration $config)
@@ -156,14 +127,15 @@ class Application
 	/**
 	 * mount, ajoute un branchement.
 	 *
-	 * @param string $branchName
+	 * @param string $branch
 	 * @param callable $cb
+	 * @throws ApplicationException
 	 * @return self
 	 */
-	public function group($branchName, $cb)
+	public function group($branch, $cb)
 	{
-		$next = true;
-		$this->branch = $branchName;
+		$this->branch = $branch;
+
 		if (is_array($cb)) {
 			Util::launchCallback($cb, $this->req, $this->config->getNamespace());
 		} else {
@@ -173,17 +145,7 @@ class Application
 			call_user_func_array($cb, [$this->req]);
 		}
 
-		return $this;
-	}
-
-	/**
-	 * unmount, détruit le branchement en cour.
-	 *
-	 * @return self
-	 */
-	public function ungroup()
-	{
-		$this->branch = "";
+        $this->branch = "";
 
 		return $this;
 	}
@@ -197,7 +159,7 @@ class Application
 	 */
 	public function get($path, $cb = null)
 	{
-		if ($cb == null) {
+		if ($cb === null) {
 			$prop = $path;
 			if (property_exists($this, $prop)) {
 				return $this->$prop;
@@ -238,13 +200,15 @@ class Application
 	 */
 	public function any($path, $cb)
 	{
-		$this->post($path, $cb)->delete($path, $cb)->put($path, $cb)->update($path, $cb)->get($path, $cb);
+        foreach(["post", "delete", "put", "update", "get"] as $func) {
+            $this->$func($path, $cb);
+        }
 
 		return $this;
 	}
 
 	/**
-	 * any, route de tout type DELETE
+	 * delete, route de tout type DELETE
 	 *
 	 * @param string $path
 	 * @param callable $cb
@@ -256,7 +220,7 @@ class Application
 	}
 
 	/**
-	 * any, route de tout type PUT
+	 * put, route de tout type PUT
 	 *
 	 * @param string $path
 	 * @param callable $cb
@@ -265,19 +229,6 @@ class Application
 	public function put($path, $cb)
 	{
 		return $this->addHttpVerbe("PUT", $path, $cb);
-	}
-
-	/**
-	 * any, route de tout type PUT
-	 *
-	 * @param string $path
-	 * @param callable $cb
-	 * 
-	 * @return self
-	 */
-	public function head($path, $cb)
-	{
-		return $this->addHttpVerbe("HEAD", $path, $cb);
 	}
 
 	/**
@@ -290,14 +241,13 @@ class Application
 	public function to404($cb)
 	{
 		$this->error404 = $cb;
-
 		return $this;
 	}
 
 	/**
 	 * any, route de tout type PUT
 	 *
-	 * @param array $match
+	 * @param array $methods
 	 * @param string $path
 	 * @param callable $cb
 	 * @return self
@@ -355,7 +305,7 @@ class Application
 	{
 		static::$routes[$method][] = new Route($path, $cb);
 
-		$this->currentRoute = $path;
+		$this->currentPath = $path;
 		$this->currentMethod = $method;
 
 		return $this;
@@ -371,12 +321,12 @@ class Application
 	{
 		if (empty($this->with)) {
 			$this->with[$this->currentMethod] = [];
-			$this->with[$this->currentMethod][$this->currentRoute] = $otherRule;
+			$this->with[$this->currentMethod][$this->currentPath] = $otherRule;
 		} else {
 			if (array_key_exists($this->currentMethod, $this->with)) {
 				$this->with[$this->currentMethod] = array_merge(
 					$this->with[$this->currentMethod], 
-					[$this->currentRoute => $otherRule]
+					[$this->currentPath => $otherRule]
 				);
 			}
 		}
@@ -417,8 +367,8 @@ class Application
 					$with = [];
 				}
 
-				if ($route->match($this->req->uri($this->root), $with)) {
-					$this->currentRoot = $route->getPath();
+				if ($route->match($this->req->uri($this->config->getApproot()), $with)) {
+					$this->currentPath = $route->getPath();
 					$route->call($this->req, $this->config->getNamespace());
 					$error = false;
 				}
@@ -444,7 +394,7 @@ class Application
 	 */
 	public function set($key, $value)
 	{
-		if (in_array($key, ["view", "engine", "public", "root"])) {
+		if (in_array($key, ["view", "engine", "root"])) {
 			switch ($key) {
 				case "view":
 					$method = "setViewpath";
@@ -452,11 +402,8 @@ class Application
 				case "engine":
 					$method = "setEngine";
 					break;
-				case "public":
-					$method = "setPublicpath";
-					break;
 				case "root":
-					$method = "setRootpath";
+					$method = "setApproot";
 					break;
 			}
 
@@ -494,6 +441,7 @@ class Application
 	 * 
 	 * @param string $method
 	 * @param array $param
+	 * @throws ApplicationException
 	 * @return mixed
 	 */
 	public function __call($method, $param)
@@ -505,8 +453,11 @@ class Application
 		}
 	}
 
+	/**
+	 * @return mixed
+	 */
 	public function url()
 	{
-		return $this->currentRoot;
+		return $this->currentPath;
 	}
 }

@@ -56,7 +56,7 @@ class Str
                 $end = static::length($str);
             }
             if ($start < $end) {
-                $sliceStr = mb_substr($str, $start, $end);
+                $sliceStr = mb_substr($str, $start, $end, "UTF-8");
             }
         }
         return $sliceStr;
@@ -108,7 +108,7 @@ class Str
         if ($search === $str) {
             return true;
         } else {
-            if (-1 == static::pos($search, $str)) {
+            if (-1 !== static::pos($search, $str)) {
                 return true;
             }
         }
@@ -147,7 +147,7 @@ class Str
      */
     public static function len($str)
     {
-        return mb_strlen($str);
+        return mb_strlen($str, "UTF-8");
     }
 
     /**

@@ -59,6 +59,14 @@ class Response
     }
 
 	/**
+	 * @return Response
+	 */
+	public static function takeInstance()
+	{
+		return self::$instance;
+	}
+
+	/**
 	 * Modifie les entêtes http
 	 *
 	 * @param string $key
@@ -86,7 +94,7 @@ class Response
     }
 
     /**
-     * redirectTo404, redirige vers 404
+     * redirectTo404, rédirige vers 404
      * @return self
      */
     public function redirectTo404()
@@ -107,7 +115,6 @@ class Response
 
 		if (in_array((int) $code, array_keys(self::$header), true)) {
 			header(self::$header[$code], true, $code);
-			return true;
 		} else {
 			$r = false;
 		}
@@ -218,10 +225,10 @@ class Response
 		$tpl = null;
 
 		if ($this->config->getEngine() == "twig") {
-
 		    $loader = new Twig_Loader_Filesystem($this->config->getViewpath());
 		    $tpl = new Twig_Environment($loader, array(
-		        'cache' => $this->config->getCachepath()
+		        'cache' => $this->config->getCachepath(),
+				'auto_reload' => true
 		    ));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new Mustache();

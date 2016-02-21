@@ -32,43 +32,42 @@ class AppConfiguration
     /**
      * @var string
      */
-    private $appname;
+    private $appname = "Bow Application";
     /**
      * @var string
      */
     private $logDirecotoryName;
     /**
-     * @var string
+     * @var string|false
      */
-    private $cache;
+    private $cache = false;
     /**
-     * @var string
+     * @var array
      */
-    private $names;
+    private $names = [];
     /**
      * @var string
      */
     private $timezone;
     /**
-     * @var string
+     * @var int
      */
-    private $tokenExpirateTime;
+    private $tokenExpirateTime = 3600;
     /**
      * @var string
      */
-    private $renderEngine;
+    private $approot = "";
     /**
      * @var string
      */
-    private $cacheFolder;
-    /**
-     * @var string
-     */
-    private $app_key = "Eda4WhAyMDE2LTAyLTE2IDIwOjM2OjE0";
+    private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
 
     // singleton constructor.
     private function __construct($config)
     {
+        /**
+         * Chargement complet de toute la configuration de Bow
+         */
         $this->appname = $config->appname;
         $this->logDirecotoryName = $config->logDirecotoryName;
         $this->views = $config->views;
@@ -78,11 +77,15 @@ class AppConfiguration
         $this->timezone = $config->timezone;
         $this->loglevel = $config->loglevel;
         $this->tokenExpirateTime = $config->tokenExpirateTime;
-        $this->renderEngine = $config->template;
-        $this->cacheFolder = $config->cacheFolder;
 
+        if ($config->approot) {
+            $this->approot = $config->approot;
+        }
         if (is_file($config->cipher)) {
             $this->app_key = file_get_contents($config->cipher);
+        }
+        if (isset($config->timezone)) {
+            Util::setTimezone($config->timezone);
         }
     }
 
@@ -155,6 +158,16 @@ class AppConfiguration
     }
 
     /**
+     * getAppName
+     *
+     * @return string
+     */
+    public function getAppname()
+    {
+        return $this->appname;
+    }
+
+    /**
      * getViewPath retourne configuration du path du repertoire du cache
      *
      * @param string $viewPath
@@ -169,16 +182,6 @@ class AppConfiguration
         }
 
         return $old;
-    }
-
-    /**
-     * getViewPath retourne configuration du path du repertoire du cache
-     * 
-     * @return string
-     */
-    public function getAppnamespace()
-    {
-        return $this->names;
     }
 
     /**
@@ -257,7 +260,7 @@ class AppConfiguration
 
     /**
      * getNamespace retourne la configuration des namespaces
-     * 
+     *
      * @return array
      */
     public function getNamespace()
@@ -266,12 +269,35 @@ class AppConfiguration
     }
 
     /**
-     * getNamespace retourne la configuration des namespaces
+     * getEngine retourne le nom du moteur de template définir
      * 
-     * @return array
+     * @return string
      */
     public function getEngine()
     {
         return $this->engine;
+    }
+
+    /**
+     * setApproot
+     *
+     * @param string $newApproot
+     * @return string
+     */
+    public function setApproot($newApproot)
+    {
+        $old = $this->approot;
+        if (is_string($this->approot)) {
+            $this->approot = $newApproot;
+        }
+        return $old;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApproot()
+    {
+        return $this->approot;
     }
 }

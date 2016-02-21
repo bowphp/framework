@@ -8,6 +8,7 @@ use StdClass;
 use PDOStatement;
 use PDOException;
 use ErrorException;
+use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Support\Logger;
 use Bow\Support\Security;
@@ -97,7 +98,7 @@ class Database extends DatabaseTools
         $t = static::$config;
 
         if (! $t instanceof StdClass) {
-            Util::launchCallback($cb, [new ConnectionException("Le fichier db.php est mal configurer")]);
+            Util::launchCallback($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
         }
 
         $c = isset($t->connections[static::$zone]) ? $t->connections[static::$zone] : null;
@@ -110,18 +111,30 @@ class Database extends DatabaseTools
 
         try {
             // Construction de la dsn
-            $dns = $c["scheme"] . ":host=" . $c['host'] . ($c['port'] !== '' ? ":" . $c['port'] : "") . ";dbname=". $c['dbname'];
-            
-            if ($c["scheme"] == "pgsql") {
-                $dns = str_replace(";", " ", $dns);
-            } else if ($c["scheme"] === "sqlite") {
-                $dns = "sqlite:" . $c["dbname"];
+            $username = null;
+            $password = null;
+
+            $pdoPostConfiguation = [
+                PDO::ATTR_DEFAULT_FETCH_MODE => $t->fetch
+            ];
+
+            switch($c["scheme"]) {
+                case "mysql":
+                    $dns = "mysql:host=" . $c["mysql"]['hostname'] . ($c["mysql"]['port'] !== null ? ":" . $c["mysql"]["port"] : "") . ";dbname=". $c["mysql"]['database'];
+                    $username = $c["mysql"]["username"];
+                    $password = $c["mysql"]["password"];
+                    var_dump($dns, $username, $password);
+                    $pdoPostConfiguation[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES " . Str::upper($c["mysql"]["charset"]);
+                    break;
+                case "sqlite":
+                    $dns = $c["sqlite"]["driver"] . ":" . $c["sqlite"]["database"];
+                    break;
             }
             
             // Connection à la base de donnée.
-            static::$db = new PDO($dns, $c['user'], $c['pass'], [
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES UTF8",
-                PDO::ATTR_DEFAULT_FETCH_MODE => $t->fetch
+            static::$db = new PDO($dns, $username, $password, [
+
+
             ]);
 
         } catch (PDOException $e) {
@@ -274,7 +287,7 @@ class Database extends DatabaseTools
     }
 
     /**
-     * eéxécute une requête delete
+     * éxécute une requête delete
      *
      * @param $sqlstatement
      * @param array $bind
@@ -295,7 +308,7 @@ class Database extends DatabaseTools
      * Charge le factory Table
      *
      * @param $tableName
-     * @return mixed
+     * @return Table
      */
     public static function table($tableName)
     {
@@ -322,7 +335,7 @@ class Database extends DatabaseTools
      * 
      * @throws \ErrorException
      * 
-     * @return array|self|\StdClass
+     * @return array|static|\StdClass
      */
     public static function query(array $options, $return = false, $lastInsertId = false)
     {
@@ -388,7 +401,7 @@ class Database extends DatabaseTools
     }
 
     /**
-     * Lance la verification de l'etablissement de connection
+     * Lance la verification de l'établissement de connection
      * 
      * @throws ConnectionException
      * @var void
@@ -407,7 +420,6 @@ class Database extends DatabaseTools
     public static function lastInsertId()
     {
         static::verifyConnection();
-
         return (int) static::$db->lastInsertId();
     }
 
