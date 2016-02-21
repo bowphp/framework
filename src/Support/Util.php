@@ -421,9 +421,7 @@ class Util
 		$content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: red\">{</span>$1<span style=\"color: red\">}</span></span>", $content);
 		$content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: red\">{</span>$1<span style=\"color: red\">}</span></span>", $content);
 		$content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
-		
-		echo $content;
-		echo '<script type="text/javascript">'.file_get_contents(__DIR__ . "/tools/debug.js").'</script>';
+		echo $content . '<script type="text/javascript">'.file_get_contents(__DIR__ . "/tools/debug.js").'</script>';
 	}
 
 	/**

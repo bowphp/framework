@@ -114,7 +114,7 @@ class Response
 		$r = true;
 
 		if (in_array((int) $code, array_keys(self::$header), true)) {
-			header(self::$header[$code], true, $code);
+			header("HTTP/1.1 $code " . self::$header[$code], true, $code);
 		} else {
 			$r = false;
 		}
@@ -136,7 +136,7 @@ class Response
 	}
 
 	/**
-	 * view, require $filename
+	 * sendFile, require $filename
 	 * 
 	 * @param string $filename
 	 * @param array $bind

@@ -44,7 +44,7 @@ class Mail extends Message
 
 	private function __construct()
 	{
-		$this->boundary = "__Bow-Framework-" . md5(date("r", time()));
+		$this->boundary = "__Bow-Framework-" . md5(date("r"));
 		$this->addHeader("MIME-Version", "1.0");
 		$this->addHeader("X-Mailer",  "Bow Framework");
 		$this->addHeader("Date", date("r"));
@@ -60,6 +60,7 @@ class Mail extends Message
 		if (self::$mail !== null) {
 			return self::$mail;
 		}
+
 		self::$mail = new self;
 		
 		return self::$mail;

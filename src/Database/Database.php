@@ -123,7 +123,6 @@ class Database extends DatabaseTools
                     $dns = "mysql:host=" . $c["mysql"]['hostname'] . ($c["mysql"]['port'] !== null ? ":" . $c["mysql"]["port"] : "") . ";dbname=". $c["mysql"]['database'];
                     $username = $c["mysql"]["username"];
                     $password = $c["mysql"]["password"];
-                    var_dump($dns, $username, $password);
                     $pdoPostConfiguation[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES " . Str::upper($c["mysql"]["charset"]);
                     break;
                 case "sqlite":
@@ -132,10 +131,7 @@ class Database extends DatabaseTools
             }
             
             // Connection à la base de donnée.
-            static::$db = new PDO($dns, $username, $password, [
-
-
-            ]);
+            static::$db = new PDO($dns, $username, $password, $pdoPostConfiguation);
 
         } catch (PDOException $e) {
             /**
