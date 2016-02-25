@@ -74,6 +74,27 @@ class Collection
     }
 
     /**
+     * collectionify, permet de récupérer une valeur ou la colléction de valeur sous forme
+     * d'instance de collection.
+     *
+     * @param string $key=null
+     *
+     * @return Collection
+     */
+    public function collectionify($key = null)
+    {
+
+        if ($this->has($key)) {
+            return new Collection($this->storage[$key]);
+        } else {
+            if ($key !== null) {
+                return null;
+            }
+        }
+
+        return new Collection($this->storage);
+    }
+    /**
      * add, ajoute une entrée dans la colléction
      *
      * @param string $key

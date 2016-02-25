@@ -4,6 +4,7 @@
 namespace Bow\Support;
 
 
+use Bow\Exception\RouterException;
 use DateTime;
 use InvalidArgumentException;
 use Bow\Exception\UtilException;
@@ -113,19 +114,28 @@ class Util
 	 * @param callable $cb
 	 * @param mixed $param
 	 * @param array $names
+	 * @throws RouterException
 	 * @return mixed
 	 */
 	public static function launchCallback($cb, $param = null, array $names = [])
 	{
-		$middleware_is_defined = false;	
 		$param = is_array($param) ? $param : [$param];
+        $function_list = [];
 		
 		if (!isset($names["namespace"])) {
-			return static::next($cb, $param);
+			return static::execute_function($cb, $param);
 		}
 
 		static::$names = $names;
-		
+
+		if (!file_exists($names["namespace"]["autoload"] . ".php")) {
+            throw new RouterException("L'autoload n'est définir dans le fichier de configuration");
+		}
+
+        if (!isset($names["app_autoload"])) {
+            throw new RouterException("la classe autoload n'est définir dans le fichier de configuration");
+        }
+
 		// Chargement de l'autoload
 		@require $names["namespace"]["autoload"] . ".php";
 		$autoload = $names["app_autoload"];
@@ -135,94 +145,99 @@ class Util
 		if (is_callable($cb)) {
 			return call_user_func_array($cb, $param);
 		}
-		else if (is_array($cb)) {
-			// on détermine le nombre d'élément du tableau.
-			if (count($cb) == 1) {
-				if (isset($cb["middleware"])) {
-					// On active Le mode de chargement de middleware.
-					$middleware_is_defined = true;
-					$middleware = $cb["middleware"];
-				} else if (isset($cb[0])) {
-					if (is_callable($cb[0])) {
-						$cb = $cb[0];
-					} else if (is_string($cb[0])) {
-						$cb = static::loadController($cb[0]);
-					}
-				}
-			}
-			else {
-				// la taille est égale à 2
-				if (count($cb) == 2) {
-					// la clé middleware est t-elle définir
-					if (isset($cb["middleware"])) {
-						// on active Le mode de chargement de middleware.
-						$middleware_is_defined = true;
-						$middleware = array_shift($cb);
-						if (is_string($cb[0])) {
-							$cb = static::loadController($cb[0]);
-						} else {
-							$cb = $cb[0];
-						}
-					}
-					else {
-						$middleware_is_defined = true;
-						$middleware = array_shift($cb);
-						if (!is_callable($cb)) {
-							$cb = static::loadController($cb);
-						}
-					}
-				}
-				else {
-					// TODO: execution récurcive.
-					// $this->next($cb, $param);
-				}
-			}
-		}
-		else {
-			if (!is_callable($cb)) {
-				if (is_string($cb)) {
-					$cb = static::loadController($cb);
-				}
-			}
-		}
-		// vérification de l'activation du middlware.
-		if ($middleware_is_defined) {
-			// Status permettant de bloquer la suite du programme.
-			$status = true;
-			if (is_string($middleware)) {
-				if (!in_array($middleware, $names["middleware"])) {
-					throw new RouterException($cb["middleware"] . " n'est pas un middleware definir.");
-				}
-				else {
-					// Chargement du middleware
-					$classMiddleware = $names["namespace"]["middleware"] . "\\" . ucfirst($middleware);
-					// On vérifie si le middleware définie est une middleware valide.
-					if (class_exists($classMiddleware)) {
-						$instance = new $classMiddleware();
-						$handler = [$instance, "handler"];
-					} else {
-						$handler = $middleware;
-					}
-					// Lancement du middleware.
-					$status = call_user_func_array($handler, $param);
-				}
-			// Le middleware est un callback. les middleware peuvent être
-			// définir comme des callback par l'utilisteur
-			}
-			else if (is_callable($middleware)) {
-				$status = call_user_func_array($middleware, $param);
-			}
-			// On arrêt tout en case de status false.
-			if ($status == false) {
-				die();
-			}
-		}
-		// Verification de l'existance d'une fonction a appélée.
-		if (isset($cb)) {
-			return call_user_func_array($cb, $param);
+
+        if (is_string($cb)) {
+            return call_user_func_array(static::loadController($cb), $param);
+        }
+
+        if (is_array($cb)) {
+            if (array_key_exists("middleware", $cb)) {
+                $middleware = $cb["middleware"];
+                unset($cb["middleware"]);
+            }
+
+            if (array_key_exists("uses", $cb)) {
+                if (is_array($cb["uses"])) {
+                    if (isset($cb["uses"]["with"]) && isset($cb["uses"]["call"])) {
+                        if (is_string($cb["uses"]["call"])) {
+                            $controller = $cb["uses"]["with"] . "@" . $cb["uses"]["call"];
+                            array_push($function_list, static::loadController($controller));
+                        } else {
+                            foreach($cb["uses"]["call"] as $method) {
+                                $controller = $cb["uses"]["with"] . "@" . $method;
+                                array_push($function_list,  static::loadController($controller));
+                            }
+                        }
+                    } else {
+                        foreach($cb["uses"] as $controller) {
+                            if (is_string($controller)) {
+                                array_push($function_list,  static::loadController($controller));
+                            } else if (is_callable($controller)) {
+                                array_push($function_list, $controller);
+                            }
+                        }
+                    }
+                } else {
+                    if (is_string($cb["uses"])) {
+                        array_push($function_list, static::loadController($cb["uses"]));
+                    } else {
+                        array_push($function_list, $cb["uses"]);
+                    }
+                }
+
+                unset($cb["uses"]);
+            }
+
+            if (count($cb) > 0) {
+                foreach($cb as $func) {
+                    if (is_callable($func)) {
+                        array_push($function_list, $func);
+                    } else if (is_string($func)) {
+                        array_push($function_list, static::loadController($func));
+                    }
+                }
+            }
 		}
 
-		return null;
+        // Status permettant de bloquer la suite du programme.
+        $status = true;
+
+        // Execution du middleware si define.
+        if (is_string($middleware)) {
+            if (!in_array($middleware, $names["middleware"])) {
+                throw new RouterException($middleware . " n'est pas un middleware definir.");
+            }
+            // gement du middleware
+            $classMiddleware = $names["namespace"]["middleware"] . "\\" . ucfirst($middleware);
+            // On vérifie si le middleware définie est une middleware valide.
+            if (!class_exists($classMiddleware)) {
+                throw new RouterException($middleware . " n'est pas un class Middleware.");
+            }
+
+            $instance = new $classMiddleware();
+            $handler = [$instance, "handler"];
+            $status = call_user_func_array($handler, $param);
+        // Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
+        } else if (is_callable($middleware)) {
+            $status = call_user_func_array($middleware, $param);
+        }
+        // On arrêt tout en case de status false.
+        if ($status == false) {
+            die();
+        }
+
+        if (!empty($function_list)) {
+            $status = true;
+
+            foreach($function_list as $func) {
+                $status = call_user_func_array($func, $param);
+                if ($status == false) {
+                    return $status;
+                }
+            }
+        }
+
+		return $status;
 	}
 
 	/**
@@ -232,12 +247,13 @@ class Util
 	 * @param array|callable $arg
 	 * @return mixed|void
 	 */
-	private static function next($arr, $arg)
+	private static function execute_function($arr, $arg)
 	{
 		if (is_callable($arr)) {
 			return call_user_func_array($arr, $arg);
 		}
-		else if (is_array($arr)) {
+
+        if (is_array($arr)) {
 			// Lancement de la procedure de lancement recursive.
 			array_reduce($arr, function($next, $cb) use ($arg) {
 				// $next est-il null
@@ -248,15 +264,14 @@ class Util
 					}
 
 					return call_user_func_array($cb, $arg);
-				}
-				else {
+				} else {
 					// $next est-il a true.
 					if ($next == true) {
 						// On lance la loader de controller si $cb est un String
 						if (is_string($cb)) {
 							$cb = static::loadController($cb);
 						}
-					
+
 						return call_user_func_array($cb, $arg);
 					} else {
 						die();
@@ -268,9 +283,8 @@ class Util
 		} else {
 			// On lance la loader de controller si $cb est un String
 			$cb = static::loadController($arr);
-			if (is_array($cb)) {
-				return call_user_func_array($cb, $arg);
-			}
+            var_dump($cb, $arr);
+            return call_user_func_array($cb, $arg);
 		}
 	}
 
@@ -396,9 +410,10 @@ class Util
 		}
 
 		$arr = func_get_args();
-		ob_start();
+		$html = "";
 
 		foreach ($arr as $key => $value) {
+            ob_start();
 			$len = "";
 			if (is_array($value) || is_object($value)) {
 				$len = ':len=' . count($value);
@@ -408,22 +423,21 @@ class Util
 			echo gettype($value) . $len . ' <span id="toggle" class="show" style="border:1px solid #eee; padding:0.1px 0.2px;font-size:10px;color:#888"> > </span><div style="position: relative;left:30px;top:5px"><div class="contains">';
 			var_dump($value);
 			echo '</div></div>';
-			echo "\n\n";
-		}
+            echo "\n\n";
+            $content = ob_get_clean();
+            $content = preg_replace("~\s?\{\n\s?\}~i", " is empty", $content);
+            $content = preg_replace("~(string|int|object|stdclass|bool|double|float|array|integer)~i", "<span style=\"color: rgba(255, 0, 0, 0.9); font-style: italic\">$1</span>", $content);
+            $content = preg_replace('~\((\d+)\)~im', "<span style=\"color: #498\">($1)</span>", $content);
+            $content = preg_replace('~\s(".+")~im', "<span style=\"color: #458\"> $1</span>", $content);
+            $content = preg_replace("~(=>)(\n\s+?)+~im", "<span style=\"color: #754\"> is</span>", $content);
+            $content = preg_replace("~(is</span>)\s+~im", "$1 ", $content);
+            $content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: black\">[</span>$1<span style=\"color: black\">]</span></span>", $content);
+            $content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: black\">@</span>$1<span style=\"color: black\"></span></span>", $content);
+            $content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
+            $html += $content;
+        }
 
-		$content = ob_get_clean();
-		$content = preg_replace("~\s?\{\n\s?\}~i", " is empty", $content);
-		$content = preg_replace("~(string|int|object|stdclass|bool|double|float|array)~i", "<span style=\"color: rgba(255, 0, 0, 0.9); font-style: italic\">$1</span>", $content);
-		$content = preg_replace('~\((\d+)\)~im', "<span style=\"color: #498\">(len=$1)</span>", $content);
-		$content = preg_replace('~\s(".+")~im', "<span style=\"color: #458\"> value($1)</span>", $content);
-		$content = preg_replace("~(=>)(\n\s+?)+~im", "<span style=\"color: #754\"> is</span>", $content);
-		$content = preg_replace("~(is</span>)\s+~im", "$1 ", $content);
-		$content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: red\">{</span>$1<span style=\"color: red\">}</span></span>", $content);
-		$content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: red\">{</span>$1<span style=\"color: red\">}</span></span>", $content);
-		$content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
-		
-		echo $content;
-		echo '<script type="text/javascript">'.file_get_contents(__DIR__ . "/tools/debug.js").'</script>';
+		echo $html . '<script type="text/javascript">'.file_get_contents(__DIR__ . "/tools/debug.js").'</script>';
 	}
 
 	/**

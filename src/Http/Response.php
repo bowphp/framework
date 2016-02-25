@@ -178,7 +178,7 @@ class Response
 	 */
 	public function view($filename, $bind = null, $code = 200)
 	{
-		$filename = preg_replace("/@|#|\./", "/", $filename);
+		$filename = preg_replace("/@|#/", "/", $filename);
 		$filename .= ".php";
 		
 		if ($this->config->getViewpath() !== null) {

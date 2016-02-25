@@ -122,7 +122,7 @@ class Schema
 	 * @param int $size
 	 * @param bool $null
 	 * @param null|string $default
-	 * 
+	 * @throws Exception
 	 * @return $this
 	 */
 	public function varchar($field, $size = 255, $null = false, $default = null)
@@ -139,7 +139,6 @@ class Schema
 	 * 
 	 * @param string $field
 	 * @param bool $null
-	 * @param bool $default
 	 * 
 	 * @return $this
 	 */ 
@@ -158,7 +157,7 @@ class Schema
 	 * @param string $field
 	 * @param string|null $null
 	 * 
-	 * @param $this
+	 * @return Schema
 	 */ 
 	public function datetime($field, $null = false)
 	{
@@ -175,7 +174,7 @@ class Schema
 	 * @param string $field
 	 * @param string|null $null
 	 * 
-	 * @param $this
+	 * @return Schema
 	 */ 
 	public function timestamp($field, $null = false)
 	{
@@ -207,7 +206,7 @@ class Schema
 	 * @param string $field
 	 * @param bool $null
 	 * 
-	 * @param $this
+	 * @return Schema
 	 */ 
 	public function text($field, $null = false)
 	{
@@ -219,18 +218,17 @@ class Schema
 	}
 
 	/**
-	 * char
-	 * 
 	 * @param string $field
-	 * @param bool $null
-	 * @param string|null $default
-	 * 
-	 * @param $this
-	 */ 
+	 * @param int $size
+	 * @param bool|false $null
+	 * @param string $default
+	 * @return Schema
+	 * @throws ModelException
+	 */
 	public function char($field, $size = 1, $null = false, $default = null)
 	{
 		if ($size > 4294967295) {
-			throw new ModelException("Char, max size is 4294967295", 1);
+			throw new ModelException("char(), max size is 4294967295", 1);
 		}
 
 		return $this->loadWhole("char", $field, $size, $null, $default);
@@ -238,10 +236,12 @@ class Schema
 
 	/**
 	 * autoincrement
-	 * 
-	 * @return $this
+	 *
+	 * @param string $field
+	 * @throws ModelException
+	 * @return Schema
 	 */ 
-	public function autoincrement($filed = null)
+	public function autoincrement($field = null)
 	{
 		if ($this->autoincrement === null) {
 			if ($this->lastField !== null) {
@@ -251,10 +251,9 @@ class Schema
 					throw new ModelException("Cannot add autoincrement to " . $this->lastField->method, 1);
 				}
 			} else {
-				if ($filed) {
-					$this->int($filed);
+				if ($field) {
+					$this->int($field);
 				}
-			
 			}
 		}
 
@@ -263,7 +262,8 @@ class Schema
 
 	/**
 	 * primary
-	 * 
+	 *
+	 * @throws ModelException
 	 * @return $this
 	 */
 	public function primary()
@@ -277,10 +277,10 @@ class Schema
 
 	/**
 	 * indexe
-	 * 
-	 * @return $this
+	 *
+	 * @return Schema
 	 */
-	public function indexe($field = null)
+	public function indexe()
 	{
 		return $this->addIndexes("indexe");
 	}
@@ -288,7 +288,7 @@ class Schema
 	/**
 	 * unique
 	 * 
-	 * @return $this
+	 * @return Schema
 	 */
 	public function unique()
 	{
@@ -299,8 +299,8 @@ class Schema
 	 * addIndexes
 	 * 
 	 * @param string $indexType
-	 * 
-	 * @return
+	 * @throws ModelException
+	 * @return Schema
 	 */
 	private function addIndexes($indexType)
 	{
@@ -316,13 +316,17 @@ class Schema
 
 	/**
 	 * addField
-	 * 
+	 *
+	 * @param string $method
+	 * @param string $field
+	 * @param string $data
+	 * @throws ModelException
 	 * @return $this
 	 */
 	private function addField($method, $field, $data)
 	{
 		if (!method_exists($this, $method)) {
-			throw new Exception("Error Processing Request", 1);
+			throw new ModelException("Error Processing Request", 1);
 		}
 
 		if (!$this->fields->has($method)) {

@@ -15,7 +15,6 @@ class AppConfiguration
      * @var AppConfiguration
      */
     private static $instance;
-
     /**
      * Définie le systeme de template
      *
@@ -133,7 +132,7 @@ class AppConfiguration
     {
         $old = $this->app_key;
 
-        if (! is_array($key) && is_object($key)) {
+        if (is_string($key)) {
             $this->app_key = $key;
         }
 

@@ -73,7 +73,7 @@ class Database extends DatabaseTools
      *
      * @param null $option
      * @param null $cb
-     * @return null
+     * @return null|Database
      */
     public static function connection($option = null, $cb = null)
     {
@@ -104,7 +104,7 @@ class Database extends DatabaseTools
         $c = isset($t->connections[static::$zone]) ? $t->connections[static::$zone] : null;
 
         if (is_null($c)) {
-            Util::launchCallback($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre db.php")]);
+            Util::launchCallback($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre database.php")]);
         }
 
         $db = null;
@@ -510,7 +510,7 @@ class Database extends DatabaseTools
                  */
                 if (isset($options['-order'])) {
                     $order = " ORDER BY " . (is_array($options['-order']) ? implode(", ", $options["-order"]) : $options["-order"]) . " DESC";
-                } else if (isset($options['+order'])) {
+                } else if (isset($options['+order']) || isset($options['order'])) {
                     $order = " ORDER BY " . (is_array($options['+order']) ? implode(", ", $options["+order"]) : $options["+order"]) . " ASC";
                 }
 
@@ -526,7 +526,9 @@ class Database extends DatabaseTools
                     } else {
                         $param = $options['take'];
                     }
-                    $param = is_array($param) ? implode(", ", $param) : $param;
+                    $param = is_array($param) ? implode(", ", array_map(function($v){
+                        return (int) $v;
+                    }, $param)) : $param;
                     $limit = " LIMIT " . $param;
                 }
 
@@ -537,7 +539,7 @@ class Database extends DatabaseTools
                  * ----------
                  */
                 
-                if (isset($options->grby)) {
+                if (isset($options["grby"])) {
                     $grby = " GROUP BY " . $options['grby'];
                 }
 
@@ -560,7 +562,7 @@ class Database extends DatabaseTools
                  */
 
                 if (isset($options["-between"])) {
-                    $between = $options[0] . " NOT BETWEEN " . implode(" AND ", $options["between"]);
+                    $between = $options[0] . " NOT BETWEEN " . implode(" AND ", $options["between"][1]);
                 } else if (isset($options["between"])) {
                     $between = $options[0] . " BETWEEN " . implode(" AND ", $options["between"][1]);
                 }
@@ -628,7 +630,7 @@ class Database extends DatabaseTools
              * qui récupère une erreur ou la query
              * pour évantuel vérification
              */
-            call_user_func($cb, isset($query) ? $query : E_ERROR);
+            call_user_func($cb, isset($query) ?: $query);
         }
 
         return $query;

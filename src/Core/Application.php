@@ -366,18 +366,26 @@ class Application
 				} else {
 					$with = [];
 				}
-
+                // Lancement de la recherche de la method qui arrivée dans la requete
+                // ensuite lancement de la verification de l'url de la requete
+                // execution de la fonction associé à la route.
 				if ($route->match($this->req->uri($this->config->getApproot()), $with)) {
 					$this->currentPath = $route->getPath();
-					$route->call($this->req, $this->config->getNamespace());
+					$response = $route->call($this->req, $this->config->getNamespace());
+					if (is_string($response)) {
+						$this->response()->send($response);
+					} else if (is_array($response) || is_object($response)) {
+						$this->response()->json($response);
+					}
 					$error = false;
 				}
 			}
 		}
 
+        // Si la route n'est pas enrégistre alors on lance une erreur 404
 		if ($error) {
 			$this->response()->setCode(404);
-			if ($this->error404 !== null && is_callable($this->error404)) {
+			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			}
 		}
