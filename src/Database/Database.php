@@ -3,6 +3,7 @@
 namespace Bow\Database;
 
 
+use Bow\Exception\DatabaseException;
 use PDO;
 use StdClass;
 use PDOStatement;
@@ -31,11 +32,16 @@ class Database extends DatabaseTools
      */
     private static $currentPdoErrorInfo = [];
     /**
-     * Instance de DB
+     * Instance de PDO
      *
-     * @var null
+     * @var \PDO
      */
     private static $db = null;
+
+    /**
+     * @var Database
+     */
+    private static $instance = null;
     /**
      * Configuration
      *
@@ -45,7 +51,7 @@ class Database extends DatabaseTools
     /**
      * Configuration
      *
-     * @var array
+     * @var string
      */
     private static $zone = null;
     /***
@@ -57,6 +63,8 @@ class Database extends DatabaseTools
     const DELETE = 3;
     const INSERT = 4;
 
+    private final function __construct(){}
+    private final function __clonse(){}
     /**
      * Charger la configuration
      *
@@ -65,9 +73,19 @@ class Database extends DatabaseTools
      */
     public static function configure($config)
     {
+        if (static::$instance === null) {
+            static::$instance = new self();
+        }
         return static::$config = (object) $config;
     }
 
+    /**
+     * @return Database
+     */
+    public static function takeInstance()
+    {
+        return static::$instance;
+    }
     /**
      * connection, lance la connection sur la DB
      *
@@ -114,6 +132,7 @@ class Database extends DatabaseTools
             $username = null;
             $password = null;
 
+            // Configuration suppelement coté PDO
             $pdoPostConfiguation = [
                 PDO::ATTR_DEFAULT_FETCH_MODE => $t->fetch
             ];
@@ -123,7 +142,6 @@ class Database extends DatabaseTools
                     $dns = "mysql:host=" . $c["mysql"]['hostname'] . ($c["mysql"]['port'] !== null ? ":" . $c["mysql"]["port"] : "") . ";dbname=". $c["mysql"]['database'];
                     $username = $c["mysql"]["username"];
                     $password = $c["mysql"]["password"];
-                    var_dump($dns, $username, $password);
                     $pdoPostConfiguation[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES " . Str::upper($c["mysql"]["charset"]);
                     break;
                 case "sqlite":
@@ -132,10 +150,7 @@ class Database extends DatabaseTools
             }
             
             // Connection à la base de donnée.
-            static::$db = new PDO($dns, $username, $password, [
-
-
-            ]);
+            static::$db = new PDO($dns, $username, $password, $pdoPostConfiguation);
 
         } catch (PDOException $e) {
             /**
@@ -163,8 +178,12 @@ class Database extends DatabaseTools
 		if (!is_string($enterKey)) {
         	Util::launchCallback($cb, [new InvalidArgumentException("paramètre invalide")]);
         } else {
-			static::$db = null;
-			static::connection($enterKey, $cb);
+            if($enterKey !== static::$zone) {
+                static::$db = null;
+                static::connection($enterKey, $cb);
+            } else {
+                Util::launchCallback($cb, static::takeInstance());
+            }
         }
 	}
 
@@ -190,7 +209,7 @@ class Database extends DatabaseTools
         static::verifyConnection();
 
         if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sqlstatement)) {
-            return static::executePrepareQuery($sqlstatement, $bind);
+          return static::executePrepareQuery($sqlstatement, $bind);
         }
 
         return false;
@@ -668,5 +687,20 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
         return static::$db;
+    }
+
+    /**
+     * @param $method
+     * @param array $arguments
+     * @throws DatabaseException
+     * @return mixed
+     */
+    public function __call($method, array $arguments)
+    {
+        if (method_exists(static::class, $method)) {
+            return call_user_func_array([__CLASS__, $method], $arguments);
+        }
+
+        throw new DatabaseException("$method not found", E_USER_ERROR);
     }
 }

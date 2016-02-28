@@ -4,12 +4,13 @@ namespace Bow\Mail;
 
 
 use ErrorException;
+use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Exception\SmtpException;
 use Bow\Exception\SocketException;
 
 
-class SmtpMail extends Message
+class Smtp extends Message
 {
 
     /**
@@ -18,6 +19,31 @@ class SmtpMail extends Message
      * @var null
      */
     private $sock = null;
+
+    /**
+     * @var string
+     */
+    private $username;
+
+    /**
+     * @var string
+     */
+    private $password;
+
+    /**
+     * @var string
+     */
+    private $url;
+
+    /**
+     * @var bool
+     */
+    private $secure;
+
+    /**
+     * @var bool
+     */
+    private $tls = false;
 
     /**
      * Constructor
@@ -35,6 +61,7 @@ class SmtpMail extends Message
                 $param["tls"] = false;
             }
         }
+
         $this->url = $param["server"];
         $this->username = $param["username"];
         $this->password = $param["password"];
@@ -53,21 +80,26 @@ class SmtpMail extends Message
      */
     public function send($cb = null)
     {
+        var_dump($this->formatHeader());
         $this->connection();
+        $error = true;
 
-        $data = "mail from: " . $this->username;
-        $data .= "rcpt to: " . implode(Util::sep(), $this->to);
-        $data .= "Subject: " . $this->subject;
-        $data .= "data " . $this->message;
-        $data .= $this->formatHeader();
-        $data .= ".";
-        echo $data;
+        // SMTP command
+        $this->write("MAIL FROM: " . $this->username, 250);
+        $this->write("RCPT TO: " . $this->to, 250);
+        $this->write("DATA", 354);
+        $this->write($this->formatHeader() . Util::sep() . $this->message);
+        $this->write(".", 250);
 
-        $status = $this->write($data);
+        $status = $this->disconnect();
 
-        Util::launchCallback($cb, $status);
+        if ($status == 221) {
+            $error = null;
+        }
+
+        Util::launchCallback($cb, $error);
         
-        $this->disconnect();
+
         
         return $status;
     }
@@ -77,18 +109,11 @@ class SmtpMail extends Message
      * permet de se connecté a un serveur smpt
      *
      * @throws ErrorException
-     * @throws SocketException
-     * @throws SmtpException
+     * @throws SocketException | SmtpException
      */
     private function connection()
     {
-        $url = $this->url;
-        $username = $this->username;
-        $password = $this->password;
-        $secure = $this->secure;
-        $tls = $this->tls;
-
-        @list($url, $port) = explode(":", $url, 2);
+        @list($url, $port) = explode(":", $this->url, 2);
 
         if (!isset($port)) {
             $port = 25;
@@ -96,8 +121,8 @@ class SmtpMail extends Message
             $port = (int) $port;
         }
 
-        if ($secure === true) {
-            $url = "ssl://{$url}";
+        if ($this->secure === true) {
+            $url = "ssl://$url";
             $port = 465;
         }
 
@@ -119,7 +144,7 @@ class SmtpMail extends Message
             }
         }
 
-        if ($tls === true) {
+        if ($this->tls === true) {
             
             $this->write("STARTTLS", $code=220);
             $secured = stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
@@ -131,11 +156,10 @@ class SmtpMail extends Message
             $this->write("EHLO $host", $code=250);
         }
 
-        if ($username !== null && $password !== null) {
+        if ($this->username !== null && $this->password !== null) {
             $this->write("AUTH LOGIN", 334);
-            echo "Logging";
-            $this->write(base64_encode($username), $code=334, "username");
-            $this->write(base64_encode($password), $code=235, "password");
+            $this->write(base64_encode($this->username), $code=334, "username");
+            $this->write(base64_encode($this->password), $code=235, "password");
         }
     }
 
@@ -161,8 +185,8 @@ class SmtpMail extends Message
         for (; !feof($this->sock); ) {
             if (($line = fgets($this->sock, 1e3)) != null) {
                 echo $line;
-                if (substr($line, 3, 1) == " ") {
-                    $s = (int) substr($line, 0, 3);
+                if (Str::slice($line, 3, 1) === " ") {
+                    $s = (int) Str::slice($line, 0, 3);
                     break;
                 }
             }

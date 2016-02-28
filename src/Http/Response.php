@@ -17,9 +17,11 @@ class Response
 	 */
 	private static $header = [
 		200 => "OK",
+		201 => "Created",
 		301 => "Moved Permanently",
 		302 => "Found",
 		304 => "Not Modified",
+		400 => "Bad Request",
 		401 => "Unauthorized",
 		404 => "Not Found",
 		403 => "Forbidden",

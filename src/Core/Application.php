@@ -19,6 +19,7 @@ use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Support\Logger;
 use InvalidArgumentException;
+use Bow\Exception\ApplicationException;
 
 
 class Application

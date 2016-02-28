@@ -135,6 +135,10 @@ abstract class Message
 			$form .= "$key: $value" . $sep;
 		}
 
+		if ($this->subject) {
+			$form .= "subject: " . $this->subject . $sep;
+		}
+
 		if ($content_length == 1) {
 			foreach ($this->headers["bottom"] as $value) {
 				foreach ($value as $v) {

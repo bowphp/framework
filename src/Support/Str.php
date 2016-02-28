@@ -188,4 +188,15 @@ class Str
     {
         return static::slice(0, $size, str_shuffle('#*$@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012356789'));
     }
+
+    /**
+     * slugify créateur de slug en utilisant un chaine simple.
+     *
+     * @param string $str
+     * @return string
+     */
+    public function slugify($str)
+    {
+        return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
+    }
 }

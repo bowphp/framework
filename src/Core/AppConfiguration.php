@@ -77,14 +77,16 @@ class AppConfiguration
         $this->loglevel = $config->loglevel;
         $this->tokenExpirateTime = $config->tokenExpirateTime;
 
-        if ($config->approot) {
+        if (isset($config->approot)) {
             $this->approot = $config->approot;
         }
+
         if (is_file($config->cipher)) {
             $this->app_key = file_get_contents($config->cipher);
         }
+
         if (isset($config->timezone)) {
-            Util::setTimezone($config->timezone);
+            \Bow\Support\Util::setTimezone($config->timezone);
         }
     }
 

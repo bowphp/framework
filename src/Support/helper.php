@@ -43,10 +43,19 @@ if (!function_exists("configuration")) {
 
 if (!function_exists("db")) {
     /**
+     * @param string $database
+     * @param callaback $cb
      * @return Database, the Database reference
      */
-    function db() {
-        return Database::class;
+    function db($database = null, $cb = null) {
+
+        if (is_string($database)) {
+            switch_to($database, $cb);
+        } else {
+            switch_to("default", $cb);
+        }
+
+        return Database::takeInstance();
     }
 }
 
@@ -74,13 +83,25 @@ if (!function_exists("table")) {
 }
 
 if (!function_exists("query_maker")) {
-    function query_maker($sql, $data, $method) {
+    /**
+     * @param $sql
+     * @param $data
+     * @param $cb
+     * @param $method
+     * @return null
+     */
+    function query_maker($sql, $data, $cb, $method) {
+        $rs = null;
 
         if (method_exists(Database::class, $method)) {
-            return Database::$method($sql, $data);
+            $rs = Database::$method($sql, $data);
         }
 
-        return null;
+        if (is_callable($cb)) {
+            call_user_func_array($cb, [$rs]);
+        }
+
+        return $rs;
     }
 }
 
@@ -120,10 +141,11 @@ if (!function_exists("select")) {
      * statement lance des requete SQL de type SELECT
      * @param string $sql
      * @param array $data
+     * @param callaback $cb
      * @return integer
      */
-    function select($sql, array $data = []) {
-        return query_maker($sql, $data, "select");
+    function select($sql, array $data = [], $cb = null) {
+        return query_maker($sql, $data, $cb, "select");
     }
 }
 
@@ -132,10 +154,11 @@ if (!function_exists("insert")) {
      * statement lance des requete SQL de type INSERT
      * @param string $sql
      * @param array $data
+     * @param callaback $cb
      * @return integer
      */
-    function insert($sql, array $data = []) {
-        return query_maker($sql, $data, "insert");
+    function insert($sql, array $data = [], $cb = null) {
+        return query_maker($sql, $data, $cb, "insert");
     }
 }
 
@@ -144,10 +167,11 @@ if (!function_exists("delete")) {
      * statement lance des requete SQL de type DELETE
      * @param string $sql
      * @param array $data
+     * @param callaback $cb
      * @return integer
      */
-    function delete($sql, array $data = []) {
-        return query_maker($sql, $data, "delete");
+    function delete($sql, array $data = [], $cb = null) {
+        return query_maker($sql, $data, $cb, "delete");
     }
 }
 
@@ -156,10 +180,11 @@ if (!function_exists("update")) {
      * update lance des requete SQL de type UPDATE
      * @param string $sql
      * @param array $data
+     * @param callable $cb
      * @return integer
      */
-    function update($sql, array $data = []) {
-        return query_maker($sql, $data, "update");
+    function update($sql, array $data = [], $cb = null) {
+        return query_maker($sql, $data, $cb, "update");
     }
 }
 
@@ -198,7 +223,7 @@ if (!function_exists("slugify")) {
      * @return string
      */
     function slugify($str) {
-        return Util::slugify($str);
+        return \Bow\Support\Str::slugify($str);
     }
 }
 
@@ -245,9 +270,20 @@ if (!function_exists("debug")) {
 
 if (!function_exists("csrf")) {
     /**
-     * csrf, fonction permetant de générer un token
+     * csrf, fonction permetant de crée automatiquement un gestionnaire de csrf
+     * @return \StdClass
      */
     function csrf() {
+        return Security::createTokenCsrf();
+    }
+}
+
+if (!function_exists("csrf_token")) {
+    /**
+     * csrf, fonction permetant de générer un token
+     * @return string
+     */
+    function csrf_token() {
         return Security::generateTokenCsrf();
     }
 }
@@ -264,10 +300,12 @@ if (!function_exists("store")) {
         if (!is_null($filename) && is_string($filename)) {
             Resource::setUploadFileName($filename);
         }
+
         if (!is_null($dirname)) {
             Resource::setUploadDir($dirname);
         }
-        return Resource::store($file);
+
+        return (object) Resource::store($file);
     }
 }
 
@@ -455,5 +493,75 @@ if (!function_exists("execute_function")) {
      */
     function execute_function($cb, $req, $names = []) {
         return Util::launchCallback($cb, $req, $names);
+    }
+}
+
+
+if (!function_exists("collect")) {
+
+    /**
+     * retourne une instance de collection
+     * @return \Bow\Support\Collection
+     */
+    function collect() {
+        if (func_num_args() == 0) {
+            $col = new \Bow\Support\Collection();
+        } else {
+            $col = new \Bow\Support\Collection(func_get_args());
+        }
+
+        return $col;
+    }
+}
+
+if (!function_exists("crypt")) {
+    /**
+     * @param string $data
+     * @return string
+     */
+    function crypt($data) {
+        return Security::encrypt($data);
+    }
+}
+
+if (!function_exists("decrypt")) {
+    /**
+     * @param string $data
+     * @return string
+     */
+    function decrypt($data) {
+        return Security::decrypt($data);
+    }
+}
+
+if (!function_exists("transaction")) {
+    /**
+     * debut un transaction. Désactive l'auto commit
+     * @param $cb
+     */
+    function transaction($cb) {
+        if ($cb !== null) {
+            call_user_func_array($cb, []);
+        }
+
+        Database::transaction();
+    }
+}
+
+if (!function_exists("rollback")) {
+    /**
+     * annuler un rollback
+     */
+    function rollback() {
+        Database::rollback();
+    }
+}
+
+if (!function_exists("commit")) {
+    /**
+     * valider une transaction
+     */
+    function commit() {
+        Database::commit();
     }
 }

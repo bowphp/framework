@@ -4,6 +4,7 @@ namespace Bow\Database;
 
 
 use Bow\Support\Security;
+use Bow\Support\Collection;
 use Bow\Exception\TableException;
 
 
@@ -269,7 +270,7 @@ class Table extends DatabaseTools
      * clause where avec comparaison en <<in>>
      * 
      * @param string $column
-     * @param string $range
+     * @param array $range
      * @param string $boolean
      * 
      * @throws TableException
@@ -308,7 +309,7 @@ class Table extends DatabaseTools
      * clause where avec comparaison en <<not in>>
      * 
      * @param string $column
-     * @param string $range
+     * @param array $range
      * 
      * @throws TableException
      * 
@@ -914,5 +915,21 @@ class Table extends DatabaseTools
         }
 
         return $this->jump($current)->take($n)->get();
+    }
+
+    /**
+     * toCollection, retourne les données de la DB sous en instance de Collection
+     *
+     * @return Collection
+     */
+    public function collectionify()
+    {
+        $data = $this->get();
+
+        if (!is_array($data)) {
+            $data = [$data];
+        }
+
+        return new Collection($data);
     }
 }

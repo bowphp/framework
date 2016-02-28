@@ -207,7 +207,7 @@ class Util
             if (!in_array($middleware, $names["middleware"])) {
                 throw new RouterException($middleware . " n'est pas un middleware definir.");
             }
-            // gement du middleware
+            // Chargement du middleware
             $classMiddleware = $names["namespace"]["middleware"] . "\\" . ucfirst($middleware);
             // On vérifie si le middleware définie est une middleware valide.
             if (!class_exists($classMiddleware)) {
@@ -283,9 +283,13 @@ class Util
 		} else {
 			// On lance la loader de controller si $cb est un String
 			$cb = static::loadController($arr);
-            var_dump($cb, $arr);
-            return call_user_func_array($cb, $arg);
-		}
+
+            if ($cb !== null) {
+                return call_user_func_array($cb, $arg);
+            }
+
+            return null;
+        }
 	}
 
 	/**
@@ -601,16 +605,5 @@ class Util
 		}
 
 		return static::$sep;
-	}
-
-	/**
-	 * slugify créateur de slug en utilisant un chaine simple.
-	 * 
-	 * @param string $str
-	 * @return string
-	 */
-	public function slugify($str)
-	{
-		return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
 	}
 }

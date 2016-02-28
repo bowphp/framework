@@ -59,7 +59,7 @@ class Event
     }
 
     /**
-     * off
+     * off supprime un event enregistre
      * @param $event
      */
     public static function off($event)
