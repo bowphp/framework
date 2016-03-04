@@ -10,50 +10,51 @@ class Schema
 	/**
 	 * fields list
 	 * 
-	 * @var bool
+	 * @var Collection
 	 */
-	private $fileds = null;
-	/**
-	 * define all avalaibles method assign to Model
-	 * 
-	 * @var bool
-	 */
-	private static $types = [ "varchar", "int", "char", "date", "datetime", "text", "timestamp", "bigint", "longint" ];
-	/**
+	private $fields;
+
+    /**
 	 * define the primary key
 	 * 
 	 * @var bool
 	 */
 	private $primary = null;
-	/**
+
+    /**
 	 * last define field
 	 * 
-	 * @var bool
+	 * @var \StdClass
 	 */
 	private $lastField = null;
-	/**
+
+    /**
 	 * Table name
 	 * 
 	 * @var bool
 	 */
 	private $table = null;
-	/**
+
+    /**
 	 * Sql Statement
 	 * 
 	 * @var string
-	 */ 
+	 */
 	private $sqlStement = null;
-	/**
+
+    /**
 	 * @var string
 	 */
 	private $engine = "MyIsam";
-	/**
+
+    /**
 	 * @var string
 	 */
 	private $character = "UTF8";
-	/**
+
+    /**
 	 * define the auto increment field
-	 * @var bool
+	 * @var \StdClass
 	 */
 	private $autoincrement = null;
 
@@ -122,13 +123,13 @@ class Schema
 	 * @param int $size
 	 * @param bool $null
 	 * @param null|string $default
-	 * @throws Exception
+	 * @throws \Exception
 	 * @return $this
 	 */
 	public function varchar($field, $size = 255, $null = false, $default = null)
 	{
 		if ($size > 255) {
-			throw new Exception("Error Processing Request", 1);
+			throw new \Exception("Error Processing Request", 1);
 		}
 
 		return $this->loadWhole("varchar", $field, $size, $null, $default);
@@ -155,7 +156,7 @@ class Schema
 	 * datetime
 	 * 
 	 * @param string $field
-	 * @param string|null $null
+	 * @param string|bool $null
 	 * 
 	 * @return Schema
 	 */ 
@@ -172,7 +173,7 @@ class Schema
 	 * timestamp
 	 * 
 	 * @param string $field
-	 * @param string|null $null
+	 * @param string|bool $null
 	 * 
 	 * @return Schema
 	 */ 
@@ -515,7 +516,7 @@ class Schema
 
 	/**
 	 * __invoke
-	 * 
+	 * @param \PDO $db
 	 * @return bool
 	 */
 	public function __invoke(\PDO $db)

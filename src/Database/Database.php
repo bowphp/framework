@@ -64,7 +64,7 @@ class Database extends DatabaseTools
     const INSERT = 4;
 
     private final function __construct(){}
-    private final function __clonse(){}
+    private final function __clone(){}
     /**
      * Charger la configuration
      *
@@ -209,7 +209,7 @@ class Database extends DatabaseTools
         static::verifyConnection();
 
         if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sqlstatement)) {
-          return static::executePrepareQuery($sqlstatement, $bind);
+            return static::executePrepareQuery($sqlstatement, $bind);
         }
 
         return false;
@@ -230,17 +230,12 @@ class Database extends DatabaseTools
 
             $pdostatement = static::$db->prepare($sqlstatement);
             static::bind($pdostatement, $bind);
-            $fetch = "fetchAll";
             $pdostatement->execute();
 
             static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
             static::$currentPdoErrorInfo = static::$db->errorInfo();
 
-            if ($pdostatement->rowCount() == 1) {
-               $fetch = "fetch";
-            }
-
-            return Security::sanitaze($pdostatement->$fetch());
+            return Security::sanitaze($pdostatement->fetchAll());
         }
 
         return null;
@@ -366,14 +361,7 @@ class Database extends DatabaseTools
         static::bind($pdoStatement, isset($options["data"]) ? $options["data"] : []);
 
         $pdoStatement->execute();
-
-        if ($pdoStatement->rowCount() === 0) {
-            $data = null;
-        } else if ($pdoStatement->rowCount() === 1) {
-            $data = $pdoStatement->fetch();
-        } else {
-            $data = $pdoStatement->fetchAll();
-        }
+        $data = $pdoStatement->fetchAll();
 
         if ($return == true) {
             if ($lastInsertId == false) {

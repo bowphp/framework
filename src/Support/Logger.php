@@ -2,6 +2,7 @@
 /**
  * Logger class
  * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
  */
 
 namespace Bow\Support;

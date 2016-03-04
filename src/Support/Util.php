@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 
 namespace Bow\Support;
 
@@ -128,17 +132,17 @@ class Util
 
 		static::$names = $names;
 
-		if (!file_exists($names["namespace"]["autoload"] . ".php")) {
+		if (!file_exists($names["autoload"] . ".php")) {
             throw new RouterException("L'autoload n'est définir dans le fichier de configuration");
 		}
 
-        if (!isset($names["app_autoload"])) {
-            throw new RouterException("la classe autoload n'est définir dans le fichier de configuration");
+        if (!isset($names["namespace"]["app"])) {
+            throw new RouterException("Le namespace autoload n'est définir dans le fichier de configuration");
         }
 
 		// Chargement de l'autoload
-		@require $names["namespace"]["autoload"] . ".php";
-		$autoload = $names["app_autoload"];
+		@require $names["autoload"] . ".php";
+		$autoload = $names["namespace"]["app"];
 		@$autoload::register();
 		$middleware = null;
 
@@ -204,11 +208,13 @@ class Util
 
         // Execution du middleware si define.
         if (is_string($middleware)) {
-            if (!in_array($middleware, $names["middleware"])) {
+            if (!in_array($middleware, $names["middlewares"])) {
                 throw new RouterException($middleware . " n'est pas un middleware definir.");
             }
+
             // Chargement du middleware
             $classMiddleware = $names["namespace"]["middleware"] . "\\" . ucfirst($middleware);
+            
             // On vérifie si le middleware définie est une middleware valide.
             if (!class_exists($classMiddleware)) {
                 throw new RouterException($middleware . " n'est pas un class Middleware.");
@@ -217,15 +223,20 @@ class Util
             $instance = new $classMiddleware();
             $handler = [$instance, "handler"];
             $status = call_user_func_array($handler, $param);
+        
         // Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
         } else if (is_callable($middleware)) {
             $status = call_user_func_array($middleware, $param);
         }
+
         // On arrêt tout en case de status false.
         if ($status == false) {
             die();
         }
 
+        // Lancement de l'execution de la liste
+        // fonction a execute suivant un ordre 
+        // conforme au middleware.
         if (!empty($function_list)) {
             $status = true;
 
@@ -333,7 +344,7 @@ class Util
 	}
 
 	/**
-	 * convertHourToLetter, convert une heure en letter Format: HH:MM:SS
+	 * hourToLetter, convert une heure en letter Format: HH:MM:SS
 	 * 
 	 * @param string $hour
 	 * @return string
@@ -373,7 +384,7 @@ class Util
 	}
 
 	/**
-	 * convertDateToLetter, convert une date sous forme de letter
+	 * dateToLetter, convert une date sous forme de letter
 	 * 
 	 * @param string $dateString
 	 * @return string

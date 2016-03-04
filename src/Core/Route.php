@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @author Franck Dakia
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Core
  */
 
 namespace Bow\Core;
@@ -9,8 +10,6 @@ namespace Bow\Core;
 
 use Bow\Support\Util;
 use Bow\Http\Request;
-use Bow\Exception\RouterException;
-
 
 Class Route
 {
@@ -149,7 +148,6 @@ Class Route
 		}
 
 		$req->params = (object) $params;
-		array_unshift($this->match, $req);
 
 		return Util::launchCallback($this->cb, $this->match, $names);
 	}

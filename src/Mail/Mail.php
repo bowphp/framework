@@ -15,7 +15,7 @@ use Bow\Support\Util;
 use InvalidArgumentException;
 
 
-class Mail extends Message
+abstract class Mail extends Message
 {
 
 	/**
@@ -48,20 +48,5 @@ class Mail extends Message
 		$this->addHeader("MIME-Version", "1.0");
 		$this->addHeader("X-Mailer",  "Bow Framework");
 		$this->addHeader("Date", date("r"));
-	}
-
-	/**
-	 * takeInstance, charge la classe Mail en mode singléton
-	 * 
-	 * @return self
-	 */
-	public static function takeInstance()
-	{
-		if (self::$mail !== null) {
-			return self::$mail;
-		}
-		self::$mail = new self;
-		
-		return self::$mail;
 	}
 }

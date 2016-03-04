@@ -11,13 +11,16 @@
  * @package Bow\Core
  */
 
+
 namespace Bow\Core;
 
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\HtmlFormatter;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
-use Bow\Support\Logger;
 use InvalidArgumentException;
 use Bow\Exception\ApplicationException;
 
@@ -42,13 +45,6 @@ class Application
 	 * @var string
 	 */
 	private $specialMethod = null;
-
-	/**
-	 * Répresente la racine de l'application
-	 *
-	 * @var string
-	 */
-	private $root = "";
 	
 	/**
 	 * Fonction lancer en cas d'erreur.
@@ -103,6 +99,28 @@ class Application
 		$this->req = $this->request()->method();
 		$this->config = $config;
         $this->req = $this->request();
+
+        $logger = new Logger("BOW: ");
+        $access = new Logger("BOW: ");
+
+        if ($config->getLogLevel() === "develope" ) {
+            $log = Logger::DEBUG;
+        } else {
+            $log = Logger::INFO;
+        }
+
+        $loggerStream = new StreamHandler($config->getLogpath() . "/error.log", $log);
+
+        if ($log === Logger::DEBUG) {
+            $dateFormat = "Y n j, g:i a";
+            $htmlFormat = new HtmlFormatter($dateFormat);
+            $loggerStream->setFormatter($htmlFormat);
+        }
+
+        $logger->pushHandler($loggerStream);
+        $accessStream = new StreamHandler($config->getLogpath() . "/access.log", $log);
+        $access->pushHandler($accessStream);
+        $access->info("request", $_SERVER);
 	}
 
 	/**
@@ -367,6 +385,7 @@ class Application
 				} else {
 					$with = [];
 				}
+
                 // Lancement de la recherche de la method qui arrivée dans la requete
                 // ensuite lancement de la verification de l'url de la requete
                 // execution de la fonction associé à la route.
@@ -378,13 +397,14 @@ class Application
 					} else if (is_array($response) || is_object($response)) {
 						$this->response()->json($response);
 					}
+
 					$error = false;
 				}
 			}
 		}
 
         // Si la route n'est pas enrégistre alors on lance une erreur 404
-		if ($error) {
+		if ($error === true) {
 			$this->response()->setCode(404);
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
@@ -430,7 +450,7 @@ class Application
 	 * 
 	 * @return Response
 	 */
-	public function response()
+	private function response()
 	{
 		return Response::configure($this->config);
 	}
@@ -440,7 +460,7 @@ class Application
 	 * 
 	 * @return Request
 	 */
-	public function request()
+	private function request()
 	{
 		return Request::configure();
 	}

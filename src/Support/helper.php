@@ -10,6 +10,7 @@
 */
 
 use Bow\Support\Util;
+use Bow\Support\Event;
 use Bow\Support\Security;
 use Bow\Support\Resource;
 use Bow\Database\Database;
@@ -44,7 +45,7 @@ if (!function_exists("configuration")) {
 if (!function_exists("db")) {
     /**
      * @param string $database
-     * @param callaback $cb
+     * @param callable $cb
      * @return Database, the Database reference
      */
     function db($database = null, $cb = null) {
@@ -109,6 +110,7 @@ if (!function_exists("last_insert_id")) {
     /**
      * Retourne le dernier ID suite a une requete INSERT sur un table dont ID est
      * auto_increment.
+     * @return int|null
      */
     function last_insert_id() {
         return Database::lastInsertId();
@@ -116,6 +118,11 @@ if (!function_exists("last_insert_id")) {
 }
 
 if (!function_exists("query_response")) {
+    /**
+     * @param string $method
+     * @param array $param
+     * @return null|mixed
+     */
     function query_response($method, $param) {
 
         if (method_exists($GLOBALS["response"], $method)) {
@@ -141,7 +148,7 @@ if (!function_exists("select")) {
      * statement lance des requete SQL de type SELECT
      * @param string $sql
      * @param array $data
-     * @param callaback $cb
+     * @param callable $cb
      * @return integer
      */
     function select($sql, array $data = [], $cb = null) {
@@ -154,7 +161,7 @@ if (!function_exists("insert")) {
      * statement lance des requete SQL de type INSERT
      * @param string $sql
      * @param array $data
-     * @param callaback $cb
+     * @param callable $cb
      * @return integer
      */
     function insert($sql, array $data = [], $cb = null) {
@@ -167,7 +174,7 @@ if (!function_exists("delete")) {
      * statement lance des requete SQL de type DELETE
      * @param string $sql
      * @param array $data
-     * @param callaback $cb
+     * @param callable $cb
      * @return integer
      */
     function delete($sql, array $data = [], $cb = null) {
@@ -196,7 +203,7 @@ if (!function_exists("statement")) {
      * @return integer
      */
     function statement($sql, array $data = []) {
-        return query_maker($sql, $data, "statement");
+        return query_maker($sql, $data, null, "statement");
     }
 }
 
@@ -257,6 +264,15 @@ if (!function_exists("query")) {
     }
 }
 
+if (!function_exists("request")) {
+    /**
+     * @return Bow\Http\Request
+     */
+    function request() {
+        return $GLOBALS["request"];
+    }
+}
+
 if (!function_exists("debug")) {
     /**
      * debug, fonction de debug de variable
@@ -271,10 +287,11 @@ if (!function_exists("debug")) {
 if (!function_exists("csrf")) {
     /**
      * csrf, fonction permetant de crée automatiquement un gestionnaire de csrf
+     * @param int $time
      * @return \StdClass
      */
-    function csrf() {
-        return Security::createTokenCsrf();
+    function csrf($time = null) {
+        return Security::createTokenCsrf($time);
     }
 }
 
@@ -302,7 +319,7 @@ if (!function_exists("store")) {
         }
 
         if (!is_null($dirname)) {
-            Resource::setUploadDir($dirname);
+            Resource::setUploadDirectory($dirname);
         }
 
         return (object) Resource::store($file);
@@ -321,14 +338,14 @@ if (!function_exists("json")) {
     }
 }
 
-if (!function_exists("statuscode")) {
+if (!function_exists("set_code")) {
     /**
      * statuscode, permet de changer le code de la reponse du server
-     * @param integer $code=200
+     * @param int $code=200
      * @return mixed
      */
-    function statuscode($code) {
-        return query_response("setCode", (int) $code);
+    function set_code($code) {
+        return $GLOBALS["response"]->setCode($code);
     }
 }
 
@@ -370,42 +387,41 @@ if (!function_exists("response")) {
      * @param string $template, le message a envoyer
      * @param integer $code, le code d'erreur
      * @param string $type, le type mime du contenu
-     * @return Response
+     * @return Bow\Http\Response
      */
     function response($template = null, $code = 200, $type = "text/html") {
-
 
         if (is_null($template)) {
             return $GLOBALS["response"];
         }
 
-        setHeader("Content-Type", $type);
-        statuscode($code);
+        set_header("Content-Type", $type);
+        set_code($code);
         query_response("send", $template);
 
         return $GLOBALS["response"];
     }
 }
 
-if (!function_exists("setheader")) {
+if (!function_exists("set_header")) {
     /**
      * modifie les entêtes HTTP
      * @param string $key le nom de l'entête http
      * @param string $value la valeur à assigner
      */
-    function setheader($key, $value) {
+    function set_header($key, $value) {
         query_response("setHeader", $key, $value);
     }
 }
 
-if (!function_exists("sendfile")) {
+if (!function_exists("send_file")) {
     /**
      * sendfile c'est un alias de require, mais vas chargé les fichiers contenu dans
      * la vie de l'application. Ici <code>sendfile</code> résoue le problème de scope.
      * @param string $filename le nom du fichier
      * @param array $bind les données la exporter
      */
-    function sendfile($filename, $bind = []) {
+    function send_file($filename, $bind = []) {
         query_response("sendFile", $filename, $bind);
     }
 }
@@ -419,14 +435,14 @@ if (!function_exists("send")) {
     }
 }
 
-if (!function_exists("c_sql")) {
+if (!function_exists("execute_sql")) {
     /**
      * Execute des requêtes sql customisé
      *
      * @param array $option
      * @return array|StdClass|null
      */
-    function c_sql(array $option) {
+    function execute_sql(array $option) {
         return Database::query($option);
     }
 }
@@ -563,5 +579,29 @@ if (!function_exists("commit")) {
      */
     function commit() {
         Database::commit();
+    }
+}
+
+if (!function_exists("event")) {
+    /**
+     * @param string $event_name
+     * @param callable|array $fn
+     */
+    function event($event_name, $fn) {
+        Event::on($event_name, $fn);
+    }
+}
+
+if (!function_exists("trigger")) {
+    /**
+     * @param string $event_name
+     * @throws Exception
+     */
+    function trigger($event_name) {
+        if (!is_string($event_name)) {
+            throw new Exception("Le premier parametre doit etre une chaine de caractere", 1);
+        }
+        
+        call_user_func_array([Event::class, "trigger"], func_get_args());
     }
 }

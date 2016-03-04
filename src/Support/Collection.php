@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 
 namespace Bow\Support;
 
@@ -14,6 +18,7 @@ class Collection
 	public function __construct()
 	{
         if (func_num_args() === 1) {
+
             if (is_array(func_get_arg(0))) {
                 $this->storage = func_get_arg(0);
             } else if (is_object(func_get_arg(0))) {
@@ -21,6 +26,7 @@ class Collection
             } else {
         		$this->storage = func_get_args();
             }
+
         } else {
             $this->storage = func_get_args();
         }
@@ -139,7 +145,7 @@ class Collection
     /**
      * add, ajoute une entrée dans la colléction
      *
-     * @param string $key
+     * @param string|int $key
      * @param $data
      * 
      * @return Collection

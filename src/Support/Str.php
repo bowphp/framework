@@ -1,8 +1,7 @@
 <?php
 /**
  * @author Franck Dakia <dakiafranck@gmail.com>
- * Date: 19/02/16
- * Time: 10:51
+ * @package Bow\Support
  */
 
 namespace Bow\Support;
@@ -195,7 +194,7 @@ class Str
      * @param string $str
      * @return string
      */
-    public function slugify($str)
+    public static function slugify($str)
     {
         return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
     }

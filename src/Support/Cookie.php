@@ -49,13 +49,17 @@ class Cookie
      */
     public static function get($key = null)
     {
-        if (static::has($key)) {
-            if (! static::$isDecrypt[$key]) {
-                static::$isDecrypt[$key] = true;
-                return Security::decrypt($_COOKIE[$key]);
-            }
+        if ($key !== null) {
+            if (static::has($key)) {
+                if (! static::$isDecrypt[$key]) {
+                    static::$isDecrypt[$key] = true;
+                    return Security::decrypt($_COOKIE[$key]);
+                }
 
-            return  Security::decrypt($_COOKIE[$key]);
+                return  Security::decrypt($_COOKIE[$key]);
+            } else {
+                return null;
+            }
         }
 
         foreach($_COOKIE as $cookie_key => $value) {

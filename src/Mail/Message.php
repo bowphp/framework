@@ -7,7 +7,6 @@ use Bow\Support\Util;
 
 abstract class Message
 {
-
 	/**
 	 * Liste des entêtes
 	 *
@@ -16,18 +15,18 @@ abstract class Message
 	protected $headers = ["top" => [], "bottom" => []];
 	/**
 	 * définir le destinataire
-	 * @var string
+	 * @var array
 	 */
-	protected $to = null;
+	protected $to = [];
 	/**
 	 * définir l'object du mail
 	 * @var string
 	 */
 	protected $subject = null;
 	/**
-	 * @var string
+	 * @var array
 	 */
-	protected $form = null;
+	protected $form = [];
 	/**
 	 * définir le message
 	 * @var string
@@ -83,6 +82,8 @@ abstract class Message
 		} else {
             $top[$key] = $value;
 		}
+
+		$this->headers["top"] = $top;
 		
 		return $this;
 	}
@@ -181,17 +182,7 @@ abstract class Message
 	 */
 	public function to($to, $name = null, $smtp = false)
 	{
-		$to = $this->formatEmail($to, $name);
-
-		if ($smtp === true) {
-			$this->addFeatureHeader("To", $to);
-		} else {
-			if ($this->to !== null) {
-				$this->to .= ", ";
-			} else {
-				$this->to = $to;
-			}
-		}
+		$this->to[] = $this->formatEmail($to, $name);
 
 		return $this;
 	}

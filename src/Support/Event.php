@@ -1,9 +1,8 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: papac
- * Date: 24/02/16
- * Time: 23:37
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
  */
 
 namespace Bow\Support;

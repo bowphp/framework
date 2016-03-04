@@ -55,34 +55,34 @@ class AppConfiguration
     /**
      * @var string
      */
-    private $approot = "";
+    private $approot;
     /**
      * @var string
      */
     private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
 
     // singleton constructor.
-    private function __construct($config)
+    private final function __construct($config)
     {
         /**
          * Chargement complet de toute la configuration de Bow
          */
-        $this->appname = $config->appname;
-        $this->logDirecotoryName = $config->logDirecotoryName;
-        $this->views = $config->views;
-        $this->engine = $config->template;
-        $this->cache = $config->cacheFolder;
-        $this->names = $config->names;
-        $this->timezone = $config->timezone;
-        $this->loglevel = $config->loglevel;
-        $this->tokenExpirateTime = $config->tokenExpirateTime;
+        $this->appname           = $config->app_name;
+        $this->logDirecotoryName = $config->log_direcotory_name;
+        $this->views             = $config->views;
+        $this->engine            = $config->template;
+        $this->cache             = $config->cache_folder;
+        $this->names             = $config->classes;
+        $this->timezone          = $config->timezone;
+        $this->debug             = $config->debug;
+        $this->tokenExpirateTime = $config->token_expirate_time;
 
-        if (isset($config->approot)) {
-            $this->approot = $config->approot;
+        if (isset($config->app_root)) {
+            $this->approot = $config->app_root;
         }
 
-        if (is_file($config->cipher)) {
-            $this->app_key = file_get_contents($config->cipher);
+        if (is_file($config->app_key)) {
+            $this->app_key = file_get_contents($config->app_key);
         }
 
         if (isset($config->timezone)) {
@@ -93,12 +93,12 @@ class AppConfiguration
     /**
      * Ferméture de la fonction magic __clone pour optimizer le singleton
      */
-    private function __clone(){}
+    private final function __clone(){}
 
     /**
      * takeInstance singleton
      * @param array $config
-     * @return self
+     * @return AppConfiguration
      */
     public static function configure($config) {
         if (! static::$instance instanceof AppConfiguration) {
@@ -110,7 +110,7 @@ class AppConfiguration
 
     /**
      * takeInstance singleton
-     * @return self
+     * @return AppConfiguration
      */
     public static function takeInstance() {
         return static::$instance;
@@ -250,6 +250,26 @@ class AppConfiguration
     }
 
     /**
+     * @param string $log
+     * @return string
+     */
+    public function setLogLevel($log)
+    {
+        $old = $this->debug;
+
+        if (in_array($log, ["develope", "production"])) {
+            $this->debug = $log;
+        }
+
+        return $old;
+    }
+
+    public function getLogLevel()
+    {
+        return $this->debug;
+    }
+
+    /**
      * getTimezone retourne la configuration de la TL
      * 
      * @return string
@@ -295,6 +315,7 @@ class AppConfiguration
     }
 
     /**
+     * Retourn la route principal de l'application.
      * @return string
      */
     public function getApproot()

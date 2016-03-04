@@ -10,7 +10,7 @@ use Bow\Exception\SmtpException;
 use Bow\Exception\SocketException;
 
 
-class Smtp extends Message
+abstract class Smtp extends Message
 {
 
     /**
