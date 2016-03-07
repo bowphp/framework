@@ -1,12 +1,10 @@
 <?php
-
 /**
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Core
  */
 
 namespace Bow\Core;
-
 
 use Bow\Support\Util;
 use Bow\Http\Request;

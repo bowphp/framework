@@ -2,8 +2,6 @@
 
 namespace Bow\Database;
 
-
-use Bow\Exception\DatabaseException;
 use PDO;
 use StdClass;
 use PDOStatement;
@@ -14,8 +12,8 @@ use Bow\Support\Util;
 use Bow\Support\Logger;
 use Bow\Support\Security;
 use InvalidArgumentException;
+use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
-
 
 class Database extends DatabaseTools
 {

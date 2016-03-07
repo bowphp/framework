@@ -6,7 +6,6 @@ use Closure;
 use ErrorException;
 use Bow\Interfaces\CollectionAccess;
 
-
 class RequestData implements CollectionAccess
 {
 	

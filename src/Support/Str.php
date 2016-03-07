@@ -6,7 +6,6 @@
 
 namespace Bow\Support;
 
-
 class Str
 {
     /**
@@ -80,10 +79,15 @@ class Str
      * @param string $pattern
      * @param string $str
      * @param array $match
+     * @throws \ErrorException
      * @return int
      */
-    public static function match($pattern, $str, & $match)
+    public static function match($pattern, $str, & $match = null)
     {
+        if (static::slice($pattern, 0, 1) !== static::slice($pattern, static::len($pattern) - 1, 1)) {
+            throw new \ErrorException("$pattern not valide");
+        }
+
         return preg_match($pattern, $str, $match);
     }
 
@@ -197,5 +201,48 @@ class Str
     public static function slugify($str)
     {
         return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
+    }
+
+    /**
+     * unslugify créateur de slug en utilisant un chaine simple.
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function unslugify($str)
+    {
+        return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
+    }
+
+    /**
+     * @param string $email
+     * @throws \ErrorException
+     * @return int
+     */
+    public static function mailIsMatch($email)
+    {
+        if (!is_string($email)) {
+            throw new \ErrorException("accept string " . gettype($email) . " given");
+        }
+
+        return static::match("/^[a-zA-z_-.]+([0-9]+)?@[a-z0-9]{2,}\.[a-z]{2,6}$/", $email);
+    }
+
+    /**
+     * @param string $domain
+     * @throws \ErrorException
+     * @return int
+     */
+    public static function domainIsMatch($domain)
+    {
+        if (!is_string($email)) {
+            throw new \ErrorException("accept string " . gettype($email) . " given");
+        }
+
+        if (!is_string($domain)) {
+
+        }
+
+        return static::match("/^((http|ftp|ssl|url):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
     }
 }

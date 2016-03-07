@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
@@ -7,10 +6,8 @@
 
 namespace Bow\Support;
 
-
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
-
 
 class Session implements CollectionAccessStatic
 {
@@ -158,12 +155,26 @@ class Session implements CollectionAccessStatic
     }
 
 	/**
-	 * disconnect, permet vider le cache de session
+	 * clear, permet de vider le cache sauf csrf|application_flash
 	 */
-	public static function stop()
+	public static function clear()
 	{
 		self::start();
-		session_destroy();
-		session_unset();
+
+		foreach($_SERVER as $key => $value){
+            if ($key !== "csrf" || $key !== "application_flash") {
+                unset($_SERVER[$key]);
+            }
+        }
 	}
+
+    /**
+     * clearFull, permet vider le cache de session
+     */
+    public static function clearFull()
+    {
+        static::start();
+        session_unset();
+        session_destroy();
+    }
 }

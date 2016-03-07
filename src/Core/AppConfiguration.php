@@ -5,11 +5,9 @@ namespace Bow\Core;
 class AppConfiguration
 {
     /**
-     * Patter Singleton
-     * 
      * @var string
      */
-    private $loglevel = "dev";
+    private $debug = "develope";
 
     /**
      * @var AppConfiguration

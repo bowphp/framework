@@ -1,29 +1,22 @@
 <?php
-
 /**
- * @author DIAGNOSTIC sarl, <info@diagnostic-ci.com>
- * 
  * Create and maintener by diagnostic developpers teams:
  * 
  * @author Etchien Boa <geekroot9@gmail.com>
  * @author Dakia Franck <dakiafranck@gmail.com>
- * 
  * @package Bow\Core
  */
 
-
 namespace Bow\Core;
 
-
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Formatter\HtmlFormatter;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use InvalidArgumentException;
+use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\HtmlFormatter;
 use Bow\Exception\ApplicationException;
-
 
 class Application
 {

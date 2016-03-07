@@ -90,7 +90,7 @@ class Response
     public function redirect($path)
     {
         echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
-        header("Location: " . $this->getRootpath() . $path, true, 301);
+        header("Location: " . $this->config->getApproot() . $path, true, 301);
 
         die();
     }

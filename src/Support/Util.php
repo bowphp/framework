@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
@@ -7,12 +6,10 @@
 
 namespace Bow\Support;
 
-
-use Bow\Exception\RouterException;
 use DateTime;
 use InvalidArgumentException;
 use Bow\Exception\UtilException;
-
+use Bow\Exception\RouterException;
 
 class Util
 {
@@ -418,7 +415,7 @@ class Util
 	 * @throws InvalidArgumentException
 	 * @return void
 	 */
-	public static function debug()
+	public static function dump()
 	{
 		if (func_num_args() == 0) {
 			throw new InvalidArgumentException(__METHOD__ ."(): Vous devez donner un paramètre à la fonction", E_ERROR);

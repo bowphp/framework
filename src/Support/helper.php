@@ -11,6 +11,7 @@
 
 use Bow\Support\Util;
 use Bow\Support\Event;
+use Bow\Support\Session;
 use Bow\Support\Security;
 use Bow\Support\Resource;
 use Bow\Database\Database;
@@ -273,14 +274,14 @@ if (!function_exists("request")) {
     }
 }
 
-if (!function_exists("debug")) {
+if (!function_exists("dump")) {
     /**
-     * debug, fonction de debug de variable
+     * dump, fonction de debug de variable
      * Elle vous permet d'avoir un coloration
      * synthaxique des types de donnée.
      */
-    function debug() {
-        call_user_func_array([Util::class, "debug"], func_get_args());
+    function dump() {
+        call_user_func_array([Util::class, "dump"], func_get_args());
     }
 }
 
@@ -411,6 +412,16 @@ if (!function_exists("set_header")) {
      */
     function set_header($key, $value) {
         query_response("setHeader", $key, $value);
+    }
+}
+
+if (!function_exists("redirect")) {
+    /**
+     * modifie les entêtes HTTP
+     * @param string $path le path de rédirection
+     */
+    function redirect($path) {
+        query_response("redirect", $path);
     }
 }
 
@@ -603,5 +614,13 @@ if (!function_exists("trigger")) {
         }
         
         call_user_func_array([Event::class, "trigger"], func_get_args());
+    }
+}
+
+if (!function_exists("flash")) {
+    function falsh() {
+        if (!Session::has("bow_flash")) {
+            Session::add("bow_flash", ["error" => [], "warning" => [],  "info" => []]);
+        }
     }
 }

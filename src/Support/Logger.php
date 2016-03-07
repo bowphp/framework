@@ -11,7 +11,6 @@ use Bow\Http\Request;
 use Bow\Support\Resource;
 use Psr\Log\AbstractLogger;
 
-
 class Logger extends AbstractLogger
 {
     /**

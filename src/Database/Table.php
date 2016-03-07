@@ -2,11 +2,10 @@
 
 namespace Bow\Database;
 
-
 use Bow\Support\Security;
 use Bow\Support\Collection;
 use Bow\Exception\TableException;
-
+use Bow\Support\Session;
 
 class Table extends DatabaseTools
 {
@@ -143,6 +142,10 @@ class Table extends DatabaseTools
             }
         }
 
+        if (is_string($value)) {
+            $value = Security::sanitaze($value, true);
+        }
+
         if ($this->where == null) {
             $this->where = "$column $comp $value";
         } else {
@@ -198,7 +201,7 @@ class Table extends DatabaseTools
      * clause where avec comparaison en <<not null>>
      *
      * @param $column
-     * @param string $boolean="and"
+     * @param string $boolean="and|or"
      *
      * @return $this
      */
@@ -219,7 +222,7 @@ class Table extends DatabaseTools
      *
      * @param $column
      * @param array $range
-     * @param string boolean="and"
+     * @param string boolean="and|or"
      *
      * @throws TableException
      *
@@ -228,7 +231,7 @@ class Table extends DatabaseTools
     public function whereBetween($column, array $range, $boolean = "and")
     {
 
-        if (count($range) > 2) {
+        if (count($range) >= 2) {
             $range = array_slice($range, 0, 2);
         } else {
             if (count($range) == 0) {
@@ -240,13 +243,17 @@ class Table extends DatabaseTools
         $between = implode(" and ", $range);
 
         if (is_null($this->where)) {
-            if ($boolean == "not" || $boolean == "and not") {
-                $this->where = "not $column between " . $between;
+            if ($boolean == "not") {
+                $this->where = "$column not between " . $between;
             } else {
                 $this->where = "$column between " . $between;
             }
         } else {
-            $this->where .= " $boolean $column is not null";
+            if ($boolean == "not") {
+                $this->where .= " and $column not between $between";
+            } else {
+                $this->where .= " $boolean $column between $between";
+            }
         }
 
         return $this;
@@ -261,7 +268,7 @@ class Table extends DatabaseTools
      */
     public function whereNotBetween($column, array $range)
     {
-        $this->whereBetween($column, $range, "and not");
+        $this->whereBetween($column, $range, "not");
 
         return $this;
     }
@@ -293,13 +300,17 @@ class Table extends DatabaseTools
         $in = implode(", ", $range);
 
         if (is_null($this->where)) {
-            if ($boolean == "not" || $boolean == "and not") {
-                $this->where = "not $column in ($in)";
+            if ($boolean == "not") {
+                $this->where = "$column not in ($in)";
             } else {
-                $this->where .= " and not $column in ($in)";
+                $this->where = "$column in ($in)";
             }
         } else {
-            $this->where .= " $boolean $column in ($in)";
+            if ($boolean == "not") {
+                $this->where .= " and $column not in ($in)";
+            } else {
+                $this->where .= " and $column in ($in)";
+            }
         }
 
         return $this;
@@ -317,11 +328,7 @@ class Table extends DatabaseTools
      */
     public function whereNotIn($column, array $range)
     {
-        if (is_null($this->where)) {
-            throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un whereIn avant", E_ERROR);
-        }
-
-        $this->whereIn($column, $range, "and not");
+        $this->whereIn($column, $range, "not");
 
         return $this;
     }
@@ -393,26 +400,26 @@ class Table extends DatabaseTools
      * On, Si chainé avec lui même doit ajouter un <<and>> avant, sinon
      * si chainé avec <<orOn>> orOn ajout un <<or>> dévant
      *
-     * @param string $colum1
+     * @param string $column1
      * @param string $comp
-     * @param string $colum2
+     * @param string $column2
      *
      * @throws TableException
      *
      * @return $this
      */
-    public function on($colum1, $comp = "=", $colum2)
+    public function on($column1, $comp = "=", $column2)
     {
         if (is_null($this->join)) {
             throw new TableException("la clause inner join est dèja activé.", E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
-            $colum2 = $comp;
+            $column2 = $comp;
         }
 
         if (!preg_match("/on/i", $this->join)) {
-            $this->join .= " on $colum1 $comp $colum2";
+            $this->join .= " on $column1 $comp $column2";
         }
 
         return $this;
@@ -495,7 +502,7 @@ class Table extends DatabaseTools
     public function jump($offset = 0)
     {
     	if (is_null($this->limit)) {
-            $this->limit = "$offset,";
+            $this->limit = "$offset, ";
         }
 
         return $this;
@@ -583,7 +590,7 @@ class Table extends DatabaseTools
         $sql = "select $aggregat($column) from " . $this->tableName;
     	
         if (!is_null($this->where)) {
-    		$sql .= " " . $this->where;
+    		$sql .= " where " . $this->where;
     		$this->where = null;
         }
     	
@@ -674,7 +681,7 @@ class Table extends DatabaseTools
         $sql = "select count($column) from " . $this->tableName;
 
         if ($this->where !== null) {
-            $sql .= " " . $this->where;
+            $sql .= " where " . $this->where;
             $this->where = null;
         }
 

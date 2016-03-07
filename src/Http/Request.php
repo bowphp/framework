@@ -2,10 +2,8 @@
 
 namespace Bow\Http;
 
-
 use StdClass;
 use Bow\Core\Application;
-
 
 class Request
 {

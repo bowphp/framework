@@ -1,8 +1,10 @@
 <?php
-
 /**
  * BowAutoload, systeme de Chargement automatique des classes.
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow
  */
+
 namespace Bow;
 
 class BowAutoload
