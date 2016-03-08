@@ -35,6 +35,10 @@ class Table extends DatabaseTools
     private $where = null;
 
     /**
+     * @var array
+     */
+    private $whereDataBind = [];
+    /**
      * @var string
      */
     private $join = null;
@@ -142,14 +146,12 @@ class Table extends DatabaseTools
             }
         }
 
-        if (is_string($value)) {
-            $value = Security::sanitaze($value, true);
-        }
+        $this->whereDataBind[$column] = $value;
 
         if ($this->where == null) {
-            $this->where = "$column $comp $value";
+            $this->where = "$column $comp :$column";
         } else {
-            $this->where .= " $boolean $column $comp $value";
+            $this->where .= " $boolean $column $comp :$column";
         }
 
         return $this;
@@ -172,7 +174,7 @@ class Table extends DatabaseTools
             throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un where avant", E_ERROR);
         }
 
-        $this->where("$column", $comp, $value, "or");
+        $this->where($column, $comp, $value, "or");
 
         return $this;
     }
@@ -231,13 +233,8 @@ class Table extends DatabaseTools
     public function whereBetween($column, array $range, $boolean = "and")
     {
 
-        if (count($range) >= 2) {
-            $range = array_slice($range, 0, 2);
-        } else {
-            if (count($range) == 0) {
-                throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
-            }
-            $range = [$range[0], $range[0]];
+        if (count($range) !== 2) {
+            throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
         }
 
         $between = implode(" and ", $range);
@@ -652,6 +649,7 @@ class Table extends DatabaseTools
 
         // execution de requete.
         $stmt = $this->connection->prepare($sql);
+        static::bind($stmt, $this->whereDataBind);
         $stmt->execute();
 
         $data = Security::sanitaze($stmt->fetchAll());
@@ -685,7 +683,10 @@ class Table extends DatabaseTools
             $this->where = null;
         }
 
-    	$count = (int) $this->connection->query($sql)->fetchColumn();
+    	$stmt = $this->connection->prepare($sql);
+        static::bind($stmt, $this->whereDataBind);
+        $stmt->execute();
+        $count = $stmt->fetchColumn();
 
     	if (is_callable($cb)) {
     		call_user_func_array($cb, [$count]);
@@ -729,12 +730,11 @@ class Table extends DatabaseTools
     /**
      * Action delete
      *
-     * @param array $where
      * @param callable $cb
      * 
      * @return int
      */
-    public function delete($where = [], $cb = null)
+    public function delete($cb = null)
     {
 		$sql = "delete from " . $this->tableName;
 
@@ -745,12 +745,7 @@ class Table extends DatabaseTools
 
 		$stmt = $this->connection->prepare($sql);
 
-		if (is_callable($where)) {
-			$cb = $where;
-			$where = [];
-		}
-
-		static::bind($stmt, $where);
+		static::bind($stmt, $this->whereDataBind);
 		$stmt->execute();
 		
 		$data = $stmt->rowCount();
@@ -803,13 +798,15 @@ class Table extends DatabaseTools
         $sql = "update " . $this->tableName . " set $column = $column $sign $step";
 
         if (!is_null($this->where)) {
-
             $sql .= " " . $this->where;
             $this->where = null;
-
         }
 
-        return (int) $this->connection->exec($sql);
+        $stmt = $this->connection->prepare($sql);
+        $this->bind($stmt, $this->whereDataBind);
+        $stmt->execute();
+
+        return (int) $stmt->rowCount();
     }
 
     /**

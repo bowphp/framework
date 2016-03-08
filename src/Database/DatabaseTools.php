@@ -91,7 +91,7 @@ abstract class DatabaseTools
      * 
      * @return array $resultat
      */
-    protected function add2points(array $data)
+    protected static function add2points(array $data)
     {
         $resultat = [];
 
