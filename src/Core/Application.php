@@ -1,25 +1,22 @@
 <?php
-
 /**
- * @author DIAGNOSTIC sarl, <info@diagnostic-ci.com>
- * 
  * Create and maintener by diagnostic developpers teams:
  * 
  * @author Etchien Boa <geekroot9@gmail.com>
  * @author Dakia Franck <dakiafranck@gmail.com>
- * 
  * @package Bow\Core
  */
 
 namespace Bow\Core;
 
-
+use Monolog\Logger;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
-use Bow\Support\Logger;
 use InvalidArgumentException;
-
+use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\HtmlFormatter;
+use Bow\Exception\ApplicationException;
 
 class Application
 {
@@ -41,13 +38,6 @@ class Application
 	 * @var string
 	 */
 	private $specialMethod = null;
-
-	/**
-	 * Répresente la racine de l'application
-	 *
-	 * @var string
-	 */
-	private $root = "";
 	
 	/**
 	 * Fonction lancer en cas d'erreur.
@@ -102,6 +92,28 @@ class Application
 		$this->req = $this->request()->method();
 		$this->config = $config;
         $this->req = $this->request();
+
+        $logger = new Logger("BOW: ");
+        $access = new Logger("BOW: ");
+
+        if ($config->getLogLevel() === "develope" ) {
+            $log = Logger::DEBUG;
+        } else {
+            $log = Logger::INFO;
+        }
+
+        $loggerStream = new StreamHandler($config->getLogpath() . "/error.log", $log);
+
+        if ($log === Logger::DEBUG) {
+            $dateFormat = "Y n j, g:i a";
+            $htmlFormat = new HtmlFormatter($dateFormat);
+            $loggerStream->setFormatter($htmlFormat);
+        }
+
+        $logger->pushHandler($loggerStream);
+        $accessStream = new StreamHandler($config->getLogpath() . "/access.log", $log);
+        $access->pushHandler($accessStream);
+        $access->info("request", $_SERVER);
 	}
 
 	/**
@@ -303,9 +315,9 @@ class Application
 	 */
 	private function routeLoader($method, $path, $cb)
 	{
-		static::$routes[$method][] = new Route($path, $cb);
+		static::$routes[$method][] = new Route($this->config->getApproot() . $path, $cb);
 
-		$this->currentPath = $path;
+		$this->currentPath = $this->config->getApproot() . $path;
 		$this->currentMethod = $method;
 
 		return $this;
@@ -359,7 +371,11 @@ class Application
 		}
 
 		if (isset(static::$routes[$method])) {
-			foreach (static::$routes[$method] as $key => $route) {	
+			foreach (static::$routes[$method] as $key => $route) {
+
+				if (! ($route instanceof Route)) {
+					break;
+				}
 
 				if (isset($this->with[$method][$route->getPath()])) {
 					$with = $this->with[$method][$route->getPath()];
@@ -367,17 +383,27 @@ class Application
 					$with = [];
 				}
 
-				if ($route->match($this->req->uri($this->config->getApproot()), $with)) {
+                // Lancement de la recherche de la method qui arrivée dans la requete
+                // ensuite lancement de la verification de l'url de la requete
+                // execution de la fonction associé à la route.
+				if ($route->match($this->req->uri(), $with)) {
 					$this->currentPath = $route->getPath();
-					$route->call($this->req, $this->config->getNamespace());
+					$response = $route->call($this->req, $this->config->getNamespace());
+					if (is_string($response)) {
+						$this->response()->send($response);
+					} else if (is_array($response) || is_object($response)) {
+						$this->response()->json($response);
+					}
+
 					$error = false;
 				}
 			}
 		}
 
-		if ($error) {
+        // Si la route n'est pas enrégistre alors on lance une erreur 404
+		if ($error === true) {
 			$this->response()->setCode(404);
-			if ($this->error404 !== null && is_callable($this->error404)) {
+			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			}
 		}
@@ -421,7 +447,7 @@ class Application
 	 * 
 	 * @return Response
 	 */
-	public function response()
+	private function response()
 	{
 		return Response::configure($this->config);
 	}
@@ -431,7 +457,7 @@ class Application
 	 * 
 	 * @return Request
 	 */
-	public function request()
+	private function request()
 	{
 		return Request::configure();
 	}

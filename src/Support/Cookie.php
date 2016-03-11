@@ -11,12 +11,12 @@ class Cookie
     /**
      * @access private
      */
-    private function __construct() {}
+    private final function __construct() {}
 
     /**
      * @access private
      */
-    private function __clone() {}
+    private final function __clone() {}
 
     /**
      * has, vérifie l'existance une clé dans la colléction de session
@@ -49,20 +49,26 @@ class Cookie
      */
     public static function get($key = null)
     {
-        if (static::has($key)) {
-            if (! static::$isDecrypt[$key]) {
-                static::$isDecrypt[$key] = true;
-                return Security::decrypt($_COOKIE[$key]);
+        if ($key !== null) {
+            if (static::has($key)) {
+                if (! static::$isDecrypt[$key]) {
+                    static::$isDecrypt[$key] = true;
+                    return Security::decrypt($_COOKIE[$key]);
+                }
+
+                return  Security::decrypt($_COOKIE[$key]);
+            } else {
+                return null;
             }
-            return $_COOKIE[$key];
         }
 
-        foreach($_COOKIE as $value) {
-            if (! static::$isDecrypt[$key]) {
-                static::$isDecrypt[$key] = true;
-                $_COOKIE[$key] = Security::decrypt($value);
+        foreach($_COOKIE as $cookie_key => $value) {
+            if (! static::$isDecrypt[$cookie_key]) {
+                static::$isDecrypt[$cookie_key] = true;
+                $_COOKIE[$cookie_key] = Security::decrypt($value);
             }
         }
+
         return $_COOKIE;
     }
 
@@ -71,17 +77,22 @@ class Cookie
      * 
      * @param string|int $key, la clé du cookie
      * @param mixed $data la donnée a associée
-     * @param int $time le temps de vie du cookie
+     * @param int $expirate le temps de vie du cookie
      * @param string $path le path de reconnaissance
      * @param string $domain le domaine sur lequel sera envoyé le cookie
      * @param bool $secure définie la sécurité
      * @param bool $http définie si c'est seulement le protocole http
      * @return bool
      */
-    public static function add($key, $data, $time = 3600, $path = null, $domain = null, $secure = false, $http = true)
+    public static function add($key, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
     {
         static::$isDecrypt[$key] = false;
-        return setcookie($key, Security::encrypt($data), $time, $path, $domain, $secure, $http);
+
+        if ($data !== null) {
+            $data = Security::encrypt($data);
+        }
+
+        return setcookie($key, $data, $expirate, $path, $domain, $secure, $http);
     }
 
     /**
@@ -96,10 +107,10 @@ class Cookie
 
         if (static::has($key)) {
             if (! static::$isDecrypt[$key]) {
-                $old = $_COOKIE[$key];
-                $old = Security::decrypt($old);
+                $old = Security::decrypt($_COOKIE[$key]);
                 unset(static::$isDecrypt[$key]);
             }
+
             unset($_COOKIE[$key]);
         }
 

@@ -1,11 +1,15 @@
 <?php
+/**
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 
 namespace Bow\Support;
 
 class Form
 {
-    private function __construct() {}
-    private function __clone() {}
+    private final function __construct() {}
+    private final function __clone() {}
     private static $form = "";
 
     /**

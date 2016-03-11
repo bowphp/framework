@@ -1,8 +1,10 @@
 <?php
-
+/**
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 
 namespace Bow\Support;
-
 
 class Collection
 {
@@ -14,6 +16,7 @@ class Collection
 	public function __construct()
 	{
         if (func_num_args() === 1) {
+
             if (is_array(func_get_arg(0))) {
                 $this->storage = func_get_arg(0);
             } else if (is_object(func_get_arg(0))) {
@@ -21,6 +24,7 @@ class Collection
             } else {
         		$this->storage = func_get_args();
             }
+
         } else {
             $this->storage = func_get_args();
         }
@@ -30,11 +34,13 @@ class Collection
      * has, vérifie l'existance une clé dans la colléction de session
      *
      * @param string $key
-     * @param bool $val
+     * @param bool $val Quand $val est a true alors :has vas vérifie $key non pas comment une cle mais un valeur.
      * @return boolean
      */
     public function has($key, $val = false)
-    {   
+    {
+        // Quand $val est a true alors :has vas vérifie
+        // $key non pas comment une cle mais un valeur.
         if ($val === true) {
         	return isset(array_flip($this->storage)[$key]);
         }
@@ -49,14 +55,24 @@ class Collection
      */
     public function isEmpty()
     {
-    	return empty($this->storage);
+        $isEmpty = empty($this->storage);
+
+        if ($isEmpty === false) {
+            if ($this->length() == 1) {
+                if (is_null($this->values()[0])) {
+                    $isEmpty = true;
+                }
+            }
+        }
+
+    	return $isEmpty;
     }
 
     /**
      * get, permet de récupérer une valeur ou la colléction de valeur.
      *
-     * @param string $key=null
-     * 
+     * @param string $key
+     *
      * @return mixed
      */
     public function get($key = null)
@@ -74,12 +90,63 @@ class Collection
     }
 
     /**
+     * retourne la liste des valeurs de la collection
+     * @return array
+     */
+    public function values()
+    {
+        $r = [];
+
+        foreach($this->storage as $value) {
+            array_push($r, $value);
+        }
+
+        return $r;
+    }
+
+    /**
+     * retourne la liste des clés de la collection
+     * @return array
+     */
+    public function keys()
+    {
+        $r = [];
+
+        foreach($this->storage as $key => $value) {
+            array_push($r, $key);
+        }
+
+        return $r;
+    }
+
+    /**
+     * collectionify, permet de récupérer une valeur ou la colléction de valeur sous forme
+     * d'instance de collection.
+     *
+     * @param string $key=null
+     *
+     * @return Collection
+     */
+    public function collectionify($key = null)
+    {
+
+        if ($this->has($key)) {
+            return new Collection($this->storage[$key]);
+        } else {
+            if ($key !== null) {
+                return null;
+            }
+        }
+
+        return new Collection($this->storage);
+    }
+    /**
      * add, ajoute une entrée dans la colléction
      *
-     * @param string $key
+     * @param string|int $key
      * @param $data
      * 
-     * @return $this
+     * @return Collection
      */
     public function add($key, $data = null)
     {
@@ -99,7 +166,7 @@ class Collection
      *
      * @param string $key
      * 
-     * @return $this
+     * @return Collection
      */
     public function remove($key)
     {
@@ -135,22 +202,42 @@ class Collection
      * 
      * @param callable $cb
      * 
-     * @return $this
+     * @return Collection
      */
     public function each($cb)
     {
     	foreach ($this->storage as $key => $value) {
-        	call_user_func_array($cb, [$value, $key]);
+        	if (false === call_user_func_array($cb, [$value, $key])) {
+                break;
+            }
         }
 
         return $this;
     }
 
     /**
+     * fusion la collection avec un tableau ou une autre collection
+     * @param Collection|array $array
+     * @throws \ErrorException
+     * @return Collection
+     */
+    public function merge($array) {
+
+        if (is_array($array)) {
+            $this->storage = array_merge($this->storage, $array);
+        } else if ($array instanceof Collection) {
+            $this->storage = array_merge($this->storage, $array->get());
+        } else {
+            throw new \ErrorException(__METHOD__ . "(), must be take 1 parameter to be array or Collection, " . gettype($array) . " given", E_ERROR);
+        }
+
+        return $this;
+    }
+    /**
      * map
      *
      * @param callable $cb
-     * @return $this
+     * @return Collection
      */
     public function map($cb)
     {
@@ -229,16 +316,6 @@ class Collection
     }
 
     /**
-     * keys retourne la liste des clés de la collection
-     * 
-     * @return array
-     */
-    public function keys()
-    {
-        return array_keys($this->storage);
-    }
-
-    /**
      * Sum
      * 
      * @param callable $cb
@@ -313,7 +390,7 @@ class Collection
     /**
      * length, longeur de la collection
      * 
-     * @return array
+     * @return int
      */
     public function length()
     {

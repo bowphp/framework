@@ -2,10 +2,8 @@
 
 namespace Bow\Http;
 
-
 use StdClass;
 use Bow\Core\Application;
-
 
 class Request
 {
@@ -48,10 +46,9 @@ class Request
 	/**
 	 * retourne uri envoyer par client.
 	 *
-	 * @param string $path=""
 	 * @return string
 	 */
-	public function uri($path = "")
+	public function uri()
 	{
 		if ($pos = strpos($_SERVER["REQUEST_URI"], "?")) {
 			$uri = substr($_SERVER["REQUEST_URI"], 0, $pos);
@@ -59,7 +56,7 @@ class Request
 			$uri = $_SERVER["REQUEST_URI"];
 		}
 
-		return str_replace($path, "", $uri);
+		return $uri;
 	}
 
 	/**

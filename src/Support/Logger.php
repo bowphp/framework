@@ -2,6 +2,7 @@
 /**
  * Logger class
  * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
  */
 
 namespace Bow\Support;
@@ -9,7 +10,6 @@ namespace Bow\Support;
 use Bow\Http\Request;
 use Bow\Support\Resource;
 use Psr\Log\AbstractLogger;
-
 
 class Logger extends AbstractLogger
 {

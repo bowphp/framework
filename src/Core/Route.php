@@ -1,16 +1,13 @@
 <?php
-
 /**
- * @author Franck Dakia
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Core
  */
 
 namespace Bow\Core;
 
-
 use Bow\Support\Util;
 use Bow\Http\Request;
-use Bow\Exception\RouterException;
-
 
 Class Route
 {
@@ -40,14 +37,14 @@ Class Route
 	 *
 	 * @var array
 	 */
-	private $match;
+	private $match = [];
 
 	/**
 	 * Régle supplementaire de validation d'url
 	 *
-	 * @var $with
+	 * @var array
 	 */
-	private $with;
+	private $with = [];
 
 	/**
 	 * Contructeur
@@ -77,7 +74,7 @@ Class Route
 	 * 
 	 * @param string $url
 	 * @param array $with
-     * @return bool.
+     * @return bool
 	 */
 	public function match($url, $with)
 	{
@@ -145,11 +142,16 @@ Class Route
 		$params = [];
 
 		foreach ($this->key as $key => $value) {
-			$params[$value] = $this->match[$key];
+			if (!is_int($this->match[$key])) {
+				$params[$value] = $this->match[$key];
+			} else {
+				$tmp = (int) $this->match[$key];
+				$params[$value] = $tmp;
+				$this->match[$key] = $tmp;
+			}
 		}
 
 		$req->params = (object) $params;
-		array_unshift($this->match, $req);
 
 		return Util::launchCallback($this->cb, $this->match, $names);
 	}

@@ -2,7 +2,6 @@
 
 namespace Bow\Database;
 
-
 use PDO;
 use StdClass;
 use PDOStatement;
@@ -13,8 +12,8 @@ use Bow\Support\Util;
 use Bow\Support\Logger;
 use Bow\Support\Security;
 use InvalidArgumentException;
+use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
-
 
 class Database extends DatabaseTools
 {
@@ -31,11 +30,16 @@ class Database extends DatabaseTools
      */
     private static $currentPdoErrorInfo = [];
     /**
-     * Instance de DB
+     * Instance de PDO
      *
-     * @var null
+     * @var \PDO
      */
     private static $db = null;
+
+    /**
+     * @var Database
+     */
+    private static $instance = null;
     /**
      * Configuration
      *
@@ -45,7 +49,7 @@ class Database extends DatabaseTools
     /**
      * Configuration
      *
-     * @var array
+     * @var string
      */
     private static $zone = null;
     /***
@@ -57,6 +61,8 @@ class Database extends DatabaseTools
     const DELETE = 3;
     const INSERT = 4;
 
+    private final function __construct(){}
+    private final function __clone(){}
     /**
      * Charger la configuration
      *
@@ -65,15 +71,25 @@ class Database extends DatabaseTools
      */
     public static function configure($config)
     {
+        if (static::$instance === null) {
+            static::$instance = new self();
+        }
         return static::$config = (object) $config;
     }
 
+    /**
+     * @return Database
+     */
+    public static function takeInstance()
+    {
+        return static::$instance;
+    }
     /**
      * connection, lance la connection sur la DB
      *
      * @param null $option
      * @param null $cb
-     * @return null
+     * @return null|Database
      */
     public static function connection($option = null, $cb = null)
     {
@@ -104,7 +120,7 @@ class Database extends DatabaseTools
         $c = isset($t->connections[static::$zone]) ? $t->connections[static::$zone] : null;
 
         if (is_null($c)) {
-            Util::launchCallback($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre db.php")]);
+            Util::launchCallback($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre database.php")]);
         }
 
         $db = null;
@@ -114,6 +130,7 @@ class Database extends DatabaseTools
             $username = null;
             $password = null;
 
+            // Configuration suppelement coté PDO
             $pdoPostConfiguation = [
                 PDO::ATTR_DEFAULT_FETCH_MODE => $t->fetch
             ];
@@ -159,8 +176,12 @@ class Database extends DatabaseTools
 		if (!is_string($enterKey)) {
         	Util::launchCallback($cb, [new InvalidArgumentException("paramètre invalide")]);
         } else {
-			static::$db = null;
-			static::connection($enterKey, $cb);
+            if($enterKey !== static::$zone) {
+                static::$db = null;
+                static::connection($enterKey, $cb);
+            } else {
+                Util::launchCallback($cb, static::takeInstance());
+            }
         }
 	}
 
@@ -207,17 +228,12 @@ class Database extends DatabaseTools
 
             $pdostatement = static::$db->prepare($sqlstatement);
             static::bind($pdostatement, $bind);
-            $fetch = "fetchAll";
             $pdostatement->execute();
 
             static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
             static::$currentPdoErrorInfo = static::$db->errorInfo();
 
-            if ($pdostatement->rowCount() == 1) {
-               $fetch = "fetch";
-            }
-
-            return Security::sanitaze($pdostatement->$fetch());
+            return Security::sanitaze($pdostatement->fetchAll());
         }
 
         return null;
@@ -343,14 +359,7 @@ class Database extends DatabaseTools
         static::bind($pdoStatement, isset($options["data"]) ? $options["data"] : []);
 
         $pdoStatement->execute();
-
-        if ($pdoStatement->rowCount() === 0) {
-            $data = null;
-        } else if ($pdoStatement->rowCount() === 1) {
-            $data = $pdoStatement->fetch();
-        } else {
-            $data = $pdoStatement->fetchAll();
-        }
+        $data = $pdoStatement->fetchAll();
 
         if ($return == true) {
             if ($lastInsertId == false) {
@@ -506,7 +515,7 @@ class Database extends DatabaseTools
                  */
                 if (isset($options['-order'])) {
                     $order = " ORDER BY " . (is_array($options['-order']) ? implode(", ", $options["-order"]) : $options["-order"]) . " DESC";
-                } else if (isset($options['+order'])) {
+                } else if (isset($options['+order']) || isset($options['order'])) {
                     $order = " ORDER BY " . (is_array($options['+order']) ? implode(", ", $options["+order"]) : $options["+order"]) . " ASC";
                 }
 
@@ -522,7 +531,9 @@ class Database extends DatabaseTools
                     } else {
                         $param = $options['take'];
                     }
-                    $param = is_array($param) ? implode(", ", $param) : $param;
+                    $param = is_array($param) ? implode(", ", array_map(function($v){
+                        return (int) $v;
+                    }, $param)) : $param;
                     $limit = " LIMIT " . $param;
                 }
 
@@ -533,7 +544,7 @@ class Database extends DatabaseTools
                  * ----------
                  */
                 
-                if (isset($options->grby)) {
+                if (isset($options["grby"])) {
                     $grby = " GROUP BY " . $options['grby'];
                 }
 
@@ -556,7 +567,7 @@ class Database extends DatabaseTools
                  */
 
                 if (isset($options["-between"])) {
-                    $between = $options[0] . " NOT BETWEEN " . implode(" AND ", $options["between"]);
+                    $between = $options[0] . " NOT BETWEEN " . implode(" AND ", $options["between"][1]);
                 } else if (isset($options["between"])) {
                     $between = $options[0] . " BETWEEN " . implode(" AND ", $options["between"][1]);
                 }
@@ -624,7 +635,7 @@ class Database extends DatabaseTools
              * qui récupère une erreur ou la query
              * pour évantuel vérification
              */
-            call_user_func($cb, isset($query) ? $query : E_ERROR);
+            call_user_func($cb, isset($query) ?: $query);
         }
 
         return $query;
@@ -662,5 +673,20 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
         return static::$db;
+    }
+
+    /**
+     * @param $method
+     * @param array $arguments
+     * @throws DatabaseException
+     * @return mixed
+     */
+    public function __call($method, array $arguments)
+    {
+        if (method_exists(static::class, $method)) {
+            return call_user_func_array([__CLASS__, $method], $arguments);
+        }
+
+        throw new DatabaseException("$method not found", E_USER_ERROR);
     }
 }

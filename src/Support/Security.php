@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 
 namespace Bow\Support;
 
@@ -144,7 +148,7 @@ class Security
 	/**
 	 * Createur de token csrf
 	 * @param int $time=null
-	 * @return void
+	 * @return bool
 	 */
 	public static function createTokenCsrf($time = null)
 	{
@@ -152,11 +156,19 @@ class Security
 			if (is_int($time)) {
 				static::$tokenCsrfExpirateTime = $time;
 			}
+
+			$token = static::generateTokenCsrf();
+
 			Session::add("csrf", (object) [
-				"token" => static::generateTokenCsrf(), 
-				"expirate" => time() + static::$tokenCsrfExpirateTime
+				"token" => $token,
+				"expirate" => time() + static::$tokenCsrfExpirateTime,
+				"field" => '<input type="hidden" name="crsf_token" value="' . $token .'"/>'
 			]);
+
+            return true;
 		}
+
+        return false;
 	}
 
 	/**
@@ -182,9 +194,13 @@ class Security
 	 * @param int $time
 	 * @return boolean
 	 */
-	public static function tokenCsrfTimeIsExpirate($time)
+	public static function tokenCsrfTimeIsExpirate($time = null)
 	{
 		if (Session::has("csrf")) {
+            if ($time === null) {
+                $time = time();
+            }
+
 			if (static::getTokenCsrf()->expirate >= (int) $time) {
 				return true;
 			}
@@ -229,10 +245,10 @@ class Security
 	 */
 	public static function encrypt($data)
 	{
-        self::$key = AppConfiguration::takeInstance()->getAppkey();
+        static::$key = AppConfiguration::takeInstance()->getAppkey();
 		$iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
 		static::$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-		$encrypted_data = mcrypt_encrypt(MCRYPT_BLOWFISH, self::$key, $data, MCRYPT_MODE_CBC, static::$iv);
+		$encrypted_data = mcrypt_encrypt(MCRYPT_BLOWFISH, static::$key, $data, MCRYPT_MODE_CBC, static::$iv);
 
 	 	return base64_encode($encrypted_data . static::$iv);
 	}
@@ -250,7 +266,7 @@ class Security
         $start = strlen($encrypted_data) - $iv_size;
         $iv = substr($encrypted_data, $start, $iv_size);
         $encrypted_data = substr($encrypted_data, 0, $start);
-		$decrypted_data = mcrypt_decrypt(MCRYPT_BLOWFISH, self::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
+		$decrypted_data = mcrypt_decrypt(MCRYPT_BLOWFISH, static::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
 
 		return $decrypted_data;
 	}

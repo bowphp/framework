@@ -1,4 +1,9 @@
 <?php
+/**
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ *
+ * @package Bow\Support
+ */
 
 namespace Bow\Support;
 
@@ -214,7 +219,7 @@ class Resource
 	 */
     private static function write($resource, $content)
     {
-		$status = true;
+		$status = null;
     	if (is_resource($resource)) {
 	        $status = fwrite($resource, $content);
     	} else {
@@ -241,7 +246,7 @@ class Resource
 	 * @param string $file
 	 * @param string $content
 	 */
-    public static function preappend($file, $content)
+    public static function prepend($file, $content)
     {
         $tmp_content = file_get_contents($file);
         

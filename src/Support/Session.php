@@ -1,12 +1,13 @@
 <?php
-
+/**
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 
 namespace Bow\Support;
 
-
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
-
 
 class Session implements CollectionAccessStatic
 {
@@ -85,7 +86,10 @@ class Session implements CollectionAccessStatic
 
 		if ($next === true) {
 			if (static::has($key)) {
-				array_push($_SESSION[$key], $data);
+                if (!is_array($_SESSION[$key])) {
+                    $_SESSION[$key] = [$_SESSION[$key]];
+                }
+                array_push($_SESSION[$key], $data);
 			} else {
 				$_SESSION[$key] = $data;
 			}
@@ -128,18 +132,27 @@ class Session implements CollectionAccessStatic
      *
      * @param $key
      * @param null $message
+     * @throws \ErrorException
      * @return mixed
      */
     public function fash($key, $message = null)
     {
-        if (!static::has("application_flash")) {
-            $_SERVER["application_flash"] = new Collection();
+        if (!static::has("bow.flash")) {
+            $_SERVER["bow.flash"] = new Flash();
+        }
+
+		if (!in_array($key, ["error", "warning", "info", "success"])) {
+			throw new \ErrorException("$key n'est pas valide.");
+		}
+
+        if ($key === "info") {
+            $key = "information";
         }
 
         if ($message === null) {
-            return $_SERVER["application_flash"]->get($key);
+            return $_SERVER["bow.flash"]->$key();
         } else {
-            $_SERVER["application_flash"]->add($key, $message);
+            $_SERVER["bow.flash"]->$key($message);
         }
 
         return null;
@@ -150,16 +163,30 @@ class Session implements CollectionAccessStatic
      */
     public function reFlash()
     {
-        unset($_SERVER["application_flash"]);
+        unset($_SERVER["bow.flash"]);
     }
 
 	/**
-	 * disconnect, permet vider le cache de session
+	 * clear, permet de vider le cache sauf csrf|bow.flash
 	 */
-	public static function stop()
+	public static function clear()
 	{
 		self::start();
-		session_destroy();
-		session_unset();
+
+		foreach($_SERVER as $key => $value){
+            if ($key !== "csrf" || $key !== "bow.flash") {
+                unset($_SERVER[$key]);
+            }
+        }
 	}
+
+    /**
+     * clearFull, permet vider le cache de session
+     */
+    public static function clearFull()
+    {
+        static::start();
+        session_unset();
+        session_destroy();
+    }
 }

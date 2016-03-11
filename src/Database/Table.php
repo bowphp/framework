@@ -2,10 +2,10 @@
 
 namespace Bow\Database;
 
-
 use Bow\Support\Security;
+use Bow\Support\Collection;
 use Bow\Exception\TableException;
-
+use Bow\Support\Session;
 
 class Table extends DatabaseTools
 {
@@ -34,6 +34,10 @@ class Table extends DatabaseTools
      */
     private $where = null;
 
+    /**
+     * @var array
+     */
+    private $whereDataBind = [];
     /**
      * @var string
      */
@@ -121,14 +125,14 @@ class Table extends DatabaseTools
 
     /**
      * where, ajout condition de type where, si chainé ajout un <<and>>
-     * 
+     *
      * @param $column
      * @param $comp
      * @param null $value
      * @param $boolean
-     * 
+     *
      * @throws TableException
-     * 
+     *
      * @return $this
      */
     public function where($column, $comp = "=", $value = null, $boolean = "and")
@@ -142,10 +146,12 @@ class Table extends DatabaseTools
             }
         }
 
+        $this->whereDataBind[$column] = $value;
+
         if ($this->where == null) {
-            $this->where = "$column $comp $value";
+            $this->where = "$column $comp :$column";
         } else {
-            $this->where .= " $boolean $column $comp $value";
+            $this->where .= " $boolean $column $comp :$column";
         }
 
         return $this;
@@ -153,14 +159,14 @@ class Table extends DatabaseTools
 
     /**
      * orWhere, retourne une condition de type [where colonne = value <<or colonne = value>>]
-     * 
+     *
      * @param string $column
      * @param string $comp
      * @param null $value
-     * 
+     *
      * @throws TableException
-     * 
-     * @return self
+     *
+     * @return Table
      */
     public function orWhere($column, $comp = "=", $value = null)
     {
@@ -168,17 +174,17 @@ class Table extends DatabaseTools
             throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un where avant", E_ERROR);
         }
 
-        $this->where("$column", $comp, $value, "or");
+        $this->where($column, $comp, $value, "or");
 
         return $this;
     }
 
     /**
      * clause where avec comparaison en <<is null>>
-     * 
+     *
      * @param string $column
      * @param string $boolean="and"
-     * 
+     *
      * @return $this
      */
     public function whereNull($column, $boolean = "and")
@@ -195,10 +201,10 @@ class Table extends DatabaseTools
 
     /**
      * clause where avec comparaison en <<not null>>
-     * 
+     *
      * @param $column
-     * @param string $boolean="and"
-     * 
+     * @param string $boolean="and|or"
+     *
      * @return $this
      */
     public function whereNotNull($column, $boolean = "and")
@@ -215,65 +221,64 @@ class Table extends DatabaseTools
 
     /**
      * clause where avec comparaison en <<between>>
-     * 
+     *
      * @param $column
      * @param array $range
-     * @param string boolean="and"
-     * 
+     * @param string boolean="and|or"
+     *
      * @throws TableException
-     * 
+     *
      * @return $this
      */
     public function whereBetween($column, array $range, $boolean = "and")
     {
 
-        if (count($range) > 2) {
-            $range = array_slice($range, 0, 2);
-        } else {
-            if (count($range) == 0) {
-                throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
-            }
-            $range = [$range[0], $range[0]];
+        if (count($range) !== 2) {
+            throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
         }
 
         $between = implode(" and ", $range);
 
         if (is_null($this->where)) {
-            if ($boolean == "not" || $boolean == "and not") {
-                $this->where = "not $column between " . $between;
+            if ($boolean == "not") {
+                $this->where = "$column not between " . $between;
             } else {
                 $this->where = "$column between " . $between;
             }
         } else {
-            $this->where .= " $boolean $column is not null";
+            if ($boolean == "not") {
+                $this->where .= " and $column not between $between";
+            } else {
+                $this->where .= " $boolean $column between $between";
+            }
         }
 
         return $this;
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param $column
      * @param $range
      * @return $this
      */
     public function whereNotBetween($column, array $range)
     {
-        $this->whereBetween($column, $range, "and not");
+        $this->whereBetween($column, $range, "not");
 
         return $this;
     }
 
     /**
      * clause where avec comparaison en <<in>>
-     * 
+     *
      * @param string $column
-     * @param string $range
+     * @param array $range
      * @param string $boolean
-     * 
+     *
      * @throws TableException
-     * 
+     *
      * @return $this
      */
     public function whereIn($column, array $range, $boolean = "and")
@@ -292,13 +297,17 @@ class Table extends DatabaseTools
         $in = implode(", ", $range);
 
         if (is_null($this->where)) {
-            if ($boolean == "not" || $boolean == "and not") {
-                $this->where = "not $column in ($in)";
+            if ($boolean == "not") {
+                $this->where = "$column not in ($in)";
             } else {
-                $this->where .= " and not $column in ($in)";
+                $this->where = "$column in ($in)";
             }
         } else {
-            $this->where .= " $boolean $column in ($in)";
+            if ($boolean == "not") {
+                $this->where .= " and $column not in ($in)";
+            } else {
+                $this->where .= " and $column in ($in)";
+            }
         }
 
         return $this;
@@ -306,30 +315,26 @@ class Table extends DatabaseTools
 
     /**
      * clause where avec comparaison en <<not in>>
-     * 
+     *
      * @param string $column
-     * @param string $range
-     * 
+     * @param array $range
+     *
      * @throws TableException
-     * 
+     *
      * @return $this
      */
     public function whereNotIn($column, array $range)
-    {   
-        if (is_null($this->where)) {
-            throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un whereIn avant", E_ERROR);
-        }
+    {
+        $this->whereIn($column, $range, "not");
 
-        $this->whereIn($column, $range, "and not");
-        
         return $this;
     }
 
     /**
      * clause join
-     * 
+     *
      * @param $table
-     * 
+     *
      * @return $this
      */
     public function join($table)
@@ -345,11 +350,11 @@ class Table extends DatabaseTools
 
     /**
      * clause left join
-     * 
+     *
      * @param $table
-     * 
+     *
      * @throws TableException
-     * 
+     *
      * @return $this
      */
     public function leftJoin($table)
@@ -369,7 +374,7 @@ class Table extends DatabaseTools
 
     /**
      * clause right join
-     * 
+     *
      * @param $table
      * @throws TableException
      * @return $this
@@ -391,27 +396,27 @@ class Table extends DatabaseTools
     /**
      * On, Si chainé avec lui même doit ajouter un <<and>> avant, sinon
      * si chainé avec <<orOn>> orOn ajout un <<or>> dévant
-     * 
-     * @param string $colum1
+     *
+     * @param string $column1
      * @param string $comp
-     * @param string $colum2
-     * 
+     * @param string $column2
+     *
      * @throws TableException
-     * 
+     *
      * @return $this
      */
-    public function on($colum1, $comp = "=", $colum2)
+    public function on($column1, $comp = "=", $column2)
     {
         if (is_null($this->join)) {
             throw new TableException("la clause inner join est dèja activé.", E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
-            $colum2 = $comp;
+            $column2 = $comp;
         }
 
         if (!preg_match("/on/i", $this->join)) {
-            $this->join .= " on $colum1 $comp $colum2";
+            $this->join .= " on $column1 $comp $column2";
         }
 
         return $this;
@@ -420,13 +425,13 @@ class Table extends DatabaseTools
     /**
      * clause On, suivie d'une combinaison par un comparateur <<or>>
      * Il faut que l'utilisateur fasse un <<on()>> avant d'utiliser le <<orOn>>
-     * 
+     *
      * @param string $column
      * @param string $comp
      * @param string $value
-     * 
+     *
      * @throws TableException
-     * 
+     *
      * @return $this
      */
     public function orOn($column, $comp = "=", $value)
@@ -450,9 +455,9 @@ class Table extends DatabaseTools
 
     /**
      * clause group by
-     * 
+     *
      * @param string $column
-     * 
+     *
      * @return $this
      */
     public function group($column)
@@ -466,10 +471,10 @@ class Table extends DatabaseTools
 
     /**
      * clause order by
-     * 
+     *
      * @param string $column
      * @param string $type
-     * 
+     *
      * @return $this
      */
     public function order($column, $type = "asc")
@@ -489,13 +494,12 @@ class Table extends DatabaseTools
      * jump = offset
      *
      * @param int $offset
-     * 
      * @return $this
      */
     public function jump($offset = 0)
     {
     	if (is_null($this->limit)) {
-            $this->limit = "$offset,";
+            $this->limit = "$offset, ";
         }
 
         return $this;
@@ -527,7 +531,7 @@ class Table extends DatabaseTools
      *
      * @param string $column
      * 
-     * @return self
+     * @return Table
      */
     public function max($column)
     {
@@ -539,7 +543,7 @@ class Table extends DatabaseTools
      *
      * @param string $column
      * 
-     * @return self
+     * @return Table
      */
     public function min($column)
     {
@@ -551,7 +555,7 @@ class Table extends DatabaseTools
      *
      * @param string $column
      * 
-     * @return self
+     * @return Table
      */
     public function avg($column)
     {
@@ -563,7 +567,7 @@ class Table extends DatabaseTools
      *
      * @param string $column
      * 
-     * @return self
+     * @return Table
      */
     public function sum($column)
     {
@@ -583,7 +587,7 @@ class Table extends DatabaseTools
         $sql = "select $aggregat($column) from " . $this->tableName;
     	
         if (!is_null($this->where)) {
-    		$sql .= " " . $this->where;
+    		$sql .= " where " . $this->where;
     		$this->where = null;
         }
     	
@@ -604,7 +608,6 @@ class Table extends DatabaseTools
     public function get($cb = null)
     {
         $sql = "select ";
-        $fetch = "fetchAll";
 
        	// Ajout de la clause select
         if (is_null($this->select)) {
@@ -646,13 +649,10 @@ class Table extends DatabaseTools
 
         // execution de requete.
         $stmt = $this->connection->prepare($sql);
+        static::bind($stmt, $this->whereDataBind);
         $stmt->execute();
 
-        if ($stmt->rowCount() <= 1) {
-        	$fetch = "fetch";
-        }
-
-        $data = Security::sanitaze($stmt->$fetch());
+        $data = Security::sanitaze($stmt->fetchAll());
 
         if (is_callable($cb)) {
         	return call_user_func_array($cb, [$data]);
@@ -676,7 +676,17 @@ class Table extends DatabaseTools
     		$column = "*";
     	}
 
-    	$count = (int) $this->connection->query("select count($column) from " . $this->tableName)->fetchColumn();
+        $sql = "select count($column) from " . $this->tableName;
+
+        if ($this->where !== null) {
+            $sql .= " where " . $this->where;
+            $this->where = null;
+        }
+
+    	$stmt = $this->connection->prepare($sql);
+        static::bind($stmt, $this->whereDataBind);
+        $stmt->execute();
+        $count = $stmt->fetchColumn();
 
     	if (is_callable($cb)) {
     		call_user_func_array($cb, [$count]);
@@ -720,12 +730,11 @@ class Table extends DatabaseTools
     /**
      * Action delete
      *
-     * @param array $where
      * @param callable $cb
      * 
      * @return int
      */
-    public function delete($where = [], $cb = null)
+    public function delete($cb = null)
     {
 		$sql = "delete from " . $this->tableName;
 
@@ -736,12 +745,7 @@ class Table extends DatabaseTools
 
 		$stmt = $this->connection->prepare($sql);
 
-		if (is_callable($where)) {
-			$cb = $where;
-			$where = [];
-		}
-
-		static::bind($stmt, $where);
+		static::bind($stmt, $this->whereDataBind);
 		$stmt->execute();
 		
 		$data = $stmt->rowCount();
@@ -759,7 +763,7 @@ class Table extends DatabaseTools
      * @param $column
      * @param int $step
      * 
-     * @return self
+     * @return Table
      */
     public function increment($column, $step = 1)
     {
@@ -794,13 +798,15 @@ class Table extends DatabaseTools
         $sql = "update " . $this->tableName . " set $column = $column $sign $step";
 
         if (!is_null($this->where)) {
-
             $sql .= " " . $this->where;
             $this->where = null;
-
         }
 
-        return (int) $this->connection->exec($sql);
+        $stmt = $this->connection->prepare($sql);
+        $this->bind($stmt, $this->whereDataBind);
+        $stmt->execute();
+
+        return (int) $stmt->rowCount();
     }
 
     /**
@@ -823,6 +829,7 @@ class Table extends DatabaseTools
     {
         $sql = "insert into " . $this->tableName . " set ";
         $values = Security::sanitaze($values, true);
+
         $sql .= parent::rangeField(parent::add2points(array_keys($values)));
 
         $stmt = $this->connection->prepare($sql);
@@ -842,7 +849,6 @@ class Table extends DatabaseTools
     public function insertAndGetLastId(array $values)
     {
         $this->insert($values);
-
         return $this->connection->lastInsertId();
     }
 
@@ -864,7 +870,6 @@ class Table extends DatabaseTools
     public function last()
     {
         $c = $this->count();
-
         return $this->jump($c - 1)->take(1)->get();
     }
 
@@ -899,7 +904,7 @@ class Table extends DatabaseTools
      * 
      * @param integer $n
      * @param integer $current
-     * @return array|StdClass
+     * @return array|\StdClass
      */
     public function paginate($n, $current = 0)
     {
@@ -914,5 +919,22 @@ class Table extends DatabaseTools
         }
 
         return $this->jump($current)->take($n)->get();
+    }
+
+    /**
+     * collectionify, retourne les données de la DB sous en instance de Collection
+     *
+     * @return Collection
+     */
+    public function collectionify()
+    {
+        $data = $this->get();
+        $coll =  new Collection();
+
+        foreach($data as $key => $value) {
+            $coll->add($value);
+        }
+
+        return $coll;
     }
 }

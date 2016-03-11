@@ -3,6 +3,7 @@
 namespace Bow\Http;
 
 use ErrorException;
+use Jade\Jade;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 use Bow\Core\AppConfiguration;
@@ -17,9 +18,11 @@ class Response
 	 */
 	private static $header = [
 		200 => "OK",
+		201 => "Created",
 		301 => "Moved Permanently",
 		302 => "Found",
 		304 => "Not Modified",
+		400 => "Bad Request",
 		401 => "Unauthorized",
 		404 => "Not Found",
 		403 => "Forbidden",
@@ -88,7 +91,7 @@ class Response
     public function redirect($path)
     {
         echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
-        header("Location: " . $this->getRootpath() . $path, true, 301);
+        header("Location: " . $path, true, 301);
 
         die();
     }
@@ -178,9 +181,8 @@ class Response
 	 */
 	public function view($filename, $bind = null, $code = 200)
 	{
-		$filename = preg_replace("/@|#|\./", "/", $filename);
-		$filename .= ".php";
-		
+		$filename = preg_replace("/@|#/", "/", $filename) . $this->config->getTemplateExtension();
+
 		if ($this->config->getViewpath() !== null) {
 			if (!is_file($this->config->getViewpath() . "/" . $filename)) {
 				throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
@@ -196,7 +198,7 @@ class Response
 		}
 
 		// Chargement du template.
-		$template = $this->templateLoader($filename);
+		$template = $this->templateLoader();
 		$this->setCode($code);
 
 		if ($this->config->getEngine() == "twig") {
@@ -212,7 +214,7 @@ class Response
 	 * templateLoader, charge le moteur template à utiliser.
 	 * 
 	 * @throws ErrorException
-	 * @return Mustache|Twig_Evironement
+	 * @return Twig_Environment|\Mustache_Engine|Jade
 	 */
 	private function templateLoader()
 	{
@@ -231,7 +233,13 @@ class Response
 				'auto_reload' => true
 		    ));
 		} else if ($this->config->getEngine() == "mustache") {
-			$tpl = new Mustache();
+			$tpl = new \Mustache_Engine();
+		} else {
+			$tpl = new Jade([
+                'cache' => $this->config->getCachepath(),
+                'prettyprint' => true,
+                'extension' => $this->config->getTemplateExtension()
+            ]);
 		}
 
 		return $tpl;
