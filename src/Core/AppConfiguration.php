@@ -2,6 +2,8 @@
 
 namespace Bow\Core;
 
+use Bow\Support\Util;
+
 class AppConfiguration
 {
     /**
@@ -57,6 +59,10 @@ class AppConfiguration
     /**
      * @var string
      */
+    private $template_extension = ".php";
+    /**
+     * @var string
+     */
     private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
 
     // singleton constructor.
@@ -74,6 +80,7 @@ class AppConfiguration
         $this->timezone          = $config->timezone;
         $this->debug             = $config->debug;
         $this->tokenExpirateTime = $config->token_expirate_time;
+        $this->template_extension = $config->template_extension;
 
         if (isset($config->app_root)) {
             $this->approot = $config->app_root;
@@ -84,7 +91,7 @@ class AppConfiguration
         }
 
         if (isset($config->timezone)) {
-            \Bow\Support\Util::setTimezone($config->timezone);
+            Util::setTimezone($config->timezone);
         }
     }
 
@@ -319,5 +326,30 @@ class AppConfiguration
     public function getApproot()
     {
         return $this->approot;
+    }
+
+    /**
+     * modifier l'extension de template.
+     * @param string $extension
+     * @return string
+     */
+    public function setTemplateExtension($extension)
+    {
+        $old = $this->template_extension;
+
+        if (is_string($extension)) {
+            $this->template_extension = $extension;
+        }
+
+        return $old;
+    }
+
+    /**
+     * retourne l'extension de template.
+     * @return string
+     */
+    public function getTemplateExtension()
+    {
+        return $this->template_extension;
     }
 }

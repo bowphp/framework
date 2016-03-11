@@ -52,7 +52,7 @@ class RequestData implements CollectionAccess
 	 *
 	 * @param $method
 	 * 
-	 * @return self
+	 * @return RequestData
 	 */
 	public static function configure($method)
 	{
@@ -106,7 +106,7 @@ class RequestData implements CollectionAccess
 	 *
 	 * @param string $key
 	 * 
-	 * @return self
+	 * @return RequestData
 	 */
 	public function remove($key)
 	{
@@ -122,7 +122,7 @@ class RequestData implements CollectionAccess
 	 * @param mixed $data
 	 * @param bool $next
 	 * 
-	 * @return self
+	 * @return RequestData
 	 */
 	public function add($key, $data, $next = false)
 	{
@@ -135,6 +135,8 @@ class RequestData implements CollectionAccess
 		} else {
 			$this->data[$key] = $data;
 		}
+		
+		return $this;
 	}
 
 	/**
@@ -145,7 +147,7 @@ class RequestData implements CollectionAccess
 	 * 
 	 * @throws ErrorException
 	 * 
-	 * @return self
+	 * @return RequestData
 	 */
 	public function set($key, $value)
 	{
@@ -163,7 +165,7 @@ class RequestData implements CollectionAccess
 	 *
 	 * @param Closure $cb
 	 * 
-	 * @return void
+	 * @return mixed
 	 */
 	public function each(Closure $cb)
 	{

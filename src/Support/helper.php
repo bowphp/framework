@@ -374,7 +374,7 @@ if (!function_exists("secure")) {
      * @return mixed
      */
     function secure($data) {
-        if (is_int($data) || is_string($data)) {
+        if (is_int($data)) {
             return $data;
         } else {
             return Security::sanitaze($data, true);
@@ -596,21 +596,26 @@ if (!function_exists("commit")) {
 if (!function_exists("event")) {
     /**
      * @param string $event_name
+     * @throws \Bow\Exception\EventException
      * @param callable|array $fn
      */
     function event($event_name, $fn) {
-        Event::on($event_name, $fn);
+        if (!is_string($event_name)) {
+            throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
+        }
+
+        call_user_func_array([Event::class, "on"], [$event_name, $fn]);
     }
 }
 
 if (!function_exists("trigger")) {
     /**
      * @param string $event_name
-     * @throws Exception
+     * @throws \Bow\Exception\EventException
      */
     function trigger($event_name) {
         if (!is_string($event_name)) {
-            throw new Exception("Le premier parametre doit etre une chaine de caractere", 1);
+            throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
         }
         
         call_user_func_array([Event::class, "trigger"], func_get_args());
@@ -618,9 +623,11 @@ if (!function_exists("trigger")) {
 }
 
 if (!function_exists("flash")) {
-    function falsh() {
-        if (!Session::has("bow_flash")) {
-            Session::add("bow_flash", ["error" => [], "warning" => [],  "info" => []]);
-        }
+    /**
+     * flash
+     * @return \Bow\Support\Flash
+     */
+    function flash() {
+        return Session::get("bow.flash");
     }
 }

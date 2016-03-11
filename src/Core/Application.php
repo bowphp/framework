@@ -315,9 +315,9 @@ class Application
 	 */
 	private function routeLoader($method, $path, $cb)
 	{
-		static::$routes[$method][] = new Route($path, $cb);
+		static::$routes[$method][] = new Route($this->config->getApproot() . $path, $cb);
 
-		$this->currentPath = $path;
+		$this->currentPath = $this->config->getApproot() . $path;
 		$this->currentMethod = $method;
 
 		return $this;
@@ -371,7 +371,11 @@ class Application
 		}
 
 		if (isset(static::$routes[$method])) {
-			foreach (static::$routes[$method] as $key => $route) {	
+			foreach (static::$routes[$method] as $key => $route) {
+
+				if (! ($route instanceof Route)) {
+					break;
+				}
 
 				if (isset($this->with[$method][$route->getPath()])) {
 					$with = $this->with[$method][$route->getPath()];
@@ -382,7 +386,7 @@ class Application
                 // Lancement de la recherche de la method qui arrivée dans la requete
                 // ensuite lancement de la verification de l'url de la requete
                 // execution de la fonction associé à la route.
-				if ($route->match($this->req->uri($this->config->getApproot()), $with)) {
+				if ($route->match($this->req->uri(), $with)) {
 					$this->currentPath = $route->getPath();
 					$response = $route->call($this->req, $this->config->getNamespace());
 					if (is_string($response)) {

@@ -1,101 +1,79 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: papac
- * Date: 3/5/16
- * Time: 8:56 AM
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
  */
 
 namespace Bow\Support;
 
-
 class Flash
 {
-    private static $warning     = [];
-    private static $information = [];
-    private static $error       = [];
-    private static $success     = [];
-
-
-    private final function __construct(){}
-    private final function __clone() {}
-
-    public static function warning()
-    {
-        return static::toCollection("warning");
-    }
-
-    public static function information()
-    {
-        return static::toCollection("information");
-    }
-
-    public static function error()
-    {
-        return static::toCollection("success");
-    }
-
-    public static function success()
-    {
-        return static::toCollection("success");
-    }
-
     /**
-     * @param array $context
+     * @var array
      */
-    public static function addInfo(array $context)
+    private $warning     = [];
+    /**
+     * @var array
+     */
+    private $information = [];
+    /**
+     * @var array
+     */
+    private $error       = [];
+    /**
+     * @var array
+     */
+    private $success     = [];
+
+    public function __construct()
     {
-        static::addFash("information", $context);
     }
 
-    /**
-     * @param array $context
-     */
-    public static function addWarn(array $context)
+    public function __clone()
     {
-        static::addFash("warning", $context);
     }
 
-    /**
-     * @param array $context
-     */
-    public static function addError(array $context)
+    public function warning($value = null)
     {
-        static::addFash("error", $context);
-    }
-
-    /**
-     * @param array $context
-     */
-    public static function addSuccess(array $context)
-    {
-        static::addFash("success", $context);
-    }
-
-    /**
-     * @param $level
-     * @param array $context
-     */
-    private static function addFash($level, array $context)
-    {
-        foreach($context as $key => $value) {
-            static::${$level}[$key] = $value;
-        }
-    }
-
-    /**
-     * @param string $level
-     * @return Collection
-     */
-    private static function toCollection($level)
-    {
-        $data = static::${$level};
-        $coll = new Collection();
-
-        foreach($data as $key => $value) {
-            $coll->add($key, $value);
+        if ($value !== null) {
+            $this->warning = $value;
         }
 
-        return $coll;
+        return $this->warning;
+    }
+
+    public function information($value = null)
+    {
+        if ($value !== null) {
+            $this->information = $value;
+        }
+
+        return $this->information;
+    }
+
+    /**
+     * @param $value
+     * @return array
+     */
+    public function error($value = null)
+    {
+        if ($value !== null) {
+            $this->error = $value;
+        }
+
+        return $this->error;
+    }
+
+    /**
+     * @param $value
+     * @return array
+     */
+    public function success($value = null)
+    {
+        if ($value !== null) {
+            $this->success = $value;
+        }
+
+        return $this->success;
     }
 }
