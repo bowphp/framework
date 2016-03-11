@@ -926,7 +926,7 @@ class Table extends DatabaseTools
      *
      * @return Collection
      */
-    public function collectionify()
+    public function toCollection()
     {
         $data = $this->get();
         $coll =  new Collection();
