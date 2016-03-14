@@ -197,9 +197,9 @@ class Security
 	public static function tokenCsrfTimeIsExpirate($time = null)
 	{
 		if (Session::has("csrf")) {
-            if ($time === null) {
-                $time = time();
-            }
+			if ($time === null) {
+				$time = time();
+			}
 
 			if (static::getTokenCsrf()->expirate >= (int) $time) {
 				return true;

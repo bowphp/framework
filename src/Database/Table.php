@@ -902,11 +902,12 @@ class Table extends DatabaseTools
     /**
      * paginate 
      * 
-     * @param integer $n
-     * @param integer $current
+     * @param integer $n nombre d'element a récupérer
+     * @param integer $current la page courrant
+     * @param integer $chunk le nombre de groupe que l'on veux faire
      * @return array|\StdClass
      */
-    public function paginate($n, $current = 0)
+    public function paginate($n, $current = 0, $chunk = null)
     {
         --$current;
 
@@ -918,7 +919,14 @@ class Table extends DatabaseTools
             }
         }
 
-        return $this->jump($current)->take($n)->get();
+        $data = $this->jump($current)->take($n)->get();
+
+        // groupé les données
+        if (is_int($chunk)) {
+            $data = array_chunk($data, $chunk);
+        }
+
+        return $data;
     }
 
     /**
@@ -926,7 +934,7 @@ class Table extends DatabaseTools
      *
      * @return Collection
      */
-    public function collectionify()
+    public function toCollection()
     {
         $data = $this->get();
         $coll =  new Collection();
