@@ -235,7 +235,7 @@ class Str
     public static function domainIsMatch($domain)
     {
         if (!is_string($domain)) {
-            throw new \ErrorException("accept string " . gettype($email) . " given");
+            throw new \ErrorException("accept string " . gettype($domain) . " given");
         }
 
         return static::match("/^((http|ftp|ssl|url):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
