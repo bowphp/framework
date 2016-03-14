@@ -27,8 +27,8 @@ global $response;
 
 $app_dir = dirname(dirname(dirname(__DIR__)));
 
-$response = \Bow\Http\Response::configure(AppConfiguration::configure(require $app_dir . "/config/application.php"));
-$request  = \Bow\Http\Request::configure();
+$response = Bow\Http\Response::configure(AppConfiguration::configure(require $app_dir . "/config/application.php"));
+$request  = Bow\Http\Request::configure();
 
 Database::configure(require $app_dir . "/config/database.php");
 Resource::configure(require $app_dir . "/config/resource.php");
