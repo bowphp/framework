@@ -324,16 +324,10 @@ class Resource
 	 */
     public static function configure($config = null)
     {
-    	if ($config !== null) {
-	    	static::$fileExtension = $config->uploadFileExtension;
-	    	$c = $config->uploadConfiguration;
-
-	    	if ($c->type === "folder") {
-	    		static::$uploadDir = $c->config["folder"]["dirname"];
-	    	} else {
-	    		// Todo: ftp workflow
-	    	}
-    	}
+        if ($config !== null) {
+            static::$fileExtension = $config->upload_file_extension;
+            static::$uploadDir = $config->upload_directory;
+        }
     }
 
 	/**

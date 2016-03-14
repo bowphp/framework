@@ -49,14 +49,17 @@ class Str
     public static function slice($str, $start, $end = null)
     {
         $sliceStr = "";
+
         if (is_string($str)) {
             if ($end === null) {
-                $end = static::length($str);
+                $end = static::len($str);
             }
+
             if ($start < $end) {
                 $sliceStr = mb_substr($str, $start, $end, "UTF-8");
             }
         }
+
         return $sliceStr;
     }
 
@@ -157,16 +160,12 @@ class Str
      * wordify
      *
      * @param $str
+     * @param $sep
      * @return array
      */
-    public static function wordify($str)
+    public static function wordify($str, $sep = " ")
     {
-        $words = static::split(" ", $str);
-        foreach($words as $key => $values) {
-            $words[$key] = static::capitalize($values);
-        }
-
-        return $words;
+        return static::split($sep, $str, static::count($sep, $str));
     }
 
     /**
@@ -189,7 +188,7 @@ class Str
      */
     public static function randomize($size = 16)
     {
-        return static::slice(0, $size, str_shuffle('#*$@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012356789'));
+        return static::slice(str_shuffle('#*$@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012356789'), 0, $size);
     }
 
     /**
@@ -211,7 +210,7 @@ class Str
      */
     public static function unslugify($str)
     {
-        return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
+        return preg_replace("/[^a-z0-9]/", " ", strtolower(trim(strip_tags($str))));
     }
 
     /**
@@ -235,14 +234,28 @@ class Str
      */
     public static function domainIsMatch($domain)
     {
-        if (!is_string($email)) {
+        if (!is_string($domain)) {
             throw new \ErrorException("accept string " . gettype($email) . " given");
         }
 
-        if (!is_string($domain)) {
+        return static::match("/^((http|ftp|ssl|url):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
+    }
 
+    /**
+     * @param string $pattern
+     * @param string $str
+     * @return int
+     */
+    public static function count($pattern, $str)
+    {
+        $c = 0;
+
+        for($i = 0, $len = static::len($str); $i < $len; $i++) {
+            if ($str[$i] == $pattern) {
+                $c++;
+            }
         }
 
-        return static::match("/^((http|ftp|ssl|url):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
+        return $c;
     }
 }
