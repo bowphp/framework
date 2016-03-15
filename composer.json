@@ -12,7 +12,8 @@
         "psr/log": "1.0.0",
         "monolog/monolog": "^1.17",
         "mustache/mustache": "^2.10",
-        "kylekatarnls/jade-php": "^1.6"
+        "kylekatarnls/jade-php": "^1.6",
+        "nicolab/php-ftp-client": "^1.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8"

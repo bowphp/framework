@@ -7,6 +7,7 @@
 
 namespace Bow\Support;
 
+use Bow\Exception\ResourceException;
 use InvalidArgumentException;
 
 class Resource
@@ -215,15 +216,17 @@ class Resource
 	 * 
 	 * @param string $resource
 	 * @param string $content
+     * @throws ResourceException
 	 * @return boolean
 	 */
     private static function write($resource, $content)
     {
 		$status = null;
+
     	if (is_resource($resource)) {
 	        $status = fwrite($resource, $content);
     	} else {
-
+            throw new ResourceException("impossible d'ecrire dans le fichier.", E_ERROR);
     	}
 
         return $status;
@@ -232,8 +235,8 @@ class Resource
 	/**
 	 * Ecrire à la suite d'un fichier spécifier
 	 * 
-	 * @param string $file
-	 * @param string $content
+	 * @param string $file nom du fichier
+	 * @param string $content content a ajouter
 	 */
     public static function append($file, $content)
     {

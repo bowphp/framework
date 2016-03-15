@@ -96,7 +96,7 @@ class Application
         $logger = new Logger("BOW: ");
         $access = new Logger("BOW: ");
 
-        if ($config->getLogLevel() === "develope" ) {
+        if ($config->getLogLevel() === "developpe" ) {
             $log = Logger::DEBUG;
         } else {
             $log = Logger::INFO;
