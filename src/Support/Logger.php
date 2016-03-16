@@ -220,10 +220,6 @@ class Logger extends AbstractLogger
             case E_USER_DEPRECATED:
                 $this->alert($errstr,  $context);
                 break;
-            case E_CORE_ERROR:
-            case E_CORE_WARNING:
-                $this->critical($errstr,  $context);
-                break;
         }
     }
 }
