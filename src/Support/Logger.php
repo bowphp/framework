@@ -52,7 +52,7 @@ class Logger extends AbstractLogger
      * @return mixed
      */
     public function log($level, $message, array $context = []) {
-        if ($this->debug === "developpement") {
+        if ($this->debug === "development") {
             echo static::htmlFormat($level, $message, $context);
         } else  if ($this->debug === "production") {
             $message .= "\nin " . $context["file"] . " at " . $context["line"] . "\n";
@@ -149,7 +149,7 @@ class Logger extends AbstractLogger
                     <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . ucwords($message) . '</b></h1>
                     <p>' . $context["file"] . ' at <i>line ' . $context["line"] . '</i></p>
                 </div>
-                <div style="font-family: courier; font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1500px; margin: auto; margin-top: 8px;">
+                <div style="font-family: courier; font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: auto; margin-top: 8px;">
                     ' . $content . '
                 </div>
             </div>
