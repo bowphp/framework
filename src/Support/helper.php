@@ -25,7 +25,7 @@ define("DELETE", Database::DELETE);
 global $request;
 global $response;
 
-$app_dir = dirname(dirname(dirname(__DIR__)));
+$app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
 
 $response = Bow\Http\Response::configure(AppConfiguration::configure(require $app_dir . "/config/application.php"));
 $request  = Bow\Http\Request::configure();
