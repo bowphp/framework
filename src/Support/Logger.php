@@ -116,6 +116,12 @@ class Logger extends AbstractLogger
                     $len = count($errRef["args"]);
                     foreach($errRef["args"] as $k => $args) {
                         $func .= gettype($args);
+                        if (gettype($args) === "string") {
+                            $func .= "(" . $args . ")";
+                        }
+                        if (gettype($args) === "object") {
+                            $func .= "(Closure)";
+                        }
                         if ($k + 1 != $len) {
                             $func .= ", ";
                         }
@@ -123,8 +129,8 @@ class Logger extends AbstractLogger
                     $func .= ")";
                 }
 
-                $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key: at " . $line . " " . $file . " <b><i>" . $func . "</i></b>";
-                $content .= "</div>";
+                $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key: at " . $file . " <b><i>" . $func . "</i></b>:";
+                $content .= $line . " </div>";
             }
         } else {
             $content = "Aucun context.";
@@ -143,7 +149,7 @@ class Logger extends AbstractLogger
                     <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . ucwords($message) . '</b></h1>
                     <p>' . $context["file"] . ' at <i>line ' . $context["line"] . '</i></p>
                 </div>
-                <div style="font-family: courier; font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1000px; margin: auto; margin-top: 8px;">
+                <div style="font-family: courier; font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: auto; margin-top: 8px;">
                     ' . $content . '
                 </div>
             </div>
