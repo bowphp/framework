@@ -7,6 +7,7 @@
 
 namespace Bow\Support;
 
+use Bow\Exception\LoggerException;
 use Bow\Support\Resource;
 use Psr\Log\AbstractLogger;
 
@@ -15,12 +16,31 @@ class Logger extends AbstractLogger
     /**
      * @var string
      */
-    private static $debug;
+    private $debug;
 
     /**
      * @var string
      */
-    private static $path;
+    private $path;
+
+    /**
+     * @param string $debug develop | production
+     * @param string $path
+     */
+    public function __construct($debug, $path)
+    {
+        $this->debug = $debug;
+        $this->path  = $path;
+    }
+    
+    /**
+     * @return Logger
+     */
+    public function register()
+    {
+        set_error_handler([$this, "errorHandler"]);
+        set_exception_handler([$this, "exceptionHandler"]);
+    }
 
     /**
      * log
@@ -28,14 +48,20 @@ class Logger extends AbstractLogger
      * @param string $level
      * @param string $message
      * @param array $context
+     * @throws LoggerException
      * @return mixed
      */
     public function log($level, $message, array $context = []) {
-        if (static::$debug === "developpe") {
+        if ($this->debug === "developpement") {
             echo static::htmlFormat($level, $message, $context);
-        } else  if (static::$debug === "production") {
-            Resource::append(static::$path, static::textFormat($level, $message, $context));
+        } else  if ($this->debug === "production") {
+            $message .= "\nin " . $context["file"] . " at " . $context["line"] . "\n";
+            Resource::append($this->path, static::textFormat($level, $message, $context["context"] . "\n"));
+        } else {
+            throw new LoggerException("debug: ". $this->debug . " n'est pas definir");
         }
+
+        exit;
     }
 
     /**
@@ -49,7 +75,7 @@ class Logger extends AbstractLogger
     private function textFormat($level, $message, $context)
     {
         $message .= $context;
-        return sprintf("[%s] [client: %s:%d] [:%s] [pid %d] %s", date("r"), $_SERVER["REMOTE_ADDR"], $_SERVER["REMOTE_PORT"], $level, posix_getpid(), $message);
+        return sprintf("[%s] [client: %s:%d] [%s] %s", date("Y-m-d H:i:s"), $_SERVER["REMOTE_ADDR"], $_SERVER["REMOTE_PORT"], $level, $message);
     }
 
     /**
@@ -60,33 +86,72 @@ class Logger extends AbstractLogger
      * @param array $context
      * @return string
      */
-    private function htmlFormat($level, $message, array $context)
+    private function htmlFormat($level, $message, array $context = [])
     {
         $content = "";
 
+        if (isset($context["context"])) {
+            foreach ($context["context"] as $key => $errRef) {
+                $key++;
+                $func = "";
+                $line = "";
+                $file = "";
+                if (isset($errRef["function"])) {
+                    $func = $errRef["function"];
+                }
+
+                if (isset($errRef["type"])) {
+                    $func = $errRef["class"] . "" . $errRef["type"] . "" . $func. "(";
+                }
+
+                if (isset($errRef["line"])) {
+                    $line = $errRef["line"];
+                }
+
+                if (isset($errRef["file"])) {
+                    $file = $errRef["file"];
+                }
+
+                if (isset($errRef["args"])) {
+                    $len = count($errRef["args"]);
+                    foreach($errRef["args"] as $k => $args) {
+                        $func .= gettype($args);
+                        if ($k + 1 != $len) {
+                            $func .= ", ";
+                        }
+                    }
+                    $func .= ")";
+                }
+
+                $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key: at " . $line . " " . $file . " <b><i>" . $func . "</i></b>";
+                $content .= "</div>";
+            }
+        } else {
+            $content = "Aucun context.";
+        }
+
         $html = '
-            <div style="display: inline-block; margin: auto; width: 800px">
-                <div style="border: 1px solid #aaa; border-radius: 5px">
-                    <h1>(<i>' . $level . '</i>)<b>' . $message . '</b> at ' . $context[1] . '</h1>
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Bow - ' . $level . '</title>
+            </head>
+            <body>
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: inline-block; margin: auto; background-color: #eee; padding: 5px; text-align: center">
+                <div style="border: 1px solid #aaa; border-radius: 5px; padding: 8px; background-color: white; width: 950px; text-align: center; margin: auto">
+                    <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . ucwords($message) . '</b></h1>
+                    <p>' . $context["file"] . ' at <i>line ' . $context["line"] . '</i></p>
                 </div>
-                <div style="border: 1px solid #aaa; border-radius: 5px">
+                <div style="font-family: courier; font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1000px; margin: auto; margin-top: 8px;">
                     ' . $content . '
                 </div>
             </div>
+            </body>
+            </html>
         ';
-        return $html;
-    }
 
-    /**
-     * @param string $debug develop | production
-     * @param string $path
-     */
-    public static function register($debug, $path)
-    {
-        static::$debug = $debug;
-        static::$path  = $path;
-        set_error_handler([__CLASS__, "errorHandler"]);
-        set_exception_handler([__CLASS__, "exceptionHandler"]);
+         return $html;
     }
 
     /**
@@ -96,17 +161,17 @@ class Logger extends AbstractLogger
      * @param int $linenum
      * @param array $context
      */
-    private function errorHandler($errno, $errmsg, $filename, $linenum, $context)
+    public function errorHandler($errno, $errmsg, $filename, $linenum, $context)
     {
-        static::addHandler($errno, $errmsg, $filename, $linenum, $context);
+        $this->addHandler($errno, $errmsg, $filename, $linenum, $context);
     }
 
     /**
      * @param \Exception $e
      */
-    private function exceptionHandler(\Exception $e)
+    public function exceptionHandler(\Exception $e)
     {
-        if (static::$debug === "developpe") {
+        if ($this->debug === "developpement") {
             $trace = $e->getTrace();
         } else {
             $trace = $e->getTraceAsString();
@@ -126,7 +191,7 @@ class Logger extends AbstractLogger
     {
         // information sur le contexte de l'erreur
         $context = [
-            "filename" => $file,
+            "file" => $file,
             "line"     => $linenum,
             "context"  => $vars
         ];

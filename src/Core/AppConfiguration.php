@@ -73,9 +73,9 @@ class AppConfiguration
          */
         $this->appname           = $config->app_name;
         $this->logDirecotoryName = $config->log_direcotory_name;
-        $this->views             = $config->views;
+        $this->views             = $config->views_path;
         $this->engine            = $config->template_engine;
-        $this->cache             = $config->cache_folder;
+        $this->cache             = $config->template_cache_folder;
         $this->names             = $config->classes;
         $this->timezone          = $config->timezone;
         $this->debug             = $config->debug;

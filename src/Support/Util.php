@@ -120,6 +120,7 @@ class Util
 	 */
 	public static function launchCallback($cb, $param = null, array $names = [])
 	{
+
 		$param = is_array($param) ? $param : [$param];
         $function_list = [];
 		
@@ -130,8 +131,9 @@ class Util
 		static::$names = $names;
 
 		if (!file_exists($names["autoload"] . ".php")) {
-            throw new RouterException("L'autoload n'est définir dans le fichier de configuration");
+            throw new RouterException("L'autoload n'est définir dans le fichier de configuration", E_ERROR);
 		}
+
 
         if (!isset($names["namespace"]["app"])) {
             throw new RouterException("Le namespace autoload n'est définir dans le fichier de configuration");
@@ -206,7 +208,7 @@ class Util
         // Execution du middleware si define.
         if (is_string($middleware)) {
             if (!in_array($middleware, $names["middlewares"])) {
-                throw new RouterException($middleware . " n'est pas un middleware definir.");
+                throw new RouterException($middleware . " n'est pas un middleware definir.", E_ERROR);
             }
 
             // Chargement du middleware
@@ -467,7 +469,7 @@ class Util
 		if (is_callable($cb)) {
 			call_user_func_array($cb, [static::class]);
 		} else {
-			static::debug(array_slice(func_get_args(), 1, func_num_args()));
+			static::dump(array_slice(func_get_args(), 1, func_num_args()));
 		}
 	}
 	

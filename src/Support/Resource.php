@@ -229,6 +229,8 @@ class Resource
             throw new ResourceException("impossible d'ecrire dans le fichier.", E_ERROR);
     	}
 
+		static::closeFile($resource);
+
         return $status;
     }
 
@@ -257,6 +259,10 @@ class Resource
         static::append($file, $tmp_content);
     }
 
+    public static function put($file, $content)
+    {
+        static::write(static::open($file, "w+"), $content);
+    }
 	/**
 	 * Supprimer un fichier
 	 * 
@@ -311,11 +317,11 @@ class Resource
 	/**
 	 * Supprime un répertoire.
 	 * 
-	 * @param string $file
+	 * @param string $directory
 	 * @param bool $recursive
 	 * @return boolean
 	 */
-    public static function rmdir($file, $recursive = false)
+    public static function rmdir($directory, $recursive = false)
     {
 		return null;
     }
@@ -353,7 +359,6 @@ class Resource
     private static function open($file, $mod)
 	{
         $rFile = fopen($file, $mod);
-        
         return $rFile;
     }
 

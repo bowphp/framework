@@ -9,13 +9,11 @@
 
 namespace Bow\Core;
 
-use Monolog\Logger;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
+use Bow\Support\Logger;
 use InvalidArgumentException;
-use Monolog\Handler\StreamHandler;
-use Monolog\Formatter\HtmlFormatter;
 use Bow\Exception\ApplicationException;
 
 class Application
@@ -93,27 +91,8 @@ class Application
 		$this->config = $config;
         $this->req = $this->request();
 
-        $logger = new Logger("BOW: ");
-        $access = new Logger("BOW: ");
-
-        if ($config->getLogLevel() === "developpe" ) {
-            $log = Logger::DEBUG;
-        } else {
-            $log = Logger::INFO;
-        }
-
-        $loggerStream = new StreamHandler($config->getLogpath() . "/error.log", $log);
-
-        if ($log === Logger::DEBUG) {
-            $dateFormat = "Y n j, g:i a";
-            $htmlFormat = new HtmlFormatter($dateFormat);
-            $loggerStream->setFormatter($htmlFormat);
-        }
-
-        $logger->pushHandler($loggerStream);
-        $accessStream = new StreamHandler($config->getLogpath() . "/access.log", $log);
-        $access->pushHandler($accessStream);
-        $access->info("request", $_SERVER);
+		$logger = new Logger($config->getLogLevel(), $config->getLogpath() . "/error.log");
+		$logger->register();
 	}
 
 	/**
