@@ -230,7 +230,7 @@ class Response
 		    $loader = new Twig_Loader_Filesystem($this->config->getViewpath());
 		    $tpl = new Twig_Environment($loader, array(
 		        'cache' => $this->config->getCachepath(),
-				'auto_reload' => true
+				'auto_reload' => $this->config->getCacheAutoReload()
 		    ));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new \Mustache_Engine();

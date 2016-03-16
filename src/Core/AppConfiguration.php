@@ -65,6 +65,8 @@ class AppConfiguration
      */
     private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
 
+    private $autoReload = true;
+
     // singleton constructor.
     private final function __construct($config)
     {
@@ -81,6 +83,7 @@ class AppConfiguration
         $this->debug             = $config->debug;
         $this->tokenExpirateTime = $config->token_expirate_time;
         $this->template_extension = $config->template_extension;
+        $this->autoReload        = $config->template_auto_reload_cache_views;
 
         if (isset($config->app_root)) {
             $this->approot = $config->app_root;
@@ -351,5 +354,10 @@ class AppConfiguration
     public function getTemplateExtension()
     {
         return $this->template_extension;
+    }
+
+    public function getCacheAutoReload()
+    {
+        return $this->autoReload;
     }
 }

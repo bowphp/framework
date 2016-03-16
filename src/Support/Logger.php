@@ -117,7 +117,7 @@ class Logger extends AbstractLogger
                     foreach($errRef["args"] as $k => $args) {
                         $func .= gettype($args);
                         if (gettype($args) === "string") {
-                            $func .= "(" . $args . ")";
+                            $func .= "('" . $args . "')";
                         }
                         if (gettype($args) === "object") {
                             $func .= "(Closure)";
@@ -149,7 +149,7 @@ class Logger extends AbstractLogger
                     <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . ucwords($message) . '</b></h1>
                     <p>' . $context["file"] . ' at <i>line ' . $context["line"] . '</i></p>
                 </div>
-                <div style="font-family: courier; font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: auto; margin-top: 8px;">
+                <div style="font-family: courier; font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1500px; margin: auto; margin-top: 8px;">
                     ' . $content . '
                 </div>
             </div>
