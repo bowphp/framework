@@ -29,10 +29,11 @@ class Response
 		404 => "Not Found",
 		405 => "Method Not Allowed",
 		408 => "Request Time Out",
-		500 => "Internal Server Error",
+        409 => "Conflict",
+        410 => "Gone",
+        500 => "Internal Server Error",
 		501	=> "Not Implemented",
         503 => "Service Unavailable"
-
 	];
     
     /**

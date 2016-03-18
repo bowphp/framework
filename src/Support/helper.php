@@ -65,11 +65,15 @@ if (!function_exists("view")) {
     /**
      * view
      * @param string $template
-     * @param array $data
+     * @param array|int $data
      * @param int $code
      * @return mixed
      */
     function view($template, $data = [], $code = 200) {
+        if (is_int($data)) {
+            $code = 200;
+            $data = [];
+        }
         return $GLOBALS["response"]->view($template, $data, $code);
     }
 }
