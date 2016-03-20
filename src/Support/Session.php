@@ -18,6 +18,7 @@ class Session implements CollectionAccessStatic
 	public static function start()
 	{
 		if (PHP_SESSION_ACTIVE != session_status()) {
+			session_name("bowsessid");
 			session_start();
 		}
 	}

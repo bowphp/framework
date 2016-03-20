@@ -2,10 +2,10 @@
 
 namespace Bow\Database;
 
+use Bow\Support\Str;
 use Bow\Support\Security;
 use Bow\Support\Collection;
 use Bow\Exception\TableException;
-use Bow\Support\Session;
 
 class Table extends DatabaseTools
 {
@@ -140,10 +140,14 @@ class Table extends DatabaseTools
         if (!static::isComporaisonOperator($comp)) {
             $value = $comp;
             $comp = "=";
-        } else {
-            if (is_null($value)) {
-                throw new TableException(__METHOD__."(), valeur non définir", E_ERROR);
-            }
+        }
+
+        if (is_null($value)) {
+            throw new TableException("valeur de comparaison non définir", E_ERROR);
+        }
+
+        if (!in_array(Str::lower($boolean), ["and", "or"])) {
+            throw new TableException("le booléen $boolean non accepté", E_ERROR);
         }
 
         $this->whereDataBind[$column] = $value;
@@ -171,7 +175,7 @@ class Table extends DatabaseTools
     public function orWhere($column, $comp = "=", $value = null)
     {
         if (is_null($this->where)) {
-            throw new TableException(__METHOD__."(), ne peut pas être utiliser sans un where avant", E_ERROR);
+            throw new TableException("Cette fonction ne peut pas être utiliser sans un where avant.", E_ERROR);
         }
 
         $this->where($column, $comp, $value, "or");
@@ -234,7 +238,7 @@ class Table extends DatabaseTools
     {
 
         if (count($range) !== 2) {
-            throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
+            throw new TableException("Le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
         }
 
         $between = implode(" and ", $range);
@@ -288,7 +292,7 @@ class Table extends DatabaseTools
         } else {
 
             if (count($range) == 0) {
-                throw new TableException(__METHOD__."(). le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
+                throw new TableException("Le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
             }
 
             $range = [$range[0], $range[0]];
@@ -365,7 +369,7 @@ class Table extends DatabaseTools
             if (!preg_match("/^(inner|right)\sjoin\s.*/", $this->join)) {
                 $this->join .= ", $table";
             } else {
-                throw new TableException("la clause inner join est dèja activé.", E_ERROR);
+                throw new TableException("La clause inner join est dèja initalisé.", E_ERROR);
             }
         }
 
@@ -387,7 +391,7 @@ class Table extends DatabaseTools
             if (!preg_match("/^(inner|left)\sjoin\s.*/", $this->join)) {
                 $this->join .= ", $table";
             } else {
-                throw new TableException("la clause inner join est dèja activé.", E_ERROR);
+                throw new TableException("La clause inner join est dèja initialisé.", E_ERROR);
             }
         }
         return $this;
@@ -408,7 +412,7 @@ class Table extends DatabaseTools
     public function on($column1, $comp = "=", $column2)
     {
         if (is_null($this->join)) {
-            throw new TableException("la clause inner join est dèja activé.", E_ERROR);
+            throw new TableException("La clause inner join est dèja initialisé.", E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
@@ -437,7 +441,7 @@ class Table extends DatabaseTools
     public function orOn($column, $comp = "=", $value)
     {
         if (is_null($this->join)) {
-            throw new TableException("la clause inner join est dèja activé.", E_ERROR);
+            throw new TableException("La clause inner join est dèja initialisé.", E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
@@ -447,7 +451,7 @@ class Table extends DatabaseTools
         if (preg_match("/on/i", $this->join)) {
             $this->join .= " or $column $comp $value";
         } else {
-            throw new TableException("la clause on n'est pas activé.", E_ERROR);
+            throw new TableException("La clause <b>on</b> n'est pas initialisé.", E_ERROR);
         }
 
         return $this;

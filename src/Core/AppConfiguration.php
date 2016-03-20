@@ -3,6 +3,7 @@
 namespace Bow\Core;
 
 use Bow\Support\Util;
+use Bow\Exception\ApplicationException;
 
 class AppConfiguration
 {
@@ -17,14 +18,11 @@ class AppConfiguration
     private static $instance;
     /**
      * Définie le systeme de template
-     *
      * @var string|null
      */
     private $engine = null;
-
     /**
      * Répresente le chemin vers la vue.
-     * 
      * @var null|string
      */
     private $views = null;
@@ -64,26 +62,31 @@ class AppConfiguration
      * @var string
      */
     private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
-
+    /**
+     * @var bool
+     */
     private $autoReload = true;
 
-    // singleton constructor.
+    /**
+     * @param $config
+     * @throws \Bow\Exception\UtilException
+     */
     private final function __construct($config)
     {
         /**
          * Chargement complet de toute la configuration de Bow
          */
-        $this->appname           = $config->app_name;
-        $this->logDirecotoryName = $config->log_direcotory_name;
-        $this->views             = $config->views_path;
-        $this->engine            = $config->template_engine;
-        $this->cache             = $config->template_cache_folder;
-        $this->names             = $config->classes;
-        $this->timezone          = $config->timezone;
-        $this->debug             = $config->debug;
-        $this->tokenExpirateTime = $config->token_expirate_time;
+        $this->appname            = $config->app_name;
+        $this->logDirecotoryName  = $config->log_direcotory_name;
+        $this->views              = $config->views_path;
+        $this->engine             = $config->template_engine;
+        $this->cache              = $config->template_cache_folder;
+        $this->names              = $config->classes;
+        $this->timezone           = $config->timezone;
+        $this->debug              = $config->debug;
+        $this->tokenExpirateTime  = $config->token_expirate_time;
         $this->template_extension = $config->template_extension;
-        $this->autoReload        = $config->template_auto_reload_cache_views;
+        $this->autoReload         = $config->template_auto_reload_cache_views;
 
         if (isset($config->app_root)) {
             $this->approot = $config->app_root;
@@ -136,16 +139,18 @@ class AppConfiguration
     /**
      * configure, Application key
      * @param string $key
+     * @throws ApplicationException
      * @return string
      */
     public function setAppkey($key)
     {
         $old = $this->app_key;
 
-        if (is_string($key)) {
-            $this->app_key = $key;
+        if (!is_string($key)) {
+            throw new ApplicationException("Le parametre doit etre une chaine de carrectere.", E_USER_ERROR);
         }
 
+        $this->app_key = $key;
         return $old;
     }
 
@@ -153,15 +158,18 @@ class AppConfiguration
      * setAppName
      * 
      * @param string $newAppName
+     * @throws ApplicationException
      * @return string
      */
     public function setAppname($newAppName)
     {
         $old = $newAppName;
 
-        if (is_string($newAppName)) {
-            $this->appname = $newAppName;
+        if (!is_string($newAppName)) {
+            throw new ApplicationException("Le parametre doit etre une chaine de carrectere.", E_USER_ERROR);
         }
+
+        $this->appname = $newAppName;
 
         return $old;
     }
@@ -180,15 +188,18 @@ class AppConfiguration
      * getViewPath retourne configuration du path du repertoire du cache
      *
      * @param string $viewPath
+     * @throws ApplicationException
      * @return string
      */
     public function setViewpath($viewPath)
     {
         $old = $this->views;
 
-        if (realpath($viewPath)) {
-            $this->views = $viewPath;
+        if (!realpath($viewPath)) {
+            throw new ApplicationException("Ce chemin n'est pas valide.", E_USER_ERROR);
         }
+
+        $this->views = $viewPath;
 
         return $old;
     }
@@ -207,15 +218,18 @@ class AppConfiguration
      * setCachePath
      * 
      * @param string $newCachePath
+     * @throws ApplicationException
      * @return string
      */
     public function setCachepath($newCachePath)
     {
         $old = $this->cache;
 
-        if (realpath($newCachePath)) {
-            $this->cache = $newCachePath;
+        if (!realpath($newCachePath)) {
+            throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
         }
+
+        $this->cache = $newCachePath;
 
         return $old;
     }
@@ -234,15 +248,18 @@ class AppConfiguration
      * setLogPath configuration du path du répertoir de log
      *
      * @param string $newLogPath
+     * @throws ApplicationException
      * @return string
      */
     public function setLogpath($newLogPath)
     {
         $old = $this->logDirecotoryName;
         
-        if (realpath($newLogPath)) {
-            $this->logDirecotoryName = $newLogPath;
+        if (!realpath($newLogPath)) {
+            throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
         }
+
+        $this->logDirecotoryName = $newLogPath;
 
         return $old;
     }
@@ -259,15 +276,18 @@ class AppConfiguration
 
     /**
      * @param string $log
+     * @throws ApplicationException
      * @return string
      */
     public function setLogLevel($log)
     {
         $old = $this->debug;
 
-        if (in_array($log, ["develope", "production"])) {
-            $this->debug = $log;
+        if (!in_array($log, ["development", "production"])) {
+            throw new ApplicationException("$log n'est pas accepte. <i>development|production</i>", E_USER_ERROR);
         }
+
+        $this->debug = $log;
 
         return $old;
     }
@@ -316,9 +336,11 @@ class AppConfiguration
     public function setApproot($newApproot)
     {
         $old = $this->approot;
+
         if (is_string($this->approot)) {
             $this->approot = $newApproot;
         }
+
         return $old;
     }
 

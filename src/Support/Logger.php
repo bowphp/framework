@@ -91,47 +91,54 @@ class Logger extends AbstractLogger
         $content = "";
 
         if (isset($context["context"])) {
-            foreach ($context["context"] as $key => $errRef) {
-                $key++;
-                $func = "";
-                $line = "";
-                $file = "";
-                if (isset($errRef["function"])) {
-                    $func = $errRef["function"];
-                }
 
-                if (isset($errRef["type"])) {
-                    $func = $errRef["class"] . "" . $errRef["type"] . "" . $func. "(";
-                }
+            if (is_array($context["context"])) {
 
-                if (isset($errRef["line"])) {
-                    $line = $errRef["line"];
-                }
-
-                if (isset($errRef["file"])) {
-                    $file = $errRef["file"];
-                }
-
-                if (isset($errRef["args"])) {
-                    $len = count($errRef["args"]);
-                    foreach($errRef["args"] as $k => $args) {
-                        $func .= gettype($args);
-                        if (gettype($args) === "string") {
-                            $func .= "('" . $args . "')";
-                        }
-                        if (gettype($args) === "object") {
-                            $func .= "(Closure)";
-                        }
-                        if ($k + 1 != $len) {
-                            $func .= ", ";
-                        }
+                foreach ($context["context"] as $key => $errRef) {
+                    $key++;
+                    $func = "";
+                    $line = "";
+                    $file = "";
+                    if (isset($errRef["function"])) {
+                        $func = $errRef["function"] . "(";
                     }
-                    $func .= ")";
-                }
 
-                $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key: at " . $file . " <b><i>" . $func . "</i></b>:";
-                $content .= $line . " </div>";
+                    if (isset($errRef["type"])) {
+                        $func = $errRef["class"] . "" . $errRef["type"] . "" . $func;
+                    }
+
+                    if (isset($errRef["line"])) {
+                        $line = $errRef["line"];
+                    }
+
+                    if (isset($errRef["file"])) {
+                        $file = $errRef["file"];
+                    }
+
+                    if (isset($errRef["args"])) {
+                        $len = count($errRef["args"]);
+                        foreach($errRef["args"] as $k => $args) {
+                            $func .= ucfirst(gettype($args));
+                            if (gettype($args) === "string") {
+                                $func .= "('" . $args . "')";
+                            }
+                            if (gettype($args) === "object") {
+                                $func .= "(Closure)";
+                            }
+                            if ($k + 1 != $len) {
+                                $func .= ", ";
+                            }
+                        }
+                        $func .= ")";
+                    }
+
+                    $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key: at " . $file . " <b><i>" . $func . "</i></b>:";
+                    $content .= $line . " </div>";
+                }
+            } else {
+                $content = $context["context"];
             }
+
         } else {
             $content = "Aucun context.";
         }
@@ -177,7 +184,7 @@ class Logger extends AbstractLogger
      */
     public function exceptionHandler(\Exception $e)
     {
-        if ($this->debug === "developpement") {
+        if ($this->debug === "development") {
             $trace = $e->getTrace();
         } else {
             $trace = $e->getTraceAsString();

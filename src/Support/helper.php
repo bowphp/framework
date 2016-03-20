@@ -15,6 +15,7 @@ use Bow\Support\Session;
 use Bow\Support\Security;
 use Bow\Support\Resource;
 use Bow\Database\Database;
+use Bow\Support\Collection;
 use Bow\Core\AppConfiguration;
 
 define("SELECT", Database::SELECT);
@@ -67,7 +68,7 @@ if (!function_exists("view")) {
      * @param string $template
      * @param array|int $data
      * @param int $code
-     * @return mixed
+     * @return Bow\Http\Response
      */
     function view($template, $data = [], $code = 200) {
         if (is_int($data)) {
@@ -94,7 +95,7 @@ if (!function_exists("query_maker")) {
      * @param $data
      * @param $cb
      * @param $method
-     * @return null
+     * @return Database
      */
     function query_maker($sql, $data, $cb, $method) {
         $rs = null;
@@ -154,7 +155,7 @@ if (!function_exists("select")) {
      * @param string $sql
      * @param array $data
      * @param callable $cb
-     * @return integer
+     * @return integer|array|StdClass
      */
     function select($sql, array $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "select");
@@ -243,6 +244,7 @@ if (!function_exists("body")) {
     /**
      * body, fonction de type collection
      * manipule la variable global $_POST
+     * @return Bow\Http\RequestData
      */
     function body() {
         return $GLOBALS["request"]->body();
@@ -253,6 +255,7 @@ if (!function_exists("files")) {
     /**
      * files, fonction de type collection
      * manipule la variable global $_FILES
+     * @return Bow\Http\RequestData
      */
     function files() {
         return $GLOBALS["request"]->files();
@@ -263,6 +266,7 @@ if (!function_exists("query")) {
     /**
      * query, fonction de type collection
      * manipule la variable global $_GET
+     * @return Bow\Http\RequestData
      */
     function query() {
         return $GLOBALS["request"]->query();
@@ -536,9 +540,21 @@ if (!function_exists("collect")) {
      */
     function collect() {
         if (func_num_args() == 0) {
-            $col = new \Bow\Support\Collection();
+            $col = new Collection();
         } else {
-            $col = new \Bow\Support\Collection(func_get_args());
+            if (func_num_args() === 1) {
+                if (is_array(func_get_arg(0))) {
+                    $col = new Collection(func_get_arg(0));
+                } else {
+                    $col = new Collection(func_get_args());
+                }
+            } else {
+                $col = new Collection();
+
+                foreach(func_get_args() as $param) {
+                    $col->add($param);
+                }
+            }
         }
 
         return $col;
