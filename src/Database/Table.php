@@ -957,13 +957,6 @@ class Table extends DatabaseTools
      */
     public function collectionify()
     {
-        $data = $this->get();
-        $coll =  new Collection();
-
-        foreach($data as $key => $value) {
-            $coll->add($value);
-        }
-
-        return $coll;
+        return $this->toCollection();
     }
 }
