@@ -9,8 +9,7 @@ use Bow\Support\Util;
 use Bow\Exception\SmtpException;
 use Bow\Exception\SocketException;
 
-
-abstract class Smtp extends Message
+ class Smtp extends Message
 {
 
     /**

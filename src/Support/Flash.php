@@ -33,7 +33,24 @@ class Flash
     {
     }
 
+    /**
+     * @param null $value
+     * @return array|null
+     */
     public function warning($value = null)
+    {
+        if ($value !== null) {
+            $this->warning = $value;
+        }
+
+        return $this->warning;
+    }
+
+    /**
+     * @param null $value
+     * @return array|null
+     */
+    public function danger($value = null)
     {
         if ($value !== null) {
             $this->warning = $value;

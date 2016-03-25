@@ -111,6 +111,7 @@ class Cookie
                 unset(static::$isDecrypt[$key]);
             }
 
+            static::add($key, null, time() - 3600);
             unset($_COOKIE[$key]);
         }
 

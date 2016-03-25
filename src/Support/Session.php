@@ -82,7 +82,7 @@ class Session implements CollectionAccessStatic
 		static::start();
 
 		if (!is_string($key)) {
-			throw new InvalidArgumentException("La clé doit être un chaine.", E_ERROR);
+			throw new InvalidArgumentException("La clé doit être un chaine de caractère.", E_ERROR);
 		}
 
 		if ($next === true) {
@@ -142,7 +142,7 @@ class Session implements CollectionAccessStatic
             $_SERVER["bow.flash"] = new Flash();
         }
 
-		if (!in_array($key, ["error", "warning", "info", "success"])) {
+		if (!in_array($key, ["error", "danger", "warning", "info", "success"])) {
 			throw new \ErrorException("$key n'est pas valide.");
 		}
 
@@ -175,7 +175,7 @@ class Session implements CollectionAccessStatic
 		self::start();
 
 		foreach($_SERVER as $key => $value){
-            if ($key !== "csrf" || $key !== "bow.flash") {
+            if (!in_array($key, ["csrf", "bow.flash", "bow.event"])) {
                 unset($_SERVER[$key]);
             }
         }

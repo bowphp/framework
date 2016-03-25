@@ -934,11 +934,28 @@ class Table extends DatabaseTools
     }
 
     /**
-     * collectionify, retourne les données de la DB sous en instance de Collection
+     * toCollection, retourne les données de la DB sous en instance de Collection
      *
      * @return Collection
      */
     public function toCollection()
+    {
+        $data = $this->get();
+        $coll =  new Collection();
+
+        foreach($data as $key => $value) {
+            $coll->add($value);
+        }
+
+        return $coll;
+    }
+
+    /**
+     * collectionify alias de toCollection.
+     *
+     * @return Collection
+     */
+    public function collectionify()
     {
         $data = $this->get();
         $coll =  new Collection();

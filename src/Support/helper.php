@@ -433,14 +433,14 @@ if (!function_exists("redirect")) {
     }
 }
 
-if (!function_exists("send_file")) {
+if (!function_exists("require_file")) {
     /**
-     * sendfile c'est un alias de require, mais vas chargé les fichiers contenu dans
+     * require_file c'est un alias de require, mais vas chargé les fichiers contenu dans
      * la vie de l'application. Ici <code>sendfile</code> résoue le problème de scope.
      * @param string $filename le nom du fichier
      * @param array $bind les données la exporter
      */
-    function send_file($filename, $bind = []) {
+    function require_file($filename, $bind = []) {
         query_response("sendFile", $filename, $bind);
     }
 }
@@ -521,13 +521,13 @@ if (!function_exists("pdo")) {
 if (!function_exists("execute_function")) {
     /**
      * lance une fonction de controller ou un multitude de callback
-     * @param $cb
-     * @param $req
+     * @param callable|string $cb
+     * @param mixed $params
      * @param array $names
      * @return mixed
      */
-    function execute_function($cb, $req, $names = []) {
-        return Util::launchCallback($cb, $req, $names);
+    function execute_function($cb, $params, $names = []) {
+        return Util::launchCallback($cb, $params, $names);
     }
 }
 
@@ -539,24 +539,10 @@ if (!function_exists("collect")) {
      * @return \Bow\Support\Collection
      */
     function collect() {
-        if (func_num_args() == 0) {
-            $col = new Collection();
-        } else {
-            if (func_num_args() === 1) {
-                if (is_array(func_get_arg(0))) {
-                    $col = new Collection(func_get_arg(0));
-                } else {
-                    $col = new Collection(func_get_args());
-                }
-            } else {
-                $col = new Collection();
-
-                foreach(func_get_args() as $param) {
-                    $col->add($param);
-                }
-            }
+        $col = new Collection();
+        foreach(func_get_args() as $param) {
+            $col->add($param);
         }
-
         return $col;
     }
 }
@@ -628,17 +614,17 @@ if (!function_exists("event")) {
     }
 }
 
-if (!function_exists("trigger")) {
+if (!function_exists("emit")) {
     /**
      * @param string $event_name
      * @throws \Bow\Exception\EventException
      */
-    function trigger($event_name) {
+    function emit($event_name) {
         if (!is_string($event_name)) {
             throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
         }
         
-        call_user_func_array([Event::class, "trigger"], func_get_args());
+        call_user_func_array([Event::class, "emit"], func_get_args());
     }
 }
 

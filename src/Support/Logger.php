@@ -90,6 +90,14 @@ class Logger extends AbstractLogger
     {
         $content = "";
 
+        if (is_string($context) || count($context) == 0) {
+            if (is_array($context)) {
+                $context = "not context.";
+            }
+
+            return $level . ": " . $message . " - context:" . $context;
+        }
+
         if (isset($context["context"])) {
 
             if (is_array($context["context"])) {
@@ -222,10 +230,6 @@ class Logger extends AbstractLogger
             case E_NOTICE:
             case E_USER_NOTICE:
                 $this->notice($errstr, $context);
-                break;
-            case E_DEPRECATED:
-            case E_USER_DEPRECATED:
-                $this->alert($errstr,  $context);
                 break;
         }
     }

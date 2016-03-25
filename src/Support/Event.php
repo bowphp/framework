@@ -35,6 +35,8 @@ class Event
         } else {
             static::$events->update($event, $fn);
         }
+
+        // Session::add("bow.event", static::$events);
     }
 
     /**
@@ -42,9 +44,10 @@ class Event
      * @param $event
      * @throws EventException
      */
-    public static function emit($event, $a)
+    public static function emit($event)
     {
         $args = array_slice(func_get_args(), 1);
+        // static::unserialise();
 
         if (static::$events instanceof Collection) {
             if (static::$events->has($event)) {
@@ -53,7 +56,7 @@ class Event
                 });
             }
         } else {
-          throw new EventException("Cette evenement n'est pas enregistré");
+            throw new EventException("Cette evenement n'est pas enregistré");
         }
     }
 
@@ -63,8 +66,25 @@ class Event
      */
     public static function off($event)
     {
+        // static::unserialise();
+
         if (static::$events->has($event)) {
             static::$events->remove($event);
+        }
+
+        // Session::add("bow.event", static::$events);
+    }
+
+    /**
+     * Réconstruit les informations sauvegarder dans la
+     * session
+     */
+    private static function unserialise()
+    {
+        if (Session::has("bow.event")) {
+            if (Session::get("bow.event") instanceof Collection) {
+                static::$events = Session::get("bow.event");
+            }
         }
     }
 }

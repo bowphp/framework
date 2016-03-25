@@ -4,20 +4,16 @@
  * Systeme d'envoye de mail utilisant le fonction mail de php.
  * 
  * @author Frank Dakia <dakiafranck@gmail.com>
- * 
  * @package Bow
  */
 
 namespace Bow\Mail;
 
-
 use Bow\Support\Util;
 use InvalidArgumentException;
 
-
 class Mail extends Message
 {
-
 	/**
 	 * send, Envoie le mail
 	 * 
@@ -28,9 +24,10 @@ class Mail extends Message
 	public function send($cb = null)
 	{
 		if (empty($this->to) || empty($this->subject) || empty($this->message)) {
-			throw new InvalidArgumentException(__METHOD__. "(): an error comming because your don't given the following parameter: SENDER, SUBJECT or MESSAGE.", E_USER_ERROR);
+			throw new InvalidArgumentException("Une erreur est survenu. L'expediteur ou le message ou l'object omit.", E_USER_ERROR);
 		}
-		$status = mail(implode(Util::sep(), $this->to), $this->subject, $this->message, $this->formatHeader());
+
+		$status = @mail(implode(Util::sep(), $this->to), $this->subject, $this->message, $this->formatHeader());
 
 		Util::launchCallback($cb, $status);
 
