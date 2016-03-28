@@ -1,6 +1,9 @@
 <?php
 
-namespace Bow\Database;
+namespace Bow\Database\Migration;
+
+use Bow\Support\Collection;
+use Bow\Exception\ModelException;
 
 class Blueprint
 {
@@ -484,7 +487,7 @@ class Blueprint
         });
 
         if ($this->sqlStement !== null) {
-            return "create table `". $this->table ."`($this->sqlStement)engine=" . $this->engine . " default charset=" . $this->character .";";
+            return "create table :table: ". ($this->sqlStement) . "engine=" . $this->engine . " default charset=" . $this->character .";";
         }
 
         return null;
@@ -511,4 +514,11 @@ class Blueprint
         return $nullType;
     }
 
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->stringify();
+    }
 }

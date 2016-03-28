@@ -1,37 +1,29 @@
 <?php
 
-namespace Bow\Database;
+namespace Bow\Database\Migration;
 
-use Bow\Support\Collection;
-use Bow\Exception\ModelException;
+use Bow\Support\Str;
 
 class Schema
 {
+	/**
+	 * @param string $table
+	 * @return int
+	 */
+	public static function drop($table)
+	{
+		return statement("drop table $table");
+	}
 
 	/**
-	 * __invoke
-	 * @param \PDO $db
-	 * @return bool
+	 * @param string $table
+	 * @param callable $cb
 	 */
-	public function __callStatic(\PDO $db)
+	public static function create($table, Callable $cb)
 	{
-		$statement = $this->stringify();
-		if (is_string($statement)) {
-			$status = $db->exec($statement);
-		} else {
-			$status = false;
-		}
-
-		return $status;
-	}
-
-	public static function drop()
-	{
-
-	}
-
-	public static function create()
-	{
-
+		$blueprint = new Blueprint($table);
+		call_user_func_array($cb, [$blueprint]);
+		$sql = Str::replace(":table:", $table, $blueprint);
+		statement($sql);
 	}
 }
