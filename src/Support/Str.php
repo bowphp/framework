@@ -128,10 +128,11 @@ class Str
      * @param $pattern
      * @param $replaceBy
      * @param $str
+     * @return string
      */
     public static function replace($pattern, $replaceBy, $str)
     {
-        preg_match($pattern, $replaceBy, $str);
+        return str_replace($pattern, $replaceBy, $str);
     }
 
     /**
