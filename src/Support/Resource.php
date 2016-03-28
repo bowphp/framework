@@ -7,8 +7,8 @@
 
 namespace Bow\Support;
 
-use Bow\Exception\ResourceException;
 use InvalidArgumentException;
+use Bow\Exception\ResourceException;
 
 class Resource
 {
@@ -205,7 +205,7 @@ class Resource
 		if ($cb !== null) {
 			call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null, isset($ext) ? $ext : null]);
 		} else {
-			return $status;
+			return (object) $status;
 		}
 
 		return null;
@@ -226,7 +226,7 @@ class Resource
     	if (is_resource($resource)) {
 	        $status = fwrite($resource, $content);
     	} else {
-            throw new ResourceException("impossible d'ecrire dans le fichier.", E_ERROR);
+            throw new ResourceException("Impossible d'écrire dans le fichier.", E_ERROR);
     	}
 
 		static::closeFile($resource);
@@ -300,11 +300,16 @@ class Resource
 	 * Crée un répertoire
 	 * 
 	 * @param string $files
+     * @param int $mode
 	 * @param bool $recursive
 	 * @return boolean
 	 */
-    public static function mkdir($files, $recursive = false)
+    public static function mkdir($files, $mode = 0777, $recursive = false)
     {
+        if (is_bool($mode)) {
+            $recursive = $mode;
+        }
+
         if ($recursive === true) {
             $status = @mkdir($files, 0777, true);
         } else {
@@ -323,7 +328,25 @@ class Resource
 	 */
     public static function rmdir($directory, $recursive = false)
     {
-		return null;
+		if ($recursive === true) {
+            if (!is_dir($directory)) {
+
+                $dirParts = explode(Util::sep(), $directory);
+                $dir = end($dirParts);
+                array_pop($dirParts);
+                @rmdir($dir);
+
+                if (count($dirParts)) {
+                    return true;
+                }
+
+                static::rmdir(implode(Util::sep(), $dirParts));
+            }
+        } else {
+            return @rmdir(realpath($directory));
+        }
+
+		return false;
     }
 
 	/**
@@ -337,16 +360,6 @@ class Resource
             static::$fileExtension = $config->upload_file_extension;
             static::$uploadDir = $config->upload_directory;
         }
-    }
-
-	/**
-	 * Vérifie la configuration
-	 * 
-	 * @return bool
-	 */
-    private static function isConfigured()
-    {
-        return static::$storageDir !== null ? true : false;
     }
 
 	/**
@@ -401,7 +414,7 @@ class Resource
         }
 
         closedir($dir);
-    
+
         return $files;
     }
 }

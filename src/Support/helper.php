@@ -634,6 +634,36 @@ if (!function_exists("flash")) {
      * @return \Bow\Support\Flash
      */
     function flash() {
+        if (!Session::has("bow.flash")) {
+            Session::add("bow.flash", new \Bow\Support\Flash());
+        }
         return Session::get("bow.flash");
+    }
+}
+
+if (!function_exists("bmail")) {
+    /**
+     * @param string|null $type
+     * @return \Bow\Mail\Mail|\Bow\Mail\Smtp
+     * @throws \Bow\Exception\MailException
+     */
+    function bmail($type = null) {
+        $config = require $GLOBALS["app_dir"] . "/config/mail.php";
+
+        if (!in_array($type, ["mail", "smtp"])) {
+            $config->driver = $type;
+        }
+
+        return Bow\Mail\BowMail::confirgure($config);
+    }
+}
+
+if (!function_exists("session")) {
+    /**
+     * session
+     * @return Session
+     */
+    function session() {
+        return Session::class;
     }
 }

@@ -4,7 +4,7 @@
  * Systeme d'envoye de mail utilisant le fonction mail de php.
  * 
  * @author Frank Dakia <dakiafranck@gmail.com>
- * @package Bow
+ * @package Bow\Mail
  */
 
 namespace Bow\Mail;
@@ -37,29 +37,15 @@ class Mail extends Message
 	/**
 	 * Mise en privé des fonctions magic __clone et __construct
 	 */
-	private function __clone(){}
+	private function __clone()
+	{
+	}
 
-	private function __construct()
+	public function __construct()
 	{
 		$this->boundary = "__Bow-Framework-" . md5(date("r"));
 		$this->addHeader("MIME-Version", "1.0");
 		$this->addHeader("X-Mailer",  "Bow Framework");
 		$this->addHeader("Date", date("r"));
-	}
-
-	/**
-	 * takeInstance, charge la classe Mail en mode singléton
-	 * 
-	 * @return self
-	 */
-	public static function takeInstance()
-	{
-		if (self::$mail !== null) {
-			return self::$mail;
-		}
-
-		self::$mail = new self;
-		
-		return self::$mail;
 	}
 }

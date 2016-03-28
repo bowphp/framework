@@ -17,28 +17,30 @@ class BowMail
     {
     }
 
+    private function __clone()
+    {
+    }
+
     /**
-     * @param string $type
-     * @param array $config
+     * @param \StdClass $config
      * @throws MailException
      * @return Mail|Smtp
      */
-    public static function factory($type, array $config)
+    public static function confirgure(\StdClass $config)
     {
-        if (!in_array($type, ["smtp", "mail"])) {
-            throw new MailException("le type n'est pas réconnu.", E_USER_ERROR);
+        if (!in_array($config->driver, ["smtp", "mail"])) {
+            throw new MailException("Le type n'est pas réconnu.", E_USER_ERROR);
         }
 
-       if ($type == "mail") {
-           if (!self::$instance instanceof Mail) {
-               self::$instance = Mail::takeInstance();
-           }
-       } else {
-           if (!self::$instance instanceof Smtp) {
-               self::$instance = new Smtp($config);
-           }
-       }
-
+        if ($config->driver == "mail") {
+            if (!self::$instance instanceof Mail) {
+               self::$instance = new Mail($config->mail);
+            }
+        } else {
+            if (!self::$instance instanceof Smtp) {
+                self::$instance = new Smtp($config->smpt);
+            }
+        }
 
         return self::$instance;
     }

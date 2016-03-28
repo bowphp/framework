@@ -75,7 +75,7 @@ class Session implements CollectionAccessStatic
 	 * @param boolean $next=null
 	 * 
 	 * @throws InvalidArgumentException
-	 * @return void
+	 * @return static
 	 */
 	public static function add($key, $data, $next = null)
 	{
@@ -97,6 +97,8 @@ class Session implements CollectionAccessStatic
 		} else {
 			$_SESSION[$key] = $data;
 		}
+
+		return self::class;
 	}
 
 	/**
@@ -136,7 +138,7 @@ class Session implements CollectionAccessStatic
      * @throws \ErrorException
      * @return mixed
      */
-    public function fash($key, $message = null)
+    public static function flash($key, $message = null)
     {
         if (!static::has("bow.flash")) {
             $_SERVER["bow.flash"] = new Flash();

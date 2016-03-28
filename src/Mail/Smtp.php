@@ -98,8 +98,6 @@ use Bow\Exception\SocketException;
 
         Util::launchCallback($cb, $error);
         
-
-        
         return $status;
     }
 
