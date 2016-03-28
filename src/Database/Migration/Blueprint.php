@@ -96,7 +96,7 @@ class Blueprint
      *
      * @return $this
      */
-    public function int($field, $size = 11, $null = false, $default = null)
+    public function integer($field, $size = 11, $null = false, $default = null)
     {
         return $this->loadWhole("int", $field, $size, $null, $default);
     }
@@ -126,13 +126,14 @@ class Blueprint
      * @throws \Exception
      * @return $this
      */
-    public function varchar($field, $size = 255, $null = false, $default = null)
+    public function string($field, $size = 255, $null = false, $default = null)
     {
+        $type = "varchar";
         if ($size > 255) {
-            throw new \Exception("Error Processing Request", 1);
+            $type = "text";
         }
 
-        return $this->loadWhole("varchar", $field, $size, $null, $default);
+        return $this->loadWhole($type, $field, $size, $null, $default);
     }
 
     /**
@@ -177,7 +178,7 @@ class Blueprint
      *
      * @return Schema
      */
-    public function timestamp($field, $null = false)
+    public function timestamps($field, $null = false)
     {
         $this->addField("timestamp", $field, [
             "null" => $null
@@ -196,26 +197,9 @@ class Blueprint
      *
      * @return $this
      */
-    public function longint($field, $size = 20, $null = false, $default = null)
+    public function longInteger($field, $size = 20, $null = false, $default = null)
     {
         return $this->loadWhole("longint", $field, $size, $null, $default);
-    }
-
-    /**
-     * text
-     *
-     * @param string $field
-     * @param bool $null
-     *
-     * @return Schema
-     */
-    public function text($field, $null = false)
-    {
-        $this->addField("text", $field, [
-            "null" => $null
-        ]);
-
-        return $this;
     }
 
     /**
@@ -226,7 +210,7 @@ class Blueprint
      * @return Schema
      * @throws ModelException
      */
-    public function char($field, $size = 1, $null = false, $default = null)
+    public function character($field, $size = 1, $null = false, $default = null)
     {
         if ($size > 4294967295) {
             throw new ModelException("char(), max size is 4294967295", 1);
@@ -236,13 +220,25 @@ class Blueprint
     }
 
     /**
+     * @param string $field
+     * @param array $enums
+     * @return Schema
+     */
+    public function enumerate($field, array $enums)
+    {
+        $this->addField("enum", $field, [
+            "default" => $enums
+        ]);
+    }
+
+    /**
      * autoincrement
      *
      * @param string $field
      * @throws ModelException
      * @return Schema
      */
-    public function autoincrement($field = null)
+    public function autoincrements($field = null)
     {
         if ($this->autoincrement === null) {
             if ($this->lastField !== null) {
@@ -253,7 +249,7 @@ class Blueprint
                 }
             } else {
                 if ($field) {
-                    $this->int($field);
+                    $this->integer($field);
                 }
             }
         }
@@ -297,7 +293,7 @@ class Blueprint
     }
 
     /**
-     * addIndexes
+     * addIndexes crée un clause index sur le champs spécifié.
      *
      * @param string $indexType
      * @throws ModelException
@@ -337,10 +333,13 @@ class Blueprint
         if (!$this->fields->get($method)->has($field)) {
             // default index are at false
             $data["primary"] = false;
-            $data["unique"] = false;
-            $data["indexe"] = false;
+            $data["unique"]  = false;
+            $data["indexe"]  = false;
             $this->fields->get($method)->add($field, $data);
-            $this->lastField = (object) ["method" => $method, "field" => $field];
+            $this->lastField = (object) [
+                "method" => $method,
+                "field" => $field
+            ];
         }
 
         return $this;
@@ -365,19 +364,19 @@ class Blueprint
         } else {
             if (is_string($size)) {
                 $default = $size;
-                $size = 11;
-                $null = false;
+                $size    = 11;
+                $null    = false;
             } else {
                 if (is_string($null)) {
                     $default = $null;
-                    $null = false;
+                    $null    = false;
                 }
             }
         }
 
         $this->addField($method, $field, [
-            "size" => $size,
-            "null" => $null,
+            "size"    => $size,
+            "null"    => $null,
             "default" => $default
         ]);
 
@@ -480,6 +479,12 @@ class Blueprint
                                 $this->sqlStement .= " unique";
                             }
                         }
+                    });
+                    break;
+                case "enum":
+                    $value->each(function($info, $field) {
+                        $enum = implode(", ", $info["default"]);
+                        $this->sqlStement .= " `$field` enum($enum)";
                     });
                     break;
             }
