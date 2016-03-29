@@ -23,9 +23,10 @@ interface CollectionAccess
      * get, permet de récupérer une valeur ou la colléction de valeur.
      *
      * @param string $key=null
+     * @param mixed $default=false
      * @return mixed
      */
-    public function get($key = null);
+    public function get($key = null, $default);
 
     /**
      * add, ajoute une entrée dans la colléction

@@ -89,13 +89,13 @@ class RequestData implements CollectionAccess
 	 * get, permet de récupérer une valeur ou la colléction de valeur.
 	 *
 	 * @param string $key=null
-	 * 
+	 * @param mixed $default=false
 	 * @return mixed
 	 */
-	public function get($key = null)
+	public function get($key = null, $default = false)
 	{
 		if (!is_null($key)) {
-			return $this->has($key) ? $this->data[$key] : false;
+			return $this->has($key) ? $this->data[$key] : $default;
 		}
 
 		return $this->data;
