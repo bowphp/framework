@@ -908,10 +908,11 @@ class Table extends DatabaseTools
      * 
      * @param integer $n nombre d'element a récupérer
      * @param integer $current la page courrant
-     * @param integer $chunk le nombre de groupe que l'on veux faire
+     * @param bool $complete lance la pagination automatique.
+     * @param integer $chunk le nombre l'élément par groupe que l'on veux faire.
      * @return array|\StdClass
      */
-    public function paginate($n, $current = 0, $chunk = null)
+    public function paginate($n, $current = 0, $complete = false, $chunk = null)
     {
         --$current;
 
@@ -922,12 +923,30 @@ class Table extends DatabaseTools
                 $current *= $n;
             }
         }
-
+        // sauvegarde des informations sur le where
+        $where = $this->where;
         $data = $this->jump($current)->take($n)->get();
+        // reinitialisation du where
+        $this->where = $where;
+        // réexecution de la requête.
+        if ($current == 0) {
+            $current = 1;
+        }
+
+        $restOfPage = ceil($this->count() / $n) - $current;
 
         // groupé les données
         if (is_int($chunk)) {
             $data = array_chunk($data, $chunk);
+        }
+        // active la pagination automatique.
+        if ($complete == true) {
+            $data = [
+                "next" => $current > 1 && $restOfPage > 0 ? $current + 1 : null,
+                "previous" => ($current - 1) <= 0 ? 1 : ($current - 1),
+                "data" => $data,
+                "current" => $current
+            ];
         }
 
         return $data;
