@@ -145,6 +145,9 @@ class Database extends DatabaseTools
                 case "sqlite":
                     $dns = $c["sqlite"]["driver"] . ":" . $c["sqlite"]["database"];
                     break;
+                default:
+                    throw new DatabaseException("Vérifiez la configuration de la base de donnée.", E_USER_ERROR);
+                    break;
             }
             
             // Connection à la base de donnée.
@@ -414,7 +417,9 @@ class Database extends DatabaseTools
     private static function verifyConnection()
     {
         if (! (static::$db instanceof PDO)) {
-            static::connection();
+            static::connection(function($err) {
+                throw $err;
+            });
         }
     }
     /**
@@ -435,10 +440,7 @@ class Database extends DatabaseTools
      */
     public static function getLastErreur()
     {
-        return [
-            "pdo" => static::$currentPdoErrorInfo,
-            "stmt" => static::$currentPdoStementErrorInfo
-        ];
+        return new DatabaseErrorHandler(static::$currentPdoStementErrorInfo);
     }
 
     /**
@@ -546,6 +548,9 @@ class Database extends DatabaseTools
                 
                 if (isset($options["grby"])) {
                     $grby = " GROUP BY " . $options['grby'];
+                    if (isset($options["having"])) {
+                        $grby .= " HAVING " .$options["having"];
+                    }
                 }
 
                 if (isset($options["data"])) {
