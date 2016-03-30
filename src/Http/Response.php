@@ -151,7 +151,7 @@ class Response
 	 * @param string $filename
 	 * @param array $bind
 	 * @throws ViewException
-	 * @return self
+	 * @return mixed
 	 */
 	public function sendFile($filename, $bind = [])
 	{
@@ -172,9 +172,8 @@ class Response
 
  		extract($bind);
 		// Rendu du fichier demandé.
-		require $filename;
 
-		return $this;
+		return require $filename;
 	}
 
 	/**
@@ -188,7 +187,7 @@ class Response
 	 */
 	public function view($filename, $bind = null, $code = 200)
 	{
-		$filename = preg_replace("/@|#/", "/", $filename) . $this->config->getTemplateExtension();
+		$filename = preg_replace("/@|\.|#/", "/", $filename) . $this->config->getTemplateExtension();
 
 		if ($this->config->getViewpath() !== null) {
 			if (!is_file($this->config->getViewpath() . "/" . $filename)) {
