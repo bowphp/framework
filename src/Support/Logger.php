@@ -107,6 +107,7 @@ class Logger extends AbstractLogger
                     $func = "";
                     $line = "";
                     $file = "";
+                    $errRef = (array) $errRef;
                     if (isset($errRef["function"])) {
                         $func = $errRef["function"] . "(";
                     }
