@@ -139,12 +139,12 @@ if (!function_exists("query_response")) {
     }
 }
 
-if (!function_exists("get_last_db_error")) {
+if (!function_exists("db_error")) {
     /**
      * Retourne les informations de la dernière requete
-     * @return array
+     * @return \Bow\Database\DatabaseErrorHandler
      */
-    function get_last_db_error() {
+    function db_error() {
         return Database::getLastErreur();
     }
 }
@@ -347,13 +347,13 @@ if (!function_exists("json")) {
     }
 }
 
-if (!function_exists("set_code")) {
+if (!function_exists("set_response_code")) {
     /**
      * statuscode, permet de changer le code de la reponse du server
      * @param int $code=200
      * @return mixed
      */
-    function set_code($code) {
+    function set_response_code($code) {
         return $GLOBALS["response"]->setCode($code);
     }
 }
