@@ -12,7 +12,7 @@ class Schema
 	 */
 	public static function drop($table)
 	{
-		return statement("drop table $table");
+		return statement("drop table $table;");
 	}
 
 	/**
@@ -21,7 +21,7 @@ class Schema
 	 */
 	public static function create($table, Callable $cb)
 	{
-		$blueprint = new Blueprint($table);
+		$blueprint = new Blueprint();
 		call_user_func_array($cb, [$blueprint]);
 		$sql = Str::replace(":table:", $table, $blueprint);
 		statement($sql);
