@@ -164,17 +164,15 @@ class RequestData implements CollectionAccess
 	 * each, parcourir les entrées de la colléction
 	 *
 	 * @param Closure $cb
-	 * 
-	 * @return mixed
 	 */
 	public function each(Closure $cb)
 	{
 		if ($this->isEmpty()) {
-			return call_user_func_array($cb, [null, null]);
-		}
-
-		foreach($this->data as $key => $value) {
-			call_user_func_array($cb, [$key, $value]);
+			call_user_func_array($cb, [null, null]);
+		} else {
+			foreach($this->data as $key => $value) {
+				call_user_func_array($cb, [$key, $value]);
+			}
 		}
 	}
 }

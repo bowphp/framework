@@ -467,10 +467,31 @@ class Table extends DatabaseTools
     public function group($column)
     {
         if (is_null($this->group)) {
-            $this->group = "group $column";
+            $this->group = $column;
         }
 
         return $this;
+    }
+
+    /**
+     * clause having, s'utilise avec un groupBy
+     *
+     * @param string $column
+     * @param string $comp
+     * @param null $value
+     * @param string $boolean
+     */
+    public function having($column, $comp = "=", $value = null, $boolean = "and")
+    {
+        if (!$this->isComporaisonOperator($comp)) {
+            $value = $comp;
+            $comp = "=";
+        }
+        if (is_null($this->havin)) {
+            $this->havin = "$column $comp $value";
+        } else {
+            $this->havin .= " $boolean $column $comp $value";
+        }
     }
 
     /**
@@ -584,7 +605,7 @@ class Table extends DatabaseTools
      * @param $aggregat
      * @param string $column
      * 
-     * @return null|int
+     * @return array|int
      */
     private function executeAgregat($aggregat, $column)
     {
@@ -594,9 +615,22 @@ class Table extends DatabaseTools
     		$sql .= " where " . $this->where;
     		$this->where = null;
         }
+
+        if (!is_null($this->group)) {
+            $sql .= " " . $this->group;
+            $this->group = null;
+
+            if (!isNull($this->havin)){
+                $sql .= " having " . $this->havin;
+            }
+        }
     	
         $s = $this->connection->prepare($sql);
     	$s->execute();
+
+        if ($s->rowCount() > 1) {
+            return $s->fetchAll();
+        }
 
     	return (int) $s->fetchColumn();
     }
@@ -649,6 +683,10 @@ class Table extends DatabaseTools
         if (!is_null($this->group)) {
         	$sql .= " group by " . $this->group;
         	$this->group = null;
+
+            if (!is_null($this->havin)) {
+                $sql .= " having " . $this->havin;
+            }
         }
 
         // execution de requete.
@@ -873,7 +911,9 @@ class Table extends DatabaseTools
      */
     public function last()
     {
+        $where = $this->where;
         $c = $this->count();
+        $this->where = $where;
         return $this->jump($c - 1)->take(1)->get();
     }
 
