@@ -61,7 +61,7 @@ use Bow\Exception\SocketException;
             }
         }
 
-        $this->url = $param["server"];
+        $this->url = $param["hostname"];
         $this->username = $param["username"];
         $this->password = $param["password"];
         $this->secure = $param["secure"];
@@ -69,7 +69,6 @@ use Bow\Exception\SocketException;
     }
 
     private function __clone() {}
-
 
     /**
      * Lance l'envoie de mail
@@ -213,7 +212,7 @@ use Bow\Exception\SocketException;
             $response = $this->read();
             var_dump($response);
             if (!in_array($response, (array) $code, true)) {
-                throw new SmtpException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", 1);
+                throw new SmtpException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", E_ERROR);
             }
         }
 
