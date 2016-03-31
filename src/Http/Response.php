@@ -142,7 +142,7 @@ class Response
 	{
 		$this->setHeader("Content-Type", "application/json; charset=UTF-8");
 		$this->setCode($code);
-		die(json_encode($data));
+		$this->send(json_encode($data));
 	}
 
 	/**
@@ -254,12 +254,12 @@ class Response
 	/**
 	 * Equivalant à un echo, sauf qu'il termine l'application quand $stop = true
 	 *
-	 * @param $data
+	 * @param string|array|\StdClass $data
 	 * @param bool|false $stop
 	 */
 	public function send($data, $stop = false)
 	{
-		if (is_array($data) || is_object($data)) {
+		if (is_array($data) || ($data instanceof \StdClass)) {
 			$data = json_encode($data);
 		}
 
