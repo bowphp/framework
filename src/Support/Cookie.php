@@ -44,10 +44,10 @@ class Cookie
      * get, permet de récupérer une valeur ou la colléction de valeur de cookie.
      *
      * @param string $key=null
-     * 
+     * @param mixed $default
      * @return mixed
      */
-    public static function get($key = null)
+    public static function get($key = null, $default = null)
     {
         if ($key !== null) {
             if (static::has($key)) {
@@ -58,7 +58,7 @@ class Cookie
 
                 return  Security::decrypt($_COOKIE[$key]);
             } else {
-                return null;
+                return $default;
             }
         }
 
