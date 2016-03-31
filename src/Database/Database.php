@@ -227,7 +227,7 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
 
-        if (preg_match("/^select\s.+?\sfrom\s.+?$/i", $sqlstatement)) {
+        if (preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
 
             $pdostatement = static::$db->prepare($sqlstatement);
             static::bind($pdostatement, $bind);
@@ -253,7 +253,7 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
 
-        if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)\svalues\s?\(.+\)|\s?set\s(.+)+)$/i", $sqlstatement)) {
+        if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)?\s(values\s?\(.+\),?){1,}|\s?set\s(.+)+);?$/i", $sqlstatement)) {
 
             $r = 0;
             $is_2_m_array = true;
@@ -291,7 +291,7 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
 
-        if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+$/i", $sqlstatement)) {
+        if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+;?$/i", $sqlstatement)) {
             $r = static::$db->exec($sqlstatement);
             static::$currentPdoErrorInfo = static::$db->errorInfo();
             
@@ -312,7 +312,7 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
 
-        if (preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+$/i", $sqlstatement)) {
+        if (preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i", $sqlstatement)) {
             return static::executePrepareQuery($sqlstatement, $bind);
         }
 

@@ -60,7 +60,7 @@ class Application
 	/**
 	 * Patter Singleton
 	 * 
-	 * @var self
+	 * @var Application
 	 */
 	private static $inst = null;
 
@@ -104,7 +104,7 @@ class Application
 	 * Pattern Singleton.
 	 * 
 	 * @param AppConfiguration $config
-	 * @return self
+	 * @return Application
 	 */
 	public static function configure(AppConfiguration $config)
 	{
@@ -121,7 +121,7 @@ class Application
 	 * @param string $branch
 	 * @param callable $cb
 	 * @throws ApplicationException
-	 * @return self
+	 * @return Application
 	 */
 	public function group($branch, $cb)
 	{
@@ -131,7 +131,7 @@ class Application
 			Util::launchCallback($cb, $this->req, $this->config->getNamespace());
 		} else {
 			if (!is_callable($cb)) {
-				throw new ApplicationException(__METHOD__ . "(): callback are not define", 1);
+				throw new ApplicationException("Callback are not define", E_ERROR);
 			}
 			call_user_func_array($cb, [$this->req]);
 		}
@@ -146,7 +146,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * @return self|string
+	 * @return Application|string
 	 */
 	public function get($path, $cb = null)
 	{
@@ -165,7 +165,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * @return self
+	 * @return Application
 	 */
 	public function post($path, $cb)
 	{
@@ -173,7 +173,7 @@ class Application
 
 		if ($body->has("method")) {
 			$this->specialMethod = $method = strtoupper($body->get("method"));
-			if (in_array($method, ["DELETE", "PUT", "UPDATE"])) {
+			if (in_array($method, ["DELETE", "PUT"])) {
 				$this->addHttpVerbe($method, $this->branch . $path, $cb);
 			}
 			return $this;
@@ -187,11 +187,11 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * @return self
+	 * @return Application
 	 */
 	public function any($path, $cb)
 	{
-        foreach(["post", "delete", "put", "update", "get"] as $func) {
+        foreach(["post", "delete", "put", "get"] as $func) {
             $this->$func($path, $cb);
         }
 
@@ -203,7 +203,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * @return self
+	 * @return Application
 	 */
 	public function delete($path, $cb)
 	{
@@ -215,7 +215,7 @@ class Application
 	 *
 	 * @param string $path
 	 * @param callable $cb
-	 * @return self
+	 * @return Application
 	 */
 	public function put($path, $cb)
 	{
@@ -227,7 +227,7 @@ class Application
 	 * validite de la requete
 	 *
 	 * @param callable $cb
-	 * @return self
+	 * @return Application
 	 */
 	public function to404($cb)
 	{
@@ -236,18 +236,18 @@ class Application
 	}
 
 	/**
-	 * any, route de tout type PUT
+	 * match, route de tout type de method
 	 *
 	 * @param array $methods
 	 * @param string $path
 	 * @param callable $cb
-	 * @return self
+	 * @return Application
 	 */
 	public function match(array $methods, $path, $cb)
 	{
 		foreach($methods as $method) {
 			if ($this->req->method() === strtoupper($method)) {
-				$this->routeLoader($path, $this->req->method(), $cb);
+				$this->routeLoader($this->req->method(), $this->branch . $path , $cb);
 			}
 		}
 
@@ -290,7 +290,7 @@ class Application
 	 * @param string $method
 	 * @param string $path
 	 * @param callable|array $cb
-	 * @return self
+	 * @return Application
 	 */
 	private function routeLoader($method, $path, $cb)
 	{
@@ -306,7 +306,7 @@ class Application
 	 * Lance une personnalisation de route.
 	 * 
 	 * @param array $otherRule
-	 * @return self
+	 * @return Application
 	 */
 	public function where(array $otherRule)
 	{
@@ -329,7 +329,7 @@ class Application
 	 * Lanceur de l'application
 	 * 
 	 * @param callable|null $cb
-	 * @return void
+	 * @return mixed
 	 */
 	public function run($cb = null)
 	{
@@ -396,29 +396,31 @@ class Application
 	 * @param string $key
 	 * @param string $value
 	 * @throws InvalidArgumentException
+     * @return Application|string
 	 */
 	public function set($key, $value)
 	{
-		if (in_array($key, ["view", "engine", "root"])) {
-			switch ($key) {
-				case "view":
-					$method = "setViewpath";
-					break;
-				case "engine":
-					$method = "setEngine";
-					break;
-				case "root":
-					$method = "setApproot";
-					break;
-			}
+		if (!in_array($key, ["view", "engine", "root"])) {
+            throw new InvalidArgumentException("Le premier argument n'est pas un argument de configuration", E_ERROR);
+        }
 
-			if (method_exists($this->config, $method)) {
-				return $this->config->$method($value);
-			}
-
-		} else {
-			throw new InvalidArgumentException("Le premier argument n'est pas un argument de configuration");
+        switch ($key) {
+			case "view":
+				$method = "setViewpath";
+				break;
+			case "engine":
+				$method = "setEngine";
+				break;
+			case "root":
+				$method = "setApproot";
+				break;
 		}
+
+		if (method_exists($this->config, $method)) {
+			return $this->config->$method($value);
+		}
+
+        return $this;
 	}
 
 	/**

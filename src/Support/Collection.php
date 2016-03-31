@@ -16,15 +16,11 @@ class Collection
 	public function __construct()
 	{
         if (func_num_args() === 1) {
-
             if (is_array(func_get_arg(0))) {
                 $this->storage = func_get_arg(0);
             } else if (is_object(func_get_arg(0))) {
                 $this->storage = (array) func_get_arg(0);
-            } else {
-        		$this->storage = func_get_args();
             }
-
         } else {
             $this->storage = func_get_args();
         }
@@ -306,16 +302,6 @@ class Collection
     }
 
     /**
-     * count
-     * 
-     * @return int
-     */
-    public function count()
-    {
-    	return count($this->storage);
-    }
-
-    /**
      * Sum
      * 
      * @param callable $cb
@@ -383,8 +369,20 @@ class Collection
     public function yieldify()
     {
         foreach ($this->storage as $key => $value) {
-            yield ["value" => $value, "key" => $key];
+            yield (object) ["value" => $value, "key" => $key, "done" => false];
         }
+
+        yield (object) ["value" => null, "key" => null, "done" => true];
+    }
+
+    /**
+     * Retourne les données au format JSON
+     *
+     * @return string
+     */
+    public function toJSON()
+    {
+        return json_encode($this->storage);
     }
 
     /**
@@ -395,5 +393,25 @@ class Collection
     public function length()
     {
        return count($this->storage);
+    }
+
+    /**
+     * Supprime le premier élément de la collection
+     *
+     * @return mixed
+     */
+    public function shift()
+    {
+        return array_shift($this->storage);
+    }
+
+    /**
+     * Supprime le dernier élément de la collection
+     *
+     * @return mixed
+     */
+    public function pop()
+    {
+        return array_pop($this->storage);
     }
 }
