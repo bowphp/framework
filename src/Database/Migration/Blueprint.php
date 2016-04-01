@@ -226,7 +226,7 @@ class Blueprint
      */
     public function enumerate($field, array $enums)
     {
-        $this->addField("enum", $field, [
+        $this->addField("enumerate", $field, [
             "default" => $enums
         ]);
     }
@@ -268,7 +268,7 @@ class Blueprint
         if ($this->primary === null) {
             return $this->addIndexes("primary");
         } else {
-            throw new ModelException("Primary key has already defined", 1);
+            throw new ModelException("Primary key has already defined", E_ERROR);
         }
     }
 
@@ -305,7 +305,7 @@ class Blueprint
             $last = $this->lastField;
             $this->fields->get($last->method)->update($last->field, [$indexType => true]);
         } else {
-            throw new ModelException("Cannot assign {$indexType}. Because field are not defined.", 1);
+            throw new ModelException("Cannot assign {$indexType}. Because field are not defined.", E_ERROR);
         }
 
         return $this;
@@ -323,7 +323,7 @@ class Blueprint
     private function addField($method, $field, $data)
     {
         if (!method_exists($this, $method)) {
-            throw new ModelException("Error Processing Request", 1);
+            throw new ModelException("La methode $method n'est pas.", E_ERROR);
         }
 
         if (!$this->fields->has($method)) {
@@ -481,7 +481,7 @@ class Blueprint
                         }
                     });
                     break;
-                case "enum":
+                case "enumerate":
                     $value->each(function($info, $field) {
                         $enum = implode(", ", $info["default"]);
                         $this->sqlStement .= " `$field` enum($enum)";
