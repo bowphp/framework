@@ -22,16 +22,16 @@ class Schema
 	/**
 	 * @param string $table
 	 * @param callable $cb
+     * @param bool $displaySql
 	 */
-	public static function create($table, Callable $cb)
+	public static function create($table, Callable $cb, $displaySql = false)
 	{
-		$blueprint = new Blueprint();
+		$blueprint = new Blueprint($table, $displaySql);
 		call_user_func_array($cb, [$blueprint]);
-		$sql = Str::replace(":table:", $table, (string) $blueprint);
-		if (statement($sql)) {
+		if (statement((string) $blueprint)) {
 			echo "\033[0;32m$table table created.\033[00m\n";
 		} else {
-			echo "\033[0;31m$table table already exists.\033[00m\n";
-		}
+            echo "\033[0;31m$table table already exists or not created.\033[00m\n";
+        }
 	}
 }
