@@ -49,10 +49,11 @@ class Session implements CollectionAccessStatic
      * get, permet de récupérer une valeur ou la colléction de valeur.
 	 * 
 	 * @param string $key=null
+	 * @param mixed $default
 	 * 
 	 * @return mixed
 	 */
-	public static function get($key = null)
+	public static function get($key = null, $default = null)
 	{
 		static::start();
 
@@ -60,7 +61,7 @@ class Session implements CollectionAccessStatic
 			if (static::has($key)) {
 				return $_SESSION[$key];
 			} else {
-				return null;
+				return $default;
 			}
 		}
 

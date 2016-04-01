@@ -540,7 +540,17 @@ if (!function_exists("collect")) {
      */
     function collect() {
         $col = new Collection();
-        foreach(func_get_args() as $param) {
+        $data = [];
+        if (func_num_args() == 1) {
+            if (is_array(func_get_arg(0))) {
+                $data = func_get_arg(0);
+            } else {
+                $data = (array) func_get_arg(0);
+            }
+        } else {
+            $data = func_get_args();
+        }
+        foreach($data as $param) {
             $col->add($param);
         }
         return $col;
