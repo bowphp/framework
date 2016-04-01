@@ -113,7 +113,7 @@ class Blueprint
      */
     public function bigInteger($field, $size = 20, $null = false, $default = null)
     {
-        return $this->loadWhole("bigInteger", $field, $size, $null, $default);
+        return $this->loadWhole("bigint", $field, $size, $null, $default);
     }
 
     /**
@@ -128,7 +128,7 @@ class Blueprint
      */
     public function string($field, $size = 255, $null = false, $default = null)
     {
-        $type = "string";
+        $type = "varchar";
         if ($size > 255) {
             $type = "text";
         }
@@ -180,7 +180,7 @@ class Blueprint
      */
     public function timestamps($field, $null = false)
     {
-        $this->addField("timestamps", $field, [
+        $this->addField("timestamp", $field, [
             "null" => $null
         ]);
 
@@ -199,7 +199,7 @@ class Blueprint
      */
     public function longInteger($field, $size = 20, $null = false, $default = null)
     {
-        return $this->loadWhole("longInteger", $field, $size, $null, $default);
+        return $this->loadWhole("longint", $field, $size, $null, $default);
     }
 
     /**
@@ -216,7 +216,7 @@ class Blueprint
             throw new ModelException("Max size is 4294967295", 1);
         }
 
-        return $this->loadWhole("character", $field, $size, $null, $default);
+        return $this->loadWhole("char", $field, $size, $null, $default);
     }
 
     /**
@@ -226,7 +226,7 @@ class Blueprint
      */
     public function enumerate($field, array $enums)
     {
-        $this->addField("enumerate", $field, [
+        $this->addField("enum", $field, [
             "default" => $enums
         ]);
     }
@@ -238,18 +238,22 @@ class Blueprint
      * @throws ModelException
      * @return Schema
      */
-    public function autoincrements($field = null)
+    public function increment($field = null)
     {
         if ($this->autoincrement === null) {
             if ($this->lastField !== null) {
-                if (in_array($this->lastField->method, ["integer", "longInteger", "bigInteger"])) {
+                if (in_array($this->lastField->method, ["int", "longint", "bigint"])) {
                     $this->autoincrement = $this->lastField;
                 } else {
                     throw new ModelException("Cannot add autoincrement to " . $this->lastField->method, 1);
                 }
             } else {
                 if ($field) {
-                    $this->integer($field);
+                    $this->integer($field)->primary();
+                    $this->autoincrement = (object) [
+                        "method" => "int",
+                        "field" => $field
+                    ];
                 }
             }
         }
@@ -322,10 +326,6 @@ class Blueprint
      */
     private function addField($method, $field, $data)
     {
-        if (!method_exists($this, $method)) {
-            throw new ModelException("La methode $method n'est pas.", E_ERROR);
-        }
-
         $method = strtolower($method);
 
         if (!$this->fields->has($method)) {
@@ -386,111 +386,100 @@ class Blueprint
     }
 
     /**
+     * Ajout les indexes et la clé primaire.
+     *
+     * @param $info
+     */
+    private function addIndexOrPrimaryKey($info)
+    {
+        if ($info->primary !== null) {
+            $this->sqlStement .= ", primary key(`$field`)";
+            $info->primary = null;
+        } else {
+            if ($info->unique !== null) {
+                $this->sqlStement .= " unique";
+                $info->unique = null;
+            }
+        }
+    }
+
+    /**
+     * Ajout les types de donnée au champ définir
+     *
+     * @param $info
+     * @param $field
+     */
+    private function addFieldType($info, $field)
+    {
+        $info = (object) $info;
+        $null = $this->getNullType($info->null);
+        $this->sqlStement .= "`$field` $type($info->size) $null";
+    }
+
+    /**
      * stringify
      *
      * @return string
      */
     private function stringify()
     {
-        $this->fields->each(function ($type, Collection $value) {
-
+        $this->fields->each(function (Collection $value, $type) {
             switch ($type) {
-                case 'string':
-                case 'character':
+                case 'varchar':
+                case 'char':
+                case 'text':
                     $value->each(function($info, $field) use ($type) {
-                        $info = (object) $info;
-                        $null = $this->getNullType($info->null);
-
-                        $this->sqlStement .= " `$field` $type(" . $info->size .") $null";
-
+                        $this->addFieldType($info, $field);
                         if ($info->default) {
                             $this->sqlStement .= " default '" . $info->default . "'";
                         }
-
-                        if ($info->primary === null) {
-                            $this->sqlStement .= ", primary key(`$field`)";
-                            $info->primary = null;
-                        } else {
-                            if ($info->unique === null) {
-                                $this->sqlStement .= " unique";
-                            }
-                        }
+                        $this->addIndexOrPrimaryKey($info);
                     });
                     break;
 
-                case "integer":
-                case "biginteger":
-                case "longinteger":
+                case "int":
+                case "bigint":
+                case "longint":
                     $value->each(function ($info, $field) use ($type) {
-                        $info = (object) $info;
-                        $null = $this->getNullType($info->null);
-                        $this->sqlStement .= "`$field` $type($info->size) $null";
+                        $this->addFieldType($info, $field);
 
                         if ($info->default) {
                             $this->sqlStement .= " default " . $info->default;
                         }
 
                         if ($this->autoincrement !== null) {
-                            if ($this->autoincrement->method == $type
-                                && $this->autoincrement->field == $field) {
+                            if ($this->autoincrement->method == $type && $this->autoincrement->field == $field) {
                                 $this->sqlStement .= " auto_increment";
                             }
+
                             $this->autoincrement = null;
                         }
 
-                        if ($info->primary) {
-                            $this->sqlStement .= ", primary key (`$field`)";
-                            $info->primary = null;
-                        } else {
-                            if ($info->unique) {
-                                $this->sqlStement .= " unique";
-                            }
-                        }
+                        $this->addIndexOrPrimaryKey($info);
                     });
                     break;
 
                 case "date":
                 case "datetime":
                     $value->each(function($info, $field) use ($type){
-                        $info = (object) $info;
-                        $null = $this->getNullType($info->null);
-                        $this->sqlStement .= " `$field` $type $null";
-
-                        if ($info->primary) {
-                            $this->sqlStement .= ", primary key (`$field`)";
-                            $info->primary = null;
-                        } else {
-                            if ($info->unique) {
-                                $this->sqlStement .= " unique";
-                            }
-                        }
+                        $this->addFieldType($info, $field);
+                        $this->addIndexOrPrimaryKey($info);
                     });
                     break;
 
-                case "timestamps":
+                case "timestamp":
                     $value->each(function($info, $field) use ($type){
-                        $info = (object) $info;
-                        $null = $this->getNullType($info->null);
-                        $this->sqlStement .= " `$field` $type $null";
-
-                        if ($info->primary) {
-                            $this->sqlStement .= ", primary key (`$field`)";
-                            $info->primary = null;
-                        } else {
-                            if ($info->unique) {
-                                $this->sqlStement .= " unique";
-                            }
-                        }
+                        $this->addFieldType($info, $field);
+                        $this->addIndexOrPrimaryKey($info);
                     });
                     break;
-                case "enumerate":
+                case "enum":
                     $value->each(function($info, $field) {
                         $enum = implode(", ", $info["default"]);
                         $this->sqlStement .= " `$field` enum($enum)";
                     });
                     break;
             }
-
         });
 
         if ($this->sqlStement !== null) {
