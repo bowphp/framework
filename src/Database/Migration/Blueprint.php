@@ -98,7 +98,7 @@ class Blueprint
      */
     public function integer($field, $size = 11, $null = false, $default = null)
     {
-        return $this->loadWhole("int", $field, $size, $null, $default);
+        return $this->loadWhole("integer", $field, $size, $null, $default);
     }
 
     /**
@@ -111,9 +111,9 @@ class Blueprint
      *
      * @return $this
      */
-    public function bigint($field, $size = 20, $null = false, $default = null)
+    public function bigInteger($field, $size = 20, $null = false, $default = null)
     {
-        return $this->loadWhole("bigint", $field, $size, $null, $default);
+        return $this->loadWhole("bigInteger", $field, $size, $null, $default);
     }
 
     /**
@@ -128,7 +128,7 @@ class Blueprint
      */
     public function string($field, $size = 255, $null = false, $default = null)
     {
-        $type = "varchar";
+        $type = "string";
         if ($size > 255) {
             $type = "text";
         }
@@ -180,7 +180,7 @@ class Blueprint
      */
     public function timestamps($field, $null = false)
     {
-        $this->addField("timestamp", $field, [
+        $this->addField("timestamps", $field, [
             "null" => $null
         ]);
 
@@ -199,7 +199,7 @@ class Blueprint
      */
     public function longInteger($field, $size = 20, $null = false, $default = null)
     {
-        return $this->loadWhole("longint", $field, $size, $null, $default);
+        return $this->loadWhole("longInteger", $field, $size, $null, $default);
     }
 
     /**
@@ -213,10 +213,10 @@ class Blueprint
     public function character($field, $size = 1, $null = false, $default = null)
     {
         if ($size > 4294967295) {
-            throw new ModelException("char(), max size is 4294967295", 1);
+            throw new ModelException("Max size is 4294967295", 1);
         }
 
-        return $this->loadWhole("char", $field, $size, $null, $default);
+        return $this->loadWhole("character", $field, $size, $null, $default);
     }
 
     /**
@@ -242,7 +242,7 @@ class Blueprint
     {
         if ($this->autoincrement === null) {
             if ($this->lastField !== null) {
-                if (in_array($this->lastField->method, ["int", "longint", "bigint"])) {
+                if (in_array($this->lastField->method, ["integer", "longInteger", "bigInteger"])) {
                     $this->autoincrement = $this->lastField;
                 } else {
                     throw new ModelException("Cannot add autoincrement to " . $this->lastField->method, 1);
@@ -326,6 +326,8 @@ class Blueprint
             throw new ModelException("La methode $method n'est pas.", E_ERROR);
         }
 
+        $method = strtolower($method);
+
         if (!$this->fields->has($method)) {
             $this->fields->add($method, new Collection);
         }
@@ -393,8 +395,8 @@ class Blueprint
         $this->fields->each(function ($type, Collection $value) {
 
             switch ($type) {
-                case 'varchar':
-                case 'char':
+                case 'string':
+                case 'character':
                     $value->each(function($info, $field) use ($type) {
                         $info = (object) $info;
                         $null = $this->getNullType($info->null);
@@ -416,9 +418,9 @@ class Blueprint
                     });
                     break;
 
-                case "int":
-                case "bigint":
-                case "logint":
+                case "integer":
+                case "biginteger":
+                case "longinteger":
                     $value->each(function ($info, $field) use ($type) {
                         $info = (object) $info;
                         $null = $this->getNullType($info->null);
@@ -465,7 +467,7 @@ class Blueprint
                     });
                     break;
 
-                case "timestamp":
+                case "timestamps":
                     $value->each(function($info, $field) use ($type){
                         $info = (object) $info;
                         $null = $this->getNullType($info->null);
@@ -492,7 +494,7 @@ class Blueprint
         });
 
         if ($this->sqlStement !== null) {
-            return "create table :table: ". ($this->sqlStement) . "engine=" . $this->engine . " default charset=" . $this->character .";";
+            return "create table :table: (". $this->sqlStement . ") engine=" . $this->engine . " default charset=" . $this->character .";";
         }
 
         return null;
