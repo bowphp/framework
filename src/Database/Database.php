@@ -418,7 +418,9 @@ class Database extends DatabaseTools
     {
         if (! (static::$db instanceof PDO)) {
             static::connection(function($err) {
-                throw $err;
+                if ($err instanceof PDOException) {
+                    throw $err;
+                }
             });
         }
     }

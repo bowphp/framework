@@ -332,7 +332,7 @@ class Collection
     {
         $r = [];
         
-        for($i = $this->count(); $i > 0; --$i) {
+        for($i = $this->length(); $i > 0; --$i) {
             $r[] = $this->storage[$i];
         }
 
