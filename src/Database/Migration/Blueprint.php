@@ -2,8 +2,10 @@
 
 namespace Bow\Database\Migration;
 
+use Bow\Exception\DatabaseException;
 use Bow\Support\Collection;
 use Bow\Exception\ModelException;
+use Bow\Support\Str;
 
 class Blueprint
 {
@@ -69,6 +71,11 @@ class Blueprint
     private $displaySql = false;
 
     /**
+     * @var array
+     */
+    private $dataBind = [];
+
+    /**
      * Constructor
      *
      * @param string $table nom de la table
@@ -125,6 +132,53 @@ class Blueprint
     }
 
     /**
+     * tinyint
+     *
+     * @param string $field
+     * @param bool $null
+     * @param bool $size
+     * @param null|string $default
+     *
+     * @return $this
+     */
+    public function tinyint($field, $size = null, $null = false, $default = null)
+    {
+        return $this->loadWhole("tinyint", $field, $size, $null, $default);
+    }
+
+    /**
+     * smallint
+     *
+     * @param string $field
+     * @param bool $size
+     * @param bool $null
+     * @param null|string $default
+     *
+     * @return $this
+     * @throws \ErrorException
+     */
+    public function smallint($field, $size = null, $null = false, $default = null)
+    {
+        return $this->loadWhole("smallint", $field, $size, $null, $default);
+    }
+
+    /**
+     * mediumint
+     *
+     * @param string $field
+     * @param bool $size
+     * @param bool $null
+     * @param null|string $default
+     *
+     * @return $this
+     * @throws \ErrorException
+     */
+    public function mediumint($field, $size = null, $null = false, $default = null)
+    {
+        return $this->loadWhole("mediumint", $field, $size, $null, $default);
+    }
+
+    /**
      * bigint
      *
      * @param string $field
@@ -137,6 +191,44 @@ class Blueprint
     public function bigInteger($field, $size = 20, $null = false, $default = null)
     {
         return $this->loadWhole("bigint", $field, $size, $null, $default);
+    }
+
+    /**
+     * bigint
+     *
+     * @param string $field
+     * @param int $size
+     * @param int $left
+     * @param bool $null
+     * @param null|string $default
+     *
+     * @return $this
+     */
+    public function double($field, $size = 20, $left = 0, $null = false, $default = null)
+    {
+        if ($left > 0) {
+            $size = "$size, $left";
+        }
+        return $this->loadWhole("double precision", $field, $size, $null, $default);
+    }
+
+    /**
+     * bigint
+     *
+     * @param string $field
+     * @param int $size
+     * @param int $left
+     * @param bool $null
+     * @param null|string $default
+     *
+     * @return $this
+     */
+    public function float($field, $size = 20, $left = 0, $null = false, $default = null)
+    {
+        if ($left > 0) {
+            $size = "$size, $left";
+        }
+        return $this->loadWhole("float", $field, $size, $null, $default);
     }
 
     /**
@@ -170,6 +262,40 @@ class Blueprint
     public function date($field, $null = false)
     {
         $this->addField("date", $field, [
+            "null" => $null
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * year
+     *
+     * @param string $field
+     * @param bool $null
+     *
+     * @return $this
+     */
+    public function year($field, $null = false)
+    {
+        $this->addField("year", $field, [
+            "null" => $null
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * time
+     *
+     * @param string $field
+     * @param bool $null
+     *
+     * @return $this
+     */
+    public function time($field, $null = false)
+    {
+        $this->addField("time", $field, [
             "null" => $null
         ]);
 
@@ -245,12 +371,14 @@ class Blueprint
     /**
      * @param string $field
      * @param array $enums
+     * @param bool $null
      * @return Schema
      */
-    public function enumerate($field, array $enums)
+    public function enumerate($field, array $enums, $null = false)
     {
         $this->addField("enum", $field, [
-            "default" => $enums
+            "default" => $enums,
+            "null" => $null
         ]);
     }
 
@@ -356,6 +484,22 @@ class Blueprint
         }
 
         if (!$this->fields->get($method)->has($field)) {
+
+            if (!in_array($method, ["int", "longint", "bigint"])) {
+                $value = Filler::$number++;
+            } else if (!in_array($method, ["date", "datetime", "timestamp"])) {
+                $value = Filler::$date;
+            } else if (!in_array($method, ["double", "float"])) {
+                $value = Filler::$float++;
+            } else {
+               $value = Str::slice(Filler::$string, 0, $data["size"]);
+            }
+
+            if (!is_array($this->dataBind)) {
+                $this->dataBind = [];
+            }
+
+            $this->dataBind[$field] = $value;
             // default index are at false
             $data["primary"] = false;
             $data["unique"]  = false;
@@ -400,6 +544,10 @@ class Blueprint
                     $null    = false;
                 }
             }
+        }
+
+        if ($size > 255) {
+
         }
 
         $this->addField($method, $field, [
@@ -493,15 +641,16 @@ class Blueprint
                         foreach($info["default"] as $key => $value) {
                             $info["default"][$key] = "'" .  $value . "'";
                         }
+                        $null = $this->getNullType($info["null"]);
                         $enum = implode(", ", $info["default"]);
-                        $this->sqlStement .= ", `$field` ENUM($enum)";
+                        $this->sqlStement .= ", `$field` ENUM($enum) $null";
                     });
                     break;
             }
         });
 
         if ($this->sqlStement !== null) {
-            return "CREATE TABLE IF NOT EXISTS `" . $this->table . "` (". $this->sqlStement . ") ENGINE=" . $this->engine . " DEFAULT CHARSET=" . $this->character ." COLLATE " . $this->collate .";";
+            return "CREATE TABLE IF NOT EXISTS `" . $this->table . "` (". $this->sqlStement . ") ENGINE=" . $this->engine . " DEFAULT CHARSET=" . $this->character ." COLLATE " . $this->collate .";-";
         }
 
         return null;
@@ -540,6 +689,7 @@ class Blueprint
             $sql = str_replace(") ENGINE", "\n) ENGINE", $sql);
             echo $sql . "\n";
         }
-        return $sqlR;
+
+        return $sqlR . "[::]" . serialize($this->dataBind);
     }
 }

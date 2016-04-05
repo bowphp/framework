@@ -41,9 +41,9 @@ class Flash
     {
         if ($value !== null) {
             $this->warning = $value;
+        } else {
+            return ["level" => "warning", "message" => $this->warning];
         }
-
-        return $this->warning;
     }
 
     /**
@@ -54,18 +54,19 @@ class Flash
     {
         if ($value !== null) {
             $this->warning = $value;
+        } else {
+            return ["level" => "danger", "message" => $this->warning];
         }
-
-        return $this->warning;
     }
 
     public function information($value = null)
     {
         if ($value !== null) {
             $this->information = $value;
+        } else {
+            return ["level" => "info", "message" => $this->information];
         }
-
-        return $this->information;
+        return null;
     }
 
     /**
@@ -76,9 +77,10 @@ class Flash
     {
         if ($value !== null) {
             $this->error = $value;
+        } else {
+            return ["level" => "error", "message" => $this->error];
         }
-
-        return $this->error;
+        return null;
     }
 
     /**
@@ -89,8 +91,17 @@ class Flash
     {
         if ($value !== null) {
             $this->success = $value;
+        } else {
+            return ["level" => "success", "message" => $this->success];
         }
+        return null;
+    }
 
-        return $this->success;
+    /**
+     * @return array
+     */
+    public function __sleep()
+    {
+        return ["error", "information", "success", "warning"];
     }
 }

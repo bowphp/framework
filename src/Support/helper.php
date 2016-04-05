@@ -293,24 +293,47 @@ if (!function_exists("dump")) {
     }
 }
 
-if (!function_exists("csrf")) {
+if (!function_exists("create_token_csrf")) {
     /**
      * csrf, fonction permetant de crée automatiquement un gestionnaire de csrf
      * @param int $time
      * @return \StdClass
      */
-    function csrf($time = null) {
+    function create_token_csrf($time = null) {
         return Security::createTokenCsrf($time);
     }
 }
 
-if (!function_exists("csrf_token")) {
+if (!function_exists("generate_token_csrf")) {
     /**
      * csrf, fonction permetant de générer un token
      * @return string
      */
-    function csrf_token() {
+    function generate_token_csrf() {
         return Security::generateTokenCsrf();
+    }
+}
+
+if (!function_exists("verify_token_csrf")) {
+    /**
+     * verify_token_csrf, fonction permetant de vérifier un token
+     * @param string $token l'information sur le token
+     * @param bool $strict vérifie le token et la date de création avec à la valeur time()
+     * @return string
+     */
+    function verify_token_csrf($token, $strict = false) {
+        return Security::verifyTokenCsrf($token, $strict = false);
+    }
+}
+
+if (!function_exists("token_csrf_time_is_expirate")) {
+    /**
+     * csrf, fonction permetant de générer un token
+     * @param string $time
+     * @return string
+     */
+    function token_csrf_time_is_expirate($time = null) {
+        return Security::tokenCsrfTimeIsExpirate($time);
     }
 }
 
@@ -577,12 +600,12 @@ if (!function_exists("decrypt")) {
     }
 }
 
-if (!function_exists("transaction")) {
+if (!function_exists("beginTransaction")) {
     /**
      * debut un transaction. Désactive l'auto commit
      * @param $cb
      */
-    function transaction($cb) {
+    function beginTransaction($cb) {
         if ($cb !== null) {
             call_user_func_array($cb, []);
         }

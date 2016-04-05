@@ -67,7 +67,16 @@ class Table extends DatabaseTools
      * @var null
      */
     private static $instance;
-    
+
+    /**
+     * @var bool
+     */
+    private static $getOne = false;
+
+    /**
+     * @var array
+     */
+    private $errorInfo = [];
     /**
      * Contructeur
      * 
@@ -87,11 +96,11 @@ class Table extends DatabaseTools
      * Charge le singleton
      *
      * @param $tableName
-     * @param $connection
+     * @param \PDO $connection
      * 
      * @return Table
      */
-    public static function load($tableName, $connection)
+    public static function load($tableName, \PDO $connection)
     {
         if (self::$instance === null || self::$_tableName != $tableName) {
             self::$instance = new self($tableName, $connection);
@@ -142,7 +151,7 @@ class Table extends DatabaseTools
             $comp = "=";
         }
 
-        if (is_null($value)) {
+        if ($value === null) {
             throw new TableException("valeur de comparaison non définir", E_ERROR);
         }
 
@@ -627,6 +636,7 @@ class Table extends DatabaseTools
     	
         $s = $this->connection->prepare($sql);
     	$s->execute();
+        $this->errorInfo = $s->errorInfo();
 
         if ($s->rowCount() > 1) {
             return $s->fetchAll();
@@ -692,15 +702,33 @@ class Table extends DatabaseTools
         // execution de requete.
         $stmt = $this->connection->prepare($sql);
         static::bind($stmt, $this->whereDataBind);
+        $this->whereDataBind = [];
         $stmt->execute();
+        $this->errorInfo = $stmt->errorInfo();
 
-        $data = Security::sanitaze($stmt->fetchAll());
+        if (static::$getOne) {
+            $data = Security::sanitaze($stmt->fetch());
+            static::$getOne = false;
+        } else {
+            $data = Security::sanitaze($stmt->fetchAll());
+        }
 
         if (is_callable($cb)) {
         	return call_user_func_array($cb, [$data]);
         }
         
         return $data;
+    }
+
+    /**
+     * Permet de retourner un élément dans la liste de résultat
+     *
+     * @return mixed
+     */
+    public function getOne()
+    {
+        static::$getOne = true;
+        return $this->get();
     }
 
     /**
@@ -727,7 +755,9 @@ class Table extends DatabaseTools
 
     	$stmt = $this->connection->prepare($sql);
         static::bind($stmt, $this->whereDataBind);
+        $this->whereDataBind = [];
         $stmt->execute();
+        $this->errorInfo = $stmt->errorInfo();
         $count = $stmt->fetchColumn();
 
     	if (is_callable($cb)) {
@@ -759,6 +789,7 @@ class Table extends DatabaseTools
 		$stmt = $this->connection->prepare($sql);
 		static::bind($stmt, $data);
 		$stmt->execute();
+        $this->errorInfo = $stmt->errorInfo();
 
 		$r = $stmt->rowCount();
 
@@ -788,8 +819,9 @@ class Table extends DatabaseTools
 		$stmt = $this->connection->prepare($sql);
 
 		static::bind($stmt, $this->whereDataBind);
+        $this->whereDataBind = [];
 		$stmt->execute();
-		
+        $this->errorInfo = $stmt->errorInfo();
 		$data = $stmt->rowCount();
 
         if (is_callable($cb)) {
@@ -877,6 +909,7 @@ class Table extends DatabaseTools
         $stmt = $this->connection->prepare($sql);
         $this->bind($stmt, $values);
         $stmt->execute();
+        $this->errorInfo = $stmt->errorInfo();
 
         return (int) $stmt->rowCount();
     }
@@ -936,58 +969,57 @@ class Table extends DatabaseTools
      */
     private static function isComporaisonOperator($comp)
     {
-        if (in_array($comp, ["=", ">", "<", ">=", "=<", "<>", "!="])) {
-            return true;
-        }
-
-        return false;
+        return in_array($comp, ["=", ">", "<", ">=", "=<", "<>", "!="], true);
     }
 
     /**
-     * paginate 
-     * 
+     * paginate
+     *
      * @param integer $n nombre d'element a récupérer
      * @param integer $current la page courrant
-     * @param bool $complete lance la pagination automatique.
      * @param integer $chunk le nombre l'élément par groupe que l'on veux faire.
      * @return array|\StdClass
      */
-    public function paginate($n, $current = 0, $complete = false, $chunk = null)
+    public function paginate($n, $current = 0, $chunk = null)
     {
+        // On vas une page en arrière
         --$current;
 
-        if ($current < 0) {
-            $current = 0;
-        } else {
-            if ($current > 0) {
-                $current *= $n;
-            }
-        }
-        // sauvegarde des informations sur le where
-        $where = $this->where;
-        $data = $this->jump($current)->take($n)->get();
-        // reinitialisation du where
-        $this->where = $where;
-        // réexecution de la requête.
-        if ($current == 0) {
+        // variable contenant le nombre de saut.
+        $jump = 0;
+
+        if ($current <= 0) {
+            $jump = 0;
             $current = 1;
+        } else {
+            $jump = $n * $current;
+            $current++;
         }
 
+        // sauvegarde des informations sur le where
+        $where = $this->where;
+        $dataBind = $this->whereDataBind;
+        $data = $this->jump($jump)->take($n)->get();
+
+        // reinitialisation du where
+        $this->where = $where;
+        $this->whereDataBind = $dataBind;
+
+        // On compte le nombre de page qui reste
         $restOfPage = ceil($this->count() / $n) - $current;
 
         // groupé les données
         if (is_int($chunk)) {
             $data = array_chunk($data, $chunk);
         }
+
         // active la pagination automatique.
-        if ($complete == true) {
-            $data = [
-                "next" => $current > 1 && $restOfPage > 0 ? $current + 1 : null,
-                "previous" => ($current - 1) <= 0 ? 1 : ($current - 1),
-                "data" => $data,
-                "current" => $current
-            ];
-        }
+        $data = [
+            "next" => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
+            "previous" => ($current - 1) <= 0 ? 1 : ($current - 1),
+            "data" => $data,
+            "current" => $current
+        ];
 
         return $data;
     }
@@ -1002,8 +1034,11 @@ class Table extends DatabaseTools
         $data = $this->get();
         $coll =  new Collection();
 
+        if (count($data) == 1) {
+            $data = $data[0];
+        }
         foreach($data as $key => $value) {
-            $coll->add($value);
+            $coll->add($key, $value);
         }
 
         return $coll;
@@ -1017,5 +1052,27 @@ class Table extends DatabaseTools
     public function collectionify()
     {
         return $this->toCollection();
+    }
+
+    /**
+     * vérifie si un valeur existe déjà dans la DB
+     *
+     * @param string $column
+     * @param mixed $value
+     * @return bool
+     * @throws TableException
+     */
+    public function verifyValue($column, $value)
+    {
+        return $this->where($column, $value)->count() > 0 ? true : false;
+    }
+
+    /**
+     * retourne les informations sur l'erreur PDO
+     * @return DatabaseErrorHandler
+     */
+    public function getLastError()
+    {
+        return new DatabaseErrorHandler($this->errorInfo);
     }
 }

@@ -55,10 +55,10 @@ class Logger extends AbstractLogger
         if ($this->debug === "development") {
             echo static::htmlFormat($level, $message, $context);
         } else  if ($this->debug === "production") {
-            $message .= "\nin " . $context["file"] . " at " . $context["line"] . "\n";
-            Resource::append($this->path, static::textFormat($level, $message, $context["context"] . "\n"));
+            $message .= "\nin " . $context["file"] . " at " . $context["line"]. " [";
+            Resource::append($this->path, static::textFormat($level, $message, $context["context"]));
         } else {
-            throw new LoggerException("debug: ". $this->debug . " n'est pas definir");
+            throw new LoggerException("debug: ". $this->debug . " n'est pas définir");
         }
 
         exit;
@@ -74,7 +74,17 @@ class Logger extends AbstractLogger
      */
     private function textFormat($level, $message, $context)
     {
-        $message .= $context;
+        if (is_array($context)) {
+            foreach($context as $key => $value) {
+                $value = var_export($value, true);
+                $message .= "[$key: $value]";
+            }
+        } else {
+            $message .= $context;
+        }
+
+        $message .= "]\n";
+
         return sprintf("[%s] [client: %s:%d] [%s] %s", date("Y-m-d H:i:s"), $_SERVER["REMOTE_ADDR"], $_SERVER["REMOTE_PORT"], $level, $message);
     }
 
@@ -213,7 +223,7 @@ class Logger extends AbstractLogger
     {
         // information sur le contexte de l'erreur
         $context = [
-            "file" => $file,
+            "file"     => $file,
             "line"     => $linenum,
             "context"  => $vars
         ];
