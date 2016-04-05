@@ -162,7 +162,7 @@ class Security
 			Session::add("csrf", (object) [
 				"token" => $token,
 				"expirate" => time() + static::$tokenCsrfExpirateTime,
-				"field" => '<input type="hidden" name="crsf_token" value="' . $token .'"/>'
+				"field" => '<input type="hidden" name="csrf_token" value="' . $token .'"/>'
 			]);
 
             return true;

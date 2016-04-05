@@ -291,8 +291,11 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
 
-        if (preg_match("/^(drop|alter\stable|truncate|create\stable)\s.+;?$/i", $sqlstatement)) {
+        if (preg_match("/^(drop|alter\stable|truncate|create\stable|call)\s.+;?$/i", $sqlstatement)) {
             $r = static::$db->exec($sqlstatement);
+            if ($r === 0) {
+                $r = true;
+            }
             static::$currentPdoErrorInfo = static::$db->errorInfo();
             
             return $r;

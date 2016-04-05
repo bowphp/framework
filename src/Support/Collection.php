@@ -414,4 +414,22 @@ class Collection
     {
         return array_pop($this->storage);
     }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        $this->add($name, $value);
+    }
 }

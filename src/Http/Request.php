@@ -60,7 +60,7 @@ class Request
 	}
 
 	/**
-	 * retourne path envoyé par client.
+	 * retourne le nom host du serveur.
 	 *
 	 * @return string
 	 */
@@ -70,13 +70,33 @@ class Request
 	}
 
 	/**
+	 * retourne url envoyé par client.
+	 *
+	 * @return string
+	 */
+	public function url()
+	{
+		return $this->origin() . $_SERVER["REQUEST_URI"];
+	}
+
+    /**
+     * origin le nom du serveur + le scheme
+     *
+     * @return string
+     */
+    public function origin()
+    {
+        return $_SERVER["REQUEST_SCHEME"] . "://" . $this->hostname();
+    }
+
+	/**
 	 * retourne path envoyé par client.
 	 *
 	 * @return string
 	 */
-	public function pathname()
+	public function time()
 	{
-		return "/" . $this->uri();
+		return $_SESSION["REQUEST_TIME"];
 	}
 
 	/**

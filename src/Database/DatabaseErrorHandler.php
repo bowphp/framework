@@ -38,7 +38,7 @@ class DatabaseErrorHandler
     /**
      * @return string
      */
-    public function getSqlStateErrorCode()
+    public function getCode()
     {
         return $this->pdoStatement[0];
     }
@@ -49,7 +49,7 @@ class DatabaseErrorHandler
     private function formatError()
     {
         if ($this->pdoStatement[1] !== null) {
-            $this->driverMessage = $this->pdoStatement[1];
+            $this->driverMessage = $this->pdoStatement[2];
             $this->driverCode = $this->pdoStatement[0];
             $this->error = true;
         }
@@ -58,7 +58,7 @@ class DatabaseErrorHandler
     /**
      * @return bool
      */
-    public function thereIsAnError()
+    public function hasError()
     {
         return $this->error;
     }

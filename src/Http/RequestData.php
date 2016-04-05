@@ -102,6 +102,36 @@ class RequestData implements CollectionAccess
 	}
 
 	/**
+	 * get, permet de récupérer une valeur ou la colléction de valeur.
+	 *
+	 * @param string $key=null
+	 * @param mixed $default=false
+	 * @return mixed
+	 */
+	public function getWithOut($key = null, $default = false)
+	{
+        $data = [];
+
+		foreach($this->data as $key => $value) {
+            if (!in_array($key, func_get_args())) {
+                $data[$key] = $value;
+            }
+        }
+
+		return $data;
+	}
+
+    /**
+     * verifie si le contenu de $this->data poccedent la $key n'est pas vide.
+     * @param string $key
+     * @return bool
+     */
+	public function isValied($key)
+	{
+        return !$this->has($key) ?: empty($this->data[$key]);
+	}
+
+	/**
 	 * remove, supprime une entrée dans la colléction
 	 *
 	 * @param string $key
