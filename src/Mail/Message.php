@@ -7,12 +7,12 @@ use Bow\Support\Util;
 
 abstract class Message
 {
+    const END = "\r\n";
 	/**
 	 * Liste des entêtes
-	 *
 	 * @var array
 	 */
-	protected $headers = ["top" => [], "bottom" => []];
+	protected $headers = [];
 	/**
 	 * définir le destinataire
 	 * @var array
@@ -56,10 +56,6 @@ abstract class Message
 	 * @var boolean
 	 */
 	protected $fromDefined = false;
-    /**
-     * @var string
-     */
-    protected $sep;
 
 	/**
 	 * addHeader, Ajout une entête
@@ -68,54 +64,9 @@ abstract class Message
 	 * @param string $value
 	 * @return self
 	 */
-	public function addHeader($key, $value)
+	protected function addHeader($key, $value)
 	{
-        $top = $this->headers["top"];
-
-		if (array_key_exists($key, $top)) {
-			if (!is_array($top[$key])) {
-				$old = $top[$key];
-                $top[$key] = [$old, $value];
-			} else {
-				array_push($top[$key], $value);
-			}
-		} else {
-            $top[$key] = $value;
-		}
-
-		$this->headers["top"] = $top;
-		
-		return $this;
-	}
-
-	/**
-	 * addFeatureHeader, permet d'ajout une entête
-	 *
-	 * @param string $key
-	 * @param string $value
-	 * 
-	 * @return self
-	 */
-	private function addFeatureHeader($key, $value)
-	{
-		if (strtolower($key) == "content-type") {
-			$this->headers["bottom"][$this->part] = [];
-			$this->part++;
-		}
-
-		if ($key == "data") {
-			$value = preg_replace("@\n$@", "", $value);
-			$data = $this->sep . $this->sep. $value;
-		} else {
-			$data = "$key: $value";
-		}
-
-		if (($this->part - 1) === -1) {
-			array_push($this->headers["bottom"][$this->part], $data);
-		} else {
-			array_push($this->headers["bottom"][$this->part - 1], $data);
-		}
-
+        $this->headers[] = ucwords($key) . ": " . $value;
 		return $this;
 	}
 
@@ -124,41 +75,19 @@ abstract class Message
 	 *
 	 * @return string
 	 */
-	public function formatHeader()
+	protected function formatHeader()
 	{
+        $headers = "";
+        if ($this->form) {
+            $headers .= "From: " . $this->form . self::END;
+        }
 
-		$content_length = count($this->headers["bottom"]);
-		$sep = Util::sep();
+        if ($this->subject) {
+            $headers .= "Subject: " . $this->subject . self::END;
+        }
 
-		$form = "";
-
-		foreach ($this->headers["top"] as $key => $value) {
-			$form .= "$key: $value" . $sep;
-		}
-
-		if ($this->subject) {
-			$form .= "subject: " . $this->subject . $sep;
-		}
-
-		if ($content_length == 1) {
-			foreach ($this->headers["bottom"] as $value) {
-				foreach ($value as $v) {
-					$form .= $v . $sep;
-				}
-			}
-		} else {
-			$form .= "Content-Type: multipart/mixed; boundary=\"{$this->boundary}\"{$sep}{$sep}";
-			$form .= $this->boundary . $sep;
-
-			foreach ($this->headers["bottom"] as $value) {
-				foreach ($value as $key => $v) {
-					$form .= $v . $sep;
-				}
-				$form .= $this->boundary . $sep;
-			}
-		}
-
-		return $form;
+        $headers .= implode(self::END, $this->headers);
+        return $headers;
 	}
 
 	/**
@@ -168,7 +97,7 @@ abstract class Message
 	 */
 	public function getHeader()
 	{
-		return (object) $this->headers;
+
 	}
 
 	/**
@@ -176,11 +105,10 @@ abstract class Message
 	 *
 	 * @param string $to
 	 * @param string $name
-	 * @param bool $smtp
 	 * 
 	 * @return self
 	 */
-	public function to($to, $name = null, $smtp = false)
+	public function to($to, $name = null)
 	{
 		$this->to[] = $this->formatEmail($to, $name);
 
@@ -195,13 +123,37 @@ abstract class Message
 	 * 
 	 * @return array
 	 */
-	private function formatEmail($email, $name)
+	private function formatEmail($email, $name = "")
 	{
+        /**
+         * Organisation de la liste des senders
+         */
 		if (!$name && preg_match('#^(.+) +<(.*)>\z#', $email, $matches)) {
-			return [$matches[2] => $matches[1]];
+            array_shift($matches);
+			return [$matches[0] , $matches[1]];
 		} else {
-			return [$email => $name];
+			return [$name, $email];
 		}
+	}
+
+	protected function getTo()
+	{
+		$to = "";
+        $i = 0;
+
+		foreach($this->to as $value) {
+            if ($i > 0) {
+                $to .= ", ";
+            }
+            $i++;
+			if ($value[0] !== null) {
+                $to .= "{$value[0]} <{$value[1]}>";
+			} else {
+                $to .= "{$value[1]}";
+            }
+		}
+
+        return $to;
 	}
 
 	/**
@@ -216,14 +168,15 @@ abstract class Message
 		if (!is_file($file)) {
 			trigger_error("Ce n'est pas une fichier.", E_USER_ERROR);
 		}
-
+		// récupération du contenu du fichier
 		$content = file_get_contents($file);
+        // récupération du nom de fichier.
 		$base_name = basename($file);
-
-		$this->addFeatureHeader("Content-Type", "application/octect-stream; name=\"{$base_name}\"");
-		$this->addFeatureHeader("Content-Transfer-Encoding", "base64");
-		$this->addFeatureHeader("Content-Disposition", "attachement");
-		$this->addFeatureHeader("data", chunk_split(base64_encode($content)));
+        $this->headers[] = $this->boundary;
+		$this->headers[] = "Content-Type: application/octect-stream; name=\"{$base_name}\"";
+		$this->headers[] = "Content-Transfer-Encoding: base64";
+        $this->headers[] = "Content-Disposition: attachement; filename=\"$base_name\"" . self::END;
+        $this->headers[] = chunk_split(base64_encode($content));
 		
 		return $this;
 	}
@@ -232,18 +185,12 @@ abstract class Message
 	 * subject, Définit le suject du mail
 	 *
 	 * @param string $subject
-	 * @param bool $smtp
 	 * 
 	 * @return self
 	 */
-	public function subject($subject, $smtp = false)
+	public function subject($subject)
 	{
-		if ($smtp === true) {
-			$this->addHeader("Subject", $subject);
-		} else {
-			$this->subject = $subject;
-		}
-
+        $this->subject = $subject;
 		return $this;
 	}
 
@@ -252,24 +199,18 @@ abstract class Message
 	 *
 	 * @param string $from
 	 * @param string $name=null
-	 * @param bool $smtp
 	 * 
 	 * @return self
 	 */
-	public function from($from, $name = null, $smtp = false)
+	public function from($from, $name = null)
 	{
 		$from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
 
-		if ($smtp === true) {
-			$this->form = $from;
-		} else {
-			if ($this->fromDefined === false) {
-				$this->addHeader("From", $from);
-			} else {
-				$this->fromDefined = true;
-			}
-		}
-		
+        if ($this->fromDefined === false) {
+            $this->form = $from;
+            $this->fromDefined = true;
+        }
+
 		return $this;
 	}
 
@@ -279,16 +220,9 @@ abstract class Message
 	 * @param string $html=null
 	 * @return self
 	 */
-	public function toHtml($html = null)
+	public function html($html)
 	{
-		$this->addFeatureHeader("Content-Type", "text/html; charset=utf-8");
-		$this->addFeatureHeader("Content-Transfer-Encoding", "8bit");
-
-		if (is_string($html)) {
-			$this->addFeatureHeader("data", $html);
-		}
-		
-		return $this;
+        return $this->type($html, "text/html");
 	}
 
 	/**
@@ -298,17 +232,25 @@ abstract class Message
 	 * 
 	 * @return self
 	 */
-	public function toText($text = null)
+	public function text($text = null)
 	{
-		$this->addFeatureHeader("Content-Type", "text/plain; charset=utf-8");
-		$this->addFeatureHeader("Content-Transfer-Encoding", "8bit");
-
-		if (is_string($text)) {
-			$this->addFeatureHeader("data", $text);
-		}
-		
-		return $this;
+		return $this->type($text, "text/plain");
 	}
+
+    /**
+     * @param $message
+     * @param $type
+     * @return $this
+     */
+    private function type($message, $type)
+    {
+        $this->headers[] = $this->boundary;
+        $this->headers[] = "Content-Type: $type; charset=utf-8" . self::END;
+        $this->headers[] = $message . self::END;
+        $this->headers[] = $this->boundary;
+
+        return $this;
+    }
 
 	/**
 	 * Adds blind carbon copy
@@ -391,16 +333,18 @@ abstract class Message
 	/**
 	 * Message, définir le corps du message
 	 * @param string $message
+	 * @param string $contentType
 	 * @throws \InvalidArgumentException
 	 * @return self
 	 */
-	public function message($message)
+	public function message($message, $contentType = "text")
 	{
 		if (!is_string($message)) {
-			throw new \InvalidArgumentException(__METHOD__."() parameter most be string " . gettype($message) . "given", 1);
+			throw new \InvalidArgumentException("Parameter most be string " . gettype($message) . "given", 1);
 		}
 
 		$this->message = $message;
+        $this->type($message, "text/" . ($contentType == "text" ? "plain" : "html"));
 		
 		return $this;
 	}

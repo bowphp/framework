@@ -41,11 +41,16 @@ class Mail extends Message
 	{
 	}
 
-	public function __construct()
+	public function __construct($config)
 	{
+		$this->sep = Message::END;
 		$this->boundary = "__Bow-Framework-" . md5(date("r"));
 		$this->addHeader("MIME-Version", "1.0");
 		$this->addHeader("X-Mailer",  "Bow Framework");
 		$this->addHeader("Date", date("r"));
+	}
+
+	public function form() {
+
 	}
 }

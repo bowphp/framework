@@ -53,6 +53,12 @@ use Bow\Exception\SocketException;
      */
     public function __construct(array $param)
     {
+        $this->boundary = "__Bow-Framework-" . md5(date("r"));
+        $this->addHeader("Date", date("r"));
+        $this->addHeader("X-Mailer",  "Bow Framework");
+        $this->addHeader("Content-Type", 'multipart/mixed; boundary="' . $this->boundary . '"');
+        $this->addHeader("MIME-Version", "1.0" . self::END);
+
         if (!isset($param["secure"])) {
             $param["secure"] = false;
 
@@ -78,16 +84,33 @@ use Bow\Exception\SocketException;
      */
     public function send($cb = null)
     {
-        var_dump($this->formatHeader());
         $this->connection();
         $error = true;
 
         // SMTP command
-        $this->write("MAIL FROM: " . $this->username, 250);
-        $this->write("RCPT TO: " . $this->to, 250);
+        if ($this->username === null && $this->password === null) {
+            $this->write("MAIL FROM: " . $this->getTo(), 250);
+        } else {
+            $this->write("MAIL FROM: <" . $this->username . ">", 250);
+        }
+
+
+        foreach($this->to as $value) {
+            $to = "";
+            if ($value[0] !== null) {
+                $to .= "{$value[0]} <{$value[1]}>";
+            } else {
+                $to .= "<{$value[1]}>";
+            }
+            $this->write("RCPT TO: " . $to, 250);
+        }
         $this->write("DATA", 354);
-        $this->write($this->formatHeader() . Util::sep() . $this->message);
-        $this->write(".", 250);
+        $this->write($this->formatHeader());
+        try {
+            $this->write(".", 250);
+        } catch(SmtpException $e) {
+            echo $e->getMessage();
+        }
 
         $status = $this->disconnect();
 
@@ -125,31 +148,29 @@ use Bow\Exception\SocketException;
         $this->sock = fsockopen($url, $port, $errno, $errstr, $timeout=50);
 
         if ($this->sock == null) {
-            throw new SocketException(__METHOD__."(): can not connect to {$url}:{$port}", E_USER_ERROR);
+            throw new SocketException("Can not connect to {$url}:{$port}", E_USER_ERROR);
         }
 
         stream_set_timeout($this->sock, 20, 0);
         $code = $this->read();
 
         $host = isset($_SERVER['HTTP_HOST']) && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-        
+
         if ($code == 220) {
             $code = $this->write("EHLO $host", 250);
             if ($code != 250) {
-                $this->write("EHLO $host", $code=250);
+                $this->write("EHLO $host", 250);
             }
         }
 
         if ($this->tls === true) {
-            
-            $this->write("STARTTLS", $code=220);
+            $this->write("STARTTLS", 220);
             $secured = stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-            
             if (!$secured) {
-                throw new ErrorException(__METHOD__."(): Can not secure you connection with tls.", 1);
+                throw new ErrorException("Can not secure you connection with tls.",E_ERROR);
             }
 
-            $this->write("EHLO $host", $code=250);
+//            $this->write("EHLO $host", 250);
         }
 
         if ($this->username !== null && $this->password !== null) {
@@ -164,9 +185,10 @@ use Bow\Exception\SocketException;
      */
     private function disconnect()
     {
-        $this->write("QUIT" . Util::sep());
+        $r = $this->write("QUIT" . Util::sep());
         fclose($this->sock);
         $this->sock = null;
+        return $r;
     }
 
     /**
@@ -180,15 +202,14 @@ use Bow\Exception\SocketException;
 
         for (; !feof($this->sock); ) {
             if (($line = fgets($this->sock, 1e3)) != null) {
-                echo $line;
-                if (Str::slice($line, 3, 1) === " ") {
-                    $s = (int) Str::slice($line, 0, 3);
+                $s = explode(" ", $line)[0];
+                if (preg_match("#^[0-9]+$#", $s)) {
                     break;
                 }
             }
         }
 
-        return $s;
+        return (int) $s;
     }
 
     /**
@@ -203,15 +224,15 @@ use Bow\Exception\SocketException;
      */
     private function write($command, $code = null, $message = null)
     {
-        $command = $command . Util::sep();
+        $command = $command . self::END;
+        echo $command;
         fwrite($this->sock, $command, strlen($command));
         
         $response = null;
 
         if ($code !== null) {
             $response = $this->read();
-            var_dump($response);
-            if (!in_array($response, (array) $code, true)) {
+            if (!in_array($response, (array) $code)) {
                 throw new SmtpException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", E_ERROR);
             }
         }
