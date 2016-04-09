@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Classe SMTP
+ * @autor Franck Dakia <dakiafranck@gmail.com>
+ */
+
 namespace Bow\Mail;
 
 
