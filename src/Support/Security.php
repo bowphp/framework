@@ -152,14 +152,14 @@ class Security
 	 */
 	public static function createTokenCsrf($time = null)
 	{
-		if (!Session::has("csrf")) {
+		if (!Session::has("bow.csrf")) {
 			if (is_int($time)) {
 				static::$tokenCsrfExpirateTime = $time;
 			}
 
 			$token = static::generateTokenCsrf();
 
-			Session::add("csrf", (object) [
+			Session::add("bow.csrf", (object) [
 				"token" => $token,
 				"expirate" => time() + static::$tokenCsrfExpirateTime,
 				"field" => '<input type="hidden" name="csrf_token" value="' . $token .'"/>'
@@ -186,7 +186,7 @@ class Security
 	 */
 	public static function getTokenCsrf()
 	{
-		return Session::get("csrf");
+		return Session::get("bow.csrf");
 	}
 
 	/**
@@ -196,7 +196,7 @@ class Security
 	 */
 	public static function tokenCsrfTimeIsExpirate($time = null)
 	{
-		if (Session::has("csrf")) {
+		if (Session::has("bow.csrf")) {
 			if ($time === null) {
 				$time = time();
 			}
@@ -219,10 +219,12 @@ class Security
 	{
 		$status = false;
 		
-		if (Session::has("csrf") && $token === static::getTokenCsrf()->token) {
-			$status = true;
-			if ($strict !== true) {
-				$status = $status && static::tokenCsrfTimeIsExpirate(time());
+		if (Session::has("bow.csrf")) {
+			if ($token === static::getTokenCsrf()->token) {
+				$status = true;
+				if ($strict !== true) {
+					$status = $status && static::tokenCsrfTimeIsExpirate(time());
+				}
 			}
 		}
 
@@ -234,7 +236,7 @@ class Security
 	 */
 	public static function killTokenCsrf()
 	{
-		Session::remove("csrf");
+		Session::remove("bow.csrf");
 	}
 
 	/**

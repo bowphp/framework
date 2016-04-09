@@ -67,12 +67,17 @@ class RequestData implements CollectionAccess
 	 * has, vérifie l'existance d'une clé dans la colléction
 	 *
 	 * @param string $key
-	 * 
+	 * @param bool $strict
+	 *
 	 * @return boolean
 	 */
-	public function has($key)
+	public function has($key, $strict = false)
 	{
-		return isset($this->data[$key]);
+		if ($strict) {
+			return isset($this->data[$key]) && !empty($this->data[$key]);
+		} else {
+			return isset($this->data[$key]);
+		}
 	}
 
 	/**
