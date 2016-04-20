@@ -38,7 +38,7 @@ class BowMail
             }
         } else {
             if (!self::$instance instanceof Smtp) {
-                self::$instance = new Smtp($config->smpt);
+                self::$instance = new Smtp($config->smtp);
             }
         }
 

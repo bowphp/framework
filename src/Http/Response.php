@@ -137,12 +137,13 @@ class Response
 	 *
 	 * @param mixed $data
 	 * @param int $code
+	 * @param bool $end
 	 */
-	public function json($data, $code = 200)
+	public function json($data, $code = 200, $end = false)
 	{
 		$this->setHeader("Content-Type", "application/json; charset=UTF-8");
 		$this->setCode($code);
-		$this->send(json_encode($data));
+		$this->send(json_encode($data), $end);
 	}
 
 	/**
@@ -167,7 +168,7 @@ class Response
 		}
 
 		if (!file_exists($filename)) {
-			throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
+			throw new ViewException("La vue $filename n'exist pas.", E_ERROR);
 		}
 
  		extract($bind);

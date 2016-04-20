@@ -225,7 +225,7 @@ class Str
             throw new \ErrorException("accept string " . gettype($email) . " given");
         }
 
-        return static::match("/^[a-zA-z_-.]+([0-9]+)?@[a-z0-9]{2,}\.[a-z]{2,6}$/", $email);
+        return static::match("/^[a-zA-Z0-9_-.]@[a-z0-9_-.]{2,}\.[a-z]{2,6}$/", $email);
     }
 
     /**
@@ -258,5 +258,24 @@ class Str
         }
 
         return $c;
+    }
+
+    /**
+     * retourne un nombre détermine de mots dans une chaine de caractère.
+     *
+     * @param string $words
+     * @param int $len
+     * @return string
+     */
+    public function getNWords($words, $len)
+    {
+        $wordParts = explode(" ", $words);
+        $sentence = "";
+
+        foreach($wordParts as $word) {
+            $sentence .= " " . $word;
+        }
+
+        return trim($sentence);
     }
 }

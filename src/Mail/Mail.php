@@ -27,7 +27,7 @@ class Mail extends Message
 			throw new InvalidArgumentException("Une erreur est survenu. L'expediteur ou le message ou l'object omit.", E_USER_ERROR);
 		}
 
-		$status = @mail(implode(Util::sep(), $this->to), $this->subject, $this->message, $this->formatHeader());
+		$status = @mb_send_mail(implode(Util::sep(), $this->to), $this->subject, $this->message, $this->formatHeader());
 
 		Util::launchCallback($cb, $status);
 

@@ -80,6 +80,12 @@ class Application
 	 * @var AppConfiguration|null
 	 */
 	private $config = null;
+
+    /**
+     * @var array
+     */
+	private $local = [];
+
 	/**
 	 * Private construction
 	 *
@@ -142,7 +148,7 @@ class Application
 	}
 
 	/**
-	 * get, route de type GET
+	 * get, route de type GET ou bien retourne les variable ajoutés dans Bow
 	 *
 	 * @param string $path
 	 * @param callable $cb
@@ -151,14 +157,20 @@ class Application
 	public function get($path, $cb = null)
 	{
 		if ($cb === null) {
-			$prop = $path;
-			if (property_exists($this, $prop)) {
-				return $this->$prop;
-			}
+			$key = $path;
+            if (in_array($key, $this->local)) {
+               return $this->local[$key];
+            } else {
+                if (($method = $this->getConfigMethod($key, "get")) !== false) {
+                    return $this->config->$method();
+                } else {
+                    return null;
+                }
+            }
 		}
-		
-		return $this->routeLoader("GET", $this->branch . $path, $cb);
-	}
+
+        return $this->routeLoader("GET", $this->branch . $path, $cb);
+    }
 
 	/**
 	 * post, route de type POST
@@ -191,8 +203,8 @@ class Application
 	 */
 	public function any($path, $cb)
 	{
-        foreach(["post", "delete", "put", "get"] as $func) {
-            $this->$func($path, $cb);
+        foreach(["post", "delete", "put", "get"] as $function) {
+            $this->$function($path, $cb);
         }
 
 		return $this;
@@ -400,24 +412,15 @@ class Application
 	 */
 	public function set($key, $value)
 	{
-		if (!in_array($key, ["view", "engine", "root"])) {
-            throw new InvalidArgumentException("Le premier argument n'est pas un argument de configuration", E_ERROR);
-        }
+        $method = $this->getConfigMethod($key, "set");
 
-        switch ($key) {
-			case "view":
-				$method = "setViewpath";
-				break;
-			case "engine":
-				$method = "setEngine";
-				break;
-			case "root":
-				$method = "setApproot";
-				break;
-		}
-
-		if (method_exists($this->config, $method)) {
-			return $this->config->$method($value);
+        // Vérification de l
+		if ($method !== false) {
+			if (method_exists($this->config, $method)) {
+				return $this->config->$method($value);
+			}
+		} else {
+            $this->local[$key] = $value;
 		}
 
         return $this;
@@ -455,9 +458,9 @@ class Application
 	{
 		if (method_exists($this->config, $method)) {
 			return call_user_func_array([$this->config, $method], $param);
-		} else {
-			throw new ApplicationException("$method not exists.", 1);
 		}
+
+        throw new ApplicationException("$method not exists.", E_ERROR);
 	}
 
 	/**
@@ -467,4 +470,29 @@ class Application
 	{
 		return $this->currentPath;
 	}
+
+    /**
+     * @param string $key
+     * @param string $prefix
+     * @return string|bool
+     */
+    private function getConfigMethod($key, $prefix)
+    {
+        switch ($key) {
+            case "view":
+                $method = "Viewpath";
+                break;
+            case "engine":
+                $method = "Engine";
+                break;
+            case "root":
+                $method = "Approot";
+                break;
+            default:
+                $method = false;
+                break;
+        }
+
+        return is_string($method) ? $prefix . $method : $method;
+    }
 }
