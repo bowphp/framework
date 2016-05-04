@@ -74,7 +74,7 @@ class Application
 	/**
 	 * @var Request
 	 */
-	private $req;
+	private $request;
 
 	/**
 	 * @var AppConfiguration|null
@@ -86,6 +86,11 @@ class Application
      */
 	private $local = [];
 
+    /**
+     * @var bool
+     */
+    private $disableXpoweredBy = false;
+
 	/**
 	 * Private construction
 	 *
@@ -93,9 +98,8 @@ class Application
 	 */
 	private function __construct(AppConfiguration $config)
 	{
-		$this->req = $this->request()->method();
 		$this->config = $config;
-        $this->req = $this->request();
+        $this->request = $this->request();
 
 		$logger = new Logger($config->getLogLevel(), $config->getLogpath() . "/error.log");
 		$logger->register();
@@ -134,12 +138,12 @@ class Application
 		$this->branch = $branch;
 
 		if (is_array($cb)) {
-			Util::launchCallback($cb, $this->req, $this->config->getNamespace());
+			Util::launchCallback($cb, $this->request, $this->config->getNamespace());
 		} else {
 			if (!is_callable($cb)) {
 				throw new ApplicationException("Callback are not define", E_ERROR);
 			}
-			call_user_func_array($cb, [$this->req]);
+			call_user_func_array($cb, [$this->request]);
 		}
 
         $this->branch = "";
@@ -169,7 +173,7 @@ class Application
             }
 		}
 
-        return $this->routeLoader("GET", $this->branch . $path, $cb);
+        return $this->routeLoader("GET", $path, $cb);
     }
 
 	/**
@@ -181,17 +185,17 @@ class Application
 	 */
 	public function post($path, $cb)
 	{
-		$body = $this->req->body();
+		$body = $this->request->body();
 
 		if ($body->has("method")) {
 			$this->specialMethod = $method = strtoupper($body->get("method"));
 			if (in_array($method, ["DELETE", "PUT"])) {
-				$this->addHttpVerbe($method, $this->branch . $path, $cb);
+				$this->addHttpVerbe($method, $path, $cb);
 			}
 			return $this;
 		}
 		
-		return $this->routeLoader("POST", $this->branch . $path, $cb);
+		return $this->routeLoader("POST", $path, $cb);
 	}
 
 	/**
@@ -258,8 +262,8 @@ class Application
 	public function match(array $methods, $path, $cb)
 	{
 		foreach($methods as $method) {
-			if ($this->req->method() === strtoupper($method)) {
-				$this->routeLoader($this->req->method(), $this->branch . $path , $cb);
+			if ($this->request->method() === strtoupper($method)) {
+				$this->routeLoader($this->request->method(), $path , $cb);
 			}
 		}
 
@@ -273,24 +277,25 @@ class Application
 	 * @param string $method
 	 * @param string $path
 	 * @param callable $cb
+	 *
 	 * @return self
 	 */
 	private function addHttpVerbe($method, $path, $cb)
 	{
-		$body = $this->req->body();
+		$body = $this->request->body();
 		$flag = true;
 
 		if ($body !== null) {
 			if ($body->has("method")) {
 				if ($body->get("method") === $method) {
-					$this->routeLoader($this->req->method(), $this->branch . $path, $cb);
+					$this->routeLoader($this->request->method(), $path, $cb);
 				}
 				$flag = false;
 			}
 		}
 
 		if ($flag) {
-			$this->routeLoader($method, $this->branch . $path, $cb);
+			$this->routeLoader($method, $path, $cb);
 		}
 
 		return $this;
@@ -302,13 +307,21 @@ class Application
 	 * @param string $method
 	 * @param string $path
 	 * @param callable|array $cb
+	 *
 	 * @return Application
 	 */
 	private function routeLoader($method, $path, $cb)
 	{
-		static::$routes[$method][] = new Route($this->config->getApproot() . $path, $cb);
+        // construction de la path original en fonction de la configuration de l'application
+		$path = $this->config->getApproot() . $this->branch . $path;
 
-		$this->currentPath = $this->config->getApproot() . $path;
+        // Ajout d'un nouvelle route sur l'en definie.
+		static::$routes[$method][] = new Route($path, $cb);
+
+        // route courante
+		$this->currentPath = $path;
+
+        // methode courante
 		$this->currentMethod = $method;
 
 		return $this;
@@ -318,6 +331,7 @@ class Application
 	 * Lance une personnalisation de route.
 	 * 
 	 * @param array $otherRule
+	 *
 	 * @return Application
 	 */
 	public function where(array $otherRule)
@@ -341,33 +355,45 @@ class Application
 	 * Lanceur de l'application
 	 * 
 	 * @param callable|null $cb
+	 *
 	 * @return mixed
 	 */
 	public function run($cb = null)
 	{
-		$this->response()->setHeader("X-Powered-By", "Bow Framework");
+        // Ajout de l'entête X-Powered-By
+        if (!$this->disableXpoweredBy) {
+            $this->response()->setHeader("X-Powered-By", "Bow Framework");
+        }
+
+        // drapeaux d'erreur.
 		$error = true;
 
 		if (is_callable($cb)) {
-			call_user_func_array($cb, [$this->req]);
+			call_user_func_array($cb, [$this->request]);
 		}
 
 		$this->branch = "";
-		$method = $this->req->method();
+		$method = $this->request->method();
 
+        // vérification de l'existance d'une methode spécial
+        // de type DELETE, PUT
 		if ($method == "POST") {
 			if ($this->specialMethod !== null) {
 				$method = $this->specialMethod;
 			}
 		}
 
+        // vérification de l'existance de methode de la requete dans
+        // la collection de route
 		if (isset(static::$routes[$method])) {
 			foreach (static::$routes[$method] as $key => $route) {
 
+                // route doit être une instance de Route
 				if (! ($route instanceof Route)) {
 					break;
 				}
 
+                // récupération du contenu de la where
 				if (isset($this->with[$method][$route->getPath()])) {
 					$with = $this->with[$method][$route->getPath()];
 				} else {
@@ -377,10 +403,12 @@ class Application
                 // Lancement de la recherche de la method qui arrivée dans la requete
                 // ensuite lancement de la verification de l'url de la requete
                 // execution de la fonction associé à la route.
-				if ($route->match($this->req->uri(), $with)) {
+				if ($route->match($this->request->uri(), $with)) {
 					$this->currentPath = $route->getPath();
-					$response = $route->call($this->req, $this->config->getNamespace());
-					if (is_string($response)) {
+                    // appel requête fonction
+					$response = $route->call($this->request, $this->config->getNamespace());
+
+                    if (is_string($response)) {
 						$this->response()->send($response);
 					} else if (is_array($response) || is_object($response)) {
 						$this->response()->json($response);
@@ -393,7 +421,9 @@ class Application
 
         // Si la route n'est pas enrégistre alors on lance une erreur 404
 		if ($error === true) {
-			$this->response()->setCode(404);
+			$this->response()->setCode(404, true);
+
+            // vérification et appel de la fonction du branchement 404
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			}
@@ -403,11 +433,14 @@ class Application
 	}
 
 	/**
-	 * Set, permet de rédéfinir la configuartion
-	 *
+	 * Set, permet de rédéfinir quelque élément de la configuartion de
+	 * façon élégante.
+     *
 	 * @param string $key
 	 * @param string $value
+	 *
 	 * @throws InvalidArgumentException
+	 *
      * @return Application|string
 	 */
 	public function set($key, $value)
@@ -415,7 +448,7 @@ class Application
         $method = $this->getConfigMethod($key, "set");
 
         // Vérification de l
-		if ($method !== false) {
+		if ($method) {
 			if (method_exists($this->config, $method)) {
 				return $this->config->$method($value);
 			}
@@ -451,7 +484,9 @@ class Application
 	 * 
 	 * @param string $method
 	 * @param array $param
+	 *
 	 * @throws ApplicationException
+	 *
 	 * @return mixed
 	 */
 	public function __call($method, $param)
@@ -460,7 +495,7 @@ class Application
 			return call_user_func_array([$this->config, $method], $param);
 		}
 
-        throw new ApplicationException("$method not exists.", E_ERROR);
+        throw new ApplicationException("$method n'exist pas.", E_ERROR);
 	}
 
 	/**
@@ -474,6 +509,7 @@ class Application
     /**
      * @param string $key
      * @param string $prefix
+	 *
      * @return string|bool
      */
     private function getConfigMethod($key, $prefix)
@@ -494,5 +530,13 @@ class Application
         }
 
         return is_string($method) ? $prefix . $method : $method;
+    }
+
+    /**
+     * d'active l'ecriture le l'entête X-Powered-By
+     */
+    public function disableXPoweredBy()
+    {
+        $this->disableXpoweredBy = true;
     }
 }
