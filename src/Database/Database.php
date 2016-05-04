@@ -43,7 +43,7 @@ class Database extends DatabaseTools
     /**
      * Configuration
      *
-     * @var array
+     * @var StdClass
      */
     private static $config;
     /**
@@ -73,8 +73,9 @@ class Database extends DatabaseTools
     {
         if (static::$instance === null) {
             static::$instance = new self();
+            static::$config = (object) $config;
         }
-        return static::$config = (object) $config;
+        return static::$config;
     }
 
     /**
@@ -82,6 +83,7 @@ class Database extends DatabaseTools
      */
     public static function takeInstance()
     {
+        static::verifyConnection();
         return static::$instance;
     }
     /**
@@ -94,7 +96,7 @@ class Database extends DatabaseTools
     public static function connection($option = null, $cb = null)
     {
         if (static::$db instanceof PDO) {
-            return null;
+            return static::takeInstance();
         }
 
         if ($option !== null) {
@@ -108,16 +110,11 @@ class Database extends DatabaseTools
             static::$zone = "default";
         }
 
-        /**
-         * Essaie de la connection
-         */
-        $t = static::$config;
-
-        if (! $t instanceof StdClass) {
+        if (! static::$config instanceof StdClass) {
             Util::launchCallback($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
         }
 
-        $c = isset($t->connections[static::$zone]) ? $t->connections[static::$zone] : null;
+        $c = isset(static::$config->connections[static::$zone]) ? static::$config->connections[static::$zone] : null;
 
         if (is_null($c)) {
             Util::launchCallback($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre database.php")]);
@@ -126,17 +123,19 @@ class Database extends DatabaseTools
         $db = null;
 
         try {
-            // Construction de la dsn
+            // Variable contenant les informations sur
+            // utilisateur
             $username = null;
             $password = null;
 
             // Configuration suppelement coté PDO
             $pdoPostConfiguation = [
-                PDO::ATTR_DEFAULT_FETCH_MODE => $t->fetch
+                PDO::ATTR_DEFAULT_FETCH_MODE => static::$config->fetch
             ];
 
             switch($c["scheme"]) {
                 case "mysql":
+                    // Construction de la dsn
                     $dns = "mysql:host=" . $c["mysql"]['hostname'] . ($c["mysql"]['port'] !== null ? ":" . $c["mysql"]["port"] : "") . ";dbname=". $c["mysql"]['database'];
                     $username = $c["mysql"]["username"];
                     $password = $c["mysql"]["password"];
@@ -168,23 +167,27 @@ class Database extends DatabaseTools
 	/**
 	 * switchTo, permet de ce connecter a une autre base de donnée.
      *
-	 * @param string $enterKey
+	 * @param string $newZone
 	 * @param callable $cb
 	 * @return void
 	 */
-	public static function switchTo($enterKey, $cb = null)
+	public static function switchTo($newZone, $cb = null)
 	{
         static::verifyConnection();
 
-		if (!is_string($enterKey)) {
-        	Util::launchCallback($cb, [new InvalidArgumentException("paramètre invalide")]);
-        } else {
-            if($enterKey !== static::$zone) {
-                static::$db = null;
-                static::connection($enterKey, $cb);
-            } else {
-                Util::launchCallback($cb, static::takeInstance());
-            }
+		if (!is_string($newZone)) {
+        	throw new InvalidArgumentException("paramètre invalide", E_USER_ERROR);
+        }
+
+        if($newZone !== static::$zone) {
+            static::$db = null;
+            static::$zone = $newZone;
+            static::connection($newZone, $cb);
+        }
+
+        if (!is_callable($cb)) {
+            static::$db = null;
+            static::$zone = $newZone;
         }
 	}
 
@@ -420,7 +423,7 @@ class Database extends DatabaseTools
     private static function verifyConnection()
     {
         if (! (static::$db instanceof PDO)) {
-            static::connection(function($err) {
+            static::connection(static::$zone, function($err) {
                 if ($err instanceof PDOException) {
                     throw $err;
                 }

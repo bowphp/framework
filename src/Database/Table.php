@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Database;
 
 use Bow\Support\Str;
@@ -732,6 +731,41 @@ class Table extends DatabaseTools
     }
 
     /**
+     * @return array
+     */
+    public function findAndDelete()
+    {
+        $where = $this->where;
+        $data = $this->get();
+        $this->where = $where;
+        $n = $this->delete();
+
+        return [
+            "nDeleted" => $n,
+            "data" => $data
+        ];
+    }
+
+    /**
+     * @param array $arr
+     *
+     * @return array
+     */
+    public function findAndModify(array $arr)
+    {
+        $where = $this->where;
+        $data = $this->get();
+
+        $this->where = $where;
+        $n = $this->update($arr);
+
+        return [
+            "nUpdated" => $n,
+            "data" => $data
+        ];
+    }
+
+    /**
      * count
      * 
      * @param string $column
@@ -778,17 +812,23 @@ class Table extends DatabaseTools
     public function update(array $data = [], $cb = null)
     {
 		$sql = "update " . $this->tableName . " set ";
-		$data = Security::sanitaze($data, true);
 		$sql .= parent::rangeField(parent::add2points(array_keys($data)));
 
 		if (!is_null($this->where)) {
 			$sql .= " where " . $this->where;
 			$this->where = null;
+            $data = array_merge($data, $this->whereDataBind);
+            $this->whereDataBind = [];
 		}
 
 		$stmt = $this->connection->prepare($sql);
+        $data = Security::sanitaze($data, true);
 		static::bind($stmt, $data);
+
+        // execution de la requête
 		$stmt->execute();
+
+        // récupération de la dernière erreur.
         $this->errorInfo = $stmt->errorInfo();
 
 		$r = $stmt->rowCount();
@@ -892,6 +932,7 @@ class Table extends DatabaseTools
     {
         return (bool) $this->connection->exec("truncate " . $this->tableName);
     }
+
     /**
      * Action insert
      *
