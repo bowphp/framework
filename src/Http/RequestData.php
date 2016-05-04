@@ -109,11 +109,9 @@ class RequestData implements CollectionAccess
 	/**
 	 * get, permet de récupérer une valeur ou la colléction de valeur.
 	 *
-	 * @param string $key=null
-	 * @param mixed $default=false
 	 * @return mixed
 	 */
-	public function getWithOut($key = null, $default = false)
+	public function getWithOut()
 	{
         $data = [];
 
@@ -128,12 +126,21 @@ class RequestData implements CollectionAccess
 
     /**
      * verifie si le contenu de $this->data poccedent la $key n'est pas vide.
+	 *
      * @param string $key
+     * @param string $eqTo
+	 *
      * @return bool
      */
-	public function isValied($key)
+	public function isValide($key, $eqTo = null)
 	{
-        return !$this->has($key) ?: empty($this->data[$key]);
+		$boolean = $this->has($key, true);
+
+		if ($eqTo && $boolean) {
+			$boolean = $boolean && preg_match("~$eqTo~", $this->get($key));
+		}
+
+        return $boolean;
 	}
 
 	/**

@@ -3,6 +3,7 @@
 namespace Bow\Http;
 
 use StdClass;
+use Bow\Support\Str;
 use Bow\Core\Application;
 
 class Request
@@ -187,4 +188,52 @@ class Request
 	{
 		return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 	}
+
+    /**
+     * retourne la langue de la requête.
+     *
+     * @return string|null
+     */
+	public function language()
+	{
+        $lan = null;
+
+		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
+            $tmp = explode(";", $_SERVER["HTTP_ACCEPT_LANGUAGE"])[0];
+            $lan = explode(",", $tmp)[1];
+        }
+
+        return Str::slice($lan, 0, 2);
+	}
+
+    /**
+     * retourne la localte de la requête.
+     *
+     * la locale c'est langue original du client
+     * e.g fr => locale = fr_FR // français de france
+     * e.g en => locale [ en_US, en_EN]
+     *
+     * @return string|null
+     */
+	public function locale()
+	{
+        $local = null;
+
+		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
+            preg_match("/^([a-z]+_[a-z]+)?/", $_SERVER["HTTP_ACCEPT_LANGUAGE"], $match);
+            $local = end($match);
+        }
+
+        return $local;
+	}
+
+    /**
+     * le protocol de la requête.
+     *
+     * @return mixed
+     */
+    public function protocol()
+    {
+        return $_SERVER["SERVER_PROTOCOL"];
+    }
 }

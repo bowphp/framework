@@ -97,10 +97,10 @@ class Response
      */
     public function redirect($path)
     {
-        echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
-        header("Location: " . $path, true, 301);
+		header("Location: " . $path, true, 301);
+		echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
 
-        die();
+		die();
     }
 
     /**
@@ -117,14 +117,15 @@ class Response
 	 * Modifie les entétes http
 	 * 
 	 * @param int $code
+	 * @param bool $override
 	 * @return bool|void
 	 */
-	public function setCode($code)
+	public function setCode($code, $override = false)
 	{
 		$r = true;
 
 		if (in_array((int) $code, array_keys(self::$header), true)) {
-			header("HTTP/1.1 $code " . self::$header[$code], true, $code);
+			header("HTTP/1.1 $code " . self::$header[$code], $override, $code);
 		} else {
 			$r = false;
 		}
@@ -141,6 +142,11 @@ class Response
 	 */
 	public function json($data, $code = 200, $end = false)
 	{
+		if (is_bool($code)) {
+            $end = $code;
+            $code = 200;
+        };
+
 		$this->setHeader("Content-Type", "application/json; charset=UTF-8");
 		$this->setCode($code);
 		$this->send(json_encode($data), $end);
@@ -214,7 +220,7 @@ class Response
 			$this->send($template->render(file_get_contents($filename), $bind));
 		}
 
-		return $this;
+		exit();
 	}
 
 	/**
