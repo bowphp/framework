@@ -12,7 +12,7 @@ namespace Bow\Mail;
 use Bow\Support\Util;
 use InvalidArgumentException;
 
-class Mail extends Message
+class SimpleMail extends Message
 {
 	/**
 	 * send, Envoie le mail
@@ -27,9 +27,11 @@ class Mail extends Message
 			throw new InvalidArgumentException("Une erreur est survenu. L'expediteur ou le message ou l'object omit.", E_USER_ERROR);
 		}
 
-		$status = @mb_send_mail(implode(Util::sep(), $this->to), $this->subject, $this->message, $this->formatHeader());
+		$status = @mb_send_mail($this->to, $this->subject, $this->message, $this->makeSendData());
 
-		Util::launchCallback($cb, $status);
+        if ($cb) {
+            Util::launchCallback($cb, $status);
+        }
 
 		return $status;
 	}
@@ -41,16 +43,11 @@ class Mail extends Message
 	{
 	}
 
-	public function __construct($config)
+    /**
+     * Construction
+     */
+	public function __construct()
 	{
-		$this->sep = Message::END;
 		$this->boundary = "__Bow-Framework-" . md5(date("r"));
-		$this->addHeader("MIME-Version", "1.0");
-		$this->addHeader("X-Mailer",  "Bow Framework");
-		$this->addHeader("Date", date("r"));
-	}
-
-	public function form() {
-
 	}
 }

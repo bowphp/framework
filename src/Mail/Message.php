@@ -3,53 +3,71 @@
 
 namespace Bow\Mail;
 
+use Bow\Exception\MailException;
 use Bow\Support\Util;
 
 abstract class Message
 {
+
     const END = "\r\n";
+
 	/**
 	 * Liste des entêtes
 	 * @var array
 	 */
 	protected $headers = [];
+
+    /**
+     * @var array
+     */
+
+    protected $additonnalHeader = [];
+
 	/**
 	 * définir le destinataire
 	 * @var array
 	 */
 	protected $to = [];
+
 	/**
 	 * définir l'object du mail
 	 * @var string
 	 */
 	protected $subject = null;
+
+    /**
+     * @var array
+     */
+    protected $attachement = [];
+
 	/**
 	 * @var array
 	 */
-	protected $form = [];
+	protected $form = null;
+
 	/**
-	 * définir le message
+	 * Définir le message
 	 * @var string
 	 */
 	protected $message = null;
+
 	/**
-	 * permet de compter le nombre content-type
-	 *
-	 * @var int
-	 */
-	private $part = 0;
-	/**
-	 * définir le frontière entre les contenus.
+	 * Définir le frontière entre les contenus.
 	 *
 	 * @var string
 	 */
 	protected $boundary;
-	/**
-	 * Singleton de mail
-	 *
-	 * @var self
-	 */
-	protected static $mail = null;
+
+    /**
+     * @var string
+     */
+    protected $charset = "utf-8";
+
+    /**
+     * @var string
+     */
+    protected $type = "text/html";
+
 	/**
 	 * fromDefined
 	 *
@@ -57,47 +75,38 @@ abstract class Message
 	 */
 	protected $fromDefined = false;
 
-	/**
-	 * addHeader, Ajout une entête
-	 *
-	 * @param string $key
-	 * @param string $value
-	 * @return self
-	 */
-	protected function addHeader($key, $value)
-	{
-        $this->headers[] = ucwords($key) . ": " . $value;
-		return $this;
-	}
+    /**
+     *
+     */
+    protected function setDefaultHeader()
+    {
+        $this->headers[] = "Mime-Version: 1.0";
+        $this->headers[] = "Date: " . date("r");
+        $this->headers[] = "X-Mailer: Bow Framework";
+
+        if ($this->form) {
+            $this->headers[] = "From: " . $this->form;
+        }
+
+        if ($this->subject) {
+            $this->headers[] = "Subject: " . $this->subject;
+        }
+    }
 
 	/**
 	 * formatHeader, formateur d'entête SMTP
 	 *
 	 * @return string
 	 */
-	protected function formatHeader()
+	private function formatHeader()
 	{
-        $headers = "";
-        if ($this->form) {
-            $headers .= "From: " . $this->form . self::END;
-        }
+        // Formatage de l'entête du mail
+        $headers = implode(self::END, $this->headers). self::END;
+        $headers .= "Content-Type: {$this->type}; charset=\"{$this->charset}\"". self::END;
+        $headers .= "Content-Transfer-Encoding: 8bit" . self::END;
+        $headers .= self::END . $this->message . self::END;
 
-        if ($this->subject) {
-            $headers .= "Subject: " . $this->subject . self::END;
-        }
-
-        $headers .= implode(self::END, $this->headers);
         return $headers;
-	}
-
-	/**
-	 * getHeader, retourne les entêtes définies.
-	 *
-	 * @return string
-	 */
-	public function getHeader()
-	{
-
 	}
 
 	/**
@@ -114,6 +123,16 @@ abstract class Message
 
 		return $this;
 	}
+
+    /**
+     * @param $listDesc
+     */
+    public function toList(array $listDesc)
+    {
+        foreach($listDesc as $to) {
+            $this->to[] = $this->formatEmail($to);
+        }
+    }
 
 	/**
 	 * Formaté l'email récu.
@@ -136,50 +155,47 @@ abstract class Message
 		}
 	}
 
-	protected function getTo()
-	{
-		$to = "";
-        $i = 0;
-
-		foreach($this->to as $value) {
-            if ($i > 0) {
-                $to .= ", ";
-            }
-            $i++;
-			if ($value[0] !== null) {
-                $to .= "{$value[0]} <{$value[1]}>";
-			} else {
-                $to .= "{$value[1]}";
-            }
-		}
-
-        return $to;
-	}
-
 	/**
 	 * addFile, Permet d'ajout un fichier d'attachement
 	 *
 	 * @param string $file
 	 * 
 	 * @return self
+     *
+     * @throws MailException
 	 */
 	public function addFile($file)
 	{
 		if (!is_file($file)) {
-			trigger_error("Ce n'est pas une fichier.", E_USER_ERROR);
+            throw new MailException("Fichier introuvable.", E_USER_ERROR);
 		}
-		// récupération du contenu du fichier
-		$content = file_get_contents($file);
-        // récupération du nom de fichier.
-		$base_name = basename($file);
-        $this->headers[] = $this->boundary;
-		$this->headers[] = "Content-Type: application/octect-stream; name=\"{$base_name}\"";
-		$this->headers[] = "Content-Transfer-Encoding: base64";
-        $this->headers[] = "Content-Disposition: attachement; filename=\"$base_name\"" . self::END;
-        $this->headers[] = chunk_split(base64_encode($content));
-		
+
+        $this->attachement[] = $file;
+
 		return $this;
 	}
+
+    /**
+     * @return string
+     */
+    protected function makeSendData()
+    {
+        $this->headers[] = "Content-type: multipart/mixed; boundary=\"{$this->boundary}\"" . self::END;
+
+        if (count($this->attachement) > 0) {
+            foreach($this->attachement as $file) {
+                $filename = basename($file);
+                $this->headers[] = "--" . $this->boundary;
+                $this->headers[] = "Content-Type: application/octet-stream; name=\"{$filename}\"";
+                $this->headers[] = "Content-Transfer-Encoding: base64";
+                $this->headers[] = "Content-Disposition: attachment" . self::END;
+                $this->headers[] = chunk_split(base64_encode(file_get_contents($file)));
+            }
+            $this->headers[] = "--" . $this->boundary;
+        }
+
+        return $this->formatHeader();
+    }
 
 	/**
 	 * subject, Définit le suject du mail
@@ -198,16 +214,14 @@ abstract class Message
 	 * from, définir l'expéditeur du mail
 	 *
 	 * @param string $from
-	 * @param string $name=null
+	 * @param string $name
 	 * 
 	 * @return self
 	 */
 	public function from($from, $name = null)
 	{
-		$from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
-
-        if ($this->fromDefined === false) {
-            $this->form = $from;
+        if (!$this->fromDefined) {
+            $this->form = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
             $this->fromDefined = true;
         }
 
@@ -234,20 +248,22 @@ abstract class Message
 	 */
 	public function text($text = null)
 	{
-		return $this->type($text, "text/plain");
+        $this->type($text, "text/plain");
+
+		return $this;
 	}
 
     /**
-     * @param $message
+     * @param $data
      * @param $type
      * @return $this
      */
-    private function type($message, $type)
+    private function type($data, $type)
     {
-        $this->headers[] = $this->boundary;
-        $this->headers[] = "Content-Type: $type; charset=utf-8" . self::END;
-        $this->headers[] = $message . self::END;
-        $this->headers[] = $this->boundary;
+        if (!$this->message) {
+            $this->type = $type;
+            $this->message = $data;
+        }
 
         return $this;
     }
@@ -263,7 +279,7 @@ abstract class Message
 	public function addBcc($mail, $name = null)
 	{
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
-		$this->addHeader("Bcc", $mail);
+		$this->headers[] = "Bcc: $mail";
 
 		return $this;
 	}
@@ -326,25 +342,6 @@ abstract class Message
 	public function addPriority($priority)
 	{
 		$this->addHeader('X-Priority', (int) $priority);
-		
-		return $this;
-	}
-
-	/**
-	 * Message, définir le corps du message
-	 * @param string $message
-	 * @param string $contentType
-	 * @throws \InvalidArgumentException
-	 * @return self
-	 */
-	public function message($message, $contentType = "text")
-	{
-		if (!is_string($message)) {
-			throw new \InvalidArgumentException("Parameter most be string " . gettype($message) . "given", 1);
-		}
-
-		$this->message = $message;
-        $this->type($message, "text/" . ($contentType == "text" ? "plain" : "html"));
 		
 		return $this;
 	}

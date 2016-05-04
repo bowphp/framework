@@ -1,12 +1,10 @@
 <?php
-
 /**
  * Classe SMTP
  * @autor Franck Dakia <dakiafranck@gmail.com>
  */
 
 namespace Bow\Mail;
-
 
 use ErrorException;
 use Bow\Support\Str;
@@ -58,11 +56,7 @@ use Bow\Exception\SocketException;
      */
     public function __construct(array $param)
     {
-        $this->boundary = "__Bow-Framework-" . md5(date("r"));
-        $this->addHeader("Date", date("r"));
-        $this->addHeader("X-Mailer",  "Bow Framework");
-        $this->addHeader("Content-Type", 'multipart/mixed; boundary="' . $this->boundary . '"');
-        $this->addHeader("MIME-Version", "1.0" . self::END);
+        $this->boundary = "Bow-Framework-" . md5(date("r"));
 
         if (!isset($param["secure"])) {
             $param["secure"] = false;
@@ -91,10 +85,10 @@ use Bow\Exception\SocketException;
     {
         $this->connection();
         $error = true;
-
+        $this->setDefaultHeader();
         // SMTP command
         if ($this->username === null && $this->password === null) {
-            $this->write("MAIL FROM: " . $this->getTo(), 250);
+            $this->write("MAIL FROM: <test@0.0.0.0>", 250);
         } else {
             $this->write("MAIL FROM: <" . $this->username . ">", 250);
         }
@@ -109,8 +103,10 @@ use Bow\Exception\SocketException;
             }
             $this->write("RCPT TO: " . $to, 250);
         }
+
         $this->write("DATA", 354);
-        $this->write($this->formatHeader());
+        $this->write($this->makeSendData());
+
         try {
             $this->write(".", 250);
         } catch(SmtpException $e) {
@@ -123,8 +119,10 @@ use Bow\Exception\SocketException;
             $error = null;
         }
 
-        Util::launchCallback($cb, $error);
-        
+        if (is_callable($cb)) {
+            Util::launchCallback($cb, $error);
+        }
+
         return $status;
     }
 
@@ -174,8 +172,6 @@ use Bow\Exception\SocketException;
             if (!$secured) {
                 throw new ErrorException("Can not secure you connection with tls.",E_ERROR);
             }
-
-//            $this->write("EHLO $host", 250);
         }
 
         if ($this->username !== null && $this->password !== null) {
@@ -193,6 +189,7 @@ use Bow\Exception\SocketException;
         $r = $this->write("QUIT" . Util::sep());
         fclose($this->sock);
         $this->sock = null;
+
         return $r;
     }
 

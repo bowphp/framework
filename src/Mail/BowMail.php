@@ -33,8 +33,8 @@ class BowMail
         }
 
         if ($config->driver == "mail") {
-            if (!self::$instance instanceof Mail) {
-               self::$instance = new Mail($config->mail);
+            if (!self::$instance instanceof SimpleMail) {
+               self::$instance = new SimpleMail($config->mail);
             }
         } else {
             if (!self::$instance instanceof Smtp) {
