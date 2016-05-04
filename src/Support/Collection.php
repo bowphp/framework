@@ -214,7 +214,9 @@ class Collection
     /**
      * fusion la collection avec un tableau ou une autre collection
      * @param Collection|array $array
+     *
      * @throws \ErrorException
+     *
      * @return Collection
      */
     public function merge($array) {
@@ -233,6 +235,7 @@ class Collection
      * map
      *
      * @param callable $cb
+     *
      * @return Collection
      */
     public function map($cb)
@@ -416,7 +419,10 @@ class Collection
     }
 
     /**
+     * __set
+     *
      * @param string $name
+     *
      * @return mixed
      */
     public function __get($name)
@@ -425,6 +431,8 @@ class Collection
     }
 
     /**
+     * __set
+     *
      * @param $name
      * @param $value
      */

@@ -22,12 +22,21 @@ class Cookie
      * has, vérifie l'existance une clé dans la colléction de session
      * 
      * @param string $key
-     * 
+     * @param bool $strict
+     *
      * @return boolean
      */
-    public static function has($key)
+    public static function has($key, $strict = false)
     {
-        return isset($_COOKIE[$key]);
+        $isset = isset($_COOKIE[$key]);
+
+        if ($strict) {
+            if ($isset) {
+                $isset = $isset && !empty($_COOKIE[$key]);
+            }
+        }
+
+        return $strict;
     }
 
     /**
@@ -35,7 +44,7 @@ class Cookie
      * 
      * @return boolean
      */
-    public static function IsEmpty()
+    public static function isEmpty()
     {
         return empty($_COOKIE);
     }
@@ -82,6 +91,7 @@ class Cookie
      * @param string $domain le domaine sur lequel sera envoyé le cookie
      * @param bool $secure définie la sécurité
      * @param bool $http définie si c'est seulement le protocole http
+     *
      * @return bool
      */
     public static function add($key, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
@@ -92,13 +102,14 @@ class Cookie
             $data = Security::encrypt($data);
         }
 
-        return setcookie($key, $data, $expirate, $path, $domain, $secure, $http);
+        return setcookie($key, $data, time() + $expirate, $path, $domain, $secure, $http);
     }
 
     /**
      * remove, supprime une entrée dans la table
      * 
      * @param string $key
+     *
      * @return self
      */
     public static function remove($key)

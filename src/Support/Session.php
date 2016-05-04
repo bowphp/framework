@@ -15,24 +15,49 @@ class Session implements CollectionAccessStatic
 	/**
 	 * Session starteur.
 	 */
-	public static function start()
+	private static function start()
 	{
 		if (PHP_SESSION_ACTIVE != session_status()) {
-			session_name("bowsessid");
+			session_name("BOWSESSID");
 			session_start();
 		}
 	}
+
+    /**
+     * @return array
+     */
+    private static function filter()
+    {
+        $arr = [];
+
+        foreach($_SESSION as $key => $value) {
+            if (!in_array($key, ["bow.flash", "bow.event", "csrf"])) {
+                $arr[$key] = $value;
+            }
+        }
+
+        return $arr;
+    }
 
 	/**
      * has, vérifie l'existance une clé dans la colléction de session
 	 * 
 	 * @param string $key
-	 * 
+	 * @param bool $strict
+	 *
 	 * @return boolean
 	 */
-	public static function has($key)
+	public static function has($key, $strict = false)
 	{
-		return isset(static::get()[$key]) && !empty(static::get()[$key]);
+        $isset = isset($_SESSION[$key]);
+
+        if ($strict) {
+            if ($isset) {
+                $isset = $isset && !empty($_SESSION[$key]);
+            }
+        }
+
+		return $isset;
 	}
 
 	/**
@@ -40,9 +65,9 @@ class Session implements CollectionAccessStatic
 	 * 
 	 *	@return boolean
 	 */
-	public static function IsEmpty()
+	public static function isEmpty()
 	{
-		return empty($_SESSION);
+		return empty(self::filter());
 	}
 
 	/**
@@ -65,16 +90,16 @@ class Session implements CollectionAccessStatic
 			}
 		}
 
-		return $_SESSION;
+		return self::filter();
 	}
 
 	/**
      * add, ajoute une entrée dans la colléction
-	 * 
+	 *
 	 * @param string|int $key
 	 * @param mixed $data
 	 * @param boolean $next=null
-	 * 
+	 *
 	 * @throws InvalidArgumentException
 	 * @return static
 	 */
@@ -104,8 +129,9 @@ class Session implements CollectionAccessStatic
 
 	/**
      * remove, supprime une entrée dans la colléction
-	 * 
+	 *
 	 * @param string $key
+	 *
 	 * @return void
 	 */
 	public static function remove($key)
@@ -115,8 +141,10 @@ class Session implements CollectionAccessStatic
 
     /**
      * set
+	 *
      * @param string $key
      * @param mixed $value
+	 *
      * @return mixed
      */
 	public static function set($key, $value)
@@ -124,8 +152,8 @@ class Session implements CollectionAccessStatic
         $old = null;
 
         if (static::has($key)) {
-            $old = $_SERVER[$key];
-            $_SERVER[$key] = $value;
+            $old = $_SESSION[$key];
+            $_SESSION[$key] = $value;
         }
 
         return $old;
@@ -136,13 +164,15 @@ class Session implements CollectionAccessStatic
      *
      * @param $key
      * @param null $message
+	 *
      * @throws \ErrorException
+	 *
      * @return mixed
      */
     public static function flash($key, $message = null)
     {
         if (!static::has("bow.flash")) {
-            $_SERVER["bow.flash"] = new Flash();
+            $_SESSION["bow.flash"] = new Flash();
         }
 
 		if (!in_array($key, ["error", "danger", "warning", "info", "success"])) {
@@ -154,9 +184,9 @@ class Session implements CollectionAccessStatic
         }
 
         if ($message === null) {
-            return $_SERVER["bow.flash"]->$key();
+            return $_SESSION["bow.flash"]->$key();
         } else {
-            $_SERVER["bow.flash"]->$key($message);
+            $_SESSION["bow.flash"]->$key($message);
         }
 
         return null;
@@ -167,7 +197,7 @@ class Session implements CollectionAccessStatic
      */
     public function reFlash()
     {
-        unset($_SERVER["bow.flash"]);
+        unset($_SESSION["bow.flash"]);
     }
 
 	/**
@@ -177,9 +207,9 @@ class Session implements CollectionAccessStatic
 	{
 		self::start();
 
-		foreach($_SERVER as $key => $value){
+		foreach($_SESSION as $key => $value){
             if (!in_array($key, ["csrf", "bow.flash", "bow.event"])) {
-                unset($_SERVER[$key]);
+                unset($_SESSION[$key]);
             }
         }
 	}

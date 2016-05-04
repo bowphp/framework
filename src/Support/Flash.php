@@ -34,7 +34,10 @@ class Flash
     }
 
     /**
-     * @param null $value
+     * warning
+     *
+     * @param null|string $value nouvelle valeur du message de warning
+     *
      * @return array|null
      */
     public function warning($value = null)
@@ -47,7 +50,10 @@ class Flash
     }
 
     /**
-     * @param null $value
+     * danger
+     *
+     * @param null $value nouvelle valeur du message de danger => warning
+     *
      * @return array|null
      */
     public function danger($value = null)
@@ -57,8 +63,17 @@ class Flash
         } else {
             return ["level" => "danger", "message" => $this->warning];
         }
+
+        return null;
     }
 
+    /**
+     * information
+     *
+     * @param null $value nouvelle valeur du message de information
+     *
+     * @return array|null
+     */
     public function information($value = null)
     {
         if ($value !== null) {
@@ -66,11 +81,15 @@ class Flash
         } else {
             return ["level" => "info", "message" => $this->information];
         }
+
         return null;
     }
 
     /**
-     * @param $value
+     * error
+     *
+     * @param null|string $value nouvelle valeur du message de error
+     *
      * @return array
      */
     public function error($value = null)
@@ -80,11 +99,15 @@ class Flash
         } else {
             return ["level" => "error", "message" => $this->error];
         }
+
         return null;
     }
 
     /**
-     * @param $value
+     * success
+     *
+     * @param null|string $value nouvelle valeur du message de success
+     *
      * @return array
      */
     public function success($value = null)
@@ -94,10 +117,13 @@ class Flash
         } else {
             return ["level" => "success", "message" => $this->success];
         }
+
         return null;
     }
 
     /**
+     * __sleep
+     *
      * @return array
      */
     public function __sleep()

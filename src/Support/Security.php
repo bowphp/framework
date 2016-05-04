@@ -119,12 +119,14 @@ class Security
 	}
 
 	/**
-	 * sanitazeString, fonction permettant de nettoyer
+	 * SanitazeString, fonction permettant de nettoyer
 	 * une chaine de caractère des caractères ajoutés
 	 * par secureString
 	 * 
-	 * @param string $data
+	 * @param string $data les données a néttoyé
+	 *
 	 * @return string
+	 *
 	 * @author Franck Dakia <dakiafranck@gmail.com>
 	 */
 	private static function sanitazeString($data)
@@ -136,8 +138,10 @@ class Security
 	 * secureString, fonction permettant de nettoyer
 	 * une chaine de caractère des caractères ',<tag>,&nbsp;
 	 * 
-	 * @param string $data
+	 * @param string $data les données a sécurisé
+	 *
 	 * @return string
+	 *
 	 * @author Franck Dakia <dakiafranck@gmail.com>
 	 */
 	private static function secureString($data)
@@ -147,7 +151,9 @@ class Security
 
 	/**
 	 * Createur de token csrf
+	 *
 	 * @param int $time=null
+	 *
 	 * @return bool
 	 */
 	public static function createTokenCsrf($time = null)
@@ -173,6 +179,7 @@ class Security
 
 	/**
 	 * Générer une clé crypté en md5
+	 *
 	 * @return string
 	 */
 	public static function generateTokenCsrf()
@@ -182,6 +189,7 @@ class Security
 
 	/**
 	 * Retourne un token csrf générer
+	 *
 	 * @return mixed
 	 */
 	public static function getTokenCsrf()
@@ -191,7 +199,9 @@ class Security
 
 	/**
 	 * Vérifie si le token en expire
-	 * @param int $time
+	 *
+	 * @param int $time le temps d'expiration
+	 *
 	 * @return boolean
 	 */
 	public static function tokenCsrfTimeIsExpirate($time = null)
@@ -211,8 +221,10 @@ class Security
 
 	/**
 	 * Vérifie si token csrf est valide
-	 * @param string $token
-	 * @param bool $strict
+	 *
+	 * @param string $token le token a vérifié
+	 * @param bool $strict le niveau de vérification
+	 *
 	 * @return boolean
 	 */
 	public static function verifyTokenCsrf($token, $strict = false)
@@ -222,7 +234,7 @@ class Security
 		if (Session::has("bow.csrf")) {
 			if ($token === static::getTokenCsrf()->token) {
 				$status = true;
-				if ($strict !== true) {
+				if ($strict) {
 					$status = $status && static::tokenCsrfTimeIsExpirate(time());
 				}
 			}
@@ -242,7 +254,7 @@ class Security
 	/**
 	 * crypt
 	 * 
-	 * @param string $data
+	 * @param string $data les données a encrypté
 	 * @return string
 	 */
 	public static function encrypt($data)
@@ -258,7 +270,8 @@ class Security
 	/**
 	 * decrypt
 	 * 
-	 * @param string $encrypted_data
+	 * @param string $encrypted_data les données a décrypté
+	 *
 	 * @return string
 	 */
 	public static function decrypt($encrypted_data)

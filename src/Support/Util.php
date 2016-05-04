@@ -423,10 +423,9 @@ class Util
 			throw new InvalidArgumentException(__METHOD__ ."(): Vous devez donner un paramètre à la fonction", E_ERROR);
 		}
 
-		$arr = func_get_args();
-		$html = "";
+        $html = "";
 
-		foreach ($arr as $key => $value) {
+        foreach (func_get_args() as $key => $value) {
             ob_start();
 			$len = "";
 			if (is_array($value) || is_object($value)) {
@@ -452,14 +451,15 @@ class Util
             $html .= $content;
         }
 
-		echo $html . '<script type="text/javascript">'.file_get_contents(__DIR__ . "/tools/debug.js").'</script>';
+		die($html . '<script type="text/javascript">'.file_get_contents(__DIR__ . "/tools/debug.js").'</script>');
 	}
 
 	/**
 	 * systeme de débugage avec message d'info
 	 * 
 	 * @param string $message
-	 * @param callable $cb=null
+	 * @param callable $cb
+	 *
 	 * @return void
 	 */
 	public static function it($message, $cb = null)
@@ -498,7 +498,7 @@ class Util
 				"quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"
 			],
 			"ten" => [
-				null, "dix", "vingt", "trente", "quarente", "cinquante",
+				null, "dix", "vingt", "trente", "quarante", "cinquante",
 				"soixante", "soixante",  "quatre-vingt", "quatre-vingt"
 			]
 		];

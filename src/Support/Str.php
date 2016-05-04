@@ -69,6 +69,7 @@ class Str
      * @param string $pattern
      * @param string $str
      * @param null $limit
+     *
      * @return array
      */
     public static function split($pattern, $str, $limit = null)
@@ -82,7 +83,9 @@ class Str
      * @param string $pattern
      * @param string $str
      * @param array $match
+     *
      * @throws \ErrorException
+     *
      * @return int
      */
     public static function match($pattern, $str, & $match = null)
@@ -97,6 +100,7 @@ class Str
     /**
      * @param $search
      * @param $str
+     *
      * @return int
      */
     public static function pos($search, $str)
@@ -107,6 +111,7 @@ class Str
     /**
      * @param $search
      * @param $str
+     *
      * @return bool
      */
     public static function contains($search, $str)
@@ -128,6 +133,7 @@ class Str
      * @param $pattern
      * @param $replaceBy
      * @param $str
+     *
      * @return string
      */
     public static function replace($pattern, $replaceBy, $str)
@@ -139,6 +145,7 @@ class Str
      * capitalize
      *
      * @param $str
+     *
      * @return string
      */
     public static function capitalize($str)
@@ -147,9 +154,10 @@ class Str
     }
 
     /**
-     * len
+     * len, retourne la taille d'une chaine.
      *
      * @param $str
+     *
      * @return int
      */
     public static function len($str)
@@ -162,6 +170,7 @@ class Str
      *
      * @param $str
      * @param $sep
+     *
      * @return array
      */
     public static function wordify($str, $sep = " ")
@@ -170,10 +179,11 @@ class Str
     }
 
     /**
-     * repeat
+     * repeat, réperte la chaine de caractère dans une nombre déterminé
      *
      * @param $str
      * @param $number
+     *
      * @return string
      */
     public static function repeat($str, $number)
@@ -185,6 +195,7 @@ class Str
      * randomize
      *
      * @param int $size
+     *
      * @return string
      */
     public static function randomize($size = 16)
@@ -196,6 +207,7 @@ class Str
      * slugify créateur de slug en utilisant un chaine simple.
      *
      * @param string $str
+     *
      * @return string
      */
     public static function slugify($str)
@@ -207,44 +219,56 @@ class Str
      * unslugify créateur de slug en utilisant un chaine simple.
      *
      * @param string $str
+     *
      * @return string
      */
-    public static function unslugify($str)
+    public static function unSlugify($str)
     {
         return preg_replace("/[^a-z0-9]/", " ", strtolower(trim(strip_tags($str))));
     }
 
     /**
+     * Vérifier si le mail est un mail valide.
+     *
      * @param string $email
+     *
      * @throws \ErrorException
+     *
      * @return int
      */
-    public static function mailIsMatch($email)
+    public static function isMail($email)
     {
         if (!is_string($email)) {
             throw new \ErrorException("accept string " . gettype($email) . " given");
         }
 
-        return static::match("/^[a-zA-Z0-9_-.]@[a-z0-9_-.]{2,}\.[a-z]{2,6}$/", $email);
+        return static::match("/^[a-zA-Z0-9._-]@[a-z0-9._-]{2,}\.[a-z]{2,6}$/", $email);
     }
 
     /**
+     * Vérifie si la chaine est un domaine
+     *
      * @param string $domain
+     *
      * @throws \ErrorException
+     *
      * @return int
      */
-    public static function domainIsMatch($domain)
+    public static function isDomain($domain)
     {
         if (!is_string($domain)) {
-            throw new \ErrorException("accept string " . gettype($domain) . " given");
+            throw new \ErrorException("Accept string " . gettype($domain) . " given");
         }
 
         return static::match("/^((http|ftp|ssl|url):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
     }
 
     /**
+     * Retourne le nombre caractère dans une chaine.
+     *
      * @param string $pattern
      * @param string $str
+     *
      * @return int
      */
     public static function count($pattern, $str)
@@ -265,6 +289,7 @@ class Str
      *
      * @param string $words
      * @param int $len
+     *
      * @return string
      */
     public function getNWords($words, $len)

@@ -28,7 +28,7 @@ global $response;
 
 $app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
 
-$response = Bow\Http\Response::configure(AppConfiguration::configure(require $app_dir . "/config/application.php"));
+$response = Bow\Http\Response::configure(AppConfiguration::configure(require $app_dir . "/config/bootstarts.php"));
 $request  = Bow\Http\Request::configure();
 
 Database::configure(require $app_dir . "/config/database.php");
@@ -72,7 +72,7 @@ if (!function_exists("view")) {
      */
     function view($template, $data = [], $code = 200) {
         if (is_int($data)) {
-            $code = 200;
+            $code = $data;
             $data = [];
         }
         return $GLOBALS["response"]->view($template, $data, $code);
@@ -116,6 +116,7 @@ if (!function_exists("last_insert_id")) {
     /**
      * Retourne le dernier ID suite a une requete INSERT sur un table dont ID est
      * auto_increment.
+     *
      * @return int|null
      */
     function last_insert_id() {
@@ -127,6 +128,7 @@ if (!function_exists("query_response")) {
     /**
      * @param string $method
      * @param array $param
+     *
      * @return null|mixed
      */
     function query_response($method, $param) {
@@ -142,6 +144,7 @@ if (!function_exists("query_response")) {
 if (!function_exists("db_error")) {
     /**
      * Retourne les informations de la dernière requete
+     *
      * @return \Bow\Database\DatabaseErrorHandler
      */
     function db_error() {
@@ -152,9 +155,11 @@ if (!function_exists("db_error")) {
 if (!function_exists("select")) {
     /**
      * statement lance des requete SQL de type SELECT
+     *
      * @param string $sql
      * @param array $data
      * @param callable $cb
+     *
      * @return integer|array|StdClass
      */
     function select($sql, array $data = [], $cb = null) {
@@ -165,9 +170,11 @@ if (!function_exists("select")) {
 if (!function_exists("insert")) {
     /**
      * statement lance des requete SQL de type INSERT
+     *
      * @param string $sql
      * @param array $data
      * @param callable $cb
+     *
      * @return integer
      */
     function insert($sql, array $data = [], $cb = null) {
@@ -178,9 +185,11 @@ if (!function_exists("insert")) {
 if (!function_exists("delete")) {
     /**
      * statement lance des requete SQL de type DELETE
+     *
      * @param string $sql
      * @param array $data
      * @param callable $cb
+     *
      * @return integer
      */
     function delete($sql, array $data = [], $cb = null) {
@@ -191,9 +200,11 @@ if (!function_exists("delete")) {
 if (!function_exists("update")) {
     /**
      * update lance des requete SQL de type UPDATE
+     *
      * @param string $sql
      * @param array $data
      * @param callable $cb
+     *
      * @return integer
      */
     function update($sql, array $data = [], $cb = null) {
@@ -204,8 +215,10 @@ if (!function_exists("update")) {
 if (!function_exists("statement")) {
     /**
      * statement lance des requete SQL de type CREATE TABLE|ALTER TABLE|RENAME|DROP TABLE
+     *
      * @param string $sql
      * @param array $data
+     *
      * @return integer
      */
     function statement($sql, array $data = []) {
@@ -217,6 +230,7 @@ if (!function_exists("kill")) {
     /**
      * kill c'est une alias de die, sauf le fait qu'il peut logger
      * le message que vous lui donnée.
+     *
      * @param string $message
      * @param boolean $log=false
      */
@@ -232,6 +246,7 @@ if (!function_exists("slugify")) {
     /**
      * slugify, transforme un chaine de caractère en slug
      * eg. la chaine "58 comprendre bow framework" -> "58-comprendre-bow-framework"
+     *
      * @param string $str
      * @return string
      */
@@ -244,6 +259,7 @@ if (!function_exists("body")) {
     /**
      * body, fonction de type collection
      * manipule la variable global $_POST
+     *
      * @return Bow\Http\RequestData
      */
     function body() {
@@ -255,6 +271,7 @@ if (!function_exists("files")) {
     /**
      * files, fonction de type collection
      * manipule la variable global $_FILES
+     *
      * @return Bow\Http\RequestData
      */
     function files() {
@@ -266,6 +283,7 @@ if (!function_exists("query")) {
     /**
      * query, fonction de type collection
      * manipule la variable global $_GET
+     *
      * @return Bow\Http\RequestData
      */
     function query() {
@@ -275,6 +293,8 @@ if (!function_exists("query")) {
 
 if (!function_exists("request")) {
     /**
+     * répresente le classe Request
+     *
      * @return Bow\Http\Request
      */
     function request() {
@@ -285,22 +305,35 @@ if (!function_exists("request")) {
 if (!function_exists("dump")) {
     /**
      * dump, fonction de debug de variable
-     * Elle vous permet d'avoir un coloration
+     * elle vous permet d'avoir un coloration
      * synthaxique des types de donnée.
      */
     function dump() {
-        call_user_func_array([Util::class, "dump"], func_get_args());
+        call_user_func_array([Util::class, "dump"], secure(func_get_args()));
     }
 }
 
 if (!function_exists("create_token_csrf")) {
     /**
      * csrf, fonction permetant de crée automatiquement un gestionnaire de csrf
+     *
      * @param int $time
-     * @return \StdClass
+     *
+     * @return bool
      */
     function create_token_csrf($time = null) {
         return Security::createTokenCsrf($time);
+    }
+}
+
+if (!function_exists("get_token_csrf")) {
+    /**
+     * get_token_csrf, fonction permetant de récupérer le token généré
+     *
+     * @return \StdClass
+     */
+    function get_token_csrf() {
+        return Security::getTokenCsrf();
     }
 }
 
@@ -322,7 +355,7 @@ if (!function_exists("verify_token_csrf")) {
      * @return string
      */
     function verify_token_csrf($token, $strict = false) {
-        return Security::verifyTokenCsrf($token, $strict = false);
+        return Security::verifyTokenCsrf($token, $strict);
     }
 }
 
@@ -361,6 +394,7 @@ if (!function_exists("store")) {
 if (!function_exists("json")) {
     /**
      * json, permet de lance des reponses server de type json
+     *
      * @param array $data
      * @param integer $code=200
      * @return mixed
@@ -373,6 +407,7 @@ if (!function_exists("json")) {
 if (!function_exists("set_response_code")) {
     /**
      * statuscode, permet de changer le code de la reponse du server
+     *
      * @param int $code=200
      * @return mixed
      */
@@ -385,6 +420,7 @@ if (!function_exists("sanitaze")) {
     /**
      * sanitaze, épure un variable d'information indésiration
      * eg. sanitaze("j\'ai") => j'ai
+     *
      * @param mixed $data
      * @return mixed
      */
@@ -401,11 +437,12 @@ if (!function_exists("secure")) {
     /**
      * secure, échape les anti-slashes, les balises html
      * eg. secure("j'ai") => j\'ai
+     *
      * @param mixed $data
      * @return mixed
      */
     function secure($data) {
-        if (is_int($data)) {
+        if (is_int($data) || is_double($data) || is_float($data)) {
             return $data;
         } else {
             return Security::sanitaze($data, true);
@@ -416,6 +453,7 @@ if (!function_exists("secure")) {
 if (!function_exists("response")) {
     /**
      * response, manipule une instance de Response::class
+     *
      * @param string $template, le message a envoyer
      * @param integer $code, le code d'erreur
      * @param string $type, le type mime du contenu
@@ -438,6 +476,7 @@ if (!function_exists("response")) {
 if (!function_exists("set_header")) {
     /**
      * modifie les entêtes HTTP
+     *
      * @param string $key le nom de l'entête http
      * @param string $value la valeur à assigner
      */
@@ -449,6 +488,7 @@ if (!function_exists("set_header")) {
 if (!function_exists("redirect")) {
     /**
      * modifie les entêtes HTTP
+     *
      * @param string $path le path de rédirection
      */
     function redirect($path) {
@@ -460,6 +500,7 @@ if (!function_exists("require_file")) {
     /**
      * require_file c'est un alias de require, mais vas chargé les fichiers contenu dans
      * la vie de l'application. Ici <code>sendfile</code> résoue le problème de scope.
+     *
      * @param string $filename le nom du fichier
      * @param array $bind les données la exporter
      */
@@ -470,6 +511,8 @@ if (!function_exists("require_file")) {
 
 if (!function_exists("send")) {
     /**
+     * alias de echo avec option auto die
+     *
      * @param string $data
      */
     function send($data) {
@@ -492,6 +535,7 @@ if (!function_exists("execute_sql")) {
 if (!function_exists("switch_to")) {
     /**
      * switch to, permet de changer de base de donnée.
+     *
      * @param string $name nom de l'entré
      * @param callable $cb fonction de callback
      */
@@ -503,6 +547,7 @@ if (!function_exists("switch_to")) {
 if (!function_exists("curl")) {
     /**
      * curl lance un requete vers une autre source de resource
+     *
      * @param string $url
      * @return array|null
      */
@@ -559,6 +604,7 @@ if (!function_exists("collect")) {
 
     /**
      * retourne une instance de collection
+     *
      * @return \Bow\Support\Collection
      */
     function collect() {
@@ -582,6 +628,8 @@ if (!function_exists("collect")) {
 
 if (!function_exists("crypt")) {
     /**
+     * Permet de crypt les données passés en paramètre
+     *
      * @param string $data
      * @return string
      */
@@ -592,6 +640,8 @@ if (!function_exists("crypt")) {
 
 if (!function_exists("decrypt")) {
     /**
+     * permet de decrypter des données crypté par la function crypt
+     *
      * @param string $data
      * @return string
      */
@@ -602,7 +652,8 @@ if (!function_exists("decrypt")) {
 
 if (!function_exists("beginTransaction")) {
     /**
-     * debut un transaction. Désactive l'auto commit
+     * Debut un transaction. Désactive l'auto commit
+     *
      * @param $cb
      */
     function beginTransaction($cb) {
@@ -634,6 +685,8 @@ if (!function_exists("commit")) {
 
 if (!function_exists("event")) {
     /**
+     * Alias de la class Event::on
+     *
      * @param string $event_name
      * @throws \Bow\Exception\EventException
      * @param callable|array $fn
@@ -649,6 +702,8 @@ if (!function_exists("event")) {
 
 if (!function_exists("emit")) {
     /**
+     * Alias de la class Event::emit
+     *
      * @param string $event_name
      * @throws \Bow\Exception\EventException
      */
@@ -677,7 +732,7 @@ if (!function_exists("flash")) {
 if (!function_exists("bmail")) {
     /**
      * @param string|null $type
-     * @return \Bow\Mail\Mail|\Bow\Mail\Smtp
+     * @return \Bow\Mail\SimpleMail|\Bow\Mail\Smtp
      * @throws \Bow\Exception\MailException
      */
     function bmail($type = null) {
