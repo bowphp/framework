@@ -54,17 +54,21 @@ class AppConfiguration
          */
         $this->config = $config;
 
-        if (isset($config["application"]->app_root)) {
-            $this->approot = $config["application"]->app_root;
+        if (isset($config["application"])) {
+            if (isset($config["application"]->app_root)) {
+                $this->approot = $config["application"]->app_root;
+            }
+
+            if (is_file($config["application"]->app_key)) {
+                $this->app_key = file_get_contents($config["application"]->app_key);
+            }
+
+            if (isset($config["application"]->timezone)) {
+                Util::setTimezone($config["application"]->timezone);
+            }
         }
 
-        if (is_file($config["application"]->app_key)) {
-            $this->app_key = file_get_contents($config["application"]->app_key);
-        }
 
-        if (isset($config["application"]->timezone)) {
-            Util::setTimezone($config["application"]->timezone);
-        }
     }
 
     /**
@@ -93,6 +97,10 @@ class AppConfiguration
      * @return AppConfiguration
      */
     public static function takeInstance() {
+        if (! static::$instance instanceof AppConfiguration) {
+            static::configure([]);
+        }
+
         return static::$instance;
     }
 

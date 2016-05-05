@@ -16,7 +16,7 @@ class Logger extends AbstractLogger
     /**
      * @var string
      */
-    private $debug;
+    protected $debug;
 
     /**
      * @var string
@@ -64,14 +64,16 @@ class Logger extends AbstractLogger
         }
 
         if ($this->debug === "production") {
-            if (is_array($context)) {
-                $message .= "\nin " . $context["file"] . " at " . $context["line"];
-                $context = $context["context"];
-            } else {
-                $context = "";
+            if (!empty($context)) {
+                $message = '"'. $message.'"' . "\nin " . $context["file"] . " at " . $context["line"];
+                if (isset($context["trace"])) {
+                    if (is_string($context["trace"])) {
+                        $message .= $context["trace"];
+                    }
+                }
             }
 
-            Resource::append($this->path, static::textFormat($level, $message, $context));
+            Resource::append($this->path, static::textFormat($level, $message . "\n"));
         }
     }
 
@@ -80,17 +82,11 @@ class Logger extends AbstractLogger
      *
      * @param $message
      * @param $level
-     * @param $context
+     *
      * @return string
      */
-    private function textFormat($level, $message, $context)
+    private function textFormat($level, $message)
     {
-        if (!is_array($context)) {
-            $message .= $context;
-        }
-
-        $message .= "\n";
-
         return sprintf("[%s] [client: %s:%d] [%s] %s", date("D Y-m-d H:i:s"), $_SERVER["REMOTE_ADDR"], $_SERVER["REMOTE_PORT"], $level, $message);
     }
 
@@ -100,25 +96,19 @@ class Logger extends AbstractLogger
      * @param string $message
      * @param string $level
      * @param array $context
+     *
      * @return string
      */
     private function htmlFormat($level, $message, array $context = [])
     {
         $content = "";
+        $subErrorMessage = "<@>";
 
-        if (is_string($context) || count($context) == 0) {
-            if (is_array($context)) {
-                $context = "not context.";
-            }
+        if (isset($context["trace"])) {
 
-            return $level . ": " . $message . " - context:" . $context;
-        }
+            if (is_array($context["trace"])) {
 
-        if (isset($context["context"])) {
-
-            if (is_array($context["context"])) {
-
-                foreach ($context["context"] as $key => $errRef) {
+                foreach ($context["trace"] as $key => $errRef) {
                     $key++;
                     $func = "";
                     $line = "";
@@ -167,11 +157,15 @@ class Logger extends AbstractLogger
                     }
                 }
             } else {
-                $content = $context["context"];
+                $content = $context["trace"];
             }
 
         } else {
-            $content = "Aucun context.";
+            $content = "<i>Aucun context.</i>";
+        }
+
+        if (isset($context["file"], $context["line"])) {
+            $subErrorMessage = $context["file"] . ' at <i>line ' . $context["line"];
         }
 
         $html = '
@@ -182,7 +176,7 @@ class Logger extends AbstractLogger
                 <title>Bow - ' . $level . '</title>
                 <style>
                     .f {
-                        font-family: "Courier new"
+                        font-family: "Courier new";
                     }
                 </style>
             </head>
@@ -190,7 +184,7 @@ class Logger extends AbstractLogger
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: inline-block; margin: auto; background-color: #eee; padding: 5px; text-align: center">
                 <div style="border: 1px solid #aaa; border-radius: 5px; padding: 8px; background-color: white; width: 950px; text-align: center; margin: auto">
                     <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . $message . '</b></h1>
-                    <p>' . $context["file"] . ' at <i>line ' . $context["line"] . '</i></p>
+                    <p>' . $subErrorMessage . '</i></p>
                 </div>
                 <div class="f" style="font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: auto; margin-top: 8px;">
                     ' . $content . '
@@ -207,12 +201,16 @@ class Logger extends AbstractLogger
      * @param int $errno
      * @param string $errmsg
      * @param string $filename
-     * @param int $linenum
-     * @param array $context
+     * @param int $line
+     * @param array $trace
      */
-    public function errorHandler($errno, $errmsg, $filename, $linenum, $context)
+    public function errorHandler($errno, $errmsg, $filename, $line, $trace)
     {
-        $this->addHandler($errno, $errmsg, $filename, $linenum, $context);
+        echo "<pre>";
+        var_dump($errno, $errmsg, $filename, $line, $trace);
+
+        die();
+        $this->addHandler($errno, $errmsg, $filename, $line, []);
     }
 
     /**
@@ -230,19 +228,19 @@ class Logger extends AbstractLogger
     }
 
     /**
-     * @param $errno
-     * @param $errstr
-     * @param $file
-     * @param $linenum
-     * @param $vars
+     * @param int $errno Le numéro d'erreur PHP
+     * @param string $errstr Le message d'erreur.
+     * @param string $file Le fichier dans lequel il y a eu l'erreur
+     * @param int $line La ligne de l'erreur
+     * @param string|array $trace L'information descriptif sur l'erreur
      */
-    private function addHandler($errno, $errstr, $file, $linenum, $vars)
+    private function addHandler($errno, $errstr, $file, $line, $trace)
     {
         // information sur le contexte de l'erreur
         $context = [
             "file"     => $file,
-            "line"     => $linenum,
-            "context"  => $vars
+            "line"     => $line,
+            "trace"  => $trace
         ];
 
         // switch sur $errno (le numero de l'erreur)
@@ -258,6 +256,10 @@ class Logger extends AbstractLogger
             case E_NOTICE:
             case E_USER_NOTICE:
                 $this->notice($errstr, $context);
+                break;
+            case E_DEPRECATED:
+            case E_USER_DEPRECATED:
+                $this->emergency($errstr, $context);
                 break;
         }
     }

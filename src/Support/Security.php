@@ -283,6 +283,6 @@ class Security
         $encrypted_data = substr($encrypted_data, 0, $start);
 		$decrypted_data = mcrypt_decrypt(MCRYPT_BLOWFISH, static::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
 
-		return $decrypted_data;
+		return static::sanitaze(trim($decrypted_data));
 	}
 }

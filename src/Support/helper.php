@@ -792,3 +792,14 @@ if (!function_exists("session")) {
         return Session::class;
     }
 }
+
+if (!function_exists("cookie")) {
+    /**
+     * aliase sur la classe Cookie.
+     *
+     * @return \Bow\Support\Cookie
+     */
+    function cookie() {
+        return \Bow\Support\Cookie::class;
+    }
+}

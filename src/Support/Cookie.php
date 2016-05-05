@@ -36,7 +36,7 @@ class Cookie
             }
         }
 
-        return $strict;
+        return $isset;
     }
 
     /**
@@ -54,28 +54,23 @@ class Cookie
      *
      * @param string $key=null
      * @param mixed $default
+     *
      * @return mixed
      */
     public static function get($key = null, $default = null)
     {
         if ($key !== null) {
             if (static::has($key)) {
-                if (! static::$isDecrypt[$key]) {
-                    static::$isDecrypt[$key] = true;
-                    return Security::decrypt($_COOKIE[$key]);
-                }
-
-                return  Security::decrypt($_COOKIE[$key]);
+                return Security::decrypt($_COOKIE[$key]);
+                // return $_COOKIE[$key];
             } else {
-                return $default;
+                return  $default;
             }
         }
 
         foreach($_COOKIE as $cookie_key => $value) {
-            if (! static::$isDecrypt[$cookie_key]) {
-                static::$isDecrypt[$cookie_key] = true;
-                $_COOKIE[$cookie_key] = Security::decrypt($value);
-            }
+            $_COOKIE[$cookie_key] = Security::decrypt($value);
+            // $_COOKIE[$cookie_key] = $value;
         }
 
         return $_COOKIE;
@@ -96,10 +91,9 @@ class Cookie
      */
     public static function add($key, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
     {
-        static::$isDecrypt[$key] = false;
-
         if ($data !== null) {
             $data = Security::encrypt($data);
+            // $data = $data;
         }
 
         return setcookie($key, $data, time() + $expirate, $path, $domain, $secure, $http);
@@ -127,5 +121,21 @@ class Cookie
         }
 
         return $old;
+    }
+
+    /**
+     * Fonction de destruction de l'object
+     */
+    public function __destruct()
+    {
+        Session::add("bow.cookie.secure", static::$isDecrypt);
+    }
+
+    /**
+     * Fonction qu
+     */
+    public function __wakeup()
+    {
+        static::$isDecrypt = Session::get("bow.cookie.secure");
     }
 }
