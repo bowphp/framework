@@ -8,60 +8,35 @@ use Bow\Exception\ApplicationException;
 class AppConfiguration
 {
     /**
-     * @var string
-     */
-    private $debug = "develope";
-
-    /**
      * @var AppConfiguration
      */
     private static $instance;
-    /**
-     * Définie le systeme de template
-     * @var string|null
-     */
-    private $engine = null;
-    /**
-     * Répresente le chemin vers la vue.
-     * @var null|string
-     */
-    private $views = null;
+
     /**
      * @var string
      */
     private $appname = "Bow Application";
-    /**
-     * @var string
-     */
-    private $logDirecotoryName;
+
     /**
      * @var string|false
      */
     private $cache = false;
-    /**
-     * @var array
-     */
-    private $names = [];
-    /**
-     * @var string
-     */
-    private $timezone;
-    /**
-     * @var int
-     */
-    private $tokenExpirateTime = 3600;
+
     /**
      * @var string
      */
     private $approot;
+
     /**
      * @var string
      */
     private $template_extension = ".php";
+
     /**
      * @var string
      */
     private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
+
     /**
      * @var bool
      */
@@ -69,6 +44,7 @@ class AppConfiguration
 
     /**
      * @param $config
+     *
      * @throws \Bow\Exception\UtilException
      */
     private final function __construct($config)
@@ -76,28 +52,18 @@ class AppConfiguration
         /**
          * Chargement complet de toute la configuration de Bow
          */
-        $this->appname            = $config->app_name;
-        $this->logDirecotoryName  = $config->log_direcotory_name;
-        $this->views              = $config->views_path;
-        $this->engine             = $config->template_engine;
-        $this->cache              = $config->template_cache_folder;
-        $this->names              = $config->classes;
-        $this->timezone           = $config->timezone;
-        $this->debug              = $config->debug;
-        $this->tokenExpirateTime  = $config->token_expirate_time;
-        $this->template_extension = $config->template_extension;
-        $this->autoReload         = $config->template_auto_reload_cache_views;
+        $this->config = $config;
 
-        if (isset($config->app_root)) {
-            $this->approot = $config->app_root;
+        if (isset($config["application"]->app_root)) {
+            $this->approot = $config["application"]->app_root;
         }
 
-        if (is_file($config->app_key)) {
-            $this->app_key = file_get_contents($config->app_key);
+        if (is_file($config["application"]->app_key)) {
+            $this->app_key = file_get_contents($config["application"]->app_key);
         }
 
-        if (isset($config->timezone)) {
-            Util::setTimezone($config->timezone);
+        if (isset($config["application"]->timezone)) {
+            Util::setTimezone($config["application"]->timezone);
         }
     }
 
@@ -108,7 +74,9 @@ class AppConfiguration
 
     /**
      * takeInstance singleton
+     *
      * @param array $config
+     *
      * @return AppConfiguration
      */
     public static function configure($config) {
@@ -121,6 +89,7 @@ class AppConfiguration
 
     /**
      * takeInstance singleton
+     *
      * @return AppConfiguration
      */
     public static function takeInstance() {
@@ -138,8 +107,11 @@ class AppConfiguration
     }
     /**
      * configure, Application key
+     *
      * @param string $key
+     *
      * @throws ApplicationException
+     *
      * @return string
      */
     public function setAppkey($key)
@@ -147,7 +119,7 @@ class AppConfiguration
         $old = $this->app_key;
 
         if (!is_string($key)) {
-            throw new ApplicationException("Le parametre doit etre une chaine de carrectere.", E_USER_ERROR);
+            throw new ApplicationException("Le paramètre doit être une chaine de caractère.", E_USER_ERROR);
         }
 
         $this->app_key = $key;
@@ -158,7 +130,9 @@ class AppConfiguration
      * setAppName
      * 
      * @param string $newAppName
+     *
      * @throws ApplicationException
+     *
      * @return string
      */
     public function setAppname($newAppName)
@@ -169,7 +143,7 @@ class AppConfiguration
             throw new ApplicationException("Le parametre doit etre une chaine de carrectere.", E_USER_ERROR);
         }
 
-        $this->appname = $newAppName;
+        $this->config["application"]->app_name = $newAppName;
 
         return $old;
     }
@@ -181,25 +155,27 @@ class AppConfiguration
      */
     public function getAppname()
     {
-        return $this->appname;
+        return $this->config["application"]->app_name;
     }
 
     /**
      * getViewPath retourne configuration du path du repertoire du cache
      *
      * @param string $viewPath
+     *
      * @throws ApplicationException
+     *
      * @return string
      */
     public function setViewpath($viewPath)
     {
-        $old = $this->views;
+        $old = $this->config["application"]->views_path;
 
         if (!realpath($viewPath)) {
             throw new ApplicationException("Ce chemin n'est pas valide.", E_USER_ERROR);
         }
 
-        $this->views = $viewPath;
+        $this->config["application"]->views_path = $viewPath;
 
         return $old;
     }
@@ -211,25 +187,27 @@ class AppConfiguration
      */
     public function getViewpath()
     {
-        return $this->views;
+        return $this->config["application"]->views_path;
     }
 
     /**
      * setCachePath
      * 
      * @param string $newCachePath
+     *
      * @throws ApplicationException
+     *
      * @return string
      */
     public function setCachepath($newCachePath)
     {
-        $old = $this->cache;
+        $old = $this->config["application"]->template_cache_folder;
 
         if (!realpath($newCachePath)) {
             throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
         }
 
-        $this->cache = $newCachePath;
+        $this->config["application"]->template_cache_folder = $newCachePath;
 
         return $old;
     }
@@ -241,25 +219,27 @@ class AppConfiguration
      */
     public function getCachepath()
     {
-        return $this->cache;
+        return $this->config["application"]->template_cache_folder;
     }
     
     /**
      * setLogPath configuration du path du répertoir de log
      *
      * @param string $newLogPath
+     *
      * @throws ApplicationException
+     *
      * @return string
      */
     public function setLogpath($newLogPath)
     {
-        $old = $this->logDirecotoryName;
+        $old = $this->config["application"]->log_direcotory_name;
         
         if (!realpath($newLogPath)) {
             throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
         }
 
-        $this->logDirecotoryName = $newLogPath;
+        $this->config["application"]->log_direcotory_name = $newLogPath;
 
         return $old;
     }
@@ -271,30 +251,36 @@ class AppConfiguration
      */
     public function getLogpath()
     {
-        return $this->logDirecotoryName;
+        return $this->config["application"]->log_direcotory_name;
     }
 
     /**
+     *
      * @param string $log
+     *
      * @throws ApplicationException
+     *
      * @return string
      */
     public function setLogLevel($log)
     {
-        $old = $this->debug;
+        $old = $this->config["application"]->debug;
 
         if (!in_array($log, ["development", "production"])) {
             throw new ApplicationException("$log n'est pas accepte. <i>development|production</i>", E_USER_ERROR);
         }
 
-        $this->debug = $log;
+        $this->config["application"]->debug = $log;
 
         return $old;
     }
 
+    /**
+     * @return mixed
+     */
     public function getLogLevel()
     {
-        return $this->debug;
+        return $this->config["application"]->debug;
     }
 
     /**
@@ -304,7 +290,7 @@ class AppConfiguration
      */
     public function getTimezone()
     {
-        return $this->timezone;
+        return $this->config["application"]->timezone;
     }
 
     /**
@@ -314,7 +300,7 @@ class AppConfiguration
      */
     public function getNamespace()
     {
-        return $this->names;
+        return $this->config["application"]->classes;
     }
 
     /**
@@ -324,13 +310,14 @@ class AppConfiguration
      */
     public function getEngine()
     {
-        return $this->engine;
+        return $this->config["application"]->template_engine;
     }
 
     /**
      * setApproot
      *
      * @param string $newApproot
+     *
      * @return string
      */
     public function setApproot($newApproot)
@@ -346,6 +333,7 @@ class AppConfiguration
 
     /**
      * Retourn la route principal de l'application.
+     *
      * @return string
      */
     public function getApproot()
@@ -355,15 +343,17 @@ class AppConfiguration
 
     /**
      * modifier l'extension de template.
+     *
      * @param string $extension
+     *
      * @return string
      */
     public function setTemplateExtension($extension)
     {
-        $old = $this->template_extension;
+        $old = $this->config["application"]->template_extension;
 
         if (is_string($extension)) {
-            $this->template_extension = $extension;
+            $this->config["application"]->template_extension = $extension;
         }
 
         return $old;
@@ -371,15 +361,70 @@ class AppConfiguration
 
     /**
      * retourne l'extension de template.
+     *
      * @return string
      */
     public function getTemplateExtension()
     {
-        return $this->template_extension;
+        return $this->config["application"]->template_extension;
     }
 
+    /**
+     * @return mixed
+     */
     public function getCacheAutoReload()
     {
-        return $this->autoReload;
+        return $this->config["application"]->template_auto_reload_cache_views;
+    }
+
+    /**
+     * retourne la configuration de la base de donnée
+     *
+     * @return array|object
+     */
+    public function getDatabaseConfiguration()
+    {
+        return $this->config["database"];
+    }
+
+    /**
+     * retourne la configuration des mails
+     *
+     * @return array|object
+     */
+    public function getMailConfiguration()
+    {
+        return $this->config["mail"];
+    }
+
+    /**
+     * retourne la configuration des resources
+     *
+     * @return array|object
+     */
+    public function getResourceConfiguration()
+    {
+        return $this->config["resource"];
+    }
+
+    /**
+     * modifie le driver du systeme de mail.
+     *
+     * @param string $driver
+     *
+     * @return string
+     *
+     * @throws ApplicationException
+     */
+    public function setMailDriver($driver) {
+
+        if (!in_array($driver, ["mail", "smtp"])) {
+            throw new ApplicationException("$driver n'est valide", E_ERROR);
+        }
+
+        $old = $this->config["mail"]->driver;
+        $this->config["mail"]->driver = $driver;
+
+        return $old;
     }
 }

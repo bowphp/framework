@@ -426,6 +426,8 @@ class Application
             // vérification et appel de la fonction du branchement 404
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
+			} else {
+				$this->response()->send("404", true);
 			}
 		}
 

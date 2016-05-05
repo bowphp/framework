@@ -9,7 +9,9 @@
 |
 */
 
+use Bow\Http\Request;
 use Bow\Support\Util;
+use Bow\Http\Response;
 use Bow\Support\Event;
 use Bow\Support\Session;
 use Bow\Support\Security;
@@ -23,31 +25,37 @@ define("INSERT", Database::INSERT);
 define("UPDATE", Database::UPDATE);
 define("DELETE", Database::DELETE);
 
-global $request;
-global $response;
-
-$app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
-
-$response = Bow\Http\Response::configure(AppConfiguration::configure(require $app_dir . "/config/bootstarts.php"));
-$request  = Bow\Http\Request::configure();
-
-Database::configure(require $app_dir . "/config/database.php");
-Resource::configure(require $app_dir . "/config/resource.php");
-
 if (!function_exists("configuration")) {
     /**
      * Application configuration
+     *
      * @return AppConfiguration
      */
     function configuration() {
-        return AppConfiguration::takeInstance();
+        $app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
+        return AppConfiguration::configure(require $app_dir . "/config/bootstarts.php");
     }
 }
 
+// Configuration de la Request et de la Response
+$response = Response::configure(configuration());
+$request  = Request::configure();
+
+// Configuration de la base de donnée
+Database::configure(configuration()->getDatabaseConfiguration());
+
+// Configuration de la resource de l'application.
+Resource::configure(configuration()->getResourceConfiguration());
+
+
 if (!function_exists("db")) {
     /**
-     * @param string $database
-     * @param callable $cb
+     * permet de se connecter sur une autre base de donnée
+     * et retourne l'instance de la Database
+     *
+     * @param string $database le nom de la configuration de la db
+     * @param callable $cb la fonction de rappel
+     *
      * @return Database, the Database reference
      */
     function db($database = null, $cb = null) {
@@ -64,10 +72,12 @@ if (!function_exists("db")) {
 
 if (!function_exists("view")) {
     /**
-     * view
+     * view aliase sur Response::view
+     *
      * @param string $template
      * @param array|int $data
      * @param int $code
+     *
      * @return Bow\Http\Response
      */
     function view($template, $data = [], $code = 200) {
@@ -81,6 +91,8 @@ if (!function_exists("view")) {
 
 if (!function_exists("table")) {
     /**
+     * table aliase Database::table
+     *
      * @param string $tableName, le nom d'un table.
      * @return Bow\Database\Table
      */
@@ -91,10 +103,13 @@ if (!function_exists("table")) {
 
 if (!function_exists("query_maker")) {
     /**
+     * fonction d'astuce
+     *
      * @param $sql
      * @param $data
      * @param $cb
      * @param $method
+     *
      * @return Database
      */
     function query_maker($sql, $data, $cb, $method) {
@@ -736,19 +751,41 @@ if (!function_exists("bmail")) {
      * @throws \Bow\Exception\MailException
      */
     function bmail($type = null) {
-        $config = require $GLOBALS["app_dir"] . "/config/mail.php";
+        $config = configuration()->getMailConfiguration();
 
-        if (!in_array($type, ["mail", "smtp"])) {
-            $config->driver = $type;
+        if ($type !== null) {
+            if (!in_array($type, ["mail", "smtp"])) {
+                $config->driver = $type;
+            }
         }
 
         return Bow\Mail\BowMail::confirgure($config);
     }
 }
 
+if (! function_exists("env")) {
+    /**
+     * env manipule les variables d'environement du server.
+     *
+     * @param $key
+     * @param null $value
+     *
+     * @return bool|string
+     */
+    function env($key, $value = null) {
+        if ($value !== null) {
+            return getenv(\Bow\Support\Str::upper($key));
+        } else {
+            return putenv(\Bow\Support\Str::upper($key) . "=" . $value);
+        }
+
+    }
+}
+
 if (!function_exists("session")) {
     /**
      * session
+     *
      * @return Session
      */
     function session() {

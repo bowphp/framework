@@ -9,7 +9,7 @@ use Bow\Exception\MailException;
 class BowMail
 {
     /**
-     * @var Mail|Smtp
+     * @var SimpleMail|Smtp
      */
     private static $instance;
 
@@ -24,7 +24,7 @@ class BowMail
     /**
      * @param \StdClass $config
      * @throws MailException
-     * @return Mail|Smtp
+     * @return SimpleMail|Smtp
      */
     public static function confirgure(\StdClass $config)
     {

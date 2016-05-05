@@ -295,7 +295,7 @@ abstract class Message
 	public function addCc($mail, $name = null)
 	{
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
-		$this->addHeader("Cc", $mail);
+		$this->headers[] = "Cc: $mail";
 
 		return $this;
 	}
@@ -311,7 +311,7 @@ abstract class Message
 	public function addReplyTo($mail, $name = null)
 	{
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
-		$this->addHeader("Replay-To", $mail);
+		$this->headers[] = "Replay-To: $mail";
 	
 		return $this;
 	}
@@ -327,7 +327,7 @@ abstract class Message
 	public function addReturnPath($mail, $name = null)
 	{
 		$mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
-		$this->addHeader("Return-Path", $mail);
+		$this->headers[] = "Return-Path: $mail";
 		
 		return $this;
 	}
@@ -341,7 +341,7 @@ abstract class Message
 	 */
 	public function addPriority($priority)
 	{
-		$this->addHeader('X-Priority', (int) $priority);
+		$this->headers[] = "X-Priority: " . (int) $priority;
 		
 		return $this;
 	}

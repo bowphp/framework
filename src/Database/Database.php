@@ -296,9 +296,11 @@ class Database extends DatabaseTools
 
         if (preg_match("/^(drop|alter\stable|truncate|create\stable|call)\s.+;?$/i", $sqlstatement)) {
             $r = static::$db->exec($sqlstatement);
+
             if ($r === 0) {
                 $r = true;
             }
+
             static::$currentPdoErrorInfo = static::$db->errorInfo();
             
             return $r;
@@ -328,7 +330,8 @@ class Database extends DatabaseTools
     /**
      * Charge le factory Table
      *
-     * @param $tableName
+     * @param string $tableName le nom de la table
+     *
      * @return Table
      */
     public static function table($tableName)
@@ -383,8 +386,6 @@ class Database extends DatabaseTools
 
     /**
      * Lancement du debut d'un transaction
-     *
-     * @var void
      */
     public static function transaction()
     {
@@ -394,8 +395,6 @@ class Database extends DatabaseTools
 
     /**
      * Valider une transaction
-     * 
-     * @var void
      */
     public static function commit()
     {
@@ -405,8 +404,6 @@ class Database extends DatabaseTools
 
     /**
      * Annuler une transaction
-     * 
-     * @var void
      */
     public static function rollback()
     {
@@ -418,7 +415,6 @@ class Database extends DatabaseTools
      * Lance la verification de l'établissement de connection
      * 
      * @throws ConnectionException
-     * @var void
      */
     private static function verifyConnection()
     {
@@ -669,7 +665,7 @@ class Database extends DatabaseTools
         $pdostatement->execute();
 
         static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
-        static::$currentPdoErrorInfo = static::$db->errorInfo();
+        static::$currentPdoErrorInfo        = static::$db->errorInfo();
 
         $r = $pdostatement->rowCount();
         $pdostatement->closeCursor();
@@ -689,9 +685,13 @@ class Database extends DatabaseTools
     }
 
     /**
+     * __call
+     *
      * @param $method
      * @param array $arguments
+     *
      * @throws DatabaseException
+     *
      * @return mixed
      */
     public function __call($method, array $arguments)

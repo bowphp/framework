@@ -110,8 +110,11 @@ class Table extends DatabaseTools
 
     /**
      * select, ajout de champ à séléction.
-     * 
+     *
+     * SELECT $column | SELECT column1, column2, ...
+     *
      * @param null $column
+     *
      * @return $this
      */
     public function select($column = null) {
@@ -133,6 +136,8 @@ class Table extends DatabaseTools
 
     /**
      * where, ajout condition de type where, si chainé ajout un <<and>>
+     *
+     * WHERE column1 $comp $value|column
      *
      * @param $column
      * @param $comp
@@ -194,6 +199,8 @@ class Table extends DatabaseTools
     /**
      * clause where avec comparaison en <<is null>>
      *
+     * WHERE column IS NULL
+     *
      * @param string $column
      * @param string $boolean="and"
      *
@@ -214,6 +221,8 @@ class Table extends DatabaseTools
     /**
      * clause where avec comparaison en <<not null>>
      *
+     * WHERE column NOT NULL
+     *
      * @param $column
      * @param string $boolean="and|or"
      *
@@ -233,6 +242,8 @@ class Table extends DatabaseTools
 
     /**
      * clause where avec comparaison en <<between>>
+     *
+     * WHERE column BETWEEN "" AND ""
      *
      * @param $column
      * @param array $range
@@ -269,7 +280,7 @@ class Table extends DatabaseTools
     }
 
     /**
-     *
+     * WHERE column NOT BETWEEN "" AND ""
      *
      * @param $column
      * @param $range
