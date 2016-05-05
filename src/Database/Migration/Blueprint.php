@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Database\Migration;
 
 use Bow\Exception\DatabaseException;
@@ -10,590 +9,46 @@ use Bow\Support\Str;
 class Blueprint
 {
     /**
-     * fields list
+     * @var TableColumnsMaker
+     */
+    private $columns;
+
+    /**
+     * Contructeur.
      *
-     * @var Collection
+     * @param TableColumnsMaker $columns
      */
-    private $fields;
-
-    /**
-     * define the primary key
-     *
-     * @var bool
-     */
-    private $primary = null;
-
-    /**
-     * last define field
-     *
-     * @var \StdClass
-     */
-    private $lastField = null;
-
-    /**
-     * Table name
-     *
-     * @var bool
-     */
-    private $table = null;
-
-    /**
-     * Sql Statement
-     *
-     * @var string
-     */
-    private $sqlStement = null;
-
-    /**
-     * @var string
-     */
-    private $engine = "MyISAM";
-
-    /**
-     * @var string
-     */
-    private $collate = "utf8_unicode_ci";
-
-    /**
-     * @var string
-     */
-    private $character = "UTF8";
-
-    /**
-     * define the auto increment field
-     * @var \StdClass
-     */
-    private $autoincrement = null;
-
-    /**
-     * @var bool
-     */
-    private $displaySql = false;
-
-    /**
-     * @var array
-     */
-    private $dataBind = [];
-
-    /**
-     * Constructor
-     *
-     * @param string $table nom de la table
-     * @param bool $displaySql
-     */
-    public function __construct($table, $displaySql = false)
+    public function __construct(TableColumnsMaker $columns)
     {
-        $this->fields  = new Collection;
-        $this->table = $table;
-        $this->displaySql = $displaySql;
-        return $this;
+        $this->columns = $columns;
     }
 
     /**
-     * charset, set the model default character name
-     * @param $character
+     * Génère une chaine requête de type CREATE
+     *
+     * @return null|string
      */
-    public function charset($character)
+    public function toCreateTableStatement()
     {
-        $this->character = $character;
-    }
-
-    /**
-     * setEngine, set the model engine name
-     * @param $collate
-     */
-    public function collate($collate)
-    {
-        $this->collate = $collate;
-    }
-
-    /**
-     * setEngine, set the model engine name
-     * @param $engine
-     */
-    public function engine($engine)
-    {
-        $this->engine = $engine;
-    }
-
-    /**
-     * int
-     *
-     * @param string $field
-     * @param int $size
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     */
-    public function integer($field, $size = 11, $null = false, $default = null)
-    {
-        return $this->loadWhole("int", $field, $size, $null, $default);
-    }
-
-    /**
-     * tinyint
-     *
-     * @param string $field
-     * @param bool $null
-     * @param bool $size
-     * @param null|string $default
-     *
-     * @return $this
-     */
-    public function tinyint($field, $size = null, $null = false, $default = null)
-    {
-        return $this->loadWhole("tinyint", $field, $size, $null, $default);
-    }
-
-    /**
-     * smallint
-     *
-     * @param string $field
-     * @param bool $size
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     * @throws \ErrorException
-     */
-    public function smallint($field, $size = null, $null = false, $default = null)
-    {
-        return $this->loadWhole("smallint", $field, $size, $null, $default);
-    }
-
-    /**
-     * mediumint
-     *
-     * @param string $field
-     * @param bool $size
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     * @throws \ErrorException
-     */
-    public function mediumint($field, $size = null, $null = false, $default = null)
-    {
-        return $this->loadWhole("mediumint", $field, $size, $null, $default);
-    }
-
-    /**
-     * bigint
-     *
-     * @param string $field
-     * @param int $size
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     */
-    public function bigInteger($field, $size = 20, $null = false, $default = null)
-    {
-        return $this->loadWhole("bigint", $field, $size, $null, $default);
-    }
-
-    /**
-     * bigint
-     *
-     * @param string $field
-     * @param int $size
-     * @param int $left
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     */
-    public function double($field, $size = 20, $left = 0, $null = false, $default = null)
-    {
-        if ($left > 0) {
-            $size = "$size, $left";
-        }
-        return $this->loadWhole("double precision", $field, $size, $null, $default);
-    }
-
-    /**
-     * bigint
-     *
-     * @param string $field
-     * @param int $size
-     * @param int $left
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     */
-    public function float($field, $size = 20, $left = 0, $null = false, $default = null)
-    {
-        if ($left > 0) {
-            $size = "$size, $left";
-        }
-        return $this->loadWhole("float", $field, $size, $null, $default);
-    }
-
-    /**
-     * varchar
-     *
-     * @param string $field
-     * @param int $size
-     * @param bool $null
-     * @param null|string $default
-     * @throws \Exception
-     * @return $this
-     */
-    public function string($field, $size = 255, $null = false, $default = null)
-    {
-        $type = "varchar";
-        if ($size > 255) {
-            $type = "text";
+        if ($this->stringify() !== null) {
+            return "CREATE TABLE `" . $this->columns->getTableName() . "` (". $this->columns->sqlStement . ") ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharacter() ." COLLATE " . $this->columns->getEngine() .";-";
         }
 
-        return $this->loadWhole($type, $field, $size, $null, $default);
+        return null;
     }
 
     /**
-     * date
+     * Génère une chaine requête de type CREATE
      *
-     * @param string $field
-     * @param bool $null
-     *
-     * @return $this
+     * @return null|string
      */
-    public function date($field, $null = false)
+    public function toAlterTableStatement()
     {
-        $this->addField("date", $field, [
-            "null" => $null
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * year
-     *
-     * @param string $field
-     * @param bool $null
-     *
-     * @return $this
-     */
-    public function year($field, $null = false)
-    {
-        $this->addField("year", $field, [
-            "null" => $null
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * time
-     *
-     * @param string $field
-     * @param bool $null
-     *
-     * @return $this
-     */
-    public function time($field, $null = false)
-    {
-        $this->addField("time", $field, [
-            "null" => $null
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * datetime
-     *
-     * @param string $field
-     * @param string|bool $null
-     *
-     * @return Schema
-     */
-    public function datetime($field, $null = false)
-    {
-        $this->addField("datetime", $field, [
-            "null" => $null
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * timestamp
-     *
-     * @param string $field
-     * @param string|bool $null
-     *
-     * @return Schema
-     */
-    public function timestamps($field, $null = false)
-    {
-        $this->addField("timestamp", $field, [
-            "null" => $null
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * longint
-     *
-     * @param string $field
-     * @param int $size
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     */
-    public function longInteger($field, $size = 20, $null = false, $default = null)
-    {
-        return $this->loadWhole("longint", $field, $size, $null, $default);
-    }
-
-    /**
-     * @param string $field
-     * @param int $size
-     * @param bool|false $null
-     * @param string $default
-     * @return Schema
-     * @throws ModelException
-     */
-    public function character($field, $size = 1, $null = false, $default = null)
-    {
-        if ($size > 4294967295) {
-            throw new ModelException("Max size is 4294967295", 1);
+        if ($this->stringify() !== null) {
+            return "ALTER TABLE ADD " . $this->columns->getTableName() . " ". $this->columns->sqlStement . "; ";
         }
 
-        return $this->loadWhole("char", $field, $size, $null, $default);
-    }
-
-    /**
-     * @param string $field
-     * @param array $enums
-     * @param bool $null
-     * @return Schema
-     */
-    public function enumerate($field, array $enums, $null = false)
-    {
-        $this->addField("enum", $field, [
-            "default" => $enums,
-            "null" => $null
-        ]);
-    }
-
-    /**
-     * autoincrement
-     *
-     * @param string $field
-     * @throws ModelException
-     * @return Schema
-     */
-    public function increment($field = null)
-    {
-        if ($this->autoincrement === null) {
-            if ($this->lastField !== null) {
-                if (in_array($this->lastField->method, ["int", "longint", "bigint"])) {
-                    $this->autoincrement = $this->lastField;
-                } else {
-                    throw new ModelException("Cannot add autoincrement to " . $this->lastField->method, 1);
-                }
-            } else {
-                if ($field) {
-                    $this->integer($field)->primary();
-                    $this->autoincrement = (object) [
-                        "method" => "int",
-                        "field" => $field
-                    ];
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * primary
-     *
-     * @throws ModelException
-     * @return $this
-     */
-    public function primary()
-    {
-        if ($this->primary === null) {
-            return $this->addIndexes("primary");
-        } else {
-            throw new ModelException("Primary key has already defined", E_ERROR);
-        }
-    }
-
-    /**
-     * indexe
-     *
-     * @return Schema
-     */
-    public function indexe()
-    {
-        return $this->addIndexes("indexe");
-    }
-
-    /**
-     * unique
-     *
-     * @return Schema
-     */
-    public function unique()
-    {
-        return $this->addIndexes("unique");
-    }
-
-    /**
-     * addIndexes crée un clause index sur le champs spécifié.
-     *
-     * @param string $indexType
-     * @throws ModelException
-     * @return Schema
-     */
-    private function addIndexes($indexType)
-    {
-        if ($this->lastField !== null) {
-            $last = $this->lastField;
-            $this->fields->get($last->method)->update($last->field, [$indexType => true]);
-        } else {
-            throw new ModelException("Cannot assign {$indexType}. Because field are not defined.", E_ERROR);
-        }
-
-        return $this;
-    }
-
-    /**
-     * addField
-     *
-     * @param string $method
-     * @param string $field
-     * @param string $data
-     * @throws ModelException
-     * @return $this
-     */
-    private function addField($method, $field, $data)
-    {
-        $method = strtolower($method);
-
-        if (!$this->fields->has($method)) {
-            $this->fields->add($method, new Collection);
-        }
-
-        if (!$this->fields->get($method)->has($field)) {
-
-            if (!in_array($method, ["int", "longint", "bigint"])) {
-                $value = Filler::$number++;
-            } else if (!in_array($method, ["date", "datetime", "timestamp"])) {
-                $value = Filler::$date;
-            } else if (!in_array($method, ["double", "float"])) {
-                $value = Filler::$float++;
-            } else {
-               $value = Str::slice(Filler::$string, 0, $data["size"]);
-            }
-
-            if (!is_array($this->dataBind)) {
-                $this->dataBind = [];
-            }
-
-            $this->dataBind[$field] = $value;
-            // default index are at false
-            $data["primary"] = false;
-            $data["unique"]  = false;
-            $data["indexe"]  = false;
-            if (!isset($data["size"])) {
-                $data["size"] = "";
-            }
-            $this->fields->get($method)->add($field, $data);
-            $this->lastField = (object) [
-                "method" => $method,
-                "field" => $field
-            ];
-        }
-
-        return $this;
-    }
-
-    /**
-     * loadWhole
-     *
-     * @param string $method
-     * @param string $field
-     * @param int $size
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return $this
-     */
-    private function loadWhole($method, $field, $size = 20, $null = false, $default = null)
-    {
-        if (is_bool($size)) {
-            $null = $size;
-            $size = 11;
-        } else {
-            if (is_string($size)) {
-                $default = $size;
-                $size    = 11;
-                $null    = false;
-            } else {
-                if (is_string($null)) {
-                    $default = $null;
-                    $null    = false;
-                }
-            }
-        }
-
-        if ($size > 255) {
-
-        }
-
-        $this->addField($method, $field, [
-            "size"    => $size,
-            "null"    => $null,
-            "default" => $default
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * Ajout les indexes et la clé primaire.
-     *
-     * @param \StdClass $info
-     */
-    private function addIndexOrPrimaryKey($info)
-    {
-        if ($info["primary"]) {
-            $this->sqlStement .= " PRIMARY KEY";
-            $info["primary"] = false;
-        } else {
-            if ($info["unique"]) {
-                $this->sqlStement .= " UNIQUE";
-                $info["unique"] = false;
-            }
-        }
-    }
-
-    /**
-     * Ajout les types de donnée au champ définir
-     *
-     * @param \StdClass $info
-     * @param string $field
-     * @param string $type
-     */
-    private function addFieldType($info, $field, $type)
-    {
-        $null = $this->getNullType($info["null"]);
-        $type = strtoupper($type);
-        if (isset($info['size'])) {
-            $info['size'] = "(". $info['size'] .")";
-        } else {
-            $info['size'] = "";
-        }
-        $this->sqlStement .= "`$field` $type{$info['size']} $null";
+        return null;
     }
 
     /**
@@ -603,28 +58,31 @@ class Blueprint
      */
     private function stringify()
     {
-        $this->fields->each(function (Collection $value, $type) {
+        $fields = $this->columns->getDefineFields();
+
+        $fields->each(function (Collection $value, $type) {
+
             switch ($type) {
-                case 'varchar':
-                case 'char'   :
-                case 'text'   :
-                case "int"    :
-                case "bigint" :
-                case "longint":
+                case 'varchar'  :
+                case 'char'     :
+                case 'text'     :
+                case "int"      :
+                case "bigint"   :
+                case "longint"  :
                     $value->each(function ($info, $field) use ($type) {
-                        $this->addFieldType($info, $field, $type);
+                        $this->columns->addFieldType($info, $field, $type);
                         if (in_array($type, ["int", "bigint", "longint"], true)) {
-                            if ($this->autoincrement !== null) {
-                                if ($this->autoincrement->method == $type && $this->autoincrement->field == $field) {
-                                    $this->sqlStement .= " AUTO_INCREMENT";
+                            if ($this->columns->getAutoincrement() !== null) {
+                                if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
+                                    $this->columns->sqlStement .= " AUTO_INCREMENT";
                                 }
-                                $this->autoincrement = null;
+                                $this->columns->setAutoincrement(null);
                             }
                         }
                         if ($info["default"]) {
-                            $this->sqlStement .= " DEFAULT " . $info["default"];
+                            $this->columns->sqlStement .= " DEFAULT " . $info["default"];
                         }
-                        $this->addIndexOrPrimaryKey($info);
+                        $this->columns->addIndexOrPrimaryKey($info, $field);
                     });
                     break;
 
@@ -632,64 +90,24 @@ class Blueprint
                 case "datetime" :
                 case "timestamp":
                     $value->each(function($info, $field) use ($type){
-                        $this->addFieldType($info, $field, $type);
-                        $this->addIndexOrPrimaryKey($info);
+                        $this->columns->addFieldType($info, $field, $type);
+                        $this->columns->addIndexOrPrimaryKey($info, $field);
                     });
                     break;
-                case "enum":
+                case "enum"     :
                     $value->each(function($info, $field) {
                         foreach($info["default"] as $key => $value) {
                             $info["default"][$key] = "'" .  $value . "'";
                         }
-                        $null = $this->getNullType($info["null"]);
+                        $null = $this->columns->getNullType($info["null"]);
                         $enum = implode(", ", $info["default"]);
-                        $this->sqlStement .= ", `$field` ENUM($enum) $null";
+                        $this->columns->sqlStement .= ", `$field` ENUM($enum) $null";
                     });
+
                     break;
             }
         });
 
-        if ($this->sqlStement !== null) {
-            return "CREATE TABLE IF NOT EXISTS `" . $this->table . "` (". $this->sqlStement . ") ENGINE=" . $this->engine . " DEFAULT CHARSET=" . $this->character ." COLLATE " . $this->collate .";-";
-        }
-
-        return null;
-    }
-
-    /**
-     * getNullType retourne les valeurs "null" ou "not null"
-     *
-     * @param bool $null
-     * @return string
-     */
-    private function getNullType($null)
-    {
-        if ($this->sqlStement != null) {
-            $this->sqlStement .= ", ";
-        }
-
-        $nullType = "NOT NULL";
-
-        if ($null) {
-            $nullType = "NULL";
-        }
-
-        return $nullType;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        $sql = $sqlR = $this->stringify();
-        if ($this->displaySql) {
-            $sql = str_replace(" (", "(\n   ", $sql);
-            $sql = preg_replace("#(\)|L|E|Y), #", "$1, \n   ", $sql);
-            $sql = str_replace(") ENGINE", "\n) ENGINE", $sql);
-            echo $sql . "\n";
-        }
-
-        return $sqlR . "[::]" . serialize($this->dataBind);
+        return $this->columns->sqlStement;
     }
 }
