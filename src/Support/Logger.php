@@ -102,18 +102,18 @@ class Logger extends AbstractLogger
     private function htmlFormat($level, $message, array $context = [])
     {
         $content = "";
-        $subErrorMessage = "<@>";
+        $subErrorMessage = "...";
 
         if (isset($context["trace"])) {
 
             if (is_array($context["trace"])) {
 
                 foreach ($context["trace"] as $key => $errRef) {
-                    $key++;
-                    $func = "";
-                    $line = "";
-                    $file = "";
+                    $func   = "";
+                    $line   = "";
+                    $file   = "";
                     $errRef = (array) $errRef;
+
                     if (isset($errRef["function"])) {
                         $func = $errRef["function"] . "(";
                     }
@@ -137,12 +137,16 @@ class Logger extends AbstractLogger
 
                             foreach($errRef["args"] as $k => $args) {
                                 $func .= ucfirst(gettype($args));
-                                if (gettype($args) === "string") {
-                                    $func .= "('" . $args . "')";
-                                }
-                                if (gettype($args) === "object") {
-                                    $func .= "(Closure)";
-                                }
+                                 if (gettype($args) === "string") {
+                                     $func .= "('" . $args . "')";
+                                 }
+                                 if (gettype($args) === "object") {
+                                     if (is_callable($args)) {
+                                         $func .= "(Closure)";
+                                     } else {
+                                         $func .= "(" . get_class($args) . ")";
+                                     }
+                                 }
                                 if ($k + 1 != $len) {
                                     $func .= ", ";
                                 }
@@ -152,7 +156,7 @@ class Logger extends AbstractLogger
                     }
 
                     if (is_int($key)) {
-                        $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key: at " . $file . " <b><i>" . $func . "</i></b>:";
+                        $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key# at " . $file . " <b><i>" . $func . "</i></b>:";
                         $content .= $line . " </div>";
                     }
                 }
@@ -174,19 +178,14 @@ class Logger extends AbstractLogger
             <head>
                 <meta charset="utf-8">
                 <title>Bow - ' . $level . '</title>
-                <style>
-                    .f {
-                        font-family: "Courier new";
-                    }
-                </style>
             </head>
             <body>
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: inline-block; margin: auto; background-color: #eee; padding: 5px; text-align: center">
-                <div style="border: 1px solid #aaa; border-radius: 5px; padding: 8px; background-color: white; width: 950px; text-align: center; margin: auto">
+                <div style="border: 1px solid #aaa; border-radius: 100px; padding: 8px; width: 950px; text-align: center; margin: auto; background-image: linear-gradient(#ddd, #eee, #dedede); overflow: auto; box-sizing: border-box">
                     <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . $message . '</b></h1>
                     <p>' . $subErrorMessage . '</i></p>
                 </div>
-                <div class="f" style="font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: auto; margin-top: 8px;">
+                <div style="font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: auto; margin-top: 8px;">
                     ' . $content . '
                 </div>
             </div>
@@ -206,10 +205,6 @@ class Logger extends AbstractLogger
      */
     public function errorHandler($errno, $errmsg, $filename, $line, $trace)
     {
-        echo "<pre>";
-        var_dump($errno, $errmsg, $filename, $line, $trace);
-
-        die();
         $this->addHandler($errno, $errmsg, $filename, $line, []);
     }
 
