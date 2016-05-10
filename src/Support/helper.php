@@ -451,7 +451,7 @@ if (!function_exists("set_response_code")) {
      * @return mixed
      */
     function set_response_code($code) {
-        return response()->setCode($code);
+        return response()->code($code);
     }
 }
 
@@ -497,7 +497,7 @@ if (!function_exists("set_header")) {
      * @param string $value la valeur à assigner
      */
     function set_header($key, $value) {
-        query_response("setHeader", $key, $value);
+        query_response("set", $key, $value);
     }
 }
 

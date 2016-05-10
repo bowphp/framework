@@ -83,7 +83,7 @@ class Response
 	 * @param string $value
 	 * @return self
 	 */
-	public function setHeader($key, $value)
+	public function set($key, $value)
 	{
 		header("$key: $value");
 
@@ -109,7 +109,7 @@ class Response
      */
     public function redirectTo404()
     {
-        $this->setCode(404);
+        $this->code(404);
         return $this;
     }
 
@@ -120,7 +120,7 @@ class Response
 	 * @param bool $override
 	 * @return bool|void
 	 */
-	public function setCode($code, $override = false)
+	public function code($code, $override = false)
 	{
 		$r = true;
 
@@ -147,8 +147,8 @@ class Response
             $code = 200;
         };
 
-		$this->setHeader("Content-Type", "application/json; charset=UTF-8");
-		$this->setCode($code);
+		$this->set("Content-Type", "application/json; charset=UTF-8");
+		$this->code($code);
 		$this->send(json_encode($data), $end);
 	}
 
@@ -212,7 +212,7 @@ class Response
 
 		// Chargement du template.
 		$template = $this->templateLoader();
-		$this->setCode($code);
+		$this->code($code);
 
 		if ($this->config->getEngine() == "twig") {
 			$this->send($template->render($filename, $bind));
