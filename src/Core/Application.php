@@ -421,14 +421,13 @@ class Application
 
         // Si la route n'est pas enrégistre alors on lance une erreur 404
 		if ($error === true) {
-			$this->response()->setCode(404, true);
-
             // vérification et appel de la fonction du branchement 404
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			} else {
 				$this->response()->send("404", true);
 			}
+			$this->response()->setCode(404, true);
 		}
 
 		return $error;

@@ -38,8 +38,8 @@ if (!function_exists("configuration")) {
 }
 
 // Configuration de la Request et de la Response
-$response = Response::configure(configuration());
-$request  = Request::configure();
+Response::configure(configuration());
+Request::configure();
 
 // Configuration de la base de donnée
 Database::configure(configuration()->getDatabaseConfiguration());
@@ -47,6 +47,40 @@ Database::configure(configuration()->getDatabaseConfiguration());
 // Configuration de la resource de l'application.
 Resource::configure(configuration()->getResourceConfiguration());
 
+
+if (!function_exists("response")) {
+    /**
+     * response, manipule une instance de Response::class
+     *
+     * @param string $template, le message a envoyer
+     * @param integer $code, le code d'erreur
+     * @param string $type, le type mime du contenu
+     * @return Bow\Http\Response
+     */
+    function response($template = null, $code = 200, $type = "text/html") {
+
+        if (is_null($template)) {
+            return Response::takeInstance();
+        }
+
+        set_header("Content-Type", $type);
+        set_code($code);
+        query_response("send", $template);
+
+        return Response::takeInstance();
+    }
+}
+
+if (!function_exists("request")) {
+    /**
+     * répresente le classe Request
+     *
+     * @return Bow\Http\Request
+     */
+    function request() {
+        return Request::configure();
+    }
+}
 
 if (!function_exists("db")) {
     /**
@@ -85,7 +119,7 @@ if (!function_exists("view")) {
             $code = $data;
             $data = [];
         }
-        return $GLOBALS["response"]->view($template, $data, $code);
+        return response()->view($template, $data, $code);
     }
 }
 
@@ -132,10 +166,11 @@ if (!function_exists("last_insert_id")) {
      * Retourne le dernier ID suite a une requete INSERT sur un table dont ID est
      * auto_increment.
      *
-     * @return int|null
+     * @param string $name
+     * @return int
      */
-    function last_insert_id() {
-        return Database::lastInsertId();
+    function last_insert_id($name = null) {
+        return Database::lastInsertId($name);
     }
 }
 
@@ -144,12 +179,12 @@ if (!function_exists("query_response")) {
      * @param string $method
      * @param array $param
      *
-     * @return null|mixed
+     * @return mixed
      */
     function query_response($method, $param) {
 
-        if (method_exists($GLOBALS["response"], $method)) {
-            return call_user_func_array([$GLOBALS["response"], $method], array_slice(func_get_args(), 1));
+        if (method_exists(response(), $method)) {
+            return call_user_func_array([response(), $method], array_slice(func_get_args(), 1));
         }
 
         return null;
@@ -278,7 +313,7 @@ if (!function_exists("body")) {
      * @return Bow\Http\RequestData
      */
     function body() {
-        return $GLOBALS["request"]->body();
+        return request()->body();
     }
 }
 
@@ -290,7 +325,7 @@ if (!function_exists("files")) {
      * @return Bow\Http\RequestData
      */
     function files() {
-        return $GLOBALS["request"]->files();
+        return request()->files();
     }
 }
 
@@ -302,18 +337,7 @@ if (!function_exists("query")) {
      * @return Bow\Http\RequestData
      */
     function query() {
-        return $GLOBALS["request"]->query();
-    }
-}
-
-if (!function_exists("request")) {
-    /**
-     * répresente le classe Request
-     *
-     * @return Bow\Http\Request
-     */
-    function request() {
-        return $GLOBALS["request"];
+        return request()->query();
     }
 }
 
@@ -427,7 +451,7 @@ if (!function_exists("set_response_code")) {
      * @return mixed
      */
     function set_response_code($code) {
-        return $GLOBALS["response"]->setCode($code);
+        return response()->setCode($code);
     }
 }
 
@@ -462,29 +486,6 @@ if (!function_exists("secure")) {
         } else {
             return Security::sanitaze($data, true);
         }
-    }
-}
-
-if (!function_exists("response")) {
-    /**
-     * response, manipule une instance de Response::class
-     *
-     * @param string $template, le message a envoyer
-     * @param integer $code, le code d'erreur
-     * @param string $type, le type mime du contenu
-     * @return Bow\Http\Response
-     */
-    function response($template = null, $code = 200, $type = "text/html") {
-
-        if (is_null($template)) {
-            return $GLOBALS["response"];
-        }
-
-        set_header("Content-Type", $type);
-        set_code($code);
-        query_response("send", $template);
-
-        return $GLOBALS["response"];
     }
 }
 
@@ -586,7 +587,7 @@ if (!function_exists("url")) {
      * @return string $url
      */
     function url() {
-        return $GLOBALS["request"]->url();
+        return request()->url();
     }
 }
 

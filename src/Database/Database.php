@@ -89,30 +89,31 @@ class Database extends DatabaseTools
     /**
      * connection, lance la connection sur la DB
      *
-     * @param null $option
+     * @param null $zone
      * @param null $cb
      * @return null|Database
      */
-    public static function connection($option = null, $cb = null)
+    public static function connection($zone = null, $cb = null)
     {
         if (static::$db instanceof PDO) {
             return static::takeInstance();
         }
 
-        if ($option !== null) {
-            if (is_string($option)) {
-                static::$zone = $option;
-            } else if (is_callable($option)) {
-                static::$zone = "default";
-                $cb = $option;
-            }
-        } else {
-            static::$zone = "default";
+        if (is_callable($zone)) {
+            $cb = $zone;
+            $zone = null;
         }
+
 
         if (! static::$config instanceof StdClass) {
             Util::launchCallback($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
         }
+
+        if ($zone == null) {
+            $zone = static::$config->default;
+        }
+
+        static::$zone = $zone;
 
         $c = isset(static::$config->connections[static::$zone]) ? static::$config->connections[static::$zone] : null;
 
@@ -173,10 +174,8 @@ class Database extends DatabaseTools
 	 */
 	public static function switchTo($newZone, $cb = null)
 	{
-        static::verifyConnection();
-
 		if (!is_string($newZone)) {
-        	throw new InvalidArgumentException("paramètre invalide", E_USER_ERROR);
+        	throw new InvalidArgumentException("Paramètre invalide", E_USER_ERROR);
         }
 
         if($newZone !== static::$zone) {
@@ -185,9 +184,9 @@ class Database extends DatabaseTools
             static::connection($newZone, $cb);
         }
 
-        if (!is_callable($cb)) {
+        if (is_callable($cb)) {
             static::$db = null;
-            static::$zone = $newZone;
+            static::$zone = "default";
         }
 	}
 
@@ -428,13 +427,14 @@ class Database extends DatabaseTools
     }
     /**
      * Récupère l'identifiant de la dernière enregistrement.
-     * 
+     *
+     * @param string $name
      * @return int
      */
-    public static function lastInsertId()
+    public static function lastInsertId($name = null)
     {
         static::verifyConnection();
-        return (int) static::$db->lastInsertId();
+        return (int) static::$db->lastInsertId($name);
     }
 
     /**

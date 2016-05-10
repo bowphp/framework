@@ -1114,13 +1114,25 @@ class Table extends DatabaseTools
      * @return bool
      * @throws TableException
      */
-    public function verifyValue($column, $value)
+    public function valueExists($column, $value)
     {
         return $this->where($column, $value)->count() > 0 ? true : false;
     }
 
     /**
+     * rétourne l'id de la dernière insertion
+     *
+     * @param string $name [optional]
+     * @return string
+     */
+    public function lastId($name = null)
+    {
+        return $this->connection->lastInsertId($name);
+    }
+
+    /**
      * retourne les informations sur l'erreur PDO
+     *
      * @return DatabaseErrorHandler
      */
     public function getLastError()

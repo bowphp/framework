@@ -18,6 +18,9 @@ class Resource
 	const ERROR = 5;
 	const SUCCESS = 7;
 	const WARNING = 6;
+	const ERROR_EXTENSION_INVALIDE = 8;
+	const ERROR_SIZE_INVALIDE = 9;
+	const ERROR_UPLOAD_ERROR = 10;
 	/**
 	 * Variable de configuration
 	 * 
@@ -167,39 +170,24 @@ class Resource
 						move_uploaded_file($file->tmp_name, static::$uploadDir . "/" . $filename . '.' . $pathInfo->extension);
 						
 						// Status, fichier uploadé
-						$status = [
-							"status" => static::SUCCESS,
-							"message" => "File Uploaded"
-						];
+						$status = static::SUCCESS;
 					} else {
 						// status, extension du fichier
-						$status = [
-							"status" => static::ERROR,
-							"message" => "Availabe File, verify file type"
-						];
+						$status = static::ERROR_EXTENSION_INVALIDE;
 					}
 				} else {
 					// status, la taille est invalide
-					$status = [
-						"status" => static::ERROR,
-						"message" => "File is more big, max size " . static::$fileSize. " octets."
-					];
+					$status = static::ERROR_SIZE_INVALIDE;
 				}
 
 			} else {
 				// status, fichier erroné.
-				$status = [
-					"status" => static::ERROR,
-					"message" => "Le fichier possède des erreurs"
-				];
+				$status = static::ERROR_UPLOAD_ERROR;
 			}
 
 		} else {
 			// status, fichier non uploadé
-			$status = [
-				"status" => static::ERROR,
-				"message" => "Le fichier n'a pas pus être uploader"
-			];
+			$status = static::ERROR_UPLOAD_ERROR;
 		}
 
 		if ($cb !== null) {
