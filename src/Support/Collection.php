@@ -328,15 +328,25 @@ class Collection
 
     /**
      * reverse
-     * 
+     *
+     * @param bool $collectionify
+     *
      * @return array
      */
-    public function reverse()
+    public function reverse($collectionify = false)
     {
         $r = [];
         
         for($i = $this->length(); $i > 0; --$i) {
             $r[] = $this->storage[$i];
+        }
+
+        if ($collectionify) {
+            $c = new Collection($r);
+            foreach($r as $key => $value) {
+                $c->add($key, $value);
+            }
+            $r = $c;
         }
 
         return $r;

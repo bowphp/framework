@@ -8,7 +8,7 @@ use Bow\Interfaces\CollectionAccess;
 
 class RequestData implements CollectionAccess
 {
-	
+
 	/**
 	 * @var array
 	 */
@@ -45,13 +45,15 @@ class RequestData implements CollectionAccess
 	/**
 	 * Fonction magic __clone en <<private>>
 	 */
-	private function __clone(){}
+	private function __clone()
+	{
+	}
 
 	/**
 	 * Factory permettant de charger les différentes colléctions
 	 *
 	 * @param $method
-	 * 
+	 *
 	 * @return RequestData
 	 */
 	public static function configure($method)
@@ -83,7 +85,7 @@ class RequestData implements CollectionAccess
 	/**
 	 * isEmpty, vérifie si une collection est vide.
 	 *
-	 *	@return boolean
+	 * @return boolean
 	 */
 	public function isEmpty()
 	{
@@ -93,8 +95,8 @@ class RequestData implements CollectionAccess
 	/**
 	 * get, permet de récupérer une valeur ou la colléction de valeur.
 	 *
-	 * @param string $key=null
-	 * @param mixed $default=false
+	 * @param string $key =null
+	 * @param mixed $default =false
 	 * @return mixed
 	 */
 	public function get($key = null, $default = false)
@@ -113,25 +115,25 @@ class RequestData implements CollectionAccess
 	 */
 	public function getWithOut()
 	{
-        $data = [];
+		$data = [];
 
-		foreach($this->data as $key => $value) {
-            if (!in_array($key, func_get_args())) {
-                $data[$key] = $value;
-            }
-        }
+		foreach ($this->data as $key => $value) {
+			if (!in_array($key, func_get_args())) {
+				$data[$key] = $value;
+			}
+		}
 
 		return $data;
 	}
 
-    /**
-     * verifie si le contenu de $this->data poccedent la $key n'est pas vide.
+	/**
+	 * verifie si le contenu de $this->data poccedent la $key n'est pas vide.
 	 *
-     * @param string $key
-     * @param string $eqTo
+	 * @param string $key
+	 * @param string $eqTo
 	 *
-     * @return bool
-     */
+	 * @return bool
+	 */
 	public function isValide($key, $eqTo = null)
 	{
 		$boolean = $this->has($key, true);
@@ -140,20 +142,20 @@ class RequestData implements CollectionAccess
 			$boolean = $boolean && preg_match("~$eqTo~", $this->get($key));
 		}
 
-        return $boolean;
+		return $boolean;
 	}
 
 	/**
 	 * remove, supprime une entrée dans la colléction
 	 *
 	 * @param string $key
-	 * 
+	 *
 	 * @return RequestData
 	 */
 	public function remove($key)
 	{
 		unset($this->data[$key]);
-		
+
 		return $this;
 	}
 
@@ -163,12 +165,12 @@ class RequestData implements CollectionAccess
 	 * @param string $key
 	 * @param mixed $data
 	 * @param bool $next
-	 * 
+	 *
 	 * @return RequestData
 	 */
 	public function add($key, $data, $next = false)
 	{
-		if($this->has($key)) {
+		if ($this->has($key)) {
 			if ($next) {
 				array_push($this->data[$key], $data);
 			} else {
@@ -177,7 +179,7 @@ class RequestData implements CollectionAccess
 		} else {
 			$this->data[$key] = $data;
 		}
-		
+
 		return $this;
 	}
 
@@ -186,9 +188,9 @@ class RequestData implements CollectionAccess
 	 *
 	 * @param string $key
 	 * @param mixed $value
-	 * 
+	 *
 	 * @throws ErrorException
-	 * 
+	 *
 	 * @return RequestData
 	 */
 	public function set($key, $value)
@@ -198,7 +200,7 @@ class RequestData implements CollectionAccess
 		} else {
 			throw new ErrorException("Clé non définie", E_NOTICE);
 		}
-		
+
 		return $this;
 	}
 
@@ -212,9 +214,45 @@ class RequestData implements CollectionAccess
 		if ($this->isEmpty()) {
 			call_user_func_array($cb, [null, null]);
 		} else {
-			foreach($this->data as $key => $value) {
-				call_user_func_array($cb, [$key, $value]);
+			foreach ($this->data as $key => $value) {
+				call_user_func_array($cb, [$value, $key]);
 			}
 		}
 	}
+
+    /**
+     * __get
+     *
+     * @param string $name Le nom de la variable
+     * @return null
+     */
+	public function __get($name)
+	{
+		if ($this->has($name)) {
+			return $this->data[$name];
+		}
+
+		return null;
+	}
+
+    /**
+     * __set
+     *
+     * @param string $name Le nom de la variable
+     * @param mixed $value La valeur a assigné
+     * @return null
+     */
+    public function __set($name, $value)
+    {
+        $old = null;
+
+        if ($this->has($name)) {
+            $old = $this->data[$name];
+            $this->data[$name] = $value;
+        } else {
+            $this->data[$name] = $value;
+        }
+
+        return $old;
+    }
 }

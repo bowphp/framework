@@ -263,6 +263,8 @@ class AppConfiguration
     }
 
     /**
+     * Modifie le niveau de log
+     * Deux valeur possible development | production
      *
      * @param string $log
      *
@@ -284,7 +286,10 @@ class AppConfiguration
     }
 
     /**
-     * @return mixed
+     * Retoure de niveau du log
+     * Deux valeur possible development | production
+     *
+     * @return string
      */
     public function getLogLevel()
     {
@@ -417,6 +422,7 @@ class AppConfiguration
 
     /**
      * modifie le driver du systeme de mail.
+     * Deux valeur possible mail | smtp
      *
      * @param string $driver
      *

@@ -758,6 +758,42 @@ class Table extends DatabaseTools
     }
 
     /**
+     * Lance une execption en case de donnée non trouvé
+     *
+     * @return array
+     *
+     * @throws TableException
+     */
+    public function findOrFail()
+    {
+        $data = $this->get();
+
+        if (count($data) == 0) {
+            throw new TableException("Aucune donnée trouver.", E_WARNING);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Lance une execption en case de donnée non trouvé
+     *
+     * @return \stdClass
+     *
+     * @throws TableException
+     */
+    public function findOneOrFail()
+    {
+        $data = $this->getOne();
+
+        if ($data == false) {
+            throw new TableException("Aucune donnée trouver.", E_WARNING);
+        }
+
+        return $data;
+    }
+
+    /**
      * @param array $arr
      *
      * @return array

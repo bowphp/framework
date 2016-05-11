@@ -241,12 +241,15 @@ class Response
 
 		if ($this->config->getEngine() == "twig") {
 		    $loader = new Twig_Loader_Filesystem($this->config->getViewpath());
-		    $tpl = new Twig_Environment($loader, array(
+		    $tpl = new Twig_Environment($loader, [
 		        'cache' => $this->config->getCachepath(),
-				'auto_reload' => $this->config->getCacheAutoReload()
-		    ));
+				'auto_reload' => $this->config->getCacheAutoReload(),
+                "debug" => $this->config->getLogLevel() == "develepment" ? true : false
+		    ]);
 		} else if ($this->config->getEngine() == "mustache") {
-			$tpl = new \Mustache_Engine();
+			$tpl = new \Mustache_Engine([
+                'cache' => $this->config->getCachepath()
+			]);
 		} else {
 			$tpl = new Jade([
                 'cache' => $this->config->getCachepath(),
