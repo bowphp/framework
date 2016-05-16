@@ -1,11 +1,13 @@
 <?php
+namespace Bow\Support;
+
 /**
+ * Classe de la manipulation simple de donnés dans un tableau
+ *
+ * @class Collection
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-
-namespace Bow\Support;
-
 class Collection
 {
 	/**
@@ -16,11 +18,7 @@ class Collection
 	public function __construct()
 	{
         if (func_num_args() === 1) {
-            if (is_array(func_get_arg(0))) {
-                $this->storage = func_get_arg(0);
-            } else if (is_object(func_get_arg(0))) {
-                $this->storage = (array) func_get_arg(0);
-            }
+             $this->storage = (array) func_get_arg(0);
         } else {
             $this->storage = func_get_args();
         }
@@ -200,10 +198,10 @@ class Collection
      * 
      * @return Collection
      */
-    public function each($cb)
+    public function each(Callable $cb)
     {
     	foreach ($this->storage as $key => $value) {
-        	if (false === call_user_func_array($cb, [$value, $key])) {
+        	if (call_user_func_array($cb, [$value, $key])) {
                 break;
             }
         }
@@ -297,8 +295,8 @@ class Collection
     {
     	$next = null;
 
-    	foreach ($this->storage as $key => $value) {
-    		$next = call_user_func_array($cb, [$next, $value, $key, $this->storage]);
+    	foreach ($this->storage as $key => $current) {
+    		$next = call_user_func_array($cb, [$next, $current, $key, $this->storage]);
     	}
 
         return $this;
@@ -431,7 +429,7 @@ class Collection
     /**
      * __set
      *
-     * @param string $name
+     * @param string $name La clé
      *
      * @return mixed
      */

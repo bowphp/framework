@@ -521,7 +521,7 @@ class Table extends DatabaseTools
      *
      * @return $this
      */
-    public function order($column, $type = "asc")
+    public function orderBy($column, $type = "asc")
     {
         if (is_null($this->order)) {
             if (!in_array($type, ["asc", "desc"])) {
@@ -722,7 +722,7 @@ class Table extends DatabaseTools
         } else {
             $data = Security::sanitaze($stmt->fetchAll());
         }
-
+        $stmt->closeCursor();
         if (is_callable($cb)) {
         	return call_user_func_array($cb, [$data]);
         }
@@ -742,14 +742,42 @@ class Table extends DatabaseTools
     }
 
     /**
+     *
+     *
+     * @param callable $cb
+     * @return $this
+     */
+    public function transition(Callable $cb)
+    {
+        $where = $this->where;
+        $data = $this->get();
+        $bool = call_user_func_array($cb, [$data]);
+
+        if ($bool === true) {
+            $this->where = $where;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Récuper des informations sur la table ensuite les supprimes dans celle-ci
+     *
+     * @param Callable $cb La fonction de rappel qui si definir vous offre en parametre
+     *                     Les données récupés et le nombre d'élément supprimé.
+     *
      * @return array
      */
-    public function findAndDelete()
+    public function findAndDelete($cb = null)
     {
         $where = $this->where;
         $data = $this->get();
         $this->where = $where;
         $n = $this->delete();
+
+        if (is_callable($cb)) {
+            $cb($data, $n);
+        }
 
         return [
             "nDeleted" => $n,
@@ -795,13 +823,46 @@ class Table extends DatabaseTools
 
     /**
      * @param array $arr
+     * @param Callable $callback
      *
      * @return array
      */
-    public function findAndModify(array $arr)
+    public function findAndModify(array $arr, $callback = null)
+    {
+        // Transfert du where pour un prochaine définition
+        // Dans le but de ne pas doubler le where
+        $where = $this->where;
+
+        // Execution de GET
+        $data = $this->get();
+        // On Effecture le transfert après éxécution du get
+        $this->where = $where;
+        $n = 0;
+
+        if (is_callable($callback)) {
+            $r = call_user_func_array($callback, [$data]);
+            if ($r === true) {
+                $n = $this->update($arr);
+            }
+        } else {
+            $n = $this->update($arr);
+        }
+
+        return [
+            "nUpdated" => $n,
+            "data" => $data
+        ];
+    }
+
+    /**
+     * @param array $arr
+     *
+     * @return array
+     */
+    public function findOneAndModify(array $arr)
     {
         $where = $this->where;
-        $data = $this->get();
+        $data = $this->getOne();
 
         $this->where = $where;
         $n = $this->update($arr);

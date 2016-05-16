@@ -11,9 +11,10 @@
 
 use Bow\Http\Request;
 use Bow\Support\Util;
-use Bow\Http\Response;
 use Bow\Support\Event;
+use Bow\Http\Response;
 use Bow\Support\Session;
+use Bow\Http\RequestData;
 use Bow\Support\Security;
 use Bow\Support\Resource;
 use Bow\Database\Database;
@@ -53,9 +54,9 @@ if (!function_exists("response")) {
      * response, manipule une instance de Response::class
      *
      * @param string $template, le message a envoyer
-     * @param integer $code, le code d'erreur
+     * @param int $code, le code d'erreur
      * @param string $type, le type mime du contenu
-     * @return Bow\Http\Response
+     * @return Response
      */
     function response($template = null, $code = 200, $type = "text/html") {
 
@@ -75,7 +76,7 @@ if (!function_exists("request")) {
     /**
      * répresente le classe Request
      *
-     * @return Bow\Http\Request
+     * @return Request
      */
     function request() {
         return Request::configure();
@@ -112,7 +113,7 @@ if (!function_exists("view")) {
      * @param array|int $data
      * @param int $code
      *
-     * @return Bow\Http\Response
+     * @return Response
      */
     function view($template, $data = [], $code = 200) {
         if (is_int($data)) {
@@ -144,7 +145,7 @@ if (!function_exists("query_maker")) {
      * @param $cb
      * @param $method
      *
-     * @return Database
+     * @return mixed
      */
     function query_maker($sql, $data, $cb, $method) {
         $rs = null;
@@ -154,7 +155,7 @@ if (!function_exists("query_maker")) {
         }
 
         if (is_callable($cb)) {
-            call_user_func_array($cb, [$rs]);
+            return call_user_func_array($cb, [$rs]);
         }
 
         return $rs;
@@ -210,10 +211,25 @@ if (!function_exists("select")) {
      * @param array $data
      * @param callable $cb
      *
-     * @return integer|array|StdClass
+     * @return int|array|StdClass
      */
     function select($sql, array $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "select");
+    }
+}
+
+if (!function_exists("select_one")) {
+    /**
+     * statement lance des requete SQL de type SELECT
+     *
+     * @param string $sql
+     * @param array $data
+     * @param callable $cb
+     *
+     * @return int|array|StdClass
+     */
+    function select_one($sql, array $data = [], $cb = null) {
+        return query_maker($sql, $data, $cb, "selectOne");
     }
 }
 
@@ -225,7 +241,7 @@ if (!function_exists("insert")) {
      * @param array $data
      * @param callable $cb
      *
-     * @return integer
+     * @return int
      */
     function insert($sql, array $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "insert");
@@ -240,7 +256,7 @@ if (!function_exists("delete")) {
      * @param array $data
      * @param callable $cb
      *
-     * @return integer
+     * @return int
      */
     function delete($sql, array $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "delete");
@@ -255,7 +271,7 @@ if (!function_exists("update")) {
      * @param array $data
      * @param callable $cb
      *
-     * @return integer
+     * @return int
      */
     function update($sql, array $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "update");
@@ -269,7 +285,7 @@ if (!function_exists("statement")) {
      * @param string $sql
      * @param array $data
      *
-     * @return integer
+     * @return int
      */
     function statement($sql, array $data = []) {
         return query_maker($sql, $data, null, "statement");
@@ -310,7 +326,7 @@ if (!function_exists("body")) {
      * body, fonction de type collection
      * manipule la variable global $_POST
      *
-     * @return Bow\Http\RequestData
+     * @return RequestData
      */
     function body() {
         return request()->body();
@@ -322,7 +338,7 @@ if (!function_exists("files")) {
      * files, fonction de type collection
      * manipule la variable global $_FILES
      *
-     * @return Bow\Http\RequestData
+     * @return RequestData
      */
     function files() {
         return request()->files();
@@ -334,7 +350,7 @@ if (!function_exists("query")) {
      * query, fonction de type collection
      * manipule la variable global $_GET
      *
-     * @return Bow\Http\RequestData
+     * @return RequestData
      */
     function query() {
         return request()->query();
@@ -435,7 +451,7 @@ if (!function_exists("json")) {
      * json, permet de lance des reponses server de type json
      *
      * @param array $data
-     * @param integer $code=200
+     * @param int $code=200
      * @return mixed
      */
     function json($data, $code = 200) {
@@ -598,7 +614,18 @@ if (!function_exists("pdo")) {
      * @return PDO
      */
     function pdo() {
-        return Database::pdo();
+        return Database::getPdo();
+    }
+}
+
+if (!function_exists("set_pdo")) {
+    /**
+     * modifie l'instance de la connection PDO
+     *
+     * @param PDO $pdo
+     */
+    function set_pdo(PDO $pdo) {
+        Database::setPdo($pdo);
     }
 }
 
@@ -735,13 +762,28 @@ if (!function_exists("emit")) {
 if (!function_exists("flash")) {
     /**
      * flash
+     *
+     * e.g flash("error", "An error occured");
+     *
+     * @param string $key Le nom du niveau soit ("error", "info", "warn", "danger","success")
+     * @param string $message Le message du flash, Dans le case ou le message n'est pas
+     *                        spécifié la fonction rétourne le message du flash concerné
+     *                        par la clé
+     *
      * @return \Bow\Support\Flash
      */
-    function flash() {
-        if (!Session::has("bow.flash")) {
-            Session::add("bow.flash", new \Bow\Support\Flash());
-        }
-        return Session::get("bow.flash");
+    function flash($key, $message = null) {
+        return Session::flash($key, $message);
+    }
+}
+
+if (!function_exists("re_flash")) {
+    /**
+     * flash
+     * @return \Bow\Support\Flash
+     */
+    function re_flash() {
+        Session::reFlash();
     }
 }
 

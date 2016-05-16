@@ -246,7 +246,7 @@ abstract class Message
 	 * 
 	 * @return self
 	 */
-	public function text($text = null)
+	public function text($text)
 	{
         $this->type($text, "text/plain");
 

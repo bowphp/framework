@@ -12,6 +12,12 @@ use Bow\Exception\ViewException;
 class Response
 {
 	/**
+     * Singleton
+     * @var self
+     */
+    private static $instance = null;
+
+	/**
 	 * Liste de code http valide pour l'application
 	 * Sauf que l'utilisateur poura lui même rédéfinir
 	 * ces codes s'il utilise la fonction `header` de php
@@ -19,30 +25,44 @@ class Response
 	private static $header = [
 		200 => "OK",
 		201 => "Created",
-        204 => "No Content",
+		202 => "Accepted",
+		204 => "No Content",
+		205 => "Reset Content",
+		206 => "Partial Content",
+		300 => "Multipe Choices",
 		301 => "Moved Permanently",
 		302 => "Found",
+		303 => "See Other",
 		304 => "Not Modified",
+		305 => "Use Proxy",
+		307 => "Temporary Redirect",
 		400 => "Bad Request",
 		401 => "Unauthorized",
+		402 => "Payment Required",
 		403 => "Forbidden",
 		404 => "Not Found",
 		405 => "Method Not Allowed",
+		406 => "Not Acceptable",
+		407 => "Proxy Authentication",
 		408 => "Request Time Out",
-        409 => "Conflict",
-        410 => "Gone",
-        500 => "Internal Server Error",
+		409 => "Conflict",
+		410 => "Gone",
+		411 => "Length Required",
+		412 => "Precondition Failed",
+		413 => "Payload Too Large",
+		414 => "URI Too Long",
+		415 => "Unsupport Media",
+		416 => "Range Not Statisfiable",
+		417 => "Expectation Failed",
+		500 => "Internal Server Error",
 		501	=> "Not Implemented",
-        503 => "Service Unavailable"
+		502	=> "Bad Gateway",
+		503 => "Service Unavailable",
+		504	=> "Gateway Timeout",
+		505	=> "HTTP Version Not Supported",
 	];
-    
-    /**
-     * Singleton
-     * @var self
-     */
-    private static $instance = null;
-    
-    /**
+
+	/**
      * Instance de l'application
      * @var AppConfiguration
      */

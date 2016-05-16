@@ -83,35 +83,28 @@ class Security
 		// strict integer regex 
 		$rNum = "/^\d+$/";
 
-		if (is_array($data)) {
-			foreach ($data as $key => $value) {
-				if (is_string($value)) {
-					if (preg_match($rNum, $value)) {
-						$data[$key] = (int) $value;
-						continue;
-					}
-					$data[$key] = static::$method($value);
-				} else if (is_object($value)) {
-					$data[$key] = static::sanitaze($value);
-				}
-			}
-		} else if (is_object($data)) {
-			foreach ($data as $key => $value) {
-				if (is_string($value)) {
-					if (preg_match($rNum, $value)) {
-						$data->$key = (int) $value;
-						continue;
-					}
-					$data->$key = static::$method($value);
-				} else if (is_array($value)) {
-					$data->$key  = static::sanitaze($value);
-				}
-			}
-		} else if (is_string($data)) {
+		if (is_string($data)) {
 			if (preg_match($rNum, $data)) {
 				$data = (int) $data;
 			} else {
-				$data = static::$method($data);
+				$data = self::$method($data);
+			}
+			return $data;
+		}
+
+		if (is_numeric($data)) {
+			return $data;
+		}
+
+		if (is_array($data)) {
+			foreach($data as $key => $value) {
+				$data[$key] = self::sanitaze($value, $secure);
+			}
+		}
+
+		if (is_object($data)) {
+			foreach($data as $key => $value) {
+				$data->$key = self::sanitaze($value, $secure);
 			}
 		}
 
@@ -246,7 +239,7 @@ class Security
 	/**
 	 * Détruie le token
 	 */
-	public static function killTokenCsrf()
+	public static function clearTokenCsrf()
 	{
 		Session::remove("bow.csrf");
 	}

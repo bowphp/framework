@@ -1,6 +1,7 @@
 <?php
-
 namespace Bow\Support;
+
+use Bow\Support\Session;
 
 class Cookie
 {

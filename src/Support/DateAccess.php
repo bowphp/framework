@@ -1,13 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: papac
- * Date: 5/7/16
- * Time: 9:50 PM
- */
-
 namespace Bow\Support;
-
 
 class DateAccess
 {

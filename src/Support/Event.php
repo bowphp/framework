@@ -36,8 +36,6 @@ class Event
         } else {
             static::$events->update($event, $fn);
         }
-
-        // Session::add("bow.event", static::$events);
     }
 
     /**
@@ -71,8 +69,6 @@ class Event
      */
     public static function off($event, $cb = null)
     {
-        // static::unserialise();
-
         if (static::$events->has($event)) {
             static::$events->remove($event);
 

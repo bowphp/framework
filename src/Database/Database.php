@@ -245,6 +245,32 @@ class Database extends DatabaseTools
     }
 
     /**
+     * éxécute une requête select et retourne un seul enregistrement
+     *
+     * @param $sqlstatement
+     * @param array $bind
+     * @return mixed|null
+     */
+    public static function selectOne($sqlstatement, array $bind = [])
+    {
+        static::verifyConnection();
+
+        if (preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
+
+            $pdostatement = static::$db->prepare($sqlstatement);
+            static::bind($pdostatement, $bind);
+            $pdostatement->execute();
+
+            static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
+            static::$currentPdoErrorInfo = static::$db->errorInfo();
+
+            return Security::sanitaze($pdostatement->fetch());
+        }
+
+        return null;
+    }
+
+    /**
      * éxécute une requête insert
      *
      * @param $sqlstatement
@@ -255,26 +281,19 @@ class Database extends DatabaseTools
     {
         static::verifyConnection();
 
-        if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)?\s(values\s?\(.+\),?){1,}|\s?set\s(.+)+);?$/i", $sqlstatement)) {
+        if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)?\s(values\s?\(.+\),?)+|\s?set\s(.+)+);?$/i", $sqlstatement)) {
 
             $r = 0;
             $is_2_m_array = true;
 
-            if (count($bind) > 0) {
-                foreach ($bind as $key => $value) {
-                    if (is_array($value)) {
+            if (isset($bind[0])) {
+                if (is_array($bind[0])) {
+                    foreach ($bind as $key => $value) {
                         $r += static::executePrepareQuery($sqlstatement, $value);
-                    } else {
-                        $is_2_m_array = false;
                     }
+                } else {
+                    $r = static::executePrepareQuery($sqlstatement, $bind);
                 }
-
-                if (!$is_2_m_array) {
-                    $r += static::executePrepareQuery($sqlstatement, $bind);
-                }
-
-            } else {
-                $r = static::executePrepareQuery($sqlstatement, $bind);
             }
 
             return $r;
@@ -678,10 +697,20 @@ class Database extends DatabaseTools
      * 
      * @return PDO
      */
-    public static function pdo()
+    public static function getPdo()
     {
         static::verifyConnection();
         return static::$db;
+    }
+
+    /**
+     * modifie l'instance de PDO
+     *
+     * @param PDO $pdo
+     */
+    public static function setPdo(PDO $pdo)
+    {
+        static::$db = $pdo;
     }
 
     /**

@@ -6,6 +6,8 @@
 
 namespace Bow\Support;
 
+use \StdClass;
+
 class Flash
 {
     /**
@@ -25,27 +27,19 @@ class Flash
      */
     private $success     = [];
 
-    public function __construct()
-    {
-    }
-
-    public function __clone()
-    {
-    }
-
     /**
      * warning
      *
      * @param null|string $value nouvelle valeur du message de warning
      *
-     * @return array|null
+     * @return StdClass|null
      */
     public function warning($value = null)
     {
         if ($value !== null) {
             $this->warning = $value;
         } else {
-            return ["level" => "warning", "message" => $this->warning];
+            return (object) ["level" => "warning", "message" => $this->warning];
         }
     }
 
@@ -54,17 +48,15 @@ class Flash
      *
      * @param null $value nouvelle valeur du message de danger => warning
      *
-     * @return array|null
+     * @return StdClass|null
      */
     public function danger($value = null)
     {
         if ($value !== null) {
             $this->warning = $value;
         } else {
-            return ["level" => "danger", "message" => $this->warning];
+            return (object) ["level" => "danger", "message" => $this->warning];
         }
-
-        return null;
     }
 
     /**
@@ -72,17 +64,15 @@ class Flash
      *
      * @param null $value nouvelle valeur du message de information
      *
-     * @return array|null
+     * @return StdClass|null
      */
     public function information($value = null)
     {
         if ($value !== null) {
             $this->information = $value;
         } else {
-            return ["level" => "info", "message" => $this->information];
+            return (object) ["level" => "info", "message" => $this->information];
         }
-
-        return null;
     }
 
     /**
@@ -90,17 +80,15 @@ class Flash
      *
      * @param null|string $value nouvelle valeur du message de error
      *
-     * @return array
+     * @return StdClass|void
      */
     public function error($value = null)
     {
         if ($value !== null) {
             $this->error = $value;
         } else {
-            return ["level" => "error", "message" => $this->error];
+            return (object) ["level" => "error", "message" => $this->error];
         }
-
-        return null;
     }
 
     /**
@@ -108,23 +96,21 @@ class Flash
      *
      * @param null|string $value nouvelle valeur du message de success
      *
-     * @return array
+     * @return StdClass
      */
     public function success($value = null)
     {
         if ($value !== null) {
             $this->success = $value;
         } else {
-            return ["level" => "success", "message" => $this->success];
+            return (object) ["level" => "success", "message" => $this->success];
         }
-
-        return null;
     }
 
     /**
      * __sleep
      *
-     * @return array
+     * @return StdClass
      */
     public function __sleep()
     {

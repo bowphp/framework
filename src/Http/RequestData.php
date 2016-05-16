@@ -116,9 +116,9 @@ class RequestData implements CollectionAccess
 	public function getWithOut()
 	{
 		$data = [];
-
+		$keyWasDefine = func_get_args();
 		foreach ($this->data as $key => $value) {
-			if (!in_array($key, func_get_args())) {
+			if (!in_array($key, $keyWasDefine)) {
 				$data[$key] = $value;
 			}
 		}
@@ -127,7 +127,7 @@ class RequestData implements CollectionAccess
 	}
 
 	/**
-	 * verifie si le contenu de $this->data poccedent la $key n'est pas vide.
+	 * vérifie si le contenu de $this->data poccedent la $key n'est pas vide.
 	 *
 	 * @param string $key
 	 * @param string $eqTo

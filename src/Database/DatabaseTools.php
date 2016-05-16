@@ -19,6 +19,9 @@ abstract class DatabaseTools
      */
     protected static function bind(PDOStatement $pdoStatement, array $data = [])
     {
+        // On sécurise les informations avants l'insertion.
+        $data = Security::sanitaze($data, true);
+
         foreach ($data as $key => $value) {
 
             if (is_null($value) || $value === "NULL") {
@@ -28,15 +31,12 @@ abstract class DatabaseTools
             $param = PDO::PARAM_INT;
 
             if (preg_match("/[a-zA-Z_-]+/", $value)) {
-
                 /**
                  * SÉCURIATION DES DONNÉS
                  * - Injection SQL
                  * - XSS
                  */
                 $param = PDO::PARAM_STR;
-                $value = Security::sanitaze($value, true);
-
             } else {
                 /**
                  * On force la valeur en entier ou en réél.
@@ -45,6 +45,8 @@ abstract class DatabaseTools
                     $value = (int) $value;
                 } else if (is_float($value)) {
                     $value = (float) $value;
+                } else {
+                    $value = (double) $value;
                 }
             }
             /**
