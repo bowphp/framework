@@ -30,6 +30,11 @@ class AppConfiguration
     /**
      * @var string
      */
+    private $public = "";
+
+    /**
+     * @var string
+     */
     private $template_extension = ".php";
 
     /**
@@ -67,8 +72,6 @@ class AppConfiguration
                 Util::setTimezone($config["application"]->timezone);
             }
         }
-
-
     }
 
     /**
@@ -352,6 +355,37 @@ class AppConfiguration
     public function getApproot()
     {
         return $this->approot;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPublicPath()
+    {
+        if (isset($this->config->static_files_directory)) {
+            return $this->config->static_files_directory;
+        }
+
+        return $this->public;
+    }
+
+    /**
+     * Modifie le chemin vers les fichiers public.
+     *
+     * @param string $public Le nouveau chemin vers les fichiers public.
+     * @return string
+     */
+    public function setPublicPath($public)
+    {
+        if (isset($this->config->static_files_directory)) {
+            $old = $this->config->static_files_directory;
+            $this->config->static_files_directory = $public;
+        } else {
+            $old = $this->public;
+            $this->public = $public;
+        }
+
+        return $old;
     }
 
     /**

@@ -1,11 +1,11 @@
 <?php
-
 namespace Bow\Http;
 
-use ErrorException;
 use Jade\Jade;
-use Twig_Environment;
-use Twig_Loader_Filesystem;
+use ErrorException;
+use Bow\Support\Str;
+use Bow\Support\Session;
+use Bow\Support\Security;
 use Bow\Core\AppConfiguration;
 use Bow\Exception\ViewException;
 
@@ -247,7 +247,7 @@ class Response
 	 * templateLoader, charge le moteur template à utiliser.
 	 * 
 	 * @throws ErrorException
-	 * @return Twig_Environment|\Mustache_Engine|Jade
+	 * @return \Twig_Environment|\Mustache_Engine|\Jade\Jade
 	 */
 	private function templateLoader()
 	{
@@ -260,12 +260,24 @@ class Response
 		$tpl = null;
 
 		if ($this->config->getEngine() == "twig") {
-		    $loader = new Twig_Loader_Filesystem($this->config->getViewpath());
-		    $tpl = new Twig_Environment($loader, [
+		    $loader = new \Twig_Loader_Filesystem($this->config->getViewpath());
+		    $tpl = new \Twig_Environment($loader, [
 		        'cache' => $this->config->getCachepath(),
 				'auto_reload' => $this->config->getCacheAutoReload(),
                 "debug" => $this->config->getLogLevel() == "develepment" ? true : false
 		    ]);
+			/**
+			 * - Ajout de variable globale
+			 * - Ajout de fonction
+			 * dans le cadre de l'utilisation de Twig
+			 */
+			$tpl->addGlobal('__public', $this->config->getPublicPath());
+			$tpl->addGlobal('__root', $this->config->getApproot());
+			$tpl->addFunction('__secure', new \Twig_SimpleFunction("__secure", function($data) {
+				return Security::sanitaze($data, true);
+			}));
+			$tpl->addFunction('__sanitaze', new \Twig_SimpleFunction("__sanitaze", [Security::class, "sanitaze"]));
+			$tpl->addFunction('__slugify', new \Twig_SimpleFunction("__slugify", [Str::class, "slugify"]));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new \Mustache_Engine([
                 'cache' => $this->config->getCachepath()

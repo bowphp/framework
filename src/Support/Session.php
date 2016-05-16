@@ -212,6 +212,7 @@ class Session implements CollectionAccessStatic
      */
     public static function reFlash()
     {
+        self::start();
         unset($_SESSION["bow.flash"]);
     }
 
