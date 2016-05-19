@@ -34,7 +34,7 @@ class AlterTable
      */
     public function add(Callable $cb)
     {
-        $columns = new TableColumnsMaker($this->tableName, $this->displaySql);
+        $columns = new ColumnsMaker($this->tableName, $this->displaySql);
 
         $cb($columns);
 
@@ -57,7 +57,7 @@ class AlterTable
     public function drop()
     {
         $columns = implode(", ", func_get_args());
-        $sql = "ALTER TABLE . ". $this->tableName ." . DROP " . $columns;
+        $sql = "ALTER TABLE . ". $this->tableName ." . DROP " . $columns . ";";
 
         if (Database::statement($sql)) {
             echo "\033[0;32m" . $columns . " in " . $this->tableName . " table have been droped.\033[00m\n";

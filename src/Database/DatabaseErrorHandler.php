@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Database;
 
 use Bow\Exception\DatabaseException;

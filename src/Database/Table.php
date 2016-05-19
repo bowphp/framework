@@ -71,11 +71,7 @@ class Table extends DatabaseTools
      * @var bool
      */
     private static $getOne = false;
-
-    /**
-     * @var array
-     */
-    private $errorInfo = [];
+    
     /**
      * Contructeur
      * 
@@ -646,7 +642,7 @@ class Table extends DatabaseTools
     	
         $s = $this->connection->prepare($sql);
     	$s->execute();
-        $this->errorInfo = $s->errorInfo();
+        self::$errorInfo = $s->errorInfo();
 
         if ($s->rowCount() > 1) {
             return $s->fetchAll();
@@ -714,7 +710,7 @@ class Table extends DatabaseTools
         static::bind($stmt, $this->whereDataBind);
         $this->whereDataBind = [];
         $stmt->execute();
-        $this->errorInfo = $stmt->errorInfo();
+        self::$errorInfo = $stmt->errorInfo();
 
         if (static::$getOne) {
             $data = Security::sanitaze($stmt->fetch());
@@ -724,7 +720,7 @@ class Table extends DatabaseTools
         }
         $stmt->closeCursor();
         if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$data]);
+        	return call_user_func_array($cb, [$this->getLastError(), $data]);
         }
         
         return $data;
@@ -751,7 +747,7 @@ class Table extends DatabaseTools
     {
         $where = $this->where;
         $data = $this->get();
-        $bool = call_user_func_array($cb, [$data]);
+        $bool = call_user_func_array($cb, [$this->getLastError(), $data]);
 
         if ($bool === true) {
             $this->where = $where;
@@ -776,7 +772,7 @@ class Table extends DatabaseTools
         $n = $this->delete();
 
         if (is_callable($cb)) {
-            $cb($data, $n);
+            $cb($this->getLastError(), $data, $n);
         }
 
         return [
@@ -840,7 +836,7 @@ class Table extends DatabaseTools
         $n = 0;
 
         if (is_callable($callback)) {
-            $r = call_user_func_array($callback, [$data]);
+            $r = call_user_func_array($callback, [$this->getLastError(), $data]);
             if ($r === true) {
                 $n = $this->update($arr);
             }
@@ -899,11 +895,11 @@ class Table extends DatabaseTools
         static::bind($stmt, $this->whereDataBind);
         $this->whereDataBind = [];
         $stmt->execute();
-        $this->errorInfo = $stmt->errorInfo();
+        self::$errorInfo = $stmt->errorInfo();
         $count = $stmt->fetchColumn();
 
     	if (is_callable($cb)) {
-    		call_user_func_array($cb, [$count]);
+    		call_user_func_array($cb, [$this->getLastError(), $count]);
     	}
 
         return  $count;
@@ -937,12 +933,12 @@ class Table extends DatabaseTools
 		$stmt->execute();
 
         // récupération de la dernière erreur.
-        $this->errorInfo = $stmt->errorInfo();
+        self::$errorInfo = $stmt->errorInfo();
 
 		$r = $stmt->rowCount();
 
 		if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$r]);
+        	return call_user_func_array($cb, [$this->getLastError(), $r]);
         }
 
 		return $r;
@@ -969,11 +965,11 @@ class Table extends DatabaseTools
 		static::bind($stmt, $this->whereDataBind);
         $this->whereDataBind = [];
 		$stmt->execute();
-        $this->errorInfo = $stmt->errorInfo();
+        self::$errorInfo = $stmt->errorInfo();
 		$data = $stmt->rowCount();
 
         if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$data]);
+        	return call_user_func_array($cb, [$this->getLastError(), $data]);
         }
 
         return $data;
@@ -1044,22 +1040,39 @@ class Table extends DatabaseTools
     /**
      * Action insert
      *
-     * @param array $values
+     * @param array $values Les données a inserer dans la base de donnée.
      * 
      * @return int
      */
-    public function insert($values)
+    public function insert(array $values)
+    {
+        $nInserted = 0;
+
+        if (is_array($values[0])) {
+            foreach($values as $key => $data) {
+                $nInserted += $this->insertOne($data);
+            }
+        } else {
+            $nInserted = $this->insertOne($values);
+        }
+
+        return $nInserted;
+    }
+
+    /**
+     * @see insert
+     * @param array $value
+     * @return int
+     */
+    public function insertOne(array $value)
     {
         $sql = "insert into " . $this->tableName . " set ";
-        $values = Security::sanitaze($values, true);
-
-        $sql .= parent::rangeField(parent::add2points(array_keys($values)));
-
+        $values = Security::sanitaze($value, true);
+        $sql .= parent::rangeField(parent::add2points(array_keys($value)));
         $stmt = $this->connection->prepare($sql);
         $this->bind($stmt, $values);
         $stmt->execute();
-        $this->errorInfo = $stmt->errorInfo();
-
+        self::$errorInfo = $stmt->errorInfo();
         return (int) $stmt->rowCount();
     }
 
@@ -1112,7 +1125,7 @@ class Table extends DatabaseTools
     /**
      * Utilitaire isComporaisonOperator, permet valider un opérateur
      *
-     * @param $comp
+     * @param string $comp Le comparateur logique
      * 
      * @return bool
      */
@@ -1206,8 +1219,8 @@ class Table extends DatabaseTools
     /**
      * vérifie si un valeur existe déjà dans la DB
      *
-     * @param string $column
-     * @param mixed $value
+     * @param string $column Le nom de la colonne a vérifié
+     * @param mixed $value Le valeur de la colonne
      * @return bool
      * @throws TableException
      */
@@ -1234,6 +1247,6 @@ class Table extends DatabaseTools
      */
     public function getLastError()
     {
-        return new DatabaseErrorHandler($this->errorInfo);
+        return new DatabaseErrorHandler(self::$errorInfo);
     }
 }

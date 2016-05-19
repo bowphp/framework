@@ -13,7 +13,7 @@ use Bow\Support\Collection;
 use Bow\Exception\ModelException;
 use Bow\Exception\DatabaseException;
 
-class TableColumnsMaker
+class ColumnsMaker
 {
     /**
      * fields list
@@ -69,7 +69,7 @@ class TableColumnsMaker
      * define the auto increment field
      * @var \StdClass
      */
-    private $autoincrement = null;
+    private $autoincrement = false;
 
     /**
      * @var bool
@@ -463,12 +463,12 @@ class TableColumnsMaker
      */
     private function addIndexes($indexType)
     {
-        if ($this->lastField !== null) {
-            $last = $this->lastField;
-            $this->fields->get($last->method)->update($last->field, [$indexType => true]);
-        } else {
+        if ($this->lastField === null) {
             throw new ModelException("Cannot assign {$indexType}. Because field are not defined.", E_ERROR);
         }
+
+        $last = $this->lastField;
+        $this->fields->get($last->method)->update($last->field, [$indexType => true]);
 
         return $this;
     }
@@ -492,12 +492,18 @@ class TableColumnsMaker
 
         if (!$this->fields->get($method)->has($field)) {
 
-            if (!in_array($method, ["int", "longint", "bigint"])) {
-                $value = Filler::$number++;
-            } else if (!in_array($method, ["date", "datetime", "timestamp"])) {
+            if (in_array($method, ["int", "longint", "bigint"])) {
+                if ($this->getAutoincrement()) {
+                    $value = "NULL";
+                } else {
+                    $value = Filler::$number++;
+                }
+            } else if (in_array($method, ["date", "datetime"])) {
                 $value = Filler::$date;
-            } else if (!in_array($method, ["double", "float"])) {
+            } else if (in_array($method, ["double", "float"])) {
                 $value = Filler::$float++;
+            } else if ($method == "timestamp") {
+                $value = time();
             } else {
                 $value = Str::slice(Filler::$string, 0, $data["size"]);
             }
@@ -511,10 +517,13 @@ class TableColumnsMaker
             $data["primary"] = false;
             $data["unique"]  = false;
             $data["indexe"]  = false;
+
             if (!isset($data["size"])) {
                 $data["size"] = "";
             }
+
             $this->fields->get($method)->add($field, $data);
+
             $this->lastField = (object) [
                 "method" => $method,
                 "field" => $field
@@ -673,7 +682,7 @@ class TableColumnsMaker
     }
 
     /**
-     * @return \StdClass
+     * @return \stdClass
      */
     public function getAutoincrement()
     {

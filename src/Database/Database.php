@@ -18,18 +18,6 @@ use Bow\Exception\ConnectionException;
 class Database extends DatabaseTools
 {
     /**
-     * Information sur les erreurs de pdoStement
-     * 
-     * @var array
-     */
-    private static $currentPdoStementErrorInfo = [];
-    /**
-     * Information sur les erreurs de pdo
-     * 
-     * @var array
-     */
-    private static $currentPdoErrorInfo = [];
-    /**
      * Instance de PDO
      *
      * @var \PDO
@@ -235,8 +223,7 @@ class Database extends DatabaseTools
             static::bind($pdostatement, $bind);
             $pdostatement->execute();
 
-            static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
-            static::$currentPdoErrorInfo = static::$db->errorInfo();
+            static::$errorInfo = $pdostatement->errorInfo();
 
             return Security::sanitaze($pdostatement->fetchAll());
         }
@@ -261,9 +248,8 @@ class Database extends DatabaseTools
             static::bind($pdostatement, $bind);
             $pdostatement->execute();
 
-            static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
-            static::$currentPdoErrorInfo = static::$db->errorInfo();
-
+            static::$errorInfo = $pdostatement->errorInfo();
+            
             return Security::sanitaze($pdostatement->fetch());
         }
 
@@ -319,8 +305,6 @@ class Database extends DatabaseTools
                 $r = true;
             }
 
-            static::$currentPdoErrorInfo = static::$db->errorInfo();
-            
             return $r;
         }
 
@@ -389,6 +373,7 @@ class Database extends DatabaseTools
         static::bind($pdoStatement, isset($options["data"]) ? $options["data"] : []);
 
         $pdoStatement->execute();
+        static::$errorInfo = $pdoStatement->errorInfo();
         $data = $pdoStatement->fetchAll();
 
         if ($return == true) {
@@ -459,11 +444,11 @@ class Database extends DatabaseTools
     /**
      * Récupère la dernière erreur sur la l'object PDO
      * 
-     * @return array
+     * @return DatabaseErrorHandler
      */
     public static function getLastErreur()
     {
-        return new DatabaseErrorHandler(static::$currentPdoStementErrorInfo);
+        return new DatabaseErrorHandler(static::$errorInfo);
     }
 
     /**
@@ -525,18 +510,18 @@ class Database extends DatabaseTools
                 }
                 /*
                  * Vérification de l'existance d'un clause:
-                 * _______
-                 *| WHERE |
-                 * -------
+                 *  _______
+                 * | WHERE |
+                 *  -------
                  */
                 if (isset($options['where'])) {
                     $where = " WHERE " . $options['where'];
                 }
                 /*
                  * Vérification de l'existance d'un clause:
-                 * __________
-                 *| ORDER BY |
-                 * ----------
+                 *  __________
+                 * | ORDER BY |
+                 *  ----------
                  */
                 if (isset($options['-order'])) {
                     $order = " ORDER BY " . (is_array($options['-order']) ? implode(", ", $options["-order"]) : $options["-order"]) . " DESC";
@@ -546,9 +531,9 @@ class Database extends DatabaseTools
 
                 /*
                  * Vérification de l'existance d'un clause:
-                 * _______
-                 *| LIMIT |
-                 * -------
+                 *  _______
+                 * | LIMIT |
+                 *  -------
                  */
                 if (isset($options['limit']) || isset($options["take"])) {
                     if (isset($options['limit'])) {
@@ -564,9 +549,9 @@ class Database extends DatabaseTools
 
                 /**
                  * Vérification de l'existance d'un clause:
-                 * ----------
-                 *| GROUP BY |
-                 * ----------
+                 *  ----------
+                 * | GROUP BY |
+                 *  ----------
                  */
                 
                 if (isset($options["grby"])) {
@@ -589,9 +574,9 @@ class Database extends DatabaseTools
                 }
                 /**
                  * Vérification de l'existance d'un clause:
-                 * ----------
-                 *| BETWEEN  |
-                 * ----------
+                 *  ----------
+                 * | BETWEEN  |
+                 *  ----------
                  */
 
                 if (isset($options["-between"])) {
@@ -609,9 +594,9 @@ class Database extends DatabaseTools
             /**
              * Niveau équivalant à un quelconque
              * SQL Statement de type:
-             * _____________
-             *| INSERT INTO |
-             * -------------
+             *  _____________
+             * | INSERT INTO |
+             *  -------------
              */
             case self::INSERT:
                 /**
@@ -626,9 +611,9 @@ class Database extends DatabaseTools
             /**
              * Niveau équivalant à un quelconque
              * SQL Statement de type:
-             * ________
-             *| UPDATE |
-             * --------
+             *  ________
+             * | UPDATE |
+             *  --------
              */
             case self::UPDATE:
                 /**
@@ -643,9 +628,9 @@ class Database extends DatabaseTools
             /**
              * Niveau équivalant à un quelconque
              * SQL Statement de type:
-             * _____________
-             *| DELETE FROM |
-             * -------------
+             *  _____________
+             * | DELETE FROM |
+             *  ------------
              */
             case self::DELETE:
                 /**
@@ -682,9 +667,7 @@ class Database extends DatabaseTools
         
         static::bind($pdostatement, $bind);
         $pdostatement->execute();
-
-        static::$currentPdoStementErrorInfo = $pdostatement->errorInfo();
-        static::$currentPdoErrorInfo        = static::$db->errorInfo();
+        static::$errorInfo = $pdostatement->errorInfo();
 
         $r = $pdostatement->rowCount();
         $pdostatement->closeCursor();
@@ -729,6 +712,6 @@ class Database extends DatabaseTools
             return call_user_func_array([__CLASS__, $method], $arguments);
         }
 
-        throw new DatabaseException("$method not found", E_USER_ERROR);
+        throw new DatabaseException("$method n'est pas une methode.", E_USER_ERROR);
     }
 }

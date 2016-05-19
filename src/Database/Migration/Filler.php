@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Database\Migration;
 
 class Filler

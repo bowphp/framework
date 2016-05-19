@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Database\Migration;
 
 use Bow\Support\Str;
@@ -52,7 +51,7 @@ class Schema
 	{
         static::$table = $table;
 
-		$columnsMaker = new TableColumnsMaker($table, $displaySql);
+		$columnsMaker = new ColumnsMaker($table, $displaySql);
 		call_user_func_array($cb, [$columnsMaker]);
 
         $sql = (new Blueprint($columnsMaker))->toCreateTableStatement();
@@ -68,9 +67,9 @@ class Schema
 	/**
 	 * @param string $table
 	 * @param bool $displaySql
-	 * @param \Closure $cb
+	 * @param Callable $cb
 	 */
-	public static function table($table, \Closure $cb, $displaySql = false)
+	public static function table($table, Callable $cb, $displaySql = false)
 	{
         $alter = new AlterTable($table, $displaySql);
         $cb($alter);
@@ -80,17 +79,67 @@ class Schema
      * fillTable, remplir un table pour permet le developpement.
      *
      * @param int $n
+     * @param int $marks
      *
      * @return mixed
      */
-    public static function fillTable($n = 1)
+    public static function fillTable($n = 1, $marks = null)
     {
+        if ($marks) {
+            $data = static::parseMarks($marks);
+        } else {
+            $data = static::$data;
+        }
+
         $insertArray = [];
 
         for($i = 0; $i < $n; $i++) {
-            $insertArray[] = static::$data;
+            $insertArray[] = $data;
         }
 
         return Database::table(static::$table)->insert($insertArray);
+    }
+
+    /**
+     * ParseMarks.
+     * ----------------------------------
+     * field name|  types   | size      |
+     * ----------------------------------
+     * name      |i, s, d, t| 1 (string)|
+     * ----------------------------------
+     *
+     * eg: name|s:59 => name string length 59
+     * eg: name|s:100;age|i
+     *
+     * @param string $marks
+     * @return array
+     */
+    private static function parseMarks($marks)
+    {
+        $parts = explode(";", $marks);
+        $r = [];
+
+        $types = [
+            "i" => "number",
+            "s" => "string",
+            "d" => "date",
+            "t" => "current_timestanp"
+        ];
+
+        foreach($parts as $key => $values) {
+            $subPart = explode("|", $values);
+            $typeAndLength = explode(":", $subPart[1]);
+            $key = $subPart[0];
+            $type = $types[$typeAndLength[0]];
+            $data = Filler::${$type};
+
+            if (count($typeAndLength) == 2) {
+                $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
+            } else {
+                $r[$key] = $data;
+            }
+        }
+
+        return $r;
     }
 }

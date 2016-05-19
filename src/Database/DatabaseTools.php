@@ -8,7 +8,7 @@ use Bow\Support\Security;
 
 abstract class DatabaseTools
 {
-
+    protected static $errorInfo = [];
     /**
      * Éxécute PDOStatement::bindValue sur une instance de PDOStatement passé en paramètre
      *
@@ -75,7 +75,7 @@ abstract class DatabaseTools
             /**
              * Construction d'une chaine de format:
              * key1 = value1, key2 = value2[, keyN = valueN]
-             * Utile pour binder une réquette INSERT en mode preparer:
+             * Utile pour binder une réquête INSERT|UPDATE|SELECT|DELETE en mode préparer:
              */
             $field .= ($i > 0 ? ", " : "") . $key . " = " . $value;
             $i++;
@@ -98,7 +98,9 @@ abstract class DatabaseTools
         $resultat = [];
 
         foreach ($data as $key => $value) {
-            $resultat[$value] = ":$value";
+            if (is_string($key)) {
+                $resultat[$value] = ":$value";
+            }
         }
 
         return $resultat;

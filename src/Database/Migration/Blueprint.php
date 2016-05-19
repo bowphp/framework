@@ -1,24 +1,24 @@
 <?php
 namespace Bow\Database\Migration;
 
-use Bow\Exception\DatabaseException;
+use Bow\Support\Str;
 use Bow\Support\Collection;
 use Bow\Exception\ModelException;
-use Bow\Support\Str;
+use Bow\Exception\DatabaseException;
 
 class Blueprint
 {
     /**
-     * @var TableColumnsMaker
+     * @var ColumnsMaker
      */
     private $columns;
 
     /**
      * Contructeur.
      *
-     * @param TableColumnsMaker $columns
+     * @param ColumnsMaker $columns
      */
-    public function __construct(TableColumnsMaker $columns)
+    public function __construct(ColumnsMaker $columns)
     {
         $this->columns = $columns;
     }
@@ -31,7 +31,7 @@ class Blueprint
     public function toCreateTableStatement()
     {
         if ($this->stringify() !== null) {
-            return "CREATE TABLE `" . $this->columns->getTableName() . "` (". $this->columns->sqlStement . ") ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharacter() ." COLLATE " . $this->columns->getEngine() .";-";
+            return "CREATE TABLE `" . $this->columns->getTableName() . "` (". $this->columns->sqlStement . ") ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";
         }
 
         return null;
@@ -72,7 +72,7 @@ class Blueprint
                     $value->each(function ($info, $field) use ($type) {
                         $this->columns->addFieldType($info, $field, $type);
                         if (in_array($type, ["int", "bigint", "longint"], true)) {
-                            if ($this->columns->getAutoincrement() !== null) {
+                            if ($this->columns->getAutoincrement() !== false) {
                                 if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
                                     $this->columns->sqlStement .= " AUTO_INCREMENT";
                                 }
