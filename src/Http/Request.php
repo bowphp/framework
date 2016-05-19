@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Http;
 
 use StdClass;

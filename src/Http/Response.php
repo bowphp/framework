@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Http;
 
+use Bow\Exception\ResponseException;
 use Jade\Jade;
 use ErrorException;
 use Bow\Support\Str;
@@ -209,11 +210,16 @@ class Response
 	 * @param string $filename
 	 * @param array $bind
 	 * @param integer $code=200
-	 * @throws ViewException
+	 * @throws ViewException|ResponseException
 	 * @return self
 	 */
-	public function view($filename, $bind = null, $code = 200)
+	public function view($filename, $bind = [], $code = 200)
 	{
+		if (is_int($bind)) {
+			$code = $bind;
+			$bind = [];
+		}
+
 		$filename = preg_replace("/@|\.|#/", "/", $filename) . $this->config->getTemplateExtension();
 
 		if ($this->config->getViewpath() !== null) {
@@ -226,10 +232,6 @@ class Response
 			}
 		}
 
-		if ($bind === null) {
-			$bind = [];
-		}
-
 		// Chargement du template.
 		$template = $this->templateLoader();
 		$this->code($code);
@@ -238,9 +240,13 @@ class Response
 			$this->send($template->render($filename, $bind));
 		} else if (in_array($this->config->getEngine(), ["mustache", "jade"])) {
 			$this->send($template->render(file_get_contents($filename), $bind));
+		} else {
+			throw new ResponseException("Le moteur de template non défini.", E_USER_ERROR);
 		}
 
-		exit();
+		if ($this->config->getLogLevel() === "production") {
+			exit();
+		}
 	}
 
 	/**
@@ -253,8 +259,10 @@ class Response
 	{
 		if ($this->config->getEngine() === null) {
 			if (!in_array($this->config->getEngine(), ["twig", "mustache", "jade"])) {
-				throw new ErrorException("Erreur: template n'est pas définir");
+				throw new ErrorException("Le moteur de template n'est pas implementé.", E_USER_ERROR);
 			}
+		} else {
+			throw new ResponseException("Le moteur de template non défini.", E_USER_ERROR);
 		}
 
 		$tpl = null;
@@ -268,16 +276,20 @@ class Response
 		    ]);
 			/**
 			 * - Ajout de variable globale
-			 * - Ajout de fonction
 			 * dans le cadre de l'utilisation de Twig
 			 */
 			$tpl->addGlobal('__public', $this->config->getPublicPath());
 			$tpl->addGlobal('__root', $this->config->getApproot());
-			$tpl->addFunction('__secure', new \Twig_SimpleFunction("__secure", function($data) {
+
+			/**
+			 * - Ajout de fonction global
+			 *  dans le cadre de l'utilisation de Twig
+			 */
+			$tpl->addFunction(new \Twig_SimpleFunction("__secure", function($data) {
 				return Security::sanitaze($data, true);
 			}));
-			$tpl->addFunction('__sanitaze', new \Twig_SimpleFunction("__sanitaze", [Security::class, "sanitaze"]));
-			$tpl->addFunction('__slugify', new \Twig_SimpleFunction("__slugify", [Str::class, "slugify"]));
+			$tpl->addFunction(new \Twig_SimpleFunction("__sanitaze", [Security::class, "sanitaze"]));
+			$tpl->addFunction(new \Twig_SimpleFunction("__slugify", [Str::class, "slugify"]));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new \Mustache_Engine([
                 'cache' => $this->config->getCachepath()
