@@ -362,8 +362,8 @@ class AppConfiguration
      */
     public function getPublicPath()
     {
-        if (isset($this->config->static_files_directory)) {
-            return $this->config->static_files_directory;
+        if (isset($this->config["application"]->static_files_directory)) {
+            return $this->config["application"]->static_files_directory;
         }
 
         return $this->public;
@@ -377,9 +377,9 @@ class AppConfiguration
      */
     public function setPublicPath($public)
     {
-        if (isset($this->config->static_files_directory)) {
-            $old = $this->config->static_files_directory;
-            $this->config->static_files_directory = $public;
+        if (isset($this->config["application"]->static_files_directory)) {
+            $old = $this->config["application"]->static_files_directory;
+            $this->$this->config["application"]->static_files_directory = $public;
         } else {
             $old = $this->public;
             $this->public = $public;

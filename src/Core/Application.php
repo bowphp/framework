@@ -6,7 +6,6 @@
  * @author Dakia Franck <dakiafranck@gmail.com>
  * @package Bow\Core
  */
-
 namespace Bow\Core;
 
 use Bow\Support\Util;
@@ -362,7 +361,7 @@ class Application
 	{
         // Ajout de l'entête X-Powered-By
         if (!$this->disableXpoweredBy) {
-            $this->response()->setHeader("X-Powered-By", "Bow Framework");
+            $this->response()->set("X-Powered-By", "Bow Framework");
         }
 
         // drapeaux d'erreur.
@@ -425,9 +424,9 @@ class Application
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			} else {
-				$this->response()->send("404", true);
+				$this->response()->send("404");
 			}
-			$this->response()->setCode(404, true);
+			$this->response()->code(404);
 		}
 
 		return $error;
@@ -496,7 +495,7 @@ class Application
 			return call_user_func_array([$this->config, $method], $param);
 		}
 
-        throw new ApplicationException("$method n'exist pas.", E_ERROR);
+        throw new ApplicationException("$method n'exist pas une methode.", E_ERROR);
 	}
 
 	/**
