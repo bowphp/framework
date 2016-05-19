@@ -65,7 +65,7 @@ if (!function_exists("response")) {
         }
 
         set_header("Content-Type", $type);
-        set_code($code);
+        set_response_code($code);
         query_response("send", $template);
 
         return Response::takeInstance();
@@ -129,9 +129,13 @@ if (!function_exists("table")) {
      * table aliase Database::table
      *
      * @param string $tableName, le nom d'un table.
+     * @param string $zoneName, le nom de la zone sur laquelle la requete sera faite.
      * @return Bow\Database\Table
      */
-    function table($tableName) {
+    function table($tableName, $zoneName = null) {
+        if (is_string($zoneName)) {
+            db($zoneName);
+        }
         return Database::table($tableName);
     }
 }
@@ -149,13 +153,19 @@ if (!function_exists("query_maker")) {
      */
     function query_maker($sql, $data, $cb, $method) {
         $rs = null;
+        $err = null;
+        if (is_callable($data)) {
+            $cb = $data;
+            $data = [];
+        }
 
         if (method_exists(Database::class, $method)) {
             $rs = Database::$method($sql, $data);
+            $err = Database::getLastErreur();
         }
 
         if (is_callable($cb)) {
-            return call_user_func_array($cb, [$rs]);
+            return call_user_func_array($cb, [$err, $rs]);
         }
 
         return $rs;
@@ -206,6 +216,13 @@ if (!function_exists("db_error")) {
 if (!function_exists("select")) {
     /**
      * statement lance des requete SQL de type SELECT
+     *
+     * select("SELECT * FROM users", function (Bow\Database\DatabaseErrorHandler $err, array $data) {
+     *    if ($err->hasError()) {
+     *          $err->throwError();
+     *    }
+     *    json($data);
+     * });
      *
      * @param string $sql
      * @param array $data

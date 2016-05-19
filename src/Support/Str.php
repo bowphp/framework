@@ -205,7 +205,7 @@ class Str
 
     /**
      * slugify créateur de slug en utilisant un chaine simple.
-     *
+     * eg: "je suis un chaine de caractere" => "je-suis-un-chaine-de-caractere"
      * @param string $str
      *
      * @return string
@@ -230,6 +230,8 @@ class Str
     /**
      * Vérifier si le mail est un mail valide.
      *
+     * eg: dakiafranck@gmail.com => true
+     *
      * @param string $email
      *
      * @throws \ErrorException
@@ -247,6 +249,9 @@ class Str
 
     /**
      * Vérifie si la chaine est un domaine
+     *
+     * eg: http://exemple.com => true
+     * eg: http:/exemple.com => false
      *
      * @param string $domain
      *
@@ -292,7 +297,7 @@ class Str
      *
      * @return string
      */
-    public function getNWords($words, $len)
+    public static function getNWords($words, $len)
     {
         $wordParts = explode(" ", $words);
         $sentence = "";

@@ -4,7 +4,6 @@
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-
 namespace Bow\Support;
 
 use Bow\Exception\LoggerException;
