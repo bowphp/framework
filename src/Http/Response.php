@@ -239,17 +239,24 @@ class Response
 			}
 		}
 
-		// Chargement du template.
-		$template = $this->templateLoader();
-		$this->code($code);
-
-		if ($this->config->getEngine() == "twig") {
-			$this->send($template->render($filename, $bind));
-		} else if (in_array($this->config->getEngine(), ["mustache", "jade"])) {
-			$this->send($template->render(file_get_contents($filename), $bind));
+		if ($this->config->getEngine() == "php") {
+			require $filename;
 		} else {
-			throw new ResponseException("Le moteur de template non défini.", E_USER_ERROR);
+			// Chargement du template.
+			$template = $this->templateLoader();
+			$this->code($code);
+
+			if ($this->config->getEngine() == "twig") {
+				$this->send($template->render($filename, $bind));
+			} else if (in_array($this->config->getEngine(), ["mustache", "jade"])) {
+				$this->send($template->render(file_get_contents($filename), $bind));
+			} else if ($this->config->getEngine() == "php") {
+				require $filename;
+			} else {
+				throw new ResponseException("Le moteur de template n'est pas défini.", E_USER_ERROR);
+			}
 		}
+
 
 		if ($this->config->getLogLevel() === "production") {
 			exit();
