@@ -150,7 +150,7 @@ class Request
 	public function ajax()
 	{
 		if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-			$xhrObj = strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]);
+			$xhrObj = Str::lower($_SERVER["HTTP_X_REQUESTED_WITH"]);
 			if ($xhrObj == "xmlhttprequest" || $xhrObj == "activexobject") {
 				return true;
 			}
@@ -181,11 +181,11 @@ class Request
 	/**
 	 * Retourne la provenance de la requête courante.
 	 *
-	 * @return string|null
+	 * @return string
 	 */
 	public function referer()
 	{
-		return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
+		return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : "/";
 	}
 
     /**
@@ -195,14 +195,7 @@ class Request
      */
 	public function language()
 	{
-        $lan = null;
-
-		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
-            $tmp = explode(";", $_SERVER["HTTP_ACCEPT_LANGUAGE"])[0];
-            $lan = explode(",", $tmp)[1];
-        }
-
-        return Str::slice($lan, 0, 2);
+        return Str::slice($this->locale(), 0, 2);
 	}
 
     /**
@@ -216,10 +209,11 @@ class Request
      */
 	public function locale()
 	{
-        $local = null;
+        $local = "";
 
 		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
-            preg_match("/^([a-z]+_[a-z]+)?/", $_SERVER["HTTP_ACCEPT_LANGUAGE"], $match);
+			$tmp = explode(";", $_SERVER["HTTP_ACCEPT_LANGUAGE"])[0];
+            preg_match("/^([a-z]+-[a-z]+)/i", $tmp, $match);
             $local = end($match);
         }
 

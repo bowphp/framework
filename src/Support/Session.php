@@ -37,7 +37,7 @@ class Session implements CollectionAccessStatic
         $arr = [];
 
         foreach($_SESSION as $key => $value) {
-            if (!in_array($key, ["bow.flash", "bow.event", "bow.csrf"])) {
+            if (!in_array($key, ["bow.flash", "bow.event", "bow.csrf", "bow.cookie.secure"])) {
                 $arr[$key] = $value;
             }
         }

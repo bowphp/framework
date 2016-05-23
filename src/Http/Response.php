@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Http;
 
-use Bow\Exception\ResponseException;
 use Jade\Jade;
 use ErrorException;
 use Bow\Support\Str;
@@ -9,6 +8,7 @@ use Bow\Support\Session;
 use Bow\Support\Security;
 use Bow\Core\AppConfiguration;
 use Bow\Exception\ViewException;
+use Bow\Exception\ResponseException;
 
 class Response
 {
@@ -69,6 +69,11 @@ class Response
      */
     private $config;
 
+	/**
+	 * Constructeur de l'application
+	 *
+	 * @param AppConfiguration $appConfig
+	 */
     private function __construct(AppConfiguration $appConfig)
     {
         $this->config = $appConfig;
@@ -90,6 +95,8 @@ class Response
     }
 
 	/**
+	 * Retourne l'instance de Response
+	 *
 	 * @return Response
 	 */
 	public static function takeInstance()
@@ -100,8 +107,8 @@ class Response
 	/**
 	 * Modifie les entêtes http
 	 *
-	 * @param string $key
-	 * @param string $value
+	 * @param string $key 	Le nom de l'entête
+	 * @param string $value La nouvelle valeur a assigne à l'entête
 	 * @return self
 	 */
 	public function set($key, $value)
@@ -114,7 +121,7 @@ class Response
     /**
      * redirect, permet de lancer une redirection vers l'url passé en paramêtre
      *
-     * @param string $path
+     * @param string $path L'url de rédirection
      */
     public function redirect($path)
     {
@@ -137,8 +144,8 @@ class Response
 	/**
 	 * Modifie les entétes http
 	 * 
-	 * @param int $code
-	 * @param bool $override
+	 * @param int  $code 	 Le code de la réponse HTTP
+	 * @param bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a "true"
 	 * @return bool|void
 	 */
 	public function code($code, $override = false)
@@ -157,9 +164,9 @@ class Response
 	/**
 	 * Réponse de type JSON
 	 *
-	 * @param mixed $data
-	 * @param int $code
-	 * @param bool $end
+	 * @param mixed $data Les données à transformer en JSON
+	 * @param int 	$code Le code de la réponse HTTP
+	 * @param bool 	$end  Quand est à true il termine le processus
 	 */
 	public function json($data, $code = 200, $end = false)
 	{
@@ -247,6 +254,8 @@ class Response
 		if ($this->config->getLogLevel() === "production") {
 			exit();
 		}
+
+		return $this;
 	}
 
 	/**

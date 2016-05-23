@@ -63,7 +63,6 @@ class Cookie
         if ($key !== null) {
             if (static::has($key)) {
                 return Security::decrypt($_COOKIE[$key]);
-                // return $_COOKIE[$key];
             } else {
                 return  $default;
             }
@@ -71,7 +70,6 @@ class Cookie
 
         foreach($_COOKIE as $cookie_key => $value) {
             $_COOKIE[$cookie_key] = Security::decrypt($value);
-            // $_COOKIE[$cookie_key] = $value;
         }
 
         return $_COOKIE;
@@ -80,13 +78,13 @@ class Cookie
     /**
      * add, permet d'ajouter une value dans le tableau de cookie.
      * 
-     * @param string|int $key, la clé du cookie
-     * @param mixed $data la donnée a associée
-     * @param int $expirate le temps de vie du cookie
-     * @param string $path le path de reconnaissance
-     * @param string $domain le domaine sur lequel sera envoyé le cookie
-     * @param bool $secure définie la sécurité
-     * @param bool $http définie si c'est seulement le protocole http
+     * @param string|int $key,     La clé du cookie
+     * @param mixed      $data     La donnée a associée
+     * @param int        $expirate Le temps de vie du cookie
+     * @param string     $path     Le path de reconnaissance
+     * @param string     $domain   Le domaine sur lequel sera envoyé le cookie
+     * @param bool       $secure   Définie la sécurité
+     * @param bool       $http     Définie si c'est seulement le protocole http
      *
      * @return bool
      */
@@ -94,7 +92,6 @@ class Cookie
     {
         if ($data !== null) {
             $data = Security::encrypt($data);
-            // $data = $data;
         }
 
         return setcookie($key, $data, time() + $expirate, $path, $domain, $secure, $http);

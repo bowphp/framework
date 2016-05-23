@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Systeme d'envoye de mail utilisant le fonction mail de php.
  * 

@@ -41,7 +41,7 @@ class AlterTable
         $sql = (new Blueprint($columns))->toAlterTableStatement();
 
         if ($this->displaySql) {
-            echo $sql;
+            echo $sql . "\n";
         }
 
         if (Database::statement($sql)) {
@@ -56,13 +56,22 @@ class AlterTable
      */
     public function drop()
     {
-        $columns = implode(", ", func_get_args());
-        $sql = "ALTER TABLE . ". $this->tableName ." . DROP " . $columns . ";";
+        $columns = "";
+
+        foreach(func_get_args() as $key => $value) {
+            if ($key > 0) {
+                $columns .= ", ";
+            }
+
+            $columns .= "DROP `$value`";
+        }
+
+        $sql = "ALTER TABLE ". $this->tableName . " " . $columns . ";";
 
         if (Database::statement($sql)) {
-            echo "\033[0;32m" . $columns . " in " . $this->tableName . " table have been droped.\033[00m\n";
+            echo "\033[0;32m'" . implode(", ", func_get_args()) . "' in " . $this->tableName . " table have been droped.\033[00m\n";
         } else {
-            echo "\033[0;32m" . $columns . " not exists in " . $this->tableName . " table.\033[00m\n";
+            echo "\033[0;31m'" . implode(", ", func_get_args()) . "' not exists in " . $this->tableName . " table.\033[00m\n";
         }
 
         if ($this->displaySql) {

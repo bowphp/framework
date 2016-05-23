@@ -490,45 +490,43 @@ class ColumnsMaker
             $this->fields->add($method, new Collection);
         }
 
-        if (!$this->fields->get($method)->has($field)) {
-
-            if (in_array($method, ["int", "longint", "bigint"])) {
-                if ($this->getAutoincrement()) {
-                    $value = "NULL";
-                } else {
-                    $value = Filler::$number++;
-                }
-            } else if (in_array($method, ["date", "datetime"])) {
-                $value = Filler::$date;
-            } else if (in_array($method, ["double", "float"])) {
-                $value = Filler::$float++;
-            } else if ($method == "timestamp") {
-                $value = time();
-            } else {
-                $value = Str::slice(Filler::$string, 0, $data["size"]);
-            }
-
-            if (!is_array($this->dataBind)) {
-                $this->dataBind = [];
-            }
-
-            $this->dataBind[$field] = $value;
-            // default index are at false
-            $data["primary"] = false;
-            $data["unique"]  = false;
-            $data["indexe"]  = false;
-
-            if (!isset($data["size"])) {
-                $data["size"] = "";
-            }
-
-            $this->fields->get($method)->add($field, $data);
-
-            $this->lastField = (object) [
-                "method" => $method,
-                "field" => $field
-            ];
+        if ($this->fields->get($method)->has($field)) {
+            return $this;
         }
+
+        if (in_array($method, ["int", "longint", "bigint"])) {
+            if ($this->getAutoincrement()) {
+                $value = "NULL";
+            } else {
+                $value = Filler::number();
+            }
+        } else if (in_array($method, ["date", "datetime"])) {
+            $value = Filler::date();
+        } else if (in_array($method, ["double", "float"])) {
+            $value = Filler::float();
+        } else if ($method == "timestamp") {
+            $value = "CURRENT_TIMESTAMP";
+        } else {
+            $value = Str::slice(Filler::string(), 0, $data["size"]);
+        }
+
+        if (!is_array($this->dataBind)) {
+            $this->dataBind = [];
+        }
+
+        $this->dataBind[$field] = $value;
+
+        // default index are at false
+        $data["primary"] = false;
+        $data["unique"]  = false;
+        $data["indexe"]  = false;
+
+        $this->fields->get($method)->add($field, $data);
+
+        $this->lastField = (object) [
+            "method" => $method,
+            "field"  => $field
+        ];
 
         return $this;
     }
@@ -536,10 +534,10 @@ class ColumnsMaker
     /**
      * loadWhole
      *
-     * @param string $method
-     * @param string $field
-     * @param int $size
-     * @param bool $null
+     * @param string      $method
+     * @param string      $field
+     * @param int         $size
+     * @param bool        $null
      * @param null|string $default
      *
      * @return $this
@@ -547,6 +545,7 @@ class ColumnsMaker
     private function loadWhole($method, $field, $size = 20, $null = false, $default = null)
     {
         if (is_bool($size)) {
+            $default = $null === false ? null : $null;
             $null = $size;
             $size = 11;
         } else {
@@ -562,10 +561,6 @@ class ColumnsMaker
             }
         }
 
-        if ($size > 255) {
-
-        }
-
         $this->addField($method, $field, [
             "size"    => $size,
             "null"    => $null,
@@ -579,7 +574,7 @@ class ColumnsMaker
      * Ajout les indexes et la clé primaire.
      *
      * @param \StdClass $info
-     * @param string $field
+     * @param string    $field
      */
     public function addIndexOrPrimaryKey($info, $field)
     {

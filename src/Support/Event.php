@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
@@ -22,10 +21,10 @@ class Event
     /**
      * addEventListener
      *
-     * @param $event
-     * @param $fn
+     * @param string   $event Le nom de l'évènement
+     * @param Callable $fn    La fonction a lancé quand l'évènement se déclanche
      */
-    public static function on($event, $fn)
+    public static function on($event, Callable $fn)
     {
         if (static::$events === null) {
             static::$events = new Collection();
@@ -41,7 +40,7 @@ class Event
     /**
      * emit dispatchEvent
      *
-     * @param $event
+     * @param string $event Le nom de l'évènement
      * @throws EventException
      */
     public static function emit($event)

@@ -1,9 +1,10 @@
 <?php
 /**
+ * Bow Router
+ *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Core
  */
-
 namespace Bow\Core;
 
 use Bow\Support\Util;
@@ -30,7 +31,7 @@ Class Route
 	 *
 	 * @var array
 	 */
-	private $key = [];
+	private $keys = [];
 
 	/**
 	 * Liste de paramaters qui on matcher
@@ -80,30 +81,39 @@ Class Route
 	{
 		$this->with = $with;
 
+		// Normalisation de l'url du nagivateur.
 		if (preg_match("~(.+)/$~", $url, $match)) {
 			$url = end($match);
 		}
 
+		// Normalisation du path définir par le programmeur.
 		if (preg_match("~(.+)/$~", $this->path, $match)) {
 			$this->path = end($match);
 		}
 
+		// On vérifie la longeur du path définie par le programmeur
+		// avec celle de l'url courant dans le navigateur de l'utilisateur.
+		// Pour éviter d'aller plus loin.
 		if (count(explode("/", $this->path)) != count(explode("/", $url))) {
 			return false;
 		}
-		
+
+		// Copie de l'url courant pour éviter de la détruie
 		$path = $url;
 
 		if (empty($this->with)) {
+			// Dans le case ou le dévéloppeur n'a pas ajouté de contrainte sur
+			// les variables capturées
 			$path = preg_replace("~:\w+~", "([^\s]+)", $this->path);
-			preg_match_all("~:([\w]+)~", $this->path, $this->key);
-			array_shift($this->key);
-			$this->key = $this->key[0];
+			preg_match_all("~:([\w]+)~", $this->path, $this->keys);
+			array_shift($this->keys);
+			$this->keys = $this->keys[0];
 		} else {
-
+			// Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
+			// capturées
 			if (preg_match_all("~:([\w]+)~", $this->path, $match)) {
                 $tmpPath =  $this->path;
-                $this->key = $match[1];
+                $this->keys = $match[1];
 
 				foreach ($match[1] as $key => $value) {
                     if (array_key_exists($value, $this->with)) {
@@ -111,7 +121,7 @@ Class Route
                     }
                 }
 
-                // En case la path différent on récupère, on récupère celle dans $tmpPath
+                // Dans le case ou le path différent on récupère, on récupère celle dans $tmpPath
                 if ($tmpPath !== $this->path) {
                     $path = $tmpPath;
                 }
@@ -120,7 +130,7 @@ Class Route
 			$this->with = [];
 		}
 
-		// Vérifcation de url
+		// Vérifcation de url et path PARSER
 		if (preg_match("~^$path$~", $url, $match)) {
 			array_shift($match);
 			$this->match = str_replace("/", "", $match);
@@ -133,15 +143,17 @@ Class Route
 	/**
 	 * Fonction permettant de lancer les fonctions de rappel.
 	 * 
-	 * @param Request $req
-	 * @param array $names
+	 * @param Request 	  $req
+	 * @param array 	  $names
+	 * @param Application $app
+	 *
 	 * @return mixed
 	 */
-	public function call(Request $req, $names)
+	public function call(Request $req, $names, Application $app = null)
 	{
 		$params = [];
 
-		foreach ($this->key as $key => $value) {
+		foreach ($this->keys as $key => $value) {
 			if (!is_int($this->match[$key])) {
 				$params[$value] = $this->match[$key];
 			} else {
@@ -149,6 +161,10 @@ Class Route
 				$params[$value] = $tmp;
 				$this->match[$key] = $tmp;
 			}
+		}
+
+		if ($app !== null) {
+			array_unshift($this->match, $app);
 		}
 
 		$req->params = (object) $params;

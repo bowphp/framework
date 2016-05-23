@@ -45,7 +45,19 @@ class Blueprint
     public function toAlterTableStatement()
     {
         if ($this->stringify() !== null) {
-            return "ALTER TABLE ADD " . $this->columns->getTableName() . " ". $this->columns->sqlStement . "; ";
+
+            $sqlArray = explode(", ", $this->columns->sqlStement);
+            $sql = '';
+
+            foreach($sqlArray as $key => $value) {
+                if ($key > 0) {
+                    $sql .= ", ";
+                }
+
+                $sql .= "ADD `$value`";
+            }
+
+            return "ALTER TABLE " . $this->columns->getTableName() . " " . $sql . ";";
         }
 
         return null;

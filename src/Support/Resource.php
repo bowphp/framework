@@ -166,8 +166,10 @@ class Resource
 								$filename = $pathInfo->filename;
 							}
 						}
+
+						$filename .= "." . $pathInfo->extension;
 						// Déplacement du fichier tmp vers le dossier d'upload
-						move_uploaded_file($file->tmp_name, static::$uploadDir . "/" . $filename . '.' . $pathInfo->extension);
+						move_uploaded_file($file->tmp_name, static::$uploadDir . "/" . $filename);
 						
 						// Status, fichier uploadé
 						$status = static::SUCCESS;
@@ -191,7 +193,7 @@ class Resource
 		}
 
 		if ($cb !== null) {
-			call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null, isset($ext) ? $ext : null]);
+			call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null]);
 		} else {
 			return (object) $status;
 		}

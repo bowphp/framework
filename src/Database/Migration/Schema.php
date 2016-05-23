@@ -79,12 +79,17 @@ class Schema
      * fillTable, remplir un table pour permet le developpement.
      *
      * @param int $n
-     * @param int $marks
+     * @param string $table [optional]
+     * @param string $marks
      *
      * @return mixed
      */
-    public static function fillTable($n = 1, $marks = null)
+    public static function fillTable($n = 1, $table = null, $marks = null)
     {
+        if (is_string(static::$table)) {
+            $table = static::$table;
+        }
+
         if ($marks) {
             $data = static::parseMarks($marks);
         } else {
@@ -97,7 +102,7 @@ class Schema
             $insertArray[] = $data;
         }
 
-        return Database::table(static::$table)->insert($insertArray);
+        return Database::table($table)->insert($insertArray);
     }
 
     /**
@@ -123,18 +128,24 @@ class Schema
             "i" => "number",
             "s" => "string",
             "d" => "date",
-            "t" => "current_timestanp"
+            "t" => "current_timestamp"
         ];
 
         foreach($parts as $key => $values) {
             $subPart = explode("|", $values);
             $typeAndLength = explode(":", $subPart[1]);
             $key = $subPart[0];
-            $type = $types[$typeAndLength[0]];
+            $type = $types[Str::lower($typeAndLength[0])];
             $data = Filler::${$type};
 
             if (count($typeAndLength) == 2) {
-                $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
+                if ($type == "string") {
+                    $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
+                } else if ($type == "integer") {
+                    $r[$key] = $typeAndLength[1];
+                } else {
+                    $r[$key] = $data;
+                }
             } else {
                 $r[$key] = $data;
             }

@@ -455,6 +455,17 @@ class AppConfiguration
     }
 
     /**
+     * Retourne un booléen qui répresente une décision de configuration
+     * des paramètres sur les callbacks et les methods des controlleurs
+     *
+     * @return bool
+     */
+    public function getTakeInstanceOfApplicationInFunction()
+    {
+        return $this->config["application"]->instance_of_application_in_function;
+    }
+
+    /**
      * modifie le driver du systeme de mail.
      * Deux valeur possible mail | smtp
      *

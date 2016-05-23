@@ -1,10 +1,8 @@
 <?php
-
-
 namespace Bow\Mail;
 
-use Bow\Exception\MailException;
 use Bow\Support\Util;
+use Bow\Exception\MailException;
 
 abstract class Message
 {

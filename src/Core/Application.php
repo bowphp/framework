@@ -91,6 +91,11 @@ class Application
     private $disableXpoweredBy = false;
 
 	/**
+	 * @var Logger
+	 */
+	private $logger;
+
+	/**
 	 * Private construction
 	 *
 	 * @param AppConfiguration $config
@@ -102,6 +107,7 @@ class Application
 
 		$logger = new Logger($config->getLogLevel(), $config->getLogpath() . "/error.log");
 		$logger->register();
+		$this->logger = $logger;
 	}
 
 	/**
@@ -132,7 +138,7 @@ class Application
 	 * @throws ApplicationException
 	 * @return Application
 	 */
-	public function group($branch, $cb)
+	public function group($branch, Callable $cb)
 	{
 		$this->branch = $branch;
 
@@ -154,7 +160,7 @@ class Application
 	 * get, route de type GET ou bien retourne les variable ajoutés dans Bow
 	 *
 	 * @param string $path
-	 * @param callable $cb
+	 * @param Callable $cb [optional]
 	 * @return Application|string
 	 */
 	public function get($path, $cb = null)
@@ -179,10 +185,10 @@ class Application
 	 * post, route de type POST
 	 *
 	 * @param string $path
-	 * @param callable $cb
+	 * @param Callable $cb
 	 * @return Application
 	 */
-	public function post($path, $cb)
+	public function post($path, Callable $cb)
 	{
 		$body = $this->request->body();
 
@@ -201,10 +207,10 @@ class Application
 	 * any, route de tout type GET|POST|DELETE|PUT
 	 *
 	 * @param string $path
-	 * @param callable $cb
+	 * @param Callable $cb
 	 * @return Application
 	 */
-	public function any($path, $cb)
+	public function any($path, Callable $cb)
 	{
         foreach(["post", "delete", "put", "get"] as $function) {
             $this->$function($path, $cb);
@@ -220,7 +226,7 @@ class Application
 	 * @param callable $cb
 	 * @return Application
 	 */
-	public function delete($path, $cb)
+	public function delete($path, Callable $cb)
 	{
 		return $this->addHttpVerbe("DELETE", $path, $cb);
 	}
@@ -232,7 +238,7 @@ class Application
 	 * @param callable $cb
 	 * @return Application
 	 */
-	public function put($path, $cb)
+	public function put($path, Callable $cb)
 	{
 		return $this->addHttpVerbe("PUT", $path, $cb);
 	}
@@ -244,7 +250,7 @@ class Application
 	 * @param callable $cb
 	 * @return Application
 	 */
-	public function to404($cb)
+	public function to404(Callable $cb)
 	{
 		$this->error404 = $cb;
 		return $this;
@@ -258,7 +264,7 @@ class Application
 	 * @param callable $cb
 	 * @return Application
 	 */
-	public function match(array $methods, $path, $cb)
+	public function match(array $methods, $path, Callable $cb)
 	{
 		foreach($methods as $method) {
 			if ($this->request->method() === strtoupper($method)) {
@@ -279,7 +285,7 @@ class Application
 	 *
 	 * @return self
 	 */
-	private function addHttpVerbe($method, $path, $cb)
+	private function addHttpVerbe($method, $path, Callable $cb)
 	{
 		$body = $this->request->body();
 		$flag = true;
@@ -309,7 +315,7 @@ class Application
 	 *
 	 * @return Application
 	 */
-	private function routeLoader($method, $path, $cb)
+	private function routeLoader($method, $path, Callable $cb)
 	{
         // construction de la path original en fonction de la configuration de l'application
 		$path = $this->config->getApproot() . $this->branch . $path;
@@ -335,10 +341,18 @@ class Application
 	 */
 	public function where(array $otherRule)
 	{
+		// Quand le tableau de collection des contraintes sur les variables est vide
 		if (empty($this->with)) {
+			// Si on crée un nouvelle entre dans le tableau avec le nom de la methode HTTP
+			// courante dont la valeur est un tableau, ensuite dans ce tableau on crée une
+			// autre entré avec comme clé le path définie par le developpeur et pour valeur
+			// les contraintes sur les variables.
 			$this->with[$this->currentMethod] = [];
 			$this->with[$this->currentMethod][$this->currentPath] = $otherRule;
 		} else {
+			// Quand le tableau de collection des contraintes sur les variables n'est pas vide
+			// On vérifie l'existance de clé portant le nom de la methode HTTP courant
+			// si la elle existe alors on fusionne l'ancien contenu avec la nouvelle.
 			if (array_key_exists($this->currentMethod, $this->with)) {
 				$this->with[$this->currentMethod] = array_merge(
 					$this->with[$this->currentMethod], 
@@ -368,7 +382,9 @@ class Application
 		$error = true;
 
 		if (is_callable($cb)) {
-			call_user_func_array($cb, [$this->request]);
+			if (call_user_func_array($cb, [$this->request])) {
+				die();
+			}
 		}
 
 		$this->branch = "";
@@ -389,7 +405,7 @@ class Application
 
                 // route doit être une instance de Route
 				if (! ($route instanceof Route)) {
-					break;
+					continue;
 				}
 
                 // récupération du contenu de la where
@@ -404,8 +420,13 @@ class Application
                 // execution de la fonction associé à la route.
 				if ($route->match($this->request->uri(), $with)) {
 					$this->currentPath = $route->getPath();
+
                     // appel requête fonction
-					$response = $route->call($this->request, $this->config->getNamespace());
+					if ($this->config->getTakeInstanceOfApplicationInFunction()) {
+						$response = $route->call($this->request, $this->config->getNamespace(), $this);
+					} else {
+						$response = $route->call($this->request, $this->config->getNamespace());
+					}
 
                     if (is_string($response)) {
 						$this->response()->send($response);
@@ -480,25 +501,6 @@ class Application
 	}
 
 	/**
-	 * __call fonction magic php
-	 * 
-	 * @param string $method
-	 * @param array $param
-	 *
-	 * @throws ApplicationException
-	 *
-	 * @return mixed
-	 */
-	public function __call($method, $param)
-	{
-		if (method_exists($this->config, $method)) {
-			return call_user_func_array([$this->config, $method], $param);
-		}
-
-        throw new ApplicationException("$method n'exist pas une methode.", E_ERROR);
-	}
-
-	/**
 	 * @return mixed
 	 */
 	public function url()
@@ -539,4 +541,37 @@ class Application
     {
         $this->disableXpoweredBy = true;
     }
+
+	/**
+	 * Fonction retournant une instance de logger.
+	 *
+	 * @return Logger
+	 */
+	public function logger()
+	{
+		return $this->logger;
+	}
+
+	/**
+	 * __call fonction magic php
+	 *
+	 * @param string $method
+	 * @param array $param
+	 *
+	 * @throws ApplicationException
+	 *
+	 * @return mixed
+	 */
+	public function __call($method, array $param)
+	{
+		if (method_exists($this->config, $method)) {
+			return call_user_func_array([$this->config, $method], $param);
+		}
+
+		if (in_array($this->local, $method)) {
+			return call_user_func_array($this->local[$method], $param);
+		}
+
+		throw new ApplicationException("$method n'exist pas une methode.", E_ERROR);
+	}
 }

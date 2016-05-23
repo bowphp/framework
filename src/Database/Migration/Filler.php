@@ -4,19 +4,35 @@ namespace Bow\Database\Migration;
 class Filler
 {
     /**
-     * @var int
+     * @return int
      */
-    public static $number = 1;
+    public static function number()
+    {
+        return rand(1, 100);
+    }
+
     /**
-     * @var int
+     * @return string
      */
-    public static $float = 1.0;
+    public static function string()
+    {
+        return "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    }
+
     /**
-     * @var string
+     * @return string
      */
-    public static $string = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    public static function date()
+    {
+        return "NOW()";
+    }
+
     /**
-     * @var string
+     * @return float
      */
-    public static $date = "NOW()";
+    public static function float()
+    {
+        $a = rand(1, 100) . "." . rand(1, 100);
+        return (float) $a;
+    }
 }
