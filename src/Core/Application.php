@@ -547,7 +547,7 @@ class Application
 	 *
 	 * @return Logger
 	 */
-	public function logger()
+	public function log()
 	{
 		return $this->logger;
 	}
