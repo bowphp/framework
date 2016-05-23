@@ -831,8 +831,11 @@ class Table extends DatabaseTools
 
         // Execution de GET
         $data = $this->get();
+
         // On Effecture le transfert après éxécution du get
         $this->where = $where;
+
+        // nombre d'élément affécter lors de l'insertion.
         $n = 0;
 
         if (is_callable($callback)) {
@@ -1060,6 +1063,28 @@ class Table extends DatabaseTools
     }
 
     /**
+     * save aliase sur l'action insert
+     *
+     * @param array $values Les données a inserer dans la base de donnée.
+     *
+     * @return int
+     */
+    public function save(array $values)
+    {
+        $nInserted = 0;
+
+        if (is_array($values[0])) {
+            foreach($values as $key => $data) {
+                $nInserted += $this->insertOne($data);
+            }
+        } else {
+            $nInserted = $this->insertOne($values);
+        }
+
+        return $nInserted;
+    }
+
+    /**
      * @see insert
      * @param array $value
      * @return int
@@ -1084,6 +1109,19 @@ class Table extends DatabaseTools
      * @return int
      */
     public function insertAndGetLastId(array $values)
+    {
+        $this->insert($values);
+        return $this->connection->lastInsertId();
+    }
+
+    /**
+     * saveAndGetLastId aliase sur action insertAndGetLastId, lance les actions insert et lastInsertId
+     *
+     * @param array $values
+     *
+     * @return int
+     */
+    public function saveAndGetLastId(array $values)
     {
         $this->insert($values);
         return $this->connection->lastInsertId();
