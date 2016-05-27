@@ -201,7 +201,7 @@ class Str
      */
     public static function randomize($size = 16)
     {
-        return static::slice(str_shuffle('#*$@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012356789'), 0, $size);
+        return static::slice(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012356789'), 0, $size);
     }
 
     /**
@@ -267,6 +267,78 @@ class Str
         }
 
         return static::match("/^((http|ftp|ssl|url):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
+    }
+
+    /**
+     * Vérifie si la chaine est en alphanumeric
+     *
+     * @param string $str
+     *
+     * @throws \ErrorException
+     *
+     * @return int
+     */
+    public static function isAlphaNum($str)
+    {
+        if (!is_string($str)) {
+            throw new \ErrorException("Accept string " . gettype($str) . " given");
+        }
+
+        return static::match("/^[a-zA-Z0-9]+$/", $str);
+    }
+
+    /**
+     * Vérifie si la chaine est en numeric
+     *
+     * @param string $str
+     *
+     * @throws \ErrorException
+     *
+     * @return int
+     */
+    public static function isNumeric($str)
+    {
+        if (!is_string($str)) {
+            throw new \ErrorException("Accept string " . gettype($str) . " given");
+        }
+
+        return static::match("/^[0-9]+(.[0-9]+)?$/", $str);
+    }
+
+    /**
+     * Vérifie si la chaine est en alpha
+     *
+     * @param string $str
+     *
+     * @throws \ErrorException
+     *
+     * @return int
+     */
+    public static function isAlpha($str)
+    {
+        if (!is_string($str)) {
+            throw new \ErrorException("Accept string " . gettype($str) . " given");
+        }
+
+        return static::match("/^[a-zA-Z]?$/", $str);
+    }
+
+    /**
+     * Vérifie si la chaine est en format slug
+     *
+     * @param string $str
+     *
+     * @throws \ErrorException
+     *
+     * @return int
+     */
+    public static function isSlug($str)
+    {
+        if (!is_string($str)) {
+            throw new \ErrorException("Accept string " . gettype($str) . " given");
+        }
+
+        return static::match("/^[a-z0-9-]+[a-z0-9]+$/", $str);
     }
 
     /**
