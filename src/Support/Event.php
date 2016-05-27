@@ -1,13 +1,14 @@
 <?php
-/**
- * @author Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
-
 namespace Bow\Support;
 
 use Bow\Exception\EventException;
 
+/**
+ * Class Event
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 class Event
 {
     final private function __clone(){}

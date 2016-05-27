@@ -4,6 +4,12 @@ namespace Bow\Mail;
 use Bow\Support\Util;
 use Bow\Exception\MailException;
 
+/**
+ * Class Message
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Mail
+ */
 abstract class Message
 {
 
@@ -39,9 +45,9 @@ abstract class Message
     protected $attachement = [];
 
 	/**
-	 * @var array
+	 * @var string
 	 */
-	protected $form = null;
+	protected $from = null;
 
 	/**
 	 * Définir le message
@@ -82,8 +88,8 @@ abstract class Message
         $this->headers[] = "Date: " . date("r");
         $this->headers[] = "X-Mailer: Bow Framework";
 
-        if ($this->form) {
-            $this->headers[] = "From: " . $this->form;
+        if ($this->from) {
+            $this->headers[] = "From: " . $this->from;
         }
 
         if ($this->subject) {
@@ -219,7 +225,7 @@ abstract class Message
 	public function from($from, $name = null)
 	{
         if (!$this->fromDefined) {
-            $this->form = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
+            $this->from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
             $this->fromDefined = true;
         }
 

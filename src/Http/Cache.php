@@ -1,7 +1,12 @@
 <?php
-
 namespace Bow\Http;
 
+/**
+ * Class Cache
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Http
+ */
 class Cache
 {
     public function toPublic()

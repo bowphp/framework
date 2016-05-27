@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: papac
- * Date: 5/4/16
- * Time: 10:25 PM
- */
-
 namespace Bow\Database\Migration;
 
 use Bow\Support\Str;

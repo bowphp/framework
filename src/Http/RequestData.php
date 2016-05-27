@@ -1,11 +1,16 @@
 <?php
-
 namespace Bow\Http;
 
 use Closure;
 use ErrorException;
 use Bow\Interfaces\CollectionAccess;
 
+/**
+ * Class RequestData
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Http
+ */
 class RequestData implements CollectionAccess
 {
 
@@ -27,7 +32,7 @@ class RequestData implements CollectionAccess
 	/**
 	 * Contructeur privé
 	 *
-	 * @param $method
+	 * @param string $method
 	 */
 	private function __construct($method)
 	{
@@ -37,6 +42,8 @@ class RequestData implements CollectionAccess
 			$this->data = $_POST;
 		} else if ($method == "FILES") {
 			$this->data = $_FILES;
+		} else if ($method == "ALL") {
+			$this->data = array_merge($_POST, $_FILES, $_GET);
 		}
 
 		static::$last_method = $method;

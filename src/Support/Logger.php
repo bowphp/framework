@@ -1,15 +1,16 @@
 <?php
-/**
- * Logger class
- * @author Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 namespace Bow\Support;
 
 use Bow\Exception\LoggerException;
 use Bow\Support\Resource;
 use Psr\Log\AbstractLogger;
 
+/**
+ * Class Logger
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 class Logger extends AbstractLogger
 {
     /**

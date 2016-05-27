@@ -1,15 +1,15 @@
 <?php
+namespace Bow\Core;
+
+use Bow\Support\Util;
+use Bow\Http\Request;
+
 /**
  * Bow Router
  *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Core
  */
-namespace Bow\Core;
-
-use Bow\Support\Util;
-use Bow\Http\Request;
-
 Class Route
 {
 	/**
@@ -167,7 +167,7 @@ Class Route
 			array_unshift($this->match, $app);
 		}
 
-		$req->params = (object) $params;
+		$req::$params = (object) $params;
 
 		return Util::launchCallback($this->cb, $this->match, $names);
 	}

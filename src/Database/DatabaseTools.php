@@ -1,11 +1,16 @@
 <?php
-
 namespace Bow\Database;
 
 use PDO;
 use PDOStatement;
 use Bow\Support\Security;
 
+/**
+ * Class DatabaseTools
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Database
+ */
 abstract class DatabaseTools
 {
     protected static $errorInfo = [];
@@ -98,9 +103,7 @@ abstract class DatabaseTools
         $resultat = [];
 
         foreach ($data as $key => $value) {
-            if (is_string($key)) {
-                $resultat[$value] = ":$value";
-            }
+            $resultat[$value] = ":$value";
         }
 
         return $resultat;

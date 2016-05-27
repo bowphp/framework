@@ -1,11 +1,12 @@
 <?php
+namespace Bow\Support;
+
 /**
+ * Class Form
+ *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-
-namespace Bow\Support;
-
 class Form
 {
     private final function __construct() {}

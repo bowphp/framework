@@ -5,6 +5,12 @@ use StdClass;
 use Bow\Support\Str;
 use Bow\Core\Application;
 
+/**
+ * Class Request
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Http
+ */
 class Request
 {
 	/**
@@ -20,14 +26,14 @@ class Request
 	 * 
 	 * @var object
 	 */
-	public $params;
+	public static $params;
 
 	/**
 	 * Constructeur
 	 */
 	private function __construct()
 	{
-		$this->params = new StdClass();
+		static::$params = new StdClass();
 	}
 
 	/**
@@ -113,6 +119,62 @@ class Request
 	}
 
 	/**
+	 * Si la réquête est de type POST
+	 *
+	 * @return bool
+	 */
+	public function isPost()
+	{
+		if ($this->method() == "POST") {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Si la réquête est de type GET
+	 *
+	 * @return bool
+	 */
+	public function isGet()
+	{
+		if ($this->method() == "GET") {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Si la réquête est de type PUT
+	 *
+	 * @return bool
+	 */
+	public function isPut()
+	{
+		if ($this->method() == "PUT" || $this->body()->get("_method", null) == "PUT") {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Si la réquête est de type DELETE
+	 *
+	 * @return bool
+	 */
+	public function isDelete()
+	{
+		if ($this->method() == "DELETE" || $this->body()->get("_method", null) == "DELETE") {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Charge la factory RequestData pour le POST
 	 *
 	 * @return RequestData
@@ -143,11 +205,21 @@ class Request
     }
 
 	/**
+	 * Change le factory RequestData pour tout les entrés PHP (GET, FILES, POST)
+	 *
+	 * @return RequestData
+	 */
+	public static function allInput()
+	{
+		return RequestData::configure("ALL");
+	}
+
+	/**
 	 * Vérifie si on n'est dans le cas d'un requête AJAX.
 	 *
 	 * @return boolean
 	 */
-	public function ajax()
+	public function isAjax()
 	{
 		if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
 			$xhrObj = Str::lower($_SERVER["HTTP_X_REQUESTED_WITH"]);

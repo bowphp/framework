@@ -1,11 +1,12 @@
 <?php
+namespace Bow\Support;
+
 /**
+ * Class Str
+ *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-
-namespace Bow\Support;
-
 class Str
 {
     /**

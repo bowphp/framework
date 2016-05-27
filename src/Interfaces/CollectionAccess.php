@@ -1,7 +1,12 @@
 <?php
-
 namespace Bow\Interfaces;
 
+/**
+ * Interface CollectionAccess
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Interfaces
+ */
 interface CollectionAccess
 {
     /**

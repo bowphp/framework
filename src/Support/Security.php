@@ -1,13 +1,14 @@
 <?php
-/**
- * @author Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
-
 namespace Bow\Support;
 
 use Bow\Core\AppConfiguration;
 
+/**
+ * Class Security
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 class Security
 {
 	/**
@@ -100,12 +101,14 @@ class Security
 			foreach($data as $key => $value) {
 				$data[$key] = self::sanitaze($value, $secure);
 			}
+			return $data;
 		}
 
 		if (is_object($data)) {
 			foreach($data as $key => $value) {
 				$data->$key = self::sanitaze($value, $secure);
 			}
+			return $data;
 		}
 
 		return $data;
@@ -149,14 +152,14 @@ class Security
 	 *
 	 * @return bool
 	 */
-	public static function createTokenCsrf($time = null)
+	public static function createCsrfToken($time = null)
 	{
 		if (!Session::has("bow.csrf")) {
 			if (is_int($time)) {
 				static::$tokenCsrfExpirateTime = $time;
 			}
 
-			$token = static::generateTokenCsrf();
+			$token = static::generateCsrfToken();
 
 			Session::add("bow.csrf", (object) [
 				"token" => $token,
@@ -175,7 +178,7 @@ class Security
 	 *
 	 * @return string
 	 */
-	public static function generateTokenCsrf()
+	public static function generateCsrfToken()
 	{
 		return md5(base64_encode(openssl_random_pseudo_bytes(23)) . date("Y-m-d H:i:s") . uniqid(rand(), true));
 	}
@@ -185,7 +188,7 @@ class Security
 	 *
 	 * @return mixed
 	 */
-	public static function getTokenCsrf()
+	public static function getCsrfToken()
 	{
 		return Session::get("bow.csrf");
 	}
@@ -204,7 +207,7 @@ class Security
 				$time = time();
 			}
 
-			if (static::getTokenCsrf()->expirate >= (int) $time) {
+			if (static::getCsrfToken()->expirate >= (int) $time) {
 				return true;
 			}
 		}
@@ -220,12 +223,12 @@ class Security
 	 *
 	 * @return boolean
 	 */
-	public static function verifyTokenCsrf($token, $strict = false)
+	public static function verifyCsrfToken($token, $strict = false)
 	{
 		$status = false;
 		
 		if (Session::has("bow.csrf")) {
-			if ($token === static::getTokenCsrf()->token) {
+			if ($token === static::getCsrfToken()->token) {
 				$status = true;
 				if ($strict) {
 					$status = $status && static::tokenCsrfTimeIsExpirate(time());
@@ -239,7 +242,7 @@ class Security
 	/**
 	 * Détruie le token
 	 */
-	public static function clearTokenCsrf()
+	public static function clearCsrfToken()
 	{
 		Session::remove("bow.csrf");
 	}

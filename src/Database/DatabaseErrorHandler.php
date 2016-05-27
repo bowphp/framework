@@ -3,8 +3,19 @@ namespace Bow\Database;
 
 use Bow\Exception\DatabaseException;
 
+/**
+ * Class DatabaseErrorHandler
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Database
+ */
 class DatabaseErrorHandler
 {
+    /**
+     * @var mixed
+     */
+    public $rowAffected = 0;
+
     /**
      * @var array
      */
@@ -35,6 +46,8 @@ class DatabaseErrorHandler
     }
 
     /**
+     * Le code de l'erreur PDO
+     *
      * @return string
      */
     public function getCode()
@@ -43,11 +56,11 @@ class DatabaseErrorHandler
     }
 
     /**
-     *
+     * formateur
      */
     private function formatError()
     {
-        if ($this->pdoStatement[1] !== null) {
+        if (isset($this->pdoStatement[1]) && $this->pdoStatement[1] !== null) {
             $this->driverMessage = $this->pdoStatement[2];
             $this->driverCode = $this->pdoStatement[0];
             $this->error = true;
@@ -55,6 +68,8 @@ class DatabaseErrorHandler
     }
 
     /**
+     * Donne l'information de l'existance d'une erreur.
+     *
      * @return bool
      */
     public function hasError()
@@ -63,6 +78,8 @@ class DatabaseErrorHandler
     }
 
     /**
+     * Le message de l'erreur PDO
+     *
      * @return string
      */
     public function getMessage()
@@ -71,6 +88,8 @@ class DatabaseErrorHandler
     }
 
     /**
+     * Retourne l'erreur PDO similaire de PDO::errorInfo()
+     *
      * @return array
      */
     public function toArray()
@@ -79,6 +98,8 @@ class DatabaseErrorHandler
     }
 
     /**
+     * Lance une exception qui a pour message le message de l'erreur PDO
+     *
      * @throws DatabaseException
      */
     public function throwError() {

@@ -5,7 +5,14 @@ use Bow\Support\Str;
 use Bow\Support\Security;
 use Bow\Support\Collection;
 use Bow\Exception\TableException;
+use Bow\Database\DatabaseErrorHandler;
 
+/**
+ * Class Table
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Database
+ */
 class Table extends DatabaseTools
 {
     /**
@@ -718,7 +725,9 @@ class Table extends DatabaseTools
         } else {
             $data = Security::sanitaze($stmt->fetchAll());
         }
+
         $stmt->closeCursor();
+
         if (is_callable($cb)) {
         	return call_user_func_array($cb, [$this->getLastError(), $data]);
         }
@@ -772,11 +781,11 @@ class Table extends DatabaseTools
         $n = $this->delete();
 
         if (is_callable($cb)) {
-            $cb($this->getLastError(), $data, $n);
+            call_user_func_array($cb, [$n, $data]);
         }
 
-        return [
-            "nDeleted" => $n,
+        return (object) [
+            "info" => $n,
             "data" => $data
         ];
     }
@@ -808,13 +817,8 @@ class Table extends DatabaseTools
      */
     public function findOneOrFail()
     {
-        $data = $this->getOne();
-
-        if ($data == false) {
-            throw new TableException("Aucune donnée trouver.", E_WARNING);
-        }
-
-        return $data;
+        static::$getOne = true;
+        return $this->findOrFail();
     }
 
     /**
@@ -829,65 +833,54 @@ class Table extends DatabaseTools
         // Dans le but de ne pas doubler le where
         $where = $this->where;
 
-        // Execution de GET
+        // Execution de GET, retourne un table comme nous avons pas definie de callback
         $data = $this->get();
 
         // On Effecture le transfert après éxécution du get
         $this->where = $where;
 
         // nombre d'élément affécter lors de l'insertion.
-        $n = 0;
+        $n = $this->update($arr);
 
         if (is_callable($callback)) {
-            $r = call_user_func_array($callback, [$this->getLastError(), $data]);
-            if ($r === true) {
-                $n = $this->update($arr);
-            }
-        } else {
-            $n = $this->update($arr);
+            return call_user_func_array($callback, [$this->getLastError(), $data]);
         }
 
-        return [
-            "nUpdated" => $n,
-            "data" => $data
-        ];
+        return $data;
     }
 
     /**
-     * @param array $arr
+     * @param array $arr Les nouvelles informations à inserer dans la base de donnée
+     * @param callable $callback [optional] La fonction de rappel. Dans ou elle est définie
+     *                                      elle récupère en paramètre une instance de DatabaseErrorHanlder
+     *                                      et les données récupérés par la réquête.
      *
      * @return array
      */
-    public function findOneAndModify(array $arr)
+    public function findOneAndModify(array $arr, Callable $callback = null)
     {
-        $where = $this->where;
-        $data = $this->getOne();
-
-        $this->where = $where;
-        $n = $this->update($arr);
-
-        return [
-            "nUpdated" => $n,
-            "data" => $data
-        ];
+        static::$getOne = true;
+        return $this->findAndModify($arr, $callback);
     }
 
     /**
      * count
      * 
-     * @param string $column
-     * @param callable $cb=null
+     * @param string $column          La colonne sur laquelle sera faite le `count`
+     * @param callable $cb [optional] La fonction de rappel. Dans ou elle est définie
+     *                                elle récupère en paramètre une instance de DatabaseErrorHanlder
+     *                                et les données récupérés par la réquête.
      * 
-     * @return int
+     * @return DatabaseErrorHandler
      */
-    public function count($column = "*", $cb = null)
+    public function count($column = "*", Callable $cb = null)
     {
     	if (is_callable($column)) {
     		$cb = $column;
     		$column = "*";
     	}
 
-        $sql = "select count($column) from " . $this->tableName;
+        $sql = "select count(`$column`) from " . $this->tableName;
 
         if ($this->where !== null) {
             $sql .= " where " . $this->where;
@@ -899,26 +892,28 @@ class Table extends DatabaseTools
         $this->whereDataBind = [];
         $stmt->execute();
         self::$errorInfo = $stmt->errorInfo();
-        $count = $stmt->fetchColumn();
+        $r = $stmt->fetchColumn();
 
     	if (is_callable($cb)) {
-    		call_user_func_array($cb, [$this->getLastError(), $count]);
+    		call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
     	}
 
-        return  $count;
+        return  $this->getResponseOfQuery($r);
     }
 
     /**
      * Action update
      *
-     * @param array $data
-     * @param callable $cb
+     * @param array $data  Les données à mettre à jour
+     * @param callable $cb La fonction de rappel. Dans ou elle est définie
+     *                     elle récupère en paramètre une instance de DatabaseErrorHanlder
+     *                     et les données récupérés par la réquête.
      * 
      * @return int
      */
-    public function update(array $data = [], $cb = null)
+    public function update(array $data = [], Callable $cb = null)
     {
-		$sql = "update " . $this->tableName . " set ";
+		$sql = "update `" . $this->tableName . "` set ";
 		$sql .= parent::rangeField(parent::add2points(array_keys($data)));
 
 		if (!is_null($this->where)) {
@@ -941,10 +936,10 @@ class Table extends DatabaseTools
 		$r = $stmt->rowCount();
 
 		if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$this->getLastError(), $r]);
+        	return call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
         }
 
-		return $r;
+		return $this->getResponseOfQuery($r);
     }
 
     /**
@@ -952,11 +947,11 @@ class Table extends DatabaseTools
      *
      * @param callable $cb
      * 
-     * @return int
+     * @return DatabaseErrorHandler
      */
-    public function delete($cb = null)
+    public function delete(Callable $cb = null)
     {
-		$sql = "delete from " . $this->tableName;
+		$sql = "delete from `" . $this->tableName . "`";
 
 		if (!is_null($this->where)) {
 			$sql .= " where " . $this->where;
@@ -969,22 +964,39 @@ class Table extends DatabaseTools
         $this->whereDataBind = [];
 		$stmt->execute();
         self::$errorInfo = $stmt->errorInfo();
-		$data = $stmt->rowCount();
+		$r = $stmt->rowCount();
 
         if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$this->getLastError(), $data]);
+        	return call_user_func_array($cb, [$this->getResponseOfQuery($r), $r]);
         }
 
-        return $data;
+        return $this->getResponseOfQuery($r);
+    }
+
+    /**
+     * remove alise simplifié de delete.
+     *
+     * @param string $column Le nom du champs de la conditions
+     * @param string $comp Le type de comparaison
+     * @param string $value [optinal] La valeur a comparé
+     *
+     * @return DatabaseErrorHandler
+     *
+     * @throws TableException
+     */
+    public function remove($column, $comp = "=", $value = null)
+    {
+        $this->where = null;
+        return $this->where($column, $comp, $value)->delete();
     }
 
     /**
      * Action increment, ajout 1 par défaut sur le champs spécifié
      *
-     * @param $column
-     * @param int $step
-     * 
-     * @return Table
+     * @param string $column La colonne sur laquel est faite incrémentation
+     * @param int $step Le part de l'incrementation
+     *
+     * @return DatabaseErrorHandler
      */
     public function increment($column, $step = 1)
     {
@@ -998,7 +1010,7 @@ class Table extends DatabaseTools
      * @param string $column
      * @param int $step
      * 
-     * @return int|bool
+     * @return DatabaseErrorHandler
      */
     public function decrement($column, $step = 1)
     {
@@ -1012,11 +1024,11 @@ class Table extends DatabaseTools
      * @param int $step
      * @param string $sign
      * 
-     * @return int
+     * @return DatabaseErrorHandler
      */
     private function crement($column, $step = 1, $sign = "")
     {
-        $sql = "update " . $this->tableName . " set $column = $column $sign $step";
+        $sql = "update `" . $this->tableName . "` set `$column` = `$column` $sign $step";
 
         if (!is_null($this->where)) {
             $sql .= " " . $this->where;
@@ -1026,8 +1038,9 @@ class Table extends DatabaseTools
         $stmt = $this->connection->prepare($sql);
         $this->bind($stmt, $this->whereDataBind);
         $stmt->execute();
+        static::$errorInfo = $stmt->errorInfo();
 
-        return (int) $stmt->rowCount();
+        return $this->getResponseOfQuery((int) $stmt->rowCount());
     }
 
     /**
@@ -1045,13 +1058,13 @@ class Table extends DatabaseTools
      *
      * @param array $values Les données a inserer dans la base de donnée.
      * 
-     * @return int
+     * @return DatabaseErrorHandler
      */
     public function insert(array $values)
     {
         $nInserted = 0;
 
-        if (is_array($values[0])) {
+        if (isset($values[0]) && is_array($values[0])) {
             foreach($values as $key => $data) {
                 $nInserted += $this->insertOne($data);
             }
@@ -1059,7 +1072,7 @@ class Table extends DatabaseTools
             $nInserted = $this->insertOne($values);
         }
 
-        return $nInserted;
+        return $this->getResponseOfQuery($nInserted);
     }
 
     /**
@@ -1067,21 +1080,11 @@ class Table extends DatabaseTools
      *
      * @param array $values Les données a inserer dans la base de donnée.
      *
-     * @return int
+     * @return DatabaseErrorHandler
      */
     public function save(array $values)
     {
-        $nInserted = 0;
-
-        if (is_array($values[0])) {
-            foreach($values as $key => $data) {
-                $nInserted += $this->insertOne($data);
-            }
-        } else {
-            $nInserted = $this->insertOne($values);
-        }
-
-        return $nInserted;
+        return $this->insert($values);
     }
 
     /**
@@ -1089,9 +1092,9 @@ class Table extends DatabaseTools
      * @param array $value
      * @return int
      */
-    public function insertOne(array $value)
+    private function insertOne(array $value)
     {
-        $sql = "insert into " . $this->tableName . " set ";
+        $sql = "insert into `" . $this->tableName . "` set ";
         $values = Security::sanitaze($value, true);
         $sql .= parent::rangeField(parent::add2points(array_keys($value)));
         $stmt = $this->connection->prepare($sql);
@@ -1105,26 +1108,33 @@ class Table extends DatabaseTools
      * Action insertAndGetLastId lance les actions insert et lastInsertId
      *
      * @param array $values
-     * 
-     * @return int
+     * @param bool $withInfo
+     *
+     * @return int|DatabaseErrorHandler
      */
-    public function insertAndGetLastId(array $values)
+    public function insertAndGetLastId(array $values, $withInfo = false)
     {
-        $this->insert($values);
-        return $this->connection->lastInsertId();
+        $r = $this->insert($values);
+        $n = $this->connection->lastInsertId();
+
+        if ($withInfo) {
+            $n = (object) ["info" => $r, "lastId" => $n];
+        }
+
+        return $n;
     }
 
     /**
      * saveAndGetLastId aliase sur action insertAndGetLastId, lance les actions insert et lastInsertId
      *
      * @param array $values
+     * @param bool $withInfo
      *
-     * @return int
+     * @return int|DatabaseErrorHandler
      */
-    public function saveAndGetLastId(array $values)
+    public function saveAndGetLastId(array $values, $withInfo = false)
     {
-        $this->insert($values);
-        return $this->connection->lastInsertId();
+        return $this->insertAndGetLastId($values, $withInfo);
     }
 
     /**
@@ -1178,7 +1188,7 @@ class Table extends DatabaseTools
      * @param integer $n nombre d'element a récupérer
      * @param integer $current la page courrant
      * @param integer $chunk le nombre l'élément par groupe que l'on veux faire.
-     * @return array|\StdClass
+     * @return \stdClass
      */
     public function paginate($n, $current = 0, $chunk = null)
     {
@@ -1218,10 +1228,11 @@ class Table extends DatabaseTools
             "next" => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
             "previous" => ($current - 1) <= 0 ? 1 : ($current - 1),
             "data" => $data,
-            "current" => $current
+            "current" => $current,
+            "info" => $this->getResponseOfQuery(count($data))
         ];
 
-        return $data;
+        return (object) $data;
     }
 
     /**
@@ -1237,6 +1248,7 @@ class Table extends DatabaseTools
         if (count($data) == 1) {
             $data = $data[0];
         }
+
         foreach($data as $key => $value) {
             $coll->add($key, $value);
         }
@@ -1286,5 +1298,19 @@ class Table extends DatabaseTools
     public function getLastError()
     {
         return new DatabaseErrorHandler(self::$errorInfo);
+    }
+
+    /**
+     * Retourne une instance de DatabaseErrorHandler, dans lequel on peut avoir des informations sur
+     * l'erreur de la réquête.
+     *
+     * @param int $n Le nombre de ligne affécter par un réquête.
+     * @return DatabaseErrorHandler
+     */
+    private function getResponseOfQuery($n)
+    {
+        $r = $this->getLastError();
+        $r->rowAffected = $n;
+        return $r;
     }
 }

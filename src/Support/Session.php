@@ -1,9 +1,4 @@
 <?php
-/**
- * @author Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
-
 namespace Bow\Support;
 
 use Bow\Support\Str;
@@ -12,6 +7,12 @@ use Bow\Support\Security;
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
 
+/**
+ * Class Session
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 class Session implements CollectionAccessStatic
 {
 

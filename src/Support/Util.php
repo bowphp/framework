@@ -1,9 +1,4 @@
 <?php
-/**
- * @author Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
-
 namespace Bow\Support;
 
 use DateTime;
@@ -11,6 +6,12 @@ use InvalidArgumentException;
 use Bow\Exception\UtilException;
 use Bow\Exception\RouterException;
 
+/**
+ * Class Util
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 class Util
 {
 	/**
@@ -131,12 +132,12 @@ class Util
 		static::$names = $names;
 
 		if (!file_exists($names["autoload"] . ".php")) {
-            throw new RouterException("L'autoload n'est définir dans le fichier de configuration", E_ERROR);
+            throw new RouterException("L'autoload n'est pas défini dans le fichier de configuration", E_ERROR);
 		}
 
 
         if (!isset($names["namespace"]["app"])) {
-            throw new RouterException("Le namespace autoload n'est définir dans le fichier de configuration");
+            throw new RouterException("Le namespace d'autoload n'est pas défini dans le fichier de configuration");
         }
 
 		// Chargement de l'autoload
@@ -207,7 +208,7 @@ class Util
 
         // Execution du middleware si define.
         if (is_string($middleware)) {
-            if (!in_array($middleware, $names["middlewares"])) {
+            if (!in_array(ucfirst($middleware), $names["middlewares"], true)) {
                 throw new RouterException($middleware . " n'est pas un middleware definir.", E_ERROR);
             }
 
@@ -220,7 +221,7 @@ class Util
             }
 
             $instance = new $classMiddleware();
-            $handler = [$instance, "handler"];
+            $handler = [$instance, "handle"];
             $status = call_user_func_array($handler, $param);
         
         // Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
@@ -230,7 +231,7 @@ class Util
 
         // On arrêt tout en case de status false.
         if ($status == false) {
-            die();
+            return false;
         }
 
         // Lancement de l'execution de la liste
@@ -305,7 +306,7 @@ class Util
 	/**
 	 * Charge les controlleurs
 	 * 
-	 * @param string $controllerName. Utilisant la dot notation
+	 * @param string $controllerName. Le nom du controlleur a utilisé
 	 * 
 	 * @return array
 	 */
@@ -320,26 +321,6 @@ class Util
 		$class = static::$names["namespace"]["controller"] . "\\" . ucfirst($class);
 
 		return [new $class(), $method];
-	}
-
-	/**
-	 * filter, fonction permettant de filter les données
-	 *
-	 * @param array $opts
-	 * @param callable $cb
-	 * @return array $r, collection de donnée élus après le tri.
-	 */
-	public static function filtre($opts, $cb)
-	{
-		$r = [];
-
-		foreach ($opts as $key => $value) {
-			if (call_user_func_array($cb, [$value, $key])) {
-				array_push($r, $value);
-			}
-		}
-
-		return $r;
 	}
 
 	/**
@@ -443,10 +424,10 @@ class Util
             $content = preg_replace("~(string|int|object|stdclass|bool|double|float|array|integer)~i", "<span style=\"color: rgba(255, 0, 0, 0.9); font-style: italic\">$1</span>", $content);
             $content = preg_replace('~\((\d+)\)~im', "<span style=\"color: #498\">($1)</span>", $content);
             $content = preg_replace('~\s(".+")~im', "<span style=\"color: #458\"> $1</span>", $content);
-            $content = preg_replace("~(=>)(\n\s+?)+~im", "<span style=\"color: #754\"> is</span>", $content);
-            $content = preg_replace("~(is</span>)\s+~im", "$1 ", $content);
-            $content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: black\">[</span>$1<span style=\"color: black\">]</span></span>", $content);
-            $content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: black\">@</span>$1<span style=\"color: black\"></span></span>", $content);
+//            $content = preg_replace("~(=>)(\n\s+?)+~im", "<span style=\"color: #754\"> is</span>", $content);
+//            $content = preg_replace("~(is</span>)\s+~im", "$1 ", $content);
+            $content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 => <span style=\"color: black\"></span></span>", $content);
+            $content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 => <span style=\"color: black\"></span></span>", $content);
             $content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
             $html .= $content;
         }

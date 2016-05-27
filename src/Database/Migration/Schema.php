@@ -78,15 +78,33 @@ class Schema
     /**
      * fillTable, remplir un table pour permet le developpement.
      *
+     *
+     * @param string|array $table [optional]
+     * @param array $marks
      * @param int $n
-     * @param string $table [optional]
-     * @param string $marks
      *
      * @return mixed
      */
-    public static function fillTable($n = 1, $table = null, $marks = null)
+    public static function fillTable($table, array $marks = null, $n = 1)
     {
-        if (is_string(static::$table)) {
+        if (is_int($table)) {
+            $n = $table;
+            $table = null;
+            $marks = [];
+        }
+
+        if (is_array($table)) {
+            $marks = $table;
+            $table = null;
+            $n = 1;
+        }
+
+        if (is_int($marks)) {
+            $n = $marks;
+            $marks = null;
+        }
+
+        if (!is_string($table)) {
             $table = static::$table;
         }
 
@@ -121,36 +139,42 @@ class Schema
      */
     private static function parseMarks($marks)
     {
-        $parts = explode(";", $marks);
         $r = [];
 
-        $types = [
-            "i" => "number",
-            "s" => "string",
-            "d" => "date",
-            "t" => "current_timestamp"
-        ];
+        if (is_string($marks)) {
+            $parts = explode(";", $marks);
+            $types = [
+                "i" => "number",
+                "s" => "string",
+                "d" => "date",
+                "t" => "current_timestamp"
+            ];
 
-        foreach($parts as $key => $values) {
-            $subPart = explode("|", $values);
-            $typeAndLength = explode(":", $subPart[1]);
-            $key = $subPart[0];
-            $type = $types[Str::lower($typeAndLength[0])];
-            $data = Filler::${$type};
+            foreach($parts as $key => $values) {
+                $subPart = explode("|", $values);
+                $typeAndLength = explode(":", $subPart[1]);
+                $key = $subPart[0];
+                $type = $types[Str::lower($typeAndLength[0])];
+                $data = Filler::${$type};
 
-            if (count($typeAndLength) == 2) {
-                if ($type == "string") {
-                    $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
-                } else if ($type == "integer") {
-                    $r[$key] = $typeAndLength[1];
+                if (count($typeAndLength) == 2) {
+                    if ($type == "string") {
+                        $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
+                    } else if ($type == "integer") {
+                        $r[$key] = $typeAndLength[1];
+                    } else {
+                        $r[$key] = $data;
+                    }
                 } else {
                     $r[$key] = $data;
                 }
-            } else {
-                $r[$key] = $data;
             }
+
+            return $r;
         }
 
-        return $r;
+        if (is_array($marks)) {
+            return $r;
+        }
     }
 }

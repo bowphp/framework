@@ -10,6 +10,12 @@ use Bow\Core\AppConfiguration;
 use Bow\Exception\ViewException;
 use Bow\Exception\ResponseException;
 
+/**
+ * Class Response
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Http
+ */
 class Response
 {
 	/**
@@ -121,12 +127,47 @@ class Response
     /**
      * redirect, permet de lancer une redirection vers l'url passé en paramêtre
      *
-     * @param string $path L'url de rédirection
+     * @param string|array $path L'url de rédirection
+	 * Si $path est un tableau :
+	 * 	$url = [
+	 * 		"url" => "//"
+	 * 		"?" => [
+	 * 			"name" => "dakia",
+	 * 			"lastname" => "franck",
+	 * 			"id" => "1",
+	 * 		],
+	 * 		"$" => "hello"
+	 * ];
+	 *
      */
     public function redirect($path)
     {
-		header("Location: " . $path, true, 301);
-		echo '<a href="' . $path . '" >' . self::$header[301] . '</a>';
+		$url = "/";
+
+		if (is_string($path)) {
+			$url = $path;
+		} else {
+			$url = $path["url"];
+
+			if (isset($path["?"])) {
+				$url .= "?";
+				$i = 0;
+				foreach($path["?"] as $key => $value) {
+					if ($i > 0) {
+						$url .= "&";
+					}
+					$url .= $key . "=" . $value;
+					$i++;
+				}
+			}
+
+			if (isset($path["#"])) {
+				$url .= "#" . $path["#"];
+			}
+		}
+
+		header("Location: " . $url, true, 301);
+		echo '<a href="' . $url . '" >' . self::$header[301] . '</a>';
 
 		die();
     }
@@ -240,7 +281,9 @@ class Response
 		}
 
 		if ($this->config->getEngine() == "php") {
+			ob_start();
 			require $filename;
+			$this->send(ob_get_clean());
 		} else {
 			// Chargement du template.
 			$template = $this->templateLoader();

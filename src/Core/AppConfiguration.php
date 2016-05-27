@@ -1,10 +1,15 @@
 <?php
-
 namespace Bow\Core;
 
 use Bow\Support\Util;
 use Bow\Exception\ApplicationException;
 
+/**
+ * Class AppConfiguratio
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Core
+ */
 class AppConfiguration
 {
     /**

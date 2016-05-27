@@ -1,8 +1,4 @@
 <?php
-/**
- * Classe SMTP
- * @autor Franck Dakia <dakiafranck@gmail.com>
- */
 namespace Bow\Mail;
 
 use ErrorException;
@@ -11,6 +7,12 @@ use Bow\Support\Util;
 use Bow\Exception\SmtpException;
 use Bow\Exception\SocketException;
 
+/**
+ * Class Smtp
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Mail
+ */
  class Smtp extends Message
 {
 

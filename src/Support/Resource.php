@@ -1,15 +1,15 @@
 <?php
-/**
- * @author Franck Dakia <dakiafranck@gmail.com>
- *
- * @package Bow\Support
- */
-
 namespace Bow\Support;
 
 use InvalidArgumentException;
 use Bow\Exception\ResourceException;
 
+/**
+ * Class Resource
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 class Resource
 {
 	/**

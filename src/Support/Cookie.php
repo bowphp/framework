@@ -3,6 +3,12 @@ namespace Bow\Support;
 
 use Bow\Support\Session;
 
+/**
+ * Class Cookie
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support
+ */
 class Cookie
 {
     /**

@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Database;
 
 use PDO;
@@ -15,6 +14,12 @@ use InvalidArgumentException;
 use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
 
+/**
+ * Class Database
+ *
+ * @author Franck dakia <dakiafranck@gmail.com>
+ * @package Bow\Database
+ */
 class Database extends DatabaseTools
 {
     /**

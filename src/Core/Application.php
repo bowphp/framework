@@ -1,13 +1,7 @@
 <?php
-/**
- * Create and maintener by diagnostic developpers teams:
- * 
- * @author Etchien Boa <geekroot9@gmail.com>
- * @author Dakia Franck <dakiafranck@gmail.com>
- * @package Bow\Core
- */
 namespace Bow\Core;
 
+use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
@@ -15,6 +9,13 @@ use Bow\Support\Logger;
 use InvalidArgumentException;
 use Bow\Exception\ApplicationException;
 
+/**
+ * Create and maintener by diagnostic developpers teams:
+ *
+ * @author Etchien Boa <geekroot9@gmail.com>
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Core
+ */
 class Application
 {
 	/**
@@ -445,7 +446,7 @@ class Application
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			} else {
-				$this->response()->send("404");
+				$this->response()->send("Cannot " . $method . " " . $this->request->uri() . " 404");
 			}
 			$this->response()->code(404);
 		}
@@ -500,14 +501,6 @@ class Application
 		return Request::configure();
 	}
 
-	/**
-	 * @return mixed
-	 */
-	public function url()
-	{
-		return $this->currentPath;
-	}
-
     /**
      * @param string $key
      * @param string $prefix
@@ -541,6 +534,26 @@ class Application
     {
         $this->disableXpoweredBy = true;
     }
+
+	/**
+	 * @param string $controllerName
+	 * @param array $where
+	 * @return $this
+	 */
+	public function resources($controllerName, array $where = [])
+	{
+		$url = preg_replace("/controller/", "", Str::lower($controllerName));
+
+		$this->get("/$url",			 "{$controllerName}@index");
+		$this->get("/$url/create",   "{$controllerName}@create");
+		$this->get("/$url/:id",      "{$controllerName}@show")->where($where);
+		$this->get("/$url/:id/edit", "{$controllerName}@edit")->where($where);
+		$this->delete("/$url/:id",   "{$controllerName}@destroy")->where($where);
+		$this->put("/$url/:id",      "{$controllerName}@update")->where($where);
+		$this->post("/$url",         "{$controllerName}@store");
+
+		return $this;
+	}
 
 	/**
 	 * Fonction retournant une instance de logger.

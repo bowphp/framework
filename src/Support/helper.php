@@ -1,5 +1,4 @@
 <?php
-
 /*------------------------------------------------
 |
 |	HELPER
@@ -374,6 +373,18 @@ if (!function_exists("query")) {
     }
 }
 
+if (!function_exists("input")) {
+    /**
+     * input, fonction de type collection
+     * manipule la variable global $_GET, $_POST, $_FILES
+     *
+     * @return RequestData
+     */
+    function input() {
+        return request()->allInput();
+    }
+}
+
 if (!function_exists("dump")) {
     /**
      * dump, fonction de debug de variable
@@ -385,59 +396,51 @@ if (!function_exists("dump")) {
     }
 }
 
-if (!function_exists("create_token_csrf")) {
+if (!function_exists("create_csrf")) {
     /**
-     * csrf, fonction permetant de crée automatiquement un gestionnaire de csrf
+     * create_csrf, fonction permetant de récupérer le token généré
      *
-     * @param int $time
-     *
-     * @return bool
-     */
-    function create_token_csrf($time = null) {
-        return Security::createTokenCsrf($time);
-    }
-}
-
-if (!function_exists("get_token_csrf")) {
-    /**
-     * get_token_csrf, fonction permetant de récupérer le token généré
-     *
+     * @param int $time [optional]
      * @return \StdClass
      */
-    function get_token_csrf() {
-        return Security::getTokenCsrf();
+    function create_csrf($time = null) {
+        Security::createCsrfToken($time);
+        return Security::getCsrfToken();
     }
 }
 
 if (!function_exists("generate_token_csrf")) {
     /**
      * csrf, fonction permetant de générer un token
+     *
      * @return string
      */
-    function generate_token_csrf() {
-        return Security::generateTokenCsrf();
+    function gen_csrf_token() {
+        return Security::generateCsrfToken();
     }
 }
 
-if (!function_exists("verify_token_csrf")) {
+if (!function_exists("verify_csrf")) {
     /**
      * verify_token_csrf, fonction permetant de vérifier un token
+     *
      * @param string $token l'information sur le token
      * @param bool $strict vérifie le token et la date de création avec à la valeur time()
      * @return string
      */
-    function verify_token_csrf($token, $strict = false) {
-        return Security::verifyTokenCsrf($token, $strict);
+    function verify_csrf($token, $strict = false) {
+        return Security::verifyCsrfToken($token, $strict);
     }
 }
 
-if (!function_exists("token_csrf_time_is_expirate")) {
+if (!function_exists("csrf_time_is_expirate")) {
     /**
      * csrf, fonction permetant de générer un token
+     *
      * @param string $time
      * @return string
      */
-    function token_csrf_time_is_expirate($time = null) {
+    function csrf_time_is_expirate($time = null) {
         return Security::tokenCsrfTimeIsExpirate($time);
     }
 }
@@ -497,7 +500,7 @@ if (!function_exists("sanitaze")) {
      * @return mixed
      */
     function sanitaze($data) {
-        if (is_int($data) || is_string($data)) {
+        if (is_numeric($data)) {
             return $data;
         } else {
             return Security::sanitaze($data);
@@ -514,7 +517,7 @@ if (!function_exists("secure")) {
      * @return mixed
      */
     function secure($data) {
-        if (is_int($data) || is_double($data) || is_float($data)) {
+        if (is_numeric($data)) {
             return $data;
         } else {
             return Security::sanitaze($data, true);
@@ -538,22 +541,22 @@ if (!function_exists("redirect")) {
     /**
      * modifie les entêtes HTTP
      *
-     * @param string $path le path de rédirection
+     * @param string|array $path Le path de rédirection
      */
     function redirect($path) {
         query_response("redirect", $path);
     }
 }
 
-if (!function_exists("require_file")) {
+if (!function_exists("send_file")) {
     /**
-     * require_file c'est un alias de require, mais vas chargé les fichiers contenu dans
+     * send_file c'est un alias de require, mais vas chargé les fichiers contenu dans
      * la vie de l'application. Ici <code>sendfile</code> résoue le problème de scope.
      *
      * @param string $filename le nom du fichier
      * @param array $bind les données la exporter
      */
-    function require_file($filename, $bind = []) {
+    function send_file($filename, $bind = []) {
         query_response("sendFile", $filename, $bind);
     }
 }
@@ -794,19 +797,34 @@ if (!function_exists("flash")) {
     }
 }
 
-if (!function_exists("re_flash")) {
+
+if (!function_exists("middleware")) {
     /**
-     * flash
-     * @return \Bow\Support\Flash
+     * middleware, Permet de lancer un middleware n'import ou dans votre projet
+     *
+     * @param string $name Le nom du middleware a lancé
+     * @return mixed
      */
-    function re_flash() {
-        Session::reFlash();
+    function middleware($name) {
+        util()->launchCallback($name, request(), configuration()->getNamespace());
+    }
+}
+
+if (!function_exists("util")) {
+    /**
+     * Alais sur la class Util
+     *
+     * @return Util
+     */
+    function util() {
+        return Util::class;
     }
 }
 
 if (!function_exists("bmail")) {
     /**
      * @param string|null $type
+     *
      * @return \Bow\Mail\SimpleMail|\Bow\Mail\Smtp
      * @throws \Bow\Exception\MailException
      */
