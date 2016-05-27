@@ -106,7 +106,7 @@ class RequestData implements CollectionAccess
 	 * @param mixed $default =false
 	 * @return mixed
 	 */
-	public function get($key = null, $default = false)
+	public function get($key = null, $default = null)
 	{
 		if (!is_null($key)) {
 			return $this->has($key) ? $this->data[$key] : $default;
