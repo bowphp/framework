@@ -17,12 +17,23 @@ class Validate
     /**
      * @var string
      */
-    private $message = null;
+    private $lastMessage = null;
 
     /**
      * @var array
      */
-    private $corruptesFields;
+    private $messages = [];
+
+    /**
+     * @var array
+     */
+    private $corruptesFields = [];
+
+    /**
+     * @var array
+     */
+    private $corruptesRules = [];
+
 
     /**
      * Validate constructor.
@@ -34,8 +45,17 @@ class Validate
     public function __construct($fails, $message, array $corruptesFields)
     {
         $this->fails = $fails;
-        $this->message = $message;
-        $this->corruptesFields = $corruptesFields;
+        $this->lastMessage = $message;
+        $this->corruptesFields = array_keys($corruptesFields);
+        $this->corruptesRules = [];
+        $this->messages = [];
+
+        foreach($corruptesFields as $key => $corruptes) {
+            foreach($corruptes as $fields) {
+                $this->messages[$key] = $fields["message"];
+                $this->corruptesRules[$key] = $fields["masque"];
+            }
+        }
     }
 
     /**
@@ -61,10 +81,30 @@ class Validate
     /**
      * Le message d'erreur sur la dernière validation
      *
+     * @return array
+     */
+    public function getFailsRules()
+    {
+        return $this->corruptesRules;
+    }
+
+    /**
+     * Le message d'erreur sur la dernière validation
+     *
      * @return string
      */
-    public function getMessage()
+    public function getLastMessage()
     {
-        return $this->message;
+        return $this->lastMessage;
+    }
+
+    /**
+     * Le message d'erreur sur la dernière validation
+     *
+     * @return array
+     */
+    public function getMessages()
+    {
+        return $this->messages;
     }
 }
