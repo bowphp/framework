@@ -881,3 +881,16 @@ if (!function_exists("cookie")) {
         return \Bow\Support\Cookie::class;
     }
 }
+
+if (!function_exists("validate")) {
+    /**
+     * Elle permet de valider les inforations sur le critère bien définie
+     *
+     * @param array $inputs Les données a validé
+     * @param array $rules  Les critaires de validation
+     * @return \Bow\Support\Validate\Validate
+     */
+    function validate(array $inputs, array $rules) {
+        return \Bow\Support\Validate\Validator::make($inputs, $rules);
+    }
+}
