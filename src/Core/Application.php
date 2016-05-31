@@ -536,21 +536,90 @@ class Application
     }
 
 	/**
-	 * @param string $controllerName
+	 * REST API Maker.
+	 *
+	 * @param string|array $controllerName
 	 * @param array $where
 	 * @return $this
+	 * @throws ApplicationException
 	 */
 	public function resources($controllerName, array $where = [])
 	{
-		$url = preg_replace("/controller/", "", Str::lower($controllerName));
+		if (!is_string($controllerName) && !is_array($controllerName)) {
+			throw new ApplicationException("Le premier paramètre doit être un array ou une chaine de caractère", 1);
+		}
 
-		$this->get("/$url",			 "{$controllerName}@index");
-		$this->get("/$url/create",   "{$controllerName}@create");
-		$this->get("/$url/:id",      "{$controllerName}@show")->where($where);
-		$this->get("/$url/:id/edit", "{$controllerName}@edit")->where($where);
-		$this->delete("/$url/:id",   "{$controllerName}@destroy")->where($where);
-		$this->put("/$url/:id",      "{$controllerName}@update")->where($where);
-		$this->post("/$url",         "{$controllerName}@store");
+		$controller = "";
+		$internalMiddleware = null;
+		$ignoreMethod = [];
+		$valideMethod = [
+			[
+				"url"    => "/",
+				"call"   => "index",
+				"method" => "get"
+			],
+			[
+				"url"    => "/",
+				"call"   => "store",
+				"method" => "post"
+			],
+			[
+				"url"    => "/:id",
+				"call"   => "show",
+				"method" => "get"
+			],
+			[
+				"url"    => "/:id",
+				"call"   => "update",
+				"method" => "put"
+			],
+			[
+				"url"    => "/:id",
+				"call"   => "destroy",
+				"method" => "delete"
+			],
+			[
+				"url"    => "/:id/edit",
+				"call"   => "edit",
+				"method" => "get"
+			],
+			[
+				"url"    => "/create",
+				"call"   => "create",
+				"method" => "get"
+			]
+		];
+
+		if (is_array($controllerName)) {
+			if (isset($controllerName["middleware"])) {
+				$internalMiddleware = $controllerName["middleware"];
+				unset($controllerName["middleware"]);
+			}
+
+			if (isset($controllerName["uses"])) {
+				$controller = $controllerName["uses"];
+				unset($controllerName["uses"]);
+			}
+
+			if (isset($controllerName["ignores"])) {
+				$ignoreMethod = $controllerName["ignores"];
+				unset($controllerName["ignores"]);
+			}
+		} else  {
+			$controller = $controllerName;
+		}
+
+		// Url principal.
+		$url = preg_replace("/controller/", "", Str::lower($controller));
+
+		// Association de url prédéfinie
+		foreach ($valideMethod as $key => $value) {
+			if (!in_array($value["call"], $ignoreMethod)) {
+				$c = $controller . '@' . $value["call"];
+				call_user_func_array([$this, $value["method"]], ["/$url" . $value["url"], $c]);
+				$this->where($where);
+			}
+		}
 
 		return $this;
 	}

@@ -316,8 +316,8 @@ class Response
 	 */
 	private function templateLoader()
 	{
-		if ($this->config->getEngine() === null) {
-			if (!in_array($this->config->getEngine(), ["twig", "mustache", "jade"])) {
+		if ($this->config->getEngine() !== null) {
+			if (!in_array($this->config->getEngine(), ["twig", "mustache", "jade"], true)) {
 				throw new ErrorException("Le moteur de template n'est pas implementé.", E_USER_ERROR);
 			}
 		} else {
@@ -344,11 +344,11 @@ class Response
 			 * - Ajout de fonction global
 			 *  dans le cadre de l'utilisation de Twig
 			 */
-			$tpl->addFunction(new \Twig_SimpleFunction("__secure", function($data) {
+			$tpl->addFunction(new \Twig_SimpleFunction("_secure", function($data) {
 				return Security::sanitaze($data, true);
 			}));
-			$tpl->addFunction(new \Twig_SimpleFunction("__sanitaze", [Security::class, "sanitaze"]));
-			$tpl->addFunction(new \Twig_SimpleFunction("__slugify", [Str::class, "slugify"]));
+			$tpl->addFunction(new \Twig_SimpleFunction("_sanitaze", [Security::class, "sanitaze"]));
+			$tpl->addFunction(new \Twig_SimpleFunction("_slugify", [Str::class, "slugify"]));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new \Mustache_Engine([
                 'cache' => $this->config->getCachepath()

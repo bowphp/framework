@@ -409,25 +409,23 @@ class Util
         foreach (func_get_args() as $key => $value) {
             ob_start();
 			$len = "";
-			if (is_array($value) || is_object($value)) {
-				$len = ':len=' . count($value);
-			} else if (is_string($value)) {
-				$len = ":len=" . strlen($value);
-			}
-			echo gettype($value) . $len . ' <span id="toggle" class="show" style="border:1px solid #eee; padding:0.1px 0.2px;font-size:10px;color:#888"> > </span><div style="position: relative;left:30px;top:5px"><div class="contains">';
+			// if (is_array($value) || is_object($value)) {
+			// 	$len = ':len=' . count($value);
+			// } else if (is_string($value)) {
+			// 	$len = ":len=" . strlen($value);
+			// }
+			// echo gettype($value) . $len . ' <span id="toggle" class="show" style="border:1px solid #eee; padding:0.1px 0.2px;font-size:10px;color:#888"> > </span><div style="position: relative; left:25px; top:5px"><div class="contains">';
 			var_dump($value);
 			echo '</div></div>';
             echo "\n\n";
 
             $content = ob_get_clean();
-            $content = preg_replace("~\s?\{\n\s?\}~i", " is empty", $content);
-            $content = preg_replace("~(string|int|object|stdclass|bool|double|float|array|integer)~i", "<span style=\"color: rgba(255, 0, 0, 0.9); font-style: italic\">$1</span>", $content);
+            $content = preg_replace("~\s?\{\n\s?\}~i", "[]", $content);
             $content = preg_replace('~\((\d+)\)~im', "<span style=\"color: #498\">($1)</span>", $content);
             $content = preg_replace('~\s(".+")~im', "<span style=\"color: #458\"> $1</span>", $content);
-//            $content = preg_replace("~(=>)(\n\s+?)+~im", "<span style=\"color: #754\"> is</span>", $content);
-//            $content = preg_replace("~(is</span>)\s+~im", "$1 ", $content);
-            $content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 => <span style=\"color: black\"></span></span>", $content);
-            $content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 => <span style=\"color: black\"></span></span>", $content);
+            $content = preg_replace("~(=>)(\n\s+?)+~im", "", $content);
+            $content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 =><span style=\"color: black\"></span></span>", $content);
+            $content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 =><span style=\"color: black\"></span></span>", $content);
             $content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
             $html .= $content;
         }

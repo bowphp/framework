@@ -1,8 +1,6 @@
 <?php
 namespace Bow\Support\Validate;
 
-use Bow\Http\Request;
-use Bow\Http\RequestData;
 use Bow\Support\Str;
 
 /**
@@ -32,47 +30,44 @@ class Validator
 
         foreach($rules as $key => $rule) {
             // Formatage de la régle
-            $rule = explode("|", $rule);
-            foreach($rule as $masque) {
-                if (is_int($masque)) {
+            foreach(explode("|", $rule) as $masque) {
+                // Dans le case il y a un | superflux.
+                if (is_int($masque) || Str::len($masque) == "") {
                     continue;
                 }
-
+                // Erreur listes.
                 $errors[$key] = [];
 
+                // Masque sur la règle required
                 if ($masque == "required") {
                     if (!isset($inputs[$key])) {
                         $message = "Le champs \"$key\" est requis.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
-                    } else {
                         $isFails = true;
                     }
                 } else {
                     if (!isset($inputs[$key])) {
-                        $message = "Le champs \"$key\" n'est pas défini dans les régles.";
+                        $message = "Le champs \"$key\" n'est pas défini dans les données à valider.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
                         $isFails = true;
-                        break;
+                        continue;
                     }
                 }
 
-
                 if (preg_match("/^min:(\d+)$/", $masque, $match)) {
-                    $length = end($match);
+                    $length = (int) end($match);
                     if (Str::len($inputs[$key]) < $length) {
-                        $message = "Le champs \"$key\" doit avoir un contenu minimum de $length.";
+                        $message = "Le champs \"$key\" doit avoir un contenu minimal de $length.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
-                    } else {
                         $isFails = true;
                     }
                 }
 
                 if (preg_match("/^max:(\d+)$/", $masque, $match)) {
-                    $length = end($match);
+                    $length = (int) end($match);
                     if (Str::len($inputs[$key]) > $length) {
-                        $message = "Le champs \"$key\" doit avoir un contenu maximum de $length.";
+                        $message = "Le champs \"$key\" doit avoir un contenu maximal de $length.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
-                    } else {
                         $isFails = true;
                     }
                 }
@@ -81,7 +76,6 @@ class Validator
                     if (!Str::isMail($inputs[$key])) {
                         $message = "Le champs $key doit avoir un contenu au format email.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
-                    } else {
                         $isFails = true;
                     }
                 }
@@ -95,11 +89,18 @@ class Validator
                     }
                 }
 
-                if (preg_match("/^alphonum$/", $masque)) {
+                if (preg_match("/^alphanum$/", $masque)) {
                     if (!Str::isAlphaNum($inputs[$key])) {
                         $message = "Le champs \"$key\" doit avoir un contenu en alphanumérique.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
-                    } else {
+                        $isFails = true;
+                    }
+                }
+
+                if (preg_match("/^alpha$/", $masque)) {
+                    if (!Str::isAlpha($inputs[$key])) {
+                        $message = "Le champs \"$key\" doit avoir un contenu en alphabetique.";
+                        $errors[$key][] = ["masque" => $masque, "message" => $message];
                         $isFails = true;
                     }
                 }

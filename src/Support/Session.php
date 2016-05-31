@@ -24,7 +24,7 @@ class Session implements CollectionAccessStatic
 		if (PHP_SESSION_ACTIVE != session_status()) {
             session_name("BOWSESSID");
             if (!isset($_COOKIE["BOWSESSID"])) {
-                session_id(hash("sha256", Security::encrypt(Str::repeat(Security::generateTokenCsrf(), 2))));
+                session_id(hash("sha256", Security::encrypt(Str::repeat(Security::generateCsrfToken(), 2))));
             }
             session_start();
         }
@@ -211,7 +211,7 @@ class Session implements CollectionAccessStatic
     /**
      * reFlash
      */
-    public static function reFlash()
+    private static function reFlash()
     {
         self::start();
         unset($_SESSION["bow.flash"]);
@@ -232,7 +232,7 @@ class Session implements CollectionAccessStatic
 	}
 
     /**
-     * clearFull, permet vider le cache de session
+     * clear  full, permet vider le cache de session
      */
     public static function destroy()
     {

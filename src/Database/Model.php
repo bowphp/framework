@@ -3,7 +3,6 @@ namespace Bow\Database;
 
 use Bow\Support\Str;
 use Bow\Exception\ModelException;
-use Bow\Exception\TableException;
 
 /**
  * Class Model
@@ -21,43 +20,30 @@ abstract class Model
     protected static $table = null;
 
     /**
-     * implementation de la fonction magic __call
-     *
-     * @param string $method
-     * @param array  $args
-     *
-     * @return mixed
-     * @throws ModelException
-     */
-    public function __call($method, $args)
-    {
-        $scope = "scope" . ucfirst($method);
-
-        if (method_exists($this, $scope)) {
-            return call_user_func_array($scope, $args);
-        }
-
-        throw new ModelException("$method n'existe pas", E_ERROR);
-    }
-
-
-    /**
      * Facade, implementation de la fonction magic __callStatic de PHP
      *
-     * @param string $method
-     * @param array $arg
-     * @throws TableException
+     * @param string $method Le nom de la method a appelé
+     * @param array $args    Les arguments a passé à la fonction
+     * @throws ModelException
      * @return \Bow\Database\Table
      */
-    public static function __callStatic($method, $arg)
+    public static function __callStatic($method, $args)
     {
+        $scope = "custom" . ucfirst($method);
         $table = static::$table;
-        $table = Database::table(Str::lower($table));
+        $table = Database::table(Str::lower(static::$table));
+        if (method_exists($ins = new static, $scope)) {
+            if (method_exists($table, $method)) {
+                throw new ModelException("$method ne peut pas être utiliser comme fonction d'aliase.", E_ERROR);
+            }
 
-        if (method_exists($table, $method)) {
-            return call_user_func_array([$table, $method], $arg);
+            return call_user_func_array([$ins, $scope], $args);
         } else {
-            throw new TableException("methode $method n'est définie.", E_ERROR);
+            if (method_exists($table, $method)) {
+                return call_user_func_array([$table, $method], $args);
+            }
         }
+
+        throw new ModelException("methode $method n'est définie.", E_ERROR);
     }
 }

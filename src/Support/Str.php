@@ -95,7 +95,7 @@ class Str
             throw new \ErrorException("$pattern not valide");
         }
 
-        return preg_match($pattern, $str, $match);
+        return mb_ereg_match($pattern, $str, $match, "UTF-8");
     }
 
     /**
