@@ -538,12 +538,13 @@ class Application
 	/**
 	 * REST API Maker.
 	 *
-	 * @param string|array $controllerName
+     * @param string $url
+     * @param string|array $controllerName
 	 * @param array $where
 	 * @return $this
 	 * @throws ApplicationException
 	 */
-	public function resources($controllerName, array $where = [])
+	public function resources($url, $controllerName, array $where = [])
 	{
 		if (!is_string($controllerName) && !is_array($controllerName)) {
 			throw new ApplicationException("Le premier paramètre doit être un array ou une chaine de caractère", 1);
@@ -614,13 +615,17 @@ class Application
 		}
 
 		// Url principal.
-		$url = preg_replace("/controller/", "", Str::lower($controller));
+		$url = rtrim($url. "/");
+
+        if (!empty($url)) {
+            $url .= "/" . $url;
+        }
 
 		// Association de url prédéfinie
 		foreach ($valideMethod as $key => $value) {
 			if (!in_array($value["call"], $ignoreMethod)) {
 				$controller = $controller . '@' . $value["call"];
-				call_user_func_array([$this, $value["method"]], ["/$url" . $value["url"], $controller]);
+				call_user_func_array([$this, $value["method"]], ["$url" . $value["url"], $controller]);
 				if (!empty($where)) {
 					$this->where($where);
 				}
