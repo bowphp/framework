@@ -81,7 +81,7 @@ class Request
 	 */
 	public function url()
 	{
-		return $this->origin() . $_SERVER["REQUEST_URI"];
+		return $this->origin() . $this->uri();
 	}
 
     /**
@@ -117,7 +117,7 @@ class Request
 		$method = $_SERVER["REQUEST_METHOD"];
 
 		if ($method == "POST") {
-			if (!array_key_exists("HTTP_X_HTTP_METHOD", $_SERVER)) {
+			if (array_key_exists("HTTP_X_HTTP_METHOD", $_SERVER)) {
 				if (in_array($_SERVER["HTTP_X_HTTP_METHOD"], ["PUT", "DELETE"])) {
 					$method = $_SERVER["HTTP_X_HTTP_METHOD"];
 				}
