@@ -146,16 +146,15 @@ class Schema
     private static function parseMarks($marks)
     {
         $r = [];
+        $types = [
+            "i" => "number",
+            "s" => "string",
+            "d" => "date",
+            "t" => "timestamps"
+        ];
 
         if (is_string($marks)) {
             $parts = explode(";", $marks);
-            $types = [
-                "i" => "number",
-                "s" => "string",
-                "d" => "date",
-                "t" => "current_timestamp"
-            ];
-
             foreach($parts as $key => $values) {
                 $subPart = explode("|", $values);
                 $typeAndLength = explode(":", $subPart[1]);
@@ -177,9 +176,27 @@ class Schema
             }
 
             return $r;
-        }
 
-        if (is_array($marks)) {
+        } else {
+
+            foreach($marsk as $key => $values) {
+                $typeAndLength = explode(":", $values);
+                $type = $types[Str::lower($typeAndLength[0])];
+                $data = Filler::$type();
+
+                if (count($typeAndLength) == 2) {
+                    if ($type == "string") {
+                        $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
+                    } else if ($type == "integer") {
+                        $r[$key] = $typeAndLength[1];
+                    } else {
+                        $r[$key] = $data;
+                    }
+                } else {
+                    $r[$key] = $data;
+                }
+            }
+
             return $r;
         }
     }

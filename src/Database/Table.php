@@ -266,15 +266,15 @@ class Table extends DatabaseTools
 
         if (is_null($this->where)) {
             if ($boolean == "not") {
-                $this->where = "$column not between " . $between;
+                $this->where = "`$column` not between " . $between;
             } else {
-                $this->where = "$column between " . $between;
+                $this->where = "`$column` between " . $between;
             }
         } else {
             if ($boolean == "not") {
-                $this->where .= " and $column not between $between";
+                $this->where .= " and `$column` not between $between";
             } else {
-                $this->where .= " $boolean $column between $between";
+                $this->where .= " $boolean `$column` between $between";
             }
         }
 
@@ -323,15 +323,15 @@ class Table extends DatabaseTools
 
         if (is_null($this->where)) {
             if ($boolean == "not") {
-                $this->where = "$column not in ($in)";
+                $this->where = "`$column` not in ($in)";
             } else {
-                $this->where = "$column in ($in)";
+                $this->where = "`$column` in ($in)";
             }
         } else {
             if ($boolean == "not") {
-                $this->where .= " and $column not in ($in)";
+                $this->where .= " and `$column` not in ($in)";
             } else {
-                $this->where .= " and $column in ($in)";
+                $this->where .= " and `$column` in ($in)";
             }
         }
 
@@ -365,9 +365,9 @@ class Table extends DatabaseTools
     public function join($table)
     {
         if (is_null($this->join)) {
-            $this->join = "inner join $table";
+            $this->join = "inner join `$table`";
         } else {
-            $this->join .= ", $table";
+            $this->join .= ",`$table`";
         }
 
         return $this;
@@ -385,10 +385,10 @@ class Table extends DatabaseTools
     public function leftJoin($table)
     {
         if (is_null($this->join)) {
-            $this->join = "left join $table";
+            $this->join = "left join `$table`";
         } else {
             if (!preg_match("/^(inner|right)\sjoin\s.*/", $this->join)) {
-                $this->join .= ", $table";
+                $this->join .= ", `$table`";
             } else {
                 throw new TableException("La clause inner join est dèja initalisé.", E_ERROR);
             }
@@ -407,10 +407,10 @@ class Table extends DatabaseTools
     public function rightJoin($table)
     {
         if (is_null($this->join)) {
-            $this->join = "right join $table";
+            $this->join = "right join `$table`";
         } else {
             if (!preg_match("/^(inner|left)\sjoin\s.*/", $this->join)) {
-                $this->join .= ", $table";
+                $this->join .= ", `$table`";
             } else {
                 throw new TableException("La clause inner join est dèja initialisé.", E_ERROR);
             }
@@ -441,7 +441,7 @@ class Table extends DatabaseTools
         }
 
         if (!preg_match("/on/i", $this->join)) {
-            $this->join .= " on $column1 $comp $column2";
+            $this->join .= " on `$column1` $comp $column2";
         }
 
         return $this;
@@ -470,7 +470,7 @@ class Table extends DatabaseTools
         }
 
         if (preg_match("/on/i", $this->join)) {
-            $this->join .= " or $column $comp $value";
+            $this->join .= " or `$column` $comp $value";
         } else {
             throw new TableException("La clause <b>on</b> n'est pas initialisé.", E_ERROR);
         }
@@ -509,9 +509,9 @@ class Table extends DatabaseTools
             $comp = "=";
         }
         if (is_null($this->havin)) {
-            $this->havin = "$column $comp $value";
+            $this->havin = "`$column` $comp $value";
         } else {
-            $this->havin .= " $boolean $column $comp $value";
+            $this->havin .= " $boolean `$column` $comp $value";
         }
     }
 
@@ -530,7 +530,7 @@ class Table extends DatabaseTools
                 $type = "asc";
             }
 
-            $this->order = "order by $column $type";
+            $this->order = "order by `$column` $type";
         }
 
         return $this;
@@ -630,7 +630,7 @@ class Table extends DatabaseTools
      */
     private function executeAgregat($aggregat, $column)
     {
-        $sql = "select $aggregat($column) from " . $this->tableName;
+        $sql = "select $aggregat(`$column`) from " . $this->tableName;
     	
         if (!is_null($this->where)) {
     		$sql .= " where " . $this->where;
@@ -671,9 +671,9 @@ class Table extends DatabaseTools
 
        	// Ajout de la clause select
         if (is_null($this->select)) {
-            $sql .= "* from " . $this->tableName;
+            $sql .= "* from `" . $this->tableName ."`";
         } else {
-        	$sql .= $this->select . " from " . $this->tableName;
+        	$sql .= $this->select . " from `" . $this->tableName . "`";
         	$this->select = null;
         }
 

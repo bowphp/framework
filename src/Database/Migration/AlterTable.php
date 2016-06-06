@@ -53,12 +53,14 @@ class AlterTable
 
     /**
      * Supprime des columns dans la description de la table.
+     *
+     * @param array $col
      */
-    public function drop()
+    public function drop(array $col)
     {
         $columns = "";
 
-        foreach(func_get_args() as $key => $value) {
+        foreach($col as $key => $value) {
             if ($key > 0) {
                 $columns .= ", ";
             }
@@ -85,8 +87,14 @@ class AlterTable
         // not implement
     }
 
-    public function change()
+    /**
+     * Change le nom d'un table.
+     *
+     * @param string $oldTableName Le nom de l'ancienne table
+     * @param string $newTableName Le nom de la nouveau table
+     */
+    public function change($oldTableName, $newTableName)
     {
-        // not implement
+        Database::statement("ALTER TABLE");
     }
 }

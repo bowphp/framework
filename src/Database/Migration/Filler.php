@@ -24,7 +24,7 @@ class Filler
      */
     public static function date()
     {
-        return "NOW()";
+        return date("Y-d-m H:i:s");
     }
 
     /**
@@ -34,5 +34,13 @@ class Filler
     {
         $a = rand(1, 100) . "." . rand(1, 100);
         return (float) $a;
+    }
+
+    /**
+     * @return int
+     */
+    public static function timestamps()
+    {
+        return time();
     }
 }

@@ -40,7 +40,7 @@ class ColumnsMaker
      *
      * @var string
      */
-    public $sqlStement = null;
+    private $sqlStement = null;
 
     /**
      * @var string
@@ -140,7 +140,7 @@ class ColumnsMaker
      *
      * @return $this
      */
-    public function tinyint($field, $size = null, $null = false, $default = null)
+    public function tinyInteger($field, $size = null, $null = false, $default = null)
     {
         return $this->loadWhole("tinyint", $field, $size, $null, $default);
     }
@@ -172,7 +172,7 @@ class ColumnsMaker
      * @return $this
      * @throws \ErrorException
      */
-    public function mediumint($field, $size = null, $null = false, $default = null)
+    public function mediumInteger($field, $size = null, $null = false, $default = null)
     {
         return $this->loadWhole("mediumint", $field, $size, $null, $default);
     }
@@ -251,6 +251,161 @@ class ColumnsMaker
     }
 
     /**
+     * varchar
+     *
+     * @param string $field
+     * @param int $size
+     * @param bool $null
+     * @param null|string $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function longText($field, $size = 255, $null = false, $default = null)
+    {
+        return $this->loadWhole("longtext", $field, $size, $null, $default);
+    }
+
+    /**
+     * varchar
+     *
+     * @param string $field
+     * @param bool $null
+     * @param null|string $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function mediumText($field, $null = false, $default = null)
+    {
+        return $this->addField("mediumtext", $field, [
+            "null" => $null,
+            "default" => $default
+        ]);
+    }
+
+    /**
+     * tinytext
+     *
+     * @param string $field
+     * @param bool $null
+     * @param null|string $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function tinyText($field, $null = false, $default = null)
+    {
+        return $this->addField("tinytext", $field, [
+            "null" => $null,
+            "default" => $default
+        ]);
+    }
+
+    /**
+     * binary
+     *
+     * @param string $field
+     * @param int $size
+     * @param bool $null
+     * @param null|string $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function binary($field, $size = 8, $null = false, $default = null)
+    {
+        return $this->addField("binary", $field, [
+            "null" => $null,
+            "default" => $default,
+            "size" => $size
+        ]);
+    }
+
+
+    /**
+     * boolean
+     *
+     * @param string $field
+     * @param bool $null
+     * @param mixed $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function boolean($field, $null = false, $default = null)
+    {
+        return $this->addField("tinyint", $field, [
+            "null" => $null,
+            "default" => $default,
+            "size" => 1
+        ]);
+    }
+
+    /**
+     * blob
+     *
+     * @param string $field
+     * @param bool $null
+     * @param mixed $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function blob($field, $null = false, $default = null)
+    {
+        return $this->addField("blob", $field, [
+            "null" => $null,
+            "default" => $default
+        ]);
+    }
+
+    /**
+     * tiny blob
+     *
+     * @param string $field
+     * @param bool $null
+     * @param mixed $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function tinyBlob($field, $null = false, $default = null)
+    {
+        return $this->addField("tinyblob", $field, [
+            "null" => $null,
+            "default" => $default
+        ]);
+    }
+
+    /**
+     * long blob
+     *
+     * @param string $field
+     * @param bool $null
+     * @param mixed $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function longBlob($field, $null = false, $default = null)
+    {
+        return $this->addField("longblob", $field, [
+            "null" => $null,
+            "default" => $default
+        ]);
+    }
+
+    /**
+     * medium blob
+     *
+     * @param string $field
+     * @param bool $null
+     * @param mixed $default
+     * @throws \Exception
+     * @return $this
+     */
+    public function mediumBlob($field, $null = false, $default = null)
+    {
+        return $this->addField("mediumblob", $field, [
+            "null" => $null,
+            "default" => $default
+        ]);
+    }
+
+    /**
      * date
      *
      * @param string $field
@@ -322,14 +477,13 @@ class ColumnsMaker
      * timestamp
      *
      * @param string $field
-     * @param string|bool $null
      *
      * @return Schema
      */
-    public function timestamps($field, $null = false)
+    public function timestamps($field)
     {
         $this->addField("timestamp", $field, [
-            "null" => $null
+            "null" => false
         ]);
 
         return $this;
@@ -361,7 +515,7 @@ class ColumnsMaker
     public function character($field, $size = 1, $null = false, $default = null)
     {
         if ($size > 4294967295) {
-            throw new ModelException("Max size is 4294967295", 1);
+            throw new ModelException("Max size is 4294967295", E_USER_ERROR);
         }
 
         return $this->loadWhole("char", $field, $size, $null, $default);
@@ -392,7 +546,7 @@ class ColumnsMaker
     {
         if ($this->autoincrement === false) {
             if ($this->lastField !== null) {
-                if (in_array($this->lastField->method, ["int", "longint", "bigint"])) {
+                if (in_array($this->lastField->method, ["int", "longint", "bigint", "mediumint", "smallint", "tinyint"])) {
                     $this->autoincrement = $this->lastField;
                 } else {
                     throw new ModelException("Cannot add autoincrement to " . $this->lastField->method, 1);
@@ -486,7 +640,7 @@ class ColumnsMaker
             return $this;
         }
 
-        if (in_array($method, ["int", "longint", "bigint"])) {
+        if (in_array($method, ["int", "longint", "bigint", "mediumint", "smallint", "tinyint"])) {
             if ($this->getAutoincrement()) {
                 $value = "NULL";
             } else {
@@ -537,7 +691,7 @@ class ColumnsMaker
     private function loadWhole($method, $field, $size = 20, $null = false, $default = null)
     {
         if (is_bool($size)) {
-            $default = $null === false ? null : $null;
+            $default = is_bool($null) ? null : $null;
             $null = $size;
             $size = 11;
         } else {
@@ -690,5 +844,13 @@ class ColumnsMaker
     public function getBindData()
     {
         return $this->dataBind;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->sqlStement;
     }
 }
