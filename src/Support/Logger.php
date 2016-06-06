@@ -1,9 +1,8 @@
 <?php
 namespace Bow\Support;
 
-use Bow\Exception\LoggerException;
-use Bow\Support\Resource;
 use Psr\Log\AbstractLogger;
+use Bow\Exception\LoggerException;
 
 /**
  * Class Logger
@@ -73,7 +72,7 @@ class Logger extends AbstractLogger
                 }
             }
 
-            Resource::append($this->path, static::textFormat($level, $message . "\n"));
+            Resource\Storage::append($this->path, static::textFormat($level, $message . "\n"));
         }
     }
 
@@ -201,9 +200,8 @@ class Logger extends AbstractLogger
      * @param string $errmsg
      * @param string $filename
      * @param int $line
-     * @param array $trace
      */
-    public function errorHandler($errno, $errmsg, $filename, $line, $trace)
+    public function errorHandler($errno, $errmsg, $filename, $line)
     {
         $this->addHandler($errno, $errmsg, $filename, $line, []);
     }

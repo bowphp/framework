@@ -22,42 +22,49 @@ class Storage
 	const ERROR_EXTENSION_INVALIDE = 8;
 	const ERROR_SIZE_INVALIDE = 9;
 	const ERROR_UPLOAD_ERROR = 10;
+
 	/**
 	 * Variable de configuration
 	 * 
 	 * @var array
 	 */
 	private static $config = [];
+
 	/**
 	 * Répertoire de stockage
 	 * 
 	 * @var null
 	 */
 	private static $storageDir = null;
+
 	/**
 	 * Répertoire par defaut de upload
 	 * 
 	 * @var string
 	 */
 	private static $uploadDir = "public";
+
 	/**
 	 * Taille par defaut d'un fichier
 	 * 
 	 * @var int
 	 */
 	private static $fileSize = 20000000;
+
 	/**
 	 * Nom d'un fichier
 	 * 
 	 * @var null
 	 */
 	private static $uploadFileName = null;
+
 	/**
 	 * Liste des extensions par defaut
 	 * 
 	 * @var array
 	 */ 
 	private static $fileExtension = ["png", "jpg"];
+
     /**
 	 * Modifier le nom par defaut du file uploader.
 	 * 
@@ -250,10 +257,16 @@ class Storage
         static::append($file, $tmp_content);
     }
 
+	/**
+	 * @param $file
+	 * @param $content
+	 * @throws ResourceException
+	 */
     public static function put($file, $content)
     {
         static::write(static::open($file, "w+"), $content);
     }
+
 	/**
 	 * Supprimer un fichier
 	 * 
@@ -340,24 +353,48 @@ class Storage
 		return false;
     }
 
+	/**
+	 * @param $filename
+	 * @return null|string
+	 */
 	public static function get($filename)
 	{
+		if (is_file($filename) && stream_is_local($filename)) {
+			return file_get_contents($filename);
+		}
 
+		return null;
 	}
 
-	public static function isFile($filename)
+	/**
+	 * @param $targerFile
+	 * @param $sourceFile
+	 * @param bool|false $overrider
+	 */
+	public static function copy($targerFile, $sourceFile, $overrider = false)
 	{
 
 	}
 
+	/**
+	 * @param $filename
+	 */
+	public static function exists($filename)
+	{
+
+	}
+
+	/**
+	 * @return static
+	 */
 	public static function ftp()
 	{
-		return FTP::configure();
+		return Ftp\FTP::configure();
 	}
 
 	public static function disk()
 	{
-		return new FTP();
+		return new Ftp\FTP();
 	}
 
 	/**

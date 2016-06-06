@@ -632,13 +632,9 @@ if (!function_exists("url")) {
         }
 
         $url = request()->url() . $url;
-        $i = 0;
 
-        foreach($parameters as $key => $parameter) {
-            if ($i > 0) {
-                $url .= "&";
-            }
-            $url .= $key."=".$parameter;
+        if (count($parameters) > 0) {
+            $url .= "?" . http_build_query($parameters);
         }
 
         return $url;
