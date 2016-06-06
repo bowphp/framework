@@ -1,6 +1,7 @@
 <?php
-namespace Bow\Support;
+namespace Bow\Support\Resource;
 
+use Bow\Support\Util;
 use InvalidArgumentException;
 use Bow\Exception\ResourceException;
 
@@ -10,7 +11,7 @@ use Bow\Exception\ResourceException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-class Resource
+class Storage
 {
 	/**
 	 * Liste des constantes d'erreur pour l'upload de fichier.
@@ -149,7 +150,7 @@ class Resource
 			}
 
 			// Si le fichier est bien uploader, avec aucune error
-			if ($file->error === 0) {
+			if ($file->error !== 0) {
 				if ($file->size <= static::$fileSize) {
 					$pathInfo = (object) pathinfo($file->name);
 					if (in_array($pathInfo->extension, static::$fileExtension)) {
@@ -339,18 +340,25 @@ class Resource
 		return false;
     }
 
-	/**
-	 * Lance la configuration
-	 * 
-	 * @param object $config
-	 */
-    public static function configure($config = null)
-    {
-        if ($config !== null) {
-            static::$fileExtension = $config->upload_file_extension;
-            static::$uploadDir = $config->upload_directory;
-        }
-    }
+	public static function get($filename)
+	{
+
+	}
+
+	public static function isFile($filename)
+	{
+
+	}
+
+	public static function ftp()
+	{
+		return FTP::configure();
+	}
+
+	public static function disk()
+	{
+		return new FTP();
+	}
 
 	/**
 	 * Ouvrie un fichier
@@ -407,4 +415,17 @@ class Resource
 
         return $files;
     }
+
+	/**
+	 * Lance la configuration
+	 *
+	 * @param object $config
+	 */
+	public static function configure($config = null)
+	{
+		if ($config !== null) {
+			static::$fileExtension = $config->upload_file_extension;
+			static::$uploadDir = $config->upload_directory;
+		}
+	}
 }

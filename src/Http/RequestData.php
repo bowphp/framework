@@ -3,6 +3,7 @@ namespace Bow\Http;
 
 use Closure;
 use ErrorException;
+use Bow\Support\Collection;
 use Bow\Interfaces\CollectionAccess;
 
 /**
@@ -242,24 +243,42 @@ class RequestData implements CollectionAccess
 		return null;
 	}
 
-    /**
-     * __set
-     *
-     * @param string $name Le nom de la variable
-     * @param mixed $value La valeur a assigné
-     * @return null
-     */
-    public function __set($name, $value)
-    {
-        $old = null;
+	/**
+	 * @inheritdoc
+	 */
+	public function toArray()
+	{
+		return $this->data;
+	}
 
-        if ($this->has($name)) {
-            $old = $this->data[$name];
-            $this->data[$name] = $value;
-        } else {
-            $this->data[$name] = $value;
-        }
+	/**
+	 * Retourne une instance de la classe collection.
+	 *
+	 * @return Collection
+	 */
+	public function toCollection()
+	{
+		return new Collection($this->data);
+	}
 
-        return $old;
-    }
+	/**
+	 * __set
+	 *
+	 * @param string $name Le nom de la variable
+	 * @param mixed $value La valeur a assigné
+	 * @return null
+	 */
+	public function __set($name, $value)
+	{
+		$old = null;
+
+		if ($this->has($name)) {
+			$old = $this->data[$name];
+			$this->data[$name] = $value;
+		} else {
+			$this->data[$name] = $value;
+		}
+
+		return $old;
+	}
 }

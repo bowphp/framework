@@ -31,7 +31,7 @@ interface CollectionAccess
      * @param mixed $default=false
      * @return mixed
      */
-    public function get($key = null, $default);
+    public function get($key, $default);
 
     /**
      * add, ajoute une entrée dans la colléction
@@ -60,5 +60,11 @@ interface CollectionAccess
      * @return self
      */
     public function set($key, $value);
+
+    /**
+     * retourne tout les entrées de la colléction
+     * @return array
+     */
+    public function toArray();
 
 }

@@ -594,6 +594,10 @@ class Application
 			if (isset($controllerName["middleware"])) {
 				$internalMiddleware = $controllerName["middleware"];
 				unset($controllerName["middleware"]);
+				$next = Util::launchCallback(["middleware" => $internalMiddleware], $this->request);
+				if ($next === false) {
+					return $this;
+				}
 			}
 
 			if (isset($controllerName["uses"])) {
@@ -615,9 +619,11 @@ class Application
 		// Association de url prédéfinie
 		foreach ($valideMethod as $key => $value) {
 			if (!in_array($value["call"], $ignoreMethod)) {
-				$c = $controller . '@' . $value["call"];
-				call_user_func_array([$this, $value["method"]], ["/$url" . $value["url"], $c]);
-				$this->where($where);
+				$controller = $controller . '@' . $value["call"];
+				call_user_func_array([$this, $value["method"]], ["/$url" . $value["url"], $controller]);
+				if (!empty($where)) {
+					$this->where($where);
+				}
 			}
 		}
 

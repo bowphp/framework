@@ -3,7 +3,6 @@ namespace Bow\Http;
 
 use StdClass;
 use Bow\Support\Str;
-use Bow\Core\Application;
 
 /**
  * Class Request
@@ -115,7 +114,17 @@ class Request
 	 */
 	public function method()
 	{
-		return $_SERVER["REQUEST_METHOD"];
+		$method = $_SERVER["REQUEST_METHOD"];
+
+		if ($method == "POST") {
+			if (!array_key_exists("HTTP_X_HTTP_METHOD", $_SERVER)) {
+				if (in_array($_SERVER["HTTP_X_HTTP_METHOD"], ["PUT", "DELETE"])) {
+					$method = $_SERVER["HTTP_X_HTTP_METHOD"];
+				}
+			}
+		}
+
+		return $method;
 	}
 
 	/**

@@ -4,9 +4,9 @@ namespace Bow\Http;
 use Jade\Jade;
 use ErrorException;
 use Bow\Support\Str;
-use Bow\Support\Session;
 use Bow\Support\Security;
 use Bow\Core\AppConfiguration;
+use Bow\Support\Session\Session;
 use Bow\Exception\ViewException;
 use Bow\Exception\ResponseException;
 
@@ -142,8 +142,6 @@ class Response
      */
     public function redirect($path)
     {
-		$url = "/";
-
 		if (is_string($path)) {
 			$url = $path;
 		} else {
@@ -214,7 +212,7 @@ class Response
 		if (is_bool($code)) {
             $end = $code;
             $code = 200;
-        };
+        }
 
 		$this->set("Content-Type", "application/json; charset=UTF-8");
 		$this->code($code);
@@ -268,11 +266,11 @@ class Response
 			$bind = [];
 		}
 
-		$filename = preg_replace("/@|\.|#/", "/", $filename) . $this->config->getTemplateExtension();
+		$filename = preg_replace("/@|\./", "/", $filename) . $this->config->getTemplateExtension();
 
 		if ($this->config->getViewpath() !== null) {
 			if (!is_file($this->config->getViewpath() . "/" . $filename)) {
-				throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
+				throw new ViewException("La vue [$filename] n'exist pas. " . $this->config->getViewpath() . "/" . $filename, E_ERROR);
 			}
 		} else {
 			if (!is_file($filename)) {
@@ -298,11 +296,6 @@ class Response
 			} else {
 				throw new ResponseException("Le moteur de template n'est pas défini.", E_USER_ERROR);
 			}
-		}
-
-
-		if ($this->config->getLogLevel() === "production") {
-			exit();
 		}
 
 		return $this;
@@ -337,8 +330,8 @@ class Response
 			 * - Ajout de variable globale
 			 * dans le cadre de l'utilisation de Twig
 			 */
-			$tpl->addGlobal('__public', $this->config->getPublicPath());
-			$tpl->addGlobal('__root', $this->config->getApproot());
+			$tpl->addGlobal('_public', $this->config->getPublicPath());
+			$tpl->addGlobal('_root', $this->config->getApproot());
 
 			/**
 			 * - Ajout de fonction global
@@ -381,5 +374,94 @@ class Response
 		if ($stop) {
 			die();
 		}
+	}
+
+	private function accessControll($allow, $excepted)
+	{
+		if ($excepted === null) {
+			$excepted = "*";
+		}
+
+		$this->set($allow, $excepted);
+
+		return $this;
+	}
+
+	/**
+	 * @param array $excepted [optional]
+	 * @return Response
+	 * @throws ResponseException
+	 */
+	public function accessControlAllowOrigin(array $excepted)
+	{
+		if (count($excepted) == 0) {
+			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+		}
+
+		return $this->accessControll("Access-Controll-Allow-Origin", $excepted);
+	}
+
+	/**
+	 * @param array $excepted [optional] $excepted
+	 * @return Response
+	 * @throws ResponseException
+	 */
+	public function accessControlAllowMethods(array $excepted)
+	{
+		if (count($excepted) == 0) {
+			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+		}
+
+		return $this->accessControll("Access-Controll-Allow-Methods", implode(", ", $excepted));
+	}
+
+	/**
+	 * @param array $excepted [optional] $excepted
+	 * @return Response
+	 * @throws ResponseException
+	 */
+	public function accessControlAllowHeaders(array $excepted)
+	{
+		if (count($excepted) == 0) {
+			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+		}
+
+		return $this->accessControll("Access-Controll-Allow-Headers", implode(", ", $excepted));
+	}
+
+	/**
+	 * @return Response
+	 */
+	public function accessControlAllowCredentials()
+	{
+		return $this->accessControll("Access-Control-Allow-Credentials", "true");
+	}
+
+	/**
+	 * @param string $excepted [optional] $excepted
+	 * @return Response
+	 * @throws ResponseException
+	 */
+	public function accessControlMaxAge($excepted)
+	{
+		if (!is_numeric($excepted)) {
+			throw new ResponseException("La paramtere doit être un entier: " . gettype($excepted) . " donner.", E_USER_ERROR);
+		}
+
+		return $this->accessControll("Access-Control-Max-Age", $excepted);
+	}
+
+	/**
+	 * @param array $excepted [optional] $excepted
+	 * @return Response
+	 * @throws ResponseException
+	 */
+	public function accessControlExposeHeaders(array $excepted)
+	{
+		if (count($excepted) == 0) {
+			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+		}
+
+		return $this->accessControll("Access-Control-Expose-Headers", implode(", ", $excepted));
 	}
 }

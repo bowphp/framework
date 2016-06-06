@@ -29,12 +29,16 @@ class Validator
         $message = "";
 
         foreach($rules as $key => $rule) {
-            // Formatage de la régle
+            /**
+             * Formatage et validation de chaque règle
+             * eg. name => "required|max:100|alpha"
+             */
             foreach(explode("|", $rule) as $masque) {
                 // Dans le case il y a un | superflux.
                 if (is_int($masque) || Str::len($masque) == "") {
                     continue;
                 }
+
                 // Erreur listes.
                 $errors[$key] = [];
 
@@ -54,6 +58,7 @@ class Validator
                     }
                 }
 
+                // Masque sur la règle min
                 if (preg_match("/^min:(\d+)$/", $masque, $match)) {
                     $length = (int) end($match);
                     if (Str::len($inputs[$key]) < $length) {
@@ -63,6 +68,7 @@ class Validator
                     }
                 }
 
+                // Masque sur la règle max
                 if (preg_match("/^max:(\d+)$/", $masque, $match)) {
                     $length = (int) end($match);
                     if (Str::len($inputs[$key]) > $length) {
@@ -72,6 +78,7 @@ class Validator
                     }
                 }
 
+                // Masque sur la règle email.
                 if (preg_match("/^email$/", $masque, $match)) {
                     if (!Str::isMail($inputs[$key])) {
                         $message = "Le champs $key doit avoir un contenu au format email.";
@@ -80,15 +87,16 @@ class Validator
                     }
                 }
 
+                // Masque sur la règle number
                 if (preg_match("/^number$/", $masque, $match)) {
                     if (!is_numeric($inputs[$key])) {
                         $message = "Le champs \"$key\" doit avoir un contenu en numérique.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
-                    } else {
                         $isFails = true;
                     }
                 }
 
+                // Masque sur la règle alphanum
                 if (preg_match("/^alphanum$/", $masque)) {
                     if (!Str::isAlphaNum($inputs[$key])) {
                         $message = "Le champs \"$key\" doit avoir un contenu en alphanumérique.";
@@ -97,6 +105,7 @@ class Validator
                     }
                 }
 
+                // Masque sur la règle alpha
                 if (preg_match("/^alpha$/", $masque)) {
                     if (!Str::isAlpha($inputs[$key])) {
                         $message = "Le champs \"$key\" doit avoir un contenu en alphabetique.";
@@ -105,12 +114,9 @@ class Validator
                     }
                 }
 
+                // On nettoye la lsite des erreurs si la clé est valide
                 if (empty($errors[$key])) {
                     unset($errors[$key]);
-                }
-
-                if (!$isFails) {
-                    break;
                 }
             }
         }

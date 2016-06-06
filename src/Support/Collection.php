@@ -13,33 +13,37 @@ class Collection
 	/**
 	 * @var array
 	 */
-	private $storage;
+	private $storage = [];
 
-	public function __construct()
+    /**
+     * Constructeur d'instance.
+     *
+     * @param array $arr
+     */
+	public function __construct(array $arr = [])
 	{
-        if (func_num_args() === 1) {
-             $this->storage = (array) func_get_arg(0);
-        } else {
-            $this->storage = func_get_args();
-        }
+        $this->storage = $arr;
 	}
 
 	/**
      * has, vérifie l'existance une clé dans la colléction de session
      *
-     * @param string $key
-     * @param bool $val Quand $val est a true alors :has vas vérifie $key non pas comment une cle mais un valeur.
+     * @param string $key La clé de l'élément récherché
+     * @param bool   $strict Quand $val est a true alors :has vas vérifie $key non pas comment une cle mais un valeur.
      * @return boolean
      */
-    public function has($key, $val = false)
+    public function has($key, $strict = false)
     {
-        // Quand $val est a true alors :has vas vérifie
+        // Quand $strict est a true alors :has vas vérifie
         // $key non pas comment une cle mais un valeur.
-        if ($val === true) {
-        	return isset(array_flip($this->storage)[$key]);
+        $isset = isset($this->storage[$key]);
+        if ($isset) {
+            if ($strict === true) {
+                $isset = $isset && !empty($this->storage[$key]);
+            }
         }
 
-        return isset($this->storage[$key]);
+        return $isset;
     }
 
     /**
@@ -66,21 +70,24 @@ class Collection
      * get, permet de récupérer une valeur ou la colléction de valeur.
      *
      * @param string $key
+     * @param mixed $default
      *
      * @return mixed
      */
-    public function get($key = null)
+    public function get($key, $default = null)
     {
 
     	if ($this->has($key)) {
-        	return $this->storage[$key];
+            return $this->storage[$key];
         } else {
-            if ($key !== null) {
-                return null;
+            if ($default !== null) {
+                if (is_callable($default)) {
+                    return call_user_func($default);
+                }
             }
         }
 
-    	return $this->storage;
+    	return null;
     }
 
     /**
@@ -110,30 +117,30 @@ class Collection
             array_push($r, $key);
         }
 
-        return $r;
+        return new Collection($r);
     }
 
     /**
      * collectionify, permet de récupérer une valeur ou la colléction de valeur sous forme
      * d'instance de collection.
      *
-     * @param string $key=null
+     * @param string $key La clé de l'élément
      *
      * @return Collection
      */
-    public function collectionify($key = null)
+    public function collectionify($key)
     {
-
         if ($this->has($key)) {
-            return new Collection($this->storage[$key]);
-        } else {
-            if ($key !== null) {
-                return null;
+            $insData = $this->storage[$key];
+            if (!is_array($insData)) {
+                $insData = [$insData];
             }
+            return new Collection($insData);
+        } else {
+            return null;
         }
-
-        return new Collection($this->storage);
     }
+
     /**
      * add, ajoute une entrée dans la colléction
      *
@@ -156,13 +163,13 @@ class Collection
 
 
     /**
-     * remove, supprime une entrée dans la colléction
+     * delete, supprime une entrée dans la colléction
      *
      * @param string $key
      * 
      * @return Collection
      */
-    public function remove($key)
+    public function delete($key)
     {
     	unset($this->storage[$key]);
     
@@ -222,7 +229,7 @@ class Collection
         if (is_array($array)) {
             $this->storage = array_merge($this->storage, $array);
         } else if ($array instanceof Collection) {
-            $this->storage = array_merge($this->storage, $array->get());
+            $this->storage = array_merge($this->storage, $array->toArray());
         } else {
             throw new \ErrorException(__METHOD__ . "(), must be take 1 parameter to be array or Collection, " . gettype($array) . " given", E_ERROR);
         }
@@ -238,11 +245,13 @@ class Collection
      */
     public function map($cb)
     {
-    	foreach ($this->storage as $key => $value) {
-    		$this->storage[$key] = call_user_func_array($cb, [$value, $key]);
+        $data = $this->storage;
+
+    	foreach ($data as $key => $value) {
+            $data[$key] = call_user_func_array($cb, [$value, $key]);
         }
 
-        return $this;
+        return new Collection($data);
     }
 
     /**
@@ -262,7 +271,7 @@ class Collection
             }
     	}
 
-    	return $r;
+    	return new Collection($r);
     }
 
     /**
@@ -276,8 +285,9 @@ class Collection
     public function fill($data, $offset)
     {
     	$old = $this->storage;
+        $len = count($old);
 
-    	for($i = 0; $i < $offset; $i++) {
+    	for($i = $len, $len += $offset; $i < $len; $i++) {
         	$this->storage[$i] = $data;
         }
     	
@@ -303,6 +313,15 @@ class Collection
     }
 
     /**
+     * @param $sep
+     * @return string
+     */
+    public function implode($sep)
+    {
+        return implode($sep, $this->toArray());
+    }
+
+    /**
      * Sum
      * 
      * @param callable $cb
@@ -313,15 +332,87 @@ class Collection
     {
         $sum = 0;
 
-    	foreach ($this->storage as $key => $value) {
-        	$sum += $value;
-        }
+        $this->recursive($this->storage, function($value) use (& $sum) {
+            if (is_numeric($value)) {
+                $sum += $value;
+            }
+        });
 
         if ($cb !== null) {
             call_user_func_array($cb, [$sum]);
         }
 
     	return $sum;
+    }
+
+    /**
+     * Max
+     *
+     * @param callable $cb
+     *
+     * @return int
+     */
+    public function max($cb = null)
+    {
+    	return $this->side($cb, "max");
+    }
+
+    /**
+     * Max
+     *
+     * @param callable $cb
+     *
+     * @return int
+     */
+    public function min($cb = null)
+    {
+    	return $this->side($cb, "min");
+    }
+
+    /**
+     * side Execute max|min
+     *
+     * @param callable $cb
+     * @param string $type
+     *
+     * @return int
+     */
+    private function side($cb = null, $type)
+    {
+        $data = [];
+
+        $this->recursive($this->storage, function($value) use (& $data) {
+            if (is_numeric($value)) {
+                $data[] = $value;
+            }
+        });
+
+        $r = call_user_func_array("$type", [$data]);
+
+        if (is_callable($cb)) {
+            call_user_func_array($cb, [$r]);
+        }
+
+    	return $r;
+    }
+
+    /**
+     * Permet d'ignorer la clé que l'on lui donne
+     * et retourne une instance de Collection.
+     *
+     * @param array $except Liste des éléments à ignorer
+     * @return Collection
+     */
+    public function except(array $except)
+    {
+        $data = [];
+        $this->recursive($this->storage, function($value, $key) use (& $data, $except) {
+            if (!in_array($key, $except)) {
+                $data[$key] = $value;
+            }
+        });
+
+        return new Collection($data);
     }
 
     /**
@@ -347,7 +438,7 @@ class Collection
             $r = $c;
         }
 
-        return $r;
+        return new Collection($r);
     }
 
     /**
@@ -364,6 +455,9 @@ class Collection
                 if ($overide === true) {
                     $this->storage[$key] = $data;
                 } else {
+                    if (!is_array($data)) {
+                        $data = [$data];
+                    }
                     $this->storage[$key] = array_merge($this->storage[$key], $data);
                 }
             } else {
@@ -391,7 +485,7 @@ class Collection
      *
      * @return string
      */
-    public function toJSON()
+    public function toJson()
     {
         return json_encode($this->storage);
     }
@@ -427,7 +521,69 @@ class Collection
     }
 
     /**
-     * __set
+     * Retourne les éléments de la collection sous format de table;
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $data = [];
+
+        $this->recursive($this->storage, function($value, $key) use (& $data) {
+            if (is_object($value)) {
+                $data[$key] = (array) $value;
+            } else {
+                $data[$key] = $value;
+            }
+        });
+
+        return $data;
+    }
+
+    /**
+     * Retourne les éléments de la collection
+     *
+     * @return mixed
+     */
+    public function all()
+    {
+        return $this->storage;
+    }
+
+    /**
+     * Ajout après le dernier élément de la collection
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    public function push($value)
+    {
+        $data = func_get_args();
+
+        array_unshift($data, $this->storage);
+        call_user_func_array("array_push", $data);
+
+        $this->storage = $data;
+
+        return $this;
+    }
+
+    /**
+     * @param array $data
+     * @param callable $cb
+     */
+    private function recursive(array $data, Callable $cb) {
+        foreach($data as $key => $value) {
+            if (is_array($value)) {
+                $this->recursive($data, $cb);
+            } else {
+                $cb($value, $key);
+            }
+        }
+    }
+
+    /**
+     * __get
      *
      * @param string $name La clé
      *

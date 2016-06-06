@@ -1,8 +1,7 @@
 <?php
-namespace Bow\Support;
+namespace Bow\Support\Session;
 
 use Bow\Support\Str;
-use Bow\Support\Flash;
 use Bow\Support\Security;
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
@@ -22,8 +21,8 @@ class Session implements CollectionAccessStatic
 	private static function start()
 	{
 		if (PHP_SESSION_ACTIVE != session_status()) {
-            session_name("BOWSESSID");
-            if (!isset($_COOKIE["BOWSESSID"])) {
+            session_name("SESSID");
+            if (!isset($_COOKIE["SESSID"])) {
                 session_id(hash("sha256", Security::encrypt(Str::repeat(Security::generateCsrfToken(), 2))));
             }
             session_start();
@@ -85,19 +84,21 @@ class Session implements CollectionAccessStatic
 	 * 
 	 * @return mixed
 	 */
-	public static function get($key = null, $default = null)
+	public static function get($key, $default = null)
 	{
 		static::start();
 
-		if ($key !== null) {
-			if (static::has($key)) {
-				return $_SESSION[$key];
-			} else {
-				return $default;
-			}
-		}
+        if (static::has($key)) {
+            return $_SESSION[$key];
+        }
 
-		return self::filter();
+        if (isset($_SESSION["bow.flash"][$key])) {
+            $flash = $_SESSION["bow.flash"][$key];
+            static::reFlash($key);
+            return $flash;
+        }
+
+        return $default;
 	}
 
 	/**
@@ -109,15 +110,11 @@ class Session implements CollectionAccessStatic
      *                      Dans un tableau
 	 *
 	 * @throws InvalidArgumentException
-	 * @return static
+	 * @return null
 	 */
 	public static function add($key, $data, $next = false)
 	{
 		static::start();
-
-		if (!is_string($key)) {
-			throw new InvalidArgumentException("La clé doit être un chaine de caractère.", E_ERROR);
-		}
 
 		if ($next === true) {
 			if (static::has($key)) {
@@ -131,8 +128,6 @@ class Session implements CollectionAccessStatic
 		} else {
 			$_SESSION[$key] = $data;
 		}
-
-		return self::class;
 	}
 
 	/**
@@ -140,7 +135,7 @@ class Session implements CollectionAccessStatic
 	 *
 	 * @param string $key La clé de l'élément a supprimé
 	 *
-	 * @return void
+	 * @return null
 	 */
 	public static function remove($key)
 	{
@@ -178,43 +173,28 @@ class Session implements CollectionAccessStatic
 	 *
      * @return mixed
      */
-    public static function flash($key, $message = null)
+    public static function flash($key, $message)
     {
-        if (!static::has("bow.flash")) {
-            $_SESSION["bow.flash"] = new Flash();
-        }
+        $_SESSION["bow.flash"][$key] = $message;
+    }
 
-		if (!in_array($key, ["error", "danger", "warning", "warn", "info", "success"])) {
-			throw new \ErrorException("$key n'est pas valide.");
-		}
-
-        if ($key === "info") {
-            $key = "information";
-        }
-
-        if ($key === "warn") {
-            $key = "warning";
-        }
-
-        $flashMessage = null;
-
-        if ($message === null) {
-            $flashMessage = $_SESSION["bow.flash"]->$key();
-            self::reFlash();
-        } else {
-            $_SESSION["bow.flash"]->$key($message);
-        }
-
-        return $flashMessage;
+    /**
+     * Retourne la liste des données de la session sous forme de tableau.
+     *
+     * @return array
+     */
+    public static function toArray()
+    {
+        return self::filter();
     }
 
     /**
      * reFlash
+     * @param string $key
      */
-    private static function reFlash()
+    private static function reFlash($key)
     {
-        self::start();
-        unset($_SESSION["bow.flash"]);
+        unset($_SESSION["bow.flash"][$key]);
     }
 
 	/**
@@ -224,20 +204,8 @@ class Session implements CollectionAccessStatic
 	{
 		self::start();
 
-		foreach($_SESSION as $key => $value){
-            if (!in_array($key, ["bow.csrf", "bow.flash", "bow.event"])) {
-                unset($_SESSION[$key]);
-            }
+		foreach(self::filter() as $key => $value){
+            unset($_SESSION[$key]);
         }
 	}
-
-    /**
-     * clear  full, permet vider le cache de session
-     */
-    public static function destroy()
-    {
-        static::start();
-        session_unset();
-        session_destroy();
-    }
 }

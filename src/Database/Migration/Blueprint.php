@@ -1,10 +1,7 @@
 <?php
 namespace Bow\Database\Migration;
 
-use Bow\Support\Str;
 use Bow\Support\Collection;
-use Bow\Exception\ModelException;
-use Bow\Exception\DatabaseException;
 
 class Blueprint
 {

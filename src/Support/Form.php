@@ -122,6 +122,26 @@ class Form
     }
 
     /**
+     * Ajout le tag radio.
+     *
+     * @param string $name
+     * @param array $options
+     * @param string|null $selected
+     *
+     * @return void
+     */
+    public static function select($name, array $options = [], $selected = null)
+    {
+        self::$form .= "<select name=\"$name\">";
+
+        foreach($options as $key => $value) {
+            self::$form .= "<option value=\"{$key}\" " . ($selected == $key ? "selected" : "") . ">" . $value . "</option>";
+        }
+
+        self::$form .= "</select>";
+    }
+
+    /**
      * Ajout le tag <fieldset>
      *
      * @param null|string $legend

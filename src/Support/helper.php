@@ -1,8 +1,8 @@
 <?php
 /*------------------------------------------------
 |
-|	HELPER
-|	======
+|	BOW HELPER
+|	==========
 |	Définir des liens symbolique de l'ensemble des
 |	fonctions de Bow.
 |
@@ -10,15 +10,15 @@
 
 use Bow\Http\Request;
 use Bow\Support\Util;
-use Bow\Support\Event;
 use Bow\Http\Response;
-use Bow\Support\Session;
 use Bow\Http\RequestData;
 use Bow\Support\Security;
-use Bow\Support\Resource;
 use Bow\Database\Database;
 use Bow\Support\Collection;
+use Bow\Support\Session\Event;
 use Bow\Core\AppConfiguration;
+use Bow\Support\Session\Session;
+use Bow\Support\Resource\Storage;
 
 define("SELECT", Database::SELECT);
 define("INSERT", Database::INSERT);
@@ -45,7 +45,7 @@ Request::configure();
 Database::configure(configuration()->getDatabaseConfiguration());
 
 // Configuration de la resource de l'application.
-Resource::configure(configuration()->getResourceConfiguration());
+Storage::configure(configuration()->getResourceConfiguration());
 
 
 if (!function_exists("response")) {
@@ -160,7 +160,7 @@ if (!function_exists("query_maker")) {
 
         if (method_exists(Database::class, $method)) {
             $rs = Database::$method($sql, $data);
-            $err = Database::getLastErreur();
+            $err = Database::getLastError();
         }
 
         if (is_callable($cb)) {
@@ -208,7 +208,7 @@ if (!function_exists("db_error")) {
      * @return \Bow\Database\DatabaseErrorHandler
      */
     function db_error() {
-        return Database::getLastErreur();
+        return Database::getLastError();
     }
 }
 
@@ -455,14 +455,14 @@ if (!function_exists("store")) {
      */
     function store(array $file, $filename = null, $dirname = null) {
         if (!is_null($filename) && is_string($filename)) {
-            Resource::setUploadFileName($filename);
+            Storage::setUploadFileName($filename);
         }
 
         if (!is_null($dirname)) {
-            Resource::setUploadDirectory($dirname);
+            Storage::setUploadDirectory($dirname);
         }
 
-        return (object) Resource::store($file);
+        return (object) Storage::store($file);
     }
 }
 
@@ -620,10 +620,28 @@ if (!function_exists("curl")) {
 if (!function_exists("url")) {
     /**
      * url retourne l'url courant
-     * @return string $url
+     *
+     * @param string $url
+     * @param array $parameters
+     *
+     * @return string
      */
-    function url() {
-        return request()->url();
+    function url($url, array $parameters = []) {
+        if (!preg_match("/^\/?.+/", $url)) {
+            $url = "/" . $url;
+        }
+
+        $url = request()->url() . $url;
+        $i = 0;
+
+        foreach($parameters as $key => $parameter) {
+            if ($i > 0) {
+                $url .= "&";
+            }
+            $url .= $key."=".$parameter;
+        }
+
+        return $url;
     }
 }
 
@@ -643,9 +661,11 @@ if (!function_exists("set_pdo")) {
      * modifie l'instance de la connection PDO
      *
      * @param PDO $pdo
+     * @return PDO
      */
     function set_pdo(PDO $pdo) {
         Database::setPdo($pdo);
+        return pdo();
     }
 }
 
@@ -658,7 +678,7 @@ if (!function_exists("execute_function")) {
      * @return mixed
      */
     function execute_function($cb, $params, $names = []) {
-        return Util::launchCallback($cb, $params, $names);
+        return util()->launchCallback($cb, $params, $names);
     }
 }
 
@@ -672,19 +692,12 @@ if (!function_exists("collect")) {
      */
     function collect() {
         $col = new Collection();
-        $data = [];
-        if (func_num_args() == 1) {
-            if (is_array(func_get_arg(0))) {
-                $data = func_get_arg(0);
-            } else {
-                $data = (array) func_get_arg(0);
-            }
-        } else {
-            $data = func_get_args();
+        $data = func_get_args();
+
+        foreach($data as $key => $param) {
+            $col->add($key, $param);
         }
-        foreach($data as $param) {
-            $col->add($param);
-        }
+
         return $col;
     }
 }
@@ -759,7 +772,7 @@ if (!function_exists("event")) {
             throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
         }
 
-        call_user_func_array([Event::class, "on"], [$event_name, $fn]);
+        call_user_func_array([Event::class, "on"], [$event_name, $fn, configuration()->getNamespace()]);
     }
 }
 
@@ -821,14 +834,14 @@ if (!function_exists("util")) {
     }
 }
 
-if (!function_exists("bmail")) {
+if (!function_exists("bow_mail")) {
     /**
      * @param string|null $type
      *
      * @return \Bow\Mail\SimpleMail|\Bow\Mail\Smtp
      * @throws \Bow\Exception\MailException
      */
-    function bmail($type = null) {
+    function bow_mail($type = null) {
         $config = configuration()->getMailConfiguration();
 
         if ($type !== null) {
@@ -837,7 +850,7 @@ if (!function_exists("bmail")) {
             }
         }
 
-        return Bow\Mail\BowMail::confirgure($config);
+        return Bow\Mail\Mail::confirgure($config);
     }
 }
 
@@ -864,10 +877,22 @@ if (!function_exists("session")) {
     /**
      * session
      *
-     * @return Session
+     * @param string $key
+     * @param mixed $message
+     * @return mixed
      */
-    function session() {
-        return Session::class;
+    function session($key = null, $message = null) {
+        if ($key === null && $message === null) {
+            return Session::toArray();
+        }
+
+        if (Session::has($key)) {
+            return Session::get($key);
+        }
+
+        if ($key !== null && $message !== null) {
+            return Session::add($key, $message);
+        }
     }
 }
 
@@ -875,10 +900,10 @@ if (!function_exists("cookie")) {
     /**
      * aliase sur la classe Cookie.
      *
-     * @return \Bow\Support\Cookie
+     * @return \Bow\Support\Session\Cookie
      */
     function cookie() {
-        return \Bow\Support\Cookie::class;
+        return \Bow\Support\Session\Cookie::class;
     }
 }
 
@@ -892,5 +917,33 @@ if (!function_exists("validate")) {
      */
     function validate(array $inputs, array $rules) {
         return \Bow\Support\Validate\Validator::make($inputs, $rules);
+    }
+}
+
+if (!function_exists("bow_date")){
+    /**
+     * @param null $date
+     * @return \Bow\Support\DateAccess
+     */
+    function bow_date($date = null) {
+        return new \Bow\Support\DateAccess($date);
+    }
+}
+
+if (!function_exists("public_path")) {
+    /**
+     * @return string
+     */
+    function public_path() {
+        return configuration()->getPublicPath();
+    }
+}
+
+if (!function_exists("str")) {
+    /**
+     * @return \Bow\Support\Str
+     */
+    function str() {
+        return \Bow\Support\Str::class;
     }
 }

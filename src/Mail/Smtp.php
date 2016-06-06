@@ -13,7 +13,7 @@ use Bow\Exception\SocketException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
- class Smtp extends Message
+ class Smtp extends Message implements Send
 {
 
     /**
@@ -57,7 +57,7 @@ use Bow\Exception\SocketException;
      */
     public function __construct(array $param)
     {
-        $this->boundary = "Bow-Framework-" . md5(date("r"));
+        $this->setBoundary("Bow-Framework-" . md5(date("r")));
 
         if (!isset($param["secure"])) {
             $param["secure"] = false;
@@ -95,7 +95,7 @@ use Bow\Exception\SocketException;
         }
 
 
-        foreach($this->to as $value) {
+        foreach($this->getTo() as $value) {
             $to = "";
             if ($value[0] !== null) {
                 $to .= "{$value[0]} <{$value[1]}>";
@@ -106,7 +106,11 @@ use Bow\Exception\SocketException;
         }
 
         $this->write("DATA", 354);
-        $this->write($this->makeSendData());
+        $data  = $this->compileHeaders();
+        $data .= "Content-Type: {$this->getType()}; charset=\"{$this->getCharset()}\"". self::END;
+        $data .= "Content-Transfer-Encoding: 8bit" . self::END;
+        $data .= self::END . $this->getMessage() . self::END;
+        $this->write($data);
 
         try {
             $this->write(".", 250);

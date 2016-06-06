@@ -4,7 +4,6 @@ namespace Bow\Database\Migration;
 use Bow\Support\Str;
 use Bow\Support\Collection;
 use Bow\Exception\ModelException;
-use Bow\Exception\DatabaseException;
 
 class ColumnsMaker
 {
@@ -310,7 +309,7 @@ class ColumnsMaker
      *
      * @return Schema
      */
-    public function datetime($field, $null = false)
+    public function dateTime($field, $null = false)
     {
         $this->addField("datetime", $field, [
             "null" => $null
@@ -391,7 +390,7 @@ class ColumnsMaker
      */
     public function increment($field = null)
     {
-        if ($this->autoincrement === null) {
+        if ($this->autoincrement === false) {
             if ($this->lastField !== null) {
                 if (in_array($this->lastField->method, ["int", "longint", "bigint"])) {
                     $this->autoincrement = $this->lastField;

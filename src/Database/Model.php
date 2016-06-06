@@ -29,9 +29,10 @@ abstract class Model
      */
     public static function __callStatic($method, $args)
     {
-        $scope = "custom" . ucfirst($method);
+        $scope = "scope" . ucfirst($method);
         $table = static::$table;
         $table = Database::table(Str::lower(static::$table));
+
         if (method_exists($ins = new static, $scope)) {
             if (method_exists($table, $method)) {
                 throw new ModelException("$method ne peut pas être utiliser comme fonction d'aliase.", E_ERROR);

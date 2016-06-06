@@ -116,22 +116,21 @@ class Table extends DatabaseTools
      *
      * SELECT $column | SELECT column1, column2, ...
      *
-     * @param null $column
+     * @param array $column
      *
      * @return $this
      */
-    public function select($column = null) {
+    public function select($column = null)
+    {
 
         if (is_array($column)) {
             $column = implode(", ", $column);
-        } else {
-            if (func_num_args() >= 1) {
-                $column = implode(", ", func_get_args());
-            }
+            return $this;
         }
 
-        if (!is_null($column)) {
+        if (is_string($column)) {
             $this->select = $column;
+            return $this;
         }
 
         return $this;
@@ -1179,7 +1178,7 @@ class Table extends DatabaseTools
      */
     private static function isComporaisonOperator($comp)
     {
-        return in_array($comp, ["=", ">", "<", ">=", "=<", "<>", "!="], true);
+        return in_array($comp, ["=", ">", "<", ">=", "=<", "<>", "!=", "LIKE", "like"], true);
     }
 
     /**

@@ -95,7 +95,7 @@ class Str
             throw new \ErrorException("$pattern not valide");
         }
 
-        return mb_ereg_match($pattern, $str, $match, "UTF-8");
+        return preg_match($pattern, $str, $match);
     }
 
     /**
@@ -201,7 +201,7 @@ class Str
      */
     public static function randomize($size = 16)
     {
-        return static::slice(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012356789'), 0, $size);
+        return static::slice(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, $size);
     }
 
     /**
@@ -363,20 +363,20 @@ class Str
     }
 
     /**
-     * retourne un nombre détermine de mots dans une chaine de caractère.
+     * Retourne un nombre détermine de mots dans une chaine de caractère.
      *
      * @param string $words
      * @param int $len
      *
      * @return string
      */
-    public static function getNWords($words, $len)
+    public static function getWords($words, $len)
     {
         $wordParts = explode(" ", $words);
         $sentence = "";
 
-        foreach($wordParts as $word) {
-            $sentence .= " " . $word;
+        for($i = 0; $i < $len; $i++) {
+            $sentence .= " " . $wordParts[$i];
         }
 
         return trim($sentence);

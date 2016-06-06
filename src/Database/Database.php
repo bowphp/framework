@@ -150,6 +150,7 @@ class Database extends DatabaseTools
             /**
              * Lancement d'exception
              */
+            static::$errorInfo = [$e->getCode(), true, $e->getMessage()];
             Util::launchCallback($cb, [$e]);
         }
 
@@ -429,7 +430,7 @@ class Database extends DatabaseTools
         if (! (static::$db instanceof PDO)) {
             static::connection(static::$zone, function($err) {
                 if ($err instanceof PDOException) {
-                    throw $err;
+                    throw new DatabaseException($err->getMessage(), E_ERROR);
                 }
             });
         }
@@ -451,7 +452,7 @@ class Database extends DatabaseTools
      * 
      * @return DatabaseErrorHandler
      */
-    public static function getLastErreur()
+    public static function getLastError()
     {
         return new DatabaseErrorHandler(static::$errorInfo);
     }

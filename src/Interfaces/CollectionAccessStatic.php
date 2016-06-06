@@ -27,10 +27,11 @@ interface CollectionAccessStatic
     /**
      * get, permet de récupérer une valeur ou la colléction de valeur.
      *
-     * @param string $key=null
+     * @param string $key
+     * @param mixed  $default [optinal]
      * @return mixed
      */
-    public static function get($key = null);
+    public static function get($key, $default = null);
 
     /**
      * add, ajoute une entrée dans la colléction
@@ -59,5 +60,11 @@ interface CollectionAccessStatic
      * @return self
      */
     public static function set($key, $value);
+
+    /**
+     * retourne tout les entrées de la colléction
+     * @return array
+     */
+    public static function toArray();
 
 }

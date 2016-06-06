@@ -10,7 +10,7 @@ use Bow\Exception\MailException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
-abstract class Message
+class Message
 {
 
     const END = "\r\n";
@@ -19,65 +19,64 @@ abstract class Message
 	 * Liste des entêtes
 	 * @var array
 	 */
-	protected $headers = [];
+	private $headers = [];
 
     /**
      * @var array
      */
-
-    protected $additonnalHeader = [];
+	private $additonnalHeader = [];
 
 	/**
 	 * définir le destinataire
 	 * @var array
 	 */
-	protected $to = [];
+	private $to = [];
 
 	/**
 	 * définir l'object du mail
 	 * @var string
 	 */
-	protected $subject = null;
+	private $subject = null;
 
     /**
      * @var array
      */
-    protected $attachement = [];
+	private $attachement = [];
 
 	/**
 	 * @var string
 	 */
-	protected $from = null;
+	private $from = null;
 
 	/**
 	 * Définir le message
 	 * @var string
 	 */
-	protected $message = null;
+	private $message = null;
 
 	/**
 	 * Définir le frontière entre les contenus.
 	 *
 	 * @var string
 	 */
-	protected $boundary;
+	private $boundary;
 
     /**
      * @var string
      */
-    protected $charset = "utf-8";
+	private $charset = "utf-8";
 
     /**
      * @var string
      */
-    protected $type = "text/html";
+	private $type = "text/html";
 
 	/**
 	 * fromDefined
 	 *
 	 * @var boolean
 	 */
-	protected $fromDefined = false;
+	private $fromDefined = false;
 
     /**
      *
@@ -96,22 +95,6 @@ abstract class Message
             $this->headers[] = "Subject: " . $this->subject;
         }
     }
-
-	/**
-	 * formatHeader, formateur d'entête SMTP
-	 *
-	 * @return string
-	 */
-	private function formatHeader()
-	{
-        // Formatage de l'entête du mail
-        $headers = implode(self::END, $this->headers). self::END;
-        $headers .= "Content-Type: {$this->type}; charset=\"{$this->charset}\"". self::END;
-        $headers .= "Content-Transfer-Encoding: 8bit" . self::END;
-        $headers .= self::END . $this->message . self::END;
-
-        return $headers;
-	}
 
 	/**
 	 * to, définir le récépteur
@@ -180,9 +163,9 @@ abstract class Message
 	}
 
     /**
-     * @return string
+     * @return array
      */
-    protected function makeSendData()
+    public function compileHeaders()
     {
         $this->headers[] = "Content-type: multipart/mixed; boundary=\"{$this->boundary}\"" . self::END;
 
@@ -198,7 +181,7 @@ abstract class Message
             $this->headers[] = "--" . $this->boundary;
         }
 
-        return $this->formatHeader();
+        return implode(self::END, $this->headers). self::END;
     }
 
 	/**
@@ -320,6 +303,11 @@ abstract class Message
 		return $this;
 	}
 
+	protected function setBoundary($boundary)
+	{
+		$this->boundary = $boundary;
+	}
+
 	/**
 	 * Adds Return-Path
 	 * 
@@ -350,11 +338,72 @@ abstract class Message
 		return $this;
 	}
 
-    /**
-     * send, envoie de mail.
-     *
-     * @param callable|null $cb
-     * @return mixed
-     */
-    abstract public function send($cb = null);
+	public function setMessage($message)
+	{
+		$this->message = $message;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getHeaders()
+	{
+		return $this->headers;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getTo()
+	{
+		return $this->to;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getSubject()
+	{
+		return $this->subject;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getFrom()
+	{
+		return $this->from;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMessage()
+	{
+		return $this->message;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCharset()
+	{
+		return $this->charset;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function fromIsDefined()
+	{
+		return $this->fromDefined;
+	}
 }

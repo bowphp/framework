@@ -55,12 +55,18 @@ class Schema
 		call_user_func_array($cb, [$columnsMaker]);
 
         $sql = (new Blueprint($columnsMaker))->toCreateTableStatement();
+
+        if ($sql == null) {
+            die("\033[0;31mPlease check your 'up' method.\033[00m\n");
+        }
+
         self::$data = $columnsMaker->getBindData();
 
-		if (statement($sql)) {
+
+        if (statement($sql)) {
 			echo "\033[0;32m$table table created.\033[00m\n";
 		} else {
-            echo "\033[0;31m$table table already exists or not created.\033[00m\n";
+            echo "\033[0;31m$table table already exists.\033[00m\n";
         }
 	}
 

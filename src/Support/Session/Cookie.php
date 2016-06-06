@@ -1,7 +1,5 @@
 <?php
-namespace Bow\Support;
-
-use Bow\Support\Session;
+namespace Bow\Support\Session;
 
 /**
  * Class Cookie
@@ -120,7 +118,7 @@ class Cookie
                 unset(static::$isDecrypt[$key]);
             }
 
-            static::add($key, null, time() - 3600);
+            static::add($key, null, -1000);
             unset($_COOKIE[$key]);
         }
 

@@ -12,7 +12,7 @@ use Bow\Exception\MailException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
-class SimpleMail extends Message
+class SimpleMail extends Message implements Send
 {
 	/**
 	 * @var array
@@ -28,16 +28,16 @@ class SimpleMail extends Message
 	 */
 	public function send($cb = null)
 	{
-		if (empty($this->to) || empty($this->subject) || empty($this->message)) {
+		if (empty($this->getTo()) || empty($this->getSubject()) || empty($this->getMessage())) {
 			throw new InvalidArgumentException("Une erreur est survenu. L'expediteur ou le message ou l'object omit.", E_USER_ERROR);
 		}
 
 		if (count($this->config) > 0) {
 
-			if (!$this->fromDefined) {
+			if (!$this->fromIsDefined()) {
 				$form = $this->config[0];
-			} else if (!Str::isMail(explode(" ", $this->from)[0])) {
-				$form = $this->config[$this->from];
+			} else if (!Str::isMail(explode(" ", $this->getFrom())[0])) {
+				$form = $this->config[$this->getFrom()];
 			} else {
 				throw new MailException("L'expediteur n'est spécifié.", E_USER_ERROR);
 			}
@@ -46,7 +46,7 @@ class SimpleMail extends Message
 		}
 
 
-		$status = @mb_send_mail($this->to, $this->subject, $this->message, $this->makeSendData());
+		$status = @mb_send_mail($this->getTo(), $this->getMessage(), $this->getMessage(), $this->compileHeaders());
 
         if ($cb) {
             Util::launchCallback($cb, $status);
@@ -70,6 +70,6 @@ class SimpleMail extends Message
 	public function __construct(array $config = [])
 	{
 		$this->config = $config;
-		$this->boundary = "__Bow-Framework-" . md5(date("r"));
+		$this->setBoundary("__Bow-Framework-" . md5(date("r")));
 	}
 }
