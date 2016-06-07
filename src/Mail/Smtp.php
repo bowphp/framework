@@ -2,7 +2,6 @@
 namespace Bow\Mail;
 
 use ErrorException;
-use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Exception\SmtpException;
 use Bow\Exception\SocketException;
@@ -21,7 +20,7 @@ use Bow\Exception\SocketException;
      *
      * @var null
      */
-    private $sock = null;
+    private $sock;
 
     /**
      * @var string
@@ -57,7 +56,7 @@ use Bow\Exception\SocketException;
      */
     public function __construct(array $param)
     {
-        $this->setBoundary("Bow-Framework-" . md5(date("r")));
+        parent::__construct();
 
         if (!isset($param["secure"])) {
             $param["secure"] = false;
@@ -93,7 +92,6 @@ use Bow\Exception\SocketException;
         } else {
             $this->write("MAIL FROM: <" . $this->username . ">", 250);
         }
-
 
         foreach($this->getTo() as $value) {
             $to = "";

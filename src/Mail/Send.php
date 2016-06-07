@@ -9,8 +9,6 @@ namespace Bow\Mail;
  */
 interface Send
 {
-
-
     /**
      * send, envoie de mail.
      *

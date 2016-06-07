@@ -53,18 +53,15 @@ class Mail
      * Envoye de mail.
      *
      * @param string $view Le nom de la vue
-     * @param array $bind  Les données à passer à la vue.
-     * @param callable $cb La fonction
+     * @param array|callable $bind Les données à passer à la vue.
+     * @param callable $cb [optional] La fonction
      * @return bool
      *
      * @throws \Bow\Exception\ResponseException
      * @throws \Bow\Exception\ViewException
      */
-    public static function send($view, $bind, $cb)
+    public static function send($view, $bind, $cb = null)
     {
-        $type = "text/html";
-        $data = "";
-
         if (is_callable($bind)) {
             $cb = $bind;
             $bind = [];
@@ -79,7 +76,7 @@ class Mail
 
         $message->setMessage($data);
 
-        return @mb_send_mail($message->getTo(), $message->getSubject(), $message->getMessage(), $message->compileHeaders());
+        return @mb_send_mail(implode(", ", $message->getTo()), $message->getSubject(), $message->getMessage(), $message->compileHeaders());
     }
 
     /**

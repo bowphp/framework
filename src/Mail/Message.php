@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Mail;
 
-use Bow\Support\Util;
 use Bow\Exception\MailException;
 
 /**
@@ -12,7 +11,6 @@ use Bow\Exception\MailException;
  */
 class Message
 {
-
     const END = "\r\n";
 
 	/**
@@ -20,11 +18,6 @@ class Message
 	 * @var array
 	 */
 	private $headers = [];
-
-    /**
-     * @var array
-     */
-	private $additonnalHeader = [];
 
 	/**
 	 * définir le destinataire
@@ -78,8 +71,16 @@ class Message
 	 */
 	private $fromDefined = false;
 
+	/**
+	 * Construction d'une instance de SimpleMail
+	 */
+	public function __construct()
+	{
+		$this->setBoundary("__Bow-Framework-" . md5(date("r")));
+	}
+
     /**
-     *
+     * Définir les entête par défaut
      */
     protected function setDefaultHeader()
     {
@@ -97,12 +98,23 @@ class Message
     }
 
 	/**
+	 * Ajout des entêtes personnel
+	 *
+	 * @param string $key
+	 * @param string $value
+	 */
+	public function addHeader($key, $value)
+	{
+		$this->headers[] = "$key: $value";
+	}
+
+	/**
 	 * to, définir le récépteur
 	 *
 	 * @param string $to
 	 * @param string $name
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function to($to, $name = null)
 	{
@@ -147,7 +159,7 @@ class Message
 	 *
 	 * @param string $file
 	 * 
-	 * @return self
+	 * @return Message
      *
      * @throws MailException
 	 */
@@ -189,7 +201,7 @@ class Message
 	 *
 	 * @param string $subject
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function subject($subject)
 	{
@@ -203,7 +215,7 @@ class Message
 	 * @param string $from
 	 * @param string $name
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function from($from, $name = null)
 	{
@@ -219,7 +231,7 @@ class Message
 	 * toHtml, définir le type de contenu en text/html
      *
 	 * @param string $html=null
-	 * @return self
+	 * @return Message
 	 */
 	public function html($html)
 	{
@@ -231,7 +243,7 @@ class Message
 	 * 
 	 * @param string $text
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function text($text)
 	{
@@ -241,9 +253,9 @@ class Message
 	}
 
     /**
-     * @param $data
-     * @param $type
-     * @return $this
+     * @param string $data
+     * @param string $type
+     * @return Message
      */
     private function type($data, $type)
     {
@@ -251,17 +263,15 @@ class Message
             $this->type = $type;
             $this->message = $data;
         }
-
-        return $this;
     }
 
 	/**
 	 * Adds blind carbon copy
 	 * 
 	 * @param string $mail
-	 * @param string $name=null
+	 * @param string $name [optional]
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function addBcc($mail, $name = null)
 	{
@@ -275,9 +285,9 @@ class Message
 	 * Adds carbon copy
 	 * 
 	 * @param string $mail
-	 * @param string $name=null
+	 * @param string $name [optional]
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function addCc($mail, $name = null)
 	{
@@ -293,7 +303,7 @@ class Message
 	 * @param string $mail
 	 * @param string $name=null
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function addReplyTo($mail, $name = null)
 	{
@@ -303,6 +313,11 @@ class Message
 		return $this;
 	}
 
+	/**
+	 * Modifie la valeur de la frontière
+	 *
+	 * @param $boundary
+	 */
 	protected function setBoundary($boundary)
 	{
 		$this->boundary = $boundary;
@@ -314,7 +329,7 @@ class Message
 	 * @param string $mail
 	 * @param string $name=null
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function addReturnPath($mail, $name = null)
 	{
@@ -329,7 +344,7 @@ class Message
 	 * 
 	 * @param  int $priority
 	 * 
-	 * @return self
+	 * @return Message
 	 */
 	public function addPriority($priority)
 	{
@@ -338,12 +353,19 @@ class Message
 		return $this;
 	}
 
+	/**
+	 * Modifir le message du mail
+	 *
+	 * @param $message
+	 */
 	public function setMessage($message)
 	{
 		$this->message = $message;
 	}
 
 	/**
+	 * Récupère les entêtes
+	 *
 	 * @return array
 	 */
 	public function getHeaders()
@@ -352,6 +374,8 @@ class Message
 	}
 
 	/**
+	 * Récupère la liste des récepteurs
+	 *
 	 * @return array
 	 */
 	public function getTo()
@@ -360,6 +384,8 @@ class Message
 	}
 
 	/**
+	 * Récupère l'objet du mail
+	 *
 	 * @return string
 	 */
 	public function getSubject()
@@ -368,6 +394,8 @@ class Message
 	}
 
 	/**
+	 * Récupère l'expéditeur
+	 *
 	 * @return string
 	 */
 	public function getFrom()
@@ -376,6 +404,8 @@ class Message
 	}
 
 	/**
+	 * Récupère le message du mail
+	 *
 	 * @return string
 	 */
 	public function getMessage()
@@ -384,6 +414,8 @@ class Message
 	}
 
 	/**
+	 * Récupère l'encodage du mail
+	 *
 	 * @return string
 	 */
 	public function getCharset()
@@ -392,6 +424,8 @@ class Message
 	}
 
 	/**
+	 * Récupère le type de contenu
+	 *
 	 * @return string
 	 */
 	public function getType()
@@ -400,6 +434,8 @@ class Message
 	}
 
 	/**
+	 * Récupère la valeur d'une variable qui permet de vérifier qu'un expéditeur est enrégistré
+	 *
 	 * @return boolean
 	 */
 	public function fromIsDefined()

@@ -45,11 +45,12 @@ class SimpleMail extends Message implements Send
 			$this->from($form["address"], $form["username"]);
 		}
 
+		$this->setDefaultHeader();
 
-		$status = @mb_send_mail($this->getTo(), $this->getMessage(), $this->getMessage(), $this->compileHeaders());
+		$status = @mb_send_mail(implode(", ", $this->getTo()), $this->getSubject(), $this->getMessage(), $this->compileHeaders());
 
-        if ($cb) {
-            Util::launchCallback($cb, $status);
+        if (is_callable($cb)) {
+            call_user_func_array($cb, [$status]);
         }
 
 		return $status;
@@ -70,6 +71,6 @@ class SimpleMail extends Message implements Send
 	public function __construct(array $config = [])
 	{
 		$this->config = $config;
-		$this->setBoundary("__Bow-Framework-" . md5(date("r")));
+		parent::__construct();
 	}
 }
