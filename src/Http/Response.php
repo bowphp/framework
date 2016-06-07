@@ -253,11 +253,10 @@ class Response
 	/**
 	 * render, lance le rendu utilisant le template définir <<mustache|twig|jade>>
 	 *
-	 * @param string $filename
-	 * @param array $bind
-	 * @param integer $code=200
+	 * @param string  $filename Le nom de la vue
+	 * @param array   $bind     Les données à passer la vue
+	 * @param integer $code [optional] Le code http
 	 * @throws ViewException|ResponseException
-	 * @return self
 	 */
 	public function view($filename, $bind = [], $code = 200)
 	{
@@ -297,8 +296,6 @@ class Response
 				throw new ResponseException("Le moteur de template n'est pas défini.", E_USER_ERROR);
 			}
 		}
-
-		return $this;
 	}
 
 	/**
