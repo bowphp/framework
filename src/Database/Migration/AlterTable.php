@@ -95,6 +95,6 @@ class AlterTable
      */
     public function change($oldTableName, $newTableName)
     {
-        Database::statement("ALTER TABLE");
+        Database::statement("RENAME $oldTableName TO $newTableName;");
     }
 }

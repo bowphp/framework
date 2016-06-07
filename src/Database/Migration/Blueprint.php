@@ -68,7 +68,7 @@ class Blueprint
     private function makeSqlStatement()
     {
         $fields = $this->columns->getDefineFields();
-        $statement = $this->columns;
+        $statement = (string) $this->columns;
 
         $fields->each(function (Collection $value, $type) {
 
@@ -98,7 +98,7 @@ class Blueprint
                                 if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
                                     $statement .= " AUTO_INCREMENT";
                                 }
-                                $this->columns->setAutoincrement(null);
+                                $this->columns->setAutoincrement(false);
                             }
                         }
                         if ($info["default"]) {
