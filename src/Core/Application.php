@@ -22,12 +22,12 @@ class Application
 	 * Définition de contrainte sur un route.
 	 *
 	 * @var array
-	 */ 
+	 */
 	private $with = [];
 
 	/**
 	 * Branchement global sur un liste de route
-	 * 
+	 *
 	 * @var string
 	 */
 	private $branch = "";
@@ -36,30 +36,30 @@ class Application
 	 * @var string
 	 */
 	private $specialMethod = null;
-	
+
 	/**
 	 * Fonction lancer en cas d'erreur.
-	 * 
+	 *
 	 * @var null|callable
 	 */
 	private $error404 = null;
 
 	/**
 	 * Method Http courrante.
-	 * 
+	 *
 	 * @var string
 	 */
 	private $currentMethod = "";
 	/**
 	 * Enrégistre l'information la route courrante
-	 * 
+	 *
 	 * @var string
 	 */
 	private $currentPath = "";
 
 	/**
 	 * Patter Singleton
-	 * 
+	 *
 	 * @var Application
 	 */
 	private static $inst = null;
@@ -118,7 +118,7 @@ class Application
 
 	/**
 	 * Pattern Singleton.
-	 * 
+	 *
 	 * @param AppConfiguration $config
 	 * @return Application
 	 */
@@ -200,7 +200,7 @@ class Application
 			}
 			return $this;
 		}
-		
+
 		return $this->routeLoader("POST", $path, $cb);
 	}
 
@@ -335,7 +335,7 @@ class Application
 
 	/**
 	 * Lance une personnalisation de route.
-	 * 
+	 *
 	 * @param array $otherRule
 	 *
 	 * @return Application
@@ -356,7 +356,7 @@ class Application
 			// si la elle existe alors on fusionne l'ancien contenu avec la nouvelle.
 			if (array_key_exists($this->currentMethod, $this->with)) {
 				$this->with[$this->currentMethod] = array_merge(
-					$this->with[$this->currentMethod], 
+					$this->with[$this->currentMethod],
 					[$this->currentPath => $otherRule]
 				);
 			}
@@ -367,7 +367,7 @@ class Application
 
 	/**
 	 * Lanceur de l'application
-	 * 
+	 *
 	 * @param callable|null $cb
 	 *
 	 * @return mixed
@@ -483,7 +483,7 @@ class Application
 
 	/**
 	 * response, retourne une instance de la classe Response
-	 * 
+	 *
 	 * @return Response
 	 */
 	private function response()
@@ -493,7 +493,7 @@ class Application
 
 	/**
 	 * request, retourne une instance de la classe Request
-	 * 
+	 *
 	 * @return Request
 	 */
 	private function request()
@@ -614,23 +614,29 @@ class Application
 			$controller = $controllerName;
 		}
 
-		// Url principal.
-		$url = rtrim($url. "/");
+        // normalize url
+        $url = preg_replace("/\/+$/", "", $url);
 
-        if (!empty($url)) {
-            $url .= "/" . $url;
+        // Association de url prédéfinie
+        foreach ($valideMethod as $key => $value) {
+            if (!in_array($value["call"], $ignoreMethod)) {
+                $bindController = $controller . '@' . $value["call"];
+                $path = $url . $value["url"];
+                call_user_func_array([$this, $value["method"]], [$path, $bindController]);
+                if (!empty($where)) {
+                    $data = [];
+                    if (preg_match("/:id/", $path)) {
+                        if (isset($where["id"])) {
+                            $data = $where;
+                        } else {
+                            $data = ["id" => $where[0]];
+                        }
+                    }
+
+                    $this->where(array_merge($data, $where));
+                }
+            }
         }
-
-		// Association de url prédéfinie
-		foreach ($valideMethod as $key => $value) {
-			if (!in_array($value["call"], $ignoreMethod)) {
-				$controller = $controller . '@' . $value["call"];
-				call_user_func_array([$this, $value["method"]], ["$url" . $value["url"], $controller]);
-				if (!empty($where)) {
-					$this->where($where);
-				}
-			}
-		}
 
 		return $this;
 	}
