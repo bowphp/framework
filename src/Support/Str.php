@@ -225,7 +225,7 @@ class Str
             throw new \ErrorException("accept string " . gettype($email) . " given");
         }
 
-        return preg_match("/^[a-zA-Z0-9._-]@[a-z0-9._-]{2,}\.[a-z]{2,6}$/", $email);
+        return preg_match("/^[a-zA-Z0-9-_.]+@[a-z0-9-_.]{2,}\.[a-z]{2,6}$/", $email);
     }
 
     /**
@@ -246,7 +246,7 @@ class Str
             throw new \ErrorException("Accept string " . gettype($domain) . " given");
         }
 
-        return preg_match("/^((https?|ftps?|ssl|url|git):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
+        return preg_match("/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/", $domain);
     }
 
     /**
@@ -282,7 +282,7 @@ class Str
             throw new \ErrorException("Accept string " . gettype($str) . " given");
         }
 
-        return preg_match("/^[0-9]+(.[0-9]+)?$/", $str);
+        return preg_match("/^[0-9]+(\.[0-9]+)?$/", $str);
     }
 
     /**

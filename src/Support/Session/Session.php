@@ -175,6 +175,9 @@ class Session implements CollectionAccessStatic
      */
     public static function flash($key, $message)
     {
+        if (!static::has("bow.flash")) {
+            $_SESSION["bow.flash"] = [];
+        }
         $_SESSION["bow.flash"][$key] = $message;
     }
 
