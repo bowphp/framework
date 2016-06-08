@@ -331,15 +331,7 @@ class Str
      */
     public static function count($pattern, $str)
     {
-        $c = 0;
-
-        for($i = 0, $len = static::len($str); $i < $len; $i++) {
-            if ($str[$i] == $pattern) {
-                $c++;
-            }
-        }
-
-        return $c;
+        return count(explode($pattern, $str)) - 1;
     }
 
     /**

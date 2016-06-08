@@ -408,6 +408,18 @@ if (!function_exists("create_csrf")) {
     }
 }
 
+
+if (!function_exists("csrf_token")) {
+    /**
+     * create_csrf, fonction permetant de récupérer le token généré
+     *
+     * @return string
+     */
+    function csrf_token() {
+        return create_csrf()->token;
+    }
+}
+
 if (!function_exists("generate_token_csrf")) {
     /**
      * csrf, fonction permetant de générer un token

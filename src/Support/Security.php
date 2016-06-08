@@ -2,6 +2,7 @@
 namespace Bow\Support;
 
 use Bow\Core\AppConfiguration;
+use Bow\Support\Session\Session;
 
 /**
  * Class Security
@@ -37,36 +38,24 @@ class Security
 	}
 
 	/**
-	 * Stopeur les attaques de types xss
+	 * Les attaques de types xss
 	 *
 	 * @param array $verifyData
 	 * @param array $enableData
+	 *
+	 * @return bool
 	 */
-	public static function attaqueStoper($verifyData, $enableData)
+	public static function verifiySideBySide($verifyData, $enableData)
 	{
-		$errorList = '';
 		$error = false;
 		
 		foreach ($verifyData as $key => $value) {
 			if (!in_array($key, $enableData)) {
 				$error = true;
-				$errorList .= "<li><b><strong>" . $key . "</strong></b> not defined</li>";
 			}
 		}
 
-		/**
-		 * Vérification d'erreur
-		 */
-		if ($error) {
-			echo '<div style="border-radius: 3px; border: 1px solid #eee; background: tomato; padding: 10px; ">';
-			echo "<h1>Attaque stoped</h1>";
-			echo "<ul style=\"color: white\">";
-			echo $errorList;
-			echo "</ul>";
-			echo "</div>";
-			// On arrête tout.
-			die();
-		}
+		return $error;
 	}
 
 	/**
@@ -80,7 +69,7 @@ class Security
 	public static function sanitaze($data, $secure = false)
 	{
 		// récupération de la fonction à la lance.		
-		$method = $secure === true ? "secureString" : "sanitazeString";
+		$method = $secure === true ? "secureData" : "sanitazeData";
 		// strict integer regex 
 		$rNum = "/^\d+$/";
 
@@ -125,7 +114,7 @@ class Security
 	 *
 	 * @author Franck Dakia <dakiafranck@gmail.com>
 	 */
-	private static function sanitazeString($data)
+	public static function sanitazeData($data)
 	{
 		return stripslashes(trim($data));
 	}
@@ -140,7 +129,7 @@ class Security
 	 *
 	 * @author Franck Dakia <dakiafranck@gmail.com>
 	 */
-	private static function secureString($data)
+	public static function secureData($data)
 	{
 		return htmlspecialchars(addslashes(trim($data)));
 	}
@@ -164,7 +153,7 @@ class Security
 			Session::add("bow.csrf", (object) [
 				"token" => $token,
 				"expirate" => time() + static::$tokenCsrfExpirateTime,
-				"field" => '<input type="hidden" name="csrf_token" value="' . $token .'"/>'
+				"field" => '<input type="hidden" name="_token" value="' . $token .'"/>'
 			]);
 
             return true;
