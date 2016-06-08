@@ -462,7 +462,6 @@ class Storage
 	{
 		if ($config !== null) {
 			static::$fileExtension = $config->upload_file_extension;
-			static::$uploadDir = $config->upload_directory;
 		}
 	}
 }

@@ -290,9 +290,7 @@ class Response
 				$this->send($template->render($filename, $bind));
 			} else if (in_array($this->config->getEngine(), ["mustache", "jade"])) {
 				$this->send($template->render(file_get_contents($filename), $bind));
-			} else if ($this->config->getEngine() == "php") {
-				require $filename;
-			} else {
+			}  else {
 				throw new ResponseException("Le moteur de template n'est pas défini.", E_USER_ERROR);
 			}
 		}
@@ -321,7 +319,7 @@ class Response
 		    $tpl = new \Twig_Environment($loader, [
 		        'cache' => $this->config->getCachepath(),
 				'auto_reload' => $this->config->getCacheAutoReload(),
-                "debug" => $this->config->getLogLevel() == "develepment" ? true : false
+                "debug" => $this->config->getLoggerMode() == "develepment" ? true : false
 		    ]);
 			/**
 			 * - Ajout de variable globale

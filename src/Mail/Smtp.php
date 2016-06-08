@@ -2,7 +2,6 @@
 namespace Bow\Mail;
 
 use ErrorException;
-use Bow\Support\Util;
 use Bow\Exception\SmtpException;
 use Bow\Exception\SocketException;
 
@@ -12,7 +11,7 @@ use Bow\Exception\SocketException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
- class Smtp extends Message implements Send
+ class Smtp implements Send
 {
 
     /**
@@ -56,8 +55,6 @@ use Bow\Exception\SocketException;
      */
     public function __construct(array $param)
     {
-        parent::__construct();
-
         if (!isset($param["secure"])) {
             $param["secure"] = false;
 
@@ -78,22 +75,21 @@ use Bow\Exception\SocketException;
     /**
      * Lance l'envoie de mail
      *
-     * @param callable $cb=null
+     * @param Message $message
      * @return self
      */
-    public function send($cb = null)
+    public function send(Message $message)
     {
         $this->connection();
         $error = true;
-        $this->setDefaultHeader();
         // SMTP command
         if ($this->username === null && $this->password === null) {
             $this->write("MAIL FROM: <test@0.0.0.0>", 250);
         } else {
-            $this->write("MAIL FROM: <" . $this->username . ">", 250);
+            $this->write("MAIL FROM: <" . $message->getFrom() . ">", 250);
         }
 
-        foreach($this->getTo() as $value) {
+        foreach($message->getTo() as $value) {
             $to = "";
             if ($value[0] !== null) {
                 $to .= "{$value[0]} <{$value[1]}>";
@@ -104,10 +100,11 @@ use Bow\Exception\SocketException;
         }
 
         $this->write("DATA", 354);
-        $data  = $this->compileHeaders();
-        $data .= "Content-Type: {$this->getType()}; charset=\"{$this->getCharset()}\"". self::END;
-        $data .= "Content-Transfer-Encoding: 8bit" . self::END;
-        $data .= self::END . $this->getMessage() . self::END;
+        $data = "Subject: " . $message->getSubject() . Message::END;
+        $data .= $message->compileHeaders();
+        $data .= "Content-Type: {$message->getType()}; charset=\"{$message->getCharset()}\"". Message::END;
+        $data .= "Content-Transfer-Encoding: 8bit" . Message::END;
+        $data .= Message::END . $message->getMessage() . Message::END;
         $this->write($data);
 
         try {
@@ -119,14 +116,10 @@ use Bow\Exception\SocketException;
         $status = $this->disconnect();
 
         if ($status == 221) {
-            $error = null;
+            $error = false;
         }
 
-        if (is_callable($cb)) {
-            Util::launchCallback($cb, $error);
-        }
-
-        return $status;
+        return $error;
     }
 
 
@@ -189,7 +182,7 @@ use Bow\Exception\SocketException;
      */
     private function disconnect()
     {
-        $r = $this->write("QUIT" . Util::sep());
+        $r = $this->write("QUIT");
         fclose($this->sock);
         $this->sock = null;
 
@@ -229,8 +222,7 @@ use Bow\Exception\SocketException;
      */
     private function write($command, $code = null, $message = null)
     {
-        $command = $command . self::END;
-        echo $command;
+        $command = $command . Message::END;
         fwrite($this->sock, $command, strlen($command));
         
         $response = null;

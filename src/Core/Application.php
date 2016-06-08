@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Core;
 
-use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
@@ -106,7 +105,7 @@ class Application
 		$this->config = $config;
         $this->request = $this->request();
 
-		$logger = new Logger($config->getLogLevel(), $config->getLogpath() . "/error.log");
+		$logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . "/error.log");
 		$logger->register();
 		$this->logger = $logger;
 	}

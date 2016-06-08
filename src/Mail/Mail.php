@@ -75,15 +75,25 @@ class Mail
         $data = ob_get_clean();
 
         $message->setMessage($data);
-
-        return @mb_send_mail(implode(", ", $message->getTo()), $message->getSubject(), $message->getMessage(), $message->compileHeaders());
+        return self::$instance->send($message);
     }
 
     /**
+     * @param string $to
+     * @param string $subject
+     * @param string $data
+     * @param array  $headers
      * @return SimpleMail|Smtp
      */
-    public static function raw()
+    public static function raw($to, $subject, $data, array $headers = [])
     {
-        return static::$instance;
+        $message = new Message();
+
+        $message->to($to)->subject($subject)->setMessage($data);
+        foreach($headers as $key => $value) {
+            $message->addHeader($key, $value);
+        }
+
+        return static::$instance->send($message);
     }
 }

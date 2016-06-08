@@ -48,11 +48,6 @@ class AppConfiguration
     private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
 
     /**
-     * @var bool
-     */
-    private $autoReload = true;
-
-    /**
      * @param $config
      *
      * @throws \Bow\Exception\UtilException
@@ -247,7 +242,7 @@ class AppConfiguration
      *
      * @return string
      */
-    public function setLogpath($newLogPath)
+    public function setLoggerPath($newLogPath)
     {
         $old = $this->config["application"]->log_direcotory_name;
         
@@ -265,7 +260,7 @@ class AppConfiguration
      * 
      * @return string
      */
-    public function getLogpath()
+    public function getLoggerPath()
     {
         return $this->config["application"]->log_direcotory_name;
     }
@@ -280,7 +275,7 @@ class AppConfiguration
      *
      * @return string
      */
-    public function setLogLevel($log)
+    public function setLoggerMode($log)
     {
         $old = $this->config["application"]->debug;
 
@@ -299,7 +294,7 @@ class AppConfiguration
      *
      * @return string
      */
-    public function getLogLevel()
+    public function getLoggerMode()
     {
         return $this->config["application"]->debug;
     }

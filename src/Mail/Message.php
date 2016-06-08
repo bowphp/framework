@@ -73,10 +73,14 @@ class Message
 
 	/**
 	 * Construction d'une instance de SimpleMail
+	 * @param bool $boundary
 	 */
-	public function __construct()
+	public function __construct($boundary = true)
 	{
-		$this->setBoundary("__Bow-Framework-" . md5(date("r")));
+		$this->setDefaultHeader();
+		if ($boundary) {
+			$this->setBoundary("__Bow-Framework-" . md5(date("r")));
+		}
 	}
 
     /**
@@ -179,10 +183,9 @@ class Message
      */
     public function compileHeaders()
     {
-        $this->headers[] = "Content-type: multipart/mixed; boundary=\"{$this->boundary}\"" . self::END;
-
-        if (count($this->attachement) > 0) {
-            foreach($this->attachement as $file) {
+		if (count($this->attachement) > 0) {
+			$this->headers[] = "Content-type: multipart/mixed; boundary=\"{$this->boundary}\"" . self::END;
+			foreach($this->attachement as $file) {
                 $filename = basename($file);
                 $this->headers[] = "--" . $this->boundary;
                 $this->headers[] = "Content-Type: application/octet-stream; name=\"{$filename}\"";

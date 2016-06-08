@@ -12,8 +12,8 @@ interface Send
     /**
      * send, envoie de mail.
      *
-     * @param callable|null $cb
+     * @param Message $message
      * @return mixed
      */
-    public function send($cb = null);
+    public function send(Message $message);
 }

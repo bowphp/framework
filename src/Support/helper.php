@@ -33,13 +33,12 @@ if (!function_exists("configuration")) {
      */
     function configuration() {
         $app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
-        return AppConfiguration::configure(require $app_dir . "/config/bootstarts.php");
+        return AppConfiguration::configure(require $app_dir . "/config/bootstrap.php");
     }
 }
 
 // Configuration de la Request et de la Response
 Response::configure(configuration());
-Request::configure();
 
 // Configuration de la base de donnée
 Database::configure(configuration()->getDatabaseConfiguration());

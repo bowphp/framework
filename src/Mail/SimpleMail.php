@@ -2,7 +2,6 @@
 namespace Bow\Mail;
 
 use Bow\Support\Str;
-use Bow\Support\Util;
 use InvalidArgumentException;
 use Bow\Exception\MailException;
 
@@ -12,7 +11,7 @@ use Bow\Exception\MailException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
-class SimpleMail extends Message implements Send
+class SimpleMail implements Send
 {
 	/**
 	 * @var array
@@ -21,37 +20,31 @@ class SimpleMail extends Message implements Send
 	/**
 	 * send, Envoie le mail
 	 * 
-	 * @param callable|null $cb
+	 * @param Message $message
 	 * @throws InvalidArgumentException
 	 * @throws MailException
 	 * @return self
 	 */
-	public function send($cb = null)
+	public function send(Message $message)
 	{
-		if (empty($this->getTo()) || empty($this->getSubject()) || empty($this->getMessage())) {
+		if (empty($message->getTo()) || empty($message->getSubject()) || empty($message->getMessage())) {
 			throw new InvalidArgumentException("Une erreur est survenu. L'expediteur ou le message ou l'object omit.", E_USER_ERROR);
 		}
 
 		if (count($this->config) > 0) {
 
-			if (!$this->fromIsDefined()) {
+			if (!$message->fromIsDefined()) {
 				$form = $this->config[0];
-			} else if (!Str::isMail(explode(" ", $this->getFrom())[0])) {
-				$form = $this->config[$this->getFrom()];
+			} else if (!Str::isMail(explode(" ", $message->getFrom())[0])) {
+				$form = $this->config[$message->getFrom()];
 			} else {
 				throw new MailException("L'expediteur n'est spécifié.", E_USER_ERROR);
 			}
 
-			$this->from($form["address"], $form["username"]);
+			$message->from($form["address"], $form["username"]);
 		}
 
-		$this->setDefaultHeader();
-
-		$status = @mb_send_mail(implode(", ", $this->getTo()), $this->getSubject(), $this->getMessage(), $this->compileHeaders());
-
-        if (is_callable($cb)) {
-            call_user_func_array($cb, [$status]);
-        }
+		$status = @mb_send_mail(implode(", ", $message->getTo()), $message->getSubject(), $message->getMessage(), $message->compileHeaders());
 
 		return $status;
 	}
@@ -71,6 +64,5 @@ class SimpleMail extends Message implements Send
 	public function __construct(array $config = [])
 	{
 		$this->config = $config;
-		parent::__construct();
 	}
 }

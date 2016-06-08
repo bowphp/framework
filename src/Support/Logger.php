@@ -15,7 +15,7 @@ class Logger extends AbstractLogger
     /**
      * @var string
      */
-    protected $debug;
+    protected $mode;
 
     /**
      * @var string
@@ -23,12 +23,12 @@ class Logger extends AbstractLogger
     private $path;
 
     /**
-     * @param string $debug develop | production
+     * @param string $mode develop | production
      * @param string $path
      */
-    public function __construct($debug, $path)
+    public function __construct($mode, $path)
     {
-        $this->debug = $debug;
+        $this->debug = $mode;
         $this->path  = $path;
     }
     
@@ -255,5 +255,16 @@ class Logger extends AbstractLogger
                 $this->emergency($errstr, $context);
                 break;
         }
+    }
+
+    /**
+     * Modifie le mode du logger.
+     *
+     * @param string $mode Le mode du logger
+     */
+    public function setMode($mode)
+    {
+        $this->mode = $mode;
+        $this->register();
     }
 }

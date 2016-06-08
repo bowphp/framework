@@ -79,26 +79,6 @@ class Str
     }
 
     /**
-     * match
-     *
-     * @param string $pattern
-     * @param string $str
-     * @param array $match
-     *
-     * @throws \ErrorException
-     *
-     * @return int
-     */
-    public static function match($pattern, $str, & $match = null)
-    {
-        if (static::slice($pattern, 0, 1) !== static::slice($pattern, static::len($pattern) - 1, 1)) {
-            throw new \ErrorException("$pattern not valide");
-        }
-
-        return preg_match($pattern, $str, $match);
-    }
-
-    /**
      * @param $search
      * @param $str
      *
@@ -245,7 +225,7 @@ class Str
             throw new \ErrorException("accept string " . gettype($email) . " given");
         }
 
-        return static::match("/^[a-zA-Z0-9._-]@[a-z0-9._-]{2,}\.[a-z]{2,6}$/", $email);
+        return preg_match("/^[a-zA-Z0-9._-]@[a-z0-9._-]{2,}\.[a-z]{2,6}$/", $email);
     }
 
     /**
@@ -266,7 +246,7 @@ class Str
             throw new \ErrorException("Accept string " . gettype($domain) . " given");
         }
 
-        return static::match("/^((http|ftp|ssl|url):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
+        return preg_match("/^((https?|ftps?|ssl|url|git):\/\/)[a-zA-Z0-9_-.]+\.[a-z]{2,6}$/", $domain);
     }
 
     /**
@@ -284,7 +264,7 @@ class Str
             throw new \ErrorException("Accept string " . gettype($str) . " given");
         }
 
-        return static::match("/^[a-zA-Z0-9]+$/", $str);
+        return preg_match("/^[a-zA-Z0-9]+$/", $str);
     }
 
     /**
@@ -302,7 +282,7 @@ class Str
             throw new \ErrorException("Accept string " . gettype($str) . " given");
         }
 
-        return static::match("/^[0-9]+(.[0-9]+)?$/", $str);
+        return preg_match("/^[0-9]+(.[0-9]+)?$/", $str);
     }
 
     /**
@@ -320,7 +300,7 @@ class Str
             throw new \ErrorException("Accept string " . gettype($str) . " given");
         }
 
-        return static::match("/^[a-zA-Z]?$/", $str);
+        return preg_match("/^[a-zA-Z]+$/", $str);
     }
 
     /**
@@ -338,7 +318,7 @@ class Str
             throw new \ErrorException("Accept string " . gettype($str) . " given");
         }
 
-        return static::match("/^[a-z0-9-]+[a-z0-9]+$/", $str);
+        return preg_match("/^[a-z0-9-]+[a-z0-9]+$/", $str);
     }
 
     /**
