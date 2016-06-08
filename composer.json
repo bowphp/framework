@@ -9,15 +9,15 @@
     },
     "require": {
         "twig/twig": "^1.23",
-        "psr/log": "1.0.0"
+        "psr/log": "1.0.0",
+        "nesbot/carbon": "^1.21"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8",
         "monolog/monolog": "^1.17",
         "mustache/mustache": "^2.10",
         "kylekatarnls/jade-php": "^1.6",
-        "nicolab/php-ftp-client": "^1.2",
-        "nesbot/carbon": "^1.21"
+        "nicolab/php-ftp-client": "^1.2"
     },
     "authors": [
         {
