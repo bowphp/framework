@@ -5,7 +5,7 @@ use Bow\Exception\MailException;
 use Bow\Http\Response;
 
 /**
- * Class BowMail
+ * Class Mail
  *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
@@ -26,7 +26,9 @@ class Mail
     }
 
     /**
-     * @param \StdClass $config
+     * Configure la classe Mail
+     *
+     * @param \StdClass $config La configuration
      * @throws MailException
      * @return SimpleMail|Smtp
      */
@@ -71,7 +73,7 @@ class Mail
         call_user_func_array($cb, [$message]);
 
         ob_start();
-        Response::takeInstance()->view($view, $bind);
+        Response::takeInstance()->view($view, $bind. null);
         $data = ob_get_clean();
 
         $message->setMessage($data);
@@ -79,10 +81,12 @@ class Mail
     }
 
     /**
-     * @param string $to
-     * @param string $subject
-     * @param string $data
-     * @param array  $headers
+     * Envoye de mail simulaire a la fonction mail de PHP
+     *
+     * @param string $to Le destinateur
+     * @param string $subject L'objet du mail
+     * @param string $data Le message du meail
+     * @param array  $headers [optinal] Les entêtes additionnel du mail.
      * @return SimpleMail|Smtp
      */
     public static function raw($to, $subject, $data, array $headers = [])

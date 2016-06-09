@@ -255,7 +255,7 @@ class Response
 	 *
 	 * @param string  $filename Le nom de la vue
 	 * @param array   $bind     Les données à passer la vue
-	 * @param integer $code [optional] Le code http
+	 * @param integer|null $code [optional] Le code http
 	 * @throws ViewException|ResponseException
 	 */
 	public function view($filename, $bind = [], $code = 200)
@@ -267,14 +267,20 @@ class Response
 
 		$filename = preg_replace("/@|\./", "/", $filename) . $this->config->getTemplateExtension();
 
+		// Vérification de l'existance du fichier
 		if ($this->config->getViewpath() !== null) {
 			if (!is_file($this->config->getViewpath() . "/" . $filename)) {
 				throw new ViewException("La vue [$filename] n'exist pas. " . $this->config->getViewpath() . "/" . $filename, E_ERROR);
 			}
 		} else {
 			if (!is_file($filename)) {
-				throw new ViewException("La vue $filename n'exist pas!.", E_ERROR);
+				throw new ViewException("La vue [$filename] n'exist pas!.", E_ERROR);
 			}
+		}
+
+		// Modification du code http
+		if ($code !== null) {
+			$this->code($code);
 		}
 
 		if ($this->config->getEngine() == "php") {
@@ -284,7 +290,6 @@ class Response
 		} else {
 			// Chargement du template.
 			$template = $this->templateLoader();
-			$this->code($code);
 
 			if ($this->config->getEngine() == "twig") {
 				$this->send($template->render($filename, $bind));
