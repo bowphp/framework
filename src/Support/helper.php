@@ -638,12 +638,7 @@ if (!function_exists("url")) {
      * @return string
      */
     function url($url, array $parameters = []) {
-        if (!preg_match("/^\/?.+/", $url)) {
-            $url = "/" . $url;
-        }
-
-        $url = request()->url() . $url;
-
+        $url = request()->url() . ltrim($url, "/");
         if (count($parameters) > 0) {
             $url .= "?" . http_build_query($parameters);
         }
@@ -952,5 +947,30 @@ if (!function_exists("str")) {
      */
     function str() {
         return \Bow\Support\Str::class;
+    }
+}
+
+if (!function_exists("route")) {
+    /**
+     * Route
+     *
+     * @param string $name Le nom de la route nommé
+     * @param array $data Les données à assigner
+     * @return string
+     */
+    function route($name, array $data = []) {
+        $routes = configuration()->getApplicationRoutes();
+
+        if (!isset($routes[$name])) {
+            throw new \InvalidArgumentException("$name n'est pas un nom définie.", E_USER_ERROR);
+        }
+
+        $url = $routes[$name];
+
+        foreach($data as $key => $value) {
+            $url = str_replace(":$key", $value, $url);
+        }
+
+        return $url;
     }
 }
