@@ -48,6 +48,11 @@ class AppConfiguration
     private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
 
     /**
+     * @var array
+     */
+    private $routes = [];
+
+    /**
      * @param $config
      *
      * @throws \Bow\Exception\UtilException
@@ -135,6 +140,26 @@ class AppConfiguration
 
         $this->app_key = $key;
         return $old;
+    }
+
+    /**
+     * Met Ajout les routes nommés.
+     *
+     * @param array $routes
+     */
+    public function setApplicationRoutes(array $routes)
+    {
+        $this->routes = $routes;
+    }
+
+    /**
+     * Retourne la liste de Routes nommés
+     *
+     * @return array
+     */
+    public function getApplicationRoutes()
+    {
+        return $this->routes;
     }
 
     /**
