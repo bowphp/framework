@@ -46,6 +46,16 @@ use Bow\Exception\SocketException;
      */
     private $tls = false;
 
+     /**
+      * @var int
+      */
+     private $timeout;
+
+     /**
+      * @var int
+      */
+     private $port = 25;
+
     /**
      * Constructor
      * 
@@ -66,8 +76,10 @@ use Bow\Exception\SocketException;
         $this->url = $param["hostname"];
         $this->username = $param["username"];
         $this->password = $param["password"];
-        $this->secure = $param["secure"];
+        $this->secure = $param["ssl"];
         $this->tls = $param["tls"];
+        $this->timeout = $param["timeout"];
+        $this->port = $param["port"];
     }
 
     private function __clone() {}
@@ -83,10 +95,12 @@ use Bow\Exception\SocketException;
         $this->connection();
         $error = true;
         // SMTP command
-        if ($this->username === null && $this->password === null) {
-            $this->write("MAIL FROM: <test@0.0.0.0>", 250);
+        if ($this->username !== null) {
+            $this->write("MAIL FROM: <{$this->username}>", 250);
         } else {
-            $this->write("MAIL FROM: <" . $message->getFrom() . ">", 250);
+            if ($message->getFrom() !== null) {
+                $this->write("MAIL FROM: <" . $message->getFrom() . ">", 250);
+            }
         }
 
         foreach($message->getTo() as $value) {
@@ -131,23 +145,15 @@ use Bow\Exception\SocketException;
      */
     private function connection()
     {
-        @list($url, $port) = explode(":", $this->url, 2);
-
-        if (!isset($port)) {
-            $port = 25;
-        } else {
-            $port = (int) $port;
-        }
-
+        $url = $this->url;
         if ($this->secure === true) {
-            $url = "ssl://$url";
-            $port = 465;
+            $url = "ssl://" . $this->url;
         }
 
-        $this->sock = fsockopen($url, $port, $errno, $errstr, $timeout=50);
+        $this->sock = fsockopen($url, $this->port, $errno, $errstr, $this->timeout);
 
         if ($this->sock == null) {
-            throw new SocketException("Can not connect to {$url}:{$port}", E_USER_ERROR);
+            throw new SocketException("Can not connect to {$this->url}:{$this->port}", E_USER_ERROR);
         }
 
         stream_set_timeout($this->sock, 20, 0);
