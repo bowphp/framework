@@ -713,7 +713,7 @@ class Application
 			return call_user_func_array([$this->config, $method], $param);
 		}
 
-		if (in_array($this->local, $method)) {
+		if (in_array($method, $this->local)) {
 			return call_user_func_array($this->local[$method], $param);
 		}
 
