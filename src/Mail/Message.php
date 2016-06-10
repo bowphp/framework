@@ -2,6 +2,7 @@
 namespace Bow\Mail;
 
 use Bow\Exception\MailException;
+use Bow\Support\Str;
 
 /**
  * Class Message
@@ -132,8 +133,8 @@ class Message
 	 */
 	public function toList(array $listDesc)
 	{
-		foreach($listDesc as $to) {
-			$this->to[] = $this->formatEmail($to);
+		foreach($listDesc as $name => $to) {
+			$this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
 		}
 	}
 
@@ -145,17 +146,22 @@ class Message
 	 *
 	 * @return array
 	 */
-	private function formatEmail($email, $name = "")
+	private function formatEmail($email, $name = null)
 	{
 		/**
 		 * Organisation de la liste des senders
 		 */
-		if (!$name && preg_match('#^(.+) +<(.*)>\z#', $email, $matches)) {
+		if (!is_string($name) && preg_match('/^(.+)\s+<(.*)>\z$/', $email, $matches)) {
 			array_shift($matches);
-			return [$matches[0] , $matches[1]];
-		} else {
-			return [$name, $email];
+			$name = $matches[0];
+			$email = $matches[1];
 		}
+
+		if (!Str::isMail($email)) {
+			throw new \InvalidArgumentException("$email n'est pas email valide.", E_USER_ERROR);
+		}
+
+		return [$name, $email];
 	}
 
 	/**
