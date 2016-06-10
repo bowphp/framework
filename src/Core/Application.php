@@ -758,6 +758,12 @@ class Application
 			case $param === "config":
 				return $this->config;
 				break;
+			case $param === "mail":
+				return $this->config->getMailConfiguration();
+			break;
+			case $param === "db":
+				return $this->config->getDatabaseConfiguration();
+			break;
 		}
 	}
 }
