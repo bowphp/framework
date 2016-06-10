@@ -73,7 +73,7 @@ class Mail
         call_user_func_array($cb, [$message]);
 
         ob_start();
-        Response::takeInstance()->view($view, $bind. null);
+        Response::takeInstance()->view($view, $bind, null);
         $data = ob_get_clean();
 
         $message->setMessage($data);
