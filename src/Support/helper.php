@@ -789,7 +789,7 @@ if (!function_exists("emit")) {
         if (!is_string($event_name)) {
             throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
         }
-        
+
         call_user_func_array([Event::class, "emit"], func_get_args());
     }
 }

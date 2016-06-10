@@ -14,7 +14,7 @@ class Request
 {
 	/**
 	 * Variable d'instance
-	 * 
+	 *
 	 * @static self
 	 */
 	private static $instance = null;
@@ -22,7 +22,7 @@ class Request
 	/**
 	 * Variable de paramètre issue de url définie par l'utilisateur
 	 * e.g /users/:id . alors params serait params->id == une la value suivant /users/1
-	 * 
+	 *
 	 * @var object
 	 */
 	public static $params;
@@ -84,18 +84,18 @@ class Request
 		return $this->origin() . $this->uri();
 	}
 
-    /**
-     * origin le nom du serveur + le scheme
-     *
-     * @return string
-     */
-    public function origin()
-    {
+	/**
+	 * origin le nom du serveur + le scheme
+	 *
+	 * @return string
+	 */
+	public function origin()
+	{
 		if (!isset($_SERVER["REQUEST_SCHEME"])) {
 			return "";
 		}
-        return $_SERVER["REQUEST_SCHEME"] . "://" . $this->hostname();
-    }
+		return $_SERVER["REQUEST_SCHEME"] . "://" . $this->hostname();
+	}
 
 	/**
 	 * retourne path envoyé par client.
@@ -188,30 +188,30 @@ class Request
 	 *
 	 * @return RequestData
 	 */
-    public static function body()
-    {
-        return RequestData::configure("POST");
-    }
+	public static function body()
+	{
+		return RequestData::configure("POST");
+	}
 
 	/**
 	 * Charge la factory RequestData pour le GET
 	 *
 	 * @return RequestData
 	 */
-    public static function query()
-    {
-        return RequestData::configure("GET");
-    }
+	public static function query()
+	{
+		return RequestData::configure("GET");
+	}
 
 	/**
 	 * Charge la factory RequestData pour le FILES
 	 *
 	 * @return RequestData
 	 */
-    public static function files()
-    {
-        return RequestData::configure("FILES");
-    }
+	public static function files()
+	{
+		return RequestData::configure("FILES");
+	}
 
 	/**
 	 * Change le factory RequestData pour tout les entrés PHP (GET, FILES, POST)
@@ -269,45 +269,45 @@ class Request
 		return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : "/";
 	}
 
-    /**
-     * retourne la langue de la requête.
-     *
-     * @return string|null
-     */
+	/**
+	 * retourne la langue de la requête.
+	 *
+	 * @return string|null
+	 */
 	public function language()
 	{
-        return Str::slice($this->locale(), 0, 2);
+		return Str::slice($this->locale(), 0, 2);
 	}
 
-    /**
-     * retourne la localte de la requête.
-     *
-     * la locale c'est langue original du client
-     * e.g fr => locale = fr_FR // français de france
-     * e.g en => locale [ en_US, en_EN]
-     *
-     * @return string|null
-     */
+	/**
+	 * retourne la localte de la requête.
+	 *
+	 * la locale c'est langue original du client
+	 * e.g fr => locale = fr_FR // français de france
+	 * e.g en => locale [ en_US, en_EN]
+	 *
+	 * @return string|null
+	 */
 	public function locale()
 	{
-        $local = "";
+		$local = "";
 
 		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
 			$tmp = explode(";", $_SERVER["HTTP_ACCEPT_LANGUAGE"])[0];
-            preg_match("/^([a-z]+-[a-z]+)/i", $tmp, $match);
-            $local = end($match);
-        }
+			preg_match("/^([a-z]+-[a-z]+)/i", $tmp, $match);
+			$local = end($match);
+		}
 
-        return $local;
+		return $local;
 	}
 
-    /**
-     * le protocol de la requête.
-     *
-     * @return mixed
-     */
-    public function protocol()
-    {
-        return $_SERVER["SERVER_PROTOCOL"];
-    }
+	/**
+	 * le protocol de la requête.
+	 *
+	 * @return mixed
+	 */
+	public function protocol()
+	{
+		return $_SERVER["SERVER_PROTOCOL"];
+	}
 }

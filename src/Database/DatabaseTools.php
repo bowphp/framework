@@ -19,7 +19,7 @@ abstract class DatabaseTools
      *
      * @param PDOStatement $pdoStatement
      * @param $data
-     * 
+     *
      * @return PDOStatement
      */
     protected static function bind(PDOStatement $pdoStatement, array $data = [])
@@ -69,7 +69,7 @@ abstract class DatabaseTools
      * rangeField, fonction permettant de sécuriser les données.
      *
      * @param array $data, les données à sécuriser
-     * 
+     *
      * @return string $field
      */
     protected static function rangeField($data)
@@ -90,12 +90,12 @@ abstract class DatabaseTools
          */
         return $field;
     }
-    
+
     /**
      * Formateur de donnée. key => :value
      *
      * @param array $data
-     * 
+     *
      * @return array $resultat
      */
     protected static function add2points(array $data)

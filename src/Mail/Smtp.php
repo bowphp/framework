@@ -11,7 +11,7 @@ use Bow\Exception\SocketException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
- class Smtp implements Send
+class Smtp implements Send
 {
 
     /**
@@ -46,21 +46,21 @@ use Bow\Exception\SocketException;
      */
     private $tls = false;
 
-     /**
-      * @var int
-      */
-     private $timeout;
+    /**
+     * @var int
+     */
+    private $timeout;
 
-     /**
-      * @var int
-      */
-     private $port = 25;
+    /**
+     * @var int
+     */
+    private $port = 25;
 
     /**
      * Constructor
-     * 
+     *
      * @param array $param
-     * 
+     *
      * @return self
      */
     public function __construct(array $param)
@@ -222,7 +222,7 @@ use Bow\Exception\SocketException;
      * @param string $command
      * @param int $code
      * @param null $message
-     * 
+     *
      * @throws SmtpException
      * @return string
      */
@@ -230,7 +230,7 @@ use Bow\Exception\SocketException;
     {
         $command = $command . Message::END;
         fwrite($this->sock, $command, strlen($command));
-        
+
         $response = null;
 
         if ($code !== null) {

@@ -19,7 +19,7 @@ class SimpleMail implements Send
 	private $config;
 	/**
 	 * send, Envoie le mail
-	 * 
+	 *
 	 * @param Message $message
 	 * @throws InvalidArgumentException
 	 * @throws MailException
@@ -56,11 +56,11 @@ class SimpleMail implements Send
 	{
 	}
 
-    /**
-     * Construction d'une instance de SimpleMail
+	/**
+	 * Construction d'une instance de SimpleMail
 	 *
 	 * @param array $config
-     */
+	 */
 	public function __construct(array $config = [])
 	{
 		$this->config = $config;

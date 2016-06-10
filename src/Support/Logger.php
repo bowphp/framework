@@ -31,7 +31,7 @@ class Logger extends AbstractLogger
         $this->debug = $mode;
         $this->path  = $path;
     }
-    
+
     /**
      * @return Logger
      */
@@ -136,16 +136,16 @@ class Logger extends AbstractLogger
 
                             foreach($errRef["args"] as $k => $args) {
                                 $func .= ucfirst(gettype($args));
-                                 if (gettype($args) === "string") {
-                                     $func .= "('" . $args . "')";
-                                 }
-                                 if (gettype($args) === "object") {
-                                     if (is_callable($args)) {
-                                         $func .= "(Closure)";
-                                     } else {
-                                         $func .= "(" . get_class($args) . ")";
-                                     }
-                                 }
+                                if (gettype($args) === "string") {
+                                    $func .= "('" . $args . "')";
+                                }
+                                if (gettype($args) === "object") {
+                                    if (is_callable($args)) {
+                                        $func .= "(Closure)";
+                                    } else {
+                                        $func .= "(" . get_class($args) . ")";
+                                    }
+                                }
                                 if ($k + 1 != $len) {
                                     $func .= ", ";
                                 }
@@ -192,7 +192,7 @@ class Logger extends AbstractLogger
             </html>
         ';
 
-         return $html;
+        return $html;
     }
 
     /**

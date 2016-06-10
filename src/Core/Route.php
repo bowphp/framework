@@ -14,18 +14,18 @@ Class Route
 {
 	/**
 	 * Le callaback a lance si le url de la requête à matché.
-	 * 
+	 *
 	 * @var callable
 	 */
 	private $cb;
-	
+
 	/**
 	 * Le chemin sur la route définir par l'utilisateur
 	 *
 	 * @var string
 	 */
 	private $path;
-	
+
 	/**
 	 * key
 	 *
@@ -64,7 +64,7 @@ Class Route
 	 * Retourne le chemin de la route currente
 	 *
 	 * @return string
-	 */ 
+	 */
 	public function getPath()
 	{
 		return $this->path;
@@ -72,10 +72,10 @@ Class Route
 
 	/**
 	 * match, vérifie si le url de la REQUEST est conforme à celle définir par le routeur
-	 * 
+	 *
 	 * @param string $uri L'url de la requête
 	 * @param array $with Les informations de restriction.
-     * @return bool
+	 * @return bool
 	 */
 	public function match($uri, $with)
 	{
@@ -112,19 +112,19 @@ Class Route
 			// Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
 			// capturées
 			if (preg_match_all("~:([\w]+)~", $this->path, $match)) {
-                $tmpPath =  $this->path;
-                $this->keys = $match[1];
+				$tmpPath =  $this->path;
+				$this->keys = $match[1];
 
 				foreach ($match[1] as $key => $value) {
-                    if (array_key_exists($value, $this->with)) {
-                        $tmpPath = preg_replace("~:$value~", "(" . $this->with[$value] . ")", $tmpPath);
-                    }
-                }
+					if (array_key_exists($value, $this->with)) {
+						$tmpPath = preg_replace("~:$value~", "(" . $this->with[$value] . ")", $tmpPath);
+					}
+				}
 
-                // Dans le case ou le path différent on récupère, on récupère celle dans $tmpPath
-                if ($tmpPath !== $this->path) {
-                    $path = $tmpPath;
-                }
+				// Dans le case ou le path différent on récupère, on récupère celle dans $tmpPath
+				if ($tmpPath !== $this->path) {
+					$path = $tmpPath;
+				}
 			}
 
 			$this->with = [];
@@ -142,7 +142,7 @@ Class Route
 
 	/**
 	 * Fonction permettant de lancer les fonctions de rappel.
-	 * 
+	 *
 	 * @param Request 	  $req
 	 * @param array 	  $names
 	 * @param Application $app

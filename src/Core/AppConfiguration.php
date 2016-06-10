@@ -164,7 +164,7 @@ class AppConfiguration
 
     /**
      * setAppName
-     * 
+     *
      * @param string $newAppName
      *
      * @throws ApplicationException
@@ -218,7 +218,7 @@ class AppConfiguration
 
     /**
      * getViewPath retourne configuration du path du repertoire du cache
-     * 
+     *
      * @return string
      */
     public function getViewpath()
@@ -228,7 +228,7 @@ class AppConfiguration
 
     /**
      * setCachePath
-     * 
+     *
      * @param string $newCachePath
      *
      * @throws ApplicationException
@@ -250,14 +250,14 @@ class AppConfiguration
 
     /**
      * getCachePath retourne configuration du path du repertoire du cache
-     * 
+     *
      * @return string
      */
     public function getCachepath()
     {
         return $this->config["application"]->template_cache_folder;
     }
-    
+
     /**
      * setLogPath configuration du path du répertoir de log
      *
@@ -270,7 +270,7 @@ class AppConfiguration
     public function setLoggerPath($newLogPath)
     {
         $old = $this->config["application"]->log_direcotory_name;
-        
+
         if (!realpath($newLogPath)) {
             throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
         }
@@ -282,7 +282,7 @@ class AppConfiguration
 
     /**
      * getLogPath retourne la configuration du path du répertoir de log
-     * 
+     *
      * @return string
      */
     public function getLoggerPath()
@@ -326,7 +326,7 @@ class AppConfiguration
 
     /**
      * getTimezone retourne la configuration de la TL
-     * 
+     *
      * @return string
      */
     public function getTimezone()
@@ -346,7 +346,7 @@ class AppConfiguration
 
     /**
      * getEngine retourne le nom du moteur de template définir
-     * 
+     *
      * @return string
      */
     public function getEngine()

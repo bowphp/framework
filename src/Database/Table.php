@@ -78,10 +78,10 @@ class Table extends DatabaseTools
      * @var bool
      */
     private static $getOne = false;
-    
+
     /**
      * Contructeur
-     * 
+     *
      * @param string $tableName
      * @param $connection
      */
@@ -99,7 +99,7 @@ class Table extends DatabaseTools
      *
      * @param $tableName
      * @param \PDO $connection
-     * 
+     *
      * @return Table
      */
     public static function load($tableName, \PDO $connection)
@@ -544,7 +544,7 @@ class Table extends DatabaseTools
      */
     public function jump($offset = 0)
     {
-    	if (is_null($this->limit)) {
+        if (is_null($this->limit)) {
             $this->limit = "$offset, ";
         }
 
@@ -555,20 +555,20 @@ class Table extends DatabaseTools
      * take = limit
      *
      * @param int $limit
-     * 
+     *
      * @return $this
      */
     public function take($limit)
     {
-    	if (is_null($this->limit)) {
+        if (is_null($this->limit)) {
             $this->limit = $limit;
         } else {
-    		if (preg_match("/^([\d]+),$/", $this->limit, $match)) {
-            	array_shift($match);
-    			$this->limit = "{$match[0]}, $limit";
+            if (preg_match("/^([\d]+),$/", $this->limit, $match)) {
+                array_shift($match);
+                $this->limit = "{$match[0]}, $limit";
             }
-    	}
-        
+        }
+
         return $this;
     }
 
@@ -576,7 +576,7 @@ class Table extends DatabaseTools
      * Max
      *
      * @param string $column
-     * 
+     *
      * @return Table
      */
     public function max($column)
@@ -588,7 +588,7 @@ class Table extends DatabaseTools
      * Min
      *
      * @param string $column
-     * 
+     *
      * @return Table
      */
     public function min($column)
@@ -600,7 +600,7 @@ class Table extends DatabaseTools
      * Avg
      *
      * @param string $column
-     * 
+     *
      * @return Table
      */
     public function avg($column)
@@ -612,7 +612,7 @@ class Table extends DatabaseTools
      * Sum
      *
      * @param string $column
-     * 
+     *
      * @return Table
      */
     public function sum($column)
@@ -622,19 +622,19 @@ class Table extends DatabaseTools
 
     /**
      * Lance en interne les requêtes utilisants les aggregats.
-     * 
+     *
      * @param $aggregat
      * @param string $column
-     * 
+     *
      * @return array|int
      */
     private function executeAgregat($aggregat, $column)
     {
         $sql = "select $aggregat(`$column`) from " . $this->tableName;
-    	
+
         if (!is_null($this->where)) {
-    		$sql .= " where " . $this->where;
-    		$this->where = null;
+            $sql .= " where " . $this->where;
+            $this->where = null;
         }
 
         if (!is_null($this->group)) {
@@ -645,16 +645,16 @@ class Table extends DatabaseTools
                 $sql .= " having " . $this->havin;
             }
         }
-    	
+
         $s = $this->connection->prepare($sql);
-    	$s->execute();
+        $s->execute();
         self::$errorInfo = $s->errorInfo();
 
         if ($s->rowCount() > 1) {
             return $s->fetchAll();
         }
 
-    	return (int) $s->fetchColumn();
+        return (int) $s->fetchColumn();
     }
 
     // Actionner
@@ -662,49 +662,49 @@ class Table extends DatabaseTools
      * Action get, seulement sur la requete de type select
      *
      * @param callable $cb
-     * 
+     *
      * @return mixed
      */
     public function get($cb = null)
     {
         $sql = "select ";
 
-       	// Ajout de la clause select
+        // Ajout de la clause select
         if (is_null($this->select)) {
             $sql .= "* from `" . $this->tableName ."`";
         } else {
-        	$sql .= $this->select . " from `" . $this->tableName . "`";
-        	$this->select = null;
+            $sql .= $this->select . " from `" . $this->tableName . "`";
+            $this->select = null;
         }
 
         // Ajout de la clause join
         if (!is_null($this->join)) {
-        	$sql .= " join " . $this->join;
-        	$this->join = null;
+            $sql .= " join " . $this->join;
+            $this->join = null;
         }
 
         // Ajout de la clause where
         if (!is_null($this->where)) {
-        	$sql .= " where " . $this->where;
-        	$this->where = null;
+            $sql .= " where " . $this->where;
+            $this->where = null;
         }
 
         // Ajout de la clause order
         if (!is_null($this->order)) {
-        	$sql .= " " . $this->order;
-        	$this->order = null;
+            $sql .= " " . $this->order;
+            $this->order = null;
         }
 
         // Ajout de la clause limit
         if (!is_null($this->limit)) {
             $sql .= " limit " . $this->limit;
-	        $this->limit = null;
+            $this->limit = null;
         }
 
         // Ajout de la clause group
         if (!is_null($this->group)) {
-        	$sql .= " group by " . $this->group;
-        	$this->group = null;
+            $sql .= " group by " . $this->group;
+            $this->group = null;
 
             if (!is_null($this->havin)) {
                 $sql .= " having " . $this->havin;
@@ -728,9 +728,9 @@ class Table extends DatabaseTools
         $stmt->closeCursor();
 
         if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$this->getLastError(), $data]);
+            return call_user_func_array($cb, [$this->getLastError(), $data]);
         }
-        
+
         return $data;
     }
 
@@ -842,7 +842,7 @@ class Table extends DatabaseTools
         $n = $this->update($arr);
 
         if (is_callable($callback)) {
-            return call_user_func_array($callback, [$this->getLastError(), $data]);
+            return call_user_func_array($callback, [$this->getLastError(), $data, $n]);
         }
 
         return $data;
@@ -864,20 +864,20 @@ class Table extends DatabaseTools
 
     /**
      * count
-     * 
+     *
      * @param string $column          La colonne sur laquelle sera faite le `count`
      * @param callable $cb [optional] La fonction de rappel. Dans ou elle est définie
      *                                elle récupère en paramètre une instance de DatabaseErrorHanlder
      *                                et les données récupérés par la réquête.
-     * 
+     *
      * @return DatabaseErrorHandler
      */
     public function count($column = "*", Callable $cb = null)
     {
-    	if (is_callable($column)) {
-    		$cb = $column;
-    		$column = "*";
-    	}
+        if (is_callable($column)) {
+            $cb = $column;
+            $column = "*";
+        }
 
         $sql = "select count(`$column`) from " . $this->tableName;
 
@@ -886,16 +886,16 @@ class Table extends DatabaseTools
             $this->where = null;
         }
 
-    	$stmt = $this->connection->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         static::bind($stmt, $this->whereDataBind);
         $this->whereDataBind = [];
         $stmt->execute();
         self::$errorInfo = $stmt->errorInfo();
         $r = $stmt->fetchColumn();
 
-    	if (is_callable($cb)) {
-    		call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
-    	}
+        if (is_callable($cb)) {
+            call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
+        }
 
         return  $this->getResponseOfQuery($r);
     }
@@ -907,66 +907,66 @@ class Table extends DatabaseTools
      * @param callable $cb La fonction de rappel. Dans ou elle est définie
      *                     elle récupère en paramètre une instance de DatabaseErrorHanlder
      *                     et les données récupérés par la réquête.
-     * 
+     *
      * @return int
      */
     public function update(array $data = [], Callable $cb = null)
     {
-		$sql = "update `" . $this->tableName . "` set ";
-		$sql .= parent::rangeField(parent::add2points(array_keys($data)));
+        $sql = "update `" . $this->tableName . "` set ";
+        $sql .= parent::rangeField(parent::add2points(array_keys($data)));
 
-		if (!is_null($this->where)) {
-			$sql .= " where " . $this->where;
-			$this->where = null;
+        if (!is_null($this->where)) {
+            $sql .= " where " . $this->where;
+            $this->where = null;
             $data = array_merge($data, $this->whereDataBind);
             $this->whereDataBind = [];
-		}
+        }
 
-		$stmt = $this->connection->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $data = Security::sanitaze($data, true);
-		static::bind($stmt, $data);
+        static::bind($stmt, $data);
 
         // execution de la requête
-		$stmt->execute();
+        $stmt->execute();
 
         // récupération de la dernière erreur.
         self::$errorInfo = $stmt->errorInfo();
 
-		$r = $stmt->rowCount();
+        $r = $stmt->rowCount();
 
-		if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
+        if (is_callable($cb)) {
+            return call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
         }
 
-		return $this->getResponseOfQuery($r);
+        return $this->getResponseOfQuery($r);
     }
 
     /**
      * Action delete
      *
      * @param callable $cb
-     * 
+     *
      * @return DatabaseErrorHandler
      */
     public function delete(Callable $cb = null)
     {
-		$sql = "delete from `" . $this->tableName . "`";
+        $sql = "delete from `" . $this->tableName . "`";
 
-		if (!is_null($this->where)) {
-			$sql .= " where " . $this->where;
-	        $this->where = null;
-		}
+        if (!is_null($this->where)) {
+            $sql .= " where " . $this->where;
+            $this->where = null;
+        }
 
-		$stmt = $this->connection->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
 
-		static::bind($stmt, $this->whereDataBind);
+        static::bind($stmt, $this->whereDataBind);
         $this->whereDataBind = [];
-		$stmt->execute();
+        $stmt->execute();
         self::$errorInfo = $stmt->errorInfo();
-		$r = $stmt->rowCount();
+        $r = $stmt->rowCount();
 
         if (is_callable($cb)) {
-        	return call_user_func_array($cb, [$this->getResponseOfQuery($r), $r]);
+            return call_user_func_array($cb, [$this->getResponseOfQuery($r), $r]);
         }
 
         return $this->getResponseOfQuery($r);
@@ -1008,7 +1008,7 @@ class Table extends DatabaseTools
      *
      * @param string $column
      * @param int $step
-     * 
+     *
      * @return DatabaseErrorHandler
      */
     public function decrement($column, $step = 1)
@@ -1022,7 +1022,7 @@ class Table extends DatabaseTools
      * @param string $column
      * @param int $step
      * @param string $sign
-     * 
+     *
      * @return DatabaseErrorHandler
      */
     private function crement($column, $step = 1, $sign = "")
@@ -1056,7 +1056,7 @@ class Table extends DatabaseTools
      * Action insert
      *
      * @param array $values Les données a inserer dans la base de donnée.
-     * 
+     *
      * @return DatabaseErrorHandler
      */
     public function insert(array $values)
@@ -1173,7 +1173,7 @@ class Table extends DatabaseTools
      * Utilitaire isComporaisonOperator, permet valider un opérateur
      *
      * @param string $comp Le comparateur logique
-     * 
+     *
      * @return bool
      */
     private static function isComporaisonOperator($comp)
@@ -1194,8 +1194,7 @@ class Table extends DatabaseTools
         // On vas une page en arrière
         --$current;
 
-        // variable contenant le nombre de saut.
-        $jump = 0;
+        // variable contenant le nombre de saut. $jump;
 
         if ($current <= 0) {
             $jump = 0;

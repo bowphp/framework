@@ -142,7 +142,7 @@ class Database extends DatabaseTools
                     throw new DatabaseException("Vérifiez la configuration de la base de donnée.", E_USER_ERROR);
                     break;
             }
-            
+
             // Connection à la base de donnée.
             static::$db = new PDO($dns, $username, $password, $pdoPostConfiguation);
 
@@ -155,21 +155,21 @@ class Database extends DatabaseTools
         }
 
         Util::launchCallback($cb, false);
-        
+
         return static::class;
     }
 
-	/**
-	 * switchTo, permet de ce connecter a une autre base de donnée.
+    /**
+     * switchTo, permet de ce connecter a une autre base de donnée.
      *
-	 * @param string $newZone
-	 * @param callable $cb
-	 * @return void
-	 */
-	public static function switchTo($newZone, $cb = null)
-	{
-		if (!is_string($newZone)) {
-        	throw new InvalidArgumentException("Paramètre invalide", E_USER_ERROR);
+     * @param string $newZone
+     * @param callable $cb
+     * @return void
+     */
+    public static function switchTo($newZone, $cb = null)
+    {
+        if (!is_string($newZone)) {
+            throw new InvalidArgumentException("Paramètre invalide", E_USER_ERROR);
         }
 
         if($newZone !== static::$zone) {
@@ -182,11 +182,11 @@ class Database extends DatabaseTools
             static::$db = null;
             static::$zone = "default";
         }
-	}
+    }
 
     /**
      * currentZone, retourne la zone courante.
-     * 
+     *
      * @return string|null
      */
     public static function currentZone()
@@ -255,7 +255,7 @@ class Database extends DatabaseTools
             $pdostatement->execute();
 
             static::$errorInfo = $pdostatement->errorInfo();
-            
+
             return Security::sanitaze($pdostatement->fetch());
         }
 
@@ -360,13 +360,13 @@ class Database extends DatabaseTools
      *		],
      *		"data" => [ "les données a insérer." ]
      *	];
-     * 
+     *
      * @param array $options
      * @param bool|false $return
      * @param bool|false $lastInsertId
-     * 
+     *
      * @throws \ErrorException
-     * 
+     *
      * @return array|static|\StdClass
      */
     public static function query(array $options, $return = false, $lastInsertId = false)
@@ -422,7 +422,7 @@ class Database extends DatabaseTools
 
     /**
      * Lance la verification de l'établissement de connection
-     * 
+     *
      * @throws ConnectionException
      */
     private static function verifyConnection()
@@ -449,7 +449,7 @@ class Database extends DatabaseTools
 
     /**
      * Récupère la dernière erreur sur la l'object PDO
-     * 
+     *
      * @return DatabaseErrorHandler
      */
     public static function getLastError()
@@ -492,7 +492,7 @@ class Database extends DatabaseTools
          */
 
         $query = "";
-        
+
         switch ($options['type']) {
             /**
              * Niveau équivalant à un quelconque SQL Statement de type:
@@ -559,7 +559,7 @@ class Database extends DatabaseTools
                  * | GROUP BY |
                  *  ----------
                  */
-                
+
                 if (isset($options["grby"])) {
                     $grby = " GROUP BY " . $options['grby'];
                     if (isset($options["having"])) {
@@ -670,7 +670,7 @@ class Database extends DatabaseTools
     private static function executePrepareQuery($sqlstatement, array $bind = [])
     {
         $pdostatement = static::$db->prepare($sqlstatement);
-        
+
         static::bind($pdostatement, $bind);
         $pdostatement->execute();
         static::$errorInfo = $pdostatement->errorInfo();
@@ -683,7 +683,7 @@ class Database extends DatabaseTools
 
     /**
      * pdo, retourne l'instance de la connection.
-     * 
+     *
      * @return PDO
      */
     public static function getPdo()

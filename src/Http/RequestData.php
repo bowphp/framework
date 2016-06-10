@@ -228,12 +228,12 @@ class RequestData implements CollectionAccess
 		}
 	}
 
-    /**
-     * __get
-     *
-     * @param string $name Le nom de la variable
-     * @return null
-     */
+	/**
+	 * __get
+	 *
+	 * @param string $name Le nom de la variable
+	 * @return null
+	 */
 	public function __get($name)
 	{
 		if ($this->has($name)) {

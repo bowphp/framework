@@ -27,32 +27,32 @@ class Schema
      */
     private $fill;
 
-	/**
-	 * @param string $table
-	 * @return int
-	 */
-	public static function drop($table)
-	{
+    /**
+     * @param string $table
+     * @return int
+     */
+    public static function drop($table)
+    {
         if (statement("drop table $table;")) {
             echo "\033[0;32m$table table droped.\033[00m\n";
         } else {
             echo "\033[0;31m$table table not exists.\033[00m\n";
         }
-	}
+    }
 
-	/**
+    /**
      * fonction de creation d'une nouvelle table dans la base de donnée.
      *
-	 * @param string $table
-	 * @param callable $cb
+     * @param string $table
+     * @param callable $cb
      * @param bool $displaySql
-	 */
-	public static function create($table, Callable $cb, $displaySql = false)
-	{
+     */
+    public static function create($table, Callable $cb, $displaySql = false)
+    {
         static::$table = $table;
 
-		$columnsMaker = new ColumnsMaker($table, $displaySql);
-		call_user_func_array($cb, [$columnsMaker]);
+        $columnsMaker = new ColumnsMaker($table, $displaySql);
+        call_user_func_array($cb, [$columnsMaker]);
 
         $sql = (new Blueprint($columnsMaker))->toCreateTableStatement();
 
@@ -64,22 +64,22 @@ class Schema
 
 
         if (statement($sql)) {
-			echo "\033[0;32m$table table created.\033[00m\n";
-		} else {
+            echo "\033[0;32m$table table created.\033[00m\n";
+        } else {
             echo "\033[0;31m$table table already exists.\033[00m\n";
         }
-	}
+    }
 
-	/**
-	 * @param string $table
-	 * @param bool $displaySql
-	 * @param Callable $cb
-	 */
-	public static function table($table, Callable $cb, $displaySql = false)
-	{
+    /**
+     * @param string $table
+     * @param bool $displaySql
+     * @param Callable $cb
+     */
+    public static function table($table, Callable $cb, $displaySql = false)
+    {
         $alter = new AlterTable($table, $displaySql);
         $cb($alter);
-	}
+    }
 
     /**
      * fillTable, remplir un table pour permet le developpement.

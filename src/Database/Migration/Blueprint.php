@@ -46,7 +46,7 @@ class Blueprint
             $sqlArray = explode(", ", $statement);
             $sql = '';
 
-            foreach($sqlArray as $key => $value) {
+            foreach ($sqlArray as $key => $value) {
                 if ($key > 0) {
                     $sql .= ", ";
                 }
@@ -68,7 +68,7 @@ class Blueprint
     private function makeSqlStatement()
     {
         $fields = $this->columns->getDefineFields();
-        $statement = (string) $this->columns;
+        $statement = (string)$this->columns;
 
         $fields->each(function (Collection $value, $type) {
 
@@ -113,15 +113,15 @@ class Blueprint
                 case "timestamp" :
                 case "time" :
                 case "year" :
-                    $value->each(function($info, $field) use ($type, &$statement){
+                    $value->each(function ($info, $field) use ($type, &$statement) {
                         $this->columns->addFieldType($info, $field, $type);
                         $this->columns->addIndexOrPrimaryKey($info, $field);
                     });
                     break;
                 case "enum" :
-                    $value->each(function($info, $field) use (&$statement) {
-                        foreach($info["default"] as $key => $value) {
-                            $info["default"][$key] = "'" .  $value . "'";
+                    $value->each(function ($info, $field) use (&$statement) {
+                        foreach ($info["default"] as $key => $value) {
+                            $info["default"][$key] = "'" . $value . "'";
                         }
                         $null = $this->columns->getNullType($info["null"]);
                         $enum = implode(", ", $info["default"]);

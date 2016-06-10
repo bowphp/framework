@@ -19,10 +19,10 @@ use Bow\Exception\ResponseException;
 class Response
 {
 	/**
-     * Singleton
-     * @var self
-     */
-    private static $instance = null;
+	 * Singleton
+	 * @var self
+	 */
+	private static $instance = null;
 
 	/**
 	 * Liste de code http valide pour l'application
@@ -70,35 +70,35 @@ class Response
 	];
 
 	/**
-     * Instance de l'application
-     * @var AppConfiguration
-     */
-    private $config;
+	 * Instance de l'application
+	 * @var AppConfiguration
+	 */
+	private $config;
 
 	/**
 	 * Constructeur de l'application
 	 *
 	 * @param AppConfiguration $appConfig
 	 */
-    private function __construct(AppConfiguration $appConfig)
-    {
-        $this->config = $appConfig;
-    }
+	private function __construct(AppConfiguration $appConfig)
+	{
+		$this->config = $appConfig;
+	}
 
-    /**
-     * Singleton loader
-     * 
-     * @param AppConfiguration $appConfig
-     * @return self
-     */
-    public static function configure(AppConfiguration $appConfig)
-    {
-        if (self::$instance === null) {
-            self::$instance = new self($appConfig);
-        }
+	/**
+	 * Singleton loader
+	 *
+	 * @param AppConfiguration $appConfig
+	 * @return self
+	 */
+	public static function configure(AppConfiguration $appConfig)
+	{
+		if (self::$instance === null) {
+			self::$instance = new self($appConfig);
+		}
 
-        return self::$instance;
-    }
+		return self::$instance;
+	}
 
 	/**
 	 * Retourne l'instance de Response
@@ -123,11 +123,11 @@ class Response
 
 		return $this;
 	}
-    
-    /**
-     * redirect, permet de lancer une redirection vers l'url passé en paramêtre
-     *
-     * @param string|array $path L'url de rédirection
+
+	/**
+	 * redirect, permet de lancer une redirection vers l'url passé en paramêtre
+	 *
+	 * @param string|array $path L'url de rédirection
 	 * Si $path est un tableau :
 	 * 	$url = [
 	 * 		"url" => "//"
@@ -139,9 +139,9 @@ class Response
 	 * 		"$" => "hello"
 	 * ];
 	 *
-     */
-    public function redirect($path)
-    {
+	 */
+	public function redirect($path)
+	{
 		if (is_string($path)) {
 			$url = $path;
 		} else {
@@ -168,21 +168,21 @@ class Response
 		echo '<a href="' . $url . '" >' . self::$header[301] . '</a>';
 
 		die();
-    }
+	}
 
-    /**
-     * redirectTo404, rédirige vers 404
-     * @return self
-     */
-    public function redirectTo404()
-    {
-        $this->code(404);
-        return $this;
-    }
+	/**
+	 * redirectTo404, rédirige vers 404
+	 * @return self
+	 */
+	public function redirectTo404()
+	{
+		$this->code(404);
+		return $this;
+	}
 
 	/**
 	 * Modifie les entétes http
-	 * 
+	 *
 	 * @param int  $code 	 Le code de la réponse HTTP
 	 * @param bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a "true"
 	 * @return bool|void
@@ -210,9 +210,9 @@ class Response
 	public function json($data, $code = 200, $end = false)
 	{
 		if (is_bool($code)) {
-            $end = $code;
-            $code = 200;
-        }
+			$end = $code;
+			$code = 200;
+		}
 
 		$this->set("Content-Type", "application/json; charset=UTF-8");
 		$this->code($code);
@@ -221,7 +221,7 @@ class Response
 
 	/**
 	 * sendFile, require $filename
-	 * 
+	 *
 	 * @param string $filename
 	 * @param array $bind
 	 * @throws ViewException
@@ -234,7 +234,7 @@ class Response
 		if ($this->config->getViewpath() !== null) {
 			$tmp = $this->config->getViewpath() ."/". $filename . ".php";
 			if (!file_exists($tmp)) {
-				$filename = $this->config->getViewpath() ."/". $filename . ".html";			
+				$filename = $this->config->getViewpath() ."/". $filename . ".html";
 			} else {
 				$filename = $tmp;
 			}
@@ -244,7 +244,7 @@ class Response
 			throw new ViewException("La vue $filename n'exist pas.", E_ERROR);
 		}
 
- 		extract($bind);
+		extract($bind);
 		// Rendu du fichier demandé.
 
 		return require $filename;
@@ -303,7 +303,7 @@ class Response
 
 	/**
 	 * templateLoader, charge le moteur template à utiliser.
-	 * 
+	 *
 	 * @throws ErrorException
 	 * @return \Twig_Environment|\Mustache_Engine|\Jade\Jade
 	 */
@@ -320,12 +320,12 @@ class Response
 		$tpl = null;
 
 		if ($this->config->getEngine() == "twig") {
-		    $loader = new \Twig_Loader_Filesystem($this->config->getViewpath());
-		    $tpl = new \Twig_Environment($loader, [
-		        'cache' => $this->config->getCachepath(),
+			$loader = new \Twig_Loader_Filesystem($this->config->getViewpath());
+			$tpl = new \Twig_Environment($loader, [
+				'cache' => $this->config->getCachepath(),
 				'auto_reload' => $this->config->getCacheAutoReload(),
-                "debug" => $this->config->getLoggerMode() == "develepment" ? true : false
-		    ]);
+				"debug" => $this->config->getLoggerMode() == "develepment" ? true : false
+			]);
 			/**
 			 * - Ajout de variable globale
 			 * dans le cadre de l'utilisation de Twig
@@ -344,14 +344,14 @@ class Response
 			$tpl->addFunction(new \Twig_SimpleFunction("_slugify", [Str::class, "slugify"]));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new \Mustache_Engine([
-                'cache' => $this->config->getCachepath()
+				'cache' => $this->config->getCachepath()
 			]);
 		} else {
 			$tpl = new Jade([
-                'cache' => $this->config->getCachepath(),
-                'prettyprint' => true,
-                'extension' => $this->config->getTemplateExtension()
-            ]);
+				'cache' => $this->config->getCachepath(),
+				'prettyprint' => true,
+				'extension' => $this->config->getTemplateExtension()
+			]);
 		}
 
 		return $tpl;

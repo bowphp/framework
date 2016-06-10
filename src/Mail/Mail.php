@@ -40,7 +40,7 @@ class Mail
 
         if ($config->driver == "mail") {
             if (!self::$instance instanceof SimpleMail) {
-               self::$instance = new SimpleMail($config->mail);
+                self::$instance = new SimpleMail($config->mail);
             }
         } else {
             if (!self::$instance instanceof Smtp) {

@@ -52,7 +52,7 @@ class Util
 
 	/**
 	 * buildSerialization, fonction permettant de construire des sérialisation
-	 * 
+	 *
 	 * @param string $file
 	 * @param mixed $args
 	 * @return string
@@ -98,7 +98,7 @@ class Util
 	 * setTimeZone, modifie la zone horaire.
 	 *
 	 * @param string $zone
-	 * 
+	 *
 	 * @throws \ErrorException
 	 */
 	public static function setTimezone($zone)
@@ -106,7 +106,7 @@ class Util
 		if (count(explode("/", $zone)) != 2) {
 			throw new UtilException("La définition de la zone est invalide");
 		}
-	
+
 		date_default_timezone_set($zone);
 	}
 
@@ -123,8 +123,8 @@ class Util
 	{
 
 		$param = is_array($param) ? $param : [$param];
-        $function_list = [];
-		
+		$function_list = [];
+
 		if (!isset($names["namespace"])) {
 			return static::execute_function($cb, $param);
 		}
@@ -132,13 +132,13 @@ class Util
 		static::$names = $names;
 
 		if (!file_exists($names["autoload"] . ".php")) {
-            throw new RouterException("L'autoload n'est pas défini dans le fichier de configuration", E_ERROR);
+			throw new RouterException("L'autoload n'est pas défini dans le fichier de configuration", E_ERROR);
 		}
 
 
-        if (!isset($names["namespace"]["app"])) {
-            throw new RouterException("Le namespace d'autoload n'est pas défini dans le fichier de configuration");
-        }
+		if (!isset($names["namespace"]["app"])) {
+			throw new RouterException("Le namespace d'autoload n'est pas défini dans le fichier de configuration");
+		}
 
 		// Chargement de l'autoload
 		@require $names["autoload"] . ".php";
@@ -150,103 +150,103 @@ class Util
 			return call_user_func_array($cb, $param);
 		}
 
-        if (is_string($cb)) {
-            return call_user_func_array(static::loadController($cb), $param);
-        }
-
-        if (is_array($cb)) {
-            if (array_key_exists("middleware", $cb)) {
-                $middleware = $cb["middleware"];
-                unset($cb["middleware"]);
-            }
-
-            if (array_key_exists("uses", $cb)) {
-                if (is_array($cb["uses"])) {
-                    if (isset($cb["uses"]["with"]) && isset($cb["uses"]["call"])) {
-                        if (is_string($cb["uses"]["call"])) {
-                            $controller = $cb["uses"]["with"] . "@" . $cb["uses"]["call"];
-                            array_push($function_list, static::loadController($controller));
-                        } else {
-                            foreach($cb["uses"]["call"] as $method) {
-                                $controller = $cb["uses"]["with"] . "@" . $method;
-                                array_push($function_list,  static::loadController($controller));
-                            }
-                        }
-                    } else {
-                        foreach($cb["uses"] as $controller) {
-                            if (is_string($controller)) {
-                                array_push($function_list,  static::loadController($controller));
-                            } else if (is_callable($controller)) {
-                                array_push($function_list, $controller);
-                            }
-                        }
-                    }
-                } else {
-                    if (is_string($cb["uses"])) {
-                        array_push($function_list, static::loadController($cb["uses"]));
-                    } else {
-                        array_push($function_list, $cb["uses"]);
-                    }
-                }
-
-                unset($cb["uses"]);
-            }
-
-            if (count($cb) > 0) {
-                foreach($cb as $func) {
-                    if (is_callable($func)) {
-                        array_push($function_list, $func);
-                    } else if (is_string($func)) {
-                        array_push($function_list, static::loadController($func));
-                    }
-                }
-            }
+		if (is_string($cb)) {
+			return call_user_func_array(static::loadController($cb), $param);
 		}
 
-        // Status permettant de bloquer la suite du programme.
-        $status = true;
+		if (is_array($cb)) {
+			if (array_key_exists("middleware", $cb)) {
+				$middleware = $cb["middleware"];
+				unset($cb["middleware"]);
+			}
 
-        // Execution du middleware si define.
-        if (is_string($middleware)) {
-            if (!in_array(ucfirst($middleware), $names["middlewares"], true)) {
-                throw new RouterException($middleware . " n'est pas un middleware definir.", E_ERROR);
-            }
+			if (array_key_exists("uses", $cb)) {
+				if (is_array($cb["uses"])) {
+					if (isset($cb["uses"]["with"]) && isset($cb["uses"]["call"])) {
+						if (is_string($cb["uses"]["call"])) {
+							$controller = $cb["uses"]["with"] . "@" . $cb["uses"]["call"];
+							array_push($function_list, static::loadController($controller));
+						} else {
+							foreach($cb["uses"]["call"] as $method) {
+								$controller = $cb["uses"]["with"] . "@" . $method;
+								array_push($function_list,  static::loadController($controller));
+							}
+						}
+					} else {
+						foreach($cb["uses"] as $controller) {
+							if (is_string($controller)) {
+								array_push($function_list,  static::loadController($controller));
+							} else if (is_callable($controller)) {
+								array_push($function_list, $controller);
+							}
+						}
+					}
+				} else {
+					if (is_string($cb["uses"])) {
+						array_push($function_list, static::loadController($cb["uses"]));
+					} else {
+						array_push($function_list, $cb["uses"]);
+					}
+				}
 
-            // Chargement du middleware
-            $classMiddleware = $names["namespace"]["middleware"] . "\\" . ucfirst($middleware);
-            
-            // On vérifie si le middleware définie est une middleware valide.
-            if (!class_exists($classMiddleware)) {
-                throw new RouterException($middleware . " n'est pas un class Middleware.");
-            }
+				unset($cb["uses"]);
+			}
 
-            $instance = new $classMiddleware();
-            $handler = [$instance, "handle"];
-            $status = call_user_func_array($handler, $param);
-        
-        // Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
-        } else if (is_callable($middleware)) {
-            $status = call_user_func_array($middleware, $param);
-        }
+			if (count($cb) > 0) {
+				foreach($cb as $func) {
+					if (is_callable($func)) {
+						array_push($function_list, $func);
+					} else if (is_string($func)) {
+						array_push($function_list, static::loadController($func));
+					}
+				}
+			}
+		}
 
-        // On arrêt tout en case de status false.
-        if ($status == false) {
-            return false;
-        }
+		// Status permettant de bloquer la suite du programme.
+		$status = true;
 
-        // Lancement de l'execution de la liste
-        // fonction a execute suivant un ordre 
-        // conforme au middleware.
-        if (!empty($function_list)) {
-            $status = true;
+		// Execution du middleware si define.
+		if (is_string($middleware)) {
+			if (!in_array(ucfirst($middleware), $names["middlewares"], true)) {
+				throw new RouterException($middleware . " n'est pas un middleware definir.", E_ERROR);
+			}
 
-            foreach($function_list as $func) {
-                $status = call_user_func_array($func, $param);
-                if ($status == false) {
-                    return $status;
-                }
-            }
-        }
+			// Chargement du middleware
+			$classMiddleware = $names["namespace"]["middleware"] . "\\" . ucfirst($middleware);
+
+			// On vérifie si le middleware définie est une middleware valide.
+			if (!class_exists($classMiddleware)) {
+				throw new RouterException($middleware . " n'est pas un class Middleware.");
+			}
+
+			$instance = new $classMiddleware();
+			$handler = [$instance, "handle"];
+			$status = call_user_func_array($handler, $param);
+
+			// Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
+		} else if (is_callable($middleware)) {
+			$status = call_user_func_array($middleware, $param);
+		}
+
+		// On arrêt tout en case de status false.
+		if ($status == false) {
+			return false;
+		}
+
+		// Lancement de l'execution de la liste
+		// fonction a execute suivant un ordre
+		// conforme au middleware.
+		if (!empty($function_list)) {
+			$status = true;
+
+			foreach($function_list as $func) {
+				$status = call_user_func_array($func, $param);
+				if ($status == false) {
+					return $status;
+				}
+			}
+		}
 
 		return $status;
 	}
@@ -264,7 +264,7 @@ class Util
 			return call_user_func_array($arr, $arg);
 		}
 
-        if (is_array($arr)) {
+		if (is_array($arr)) {
 			// Lancement de la procedure de lancement recursive.
 			array_reduce($arr, function($next, $cb) use ($arg) {
 				// $next est-il null
@@ -295,19 +295,19 @@ class Util
 			// On lance la loader de controller si $cb est un String
 			$cb = static::loadController($arr);
 
-            if ($cb !== null) {
-                return call_user_func_array($cb, $arg);
-            }
+			if ($cb !== null) {
+				return call_user_func_array($cb, $arg);
+			}
 
-            return null;
-        }
+			return null;
+		}
 	}
 
 	/**
 	 * Charge les controlleurs
-	 * 
+	 *
 	 * @param string $controllerName. Le nom du controlleur a utilisé
-	 * 
+	 *
 	 * @return array
 	 */
 	private static function loadController($controllerName)
@@ -316,7 +316,7 @@ class Util
 		if (is_null($controllerName)) {
 			return null;
 		}
-		
+
 		list($class, $method) = preg_split("#\.|@#", $controllerName);
 		$class = static::$names["namespace"]["controller"] . "\\" . ucfirst($class);
 
@@ -325,7 +325,7 @@ class Util
 
 	/**
 	 * hourToLetter, convert une heure en letter Format: HH:MM:SS
-	 * 
+	 *
 	 * @param string $hour
 	 * @return string
 	 */
@@ -340,17 +340,17 @@ class Util
 			$heures   = static::number2Letter($hourPart[0]) . " heure";
 			$minutes  = static::number2Letter($hourPart[1]) . " minute";
 			$secondes = " ";
-			
+
 			// accord des heures.
 			if ($hourPart[0] > 1) {
 				$heures .= "s";
 			}
-			
+
 			// accord des minutes
 			if ($hourPart[1] > 1) {
 				$minutes .= "s";
 			}
-			
+
 			// Ajout de secondes
 			if (isset($hourPart[2]) && $hourPart[2] > 0) {
 				$secondes .= static::number2Letter($hourPart[2]) . " secondes";
@@ -365,7 +365,7 @@ class Util
 
 	/**
 	 * dateToLetter, convert une date sous forme de letter
-	 * 
+	 *
 	 * @param string $dateString
 	 * @return string
 	 */
@@ -394,7 +394,7 @@ class Util
 
 	/**
 	 * Lance un var_dump sur les variables passées en paramètre.
-	 * 
+	 *
 	 * @throws InvalidArgumentException
 	 * @return void
 	 */
@@ -404,10 +404,10 @@ class Util
 			throw new InvalidArgumentException(__METHOD__ ."(): Vous devez donner un paramètre à la fonction", E_ERROR);
 		}
 
-        $html = "";
+		$html = "";
 
-        foreach (func_get_args() as $key => $value) {
-            ob_start();
+		foreach (func_get_args() as $key => $value) {
+			ob_start();
 			$len = "";
 			// if (is_array($value) || is_object($value)) {
 			// 	$len = ':len=' . count($value);
@@ -417,18 +417,18 @@ class Util
 			// echo gettype($value) . $len . ' <span id="toggle" class="show" style="border:1px solid #eee; padding:0.1px 0.2px;font-size:10px;color:#888"> > </span><div style="position: relative; left:25px; top:5px"><div class="contains">';
 			var_dump($value);
 			echo '</div></div>';
-            echo "\n\n";
+			echo "\n\n";
 
-            $content = ob_get_clean();
-            $content = preg_replace("~\s?\{\n\s?\}~i", "[]", $content);
-            $content = preg_replace('~\((\d+)\)~im', "<span style=\"color: #498\">($1)</span>", $content);
-            $content = preg_replace('~\s(".+")~im', "<span style=\"color: #458\"> $1</span>", $content);
-            $content = preg_replace("~(=>)(\n\s+?)+~im", "", $content);
-            $content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 =><span style=\"color: black\"></span></span>", $content);
-            $content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 =><span style=\"color: black\"></span></span>", $content);
-            $content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
-            $html .= $content;
-        }
+			$content = ob_get_clean();
+			$content = preg_replace("~\s?\{\n\s?\}~i", "[]", $content);
+			$content = preg_replace('~\((\d+)\)~im', "<span style=\"color: #498\">($1)</span>", $content);
+			$content = preg_replace('~\s(".+")~im', "<span style=\"color: #458\"> $1</span>", $content);
+			$content = preg_replace("~(=>)(\n\s+?)+~im", "", $content);
+			$content = preg_replace('~\["(.+)"\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 =><span style=\"color: black\"></span></span>", $content);
+			$content = preg_replace('~\[(.+)\]~im', "<span style=\"color:#666\"><span style=\"color: black\"></span>$1 =><span style=\"color: black\"></span></span>", $content);
+			$content = "<pre><tt><div style=\"font-family: monaco, courier; font-size: 13px\">$content</div></tt></pre>";
+			$html .= $content;
+		}
 		$script = <<<JS
 			var toggleElement = document.querySelectorAll("#toggle");
 			if (Object.prototype.toString.call(toggleElement) === "[object NodeList]") {
@@ -454,7 +454,7 @@ JS;
 
 	/**
 	 * systeme de débugage avec message d'info
-	 * 
+	 *
 	 * @param string $message
 	 * @param callable $cb
 	 *
@@ -470,10 +470,10 @@ JS;
 			static::dump(array_slice(func_get_args(), 1, func_num_args()));
 		}
 	}
-	
+
 	/**
 	 * Permettant de convertir des chiffres en letter
-	 * 
+	 *
 	 * @param string $nombre
 	 * @return string
 	 */
@@ -537,7 +537,7 @@ JS;
 		$tensOut .= ($unite === 0 && $dixaine === 8 ? "s": "");
 		$centsOut = ($cent > 1 ? $nombreEnLettre["unite"][(int)$cent].' ' : '').($cent > 0 ? 'cent' : '').($cent > 1 && $dixaine == 0 && $unite == 0 ? '' : '');
 		$tmp = $centsOut.($centsOut && $tensOut ? ' ': '').$tensOut.(($centsOut && $unitsOut) || ($tensOut && $unitsOut) ? '-': '').$unitsOut;
-		
+
 		/**
 		 * Retourne avec les millieme associer.
 		 */

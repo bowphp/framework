@@ -80,15 +80,15 @@ class Application
 	 */
 	private $config = null;
 
-    /**
-     * @var array
-     */
+	/**
+	 * @var array
+	 */
 	private $local = [];
 
-    /**
-     * @var bool
-     */
-    private $disableXpoweredBy = false;
+	/**
+	 * @var bool
+	 */
+	private $disableXpoweredBy = false;
 
 	/**
 	 * @var Logger
@@ -103,7 +103,7 @@ class Application
 	private function __construct(AppConfiguration $config)
 	{
 		$this->config = $config;
-        $this->request = $this->request();
+		$this->request = $this->request();
 
 		$logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . "/error.log");
 		$logger->register();
@@ -151,7 +151,7 @@ class Application
 			call_user_func_array($cb, [$this->request]);
 		}
 
-        $this->branch = "";
+		$this->branch = "";
 
 		return $this;
 	}
@@ -168,19 +168,19 @@ class Application
 	{
 		if ($name === null) {
 			$key = $path;
-            if (in_array($key, $this->local)) {
-               return $this->local[$key];
-            } else {
-                if (($method = $this->getConfigMethod($key, "get")) !== false) {
-                    return $this->config->$method();
-                } else {
-                    return null;
-                }
-            }
+			if (in_array($key, $this->local)) {
+				return $this->local[$key];
+			} else {
+				if (($method = $this->getConfigMethod($key, "get")) !== false) {
+					return $this->config->$method();
+				} else {
+					return null;
+				}
+			}
 		}
 
-        return $this->routeLoader("GET", $path, $name, $cb);
-    }
+		return $this->routeLoader("GET", $path, $name, $cb);
+	}
 
 	/**
 	 * post, route de type POST
@@ -214,9 +214,9 @@ class Application
 	 */
 	public function any($path, Callable $cb)
 	{
-        foreach(["post", "delete", "put", "get"] as $function) {
-            $this->$function($path, $cb);
-        }
+		foreach(["post", "delete", "put", "get"] as $function) {
+			$this->$function($path, $cb);
+		}
 
 		return $this;
 	}
@@ -406,12 +406,12 @@ class Application
 	 */
 	public function run($cb = null)
 	{
-        // Ajout de l'entête X-Powered-By
-        if (!$this->disableXpoweredBy) {
-            $this->response()->set("X-Powered-By", "Bow Framework");
-        }
+		// Ajout de l'entête X-Powered-By
+		if (!$this->disableXpoweredBy) {
+			$this->response()->set("X-Powered-By", "Bow Framework");
+		}
 
-        // drapeaux d'erreur.
+		// drapeaux d'erreur.
 		$error = true;
 
 		if (is_callable($cb)) {
@@ -423,45 +423,45 @@ class Application
 		$this->branch = "";
 		$method = $this->request->method();
 
-        // vérification de l'existance d'une methode spécial
-        // de type DELETE, PUT
+		// vérification de l'existance d'une methode spécial
+		// de type DELETE, PUT
 		if ($method == "POST") {
 			if ($this->specialMethod !== null) {
 				$method = $this->specialMethod;
 			}
 		}
 
-        // vérification de l'existance de methode de la requete dans
-        // la collection de route
+		// vérification de l'existance de methode de la requete dans
+		// la collection de route
 		if (isset(static::$routes[$method])) {
 			foreach (static::$routes[$method] as $key => $route) {
 
-                // route doit être une instance de Route
+				// route doit être une instance de Route
 				if (! ($route instanceof Route)) {
 					continue;
 				}
 
-                // récupération du contenu de la where
+				// récupération du contenu de la where
 				if (isset($this->with[$method][$route->getPath()])) {
 					$with = $this->with[$method][$route->getPath()];
 				} else {
 					$with = [];
 				}
 
-                // Lancement de la recherche de la method qui arrivée dans la requete
-                // ensuite lancement de la verification de l'url de la requete
-                // execution de la fonction associé à la route.
+				// Lancement de la recherche de la method qui arrivée dans la requete
+				// ensuite lancement de la verification de l'url de la requete
+				// execution de la fonction associé à la route.
 				if ($route->match($this->request->uri(), $with)) {
 					$this->currentPath = $route->getPath();
 
-                    // appel requête fonction
+					// appel requête fonction
 					if ($this->config->getTakeInstanceOfApplicationInFunction()) {
 						$response = $route->call($this->request, $this->config->getNamespace(), $this);
 					} else {
 						$response = $route->call($this->request, $this->config->getNamespace());
 					}
 
-                    if (is_string($response)) {
+					if (is_string($response)) {
 						$this->response()->send($response);
 					} else if (is_array($response) || is_object($response)) {
 						$this->response()->json($response);
@@ -472,9 +472,9 @@ class Application
 			}
 		}
 
-        // Si la route n'est pas enrégistre alors on lance une erreur 404
+		// Si la route n'est pas enrégistre alors on lance une erreur 404
 		if ($error === true) {
-            // vérification et appel de la fonction du branchement 404
+			// vérification et appel de la fonction du branchement 404
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			} else {
@@ -489,28 +489,28 @@ class Application
 	/**
 	 * Set, permet de rédéfinir quelque élément de la configuartion de
 	 * façon élégante.
-     *
+	 *
 	 * @param string $key
 	 * @param string $value
 	 *
 	 * @throws InvalidArgumentException
 	 *
-     * @return Application|string
+	 * @return Application|string
 	 */
 	public function set($key, $value)
 	{
-        $method = $this->getConfigMethod($key, "set");
+		$method = $this->getConfigMethod($key, "set");
 
-        // Vérification de l
+		// Vérification de l
 		if ($method) {
 			if (method_exists($this->config, $method)) {
 				return $this->config->$method($value);
 			}
 		} else {
-            $this->local[$key] = $value;
+			$this->local[$key] = $value;
 		}
 
-        return $this;
+		return $this;
 	}
 
 	/**
@@ -533,45 +533,45 @@ class Application
 		return Request::configure();
 	}
 
-    /**
-     * @param string $key
-     * @param string $prefix
+	/**
+	 * @param string $key
+	 * @param string $prefix
 	 *
-     * @return string|bool
-     */
-    private function getConfigMethod($key, $prefix)
-    {
-        switch ($key) {
-            case "view":
-                $method = "Viewpath";
-                break;
-            case "engine":
-                $method = "Engine";
-                break;
-            case "root":
-                $method = "Approot";
-                break;
-            default:
-                $method = false;
-                break;
-        }
+	 * @return string|bool
+	 */
+	private function getConfigMethod($key, $prefix)
+	{
+		switch ($key) {
+			case "view":
+				$method = "Viewpath";
+				break;
+			case "engine":
+				$method = "Engine";
+				break;
+			case "root":
+				$method = "Approot";
+				break;
+			default:
+				$method = false;
+				break;
+		}
 
-        return is_string($method) ? $prefix . $method : $method;
-    }
+		return is_string($method) ? $prefix . $method : $method;
+	}
 
-    /**
-     * d'active l'ecriture le l'entête X-Powered-By
-     */
-    public function disableXPoweredBy()
-    {
-        $this->disableXpoweredBy = true;
-    }
+	/**
+	 * d'active l'ecriture le l'entête X-Powered-By
+	 */
+	public function disableXPoweredBy()
+	{
+		$this->disableXpoweredBy = true;
+	}
 
 	/**
 	 * REST API Maker.
 	 *
-     * @param string $url
-     * @param string|array $controllerName
+	 * @param string $url
+	 * @param string|array $controllerName
 	 * @param array $where
 	 * @return $this
 	 * @throws ApplicationException
@@ -646,29 +646,29 @@ class Application
 			$controller = $controllerName;
 		}
 
-        // normalize url
-        $url = preg_replace("/\/+$/", "", $url);
+		// normalize url
+		$url = preg_replace("/\/+$/", "", $url);
 
-        // Association de url prédéfinie
-        foreach ($valideMethod as $key => $value) {
-            if (!in_array($value["call"], $ignoreMethod)) {
-                $bindController = $controller . '@' . $value["call"];
-                $path = $url . $value["url"];
-                call_user_func_array([$this, $value["method"]], [$path, $bindController]);
-                if (!empty($where)) {
-                    $data = [];
-                    if (preg_match("/:id/", $path)) {
-                        if (isset($where["id"])) {
-                            $data = $where;
-                        } else {
-                            $data = ["id" => $where[0]];
-                        }
-                    }
+		// Association de url prédéfinie
+		foreach ($valideMethod as $key => $value) {
+			if (!in_array($value["call"], $ignoreMethod)) {
+				$bindController = $controller . '@' . $value["call"];
+				$path = $url . $value["url"];
+				call_user_func_array([$this, $value["method"]], [$path, $bindController]);
+				if (!empty($where)) {
+					$data = [];
+					if (preg_match("/:id/", $path)) {
+						if (isset($where["id"])) {
+							$data = $where;
+						} else {
+							$data = ["id" => $where[0]];
+						}
+					}
 
-                    $this->where(array_merge($data, $where));
-                }
-            }
-        }
+					$this->where(array_merge($data, $where));
+				}
+			}
+		}
 
 		return $this;
 	}
@@ -736,28 +736,28 @@ class Application
 		switch(true) {
 			case $param === "public":
 				return $this->config->getPublicPath();
-			break;
+				break;
 			case $param === "engine":
 				return $this->config->getEngine();
-			break;
+				break;
 			case $param === "root":
 				return $this->config->getApproot();
-			break;
+				break;
 			case $param === "name":
 				return $this->config->getAppname();
-			break;
+				break;
 			case $param === "route":
 				return $this->config->getApplicationRoutes();
-			break;
+				break;
 			case $param === "view path":
 				return $this->config->getViewpath();
-			break;
+				break;
 			case $param === "logger":
 				return $this->log();
-			break;
+				break;
 			case $param === "config":
 				return $this->config;
-			break;
+				break;
 		}
 	}
 }

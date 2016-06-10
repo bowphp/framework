@@ -16,20 +16,20 @@ class Security
 	 * @static int
 	 */
 	private static $tokenCsrfExpirateTime;
-	
+
 	/**
 	 * @var string
 	 */
 	private static $key = "";
 
-    /**
-     * @var null
-     */
+	/**
+	 * @var null
+	 */
 	private static $iv = null;
 
 	/**
 	 * setKey modifie la clé de cryptage
-	 * 
+	 *
 	 * @param string $key
 	 */
 	public static function setkey($key)
@@ -48,7 +48,7 @@ class Security
 	public static function verifiySideBySide($verifyData, $enableData)
 	{
 		$error = false;
-		
+
 		foreach ($verifyData as $key => $value) {
 			if (!in_array($key, $enableData)) {
 				$error = true;
@@ -60,10 +60,10 @@ class Security
 
 	/**
 	 * Sécurise les données
-	 * 
+	 *
 	 * @param mixed $data
 	 * @param bool $secure
-	 * 
+	 *
 	 * @return mixed
 	 */
 	public static function sanitaze($data, $secure = false)
@@ -107,7 +107,7 @@ class Security
 	 * SanitazeString, fonction permettant de nettoyer
 	 * une chaine de caractère des caractères ajoutés
 	 * par secureString
-	 * 
+	 *
 	 * @param string $data les données a néttoyé
 	 *
 	 * @return string
@@ -122,7 +122,7 @@ class Security
 	/**
 	 * secureString, fonction permettant de nettoyer
 	 * une chaine de caractère des caractères ',<tag>,&nbsp;
-	 * 
+	 *
 	 * @param string $data les données a sécurisé
 	 *
 	 * @return string
@@ -156,10 +156,10 @@ class Security
 				"field" => '<input type="hidden" name="_token" value="' . $token .'"/>'
 			]);
 
-            return true;
+			return true;
 		}
 
-        return false;
+		return false;
 	}
 
 	/**
@@ -215,7 +215,7 @@ class Security
 	public static function verifyCsrfToken($token, $strict = false)
 	{
 		$status = false;
-		
+
 		if (Session::has("bow.csrf")) {
 			if ($token === static::getCsrfToken()->token) {
 				$status = true;
@@ -238,34 +238,34 @@ class Security
 
 	/**
 	 * crypt
-	 * 
+	 *
 	 * @param string $data les données a encrypté
 	 * @return string
 	 */
 	public static function encrypt($data)
 	{
-        static::$key = AppConfiguration::takeInstance()->getAppkey();
+		static::$key = AppConfiguration::takeInstance()->getAppkey();
 		$iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
 		static::$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
 		$encrypted_data = mcrypt_encrypt(MCRYPT_BLOWFISH, static::$key, $data, MCRYPT_MODE_CBC, static::$iv);
 
-	 	return base64_encode($encrypted_data . static::$iv);
+		return base64_encode($encrypted_data . static::$iv);
 	}
 
 	/**
 	 * decrypt
-	 * 
+	 *
 	 * @param string $encrypted_data les données a décrypté
 	 *
 	 * @return string
 	 */
 	public static function decrypt($encrypted_data)
 	{
-        $iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
+		$iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
 		$encrypted_data = base64_decode($encrypted_data);
-        $start = strlen($encrypted_data) - $iv_size;
-        $iv = substr($encrypted_data, $start, $iv_size);
-        $encrypted_data = substr($encrypted_data, 0, $start);
+		$start = strlen($encrypted_data) - $iv_size;
+		$iv = substr($encrypted_data, $start, $iv_size);
+		$encrypted_data = substr($encrypted_data, 0, $start);
 		$decrypted_data = mcrypt_decrypt(MCRYPT_BLOWFISH, static::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
 
 		return static::sanitaze(trim($decrypted_data));

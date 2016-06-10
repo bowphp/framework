@@ -10,22 +10,22 @@ namespace Bow\Support;
  */
 class Collection
 {
-	/**
-	 * @var array
-	 */
-	private $storage = [];
+    /**
+     * @var array
+     */
+    private $storage = [];
 
     /**
      * Constructeur d'instance.
      *
      * @param array $arr
      */
-	public function __construct(array $arr = [])
-	{
+    public function __construct(array $arr = [])
+    {
         $this->storage = $arr;
-	}
+    }
 
-	/**
+    /**
      * has, vérifie l'existance une clé dans la colléction de session
      *
      * @param string $key La clé de l'élément récherché
@@ -63,7 +63,7 @@ class Collection
             }
         }
 
-    	return $isEmpty;
+        return $isEmpty;
     }
 
     /**
@@ -77,7 +77,7 @@ class Collection
     public function get($key, $default = null)
     {
 
-    	if ($this->has($key)) {
+        if ($this->has($key)) {
             return $this->storage[$key];
         } else {
             if ($default !== null) {
@@ -87,7 +87,7 @@ class Collection
             }
         }
 
-    	return null;
+        return null;
     }
 
     /**
@@ -146,7 +146,7 @@ class Collection
      *
      * @param string|int $key
      * @param $data
-     * 
+     *
      * @return Collection
      */
     public function add($key, $data = null)
@@ -155,7 +155,7 @@ class Collection
             $this->storage[$key] = $data;
         } else {
             $data = $key;
-            $this->storage[] = $data; 
+            $this->storage[] = $data;
         }
 
         return $this;
@@ -166,13 +166,13 @@ class Collection
      * delete, supprime une entrée dans la colléction
      *
      * @param string $key
-     * 
+     *
      * @return Collection
      */
     public function delete($key)
     {
-    	unset($this->storage[$key]);
-    
+        unset($this->storage[$key]);
+
         return $this;
     }
 
@@ -181,34 +181,34 @@ class Collection
      *
      * @param string $key
      * @param mixed $value
-     * 
+     *
      * @return mixed
      */
     public function set($key, $value)
     {
-    	if ($this->has($key)) {
+        if ($this->has($key)) {
             $old = $this->storage[$key];
-    		$this->storage[$key] = $value;
+            $this->storage[$key] = $value;
 
-    		return $old;
-    	}
-    	
-    	$this->storage[$key] = $value;
-    	
+            return $old;
+        }
+
+        $this->storage[$key] = $value;
+
         return null;
     }
 
     /**
      * each parcour l'ensemble des valeurs de la collection
-     * 
+     *
      * @param callable $cb
-     * 
+     *
      * @return Collection
      */
     public function each(Callable $cb)
     {
-    	foreach ($this->storage as $key => $value) {
-        	if (call_user_func_array($cb, [$value, $key])) {
+        foreach ($this->storage as $key => $value) {
+            if (call_user_func_array($cb, [$value, $key])) {
                 break;
             }
         }
@@ -247,7 +247,7 @@ class Collection
     {
         $data = $this->storage;
 
-    	foreach ($data as $key => $value) {
+        foreach ($data as $key => $value) {
             $data[$key] = call_user_func_array($cb, [$value, $key]);
         }
 
@@ -256,58 +256,58 @@ class Collection
 
     /**
      * filter
-     * 
+     *
      * @param callable $cb
-     * 
+     *
      * @return array
      */
     public function filter($cb)
     {
-    	$r = [];
+        $r = [];
 
-    	foreach ($this->storage as $key => $value) {
+        foreach ($this->storage as $key => $value) {
             if (call_user_func_array($cb, [$value, $key])) {
-            	$r[] = $this->storage[$key];
+                $r[] = $this->storage[$key];
             }
-    	}
+        }
 
-    	return new Collection($r);
+        return new Collection($r);
     }
 
     /**
      * Fill
-     * 
+     *
      * @param mixed $data
      * @param int $offset
-     * 
+     *
      * @return array
      */
     public function fill($data, $offset)
     {
-    	$old = $this->storage;
+        $old = $this->storage;
         $len = count($old);
 
-    	for($i = $len, $len += $offset; $i < $len; $i++) {
-        	$this->storage[$i] = $data;
+        for($i = $len, $len += $offset; $i < $len; $i++) {
+            $this->storage[$i] = $data;
         }
-    	
+
         return $old;
     }
 
     /**
      * reduce
-     * 
+     *
      * @param callable $cb
-     * 
+     *
      * @return self
      */
     public function reduce($cb)
     {
-    	$next = null;
+        $next = null;
 
-    	foreach ($this->storage as $key => $current) {
-    		$next = call_user_func_array($cb, [$next, $current, $key, $this->storage]);
-    	}
+        foreach ($this->storage as $key => $current) {
+            $next = call_user_func_array($cb, [$next, $current, $key, $this->storage]);
+        }
 
         return $this;
     }
@@ -323,9 +323,9 @@ class Collection
 
     /**
      * Sum
-     * 
+     *
      * @param callable $cb
-     * 
+     *
      * @return int
      */
     public function sum($cb = null)
@@ -342,7 +342,7 @@ class Collection
             call_user_func_array($cb, [$sum]);
         }
 
-    	return $sum;
+        return $sum;
     }
 
     /**
@@ -354,7 +354,7 @@ class Collection
      */
     public function max($cb = null)
     {
-    	return $this->side($cb, "max");
+        return $this->side($cb, "max");
     }
 
     /**
@@ -366,7 +366,7 @@ class Collection
      */
     public function min($cb = null)
     {
-    	return $this->side($cb, "min");
+        return $this->side($cb, "min");
     }
 
     /**
@@ -393,7 +393,7 @@ class Collection
             call_user_func_array($cb, [$r]);
         }
 
-    	return $r;
+        return $r;
     }
 
     /**
@@ -425,7 +425,7 @@ class Collection
     public function reverse($collectionify = false)
     {
         $r = [];
-        
+
         for($i = $this->length(); $i > 0; --$i) {
             $r[] = $this->storage[$i];
         }
@@ -446,7 +446,7 @@ class Collection
      *
      * @param string|integer $key
      * @param mixed $data
-     * @param boolean $overide 
+     * @param boolean $overide
      */
     public function update($key, $data, $overide = false)
     {
@@ -468,7 +468,7 @@ class Collection
 
     /**
      * yieldify, lance un générateur
-     * 
+     *
      * @return array
      */
     public function yieldify()
@@ -492,12 +492,12 @@ class Collection
 
     /**
      * length, longeur de la collection
-     * 
+     *
      * @return int
      */
     public function length()
     {
-       return count($this->storage);
+        return count($this->storage);
     }
 
     /**
