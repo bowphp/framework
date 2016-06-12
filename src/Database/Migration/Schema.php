@@ -3,7 +3,6 @@ namespace Bow\Database\Migration;
 
 use Bow\Support\Str;
 use Bow\Database\Database;
-use Bow\Database\Migration\AlterTable;
 
 class Schema
 {
@@ -11,11 +10,6 @@ class Schema
      * @var string
      */
     private static $table;
-
-    /**
-     * @var Blueprint
-     */
-    private static $blueprint;
 
     /**
      * @var array
@@ -27,13 +21,20 @@ class Schema
      */
     private $fill;
 
+    protected static $types = [
+        "i" => "number",
+        "s" => "string",
+        "d" => "date",
+        "t" => "timestamps"
+    ];
+
     /**
      * @param string $table
      * @return int
      */
     public static function drop($table)
     {
-        if (statement("drop table $table;")) {
+        if (Database::statement("drop table $table;")) {
             echo "\033[0;32m$table table droped.\033[00m\n";
         } else {
             echo "\033[0;31m$table table not exists.\033[00m\n";
@@ -51,19 +52,19 @@ class Schema
     {
         static::$table = $table;
 
-        $columnsMaker = new ColumnsMaker($table, $displaySql);
-        call_user_func_array($cb, [$columnsMaker]);
+        $fields = new Fields($table, $displaySql);
+        call_user_func_array($cb, [$fields]);
 
-        $sql = (new Blueprint($columnsMaker))->toCreateTableStatement();
+        $sql = (new StatementMaker($fields))->toCreateTableStatement();
 
         if ($sql == null) {
             die("\033[0;31mPlease check your 'up' method.\033[00m\n");
         }
 
-        self::$data = $columnsMaker->getBindData();
+        self::$data = $fields->getBindData();
 
 
-        if (statement($sql)) {
+        if (Database::statement($sql)) {
             echo "\033[0;32m$table table created.\033[00m\n";
         } else {
             echo "\033[0;31m$table table already exists.\033[00m\n";
@@ -140,64 +141,67 @@ class Schema
      * eg: name|s:59 => name string length 59
      * eg: name|s:100;age|i
      *
-     * @param string $marks
+     * @param string|array $marks
      * @return array
      */
     private static function parseMarks($marks)
     {
+        // collecteur de donnée
         $r = [];
-        $types = [
-            "i" => "number",
-            "s" => "string",
-            "d" => "date",
-            "t" => "timestamps"
-        ];
 
-        if (is_string($marks)) {
-            $parts = explode(";", $marks);
-            foreach($parts as $key => $values) {
-                $subPart = explode("|", $values);
-                $typeAndLength = explode(":", $subPart[1]);
-                $key = $subPart[0];
-                $type = $types[Str::lower($typeAndLength[0])];
-                $data = Filler::${$type};
+        // Liste des types
 
-                if (count($typeAndLength) == 2) {
-                    if ($type == "string") {
-                        $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
-                    } else if ($type == "integer") {
-                        $r[$key] = $typeAndLength[1];
+
+        switch(true) {
+            // Verification
+            case is_string($marks) === true:
+
+                $parts = explode(";", $marks);
+
+                foreach ($parts as $key => $values) {
+
+                    $subPart = explode("|", $values);
+                    $typeAndLength = explode(":", $subPart[1]);
+                    $key = $subPart[0];
+                    $type = static::$types[Str::lower($typeAndLength[0])];
+                    $data = Filler::${$type};
+
+                    if (count($typeAndLength) == 2) {
+                        if ($type == "string") {
+                            $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
+                        } else if ($type == "integer") {
+                            $r[$key] = $typeAndLength[1];
+                        } else {
+                            $r[$key] = $data;
+                        }
                     } else {
                         $r[$key] = $data;
                     }
-                } else {
-                    $r[$key] = $data;
+
                 }
-            }
+                break;
+            default:
+                foreach ($marks as $key => $values) {
 
-            return $r;
+                    $typeAndLength = explode(":", $values);
+                    $type = static::$types[Str::lower($typeAndLength[0])];
+                    $data = Filler::$type();
 
-        } else {
-
-            foreach($marsk as $key => $values) {
-                $typeAndLength = explode(":", $values);
-                $type = $types[Str::lower($typeAndLength[0])];
-                $data = Filler::$type();
-
-                if (count($typeAndLength) == 2) {
-                    if ($type == "string") {
-                        $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
-                    } else if ($type == "integer") {
-                        $r[$key] = $typeAndLength[1];
+                    if (count($typeAndLength) == 2) {
+                        if ($type == "string") {
+                            $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
+                        } else if ($type == "integer") {
+                            $r[$key] = $typeAndLength[1];
+                        } else {
+                            $r[$key] = $data;
+                        }
                     } else {
                         $r[$key] = $data;
                     }
-                } else {
-                    $r[$key] = $data;
-                }
-            }
 
-            return $r;
+                }
+                break;
         }
+        return $r;
     }
 }

@@ -34,11 +34,11 @@ class AlterTable
      */
     public function add(Callable $cb)
     {
-        $columns = new ColumnsMaker($this->tableName, $this->displaySql);
+        $columns = new Fields($this->tableName, $this->displaySql);
 
         $cb($columns);
 
-        $sql = (new Blueprint($columns))->toAlterTableStatement();
+        $sql = (new StatementMaker($columns))->toAlterTableStatement();
 
         if ($this->displaySql) {
             echo $sql . "\n";
@@ -82,6 +82,9 @@ class AlterTable
 
     }
 
+    /**
+     *
+     */
     public function modify()
     {
         // not implement
@@ -95,6 +98,10 @@ class AlterTable
      */
     public function change($oldTableName, $newTableName)
     {
-        Database::statement("RENAME $oldTableName TO $newTableName;");
+        if (Database::statement("RENAME $oldTableName TO $newTableName;")) {
+            echo "Tabe renamed.\n";
+        } else {
+            echo "\033[0;31m Cannot rename table.\033[00m\n";
+        }
     }
 }

@@ -5,7 +5,7 @@ use Bow\Support\Str;
 use Bow\Support\Collection;
 use Bow\Exception\ModelException;
 
-class ColumnsMaker
+class Fields
 {
     /**
      * fields list
@@ -34,13 +34,6 @@ class ColumnsMaker
      * @var bool
      */
     private $table = null;
-
-    /**
-     * Sql Statement
-     *
-     * @var string
-     */
-    private $sqlStement = null;
 
     /**
      * @var string
@@ -717,72 +710,6 @@ class ColumnsMaker
     }
 
     /**
-     * Ajout les indexes et la clé primaire.
-     *
-     * @param \StdClass $info
-     * @param string    $field
-     */
-    public function addIndexOrPrimaryKey($info, $field)
-    {
-        if ($info["primary"]) {
-            $this->sqlStement .= " PRIMARY KEY";
-            $info["primary"] = false;
-        } else {
-            if ($info["unique"]) {
-                $this->sqlStement .= " UNIQUE";
-                $info["unique"] = false;
-            } else {
-                if (isset($info["indexes"])) {
-                    $this->sqlStement .= ", INDEXE `" . $this->table . "_indexe_" . $field . "` (`" . $field . "`)";
-                    $info["indexes"] = false;
-                }
-            }
-        }
-    }
-
-    /**
-     * Ajout les types de donnée au champ définir
-     *
-     * @param \StdClass $info
-     * @param string $field
-     * @param string $type
-     */
-    public function addFieldType($info, $field, $type)
-    {
-        $null = $this->getNullType($info["null"]);
-        $type = strtoupper($type);
-
-        if (isset($info['size'])) {
-            $info['size'] = "(". $info['size'] .")";
-        } else {
-            $info['size'] = "";
-        }
-
-        $this->sqlStement .= "`$field` $type{$info['size']} $null";
-    }
-
-    /**
-     * getNullType retourne les valeurs "null" ou "not null"
-     *
-     * @param bool $null
-     * @return string
-     */
-    public function getNullType($null)
-    {
-        if ($this->sqlStement != null) {
-            $this->sqlStement .= ", ";
-        }
-
-        $nullType = "NOT NULL";
-
-        if ($null) {
-            $nullType = "NULL";
-        }
-
-        return $nullType;
-    }
-
-    /**
      * @return Collection
      */
     public function getDefineFields()
@@ -844,13 +771,5 @@ class ColumnsMaker
     public function getBindData()
     {
         return $this->dataBind;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->sqlStement;
     }
 }

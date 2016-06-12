@@ -3,19 +3,26 @@ namespace Bow\Database\Migration;
 
 use Bow\Support\Collection;
 
-class Blueprint
+class StatementMaker
 {
     /**
-     * @var ColumnsMaker
+     * La requète SQL
+     *
+     * @var string
+     */
+    private $sql;
+
+    /**
+     * @var Fields
      */
     private $columns;
 
     /**
      * Contructeur.
      *
-     * @param ColumnsMaker $columns
+     * @param Fields $columns
      */
-    public function __construct(ColumnsMaker $columns)
+    public function __construct(Fields $columns)
     {
         $this->columns = $columns;
     }
@@ -67,8 +74,10 @@ class Blueprint
      */
     private function makeSqlStatement()
     {
+        /**
+         * Les informations entrées par l'utilisateur.
+         */
         $fields = $this->columns->getDefineFields();
-        $statement = (string)$this->columns;
 
         $fields->each(function (Collection $value, $type) {
 
@@ -91,20 +100,20 @@ class Blueprint
                 case "blob" :
                 case "mediumblob" :
                 case "longblob" :
-                    $value->each(function ($info, $field) use ($type, &$statement) {
-                        $this->columns->addFieldType($info, $field, $type);
+                    $value->each(function ($info, $field) use ($type) {
+                        $this->addFieldType($info, $field, $type);
                         if (in_array($type, ["int", "longint", "bigint", "mediumint", "smallint", "tinyint"], true)) {
                             if ($this->columns->getAutoincrement() !== false) {
                                 if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
-                                    $statement .= " AUTO_INCREMENT";
+                                    $this->sql .= " AUTO_INCREMENT";
                                 }
                                 $this->columns->setAutoincrement(false);
                             }
                         }
                         if ($info["default"]) {
-                            $statement .= " DEFAULT " . $info["default"];
+                            $this->sql .= " DEFAULT " . $info["default"];
                         }
-                        $this->columns->addIndexOrPrimaryKey($info, $field);
+                        $this->addIndexOrPrimaryKey($info, $field);
                     });
                     break;
 
@@ -114,8 +123,8 @@ class Blueprint
                 case "time" :
                 case "year" :
                     $value->each(function ($info, $field) use ($type, &$statement) {
-                        $this->columns->addFieldType($info, $field, $type);
-                        $this->columns->addIndexOrPrimaryKey($info, $field);
+                        $this->addFieldType($info, $field, $type);
+                        $this->addIndexOrPrimaryKey($info, $field);
                     });
                     break;
                 case "enum" :
@@ -123,7 +132,7 @@ class Blueprint
                         foreach ($info["default"] as $key => $value) {
                             $info["default"][$key] = "'" . $value . "'";
                         }
-                        $null = $this->columns->getNullType($info["null"]);
+                        $null = $this->getNullType($info["null"]);
                         $enum = implode(", ", $info["default"]);
                         $statement .= ", `$field` ENUM($enum) $null";
                     });
@@ -132,6 +141,72 @@ class Blueprint
             }
         });
 
-        return $statement;
+        return $this->sql;
+    }
+
+    /**
+     * getNullType retourne les valeurs "null" ou "not null"
+     *
+     * @param bool $null
+     * @return string
+     */
+    private function getNullType($null)
+    {
+        if ($this->sql != null) {
+            $this->sql .= ", ";
+        }
+
+        $nullType = "NOT NULL";
+
+        if ($null) {
+            $nullType = "NULL";
+        }
+
+        return $nullType;
+    }
+
+    /**
+     * Ajout les types de donnée au champ définir
+     *
+     * @param \StdClass $info
+     * @param string $field
+     * @param string $type
+     */
+    private function addFieldType($info, $field, $type)
+    {
+        $null = $this->getNullType($info["null"]);
+        $type = strtoupper($type);
+
+        if (isset($info['size'])) {
+            $info['size'] = "(". $info['size'] .")";
+        } else {
+            $info['size'] = "";
+        }
+
+        $this->sql .= "`$field` $type{$info['size']} $null";
+    }
+
+    /**
+     * Ajout les indexes et la clé primaire.
+     *
+     * @param \StdClass $info
+     * @param string    $field
+     */
+    private function addIndexOrPrimaryKey($info, $field)
+    {
+        if ($info["primary"]) {
+            $this->sql .= " PRIMARY KEY";
+            $info["primary"] = false;
+        } else {
+            if ($info["unique"]) {
+                $this->sql .= " UNIQUE";
+                $info["unique"] = false;
+            } else {
+                if (isset($info["indexes"])) {
+                    $this->sql .= ", INDEXE `" . $this->columns->getTableName() . "_indexe_" . $field . "` (`" . $field . "`)";
+                    $info["indexes"] = false;
+                }
+            }
+        }
     }
 }
