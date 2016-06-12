@@ -6,7 +6,6 @@ use ErrorException;
 use Bow\Support\Str;
 use Bow\Support\Security;
 use Bow\Core\AppConfiguration;
-use Bow\Support\Session\Session;
 use Bow\Exception\ViewException;
 use Bow\Exception\ResponseException;
 
