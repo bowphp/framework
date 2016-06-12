@@ -3,12 +3,10 @@ namespace Bow\Database;
 
 use PDO;
 use StdClass;
-use PDOStatement;
 use PDOException;
 use ErrorException;
 use Bow\Support\Str;
 use Bow\Support\Util;
-use Bow\Support\Logger;
 use Bow\Support\Security;
 use InvalidArgumentException;
 use Bow\Exception\DatabaseException;

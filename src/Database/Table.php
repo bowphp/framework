@@ -5,7 +5,6 @@ use Bow\Support\Str;
 use Bow\Support\Security;
 use Bow\Support\Collection;
 use Bow\Exception\TableException;
-use Bow\Database\DatabaseErrorHandler;
 
 /**
  * Class Table
@@ -775,12 +774,19 @@ class Table extends DatabaseTools
     public function findAndDelete($cb = null)
     {
         $where = $this->where;
+        $whereData = $this->whereDataBind;
+
+        // Exection de la réquete de récupération
         $data = $this->get();
+
         $this->where = $where;
+        $this->whereDataBind = $whereData;
+
+        // Exection de la réquete de suppréssion
         $n = $this->delete();
 
         if (is_callable($cb)) {
-            call_user_func_array($cb, [$n, $data]);
+            return call_user_func_array($cb, [$n, $data]);
         }
 
         return (object) [
@@ -831,12 +837,14 @@ class Table extends DatabaseTools
         // Transfert du where pour un prochaine définition
         // Dans le but de ne pas doubler le where
         $where = $this->where;
+        $whereData = $this->whereDataBind;
 
         // Execution de GET, retourne un table comme nous avons pas definie de callback
         $data = $this->get();
 
         // On Effecture le transfert après éxécution du get
         $this->where = $where;
+        $this->whereDataBind = $whereData;
 
         // nombre d'élément affécter lors de l'insertion.
         $n = $this->update($arr);
@@ -888,8 +896,10 @@ class Table extends DatabaseTools
 
         $stmt = $this->connection->prepare($sql);
         static::bind($stmt, $this->whereDataBind);
+
         $this->whereDataBind = [];
         $stmt->execute();
+
         self::$errorInfo = $stmt->errorInfo();
         $r = $stmt->fetchColumn();
 
@@ -1094,11 +1104,13 @@ class Table extends DatabaseTools
     private function insertOne(array $value)
     {
         $sql = "insert into `" . $this->tableName . "` set ";
-        $values = Security::sanitaze($value, true);
+
         $sql .= parent::rangeField(parent::add2points(array_keys($value)));
         $stmt = $this->connection->prepare($sql);
-        $this->bind($stmt, $values);
+
+        $this->bind($stmt, $value);
         $stmt->execute();
+
         self::$errorInfo = $stmt->errorInfo();
         return (int) $stmt->rowCount();
     }
@@ -1107,7 +1119,7 @@ class Table extends DatabaseTools
      * Action insertAndGetLastId lance les actions insert et lastInsertId
      *
      * @param array $values
-     * @param bool $withInfo
+     * @param bool $withInfo Si a true cette fonction retourn un object ["info" => DatabaseErrorHandler, "id" => int]
      *
      * @return int|DatabaseErrorHandler
      */
@@ -1117,7 +1129,7 @@ class Table extends DatabaseTools
         $n = $this->connection->lastInsertId();
 
         if ($withInfo) {
-            $n = (object) ["info" => $r, "lastId" => $n];
+            $n = (object) ["info" => $r, "id" => $n];
         }
 
         return $n;
@@ -1154,8 +1166,14 @@ class Table extends DatabaseTools
     public function last()
     {
         $where = $this->where;
+        $whereData = $this->whereDataBind;
+
+        // On compte le tout.
         $c = $this->count();
+
         $this->where = $where;
+        $this->whereDataBind = $whereData;
+
         return $this->jump($c - 1)->take(1)->get();
     }
 
@@ -1225,8 +1243,8 @@ class Table extends DatabaseTools
         $data = [
             "next" => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
             "previous" => ($current - 1) <= 0 ? 1 : ($current - 1),
-            "data" => $data,
             "current" => $current,
+            "data" => $data,
             "info" => $this->getResponseOfQuery(count($data))
         ];
 
