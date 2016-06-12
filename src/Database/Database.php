@@ -72,6 +72,8 @@ class Database extends DatabaseTools
     }
 
     /**
+     * Retourne l'instance de Database
+     *
      * @return Database
      */
     public static function takeInstance()
@@ -276,16 +278,18 @@ class Database extends DatabaseTools
         if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)?\s(values\s?\(.+\),?)+|\s?set\s(.+)+);?$/i", $sqlstatement)) {
 
             $r = 0;
-            $is_2_m_array = true;
 
             if (isset($bind[0])) {
+
                 if (is_array($bind[0])) {
                     foreach ($bind as $key => $value) {
                         $r += static::executePrepareQuery($sqlstatement, $value);
                     }
-                } else {
-                    $r = static::executePrepareQuery($sqlstatement, $bind);
+
+                    return $r;
                 }
+
+                $r = static::executePrepareQuery($sqlstatement, $bind);
             }
 
             return $r;

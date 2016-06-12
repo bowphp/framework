@@ -22,19 +22,21 @@ class Schema
     private $fill;
 
     protected static $types = [
-        "i" => "number",
-        "s" => "string",
-        "d" => "date",
-        "t" => "timestamps"
+        "integer" => "number",
+        "string" => "string",
+        "date" => "date",
+        "time" => "timestamps"
     ];
 
     /**
+     * Supprimer une table.
+     *
      * @param string $table
      * @return int
      */
     public static function drop($table)
     {
-        if (Database::statement("drop table $table;")) {
+        if (Database::statement("DROP TABLE $table;")) {
             echo "\033[0;32m$table table droped.\033[00m\n";
         } else {
             echo "\033[0;31m$table table not exists.\033[00m\n";
@@ -42,7 +44,7 @@ class Schema
     }
 
     /**
-     * fonction de creation d'une nouvelle table dans la base de donnée.
+     * Fonction de creation d'une nouvelle table dans la base de donnée.
      *
      * @param string $table
      * @param callable $cb
@@ -72,19 +74,19 @@ class Schema
     }
 
     /**
+     * Manipule les informations de la table.
+     *
      * @param string $table
      * @param bool $displaySql
      * @param Callable $cb
      */
     public static function table($table, Callable $cb, $displaySql = false)
     {
-        $alter = new AlterTable($table, $displaySql);
-        $cb($alter);
+        call_user_func_array($cb, [new AlterTable($table, $displaySql)]);
     }
 
     /**
      * fillTable, remplir un table pour permet le developpement.
-     *
      *
      * @param string|array $table [optional]
      * @param array $marks
@@ -149,9 +151,6 @@ class Schema
         // collecteur de donnée
         $r = [];
 
-        // Liste des types
-
-
         switch(true) {
             // Verification
             case is_string($marks) === true:
@@ -167,6 +166,7 @@ class Schema
                     $data = Filler::${$type};
 
                     if (count($typeAndLength) == 2) {
+
                         if ($type == "string") {
                             $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
                         } else if ($type == "integer") {
@@ -174,10 +174,11 @@ class Schema
                         } else {
                             $r[$key] = $data;
                         }
-                    } else {
-                        $r[$key] = $data;
+
+                        continue;
                     }
 
+                    $r[$key] = $data;
                 }
                 break;
             default:
@@ -188,6 +189,7 @@ class Schema
                     $data = Filler::$type();
 
                     if (count($typeAndLength) == 2) {
+
                         if ($type == "string") {
                             $r[$key] = Str::slice($data, 0, $typeAndLength[1]);
                         } else if ($type == "integer") {
@@ -195,13 +197,15 @@ class Schema
                         } else {
                             $r[$key] = $data;
                         }
-                    } else {
-                        $r[$key] = $data;
+
+                        continue;
                     }
 
+                    $r[$key] = $data;
                 }
                 break;
         }
+
         return $r;
     }
 }

@@ -54,6 +54,7 @@ abstract class DatabaseTools
                     $value = (double) $value;
                 }
             }
+
             /**
              * Exécution de bindValue
              */

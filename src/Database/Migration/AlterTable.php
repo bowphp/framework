@@ -83,23 +83,14 @@ class AlterTable
     }
 
     /**
-     *
-     */
-    public function modify()
-    {
-        // not implement
-    }
-
-    /**
      * Change le nom d'un table.
      *
-     * @param string $oldTableName Le nom de l'ancienne table
      * @param string $newTableName Le nom de la nouveau table
      */
-    public function change($oldTableName, $newTableName)
+    public function change($newTableName)
     {
-        if (Database::statement("RENAME $oldTableName TO $newTableName;")) {
-            echo "Tabe renamed.\n";
+        if (Database::statement("RENAME TABLE " . $this->tableName . " TO " . $newTableName)) {
+            echo "\033[0;32mTabe renamed.\033[00m\n";
         } else {
             echo "\033[0;31m Cannot rename table.\033[00m\n";
         }
