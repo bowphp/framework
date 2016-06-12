@@ -17,13 +17,11 @@ class Mail
      */
     private static $instance;
 
-    private function __construct()
-    {
-    }
-
-    private function __clone()
-    {
-    }
+    /**
+     * Maxi singleton
+     */
+    private function __construct() {}
+    private function __clone() {}
 
     /**
      * Configure la classe Mail
@@ -32,7 +30,7 @@ class Mail
      * @throws MailException
      * @return SimpleMail|Smtp
      */
-    public static function confirgure(\StdClass $config)
+    public static function configure(\StdClass $config)
     {
         if (!in_array($config->driver, ["smtp", "mail"])) {
             throw new MailException("Le type n'est pas réconnu.", E_USER_ERROR);
