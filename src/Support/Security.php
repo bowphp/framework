@@ -71,7 +71,7 @@ class Security
 		// récupération de la fonction à la lance.		
 		$method = $secure === true ? "secureData" : "sanitazeData";
 		// strict integer regex 
-		$rNum = "/^\d+$/";
+		$rNum = "/^\d(\.\d+)?+$/";
 
 		if (is_string($data)) {
 			if (preg_match($rNum, $data)) {

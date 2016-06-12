@@ -158,6 +158,8 @@ class Session implements CollectionAccessStatic
         if (static::has($key)) {
             $old = $_SESSION[$key];
             $_SESSION[$key] = $value;
+        } else {
+            $_SESSION[$key] = $value;
         }
 
         return $old;
@@ -173,12 +175,17 @@ class Session implements CollectionAccessStatic
 	 *
      * @return mixed
      */
-    public static function flash($key, $message)
+    public static function flash($key, $message = null)
     {
         if (!static::has("bow.flash")) {
             $_SESSION["bow.flash"] = [];
         }
-        $_SESSION["bow.flash"][$key] = $message;
+
+        if ($message !== null) {
+            $_SESSION["bow.flash"][$key] = $message;
+        }
+
+        return static::get($key);
     }
 
     /**

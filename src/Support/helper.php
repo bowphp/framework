@@ -31,20 +31,24 @@ if (!function_exists("configuration")) {
      *
      * @return AppConfiguration
      */
-    function configuration() {
+    function app_config() {
         $app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
         return AppConfiguration::configure(require $app_dir . "/config/bootstrap.php");
     }
 }
 
 // Configuration de la Request et de la Response
-Response::configure(configuration());
+Response::configure(app_config());
 
 // Configuration de la base de donnée
-Database::configure(configuration()->getDatabaseConfiguration());
+Database::configure(app_config()->getDatabaseConfiguration());
 
 // Configuration de la resource de l'application.
-Storage::configure(configuration()->getResourceConfiguration());
+Storage::configure(app_config()->getResourceConfiguration());
+
+// Configuration de Mail.
+
+\Bow\Mail\Mail::configure(app_config()->getMailConfiguration());
 
 
 if (!function_exists("response")) {
@@ -118,7 +122,8 @@ if (!function_exists("view")) {
             $code = $data;
             $data = [];
         }
-        return response()->view($template, $data, $code);
+
+        response()->view($template, $data, $code);
     }
 }
 
@@ -774,7 +779,7 @@ if (!function_exists("event")) {
             throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
         }
 
-        call_user_func_array([Event::class, "on"], [$event_name, $fn, configuration()->getNamespace()]);
+        call_user_func_array([Event::class, "on"], [$event_name, $fn, app_config()->getNamespace()]);
     }
 }
 
@@ -805,7 +810,7 @@ if (!function_exists("flash")) {
      *                        spécifié la fonction rétourne le message du flash concerné
      *                        par la clé
      *
-     * @return \Bow\Support\Flash
+     * @return mixed
      */
     function flash($key, $message = null) {
         return Session::flash($key, $message);
@@ -821,7 +826,7 @@ if (!function_exists("middleware")) {
      * @return mixed
      */
     function middleware($name) {
-        util()->launchCallback($name, request(), configuration()->getNamespace());
+        util()->launchCallback($name, request(), app_config()->getNamespace());
     }
 }
 
@@ -844,7 +849,7 @@ if (!function_exists("bow_mail")) {
      * @throws \Bow\Exception\MailException
      */
     function bow_mail($type = null) {
-        $config = configuration()->getMailConfiguration();
+        $config = app_config()->getMailConfiguration();
 
         if ($type !== null) {
             if (!in_array($type, ["mail", "smtp"])) {
@@ -852,7 +857,7 @@ if (!function_exists("bow_mail")) {
             }
         }
 
-        return Bow\Mail\Mail::confirgure($config);
+        return Bow\Mail\Mail::configure($config);
     }
 }
 
@@ -937,7 +942,7 @@ if (!function_exists("public_path")) {
      * @return string
      */
     function public_path() {
-        return configuration()->getPublicPath();
+        return app_config()->getPublicPath();
     }
 }
 
@@ -959,7 +964,7 @@ if (!function_exists("route")) {
      * @return string
      */
     function route($name, array $data = []) {
-        $routes = configuration()->getApplicationRoutes();
+        $routes = app_config()->getApplicationRoutes();
 
         if (!isset($routes[$name])) {
             throw new \InvalidArgumentException("$name n'est pas un nom définie.", E_USER_ERROR);
