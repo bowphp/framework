@@ -14,6 +14,22 @@ class Form
     private static $form = "";
 
     /**
+     * Les informations prédéfinis.
+     *
+     * @var array
+     */
+    private static $with = [];
+
+    /**
+     * @param $key
+     * @return string
+     */
+    private static function getAssociateValue($key)
+    {
+        return isset(static::$with[$key]) ? static::$with[$key] : '';
+    }
+
+    /**
      * Ajout le tag <input type="text">
      *
      * @param string $name
@@ -24,6 +40,7 @@ class Form
      */
     public static function text($name, $value = "", $placeholder = null)
     {
+        $value = static::getAssociateValue($name);
         self::$form .= "<input type=\"text\" value=\"{$value}\" name=\"{$name}\" ".(is_string($placeholder) ? 'placeholder="' . $placeholder . '"' : '')."/>";
     }
 
@@ -38,6 +55,7 @@ class Form
      */
     public static function password($name, $value = "", $placeholder = null)
     {
+        $value = static::getAssociateValue($name);
         self::$form .= "<input type=\"password\" name=\"{$name}\" value=\"{$value}\" ".(is_string($placeholder) ? 'placeholder="' . $placeholder . '"' : '')."/>";
     }
 
@@ -53,6 +71,7 @@ class Form
      */
     public static function hidden($name, $value = "", $placeholder = null)
     {
+        $value = static::getAssociateValue($name);
         self::$form .= "<input type=\"hidden\" value=\"{$value}\" name=\"{$name}\" ".(is_string($placeholder) ? 'placeholder="' . $placeholder . '"' : '')."/>";
     }
 
@@ -90,7 +109,8 @@ class Form
      */
     public static function textarea($name, $text = "")
     {
-        self::$form .= "<textarea name=\"{$name}\">{$text}</textarea>";
+        $text = static::getAssociateValue($name);
+        self::$form .= "<textarea name=\"{$name}\">" . $text . "</textarea>";
     }
 
     /**
@@ -104,6 +124,7 @@ class Form
      */
     public static function checkbox($name, $checked = false,  $value = "")
     {
+        $value = static::getAssociateValue($name);
         self::$form .= "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" ". ($checked == true ? 'cheched' : '')."/>";
     }
 
@@ -118,6 +139,7 @@ class Form
      */
     public static function radio($name, $checked = false, $value = "")
     {
+        $value = static::getAssociateValue($name);
         self::$form .= "<input type=\"radio\" name=\"{$name}\" value=\"{$value}\" " . ($checked == true ? 'cheched' : '')."/>";
     }
 
@@ -133,8 +155,14 @@ class Form
     public static function select($name, array $options = [], $selected = null)
     {
         self::$form .= "<select name=\"$name\">";
+        $oldValue = static::getAssociateValue($name);
 
         foreach($options as $key => $value) {
+
+            if ($oldValue !== "") {
+                $key = $oldValue;
+            }
+
             self::$form .= "<option value=\"{$key}\" " . ($selected == $key ? "selected" : "") . ">" . $value . "</option>";
         }
 
@@ -179,14 +207,14 @@ class Form
     /**
      * Ajout le tag <label></label>
      *
-     * @param string $name
+     * @param string $title
      * @param string|null $for=null
      *
      * @return void
      */
-    public static function label($name, $for = null)
+    public static function label($title, $for = null)
     {
-        self::$form .= "<label ". ($for !== null ? "for={$for}": "") .">" . $name . "</label>";
+        self::$form .= "<label ". ($for !== null ? "for={$for}": "") .">" . $title . "</label>";
     }
 
     /**
@@ -197,10 +225,21 @@ class Form
      * @param string $id
      * @param bool|false $enctype
      *
+     * @return string
+     */
+    public static function compile($method, $action, $enctype = false, $id = "form")
+    {
+        return "<form id=\"$id\" method=\"{$method}\" action=\"{$action}\" ".($enctype === true ? 'enctype="multipart/form-data"': "").">". self::$form . "</form>";
+    }
+
+    /**
+     * Associé un model
+     *
+     * @param array $data
      * @return void
      */
-    public static function done($method, $action, $enctype = false, $id = "form")
+    public static function with($data)
     {
-        echo "<form id=\"$id\" method=\"{$method}\" action=\"{$action}\" ".($enctype === true ? 'enctype="multipart/form-data"': "").">". self::$form . "</form>";
+        static::$with = $data;
     }
 }

@@ -15,6 +15,8 @@ class DateAccess
     private $date;
 
     /**
+     * Constructeur d'instance.
+     *
      * @param null|int|string $time
      */
     public function __construct($time = null)
@@ -29,6 +31,8 @@ class DateAccess
     }
 
     /**
+     * Retourne l'année eg 16
+     *
      * @return bool|string
      */
     public function getYear()
@@ -37,6 +41,8 @@ class DateAccess
     }
 
     /**
+     * Retourne l'année total eg 2016
+     *
      * @return bool|string
      */
     public function getFullYear()
@@ -45,6 +51,8 @@ class DateAccess
     }
 
     /**
+     * Retourne le jour
+     *
      * @return bool|string
      */
     public function getDay()
@@ -53,6 +61,8 @@ class DateAccess
     }
 
     /**
+     * Retourne la date du jour
+     *
      * @return bool|string
      */
     public function getDate()
@@ -61,6 +71,8 @@ class DateAccess
     }
 
     /**
+     * Retourne les heures
+     *
      * @return bool|string
      */
     public function getHours()
@@ -69,6 +81,8 @@ class DateAccess
     }
 
     /**
+     * Retourne les seconds
+     *
      * @return bool|string
      */
     public function getSecondes()
@@ -76,12 +90,19 @@ class DateAccess
         return date("s", $this->date);
     }
 
+    /**
+     * Retourne les minutes
+     *
+     * @return bool|string
+     */
     public function getMinutes()
     {
         return date("i", $this->date);
     }
 
     /**
+     * Retourne le mois
+     *
      * @return bool|string
      */
     public function getMonth()
@@ -98,6 +119,8 @@ class DateAccess
     }
 
     /**
+     * La date en format ISO
+     *
      * @return bool|string
      */
     public function toISODate()
@@ -106,6 +129,8 @@ class DateAccess
     }
 
     /**
+     * La date en format UTC
+     *
      * @return bool|string
      */
     public function toUTCDate()
@@ -114,6 +139,8 @@ class DateAccess
     }
 
     /**
+     * La date en format ATOM
+     *
      * @return bool|string
      */
     public function toATOMDate()
@@ -122,10 +149,22 @@ class DateAccess
     }
 
     /**
+     * Retourne la version timestamp
+     *
      * @return bool|string
      */
     public function toTime()
     {
         return date("N", $this->date);
+    }
+
+    /**
+     * Vérifie si la date est dans le future
+     *
+     * @return bool
+     */
+    public function isFuture()
+    {
+        return time() < $this->date;
     }
 }

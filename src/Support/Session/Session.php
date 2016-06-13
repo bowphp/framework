@@ -199,7 +199,8 @@ class Session implements CollectionAccessStatic
     }
 
     /**
-     * reFlash
+     * Vide le système de flash.
+     *
      * @param string $key
      */
     private static function reFlash($key)

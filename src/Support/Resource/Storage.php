@@ -6,7 +6,7 @@ use InvalidArgumentException;
 use Bow\Exception\ResourceException;
 
 /**
- * Class Resource
+ * Class Storage
  *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
@@ -25,49 +25,42 @@ class Storage
 
 	/**
 	 * Variable de configuration
-	 * 
+	 *
 	 * @var array
 	 */
 	private static $config = [];
 
 	/**
-	 * Répertoire de stockage
-	 * 
-	 * @var null
-	 */
-	private static $storageDir = null;
-
-	/**
 	 * Répertoire par defaut de upload
-	 * 
+	 *
 	 * @var string
 	 */
 	private static $uploadDir = "public";
 
 	/**
 	 * Taille par defaut d'un fichier
-	 * 
+	 *
 	 * @var int
 	 */
 	private static $fileSize = 20000000;
 
 	/**
 	 * Nom d'un fichier
-	 * 
+	 *
 	 * @var null
 	 */
 	private static $uploadFileName = null;
 
 	/**
 	 * Liste des extensions par defaut
-	 * 
+	 *
 	 * @var array
-	 */ 
+	 */
 	private static $fileExtension = ["png", "jpg"];
 
-    /**
+	/**
 	 * Modifier le nom par defaut du file uploader.
-	 * 
+	 *
 	 * @param string $filename
 	 * @return static
 	 */
@@ -78,7 +71,7 @@ class Storage
 
 	/**
 	 * Modifie la liste des extensions valides
-	 * 
+	 *
 	 * @param mixed $extension
 	 */
 	public static function setUploadFileExtension($extension)
@@ -92,7 +85,7 @@ class Storage
 
 	/**
 	 * setUploadedDir, fonction permettant de rédéfinir le répertoir d'upload
-	 * 
+	 *
 	 * @param string:path, le chemin du dossier de l'upload
 	 * @throws InvalidArgumentException
 	 */
@@ -107,7 +100,7 @@ class Storage
 
 	/**
 	 * Modifie la taille prédéfinie de l'image à uploader.
-	 * 
+	 *
 	 * @param integer $size
 	 * @throws InvalidArgumentException
 	 */
@@ -125,235 +118,185 @@ class Storage
 	 *
 	 * @param array $file information sur le fichier, $_FILES
 	 * @param callable|null $cb
-	 * @param string $hash=null
 	 * @return mixed
 	 */
-	public static function store($file, $cb = null, $hash = null)
+	public static function store($file, $cb = null)
 	{
 		if (!is_object($file) && !is_array($file)) {
 			Util::launchCallBack($cb, [new InvalidArgumentException("Parametre invalide <pre>" . var_export($file, true) ."</pre>. Elle doit etre un tableau ou un object StdClass")]);
 		}
-		
+
 		if (empty($file)) {
 			Util::launchCallBack($cb, [new InvalidArgumentException("Le fichier a uploader n'existe pas")]);
 		}
-		
+
 		$file = (object) $file;
 
 		// Si le fichier est bien dans le répertoire tmp de PHP
 		if (is_uploaded_file($file->tmp_name)) {
-			
-			$dirPart = explode("/", static::$uploadDir);
-			$end = array_pop($dirPart);
-			
-			if ($end == "") {
-				static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart);
-			} else {
-				static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart) .DIRECTORY_SEPARATOR. $end;
-			}
+			return static::ERROR_UPLOAD_ERROR;
+		}
 
-			if (!is_dir(static::$uploadDir)) {
-				@mkdir(static::$uploadDir, 0766);
-			}
+		$dirPart = explode("/", static::$uploadDir);
+		$end = array_pop($dirPart);
 
-			// Si le fichier est bien uploader, avec aucune error
-			if ($file->error !== 0) {
-				if ($file->size <= static::$fileSize) {
-					$pathInfo = (object) pathinfo($file->name);
-					if (in_array($pathInfo->extension, static::$fileExtension)) {
-						if ($hash !== null) {
-							if (static::$uploadFileName !== null) {
-								$filename = hash($hash, static::$uploadFileName);
-							} else {
-								$filename = hash($hash, uniqid(rand(null, true)));
-							}
-						} else {
-							if (static::$uploadFileName !== null) {
-								$filename = static::$uploadFileName;
-							} else {
-								$filename = $pathInfo->filename;
-							}
-						}
-
-						$filename .= "." . $pathInfo->extension;
-						// Déplacement du fichier tmp vers le dossier d'upload
-						move_uploaded_file($file->tmp_name, static::$uploadDir . "/" . $filename);
-						
-						// Status, fichier uploadé
-						$status = static::SUCCESS;
-					} else {
-						// status, extension du fichier
-						$status = static::ERROR_EXTENSION_INVALIDE;
-					}
-				} else {
-					// status, la taille est invalide
-					$status = static::ERROR_SIZE_INVALIDE;
-				}
-
-			} else {
-				// status, fichier erroné.
-				$status = static::ERROR_UPLOAD_ERROR;
-			}
-
+		if ($end == "") {
+			static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart);
 		} else {
-			// status, fichier non uploadé
+			static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart) .DIRECTORY_SEPARATOR. $end;
+		}
+
+		if (!is_dir(static::$uploadDir)) {
+			@mkdir(static::$uploadDir, 0766);
+		}
+
+		// Si le fichier est bien uploader, avec aucune error
+		if ($file->error !== 0) {
 			$status = static::ERROR_UPLOAD_ERROR;
+			goto exists;
 		}
 
-		if ($cb !== null) {
-			call_user_func_array($cb, [(object) $status, isset($filename) ? $filename : null]);
+		if ($file->size <= static::$fileSize) {
+			$status = static::ERROR_SIZE_INVALIDE;
+			goto exists;
+		}
+
+		$pathInfo = (object) pathinfo($file->name);
+
+		if (in_array($pathInfo->extension, static::$fileExtension)) {
+			$status = static::ERROR_EXTENSION_INVALIDE;
+			goto exists;
+		}
+
+		if (static::$uploadFileName !== null) {
+			$filename = static::$uploadFileName;
 		} else {
-			return (object) $status;
+			$filename = $pathInfo->filename;
 		}
 
-		return null;
+		$filename .= "." . $pathInfo->extension;
+
+		// Déplacement du fichier tmp vers le dossier d'upload
+		static::move($file->tmp_name, static::$uploadDir . "/" . $filename);
+
+		// Status, fichier uploadé
+		$status = static::SUCCESS;
+
+		exists:
+			if (is_callable($cb)) {
+				call_user_func_array($cb, [$status, $filename]);
+			}
+
+		return $status;
 	}
 
 	/**
-	 * Ecrire dans le fichier spécifier
-	 * 
-	 * @param string $resource
-	 * @param string $content
-     * @throws ResourceException
-	 * @return boolean
-	 */
-    private static function write($resource, $content)
-    {
-		$status = null;
-
-    	if (is_resource($resource)) {
-	        $status = fwrite($resource, $content);
-    	} else {
-            throw new ResourceException("Impossible d'écrire dans le fichier.", E_ERROR);
-    	}
-
-		static::closeFile($resource);
-
-        return $status;
-    }
-
-	/**
 	 * Ecrire à la suite d'un fichier spécifier
-	 * 
+	 *
 	 * @param string $file nom du fichier
 	 * @param string $content content a ajouter
 	 */
-    public static function append($file, $content)
-    {
-        static::write(static::open($file, "a"), $content);
-    }
+	public static function append($file, $content)
+	{
+		file_put_contents($file, $content, FILE_APPEND);
+	}
 
 	/**
 	 * Ecrire au début d'un fichier spécifier
-	 * 
+	 *
 	 * @param string $file
 	 * @param string $content
 	 */
-    public static function prepend($file, $content)
-    {
-        $tmp_content = file_get_contents($file);
-        
-        static::put($file, $content);
-        static::append($file, $tmp_content);
-    }
+	public static function prepend($file, $content)
+	{
+		$tmp_content = file_get_contents($file);
+
+		static::put($file, $content);
+		static::append($file, $tmp_content);
+	}
 
 	/**
+	 * Put
+	 *
 	 * @param $file
 	 * @param $content
 	 * @throws ResourceException
 	 */
-    public static function put($file, $content)
-    {
-        static::write(static::open($file, "w+"), $content);
-    }
+	public static function put($file, $content)
+	{
+		file_put_contents($file, $content);
+	}
 
 	/**
 	 * Supprimer un fichier
-	 * 
+	 *
 	 * @param string $file
 	 * @return boolean
 	 */
-    public static function delete($file)
-    {
-        return @unlink($file);
-    }
+	public static function delete($file)
+	{
+		return @unlink($file);
+	}
 
 	/**
 	 * Alias sur readInDir
-	 * 
+	 *
 	 * @param string $filename
 	 * @return array
 	 */
-    public static function files($filename)
-    {
-        return static::readIndir($filename, "file");
-    }
+	public static function files($filename)
+	{
+		$directoryContents = glob($filename."/*");
+
+		return array_filter($directoryContents, function($file)
+		{
+			return filetype($file) == "file";
+		});
+	}
 
 	/**
-	 * Alias sur readInDir
-	 * 
+	 * Lire le contenu du dossier
+	 *
 	 * @param string $dirname
 	 * @return array
 	 */
-    public static function directories($dirname)
-    {
-        return static::readIndir($dirname, "dir");
-    }
+	public static function directories($dirname)
+	{
+		$directoryContents = glob($dirname."/*");
+
+		return array_filter($directoryContents, function($file)
+		{
+			return filetype($file) == "dir";
+		});
+	}
 
 	/**
 	 * Crée un répertoire
-	 * 
+	 *
 	 * @param string $files
-     * @param int $mode
+	 * @param int $mode
 	 * @param bool $recursive
 	 * @return boolean
 	 */
-    public static function mkdir($files, $mode = 0777, $recursive = false)
-    {
-        if (is_bool($mode)) {
-            $recursive = $mode;
-        }
+	public static function makeDirectory($files, $mode = 0777, $recursive = false)
+	{
+		if (is_bool($mode)) {
+			$recursive = $mode;
+			$mode = 0777;
+		}
 
-        if ($recursive === true) {
-            $status = @mkdir($files, 0777, true);
-        } else {
-            $status = @mkdir($files, 0777);
-        }
+		if ($recursive === true) {
+			$status = @mkdir($files, $mode, true);
+		} else {
+			$status = @mkdir($files, $mode);
+		}
 
 		return $status;
-    }
+	}
 
 	/**
-	 * Supprime un répertoire.
-	 * 
-	 * @param string $directory
-	 * @param bool $recursive
-	 * @return boolean
-	 */
-    public static function rmdir($directory, $recursive = false)
-    {
-		if ($recursive === true) {
-            if (!is_dir($directory)) {
-
-                $dirParts = explode(Util::sep(), $directory);
-                $dir = end($dirParts);
-                array_pop($dirParts);
-                @rmdir($dir);
-
-                if (count($dirParts)) {
-                    return true;
-                }
-
-                static::rmdir(implode(Util::sep(), $dirParts));
-            }
-        } else {
-            return @rmdir(realpath($directory));
-        }
-
-		return false;
-    }
-
-	/**
+	 * Récuper le contenu du fichier
+	 *
 	 * @param $filename
 	 * @return null|string
 	 */
@@ -367,91 +310,98 @@ class Storage
 	}
 
 	/**
+	 * Copie le contenu d'un fichier source vers un fichier cible.
+	 *
 	 * @param $targerFile
 	 * @param $sourceFile
-	 * @param bool|false $overrider
 	 */
-	public static function copy($targerFile, $sourceFile, $overrider = false)
+	public static function copy($targerFile, $sourceFile)
 	{
+		if (!static::exists($targerFile)) {
+			throw new \RuntimeException("$targerFile n'exist pas.", E_ERROR);
+		}
 
+		if (!static::exists($sourceFile)) {
+			static::makeDirectory(dirname($sourceFile), true);
+		}
+
+		file_put_contents($sourceFile, static::get($targerFile));
 	}
 
 	/**
+	 * Rénomme ou déplace un fichier source vers un fichier cible.
+	 *
+	 * @param $targerFile
+	 * @param $sourceFile
+	 */
+	public static function move($targerFile, $sourceFile)
+	{
+		static::copy($targerFile, $sourceFile);
+		static::delete($targerFile);
+	}
+
+	/**
+	 * Vérifie l'existance d'un fichier
+	 *
 	 * @param $filename
+	 * @return bool
 	 */
 	public static function exists($filename)
 	{
+		if (is_dir($filename)) {
+			$tmp = getcwd();
+			$r = chdir($filename);
+			chdir($tmp);
 
+			return $r;
+		}
+
+		return file_exists($filename);
 	}
 
 	/**
-	 * @return static
+	 * L'extension du fichier
+	 *
+	 * @param $filename
+	 * @return string
+	 */
+	public static function extension($filename)
+	{
+		if (static::exists($filename)) {
+			return pathinfo($filename, PATHINFO_EXTENSION);
+		}
+
+		return null;
+	}
+
+	/**
+	 * isFile aliase sur is_file.
+	 *
+	 * @param $filename
+	 * @return bool
+	 */
+	public static function isFile($filename)
+	{
+		return is_file($filename);
+	}
+
+	/**
+	 * Lance la connection au ftp.
+	 *
+	 * @return Ftp\FTP
 	 */
 	public static function ftp()
 	{
 		return Ftp\FTP::configure();
 	}
 
+	/**
+	 * @return Ftp\FTP
+	 */
 	public static function disk()
 	{
 		return new Ftp\FTP();
 	}
-
-	/**
-	 * Ouvrie un fichier
-	 * 
-	 * @param string $file
-	 * @param string $mod
-	 * @return resource
-	 */
-    private static function open($file, $mod)
-	{
-        $rFile = fopen($file, $mod);
-        return $rFile;
-    }
-
-	/**
-	 * Ferme un resource fichier
-	 * 
-	 * @param resource $rFile
-	 */
-    private static function closeFile($rFile)
-    {
-        if (is_resource($rFile) && get_resource_type($rFile) === "file") {
-            fclose($rFile);
-        }
-    }
-
-	/**
-	 * Lire dans le répertoire spécifier
-	 * 
-	 * @param string $dirname
-	 * @param string $type
-	 * 
-	 * @return array
-	 */
-    private static function readIndir($dirname, $type = "file")
-    {
-        $files = [];
-        $method = "is_file";
-        $dir = opendir($dirname);
-        
-        if ($type == "dir") {
-            $method = "is_dir";
-        }
-        
-        while($file = readdir($dir)) {
-            if ($method($file)) {
-                if (!in_array($file, [".", ".."])) {
-                    array_push($files, realpath($file));
-                }
-            }
-        }
-
-        closedir($dir);
-
-        return $files;
-    }
 
 	/**
 	 * Lance la configuration

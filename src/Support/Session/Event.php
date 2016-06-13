@@ -49,6 +49,13 @@ class Event
         }
     }
 
+    /**
+     * Ajout un nouvelle evenement
+     *
+     * @param string          $eventName
+     * @param Callable|string $bindFunction
+     * @param string          $eventType
+     */
     private static function addEvent($eventName, $bindFunction, $eventType)
     {
         $ref = & static::${$eventType};

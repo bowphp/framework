@@ -1,6 +1,8 @@
 <?php
 namespace Bow\Support\Session;
 
+use Bow\Support\Security;
+
 /**
  * Class Cookie
  *
@@ -123,21 +125,5 @@ class Cookie
         }
 
         return $old;
-    }
-
-    /**
-     * Fonction de destruction de l'object
-     */
-    public function __destruct()
-    {
-        Session::add("bow.cookie.secure", static::$isDecrypt);
-    }
-
-    /**
-     * Fonction qu
-     */
-    public function __wakeup()
-    {
-        static::$isDecrypt = Session::get("bow.cookie.secure");
     }
 }
