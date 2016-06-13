@@ -69,9 +69,9 @@ class Security
 	public static function sanitaze($data, $secure = false)
 	{
 		// récupération de la fonction à la lance.		
-		$method = $secure === true ? "secureData" : "sanitazeData";
+		$method = $secure === true ? 'secureData' : 'sanitazeData';
 		// strict integer regex 
-		$rNum = "/^\d(\.\d+)?+$/";
+		$rNum = '/^\d(\.\d+)?+$/';
 
 		if (is_string($data)) {
 			if (preg_match($rNum, $data)) {
@@ -143,17 +143,17 @@ class Security
 	 */
 	public static function createCsrfToken($time = null)
 	{
-		if (!Session::has("bow.csrf")) {
+		if (!Session::has('bow.csrf')) {
 			if (is_int($time)) {
 				static::$tokenCsrfExpirateTime = $time;
 			}
 
 			$token = static::generateCsrfToken();
 
-			Session::add("bow.csrf", (object) [
-				"token" => $token,
-				"expirate" => time() + static::$tokenCsrfExpirateTime,
-				"field" => '<input type="hidden" name="_token" value="' . $token .'"/>'
+			Session::add('bow.csrf', (object) [
+				'token' => $token,
+				'expirate' => time() + static::$tokenCsrfExpirateTime,
+				'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
 			]);
 
 			return true;
@@ -169,7 +169,7 @@ class Security
 	 */
 	public static function generateCsrfToken()
 	{
-		return md5(base64_encode(openssl_random_pseudo_bytes(23)) . date("Y-m-d H:i:s") . uniqid(rand(), true));
+		return md5(base64_encode(openssl_random_pseudo_bytes(23)) . date('Y-m-d H:i:s') . uniqid(rand(), true));
 	}
 
 	/**
@@ -179,7 +179,7 @@ class Security
 	 */
 	public static function getCsrfToken()
 	{
-		return Session::get("bow.csrf");
+		return Session::get('bow.csrf');
 	}
 
 	/**
@@ -191,7 +191,7 @@ class Security
 	 */
 	public static function tokenCsrfTimeIsExpirate($time = null)
 	{
-		if (Session::has("bow.csrf")) {
+		if (Session::has('bow.csrf')) {
 			if ($time === null) {
 				$time = time();
 			}
@@ -216,7 +216,7 @@ class Security
 	{
 		$status = false;
 
-		if (Session::has("bow.csrf")) {
+		if (Session::has('bow.csrf')) {
 			if ($token === static::getCsrfToken()->token) {
 				$status = true;
 				if ($strict) {
@@ -233,7 +233,7 @@ class Security
 	 */
 	public static function clearCsrfToken()
 	{
-		Session::remove("bow.csrf");
+		Session::remove('bow.csrf');
 	}
 
 	/**

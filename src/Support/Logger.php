@@ -231,8 +231,8 @@ class Logger extends AbstractLogger
     {
         // information sur le contexte de l'erreur
         $context = [
-            "file"     => $file,
-            "line"     => $line,
+            "file"   => $file,
+            "line"   => $line,
             "trace"  => $trace
         ];
 

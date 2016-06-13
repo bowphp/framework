@@ -18,7 +18,7 @@ class Str
     public static function upper($str)
     {
         if (is_string($str)) {
-            $str = mb_strtoupper($str, "UTF-8");
+            $str = mb_strtoupper($str, 'UTF-8');
         }
 
         return $str;
@@ -33,7 +33,7 @@ class Str
     public static function lower($str)
     {
         if (is_string($str)) {
-            $str = mb_strtolower($str, "UTF-8");
+            $str = mb_strtolower($str, 'UTF-8');
         }
 
         return $str;
@@ -49,7 +49,7 @@ class Str
      */
     public static function slice($str, $start, $end = null)
     {
-        $sliceStr = "";
+        $sliceStr = '';
 
         if (is_string($str)) {
             if ($end === null) {
@@ -57,7 +57,7 @@ class Str
             }
 
             if ($start < $end) {
-                $sliceStr = mb_substr($str, $start, $end, "UTF-8");
+                $sliceStr = mb_substr($str, $start, $end, 'UTF-8');
             }
         }
 
@@ -86,7 +86,7 @@ class Str
      */
     public static function pos($search, $str)
     {
-        return mb_strpos($search, $str, null, "UTF-8");
+        return mb_strpos($search, $str, null, 'UTF-8');
     }
 
     /**
@@ -143,7 +143,7 @@ class Str
      */
     public static function len($str)
     {
-        return mb_strlen($str, "UTF-8");
+        return mb_strlen($str, 'UTF-8');
     }
 
     /**
@@ -154,7 +154,7 @@ class Str
      *
      * @return array
      */
-    public static function wordify($str, $sep = " ")
+    public static function wordify($str, $sep = ' ')
     {
         return static::split($sep, $str, static::count($sep, $str));
     }
@@ -186,14 +186,14 @@ class Str
 
     /**
      * slugify créateur de slug en utilisant un chaine simple.
-     * eg: "je suis un chaine de caractere" => "je-suis-un-chaine-de-caractere"
+     * eg: 'je suis un chaine de caractere' => 'je-suis-un-chaine-de-caractere'
      * @param string $str
      *
      * @return string
      */
     public static function slugify($str)
     {
-        return preg_replace("/[^a-z0-9]/", "-", strtolower(trim(strip_tags($str))));
+        return preg_replace('/[^a-z0-9]/', '-', strtolower(trim(strip_tags($str))));
     }
 
     /**
@@ -205,7 +205,7 @@ class Str
      */
     public static function unSlugify($str)
     {
-        return preg_replace("/[^a-z0-9]/", " ", strtolower(trim(strip_tags($str))));
+        return preg_replace('/[^a-z0-9]/', ' ', strtolower(trim(strip_tags($str))));
     }
 
     /**
@@ -222,10 +222,10 @@ class Str
     public static function isMail($email)
     {
         if (!is_string($email)) {
-            throw new \ErrorException("accept string " . gettype($email) . " given");
+            throw new \ErrorException('accept string ' . gettype($email) . ' given');
         }
 
-        return preg_match("/^[a-zA-Z0-9-_.]+@[a-z0-9-_.]{2,}\.[a-z]{2,6}$/", $email);
+        return preg_match('/^[a-zA-Z0-9-_.]+@[a-z0-9-_.]{2,}\.[a-z]{2,6}$/', $email);
     }
 
     /**
@@ -243,10 +243,10 @@ class Str
     public static function isDomain($domain)
     {
         if (!is_string($domain)) {
-            throw new \ErrorException("Accept string " . gettype($domain) . " given");
+            throw new \ErrorException('Accept string ' . gettype($domain) . ' given');
         }
 
-        return preg_match("/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/", $domain);
+        return preg_match('/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/', $domain);
     }
 
     /**
@@ -261,10 +261,10 @@ class Str
     public static function isAlphaNum($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException("Accept string " . gettype($str) . " given");
+            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match("/^[a-zA-Z0-9]+$/", $str);
+        return preg_match('/^[a-zA-Z0-9]+$/', $str);
     }
 
     /**
@@ -279,10 +279,10 @@ class Str
     public static function isNumeric($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException("Accept string " . gettype($str) . " given");
+            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match("/^[0-9]+(\.[0-9]+)?$/", $str);
+        return preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
     }
 
     /**
@@ -297,10 +297,10 @@ class Str
     public static function isAlpha($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException("Accept string " . gettype($str) . " given");
+            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match("/^[a-zA-Z]+$/", $str);
+        return preg_match('/^[a-zA-Z]+$/', $str);
     }
 
     /**
@@ -315,10 +315,10 @@ class Str
     public static function isSlug($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException("Accept string " . gettype($str) . " given");
+            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match("/^[a-z0-9-]+[a-z0-9]+$/", $str);
+        return preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
     }
 
     /**
@@ -344,11 +344,11 @@ class Str
      */
     public static function getWords($words, $len)
     {
-        $wordParts = explode(" ", $words);
-        $sentence = "";
+        $wordParts = explode(' ', $words);
+        $sentence = '';
 
         for($i = 0; $i < $len; $i++) {
-            $sentence .= " " . $wordParts[$i];
+            $sentence .= ' ' . $wordParts[$i];
         }
 
         return trim($sentence);
