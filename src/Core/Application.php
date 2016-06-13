@@ -336,13 +336,13 @@ class Application
 	 */
 	private function routeLoader($method, $path, $name, Callable $cb = null)
 	{
-		if (is_callable($name)) {
+		if (!is_callable($cb) || !is_string($cb)) {
 			$cb = $name;
 			$name = null;
 		}
 
 		if (is_string($name)) {
-			if (!preg_match("/^[a-z]+(\.|@)[a-z]+$/i", $name)) {
+			if (!preg_match('/^[a-z]+(\.|@)[a-z]+$/i', $name)) {
 				$this->addRoute($path, $name);
 			} else {
 				$cb = $name;
