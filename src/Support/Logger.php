@@ -221,6 +221,8 @@ class Logger extends AbstractLogger
     }
 
     /**
+     * Ajout une exception personnalisé
+     *
      * @param int $errno Le numéro d'erreur PHP
      * @param string $errstr Le message d'erreur.
      * @param string $file Le fichier dans lequel il y a eu l'erreur
