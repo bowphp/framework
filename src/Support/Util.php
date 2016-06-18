@@ -408,7 +408,6 @@ class Util
 
 		foreach (func_get_args() as $key => $value) {
 			ob_start();
-			$len = "";
 			// if (is_array($value) || is_object($value)) {
 			// 	$len = ':len=' . count($value);
 			// } else if (is_string($value)) {

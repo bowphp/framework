@@ -569,12 +569,14 @@ class Collection
     }
 
     /**
+     * Parcour recursive d'un tableau ou objet
+     *
      * @param array $data
      * @param callable $cb
      */
     private function recursive(array $data, Callable $cb) {
         foreach($data as $key => $value) {
-            if (is_array($value)) {
+            if (is_array($value) || is_object($data)) {
                 $this->recursive($data, $cb);
             } else {
                 $cb($value, $key);

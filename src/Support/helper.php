@@ -8,6 +8,7 @@
 |
 */
 
+use Bow\Mail\Mail;
 use Bow\Http\Request;
 use Bow\Support\Util;
 use Bow\Http\Response;
@@ -28,27 +29,71 @@ define("DELETE", Database::DELETE);
 if (!function_exists("configuration")) {
     /**
      * Application configuration
-     *
+     * @param string|array $param
      * @return AppConfiguration
      */
-    function app_config() {
+    function config($param = null) {
         $app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
-        return AppConfiguration::configure(require $app_dir . "/config/bootstrap.php");
+        $config = AppConfiguration::configure(require $app_dir . "/config/bootstrap.php");
+
+        if ($param === null) {
+            return $config;
+        }
+
+        if (!in_array($param, ["name", "engine", "root", "public", "view path", "logger", "local", "config", null])) {
+            throw new InvalidArgumentException("Paramètre invalide.", E_USER_ERROR);
+        }
+
+
+        switch(true) {
+            case $param === "public":
+                return $config->getPublicPath();
+                break;
+            case $param === "engine":
+                return $config->getEngine();
+                break;
+            case $param === "root":
+                return $config->getApproot();
+                break;
+            case $param === "name":
+                return $config->getAppname();
+                break;
+            case $param === "route":
+                return $config->getApplicationRoutes();
+                break;
+            case $param === "view path":
+                return $config->getViewpath();
+                break;
+            case $param === "logger":
+                return $config->getLoggerMode();
+                break;
+            case $param === "config":
+                return $config;
+                break;
+            case $param === "mail":
+                return $config->getMailConfiguration();
+                break;
+            case $param === "db":
+                return $config->getDatabaseConfiguration();
+                break;
+        }
+
+        return $config;
     }
 }
 
 // Configuration de la Request et de la Response
-Response::configure(app_config());
+Response::configure(config());
 
 // Configuration de la base de donnée
-Database::configure(app_config()->getDatabaseConfiguration());
+Database::configure(config()->getDatabaseConfiguration());
 
 // Configuration de la resource de l'application.
-Storage::configure(app_config()->getResourceConfiguration());
+Storage::configure(config()->getResourceConfiguration());
 
 // Configuration de Mail.
 
-\Bow\Mail\Mail::configure(app_config()->getMailConfiguration());
+Mail::configure(config()->getMailConfiguration());
 
 
 if (!function_exists("response")) {
@@ -779,7 +824,7 @@ if (!function_exists("event")) {
             throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
         }
 
-        call_user_func_array([Event::class, "on"], [$event_name, $fn, app_config()->getNamespace()]);
+        call_user_func_array([Event::class, "on"], [$event_name, $fn, config()->getNamespace()]);
     }
 }
 
@@ -826,7 +871,7 @@ if (!function_exists("middleware")) {
      * @return mixed
      */
     function middleware($name) {
-        util()->launchCallback($name, request(), app_config()->getNamespace());
+        util()->launchCallback($name, request(), config()->getNamespace());
     }
 }
 
@@ -843,21 +888,22 @@ if (!function_exists("util")) {
 
 if (!function_exists("bow_mail")) {
     /**
-     * @param string|null $type
+     * Alias sur SimpleMail et Smtp
+     *
+     * @param null|string $type Le type de mail.
      *
      * @return \Bow\Mail\SimpleMail|\Bow\Mail\Smtp
      * @throws \Bow\Exception\MailException
      */
     function bow_mail($type = null) {
-        $config = app_config()->getMailConfiguration();
 
-        if ($type !== null) {
-            if (!in_array($type, ["mail", "smtp"])) {
-                $config->driver = $type;
-            }
+        $config = config()->getMailConfiguration();
+
+        if (in_array($type, ["mail", "smtp"])) {
+            $config->driver = $type;
         }
 
-        return Bow\Mail\Mail::configure($config);
+        return Mail::configure($config);
     }
 }
 
@@ -900,6 +946,8 @@ if (!function_exists("session")) {
         if ($key !== null && $message !== null) {
             return Session::add($key, $message);
         }
+
+        return;
     }
 }
 
@@ -942,7 +990,7 @@ if (!function_exists("public_path")) {
      * @return string
      */
     function public_path() {
-        return app_config()->getPublicPath();
+        return config()->getPublicPath();
     }
 }
 
@@ -964,7 +1012,7 @@ if (!function_exists("route")) {
      * @return string
      */
     function route($name, array $data = []) {
-        $routes = app_config()->getApplicationRoutes();
+        $routes = config()->getApplicationRoutes();
 
         if (!isset($routes[$name])) {
             throw new \InvalidArgumentException("$name n'est pas un nom définie.", E_USER_ERROR);
