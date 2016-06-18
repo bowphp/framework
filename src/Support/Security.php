@@ -116,7 +116,7 @@ class Security
 	 */
 	public static function sanitazeData($data)
 	{
-		return stripslashes(trim($data));
+		return stripslashes(stripslashes(trim($data)));
 	}
 
 	/**
