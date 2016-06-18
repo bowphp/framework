@@ -231,7 +231,6 @@ class Table extends DatabaseTools
      */
     public function whereNotNull($column, $boolean = "and")
     {
-
         if (is_null($this->where)) {
             $this->where = "$column is not null";
         } else {
