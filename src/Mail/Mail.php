@@ -26,11 +26,11 @@ class Mail
     /**
      * Configure la classe Mail
      *
-     * @param \StdClass $config La configuration
+     * @param \stdClass $config La configuration
      * @throws MailException
      * @return SimpleMail|Smtp
      */
-    public static function configure(\StdClass $config)
+    public static function configure(\stdClass $config)
     {
         if (!in_array($config->driver, ["smtp", "mail"])) {
             throw new MailException("Le type n'est pas réconnu.", E_USER_ERROR);
