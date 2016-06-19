@@ -339,11 +339,14 @@ class Response
 			$tpl->addFunction(new \Twig_SimpleFunction("_secure", function($data) {
 				return Security::sanitaze($data, true);
 			}));
-			$tpl->addFunction(new \Twig_SimpleFunction("_sanitaze", [Security::class, "sanitaze"]));
+			$tpl->addFunction(new \Twig_SimpleFunction("_sanitaze", function($data) {
+				return Security::sanitaze($data);
+			}));
 			$tpl->addFunction(new \Twig_SimpleFunction("_slugify", [Str::class, "slugify"]));
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new \Mustache_Engine([
-				'cache' => $this->config->getCachepath()
+				'cache' => $this->config->getCachepath(),
+				'loader' => new \Mustache_Loader_FilesystemLoader($this->config->getViewpath())
 			]);
 		} else {
 			$tpl = new Jade([
