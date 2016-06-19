@@ -367,7 +367,7 @@ class Response
 	 */
 	public function send($data, $stop = false)
 	{
-		if (is_array($data) || ($data instanceof \StdClass)) {
+		if (is_array($data) || ($data instanceof \stdClass)) {
 			$data = json_encode($data);
 		}
 
@@ -378,6 +378,11 @@ class Response
 		}
 	}
 
+	/**
+	 * @param $allow
+	 * @param $excepted
+	 * @return $this
+	 */
 	private function accessControll($allow, $excepted)
 	{
 		if ($excepted === null) {
@@ -390,6 +395,8 @@ class Response
 	}
 
 	/**
+	 * Active Access-control-Allow-Origin
+	 *
 	 * @param array $excepted [optional]
 	 * @return Response
 	 * @throws ResponseException
@@ -404,6 +411,8 @@ class Response
 	}
 
 	/**
+	 * Active Access-control-Allow-Methods
+	 *
 	 * @param array $excepted [optional] $excepted
 	 * @return Response
 	 * @throws ResponseException
@@ -418,6 +427,8 @@ class Response
 	}
 
 	/**
+	 * Active Access-control-Allow-Headers
+	 *
 	 * @param array $excepted [optional] $excepted
 	 * @return Response
 	 * @throws ResponseException
@@ -432,6 +443,8 @@ class Response
 	}
 
 	/**
+	 * Active Access-control-Allow-Credentials
+	 *
 	 * @return Response
 	 */
 	public function accessControlAllowCredentials()
@@ -440,6 +453,8 @@ class Response
 	}
 
 	/**
+	 * Active Access-control-Max-Age
+	 *
 	 * @param string $excepted [optional] $excepted
 	 * @return Response
 	 * @throws ResponseException
@@ -454,6 +469,8 @@ class Response
 	}
 
 	/**
+	 * Active Access-control-Expose-Headers
+	 *
 	 * @param array $excepted [optional] $excepted
 	 * @return Response
 	 * @throws ResponseException
