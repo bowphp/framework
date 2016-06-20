@@ -470,6 +470,17 @@ if (!function_exists("csrf_token")) {
     }
 }
 
+if (!function_exists("csrf_field")) {
+    /**
+     * csrf_field, fonction permetant de récupérer un input généré
+     *
+     * @return string
+     */
+    function csrf_field() {
+        return create_csrf()->field;
+    }
+}
+
 if (!function_exists("generate_token_csrf")) {
     /**
      * csrf, fonction permetant de générer un token
