@@ -35,6 +35,7 @@ class Session implements CollectionAccessStatic
     private static function filter()
     {
         $arr = [];
+        static::start();
 
         foreach($_SESSION as $key => $value) {
             if (!in_array($key, ["bow.flash", "bow.event", "bow.csrf", "bow.cookie.secure"])) {
@@ -55,6 +56,7 @@ class Session implements CollectionAccessStatic
 	 */
 	public static function has($key, $strict = false)
 	{
+        static::start();
         $isset = isset($_SESSION[$key]);
 
         if ($strict) {
@@ -130,6 +132,11 @@ class Session implements CollectionAccessStatic
 		}
 	}
 
+    public static function all()
+    {
+        return static::filter();
+    }
+
 	/**
      * remove, supprime une entrée dans la colléction
 	 *
@@ -154,6 +161,7 @@ class Session implements CollectionAccessStatic
 	public static function set($key, $value)
 	{
         $old = null;
+        static::start();
 
         if (static::has($key)) {
             $old = $_SESSION[$key];
@@ -177,6 +185,7 @@ class Session implements CollectionAccessStatic
      */
     public static function flash($key, $message = null)
     {
+        static::start();
         if (!static::has("bow.flash")) {
             $_SESSION["bow.flash"] = [];
         }
@@ -205,6 +214,7 @@ class Session implements CollectionAccessStatic
      */
     private static function reFlash($key)
     {
+        static::start();
         unset($_SESSION["bow.flash"][$key]);
     }
 
