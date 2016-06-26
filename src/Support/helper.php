@@ -422,14 +422,14 @@ if (!function_exists("query")) {
     }
 }
 
-if (!function_exists("input")) {
+if (!function_exists("all_input")) {
     /**
      * input, fonction de type collection
      * manipule la variable global $_GET, $_POST, $_FILES
      *
      * @return RequestData
      */
-    function input() {
+    function all_input() {
         return request()->allInput();
     }
 }
