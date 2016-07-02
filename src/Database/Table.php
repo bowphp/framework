@@ -123,7 +123,7 @@ class Table extends DatabaseTools
     {
 
         if (is_array($column)) {
-            $column = implode(", ", $column);
+            $this->select = implode(", ", $column);
             return $this;
         }
 
@@ -154,6 +154,12 @@ class Table extends DatabaseTools
         if (!static::isComporaisonOperator($comp)) {
             $value = $comp;
             $comp = "=";
+        }
+
+        // Ajout de matcher sur id.
+        if ($comp == "=" && $value === null) {
+            $value = $column;
+            $column = "id";
         }
 
         if ($value === null) {
@@ -661,7 +667,7 @@ class Table extends DatabaseTools
      *
      * @param callable $cb
      *
-     * @return mixed
+     * @return array Si le mode de séléction unitaire n'est pas active
      */
     public function get($cb = null)
     {
@@ -763,6 +769,25 @@ class Table extends DatabaseTools
     }
 
     /**
+     * find
+     *
+     * @param null $id
+     * @return array
+     * @throws TableException
+     */
+    public function find($id = null)
+    {
+        $method = "get";
+
+        if ($id !== null) {
+            $this->where("id", $id);
+            $method = "getOne";
+        }
+
+        return $this->$method();
+    }
+
+    /**
      * Récuper des informations sur la table ensuite les supprimes dans celle-ci
      *
      * @param Callable $cb La fonction de rappel qui si definir vous offre en parametre
@@ -797,12 +822,16 @@ class Table extends DatabaseTools
     /**
      * Lance une execption en case de donnée non trouvé
      *
+     * @param int|string $id
      * @return array
      *
      * @throws TableException
      */
-    public function findOrFail()
+    public function findOrFail($id = null)
     {
+        if ($id !== null) {
+            $this->where("id", $id);
+        }
         $data = $this->get();
 
         if (count($data) == 0) {
@@ -815,14 +844,15 @@ class Table extends DatabaseTools
     /**
      * Lance une execption en case de donnée non trouvé
      *
+     * @param int|string $id
      * @return \stdClass
      *
      * @throws TableException
      */
-    public function findOneOrFail()
+    public function findOneOrFail($id = null)
     {
         static::$getOne = true;
-        return $this->findOrFail();
+        return $this->findOrFail($id);
     }
 
     /**

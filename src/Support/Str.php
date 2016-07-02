@@ -40,6 +40,24 @@ class Str
     }
 
     /**
+     * camel
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function camel($str)
+    {
+        $parts = static::split('/_|-|\s+/', $str);
+
+        $camel = "";
+        foreach($parts as $value) {
+            $camel .= ucfirst($value);
+        }
+
+        return $camel;
+    }
+
+    /**
      * slice
      *
      * @param string $str

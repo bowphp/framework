@@ -751,12 +751,11 @@ if (!function_exists("collect")) {
     /**
      * retourne une instance de collection
      *
+     * @param array $data [optional]
      * @return \Bow\Support\Collection
      */
-    function collect() {
+    function collect(array $data = []) {
         $col = new Collection();
-        $data = func_get_args();
-
         foreach($data as $key => $param) {
             $col->add($key, $param);
         }

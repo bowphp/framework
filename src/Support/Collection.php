@@ -606,4 +606,25 @@ class Collection
     {
         $this->add($name, $value);
     }
+
+    /**
+     * __isset
+     *
+     * @param $name
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return $this->has($name);
+    }
+
+    /**
+     * __unset
+     *
+     * @param $name
+     */
+    public function __unset($name)
+    {
+        $this->delete($name);
+    }
 }

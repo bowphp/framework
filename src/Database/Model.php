@@ -30,7 +30,6 @@ abstract class Model
     public static function __callStatic($method, $args)
     {
         $scope = "scope" . ucfirst($method);
-        $table = static::$table;
         $table = Database::table(Str::lower(static::$table));
 
         if (method_exists($ins = new static, $scope)) {
@@ -40,11 +39,44 @@ abstract class Model
 
             return call_user_func_array([$ins, $scope], $args);
         } else {
+
             if (method_exists($table, $method)) {
-                return call_user_func_array([$table, $method], $args);
+
+                $instance = call_user_func_array([$table, $method], $args);
+
+                if (in_array($method, static::avalableMethod())) {
+
+                    if (!is_array($instance)) {
+                        $instance = [$instance];
+                    }
+
+                    $custumFieldsLists = ["create_at", "update_at", "expires_at", "login_at", "sign_at"];
+
+                    if (method_exists(static::class, "customDate")) {
+                        $custumFieldsLists = array_merge($custumFieldsLists, static::customDate());
+                    }
+
+                    foreach($instance as $value) {
+                        foreach($value as $key => $content) {
+                            if (in_array($key, $custumFieldsLists)) {
+                                $value->$key = new \Carbon\Carbon($content);
+                            }
+                        }
+                    }
+                }
+
+                return $instance;
             }
         }
 
         throw new ModelException("methode $method n'est définie.", E_ERROR);
+    }
+
+    /**
+     * @return array
+     */
+    private static function avalableMethod()
+    {
+        return ["get", "getOne", "find"];
     }
 }

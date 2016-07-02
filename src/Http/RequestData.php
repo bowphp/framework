@@ -107,24 +107,27 @@ class RequestData implements CollectionAccess
 	 * @param mixed $default =false
 	 * @return mixed
 	 */
-	public function get($key = null, $default = null)
+	public function get($key, $default = null)
 	{
-		if (!is_null($key)) {
-			return $this->has($key) ? $this->data[$key] : $default;
-		}
-
-		return $this->data;
+		return $this->has($key) ? $this->data[$key] : $default;
 	}
 
 	/**
 	 * get, permet de récupérer une valeur ou la colléction de valeur.
 	 *
+	 * @param array|string|int $expects
 	 * @return mixed
 	 */
-	public function getWithOut()
+	public function getWithOut($expects)
 	{
 		$data = [];
-		$keyWasDefine = func_get_args();
+
+		if (!is_array($expects)) {
+			$keyWasDefine = $expects;
+		} else {
+			$keyWasDefine = func_get_args();
+		}
+
 		foreach ($this->data as $key => $value) {
 			if (!in_array($key, $keyWasDefine)) {
 				$data[$key] = $value;
@@ -249,6 +252,14 @@ class RequestData implements CollectionAccess
 	public function toArray()
 	{
 		return $this->data;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function toObject()
+	{
+		return (object) $this->data;
 	}
 
 	/**

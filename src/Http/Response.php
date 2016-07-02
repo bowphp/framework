@@ -142,30 +142,28 @@ class Response
 	public function redirect($path)
 	{
 		if (is_string($path)) {
-			$url = $path;
-		} else {
-			$url = $path["url"];
+			$path = ["url" => $path];
+		}
 
-			if (isset($path["?"])) {
-				$url .= "?";
-				$i = 0;
-				foreach($path["?"] as $key => $value) {
-					if ($i > 0) {
-						$url .= "&";
-					}
-					$url .= $key . "=" . $value;
-					$i++;
+		$url = $path["url"];
+
+		if (isset($path["?"])) {
+			$url .= "?";
+			$i = 0;
+			foreach($path["?"] as $key => $value) {
+				if ($i > 0) {
+					$url .= "&";
 				}
-			}
-
-			if (isset($path["#"])) {
-				$url .= "#" . $path["#"];
+				$url .= $key . "=" . $value;
+				$i++;
 			}
 		}
 
-		header("Location: " . $url, true, 301);
-		echo '<a href="' . $url . '" >' . self::$header[301] . '</a>';
+		if (isset($path["#"])) {
+			$url .= "#" . $path["#"];
+		}
 
+		header("Location: " . $url);
 		die();
 	}
 

@@ -27,8 +27,8 @@ interface CollectionAccess
     /**
      * get, permet de récupérer une valeur ou la colléction de valeur.
      *
-     * @param string $key=null
-     * @param mixed $default=false
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
     public function get($key, $default);
@@ -66,5 +66,11 @@ interface CollectionAccess
      * @return array
      */
     public function toArray();
+
+    /**
+     * retourne tout les entrées de la colléction sous forme d'object
+     * @return array
+     */
+    public function toObject();
 
 }
