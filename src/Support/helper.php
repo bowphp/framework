@@ -551,6 +551,21 @@ if (!function_exists("json")) {
     }
 }
 
+if (!function_exists("download")) {
+    /**
+     * download, permet de lancer le téléchargement d'un fichier.
+     *
+     * @param string $file
+     * @param null|string $name
+     * @param array $headers
+     * @param string $disposition
+     * @return mixed
+     */
+    function download($file, $name, $headers, $disposition) {
+        return query_response("download", $file, $name, $headers, $disposition);
+    }
+}
+
 if (!function_exists("set_response_code")) {
     /**
      * statuscode, permet de changer le code de la reponse du server
@@ -956,8 +971,6 @@ if (!function_exists("session")) {
         if ($key !== null && $message !== null) {
             return Session::add($key, $message);
         }
-
-        return;
     }
 }
 

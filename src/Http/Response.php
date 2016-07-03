@@ -116,10 +116,9 @@ class Response
 	 * @param string $value La nouvelle valeur a assigne à l'entête
 	 * @return self
 	 */
-	public function set($key, $value)
+	public function addHeader($key, $value)
 	{
 		header("$key: $value");
-
 		return $this;
 	}
 
@@ -178,6 +177,34 @@ class Response
 	}
 
 	/**
+	 * Télécharger le fichier donnée en argument
+	 *
+	 * @param string $file
+	 * @param null $name
+	 * @param array $headers
+	 * @param string $disposition
+	 */
+	public function download($file, $name = null, array $headers = array(), $disposition = 'attachment')
+	{
+		$type = mime_content_type($file);
+
+		if ($name == null) {
+			$name = basename($file);
+		}
+
+		$this->addHeader("Content-Disposition", "$disposition; filename=$name");
+		$this->addHeader("Content-Type", "$type");
+		$this->addHeader("Content-Length", filesize($file));
+		$this->addHeader("Content-Encoding", "base64");
+
+		foreach($headers as $key => $value) {
+			$this->addHeader($key, $value);
+		}
+
+		readfile($file);
+	}
+
+	/**
 	 * Modifie les entétes http
 	 *
 	 * @param int  $code 	 Le code de la réponse HTTP
@@ -211,7 +238,7 @@ class Response
 			$code = 200;
 		}
 
-		$this->set("Content-Type", "application/json; charset=UTF-8");
+		$this->addHeader("Content-Type", "application/json; charset=UTF-8");
 		$this->code($code);
 		$this->send(json_encode($data), $end);
 	}
@@ -381,13 +408,13 @@ class Response
 	 * @param $excepted
 	 * @return $this
 	 */
-	private function accessControll($allow, $excepted)
+	private function accessControl($allow, $excepted)
 	{
 		if ($excepted === null) {
 			$excepted = "*";
 		}
 
-		$this->set($allow, $excepted);
+		$this->addHeader($allow, $excepted);
 
 		return $this;
 	}
@@ -405,7 +432,7 @@ class Response
 			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControll("Access-Controll-Allow-Origin", $excepted);
+		return $this->accessControl("Access-Controll-Allow-Origin", $excepted);
 	}
 
 	/**
@@ -421,7 +448,7 @@ class Response
 			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControll("Access-Controll-Allow-Methods", implode(", ", $excepted));
+		return $this->accessControl("Access-Controll-Allow-Methods", implode(", ", $excepted));
 	}
 
 	/**
@@ -437,7 +464,7 @@ class Response
 			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControll("Access-Controll-Allow-Headers", implode(", ", $excepted));
+		return $this->accessControl("Access-Controll-Allow-Headers", implode(", ", $excepted));
 	}
 
 	/**
@@ -447,7 +474,7 @@ class Response
 	 */
 	public function accessControlAllowCredentials()
 	{
-		return $this->accessControll("Access-Control-Allow-Credentials", "true");
+		return $this->accessControl("Access-Control-Allow-Credentials", "true");
 	}
 
 	/**
@@ -463,7 +490,7 @@ class Response
 			throw new ResponseException("La paramtere doit être un entier: " . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControll("Access-Control-Max-Age", $excepted);
+		return $this->accessControl("Access-Control-Max-Age", $excepted);
 	}
 
 	/**
@@ -479,6 +506,6 @@ class Response
 			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControll("Access-Control-Expose-Headers", implode(", ", $excepted));
+		return $this->accessControl("Access-Control-Expose-Headers", implode(", ", $excepted));
 	}
 }
