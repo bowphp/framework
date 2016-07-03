@@ -1050,3 +1050,15 @@ if (!function_exists("route")) {
         return $url;
     }
 }
+
+if ( ! function_exists('e')) {
+    /**
+     * Echape les tags HTML dans la chaine.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    function e($value) {
+        return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+    }
+}
