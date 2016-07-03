@@ -371,7 +371,20 @@ class Response
 		} else if ($this->config->getEngine() == "mustache") {
 			$tpl = new \Mustache_Engine([
 				'cache' => $this->config->getCachepath(),
-				'loader' => new \Mustache_Loader_FilesystemLoader($this->config->getViewpath())
+				'loader' => new \Mustache_Loader_FilesystemLoader($this->config->getViewpath()),
+				"helpers" => [
+					"_secure" => function($data) {
+						return Security::sanitaze($data, true);
+					},
+					"_sanitaze" => function($data) {
+						return Security::sanitaze($data);
+					},
+					"_slugify" => function($data) {
+						return Str::slugify($data);
+					},
+					"_public", $this->config->getPublicPath(),
+					"_root", $this->config->getApproot()
+				]
 			]);
 		} else {
 			$tpl = new Jade([
