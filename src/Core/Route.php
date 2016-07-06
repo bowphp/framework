@@ -82,13 +82,19 @@ Class Route
 		$this->with = $with;
 
 		// Normalisation de l'url du nagivateur.
-		if (preg_match("~(.+)/$~", $uri, $match)) {
+		if (preg_match("~(.*)/$~", $uri, $match)) {
 			$uri = end($match);
 		}
 
 		// Normalisation du path définir par le programmeur.
-		if (preg_match("~(.+)/$~", $this->path, $match)) {
+		if (preg_match("~(.*)/$~", $this->path, $match)) {
 			$this->path = end($match);
+		}
+
+		// On retourne directement tout
+		// pour gagner en performance.
+		if ($this->path == $uri) {
+			return true;
 		}
 
 		// On vérifie la longeur du path définie par le programmeur
@@ -115,6 +121,7 @@ Class Route
 				$tmpPath =  $this->path;
 				$this->keys = $match[1];
 
+				// Assication des critrères personnalisé.
 				foreach ($match[1] as $key => $value) {
 					if (array_key_exists($value, $this->with)) {
 						$tmpPath = preg_replace("~:$value~", "(" . $this->with[$value] . ")", $tmpPath);
@@ -127,6 +134,7 @@ Class Route
 				}
 			}
 
+			// On rend vide le table d'association de critère personnalisé.
 			$this->with = [];
 		}
 
@@ -144,15 +152,16 @@ Class Route
 	 * Fonction permettant de lancer les fonctions de rappel.
 	 *
 	 * @param Request 	  $req
-	 * @param array 	  $names
+	 * @param array 	  $namespaces
 	 * @param Application $app
 	 *
 	 * @return mixed
 	 */
-	public function call(Request $req, $names, Application $app = null)
+	public function call(Request $req, $namespaces, Application $app = null)
 	{
 		$params = [];
 
+		// Association des parmatres à la request
 		foreach ($this->keys as $key => $value) {
 			if (!is_int($this->match[$key])) {
 				$params[$value] = $this->match[$key];
@@ -169,6 +178,6 @@ Class Route
 
 		$req::$params = (object) $params;
 
-		return Util::launchCallback($this->cb, $this->match, $names);
+		return Util::launchCallback($this->cb, $this->match, $namespaces);
 	}
 }

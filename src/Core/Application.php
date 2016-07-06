@@ -29,7 +29,7 @@ class Application
 	 *
 	 * @var string
 	 */
-	private $branch = "";
+	private $branch = '';
 
 	/**
 	 * @var string
@@ -48,13 +48,13 @@ class Application
 	 *
 	 * @var string
 	 */
-	private $currentMethod = "";
+	private $currentMethod = '';
 	/**
 	 * Enrégistre l'information la route courrante
 	 *
 	 * @var string
 	 */
-	private $currentPath = "";
+	private $currentPath = '';
 
 	/**
 	 * Patter Singleton
@@ -105,7 +105,7 @@ class Application
 		$this->config = $config;
 		$this->request = $this->request();
 
-		$logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . "/error.log");
+		$logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . '/error.log');
 		$logger->register();
 		$this->logger = $logger;
 	}
@@ -146,12 +146,12 @@ class Application
 			Util::launchCallback($cb, $this->request, $this->config->getNamespace());
 		} else {
 			if (!is_callable($cb)) {
-				throw new ApplicationException("Callback are not define", E_ERROR);
+				throw new ApplicationException('Callback are not define', E_ERROR);
 			}
 			call_user_func_array($cb, [$this->request]);
 		}
 
-		$this->branch = "";
+		$this->branch = '';
 
 		return $this;
 	}
@@ -171,7 +171,7 @@ class Application
 			if (in_array($key, $this->local)) {
 				return $this->local[$key];
 			} else {
-				if (($method = $this->getConfigMethod($key, "get")) !== false) {
+				if (($method = $this->getConfigMethod($key, 'get')) !== false) {
 					return $this->config->$method();
 				} else {
 					return null;
@@ -179,7 +179,7 @@ class Application
 			}
 		}
 
-		return $this->routeLoader("GET", $path, $name, $cb);
+		return $this->routeLoader('GET', $path, $name, $cb);
 	}
 
 	/**
@@ -194,15 +194,15 @@ class Application
 	{
 		$body = $this->request->body();
 
-		if ($body->has("method")) {
-			$this->specialMethod = $method = strtoupper($body->get("method"));
-			if (in_array($method, ["DELETE", "PUT"])) {
+		if ($body->has('method')) {
+			$this->specialMethod = $method = strtoupper($body->get('method'));
+			if (in_array($method, ['DELETE', 'PUT'])) {
 				$this->addHttpVerbe($method, $path, $name, $cb);
 			}
 			return $this;
 		}
 
-		return $this->routeLoader("POST", $path, $name, $cb);
+		return $this->routeLoader('POST', $path, $name, $cb);
 	}
 
 	/**
@@ -214,7 +214,7 @@ class Application
 	 */
 	public function any($path, Callable $cb)
 	{
-		foreach(["post", "delete", "put", "get"] as $function) {
+		foreach(['post', 'delete', 'put', 'get'] as $function) {
 			$this->$function($path, $cb);
 		}
 
@@ -231,7 +231,7 @@ class Application
 	 */
 	public function delete($path, $name, Callable $cb = null)
 	{
-		return $this->addHttpVerbe("DELETE", $path, $name, $cb);
+		return $this->addHttpVerbe('DELETE', $path, $name, $cb);
 	}
 
 	/**
@@ -244,7 +244,7 @@ class Application
 	 */
 	public function put($path, $name, Callable $cb = null)
 	{
-		return $this->addHttpVerbe("PUT", $path, $name, $cb);
+		return $this->addHttpVerbe('PUT', $path, $name, $cb);
 	}
 
 	/**
@@ -257,7 +257,7 @@ class Application
 	 */
 	public function patch($path, $name, Callable $cb = null)
 	{
-		return $this->addHttpVerbe("PATCH", $path, $name, $cb);
+		return $this->addHttpVerbe('PATCH', $path, $name, $cb);
 	}
 
 	/**
@@ -309,8 +309,8 @@ class Application
 		$flag = true;
 
 		if ($body !== null) {
-			if ($body->has("_method")) {
-				if ($body->get("_method") === $method) {
+			if ($body->has('_method')) {
+				if ($body->get('_method') === $method) {
 					$this->routeLoader($this->request->method(), $path, $name, $cb);
 				}
 				$flag = false;
@@ -343,7 +343,7 @@ class Application
 
 		if (is_string($name)) {
 			if (!preg_match('/^[a-z]+(\.|@)[a-z]+$/i', $name)) {
-				$this->addRoute($path, $name);
+				$this->namedRoute($path, $name);
 			} else {
 				$cb = $name;
 				$name = null;
@@ -408,7 +408,7 @@ class Application
 	{
 		// Ajout de l'entête X-Powered-By
 		if (!$this->disableXpoweredBy) {
-			$this->response()->set("X-Powered-By", "Bow Framework");
+			$this->response()->addHeader('X-Powered-By', 'Bow Framework');
 		}
 
 		// drapeaux d'erreur.
@@ -420,12 +420,12 @@ class Application
 			}
 		}
 
-		$this->branch = "";
+		$this->branch = '';
 		$method = $this->request->method();
 
 		// vérification de l'existance d'une methode spécial
 		// de type DELETE, PUT
-		if ($method == "POST") {
+		if ($method == 'POST') {
 			if ($this->specialMethod !== null) {
 				$method = $this->specialMethod;
 			}
@@ -478,7 +478,7 @@ class Application
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			} else {
-				$this->response()->send("Cannot " . $method . " " . $this->request->uri() . " 404");
+				$this->response()->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
 			}
 			$this->response()->code(404);
 		}
@@ -499,7 +499,7 @@ class Application
 	 */
 	public function set($key, $value)
 	{
-		$method = $this->getConfigMethod($key, "set");
+		$method = $this->getConfigMethod($key, 'set');
 
 		// Vérification de l
 		if ($method) {
@@ -542,14 +542,14 @@ class Application
 	private function getConfigMethod($key, $prefix)
 	{
 		switch ($key) {
-			case "view":
-				$method = "Viewpath";
+			case 'view':
+				$method = 'Viewpath';
 				break;
-			case "engine":
-				$method = "Engine";
+			case 'engine':
+				$method = 'Engine';
 				break;
-			case "root":
-				$method = "Approot";
+			case 'root':
+				$method = 'Approot';
 				break;
 			default:
 				$method = false;
@@ -579,89 +579,96 @@ class Application
 	public function resources($url, $controllerName, array $where = [])
 	{
 		if (!is_string($controllerName) && !is_array($controllerName)) {
-			throw new ApplicationException("Le premier paramètre doit être un array ou une chaine de caractère", 1);
+			throw new ApplicationException('Le premier paramètre doit être un array ou une chaine de caractère', 1);
 		}
 
-		$controller = "";
+		$controller = '';
 		$internalMiddleware = null;
 		$ignoreMethod = [];
 		$valideMethod = [
 			[
-				"url"    => "/",
-				"call"   => "index",
-				"method" => "get"
+				'url'    => '/',
+				'call'   => 'index',
+				'method' => 'get'
 			],
 			[
-				"url"    => "/",
-				"call"   => "store",
-				"method" => "post"
+				'url'    => '/',
+				'call'   => 'store',
+				'method' => 'post'
 			],
 			[
-				"url"    => "/:id",
-				"call"   => "show",
-				"method" => "get"
+				'url'    => '/:id',
+				'call'   => 'show',
+				'method' => 'get'
 			],
 			[
-				"url"    => "/:id",
-				"call"   => "update",
-				"method" => "put"
+				'url'    => '/:id',
+				'call'   => 'update',
+				'method' => 'put'
 			],
 			[
-				"url"    => "/:id",
-				"call"   => "destroy",
-				"method" => "delete"
+				'url'    => '/:id',
+				'call'   => 'destroy',
+				'method' => 'delete'
 			],
 			[
-				"url"    => "/:id/edit",
-				"call"   => "edit",
-				"method" => "get"
+				'url'    => '/:id/edit',
+				'call'   => 'edit',
+				'method' => 'get'
 			],
 			[
-				"url"    => "/create",
-				"call"   => "create",
-				"method" => "get"
+				'url'    => '/create',
+				'call'   => 'create',
+				'method' => 'get'
 			]
 		];
 
 		if (is_array($controllerName)) {
-			if (isset($controllerName["middleware"])) {
-				$internalMiddleware = $controllerName["middleware"];
-				unset($controllerName["middleware"]);
-				$next = Util::launchCallback(["middleware" => $internalMiddleware], $this->request);
+			if (isset($controllerName['middleware'])) {
+				$internalMiddleware = $controllerName['middleware'];
+				unset($controllerName['middleware']);
+				$next = Util::launchCallback(['middleware' => $internalMiddleware], $this->request);
 				if ($next === false) {
 					return $this;
 				}
 			}
 
-			if (isset($controllerName["uses"])) {
-				$controller = $controllerName["uses"];
-				unset($controllerName["uses"]);
+			if (isset($controllerName['uses'])) {
+				$controller = $controllerName['uses'];
+				unset($controllerName['uses']);
 			}
 
-			if (isset($controllerName["ignores"])) {
-				$ignoreMethod = $controllerName["ignores"];
-				unset($controllerName["ignores"]);
+			if (isset($controllerName['ignores'])) {
+				$ignoreMethod = $controllerName['ignores'];
+				unset($controllerName['ignores']);
 			}
 		} else  {
 			$controller = $controllerName;
 		}
 
 		// normalize url
-		$url = preg_replace("/\/+$/", "", $url);
+		$url = preg_replace('/\/+$/', '', $url);
 
 		// Association de url prédéfinie
 		foreach ($valideMethod as $key => $value) {
-			if (!in_array($value["call"], $ignoreMethod)) {
-				$bindController = $controller . '@' . $value["call"];
-				$path = $url . $value["url"];
-				call_user_func_array([$this, $value["method"]], [$path, $bindController]);
+			// on vérifie si la methode de appelé est ignoré
+			if (!in_array($value['call'], $ignoreMethod)) {
+
+				// Formate controlleur
+				$bindController = $controller . '@' . $value['call'];
+				$path = $url . $value['url'];
+
+				// Lancement de la methode de mapping de route.
+				call_user_func_array([$this, $value['method']], [rtrim($path, '/'), $bindController]);
+
+				// Association des critères définies
 				if (!empty($where)) {
 					$data = [];
-					if (preg_match("/:id/", $path)) {
-						if (isset($where["id"])) {
+					if (preg_match('/:id/', $path)) {
+						if (isset($where['id'])) {
 							$data = $where;
 						} else {
-							$data = ["id" => $where[0]];
+							$data = ['id' => $where[0]];
 						}
 					}
 
@@ -689,7 +696,7 @@ class Application
 	 * @param string $uri  L'url pointant sur la route.
 	 * @param string $name Le nom de la routes
 	 */
-	private function addRoute($uri, $name)
+	private function namedRoute($uri, $name)
 	{
 		$route[$name] = $uri;
 		$routes = $this->config->getApplicationRoutes();
@@ -717,7 +724,7 @@ class Application
 			return call_user_func_array($this->local[$method], $param);
 		}
 
-		throw new ApplicationException("$method n'exist pas.", E_ERROR);
+		throw new ApplicationException('$method n\'exist pas.', E_ERROR);
 	}
 
 	/**
@@ -729,39 +736,39 @@ class Application
 	 */
 	public function __invoke($param)
 	{
-		if (!in_array($param, ["name", "engine", "root", "public", "view path", "logger", "local", "config"])) {
-			throw new InvalidArgumentException("Paramètre invalide.", E_USER_ERROR);
+		if (!in_array($param, ['name', 'engine', 'root', 'public', 'view path', 'logger', 'local', 'config'])) {
+			throw new InvalidArgumentException('Paramètre invalide.', E_USER_ERROR);
 		}
 
 		switch(true) {
-			case $param === "public":
+			case $param === 'public':
 				return $this->config->getPublicPath();
 				break;
-			case $param === "engine":
+			case $param === 'engine':
 				return $this->config->getEngine();
 				break;
-			case $param === "root":
+			case $param === 'root':
 				return $this->config->getApproot();
 				break;
-			case $param === "name":
+			case $param === 'name':
 				return $this->config->getAppname();
 				break;
-			case $param === "route":
+			case $param === 'route':
 				return $this->config->getApplicationRoutes();
 				break;
-			case $param === "view path":
+			case $param === 'view path':
 				return $this->config->getViewpath();
 				break;
-			case $param === "logger":
+			case $param === 'logger':
 				return $this->log();
 				break;
-			case $param === "config":
+			case $param === 'config':
 				return $this->config;
 				break;
-			case $param === "mail":
+			case $param === 'mail':
 				return $this->config->getMailConfiguration();
 			break;
-			case $param === "db":
+			case $param === 'db':
 				return $this->config->getDatabaseConfiguration();
 			break;
 		}
