@@ -13,6 +13,21 @@ use Bow\Support\Str;
 class Validator
 {
     /**
+     * Tout les marqueurs possible.
+     *
+     * - required   Vérifie que le champs existe dans les données à valider
+     * - min:value  Vérifie que le contenu du champs est un nombre de caractère minimal suivant la valeur définie
+     * - max:value  Vérifie que le contenu du champs est un nombre de caractère maximal suivant la valeur définie
+     * - size:value Vérifie que le contenu du champs est un nombre de caractère égale à la valeur définie
+     * - eq:value   Vérifie que le contenu du champs soit égale à la valeur définie
+     * - email      Vérifie que le contenu du champs soit une email
+     * - number     Vérifie que le contenu du champs soit un nombre
+     * - alphanum   Vérifie que le contenu du champs soit une chaine alphanumérique
+     * - alpha      Vérifie que le contenu du champs soit une alpha
+     * - upper      Vérifie que le contenu du champs soit une chaine en majiscule
+     * - lower      Vérifie que le contenu du champs soit une chaine en miniscule
+     * - in:(value, ..) Vérifie que le contenu du champs soit une parmis les valeurs définies.
+     *
      * e.g: required|max:255
      *      required|email|min:49
      *      required|confirmed
@@ -78,6 +93,40 @@ class Validator
                     }
                 }
 
+                // Masque sur la règle size
+                if (preg_match("/^size:(\d+)$/", $masque, $match)) {
+                    $length = (int) end($match);
+                    if (Str::len($inputs[$key]) == $length) {
+                        $message = "Le champs \"$key\" doit avoir un contenu de $length caractère(s).";
+                        $errors[$key][] = ["masque" => $masque, "message" => $message];
+                        $isFails = true;
+                    }
+                }
+
+                // Masque sur la règle in
+                if (preg_match("/^in:\((.+)\)$/", $masque, $match)) {
+                    $values = explode(",", end($match));
+                    foreach($values as $index => $value) {
+                        $values[$index] = trim($value);
+                    }
+
+                    if (!in_array($inputs[$key], $values)) {
+                        $message = "Le champs \"$key\" doit avoir un contenu une valeur dans " . implode(", ", $values) . ".";
+                        $errors[$key][] = ["masque" => $masque, "message" => $message];
+                        $isFails = true;
+                    }
+                }
+
+                // Masque sur la règle eq
+                if (preg_match("/^eq:(.+)$/", $masque, $match)) {
+                    $value = (string) end($match);
+                    if ($inputs[$key] == $value) {
+                        $message = "Le champs \"$key\" doit avoir un contenu égal à '$value'.";
+                        $errors[$key][] = ["masque" => $masque, "message" => $message];
+                        $isFails = true;
+                    }
+                }
+
                 // Masque sur la règle email.
                 if (preg_match("/^email$/", $masque, $match)) {
                     if (!Str::isMail($inputs[$key])) {
@@ -100,6 +149,24 @@ class Validator
                 if (preg_match("/^alphanum$/", $masque)) {
                     if (!Str::isAlphaNum($inputs[$key])) {
                         $message = "Le champs \"$key\" doit avoir un contenu en alphanumérique.";
+                        $errors[$key][] = ["masque" => $masque, "message" => $message];
+                        $isFails = true;
+                    }
+                }
+
+                // Masque sur la règle upper
+                if (preg_match("/^upper/", $masque)) {
+                    if (!Str::isUpper($inputs[$key])) {
+                        $message = "Le champs \"$key\" doit avoir un contenu en majiscule.";
+                        $errors[$key][] = ["masque" => $masque, "message" => $message];
+                        $isFails = true;
+                    }
+                }
+
+                // Masque sur la règle lower
+                if (preg_match("/^lower/", $masque)) {
+                    if (!Str::isLower($inputs[$key])) {
+                        $message = "Le champs \"$key\" doit avoir un contenu en miniscule.";
                         $errors[$key][] = ["masque" => $masque, "message" => $message];
                         $isFails = true;
                     }
