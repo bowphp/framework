@@ -100,9 +100,15 @@ class DatabaseErrorHandler
     /**
      * Lance une exception qui a pour message le message de l'erreur PDO
      *
+     * @param string|null $message
      * @throws DatabaseException
      */
-    public function throwError() {
-        throw new DatabaseException($this->getMessage(), E_USER_ERROR);
+    public function throwError($message = null)
+    {
+        if ($message === null) {
+            $message = $this->getMessage();
+        }
+
+        throw new DatabaseException($message, E_USER_ERROR);
     }
 }
