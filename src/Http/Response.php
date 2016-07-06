@@ -441,11 +441,11 @@ class Response
 	 */
 	public function accessControlAllowOrigin(array $excepted)
 	{
-		if (count($excepted) == 0) {
-			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+		if (!is_array($excepted)) {
+			throw new \InvalidArgumentException("Attend un tableau." . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Controll-Allow-Origin", $excepted);
+		return $this->accessControl("Access-Control-Allow-Origin", implode("|", $excepted));
 	}
 
 	/**
@@ -461,7 +461,7 @@ class Response
 			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Controll-Allow-Methods", implode(", ", $excepted));
+		return $this->accessControl("Access-Control-Allow-Methods", implode(", ", $excepted));
 	}
 
 	/**
@@ -477,7 +477,7 @@ class Response
 			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Controll-Allow-Headers", implode(", ", $excepted));
+		return $this->accessControl("Access-Control-Allow-Headers", implode(", ", $excepted));
 	}
 
 	/**
