@@ -340,6 +340,28 @@ class Str
     }
 
     /**
+     * Vérifie si la chaine est en majiscule
+     *
+     * @param string $str
+     * @return bool
+     */
+    public static function isUpper($str)
+    {
+        return static::upper($str) === $str;
+    }
+
+    /**
+     * Vérifie si la chaine est en miniscule
+     *
+     * @param string $str
+     * @return bool
+     */
+    public static function isLower($str)
+    {
+        return static::lower($str) === $str;
+    }
+
+    /**
      * Retourne le nombre caractère dans une chaine.
      *
      * @param string $pattern
@@ -367,6 +389,35 @@ class Str
 
         for($i = 0; $i < $len; $i++) {
             $sentence .= ' ' . $wordParts[$i];
+        }
+
+        return trim($sentence);
+    }
+
+    /**
+     * Retourne une chaine de caractère dont les mots sont mélangés.
+     *
+     * @param string $words
+     *
+     * @return string
+     */
+    public static function shuffleWords($words)
+    {
+        $wordParts = explode(' ', trim($words));
+        $wordPartsLen = count($wordParts);
+        $rand = [];
+
+        do {
+            $r = rand(0, $wordPartsLen - 1);
+            if (!in_array($r, $rand)) {
+                $rand[] = $r;
+            }
+        } while(count($rand) != $wordPartsLen);
+
+        $sentence = '';
+
+        foreach($rand as $word) {
+            $sentence .= $wordParts[$word] . ' ';
         }
 
         return trim($sentence);
