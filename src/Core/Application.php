@@ -368,12 +368,19 @@ class Application
 	/**
 	 * Lance une personnalisation de route.
 	 *
-	 * @param array $otherRule
+	 * @param string $var
+	 * @param string $regexContrainte
 	 *
 	 * @return Application
 	 */
-	public function where(array $otherRule)
+	public function where($var, $regexContrainte = null)
 	{
+		if (is_array($var)) {
+			$otherRule = $var;
+		} else {
+			$otherRule = [$var => $regexContrainte];
+		}
+
 		// Quand le tableau de collection des contraintes sur les variables est vide
 		if (empty($this->with)) {
 			// Si on crée un nouvelle entre dans le tableau avec le nom de la methode HTTP
