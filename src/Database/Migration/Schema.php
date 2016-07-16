@@ -63,8 +63,7 @@ class Schema
             die("\033[0;31mPlease check your 'up' method.\033[00m\n");
         }
 
-        self::$data = $fields->getBindData();
-
+        static::$data = $fields->getBindData();
 
         if (Database::statement($sql)) {
             echo "\033[0;32m$table table created.\033[00m\n";
@@ -94,7 +93,7 @@ class Schema
      *
      * @return mixed
      */
-    public static function fillTable($table, array $marks = null, $n = 1)
+    public static function fillTable($table = null, array $marks = null, $n = 1)
     {
         if (is_int($table)) {
             $n = $table;

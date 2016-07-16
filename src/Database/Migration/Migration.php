@@ -33,6 +33,6 @@ abstract class Migration
      */
     public function fill($n = 1)
     {
-        Schema::fillTable(static::$table, static::$marks, $n);
+        Schema::fillTable(static::$table, $n);
     }
 }
