@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Core;
+namespace Bow\Application;
 
 use Bow\Support\Util;
 use Bow\Http\Request;
@@ -76,6 +76,11 @@ class Application
 	private $request;
 
 	/**
+	 * @var Response
+	 */
+	private $response;
+
+	/**
 	 * @var AppConfiguration|null
 	 */
 	private $config = null;
@@ -99,11 +104,14 @@ class Application
 	 * Private construction
 	 *
 	 * @param AppConfiguration $config
+	 * @param Request $request
+	 * @param Response $response
 	 */
-	private function __construct(AppConfiguration $config)
+	private function __construct(AppConfiguration $config, Request $request, Response $response)
 	{
 		$this->config = $config;
-		$this->request = $this->request();
+		$this->request = $request;
+		$this->response = $response;
 
 		$logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . '/error.log');
 		$logger->register();
@@ -119,12 +127,14 @@ class Application
 	 * Pattern Singleton.
 	 *
 	 * @param AppConfiguration $config
+	 * @param Request $request
+	 * @param Response $response
 	 * @return Application
 	 */
-	public static function configure(AppConfiguration $config)
+	public static function make(AppConfiguration $config, Request $request, Response $response)
 	{
 		if (static::$inst === null) {
-			static::$inst = new static($config);
+			static::$inst = new static($config, $request, $response);
 		}
 
 		return static::$inst;
@@ -285,7 +295,7 @@ class Application
 	{
 		foreach($methods as $method) {
 			if ($this->request->method() === strtoupper($method)) {
-				$this->routeLoader($this->request->method(), $path , $cb, null);
+				$this->routeLoader(strtoupper($method), $path , $cb, null);
 			}
 		}
 
@@ -311,7 +321,7 @@ class Application
 		if ($body !== null) {
 			if ($body->has('_method')) {
 				if ($body->get('_method') === $method) {
-					$this->routeLoader($this->request->method(), $path, $name, $cb);
+					$this->routeLoader($method, $path, $name, $cb);
 				}
 				$flag = false;
 			}
@@ -413,9 +423,13 @@ class Application
 	 */
 	public function run($cb = null)
 	{
+		if (php_sapi_name() == 'cli') {
+			return true;
+		}
+
 		// Ajout de l'entête X-Powered-By
 		if (!$this->disableXpoweredBy) {
-			$this->response()->addHeader('X-Powered-By', 'Bow Framework');
+			$this->response->addHeader('X-Powered-By', 'Bow Framework');
 		}
 
 		// drapeaux d'erreur.
@@ -469,9 +483,9 @@ class Application
 					}
 
 					if (is_string($response)) {
-						$this->response()->send($response);
+						$this->response->send($response);
 					} else if (is_array($response) || is_object($response)) {
-						$this->response()->json($response);
+						$this->response->json($response);
 					}
 
 					$error = false;
@@ -485,9 +499,10 @@ class Application
 			if (is_callable($this->error404)) {
 				call_user_func($this->error404);
 			} else {
-				$this->response()->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
+				$this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
 			}
-			$this->response()->code(404);
+
+			$this->response->code(404);
 		}
 
 		return $error;
@@ -518,26 +533,6 @@ class Application
 		}
 
 		return $this;
-	}
-
-	/**
-	 * response, retourne une instance de la classe Response
-	 *
-	 * @return Response
-	 */
-	private function response()
-	{
-		return Response::configure($this->config);
-	}
-
-	/**
-	 * request, retourne une instance de la classe Request
-	 *
-	 * @return Request
-	 */
-	private function request()
-	{
-		return Request::configure();
 	}
 
 	/**
@@ -732,52 +727,5 @@ class Application
 		}
 
 		throw new ApplicationException('$method n\'exist pas.', E_ERROR);
-	}
-
-	/**
-	 * __invoke fonction magic php
-	 *
-	 * @param string $param
-	 * @return string|AppConfiguration|Logger
-	 * @thorws InvalidArgumentExecption
-	 */
-	public function __invoke($param)
-	{
-		if (!in_array($param, ['name', 'engine', 'root', 'public', 'view path', 'logger', 'local', 'config'])) {
-			throw new InvalidArgumentException('Paramètre invalide.', E_USER_ERROR);
-		}
-
-		switch(true) {
-			case $param === 'public':
-				return $this->config->getPublicPath();
-				break;
-			case $param === 'engine':
-				return $this->config->getEngine();
-				break;
-			case $param === 'root':
-				return $this->config->getApproot();
-				break;
-			case $param === 'name':
-				return $this->config->getAppname();
-				break;
-			case $param === 'route':
-				return $this->config->getApplicationRoutes();
-				break;
-			case $param === 'view path':
-				return $this->config->getViewpath();
-				break;
-			case $param === 'logger':
-				return $this->log();
-				break;
-			case $param === 'config':
-				return $this->config;
-				break;
-			case $param === 'mail':
-				return $this->config->getMailConfiguration();
-			break;
-			case $param === 'db':
-				return $this->config->getDatabaseConfiguration();
-			break;
-		}
 	}
 }

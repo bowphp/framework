@@ -294,7 +294,7 @@ class Request
 
 		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
 			$tmp = explode(";", $_SERVER["HTTP_ACCEPT_LANGUAGE"])[0];
-			preg_match("/^([a-z]+-[a-z]+)/i", $tmp, $match);
+			preg_match("/^([a-z]+-?_?[a-z]+)/i", $tmp, $match);
 			$local = end($match);
 		}
 

@@ -387,7 +387,7 @@ class Collection
             }
         });
 
-        $r = call_user_func_array("$type", [$data]);
+        $r = call_user_func_array("$type", $data);
 
         if (is_callable($cb)) {
             call_user_func_array($cb, [$r]);
@@ -576,8 +576,8 @@ class Collection
      */
     private function recursive(array $data, Callable $cb) {
         foreach($data as $key => $value) {
-            if (is_array($value) || is_object($data)) {
-                $this->recursive($data, $cb);
+            if (is_array($value) || is_object($value)) {
+                $this->recursive((array) $value, $cb);
             } else {
                 $cb($value, $key);
             }

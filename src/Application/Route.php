@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Core;
+namespace Bow\Application;
 
 use Bow\Support\Util;
 use Bow\Http\Request;

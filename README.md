@@ -1,6 +1,9 @@
 # Bow
 The Bow Framework [documentation](http://papac.github.com)
 
+Bow est un micro framework écrite pour les debutants qui veulent travail sur un projet un peut plus
+grand.
+
 N'ésitez pas commencez maintenant.
 
 [![start](http://papac.github.com/public/img/1382900391.gif "start bow framework")](http://papac.github.com)

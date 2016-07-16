@@ -167,4 +167,26 @@ class DateAccess
     {
         return time() < $this->date;
     }
+
+    /**
+     * @return bool|string
+     */
+    public function __toString()
+    {
+        return date("Y-m-d H:i:s", $this->date);
+    }
+
+    /**
+     * @param string $diffDate
+     * @return \DateInterval
+     */
+    public function diference($diffDate)
+    {
+        return date_diff(new \DateTime($diffDate), new \DateTime($this->date));
+    }
+
+    public function add($format)
+    {
+
+    }
 }

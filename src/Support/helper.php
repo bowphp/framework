@@ -17,9 +17,9 @@ use Bow\Support\Security;
 use Bow\Database\Database;
 use Bow\Support\Collection;
 use Bow\Support\Session\Event;
-use Bow\Core\AppConfiguration;
 use Bow\Support\Session\Session;
 use Bow\Support\Resource\Storage;
+use Bow\Application\AppConfiguration;
 
 define("SELECT", Database::SELECT);
 define("INSERT", Database::INSERT);
@@ -971,6 +971,8 @@ if (!function_exists("session")) {
         if ($key !== null && $message !== null) {
             return Session::add($key, $message);
         }
+
+        return null;
     }
 }
 

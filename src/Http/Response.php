@@ -5,9 +5,9 @@ use Jade\Jade;
 use ErrorException;
 use Bow\Support\Str;
 use Bow\Support\Security;
-use Bow\Core\AppConfiguration;
 use Bow\Exception\ViewException;
 use Bow\Exception\ResponseException;
+use Bow\Application\AppConfiguration;
 
 /**
  * Class Response
@@ -237,10 +237,19 @@ class Response
 			$end = $code;
 			$code = 200;
 		}
-
+		$this->forceInUFT8();
 		$this->addHeader("Content-Type", "application/json; charset=UTF-8");
 		$this->code($code);
 		$this->send(json_encode($data), $end);
+	}
+
+	/**
+	 * Permet de forcer l'encodage en utf-8
+	 */
+	public function forceInUFT8()
+	{
+		mb_internal_encoding("UTF-8");
+		mb_http_output("UTF-8");
 	}
 
 	/**
