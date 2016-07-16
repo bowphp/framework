@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Support\Validate;
 
+use Bow\Exception\ValidationException;
 /**
  * Class Validate
  *
@@ -106,5 +107,13 @@ class Validate
     public function getMessages()
     {
         return $this->messages;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function throwError()
+    {
+        throw new ValidationException(implode(', ', $this->messages), E_USER_ERROR);
     }
 }

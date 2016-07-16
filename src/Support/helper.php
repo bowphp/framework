@@ -44,7 +44,6 @@ if (!function_exists("configuration")) {
             throw new InvalidArgumentException("Paramètre invalide.", E_USER_ERROR);
         }
 
-
         switch(true) {
             case $param === "public":
                 return $config->getPublicPath();
@@ -92,9 +91,7 @@ Database::configure(config()->getDatabaseConfiguration());
 Storage::configure(config()->getResourceConfiguration());
 
 // Configuration de Mail.
-
 Mail::configure(config()->getMailConfiguration());
-
 
 if (!function_exists("response")) {
     /**

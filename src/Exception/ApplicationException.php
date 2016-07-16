@@ -1,5 +1,4 @@
 <?php
-
 namespace Bow\Exception;
 
 use ErrorException;
