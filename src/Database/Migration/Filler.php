@@ -26,7 +26,7 @@ class Filler
      */
     public static function date()
     {
-        return date("Y-d-m G:i:s");
+        return date("Y-m-d H:i:s");
     }
 
     /**
