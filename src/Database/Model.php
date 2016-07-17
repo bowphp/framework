@@ -59,9 +59,17 @@ abstract class Model
     /**
      * @return array
      */
-    private static function avalableMethod()
+    private static function avalableMethods()
     {
         return ["get", "getOne", "find"];
+    }
+
+    /**
+     * @return array
+     */
+    private static function avalableFields()
+    {
+        return ["create_at", "update_at", "expires_at", "login_at", "sigin_at"];
     }
 
     /**
@@ -71,13 +79,13 @@ abstract class Model
      */
     private static function carbornize($instance, $method)
     {
-        if (in_array($method, static::avalableMethod())) {
+        if (in_array($method, static::avalableMethods())) {
 
             if (!is_array($instance)) {
                 $instance = [$instance];
             }
 
-            $custumFieldsLists = ["create_at", "update_at", "expires_at", "login_at", "sigin_at"];
+            $custumFieldsLists = static::avalableFields();
 
             if (method_exists($instance, "customDate")) {
                 $custumFieldsLists = array_merge($custumFieldsLists, $instance::customDate());
