@@ -32,40 +32,25 @@ abstract class Model
         $scope = "scope" . ucfirst($method);
         $table = Database::table(Str::lower(static::$table));
 
-        if (method_exists($ins = new static, $scope)) {
+        /**
+         * Lancement de l'execution des fonctions aliase définir dans les classe
+         * héritant de la classe Model.
+         *
+         * Les classes  definir définir avec la montion scope.
+         */
+        if (method_exists($instance = new static, $scope)) {
             if (method_exists($table, $method)) {
                 throw new ModelException("$method ne peut pas être utiliser comme fonction d'aliase.", E_ERROR);
             }
-
-            return call_user_func_array([$ins, $scope], $args);
+            return call_user_func_array([$instance, $scope], $args);
         }
 
+        /**
+         * Lancement de l'execution des fonctions liée a l'instance de la classe Table
+         */
         if (method_exists($table, $method)) {
-
             $instance = call_user_func_array([$table, $method], $args);
-
-            if (in_array($method, static::avalableMethod())) {
-
-                if (!is_array($instance)) {
-                    $instance = [$instance];
-                }
-
-                $custumFieldsLists = ["create_at", "update_at", "expires_at", "login_at", "sign_at"];
-
-                if (method_exists(static::class, "customDate")) {
-                    $custumFieldsLists = array_merge($custumFieldsLists, static::customDate());
-                }
-
-                foreach($instance as $value) {
-                    foreach($value as $key => $content) {
-                        if (in_array($key, $custumFieldsLists)) {
-                            $value->$key = new \Carbon\Carbon($content);
-                        }
-                    }
-                }
-            }
-
-            return $instance;
+            return static::carbornize($instance, $method);
         }
 
         throw new ModelException("methode $method n'est définie.", E_ERROR);
@@ -77,5 +62,39 @@ abstract class Model
     private static function avalableMethod()
     {
         return ["get", "getOne", "find"];
+    }
+
+    /**
+     * @param mixed $instance
+     * @param string $method
+     * @return array
+     */
+    private static function carbornize($instance, $method)
+    {
+        if (in_array($method, static::avalableMethod())) {
+
+            if (!is_array($instance)) {
+                $instance = [$instance];
+            }
+
+            $custumFieldsLists = ["create_at", "update_at", "expires_at", "login_at", "sigin_at"];
+
+            if (method_exists($instance, "customDate")) {
+                $custumFieldsLists = array_merge($custumFieldsLists, $instance::customDate());
+            }
+
+            foreach($instance as $value) {
+                if (!is_array($value)) {
+                    $value = [$value];
+                }
+                foreach($value as $key => $content) {
+                    if (in_array($key, $custumFieldsLists)) {
+                        $value->$key = new \Carbon\Carbon($content);
+                    }
+                }
+            }
+        }
+
+        return $instance;
     }
 }
