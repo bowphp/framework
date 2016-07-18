@@ -43,6 +43,7 @@ class Table extends DatabaseTools
      * @var array
      */
     private $whereDataBind = [];
+
     /**
      * @var string
      */
@@ -123,7 +124,7 @@ class Table extends DatabaseTools
     {
 
         if (is_array($column)) {
-            $this->select = implode(", ", $column);
+            $this->select = implode(', ', $column);
             return $this;
         }
 
@@ -149,33 +150,33 @@ class Table extends DatabaseTools
      *
      * @return $this
      */
-    public function where($column, $comp = "=", $value = null, $boolean = "and")
+    public function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
         if (!static::isComporaisonOperator($comp)) {
             $value = $comp;
-            $comp = "=";
+            $comp = '=';
         }
 
         // Ajout de matcher sur id.
-        if ($comp == "=" && $value === null) {
+        if ($comp == '=' && $value === null) {
             $value = $column;
-            $column = "id";
+            $column = 'id';
         }
 
         if ($value === null) {
-            throw new TableException("valeur de comparaison non définir", E_ERROR);
+            throw new TableException('valeur de comparaison non définir', E_ERROR);
         }
 
-        if (!in_array(Str::lower($boolean), ["and", "or"])) {
-            throw new TableException("le booléen $boolean non accepté", E_ERROR);
+        if (!in_array(Str::lower($boolean), ['and', 'or'])) {
+            throw new TableException('le booléen $boolean non accepté', E_ERROR);
         }
 
         $this->whereDataBind[$column] = $value;
 
         if ($this->where == null) {
-            $this->where = "$column $comp :$column";
+            $this->where = $column . ' ' . $comp . ':' . $column;
         } else {
-            $this->where .= " $boolean $column $comp :$column";
+            $this->where .= $boolean .' '. $column . ' '. $comp .':'. $column;
         }
 
         return $this;
@@ -192,13 +193,13 @@ class Table extends DatabaseTools
      *
      * @return Table
      */
-    public function orWhere($column, $comp = "=", $value = null)
+    public function orWhere($column, $comp = '=', $value = null)
     {
         if (is_null($this->where)) {
-            throw new TableException("Cette fonction ne peut pas être utiliser sans un where avant.", E_ERROR);
+            throw new TableException('Cette fonction ne peut pas être utiliser sans un where avant.', E_ERROR);
         }
 
-        $this->where($column, $comp, $value, "or");
+        $this->where($column, $comp, $value, 'or');
 
         return $this;
     }
@@ -209,17 +210,17 @@ class Table extends DatabaseTools
      * WHERE column IS NULL
      *
      * @param string $column
-     * @param string $boolean="and"
+     * @param string $boolean='and'
      *
      * @return $this
      */
-    public function whereNull($column, $boolean = "and")
+    public function whereNull($column, $boolean = 'and')
     {
 
         if (!is_null($this->where)) {
-            $this->where = "$column is null";
+            $this->where = $column . 'is null';
         } else {
-            $this->where = " $boolean $column is null";
+            $this->where = ' ' . $boolean .' ' . $column .' is null';
         }
 
         return $this;
@@ -231,16 +232,16 @@ class Table extends DatabaseTools
      * WHERE column NOT NULL
      *
      * @param $column
-     * @param string $boolean="and|or"
+     * @param string $boolean='and|or'
      *
      * @return $this
      */
-    public function whereNotNull($column, $boolean = "and")
+    public function whereNotNull($column, $boolean = 'and')
     {
         if (is_null($this->where)) {
-            $this->where = "$column is not null";
+            $this->where = $column . 'is not null';
         } else {
-            $this->where .= " $boolean $column is not null";
+            $this->where .= ' ' . $boolean .' ' . $column .' is not null';
         }
 
         return $this;
@@ -249,36 +250,36 @@ class Table extends DatabaseTools
     /**
      * clause where avec comparaison en <<between>>
      *
-     * WHERE column BETWEEN "" AND ""
+     * WHERE column BETWEEN '' AND ''
      *
      * @param $column
      * @param array $range
-     * @param string boolean="and|or"
+     * @param string boolean='and|or'
      *
      * @throws TableException
      *
      * @return $this
      */
-    public function whereBetween($column, array $range, $boolean = "and")
+    public function whereBetween($column, array $range, $boolean = 'and')
     {
 
         if (count($range) !== 2) {
-            throw new TableException("Le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
+            throw new TableException('Le paramètre 2 ne doit pas être un tableau vide.', E_ERROR);
         }
 
-        $between = implode(" and ", $range);
+        $between = implode(' and ', $range);
 
         if (is_null($this->where)) {
-            if ($boolean == "not") {
-                $this->where = "`$column` not between " . $between;
+            if ($boolean == 'not') {
+                $this->where = '`' . $column.'` not between ' . $between;
             } else {
-                $this->where = "`$column` between " . $between;
+                $this->where = '`' . $column . '` between ' . $between;
             }
         } else {
-            if ($boolean == "not") {
-                $this->where .= " and `$column` not between $between";
+            if ($boolean == 'not') {
+                $this->where .= ' and `'.$column .'`  not between ' . $between;
             } else {
-                $this->where .= " $boolean `$column` between $between";
+                $this->where .= ' ' . $boolean . '`' . $column. '` between ' . $between;
             }
         }
 
@@ -286,7 +287,7 @@ class Table extends DatabaseTools
     }
 
     /**
-     * WHERE column NOT BETWEEN "" AND ""
+     * WHERE column NOT BETWEEN '' AND ''
      *
      * @param $column
      * @param $range
@@ -294,7 +295,7 @@ class Table extends DatabaseTools
      */
     public function whereNotBetween($column, array $range)
     {
-        $this->whereBetween($column, $range, "not");
+        $this->whereBetween($column, $range, 'not');
 
         return $this;
     }
@@ -310,32 +311,32 @@ class Table extends DatabaseTools
      *
      * @return $this
      */
-    public function whereIn($column, array $range, $boolean = "and")
+    public function whereIn($column, array $range, $boolean = 'and')
     {
         if (count($range) > 2) {
             $range = array_slice($range, 0, 2);
         } else {
 
             if (count($range) == 0) {
-                throw new TableException("Le paramètre 2 ne doit pas être un tableau vide.", E_ERROR);
+                throw new TableException('Le paramètre 2 ne doit pas être un tableau vide.', E_ERROR);
             }
 
             $range = [$range[0], $range[0]];
         }
 
-        $in = implode(", ", $range);
+        $in = implode(', ', $range);
 
         if (is_null($this->where)) {
-            if ($boolean == "not") {
-                $this->where = "`$column` not in ($in)";
+            if ($boolean == 'not') {
+                $this->where = '`' . $column . '` not in ('.$in.')';
             } else {
-                $this->where = "`$column` in ($in)";
+                $this->where = '`' . $column .'` in ('.$in.')';
             }
         } else {
-            if ($boolean == "not") {
-                $this->where .= " and `$column` not in ($in)";
+            if ($boolean == 'not') {
+                $this->where .= ' and `' . $column . '` not in ('.$in.')';
             } else {
-                $this->where .= " and `$column` in ($in)";
+                $this->where .= ' and `'.$column.'` in ('.$in.')';
             }
         }
 
@@ -354,7 +355,7 @@ class Table extends DatabaseTools
      */
     public function whereNotIn($column, array $range)
     {
-        $this->whereIn($column, $range, "not");
+        $this->whereIn($column, $range, 'not');
 
         return $this;
     }
@@ -369,9 +370,9 @@ class Table extends DatabaseTools
     public function join($table)
     {
         if (is_null($this->join)) {
-            $this->join = "inner join `$table`";
+            $this->join = 'inner join `'.$table.'`';
         } else {
-            $this->join .= ",`$table`";
+            $this->join .= ',`'.$table.'`';
         }
 
         return $this;
@@ -389,12 +390,12 @@ class Table extends DatabaseTools
     public function leftJoin($table)
     {
         if (is_null($this->join)) {
-            $this->join = "left join `$table`";
+            $this->join = 'left join `'.$table.'`';
         } else {
-            if (!preg_match("/^(inner|right)\sjoin\s.*/", $this->join)) {
-                $this->join .= ", `$table`";
+            if (!preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
+                $this->join .= ', `'.$table.'`';
             } else {
-                throw new TableException("La clause inner join est dèja initalisé.", E_ERROR);
+                throw new TableException('La clause inner join est dèja initalisé.', E_ERROR);
             }
         }
 
@@ -411,12 +412,12 @@ class Table extends DatabaseTools
     public function rightJoin($table)
     {
         if (is_null($this->join)) {
-            $this->join = "right join `$table`";
+            $this->join = 'right join `'.$table.'`';
         } else {
-            if (!preg_match("/^(inner|left)\sjoin\s.*/", $this->join)) {
-                $this->join .= ", `$table`";
+            if (!preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
+                $this->join .= ', `'.$table.'`';
             } else {
-                throw new TableException("La clause inner join est dèja initialisé.", E_ERROR);
+                throw new TableException('La clause inner join est dèja initialisé.', E_ERROR);
             }
         }
         return $this;
@@ -434,18 +435,18 @@ class Table extends DatabaseTools
      *
      * @return $this
      */
-    public function on($column1, $comp = "=", $column2)
+    public function on($column1, $comp = '=', $column2)
     {
         if (is_null($this->join)) {
-            throw new TableException("La clause inner join est dèja initialisé.", E_ERROR);
+            throw new TableException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
             $column2 = $comp;
         }
 
-        if (!preg_match("/on/i", $this->join)) {
-            $this->join .= " on `$column1` $comp $column2";
+        if (!preg_match('/on/i', $this->join)) {
+            $this->join .= ' on `'.$column1.'` '.$comp.' '.$column2;
         }
 
         return $this;
@@ -463,20 +464,20 @@ class Table extends DatabaseTools
      *
      * @return $this
      */
-    public function orOn($column, $comp = "=", $value)
+    public function orOn($column, $comp = '=', $value)
     {
         if (is_null($this->join)) {
-            throw new TableException("La clause inner join est dèja initialisé.", E_ERROR);
+            throw new TableException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
             $value = $comp;
         }
 
-        if (preg_match("/on/i", $this->join)) {
-            $this->join .= " or `$column` $comp $value";
+        if (preg_match('/on/i', $this->join)) {
+            $this->join .= ' or `'.$column.'` '.$comp.' '.$value;
         } else {
-            throw new TableException("La clause <b>on</b> n'est pas initialisé.", E_ERROR);
+            throw new TableException('La clause <b>on</b> n\'est pas initialisé.', E_ERROR);
         }
 
         return $this;
@@ -506,16 +507,16 @@ class Table extends DatabaseTools
      * @param null $value
      * @param string $boolean
      */
-    public function having($column, $comp = "=", $value = null, $boolean = "and")
+    public function having($column, $comp = '=', $value = null, $boolean = 'and')
     {
         if (!$this->isComporaisonOperator($comp)) {
             $value = $comp;
-            $comp = "=";
+            $comp = '=';
         }
         if (is_null($this->havin)) {
-            $this->havin = "`$column` $comp $value";
+            $this->havin = '`'.$column.'` '.$comp.' '.$value;
         } else {
-            $this->havin .= " $boolean `$column` $comp $value";
+            $this->havin .= ' '.$boolean.' `'.$column.'` '.$comp.' '.$value;
         }
     }
 
@@ -527,14 +528,14 @@ class Table extends DatabaseTools
      *
      * @return $this
      */
-    public function orderBy($column, $type = "asc")
+    public function orderBy($column, $type = 'asc')
     {
         if (is_null($this->order)) {
-            if (!in_array($type, ["asc", "desc"])) {
-                $type = "asc";
+            if (!in_array($type, ['asc', 'desc'])) {
+                $type = 'asc';
             }
 
-            $this->order = "order by `$column` $type";
+            $this->order = 'order by `'.$column.'` '.$type;
         }
 
         return $this;
@@ -549,7 +550,7 @@ class Table extends DatabaseTools
     public function jump($offset = 0)
     {
         if (is_null($this->limit)) {
-            $this->limit = "$offset, ";
+            $this->limit = $offset.', ';
         }
 
         return $this;
@@ -567,9 +568,9 @@ class Table extends DatabaseTools
         if (is_null($this->limit)) {
             $this->limit = $limit;
         } else {
-            if (preg_match("/^([\d]+),$/", $this->limit, $match)) {
+            if (preg_match('/^([\d]+),$/', $this->limit, $match)) {
                 array_shift($match);
-                $this->limit = "{$match[0]}, $limit";
+                $this->limit = $match[0].', '.$limit;
             }
         }
 
@@ -585,7 +586,7 @@ class Table extends DatabaseTools
      */
     public function max($column)
     {
-        return $this->executeAgregat("max", $column);
+        return $this->executeAgregat('max', $column);
     }
 
     /**
@@ -597,7 +598,7 @@ class Table extends DatabaseTools
      */
     public function min($column)
     {
-        return $this->executeAgregat("min", $column);
+        return $this->executeAgregat('min', $column);
     }
 
     /**
@@ -609,7 +610,7 @@ class Table extends DatabaseTools
      */
     public function avg($column)
     {
-        return $this->executeAgregat("avg", $column);
+        return $this->executeAgregat('avg', $column);
     }
 
     /**
@@ -621,7 +622,7 @@ class Table extends DatabaseTools
      */
     public function sum($column)
     {
-        return $this->executeAgregat("sum", $column);
+        return $this->executeAgregat('sum', $column);
     }
 
     /**
@@ -634,19 +635,19 @@ class Table extends DatabaseTools
      */
     private function executeAgregat($aggregat, $column)
     {
-        $sql = "select $aggregat(`$column`) from " . $this->tableName;
+        $sql = 'select ' . $aggregat . '(`' . $column . '`) from ' . $this->tableName;
 
         if (!is_null($this->where)) {
-            $sql .= " where " . $this->where;
+            $sql .= ' where ' . $this->where;
             $this->where = null;
         }
 
         if (!is_null($this->group)) {
-            $sql .= " " . $this->group;
+            $sql .= ' ' . $this->group;
             $this->group = null;
 
             if (!isNull($this->havin)){
-                $sql .= " having " . $this->havin;
+                $sql .= ' having ' . $this->havin;
             }
         }
 
@@ -671,47 +672,47 @@ class Table extends DatabaseTools
      */
     public function get($cb = null)
     {
-        $sql = "select ";
+        $sql = 'select ';
 
         // Ajout de la clause select
         if (is_null($this->select)) {
-            $sql .= "* from `" . $this->tableName ."`";
+            $sql .= '* from `' . $this->tableName .'`';
         } else {
-            $sql .= $this->select . " from `" . $this->tableName . "`";
+            $sql .= $this->select . ' from `' . $this->tableName . '`';
             $this->select = null;
         }
 
         // Ajout de la clause join
         if (!is_null($this->join)) {
-            $sql .= " join " . $this->join;
+            $sql .= ' join ' . $this->join;
             $this->join = null;
         }
 
         // Ajout de la clause where
         if (!is_null($this->where)) {
-            $sql .= " where " . $this->where;
+            $sql .= ' where ' . $this->where;
             $this->where = null;
         }
 
         // Ajout de la clause order
         if (!is_null($this->order)) {
-            $sql .= " " . $this->order;
+            $sql .= ' ' . $this->order;
             $this->order = null;
         }
 
         // Ajout de la clause limit
         if (!is_null($this->limit)) {
-            $sql .= " limit " . $this->limit;
+            $sql .= ' limit ' . $this->limit;
             $this->limit = null;
         }
 
         // Ajout de la clause group
         if (!is_null($this->group)) {
-            $sql .= " group by " . $this->group;
+            $sql .= ' group by ' . $this->group;
             $this->group = null;
 
             if (!is_null($this->havin)) {
-                $sql .= " having " . $this->havin;
+                $sql .= ' having ' . $this->havin;
             }
         }
 
@@ -720,13 +721,15 @@ class Table extends DatabaseTools
         static::bind($stmt, $this->whereDataBind);
         $this->whereDataBind = [];
         $stmt->execute();
+
+        // On récupère la dernière erreur.
         self::$errorInfo = $stmt->errorInfo();
 
+        $data = Security::sanitaze($stmt->fetchAll());
+
         if (static::$getOne) {
-            $data = Security::sanitaze($stmt->fetch());
+            $data = current($data);
             static::$getOne = false;
-        } else {
-            $data = Security::sanitaze($stmt->fetchAll());
         }
 
         $stmt->closeCursor();
@@ -777,11 +780,11 @@ class Table extends DatabaseTools
      */
     public function find($id = null)
     {
-        $method = "get";
+        $method = 'get';
 
         if ($id !== null) {
-            $this->where("id", $id);
-            $method = "getOne";
+            $this->where('id', $id);
+            $method = 'getOne';
         }
 
         return $this->$method();
@@ -813,10 +816,11 @@ class Table extends DatabaseTools
             return call_user_func_array($cb, [$n, $data]);
         }
 
-        return (object) [
-            "info" => $n,
-            "data" => $data
-        ];
+        if (count($data) == 1) {
+            $data = end($data);
+        }
+
+        return $data;
     }
 
     /**
@@ -830,12 +834,12 @@ class Table extends DatabaseTools
     public function findOrFail($id = null)
     {
         if ($id !== null) {
-            $this->where("id", $id);
+            $this->where('id', $id);
         }
         $data = $this->get();
 
         if (count($data) == 0) {
-            throw new TableException("Aucune donnée trouver.", E_WARNING);
+            throw new TableException('Aucune donnée trouver.', E_WARNING);
         }
 
         return $data;
@@ -909,17 +913,21 @@ class Table extends DatabaseTools
      *
      * @return DatabaseErrorHandler
      */
-    public function count($column = "*", Callable $cb = null)
+    public function count($column = '*', Callable $cb = null)
     {
         if (is_callable($column)) {
             $cb = $column;
-            $column = "*";
+            $column = '*';
         }
 
-        $sql = "select count(`$column`) from " . $this->tableName;
+        if ($column != '*') {
+            $column = '`' . $column . '`';
+        }
+
+        $sql = 'select count(' . $column . ') from `' . $this->tableName .'`';
 
         if ($this->where !== null) {
-            $sql .= " where " . $this->where;
+            $sql .= ' where ' . $this->where;
             $this->where = null;
         }
 
@@ -933,10 +941,10 @@ class Table extends DatabaseTools
         $r = $stmt->fetchColumn();
 
         if (is_callable($cb)) {
-            call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
+            call_user_func_array($cb, [$this->getResponseOfQuery($r), $r]);
         }
 
-        return  $this->getResponseOfQuery($r);
+        return (int) $r;
     }
 
     /**
@@ -951,11 +959,11 @@ class Table extends DatabaseTools
      */
     public function update(array $data = [], Callable $cb = null)
     {
-        $sql = "update `" . $this->tableName . "` set ";
+        $sql = 'update `' . $this->tableName . '` set ';
         $sql .= parent::rangeField(parent::add2points(array_keys($data)));
 
         if (!is_null($this->where)) {
-            $sql .= " where " . $this->where;
+            $sql .= ' where ' . $this->where;
             $this->where = null;
             $data = array_merge($data, $this->whereDataBind);
             $this->whereDataBind = [];
@@ -974,10 +982,10 @@ class Table extends DatabaseTools
         $r = $stmt->rowCount();
 
         if (is_callable($cb)) {
-            return call_user_func_array($cb, [$this->getResponseOfQuery($r)]);
+            return call_user_func_array($cb, [$this->getResponseOfQuery($r), $r]);
         }
 
-        return $this->getResponseOfQuery($r);
+        return (int) $r;
     }
 
     /**
@@ -989,10 +997,10 @@ class Table extends DatabaseTools
      */
     public function delete(Callable $cb = null)
     {
-        $sql = "delete from `" . $this->tableName . "`";
+        $sql = 'delete from `' . $this->tableName . '`';
 
         if (!is_null($this->where)) {
-            $sql .= " where " . $this->where;
+            $sql .= ' where ' . $this->where;
             $this->where = null;
         }
 
@@ -1008,7 +1016,7 @@ class Table extends DatabaseTools
             return call_user_func_array($cb, [$this->getResponseOfQuery($r), $r]);
         }
 
-        return $this->getResponseOfQuery($r);
+        return (int) $r;
     }
 
     /**
@@ -1022,7 +1030,7 @@ class Table extends DatabaseTools
      *
      * @throws TableException
      */
-    public function remove($column, $comp = "=", $value = null)
+    public function remove($column, $comp = '=', $value = null)
     {
         $this->where = null;
         return $this->where($column, $comp, $value)->delete();
@@ -1038,7 +1046,7 @@ class Table extends DatabaseTools
      */
     public function increment($column, $step = 1)
     {
-        return $this->crement($column, $step, "+");
+        return $this->crement($column, $step, '+');
     }
 
 
@@ -1052,7 +1060,7 @@ class Table extends DatabaseTools
      */
     public function decrement($column, $step = 1)
     {
-        return $this->crement($column, $step, "-");
+        return $this->crement($column, $step, '-');
     }
 
     /**
@@ -1064,12 +1072,12 @@ class Table extends DatabaseTools
      *
      * @return DatabaseErrorHandler
      */
-    private function crement($column, $step = 1, $sign = "")
+    private function crement($column, $step = 1, $sign = '')
     {
-        $sql = "update `" . $this->tableName . "` set `$column` = `$column` $sign $step";
+        $sql = 'update `' . $this->tableName . '` set `'.$column.'` = `'.$column.'` '.$sign.' '.$step;
 
         if (!is_null($this->where)) {
-            $sql .= " " . $this->where;
+            $sql .= ' ' . $this->where;
             $this->where = null;
         }
 
@@ -1088,7 +1096,7 @@ class Table extends DatabaseTools
      */
     public function truncate()
     {
-        return (bool) $this->connection->exec("truncate " . $this->tableName);
+        return (bool) $this->connection->exec('truncate ' . $this->tableName);
     }
 
     /**
@@ -1132,7 +1140,7 @@ class Table extends DatabaseTools
      */
     private function insertOne(array $value)
     {
-        $sql = "insert into `" . $this->tableName . "` set ";
+        $sql = 'insert into `' . $this->tableName . '` set ';
 
         $sql .= parent::rangeField(parent::add2points(array_keys($value)));
         $stmt = $this->connection->prepare($sql);
@@ -1148,7 +1156,7 @@ class Table extends DatabaseTools
      * Action insertAndGetLastId lance les actions insert et lastInsertId
      *
      * @param array $values
-     * @param bool $withInfo Si a true cette fonction retourn un object ["info" => DatabaseErrorHandler, "id" => int]
+     * @param bool $withInfo Si a true cette fonction retourn un object ['info' => DatabaseErrorHandler, 'id' => int]
      *
      * @return int|DatabaseErrorHandler
      */
@@ -1158,7 +1166,7 @@ class Table extends DatabaseTools
         $n = $this->connection->lastInsertId();
 
         if ($withInfo) {
-            $n = (object) ["info" => $r, "id" => $n];
+            $n = (object) ['info' => $r, 'id' => $n];
         }
 
         return $n;
@@ -1213,7 +1221,7 @@ class Table extends DatabaseTools
      */
     public function drop()
     {
-        return (bool) $this->connection->exec("drop table " . $this->tableName);
+        return (bool) $this->connection->exec('drop table ' . $this->tableName);
     }
 
     /**
@@ -1225,7 +1233,7 @@ class Table extends DatabaseTools
      */
     private static function isComporaisonOperator($comp)
     {
-        return in_array($comp, ["=", ">", "<", ">=", "=<", "<>", "!=", "LIKE", "like"], true);
+        return in_array($comp, ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'like'], true);
     }
 
     /**
@@ -1270,11 +1278,11 @@ class Table extends DatabaseTools
 
         // active la pagination automatique.
         $data = [
-            "next" => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
-            "previous" => ($current - 1) <= 0 ? 1 : ($current - 1),
-            "current" => $current,
-            "data" => $data,
-            "info" => $this->getResponseOfQuery(count($data))
+            'next' => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
+            'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),
+            'current' => $current,
+            'data' => $data,
+            'info' => $this->getResponseOfQuery(count($data))
         ];
 
         return (object) $data;
@@ -1291,7 +1299,7 @@ class Table extends DatabaseTools
         $coll =  new Collection();
 
         if (count($data) == 1) {
-            $data = $data[0];
+            $data = current($data);
         }
 
         foreach($data as $key => $value) {
@@ -1319,8 +1327,12 @@ class Table extends DatabaseTools
      * @return bool
      * @throws TableException
      */
-    public function valueExists($column, $value)
+    public function exists($column, $value = null)
     {
+        if ($value == null) {
+            $value = $column;
+            $column = 'id';
+        }
         return $this->where($column, $value)->count() > 0 ? true : false;
     }
 

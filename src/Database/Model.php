@@ -38,19 +38,19 @@ abstract class Model
          *
          * Les classes  definir définir avec la montion scope.
          */
-        if (method_exists($instance = new static, $scope)) {
+        if (method_exists($child = new static, $scope)) {
             if (method_exists($table, $method)) {
                 throw new ModelException("$method ne peut pas être utiliser comme fonction d'aliase.", E_ERROR);
             }
-            return call_user_func_array([$instance, $scope], $args);
+            return call_user_func_array([$child, $scope], $args);
         }
 
         /**
          * Lancement de l'execution des fonctions liée a l'instance de la classe Table
          */
         if (method_exists($table, $method)) {
-            $instance = call_user_func_array([$table, $method], $args);
-            return static::carbornize($instance, $method);
+            $table = call_user_func_array([$table, $method], $args);
+            return static::carbornize($table, $method, $child);
         }
 
         throw new ModelException("methode $method n'est définie.", E_ERROR);
@@ -73,36 +73,44 @@ abstract class Model
     }
 
     /**
-     * @param mixed $instance
+     * @param mixed $data
      * @param string $method
+     * @param mixed $child
      * @return array
      */
-    private static function carbornize($instance, $method)
+    private static function carbornize($data, $method, $child)
     {
-        if (in_array($method, static::avalableMethods())) {
+        if (!in_array($method, static::avalableMethods())) {
+            return $data;
+        }
 
-            if (!is_array($instance)) {
-                $instance = [$instance];
+        if (!is_array($data)) {
+            $data = [$data];
+        }
+
+        $custumFieldsLists = static::avalableFields();
+
+        if (method_exists($child, "customDate")) {
+            $custumFieldsLists = array_merge($custumFieldsLists, $child->customDate());
+        }
+
+        foreach($data as $value) {
+            if (!is_object($value)) {
+                continue;
             }
-
-            $custumFieldsLists = static::avalableFields();
-
-            if (method_exists($instance, "customDate")) {
-                $custumFieldsLists = array_merge($custumFieldsLists, $instance::customDate());
-            }
-
-            foreach($instance as $value) {
-                if (!is_array($value)) {
-                    $value = [$value];
-                }
-                foreach($value as $key => $content) {
-                    if (in_array($key, $custumFieldsLists)) {
-                        $value->$key = new \Carbon\Carbon($content);
-                    }
+            foreach($value as $key => $content) {
+                if (in_array($key, $custumFieldsLists)) {
+                    $value->$key = new \Carbon\Carbon($content);
                 }
             }
         }
 
-        return $instance;
+        if (count($data) == 1) {
+            if ($method == 'getOne' || preg_match('/^find/', $method)) {
+                $data = end($data);
+            }
+        }
+
+        return $data;
     }
 }
