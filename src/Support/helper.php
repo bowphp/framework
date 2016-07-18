@@ -275,7 +275,7 @@ if (!function_exists("select")) {
      *
      * @return int|array|StdClass
      */
-    function select($sql, array $data = [], $cb = null) {
+    function select($sql, $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "select");
     }
 }
@@ -290,7 +290,7 @@ if (!function_exists("select_one")) {
      *
      * @return int|array|StdClass
      */
-    function select_one($sql, array $data = [], $cb = null) {
+    function select_one($sql, $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "selectOne");
     }
 }
@@ -320,7 +320,7 @@ if (!function_exists("delete")) {
      *
      * @return int
      */
-    function delete($sql, array $data = [], $cb = null) {
+    function delete($sql, $data = [], $cb = null) {
         return query_maker($sql, $data, $cb, "delete");
     }
 }
