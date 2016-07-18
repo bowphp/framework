@@ -17,18 +17,6 @@ class Schema
     private static $data;
 
     /**
-     * @var string
-     */
-    private $fill;
-
-    protected static $types = [
-        'integer' => 'number',
-        'string' => 'string',
-        'date' => 'date',
-        'time' => 'timestamps'
-    ];
-
-    /**
      * Supprimer une table.
      *
      * @param string $table
@@ -36,7 +24,7 @@ class Schema
      */
     public static function drop($table)
     {
-        if (Database::statement('DROP TABLE $table;')) {
+        if (Database::statement('DROP TABLE ' . $table . ';')) {
             echo "\033[0;32m$table table droped.\033[00m\n";
         } else {
             echo "\033[0;31m$table table not exists.\033[00m\n";
