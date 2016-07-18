@@ -77,7 +77,7 @@ class AlterTable
         }
 
         if ($this->displaySql) {
-            echo $sql;
+            echo $sql . "\n";
         }
 
     }

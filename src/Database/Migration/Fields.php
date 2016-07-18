@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Database\Migration;
 
-use Bow\Support\Str;
 use Bow\Support\Collection;
 use Bow\Exception\ModelException;
 
@@ -70,13 +69,11 @@ class Fields
      * Constructor
      *
      * @param string $table nom de la table
-     * @param bool $displaySql
      */
-    public function __construct($table, $displaySql = false)
+    public function __construct($table)
     {
         $this->fields  = new Collection;
         $this->table = $table;
-        $this->displaySql = $displaySql;
         return $this;
     }
 
