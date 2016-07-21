@@ -178,15 +178,16 @@ class Application
 	{
 		if ($name === null) {
 			$key = $path;
+
 			if (in_array($key, $this->local)) {
 				return $this->local[$key];
-			} else {
-				if (($method = $this->getConfigMethod($key, 'get')) !== false) {
-					return $this->config->$method();
-				} else {
-					return null;
-				}
 			}
+
+			if (($method = $this->getConfigMethod($key, 'get')) !== false) {
+				return $this->config->$method();
+			}
+
+			return;
 		}
 
 		return $this->routeLoader('GET', $path, $name, $cb);
@@ -346,9 +347,14 @@ class Application
 	 */
 	private function routeLoader($method, $path, $name, Callable $cb = null)
 	{
-		if (!is_callable($cb) || !is_string($cb)) {
+		if (is_callable($name) || is_array($name)) {
 			$cb = $name;
-			$name = null;
+			if (isset($name['name'])) {
+				$name = $name['name'];
+				unset($cb['name']);
+			} else {
+				$name = null;
+			}
 		}
 
 		if (is_string($name)) {
@@ -704,6 +710,26 @@ class Application
 		$routes = $this->config->getApplicationRoutes();
 		$routes = array_merge($routes, $route);
 		$this->config->setApplicationRoutes($routes);
+	}
+
+	/**
+	 * Retourne la listes des routes de l'application
+	 * 
+	 * @return array Liste des routes définir dans l'application
+	 */
+	public function getRoutes()
+	{
+		return static::$routes;
+	}
+
+	/**
+	 * Retourne les définir pour une methode HTTP
+	 * 
+	 * @return Route
+	 */
+	public function getMethodRoutes($method)
+	{
+		return static::$routes[$method];
 	}
 
 	/**
