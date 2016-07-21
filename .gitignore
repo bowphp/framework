@@ -4,3 +4,4 @@ tests/data
 vendor/
 .idea/
 composer.lock
+src/View
