@@ -93,7 +93,7 @@ Class Route
 
 		// On retourne directement tout
 		// pour gagner en performance.
-		if ($this->path == $uri) {
+		if ($this->path === $uri) {
 			return true;
 		}
 
@@ -139,6 +139,7 @@ Class Route
 		}
 
 		// Vérifcation de url et path PARSER
+		$path = str_replace('~', '\\~', $path);
 		if (preg_match("~^$path$~", $uri, $match)) {
 			array_shift($match);
 			$this->match = str_replace("/", "", $match);
