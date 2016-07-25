@@ -29,7 +29,7 @@ abstract class Model
      */
     public static function __callStatic($method, $args)
     {
-        $scope = "scope" . ucfirst($method);
+        $scope = 'scope' . ucfirst($method);
         $table = Database::table(Str::lower(static::$table));
 
         /**
@@ -40,7 +40,7 @@ abstract class Model
          */
         if (method_exists($child = new static, $scope)) {
             if (method_exists($table, $method)) {
-                throw new ModelException("$method ne peut pas être utiliser comme fonction d'aliase.", E_ERROR);
+                throw new ModelException($method . 'ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
             }
             return call_user_func_array([$child, $scope], $args);
         }
@@ -53,7 +53,7 @@ abstract class Model
             return static::carbornize($table, $method, $child);
         }
 
-        throw new ModelException("methode $method n'est définie.", E_ERROR);
+        throw new ModelException('methode $method n\'est définie.', E_ERROR);
     }
 
     /**
@@ -61,7 +61,7 @@ abstract class Model
      */
     private static function avalableMethods()
     {
-        return ["get", "getOne", "find"];
+        return ['get', 'getOne', 'find'];
     }
 
     /**
@@ -69,7 +69,7 @@ abstract class Model
      */
     private static function avalableFields()
     {
-        return ["create_at", "update_at", "expires_at", "login_at", "sigin_at"];
+        return ['create_at', 'update_at', 'expires_at', 'login_at', 'sigin_at'];
     }
 
     /**
@@ -90,7 +90,7 @@ abstract class Model
 
         $custumFieldsLists = static::avalableFields();
 
-        if (method_exists($child, "customDate")) {
+        if (method_exists($child, 'customDate')) {
             $custumFieldsLists = array_merge($custumFieldsLists, $child->customDate());
         }
 

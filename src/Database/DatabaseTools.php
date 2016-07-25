@@ -29,13 +29,14 @@ abstract class DatabaseTools
 
         foreach ($data as $key => $value) {
 
-            if (is_null($value) || $value === "NULL") {
+            if (is_null($value) || strtolower($value) === 'null') {
+                $pdoStatement->bindValue(':'. $key, $value, PDO::PARAM_NULL);
                 continue;
             }
 
             $param = PDO::PARAM_INT;
 
-            if (preg_match("/[a-zA-Z_-]+/", $value)) {
+            if (preg_match('/[a-zA-Z_-]+/', $value)) {
                 /**
                  * SÉCURIATION DES DONNÉS
                  * - Injection SQL
@@ -59,7 +60,7 @@ abstract class DatabaseTools
              * Exécution de bindValue
              */
             if (is_string($key)) {
-                $pdoStatement->bindValue(":$key", $value, $param);
+                $pdoStatement->bindValue(':' . $key, $value, $param);
             } else {
                 $pdoStatement->bindValue($key, $value, $param);
             }
@@ -75,7 +76,7 @@ abstract class DatabaseTools
      */
     protected static function rangeField($data)
     {
-        $field = "";
+        $field = '';
         $i = 0;
         foreach ($data as $key => $value) {
             /**
@@ -83,7 +84,7 @@ abstract class DatabaseTools
              * key1 = value1, key2 = value2[, keyN = valueN]
              * Utile pour binder une réquête INSERT|UPDATE|SELECT|DELETE en mode préparer:
              */
-            $field .= ($i > 0 ? ", " : "") . $key . " = " . $value;
+            $field .= ($i > 0 ? ', ' : '') . $key . ' = ' . $value;
             $i++;
         }
         /**
@@ -104,7 +105,7 @@ abstract class DatabaseTools
         $resultat = [];
 
         foreach ($data as $key => $value) {
-            $resultat[$value] = ":$value";
+            $resultat[$value] = ':' . $value;
         }
 
         return $resultat;
