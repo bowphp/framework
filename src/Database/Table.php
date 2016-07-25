@@ -774,20 +774,14 @@ class Table extends DatabaseTools
     /**
      * find
      *
-     * @param null $id
+     * @param mixed $id
      * @return array
      * @throws TableException
      */
-    public function find($id = null)
+    public function find($id)
     {
-        $method = 'get';
-
-        if ($id !== null) {
-            $this->where('id', $id);
-            $method = 'getOne';
-        }
-
-        return $this->$method();
+        $this->where('id', $id);
+        return new SqlUnity($this, $id);
     }
 
     /**
@@ -831,18 +825,16 @@ class Table extends DatabaseTools
      *
      * @throws TableException
      */
-    public function findOrFail($id = null)
+    public function findOrFail($id)
     {
-        if ($id !== null) {
-            $this->where('id', $id);
-        }
+        $this->where('id', $id);
         $data = $this->get();
 
         if (count($data) == 0) {
             throw new TableException('Aucune donnée trouver.', E_WARNING);
         }
 
-        return $data;
+        return new SqlUnity($this, $id, $data[0]);
     }
 
     /**
