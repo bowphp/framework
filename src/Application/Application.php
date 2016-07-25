@@ -347,13 +347,17 @@ class Application
 	 */
 	private function routeLoader($method, $path, $name, Callable $cb = null)
 	{
-		if (is_callable($name) || is_array($name)) {
+		if (is_callable($name)) {
 			$cb = $name;
-			if (isset($name['name'])) {
-				$name = $name['name'];
+			$name = null;
+		}
+
+		if (is_array($name)) {
+			$cb = $name;
+			$name = null;
+			if (isset($cb['name'])) {
+				$name = $cb['name'];
 				unset($cb['name']);
-			} else {
-				$name = null;
 			}
 		}
 
@@ -366,7 +370,7 @@ class Application
 			}
 		}
 
-		// construction de la path original en fonction de la configuration de l'application
+		// construction du path original en fonction de la configuration de l'application
 		$path = $this->config->getApproot() . $this->branch . $path;
 
 		// Ajout d'un nouvelle route sur l'en definie.
