@@ -1,5 +1,6 @@
 <?php
 namespace Bow\Database;
+use Bow\Exception\TableException;
 
 /**
  * Class SQLUnit
@@ -30,11 +31,17 @@ class SqlUnity implements \IteratorAggregate
      * @param Table $table
      * @param mixed $id
      * @param null $data
+     * @throws TableException
      */
     public function __construct(Table $table, $id, $data = null) {
         if ($data === null) {
             $data = $table->getOne();
         }
+
+        if ($data == null) {
+            throw new TableException('Aucune donnée trouvé.', E_ERROR);
+        }
+
         $this->data = $data;
         $this->table = $table;
         $this->id = $id;

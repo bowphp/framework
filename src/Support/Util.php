@@ -140,10 +140,6 @@ class Util
 			throw new RouterException("Le namespace d'autoload n'est pas défini dans le fichier de configuration");
 		}
 
-		// Chargement de l'autoload
-		@require $names["autoload"] . ".php";
-		$autoload = $names["namespace"]["app"];
-		@$autoload::register();
 		$middleware = null;
 
 		if (is_callable($cb)) {
