@@ -35,7 +35,7 @@ class Input implements CollectionAccess
 	 *
 	 * @param string $method
 	 */
-	private function __construct($method)
+	private function __construct($method = null)
 	{
 		if ($method == "GET") {
 			$this->data = $_GET;
@@ -43,7 +43,8 @@ class Input implements CollectionAccess
 			$this->data = $_POST;
 		} else if ($method == "FILES") {
 			$this->data = $_FILES;
-		} else if ($method == "ALL") {
+		} else {
+			$method = 'ALL';
 			$this->data = array_merge($_POST, $_FILES, $_GET);
 		}
 
