@@ -9,10 +9,10 @@
 */
 
 use Bow\Mail\Mail;
+use Bow\Http\Input;
 use Bow\Http\Request;
 use Bow\Support\Util;
 use Bow\Http\Response;
-use Bow\Http\RequestData;
 use Bow\Support\Security;
 use Bow\Database\Database;
 use Bow\Support\Collection;
@@ -388,7 +388,7 @@ if (!function_exists("body")) {
      * body, fonction de type collection
      * manipule la variable global $_POST
      *
-     * @return RequestData
+     * @return Input
      */
     function body() {
         return request()->body();
@@ -400,7 +400,7 @@ if (!function_exists("files")) {
      * files, fonction de type collection
      * manipule la variable global $_FILES
      *
-     * @return RequestData
+     * @return Input
      */
     function files() {
         return request()->files();
@@ -412,22 +412,31 @@ if (!function_exists("query")) {
      * query, fonction de type collection
      * manipule la variable global $_GET
      *
-     * @return RequestData
+     * @return Input
      */
     function query() {
         return request()->query();
     }
 }
 
-if (!function_exists("all_input")) {
+if (!function_exists("input")) {
     /**
      * input, fonction de type collection
      * manipule la variable global $_GET, $_POST, $_FILES
      *
-     * @return RequestData
+     * @param mixed $key
+     * @return Input
      */
-    function all_input() {
-        return request()->allInput();
+    function input($key = null) {
+        $input = request()->allInput();
+
+        if ($key === null) {
+            return $input;
+        }
+
+        if ($input->has($key)) {
+            return $input->get($key);
+        }
     }
 }
 
