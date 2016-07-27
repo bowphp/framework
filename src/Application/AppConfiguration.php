@@ -379,7 +379,7 @@ class AppConfiguration
      */
     public function getApproot()
     {
-        return $this->approot;
+        return ltrim($this->approot, '/');
     }
 
     /**

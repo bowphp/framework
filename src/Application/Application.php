@@ -150,6 +150,12 @@ class Application
 	 */
 	public function group($branch, Callable $cb)
 	{
+		$branch = rtrim($branch, '/');
+
+		if (!preg_match('@^/', $branch)) {
+			$branch = '/' . $branch;
+		}
+
 		$this->branch = $branch;
 
 		if (is_array($cb)) {
@@ -368,6 +374,10 @@ class Application
 				$cb = $name;
 				$name = null;
 			}
+		}
+
+		if (!preg_match('@^/', $path)) {
+			$path = '/' . $path;
 		}
 
 		// construction du path original en fonction de la configuration de l'application
