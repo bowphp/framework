@@ -92,9 +92,10 @@ class Request
 	public function origin()
 	{
 		if (!isset($_SERVER["REQUEST_SCHEME"])) {
-			return "";
+			return 'http://' . $this->hostname();
 		}
-		return $_SERVER["REQUEST_SCHEME"] . "://" . $this->hostname();
+
+		return strtolower($_SERVER["REQUEST_SCHEME"]) . "://" . $this->hostname();
 	}
 
 	/**

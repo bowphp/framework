@@ -1057,7 +1057,7 @@ if (!function_exists("route")) {
             $url = str_replace(":$key", $value, $url);
         }
 
-        return $url;
+        return request()->origin() . request()->hostname() . $url;
     }
 }
 

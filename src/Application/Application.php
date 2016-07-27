@@ -152,7 +152,7 @@ class Application
 	{
 		$branch = rtrim($branch, '/');
 
-		if (!preg_match('@^/', $branch)) {
+		if (!preg_match('@^/@', $branch)) {
 			$branch = '/' . $branch;
 		}
 
@@ -353,6 +353,14 @@ class Application
 	 */
 	private function routeLoader($method, $path, $name, Callable $cb = null)
 	{
+
+		if (!preg_match('@^/@', $path)) {
+			$path = '/' . $path;
+		}
+
+		// construction du path original en fonction de la configuration de l'application
+		$path = $this->config->getApproot() . $this->branch . $path;
+
 		if (is_callable($name)) {
 			$cb = $name;
 			$name = null;
@@ -375,13 +383,6 @@ class Application
 				$name = null;
 			}
 		}
-
-		if (!preg_match('@^/', $path)) {
-			$path = '/' . $path;
-		}
-
-		// construction du path original en fonction de la configuration de l'application
-		$path = $this->config->getApproot() . $this->branch . $path;
 
 		// Ajout d'un nouvelle route sur l'en definie.
 		static::$routes[$method][] = new Route($path, $cb);
