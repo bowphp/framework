@@ -12,7 +12,7 @@ use Bow\Interfaces\CollectionAccess;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Http
  */
-class RequestData implements CollectionAccess
+class Input implements CollectionAccess
 {
 
 	/**

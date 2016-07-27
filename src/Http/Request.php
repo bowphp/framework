@@ -186,41 +186,41 @@ class Request
 	/**
 	 * Charge la factory RequestData pour le POST
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public static function body()
 	{
-		return RequestData::configure("POST");
+		return Input::configure("POST");
 	}
 
 	/**
 	 * Charge la factory RequestData pour le GET
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public static function query()
 	{
-		return RequestData::configure("GET");
+		return Input::configure("GET");
 	}
 
 	/**
 	 * Charge la factory RequestData pour le FILES
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public static function files()
 	{
-		return RequestData::configure("FILES");
+		return Input::configure("FILES");
 	}
 
 	/**
 	 * Change le factory RequestData pour tout les entrés PHP (GET, FILES, POST)
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public static function allInput()
 	{
-		return RequestData::configure("ALL");
+		return Input::configure("ALL");
 	}
 
 	/**
