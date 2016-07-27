@@ -62,7 +62,7 @@ class Input implements CollectionAccess
 	 *
 	 * @param $method
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public static function configure($method)
 	{
@@ -161,7 +161,7 @@ class Input implements CollectionAccess
 	 *
 	 * @param string $key
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public function remove($key)
 	{
@@ -177,7 +177,7 @@ class Input implements CollectionAccess
 	 * @param mixed $data
 	 * @param bool $next
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public function add($key, $data, $next = false)
 	{
@@ -202,7 +202,7 @@ class Input implements CollectionAccess
 	 *
 	 * @throws ErrorException
 	 *
-	 * @return RequestData
+	 * @return Input
 	 */
 	public function set($key, $value)
 	{
