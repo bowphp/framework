@@ -245,7 +245,7 @@ class Request
 	 *
 	 * @return string
 	 */
-	public function address()
+	public function ip()
 	{
 		return $_SERVER["REMOTE_ADDR"];
 	}
