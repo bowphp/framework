@@ -428,7 +428,7 @@ if (!function_exists("input")) {
      * @return Input
      */
     function input($key = null) {
-        $input = request()->allInput();
+        $input = request()->input();
 
         if ($key === null) {
             return $input;
@@ -437,6 +437,8 @@ if (!function_exists("input")) {
         if ($input->has($key)) {
             return $input->get($key);
         }
+
+        return null;
     }
 }
 

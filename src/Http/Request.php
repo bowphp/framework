@@ -218,7 +218,7 @@ class Request
 	 *
 	 * @return Input
 	 */
-	public static function allInput()
+	public static function input()
 	{
 		return Input::configure("ALL");
 	}
