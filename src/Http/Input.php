@@ -248,11 +248,19 @@ class Input implements CollectionAccess
 	}
 
 	/**
+	 * Alias sur toArray
+	 */
+	public function all()
+	{
+		return $this->toArray();
+	}
+
+	/**
 	 * @inheritdoc
 	 */
 	public function toArray()
 	{
-		return $this->data;
+		return (array) $this->data;
 	}
 
 	/**
