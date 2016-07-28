@@ -120,7 +120,7 @@ class Table extends DatabaseTools
      *
      * @return $this
      */
-    public function select($column = null)
+    public function select($column)
     {
 
         if (is_array($column)) {
