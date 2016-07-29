@@ -12,6 +12,11 @@ use Bow\Exception\ResourceException;
 class Storage
 {
 	/**
+	 * @var Ftp\FTP
+	 */
+	private static $ftp;
+
+	/**
 	 * UploadFile, fonction permettant de uploader un fichier
 	 *
 	 * @param array $file information sur le fichier, $_FILES
@@ -268,10 +273,24 @@ class Storage
 	/**
 	 * Lance la connection au ftp.
 	 *
+	 * @param array $config
 	 * @return Ftp\FTP
 	 */
-	public static function ftp()
+	public static function ftp($config = null)
 	{
-		return new Ftp\FTP();
+		if (static::$ftp == null) {
+			if (!isset($config['tls'])) {
+				$config['tls'] = false;
+			}
+
+			if (!isset($config['timeout'])) {
+				$config['timeout'] = 90;
+			}
+
+			static::$ftp = new Ftp\FTP();
+			static::$ftp->connect($config['hostname'], $config['username'], $config['password'], $config['port'], $config['tls'], $config['timeout']);
+		}
+
+		return static::$ftp;
 	}
 }
