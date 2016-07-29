@@ -88,7 +88,7 @@ Response::configure(config());
 Database::configure(config()->getDatabaseConfiguration());
 
 // Configuration de la resource de l'application.
-Storage::configure(config()->getResourceConfiguration());
+Storage::configure(config()->getFtpConfiguration());
 
 // Configuration de Mail.
 Mail::configure(config()->getMailConfiguration());
@@ -529,20 +529,22 @@ if (!function_exists("store")) {
     /**
      * store, effecture l'upload d'un fichier vers un repertoire
      * @param array $file, le fichier a uploadé.
-     * @param string|null $filename nom du fichier
-     * @param string|null $dirname nom du dossier de destination.
-     * @return StdClass
+     * @param $location
+     * @param $size
+     * @param array $extension
+     * @param callable $cb
+     * @return object
      */
-    function store(array $file, $filename = null, $dirname = null) {
-        if (!is_null($filename) && is_string($filename)) {
-            Storage::setUploadFileName($filename);
+    function store(array $file, $location, $size, array $extension, callable $cb = null) {
+
+        if (is_int($location) || preg_match('/^([0-9]+)(m|k)$/', $location)) {
+            $cb = $extension;
+            $extension = $size;
+            $size = $location;
+            $location = config()->getDefaultStoragePath();
         }
 
-        if (!is_null($dirname)) {
-            Storage::setUploadDirectory($dirname);
-        }
-
-        return (object) Storage::store($file);
+        return Storage::store($file, $location, $size, $extension, $cb);
     }
 }
 
