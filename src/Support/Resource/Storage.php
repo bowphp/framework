@@ -1,8 +1,6 @@
 <?php
 namespace Bow\Support\Resource;
 
-use Bow\Support\Util;
-use InvalidArgumentException;
 use Bow\Exception\ResourceException;
 
 /**
@@ -14,180 +12,48 @@ use Bow\Exception\ResourceException;
 class Storage
 {
 	/**
-	 * Liste des constantes d'erreur pour l'upload de fichier.
-	 */
-	const ERROR = 5;
-	const SUCCESS = 7;
-	const WARNING = 6;
-	const ERROR_EXTENSION_INVALIDE = 8;
-	const ERROR_SIZE_INVALIDE = 9;
-	const ERROR_UPLOAD_ERROR = 10;
-
-	/**
-	 * Variable de configuration
-	 *
-	 * @var array
-	 */
-	private static $config = [];
-
-	/**
-	 * Répertoire par defaut de upload
-	 *
-	 * @var string
-	 */
-	private static $uploadDir = "public";
-
-	/**
-	 * Taille par defaut d'un fichier
-	 *
-	 * @var int
-	 */
-	private static $fileSize = 20000000;
-
-	/**
-	 * Nom d'un fichier
-	 *
-	 * @var null
-	 */
-	private static $uploadFileName = null;
-
-	/**
-	 * Liste des extensions par defaut
-	 *
-	 * @var array
-	 */
-	private static $fileExtension = ["png", "jpg"];
-
-	/**
-	 * Modifier le nom par defaut du file uploader.
-	 *
-	 * @param string $filename
-	 * @return static
-	 */
-	public static function setUploadFileName($filename)
-	{
-		static::$uploadFileName = $filename;
-	}
-
-	/**
-	 * Modifie la liste des extensions valides
-	 *
-	 * @param mixed $extension
-	 */
-	public static function setUploadFileExtension($extension)
-	{
-		if (is_array($extension)) {
-			static::$fileExtension = $extension;
-		} else {
-			static::$fileExtension = func_get_args();
-		}
-	}
-
-	/**
-	 * setUploadedDir, fonction permettant de rédéfinir le répertoir d'upload
-	 *
-	 * @param string:path, le chemin du dossier de l'upload
-	 * @throws InvalidArgumentException
-	 */
-	public static function setUploadDirectory($path)
-	{
-		if (is_string($path)) {
-			static::$uploadDir = $path;
-		} else {
-			throw new InvalidArgumentException("L'argument donnée a la fontion doit etre un entier");
-		}
-	}
-
-	/**
-	 * Modifie la taille prédéfinie de l'image à uploader.
-	 *
-	 * @param integer $size
-	 * @throws InvalidArgumentException
-	 */
-	public static function setUploadFilesize($size)
-	{
-		if (is_int($size)) {
-			static::$fileSize = $size;
-		} else {
-			throw new InvalidArgumentException("L'argument donnée à la fonction doit être de type entier");
-		}
-	}
-
-	/**
 	 * UploadFile, fonction permettant de uploader un fichier
 	 *
 	 * @param array $file information sur le fichier, $_FILES
-	 * @param callable|null $cb
+	 * @param string $location
+	 * @param int $size
+	 * @param array $extension
+	 * @param callable $cb
 	 * @return mixed
+	 * @throws \InvalidArgumentException
 	 */
-	public static function store($file, $cb = null)
+	public static function store($file, $location, $size, array $extension, $cb)
 	{
-		if (!is_object($file) && !is_array($file)) {
-			Util::launchCallBack($cb, [new InvalidArgumentException("Parametre invalide <pre>" . var_export($file, true) ."</pre>. Elle doit etre un tableau ou un object StdClass")]);
+		if (!is_uploaded_file($file['tmp_name'])) {
+			return call_user_func_array($cb, ['error']);
 		}
 
-		if (empty($file)) {
-			Util::launchCallBack($cb, [new InvalidArgumentException("Le fichier a uploader n'existe pas")]);
-		}
-
-		$file = (object) $file;
-
-		// Si le fichier est bien dans le répertoire tmp de PHP
-		if (is_uploaded_file($file->tmp_name)) {
-			return static::ERROR_UPLOAD_ERROR;
-		}
-
-		$dirPart = explode("/", static::$uploadDir);
-		$end = array_pop($dirPart);
-
-		if ($end == "") {
-			static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart);
-		} else {
-			static::$uploadDir = implode(DIRECTORY_SEPARATOR, $dirPart) .DIRECTORY_SEPARATOR. $end;
-		}
-
-		if (!is_dir(static::$uploadDir)) {
-			@mkdir(static::$uploadDir, 0766);
-		}
-
-		// Si le fichier est bien uploader, avec aucune error
-		if ($file->error !== 0) {
-			$status = static::ERROR_UPLOAD_ERROR;
-			goto exists;
-		}
-
-		if ($file->size <= static::$fileSize) {
-			$status = static::ERROR_SIZE_INVALIDE;
-			goto exists;
-		}
-
-		$pathInfo = (object) pathinfo($file->name);
-
-		if (in_array($pathInfo->extension, static::$fileExtension)) {
-			$status = static::ERROR_EXTENSION_INVALIDE;
-			goto exists;
-		}
-
-		if (static::$uploadFileName !== null) {
-			$filename = static::$uploadFileName;
-		} else {
-			$filename = $pathInfo->filename;
-		}
-
-		$filename .= "." . $pathInfo->extension;
-
-		// Déplacement du fichier tmp vers le dossier d'upload
-		static::move($file->tmp_name, static::$uploadDir . "/" . $filename);
-
-		// Status, fichier uploadé
-		$status = static::SUCCESS;
-
-		exists:
-			if (is_callable($cb)) {
-				call_user_func_array($cb, [$status, $filename]);
+		if (is_string($size)) {
+			if (!preg_match('/^([0-9]+)(k|m)$/', strtolower($size), $match)) {
+				throw new \InvalidArgumentException('Taille invalide.', E_USER_ERROR);
 			}
 
-		return $status;
+			$conv = 1;
+			array_shift($match);
+
+			if ($match[1] == 'm') {
+				$conv = 1000;
+			}
+
+			$size = $match[0] * $conv;
+		}
+
+		if ($file['size'] > $size) {
+			return call_user_func_array($cb, ['size']);
+		}
+
+		if (!in_array(pathinfo($file['name'], PATHINFO_EXTENSION), $extension, true)) {
+			return call_user_func_array($cb, ['extension']);
+		}
+
+		$r = static::copy($file['tmp_name'], $location);
+
+		return call_user_func_array($cb, [$r == true ? false : 'uploaded']);
 	}
 
 	/**
@@ -195,10 +61,11 @@ class Storage
 	 *
 	 * @param string $file nom du fichier
 	 * @param string $content content a ajouter
+	 * @return bool
 	 */
 	public static function append($file, $content)
 	{
-		file_put_contents($file, $content, FILE_APPEND);
+		return file_put_contents($file, $content, FILE_APPEND);
 	}
 
 	/**
@@ -206,13 +73,14 @@ class Storage
 	 *
 	 * @param string $file
 	 * @param string $content
+	 * @return bool
 	 */
 	public static function prepend($file, $content)
 	{
 		$tmp_content = file_get_contents($file);
 
 		static::put($file, $content);
-		static::append($file, $tmp_content);
+		return static::append($file, $tmp_content);
 	}
 
 	/**
@@ -221,10 +89,11 @@ class Storage
 	 * @param $file
 	 * @param $content
 	 * @throws ResourceException
+	 * @return bool
 	 */
 	public static function put($file, $content)
 	{
-		file_put_contents($file, $content);
+		return file_put_contents($file, $content);
 	}
 
 	/**
@@ -235,18 +104,23 @@ class Storage
 	 */
 	public static function delete($file)
 	{
-		return @unlink($file);
+		if (is_dir($file)) {
+			return rmdir($file);
+		}
+
+		return unlink($file);
 	}
 
 	/**
 	 * Alias sur readInDir
 	 *
-	 * @param string $filename
+	 * @param string $dirname
 	 * @return array
 	 */
-	public static function files($filename)
+	public static function files($dirname)
 	{
-		$directoryContents = glob($filename."/*");
+		$dirname = rtrim($dirname, '/');
+		$directoryContents = glob($dirname."/*");
 
 		return array_filter($directoryContents, function($file)
 		{
@@ -285,35 +159,30 @@ class Storage
 			$mode = 0777;
 		}
 
-		if ($recursive === true) {
-			$status = @mkdir($files, $mode, true);
-		} else {
-			$status = @mkdir($files, $mode);
-		}
-
-		return $status;
+		return @mkdir($files, $mode, $recursive);
 	}
 
 	/**
 	 * Récuper le contenu du fichier
 	 *
-	 * @param $filename
+	 * @param string $filename
 	 * @return null|string
 	 */
 	public static function get($filename)
 	{
-		if (is_file($filename) && stream_is_local($filename)) {
-			return file_get_contents($filename);
+		if (!(is_file($filename) && stream_is_local($filename))) {
+			return null;
 		}
 
-		return null;
+		return file_get_contents($filename);
 	}
 
 	/**
 	 * Copie le contenu d'un fichier source vers un fichier cible.
 	 *
-	 * @param $targerFile
-	 * @param $sourceFile
+	 * @param string $targerFile
+	 * @param string $sourceFile
+	 * @return bool
 	 */
 	public static function copy($targerFile, $sourceFile)
 	{
@@ -325,7 +194,7 @@ class Storage
 			static::makeDirectory(dirname($sourceFile), true);
 		}
 
-		file_put_contents($sourceFile, static::get($targerFile));
+		return file_put_contents($sourceFile, static::get($targerFile));
 	}
 
 	/**
@@ -386,32 +255,23 @@ class Storage
 	}
 
 	/**
+	 * isDirectory aliase sur is_dir.
+	 *
+	 * @param $dirname
+	 * @return bool
+	 */
+	public static function isDirectory($dirname)
+	{
+		return is_dir($dirname);
+	}
+
+	/**
 	 * Lance la connection au ftp.
 	 *
 	 * @return Ftp\FTP
 	 */
 	public static function ftp()
 	{
-		return Ftp\FTP::configure();
-	}
-
-	/**
-	 * @return Ftp\FTP
-	 */
-	public static function disk()
-	{
 		return new Ftp\FTP();
-	}
-
-	/**
-	 * Lance la configuration
-	 *
-	 * @param object $config
-	 */
-	public static function configure($config = null)
-	{
-		if ($config !== null) {
-			static::$fileExtension = $config->upload_file_extension;
-		}
 	}
 }
