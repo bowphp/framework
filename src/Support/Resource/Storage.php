@@ -12,6 +12,11 @@ use Bow\Exception\ResourceException;
 class Storage
 {
 	/**
+	 * @var array
+	 */
+	private static $config;
+
+	/**
 	 * @var Ftp\FTP
 	 */
 	private static $ftp;
@@ -27,7 +32,7 @@ class Storage
 	 * @return mixed
 	 * @throws \InvalidArgumentException
 	 */
-	public static function store($file, $location, $size, array $extension, $cb)
+	public static function store($file, $location, $size, array $extension, callable $cb)
 	{
 		if (!is_uploaded_file($file['tmp_name'])) {
 			return call_user_func_array($cb, ['error']);
@@ -279,6 +284,10 @@ class Storage
 	public static function ftp($config = null)
 	{
 		if (static::$ftp == null) {
+			if ($config == null) {
+				$config = static::$config;
+			}
+
 			if (!isset($config['tls'])) {
 				$config['tls'] = false;
 			}
@@ -292,5 +301,13 @@ class Storage
 		}
 
 		return static::$ftp;
+	}
+
+	/**
+	 * @param array $config
+	 */
+	public static function configure(array $config)
+	{
+		static::$config = $config;
 	}
 }
