@@ -1,6 +1,12 @@
 <?php
 namespace Bow\Support\Resource\Ftp;
 
+/**
+ * Class FTP
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Support\Resource\Ftp
+ */
 class FTP
 {
     /**
@@ -28,12 +34,12 @@ class FTP
      * @param string $username Le nom d'utilisateur
      * @param string $password Le mot de passe de l'utilisteur.
      * @param int $port        Le port de connection
-     * @param int $timeout     Le temps d'attente avant réponse
      * @param bool $tls        Si a true permet d'établir un connection sécuriré.
+     * @param int $timeout     Le temps d'attente avant réponse
      *
      * @throws \ErrorException
      */
-    public function connect($hostname, $username, $password, $port = 21, $timeout = 90, $tls = false)
+    public function connect($hostname, $username, $password, $port = 21, $tls = false, $timeout = 90)
     {
         if ($tls == true) {
             $this->ftp = ftp_ssl_connect($hostname, $port, $timeout);
