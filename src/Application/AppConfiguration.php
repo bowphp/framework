@@ -20,16 +20,6 @@ class AppConfiguration
     /**
      * @var string
      */
-    private $appname = "Bow Application";
-
-    /**
-     * @var string|false
-     */
-    private $cache = false;
-
-    /**
-     * @var string
-     */
     private $approot;
 
     /**
@@ -470,13 +460,23 @@ class AppConfiguration
     }
 
     /**
-     * retourne la configuration des resources
+     * retourne la configuration des resources locale
      *
      * @return array|object
      */
-    public function getResourceConfiguration()
+    public function getDefaultStoragePath()
     {
-        return $this->config["resource"];
+        return $this->config["resource"]['storage'];
+    }
+
+    /**
+     * retourne la configuration des resources ftp
+     *
+     * @return array
+     */
+    public function getFtpConfiguration()
+    {
+        return $this->config["resource"]['ftp'];
     }
 
     /**
