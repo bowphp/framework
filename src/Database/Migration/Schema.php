@@ -59,8 +59,6 @@ class Schema
 
         if (Database::statement($sql)) {
             echo "\033[0;32m$table table created.\033[00m\n";
-        } else {
-            echo "\033[0;31m$table table already exists.\033[00m\n";
         }
     }
 

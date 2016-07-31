@@ -30,7 +30,7 @@ class SqlUnity implements \IteratorAggregate
      *
      * @param Table $table
      * @param mixed $id
-     * @param null $data
+     * @param null|\stdClass $data
      * @throws TableException
      */
     public function __construct(Table $table, $id, $data = null) {
