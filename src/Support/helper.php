@@ -453,6 +453,17 @@ if (!function_exists("dump")) {
     }
 }
 
+if (!function_exists("dd")) {
+    /**
+     * dd, fonction de debug de variable et termine le processus
+     * elle vous permet d'avoir un coloration
+     * synthaxique des types de donnée.
+     */
+    function dd() {
+        call_user_func_array([Util::class, "dd"], secure(func_get_args()));
+    }
+}
+
 if (!function_exists("create_csrf")) {
     /**
      * create_csrf, fonction permetant de récupérer le token généré
@@ -770,6 +781,15 @@ if (!function_exists("execute_function")) {
     }
 }
 
+if (!function_exists('str')) {
+    /**
+     * @return \Bow\Support\Str;
+     */
+    function str()
+    {
+        return new \Bow\Support\Str();
+    }
+}
 
 if (!function_exists("collect")) {
 
@@ -856,7 +876,7 @@ if (!function_exists("event")) {
      */
     function event($event_name, $fn) {
         if (!is_string($event_name)) {
-            throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
+            throw new \Bow\Exception\EventException("Le premier paramètre doit être une chaine de caractère.", 1);
         }
 
         call_user_func_array([Event::class, "on"], [$event_name, $fn, config()->getNamespace()]);
@@ -872,7 +892,7 @@ if (!function_exists("emit")) {
      */
     function emit($event_name) {
         if (!is_string($event_name)) {
-            throw new \Bow\Exception\EventException("Le premier parametre doit etre une chaine de caractere", 1);
+            throw new \Bow\Exception\EventException("Le premier paramètre doit être une chaine de caractère.", 1);
         }
 
         call_user_func_array([Event::class, "emit"], func_get_args());

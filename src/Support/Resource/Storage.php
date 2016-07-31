@@ -103,6 +103,10 @@ class Storage
 	 */
 	public static function put($file, $content)
 	{
+		$filename = basename($file);
+		$dirname = str_replace($filename, '', $file);
+		static::makeDirectory(rtrim($dirname, '/'));
+
 		return file_put_contents($file, $content);
 	}
 
@@ -286,6 +290,8 @@ class Storage
 		if (static::$ftp == null) {
 			if ($config == null) {
 				$config = static::$config;
+			} else {
+				static::$config = $config;
 			}
 
 			if (!isset($config['tls'])) {
@@ -298,6 +304,12 @@ class Storage
 
 			static::$ftp = new Ftp\FTP();
 			static::$ftp->connect($config['hostname'], $config['username'], $config['password'], $config['port'], $config['tls'], $config['timeout']);
+
+			if (isset($config['root'])) {
+				if ($config['root'] !== null) {
+					static::$ftp->chdir($config['root']);
+				}
+			}
 		}
 
 		return static::$ftp;

@@ -24,7 +24,7 @@ class FTP
      */
     public function __construct()
     {
-        $this->tmp = tmpfile();
+        $this->tmp = tempnam(sys_get_temp_dir(), mt_rand());
     }
 
     /**
@@ -41,7 +41,7 @@ class FTP
      */
     public function connect($hostname, $username, $password, $port = 21, $tls = false, $timeout = 90)
     {
-        if ($tls == true) {
+        if ($tls === true) {
             $this->ftp = ftp_ssl_connect($hostname, $port, $timeout);
         } else {
             $this->ftp = ftp_connect($hostname, $port, $timeout);
@@ -64,7 +64,7 @@ class FTP
      */
     public function isFile($filename)
     {
-        return ftp_fget($this->ftp, $this->tmp, $filename, FTP_ASCII);
+        return ftp_get($this->ftp, $this->tmp, $filename, FTP_ASCII);
     }
 
     /**
@@ -96,8 +96,7 @@ class FTP
     public function get($filename, $to = null)
     {
         if ($to === null) {
-
-            if (!ftp_fget($this->ftp, $this->tmp, $filename, FTP_BINARY)) {
+            if (!ftp_get($this->ftp, $this->tmp, $filename, FTP_BINARY)) {
                 return null;
             }
 
@@ -108,12 +107,64 @@ class FTP
     }
 
     /**
-     * @param $filename
-     * @param $to
+     * Date de dernière modification
+     *
+     * @param string $filename
+     * @return int
      */
-    public function put($filename, $to)
+    public function lastModifyTime($filename)
     {
+        return date('Y-m-d H:i:s', ftp_mdtm($this->ftp, $filename));
+    }
 
+    /**
+     * Liste le contenu de dossier distant.
+     *
+     * @param array $dirname
+     * @return array
+     */
+    public function listDirectory($dirname)
+    {
+        return ftp_nlist($this->ftp, $dirname);
+    }
+
+    /**
+     * Liste le contenu de dossier distant de façon brute.
+     *
+     * @param array $dirname
+     * @return array
+     */
+    public function rawListDirectory($dirname)
+    {
+        return ftp_rawlist($this->ftp, $dirname);
+    }
+
+    /**
+     * @param string $filename
+     * @param int $mode
+     * @return bool
+     */
+    public function changePermission($filename, $mode)
+    {
+        return ftp_chmod($this->ftp, $mode, $filename);
+    }
+
+    /**
+     * @return string
+     */
+    public function type()
+    {
+        return ftp_systype($this->ftp);
+    }
+
+    /**
+     * Lecteur de contenu de TMp
+     *
+     * @return null|string
+     */
+    private function readTmp()
+    {
+        return file_get_contents($this->tmp);
     }
 
     /**
@@ -136,26 +187,11 @@ class FTP
     }
 
     /**
-     * Lecteur de contenu de TMp
-     *
-     * @return null|string
-     */
-    private function readTmp()
-    {
-        $content = '';
-
-        while($line = fread($this->tmp, 1e3)) {
-            $content .= $line;
-        }
-
-        return $content == '' ? null : $content;
-    }
-
-    /**
      * Déstructeur
      */
-    public function __destroy()
+    public function __destruct()
     {
-        fclose($this->tmp);
+        @unlink($this->tmp);
+        ftp_close($this->ftp);
     }
 }
