@@ -1083,7 +1083,7 @@ if (!function_exists("route")) {
     }
 }
 
-if ( ! function_exists('e')) {
+if (!function_exists('e')) {
     /**
      * Echape les tags HTML dans la chaine.
      *
@@ -1092,5 +1092,18 @@ if ( ! function_exists('e')) {
      */
     function e($value) {
         return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+    }
+}
+
+if (!function_exists('ftp')) {
+    /**
+     * Alias sur le connection FTP.
+     *
+     * @param null|array $c configuration FTP
+     * @return \Bow\Support\Resource\Ftp\FTP
+     */
+    function ftp($c = null)
+    {
+        return Storage::ftp($c);
     }
 }
