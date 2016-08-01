@@ -18,6 +18,10 @@ use Bow\Exception\ApplicationException;
 class Application
 {
 	/**
+	 * @var array
+	 */
+	private $errorCode = [];
+	/**
 	 * Définition de contrainte sur un route.
 	 *
 	 * @var array
@@ -35,13 +39,6 @@ class Application
 	 * @var string
 	 */
 	private $specialMethod = null;
-
-	/**
-	 * Fonction lancer en cas d'erreur.
-	 *
-	 * @var null|callable
-	 */
-	private $error404 = null;
 
 	/**
 	 * Method Http courrante.
@@ -193,7 +190,7 @@ class Application
 				return $this->config->$method();
 			}
 
-			return;
+			return null;
 		}
 
 		return $this->routeLoader('GET', $path, $name, $cb);
@@ -278,15 +275,15 @@ class Application
 	}
 
 	/**
-	 * to404, Charge le fichier 404 en cas de non
-	 * validite de la requete
+	 * code, Lance une fonction en fonction du code d'erreur HTTP
 	 *
+	 * @param int $code Le code d'erreur
 	 * @param callable $cb La fonction à lancer
 	 * @return Application
 	 */
-	public function to404(Callable $cb)
+	public function code($code, callable $cb)
 	{
-		$this->error404 = $cb;
+		$this->errorCode[$code] = $cb;
 		return $this;
 	}
 
@@ -517,9 +514,7 @@ class Application
 		// Si la route n'est pas enrégistre alors on lance une erreur 404
 		if ($error === true) {
 			// vérification et appel de la fonction du branchement 404
-			if (is_callable($this->error404)) {
-				call_user_func($this->error404);
-			} else {
+			if (empty($this->errorCode)) {
 				$this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
 			}
 
@@ -739,7 +734,8 @@ class Application
 
 	/**
 	 * Retourne les définir pour une methode HTTP
-	 * 
+	 *
+	 * @param string $method
 	 * @return Route
 	 */
 	public function getMethodRoutes($method)
@@ -768,5 +764,16 @@ class Application
 		}
 
 		throw new ApplicationException('$method n\'exist pas.', E_ERROR);
+	}
+
+	/**
+	 * __destruct
+	 */
+	public function __destruct()
+	{
+		$code = http_response_code();
+		if (in_array($code, $this->errorCode)) {
+			call_user_func($this->errorCode[$code]);
+		}
 	}
 }
