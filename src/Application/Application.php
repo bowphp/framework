@@ -675,6 +675,7 @@ class Application
 				// Formate controlleur
 				$bindController = $controller . '@' . $value['call'];
 				$path = $url . $value['url'];
+				$this->namedRoute($path, strtolower(preg_replace('/controller/i', '',$controller)) . '.' . $value['call']);
 
 				// Lancement de la methode de mapping de route.
 				call_user_func_array([$this, $value['method']], [rtrim($path, '/'), $bindController]);
