@@ -1,8 +1,8 @@
 <?php
 namespace Bow\Support;
 
-use Bow\Core\AppConfiguration;
 use Bow\Support\Session\Session;
+use Bow\Application\AppConfiguration;
 
 /**
  * Class Security

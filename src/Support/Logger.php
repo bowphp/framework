@@ -37,8 +37,8 @@ class Logger extends AbstractLogger
      */
     public function register()
     {
-        set_error_handler([$this, "errorHandler"]);
-        set_exception_handler([$this, "exceptionHandler"]);
+        set_error_handler([$this, 'errorHandler']);
+        set_exception_handler([$this, 'exceptionHandler']);
     }
 
     /**
@@ -54,25 +54,25 @@ class Logger extends AbstractLogger
      */
     public function log($level, $message, array $context = []) {
 
-        if (!in_array($this->debug, ["development", "production"])) {
-            throw new LoggerException("". $this->debug . " n'est pas définir");
+        if (!in_array($this->debug, ['development', 'production'])) {
+            throw new LoggerException($this->debug . ' n\'est pas définir');
         }
 
-        if ($this->debug === "development") {
+        if ($this->debug === 'development') {
             die(static::htmlFormat($level, $message, $context));
         }
 
-        if ($this->debug === "production") {
+        if ($this->debug === 'production') {
             if (!empty($context)) {
-                $message = '"'. $message.'"' . "\nin " . $context["file"] . " at " . $context["line"];
-                if (isset($context["trace"])) {
-                    if (is_string($context["trace"])) {
-                        $message .= $context["trace"];
+                $message = '\''. $message.'\'' . ' in ' . $context['file'] . ' at ' . $context['line'];
+                if (isset($context['trace'])) {
+                    if (is_string($context['trace'])) {
+                        $message .= $context['trace'];
                     }
                 }
             }
 
-            Resource\Storage::append($this->path, static::textFormat($level, $message . "\n"));
+            Resource\Storage::append($this->path, static::textFormat($level, $message . '\n'));
         }
     }
 
@@ -86,7 +86,7 @@ class Logger extends AbstractLogger
      */
     private function textFormat($level, $message)
     {
-        return sprintf("[%s] [client: %s:%d] [%s] %s", date("D Y-m-d H:i:s"), $_SERVER["REMOTE_ADDR"], $_SERVER["REMOTE_PORT"], $level, $message);
+        return sprintf('[%s] [client: %s:%d] [%s] %s', date('D Y-m-d H:i:s'), $_SERVER['REMOTE_ADDR'], $_SERVER['REMOTE_PORT'], $level, $message);
     }
 
     /**
@@ -100,75 +100,75 @@ class Logger extends AbstractLogger
      */
     private function htmlFormat($level, $message, array $context = [])
     {
-        $content = "";
-        $subErrorMessage = "...";
+        $content = '';
+        $subErrorMessage = '...';
 
-        if (isset($context["trace"])) {
+        if (isset($context['trace'])) {
 
-            if (is_array($context["trace"])) {
+            if (is_array($context['trace'])) {
 
-                foreach ($context["trace"] as $key => $errRef) {
-                    $func   = "";
-                    $line   = "";
-                    $file   = "";
+                foreach ($context['trace'] as $key => $errRef) {
+                    $func   = '';
+                    $line   = '';
+                    $file   = '';
                     $errRef = (array) $errRef;
 
-                    if (isset($errRef["function"])) {
-                        $func = $errRef["function"] . "(";
+                    if (isset($errRef['function'])) {
+                        $func = $errRef['function'] . '(';
                     }
 
-                    if (isset($errRef["type"])) {
-                        $func = $errRef["class"] . "" . $errRef["type"] . "" . $func;
+                    if (isset($errRef['type'])) {
+                        $func = $errRef['class'] . '' . $errRef['type'] . '' . $func;
                     }
 
-                    if (isset($errRef["line"])) {
-                        $line = $errRef["line"];
+                    if (isset($errRef['line'])) {
+                        $line = $errRef['line'];
                     }
 
-                    if (isset($errRef["file"])) {
-                        $file = $errRef["file"];
+                    if (isset($errRef['file'])) {
+                        $file = $errRef['file'];
                     }
 
-                    if (isset($errRef["args"])) {
-                        if (is_array($errRef["args"])) {
+                    if (isset($errRef['args'])) {
+                        if (is_array($errRef['args'])) {
 
-                            $len = count($errRef["args"]);
+                            $len = count($errRef['args']);
 
-                            foreach($errRef["args"] as $k => $args) {
+                            foreach($errRef['args'] as $k => $args) {
                                 $func .= ucfirst(gettype($args));
-                                if (gettype($args) === "string") {
-                                    $func .= "('" . $args . "')";
+                                if (gettype($args) === 'string') {
+                                    $func .= '(\'' . $args . '\')';
                                 }
-                                if (gettype($args) === "object") {
+                                if (gettype($args) === 'object') {
                                     if (is_callable($args)) {
-                                        $func .= "(Closure)";
+                                        $func .= '(Closure)';
                                     } else {
-                                        $func .= "(" . get_class($args) . ")";
+                                        $func .= '(' . get_class($args) . ')';
                                     }
                                 }
                                 if ($k + 1 != $len) {
-                                    $func .= ", ";
+                                    $func .= ', ';
                                 }
                             }
                         }
-                        $func .= ")";
+                        $func .= ')';
                     }
 
                     if (is_int($key)) {
-                        $content .= "<div style=\"text-align: left; color: #000; border-bottom: 1px dotted #bbb\">$key# at " . $file . " <b><i>" . $func . "</i></b>:";
-                        $content .= $line . " </div>";
+                        $content .= '<div style="text-align: left; color: #000; border-bottom: 1px dotted #bbb">' . $key . '# at ' . $file . ' <b><i>' . $func . '</i></b>:';
+                        $content .= $line . ' </div>';
                     }
                 }
             } else {
-                $content = $context["trace"];
+                $content = $context['trace'];
             }
 
         } else {
-            $content = "<i>Aucun context.</i>";
+            $content = '<i>Aucun context.</i>';
         }
 
-        if (isset($context["file"], $context["line"])) {
-            $subErrorMessage = $context["file"] . ' at <i>line ' . $context["line"];
+        if (isset($context['file'], $context['line'])) {
+            $subErrorMessage = $context['file'] . ' at <i>line ' . $context['line'];
         }
 
         $html = '
@@ -184,7 +184,7 @@ class Logger extends AbstractLogger
                     <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . $message . '</b></h1>
                     <p>' . $subErrorMessage . '</i></p>
                 </div>
-                <div style="font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: auto; margin-top: 8px;">
+                <div style="font-size: 13px; border: 1px solid #aaa; border-radius: 10px; padding: 15px; width: 1100px; margin: 8px auto;">
                     ' . $content . '
                 </div>
             </div>
@@ -211,7 +211,7 @@ class Logger extends AbstractLogger
      */
     public function exceptionHandler(\Exception $e)
     {
-        if ($this->debug === "development") {
+        if ($this->debug === 'development') {
             $trace = $e->getTrace();
         } else {
             $trace = $e->getTraceAsString();
@@ -233,9 +233,9 @@ class Logger extends AbstractLogger
     {
         // information sur le contexte de l'erreur
         $context = [
-            "file"   => $file,
-            "line"   => $line,
-            "trace"  => $trace
+            'file'   => $file,
+            'line'   => $line,
+            'trace'  => $trace
         ];
 
         // switch sur $errno (le numero de l'erreur)

@@ -139,7 +139,7 @@ class Util
 		// Execution du middleware si define.
 		if (is_string($middleware)) {
 			if (!in_array(ucfirst($middleware), $names['middlewares'], true)) {
-				throw new RouterException($middleware . ' n\'est pas un middleware definir.', E_ERROR);
+				throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
 			}
 
 			// Chargement du middleware
@@ -289,7 +289,7 @@ class Util
 	 */
 	public static function dd($var)
 	{
-		call_user_func_array([static::class, "dump"], func_get_args());
+		call_user_func_array([static::class, 'dump'], func_get_args());
 		die();
 	}
 
@@ -303,7 +303,7 @@ class Util
 	 */
 	public static function it($message, $cb = null)
 	{
-		echo '<h2>{$message}</h2>';
+		echo '<h2>' . $message . '</h2>';
 
 		if (is_callable($cb)) {
 			call_user_func_array($cb, [static::class]);

@@ -651,9 +651,9 @@ class Application
 				}
 			}
 
-			if (isset($controllerName['uses'])) {
-				$controller = $controllerName['uses'];
-				unset($controllerName['uses']);
+			if (isset($controllerName['use'])) {
+				$controller = $controllerName['use'];
+				unset($controllerName['use']);
 			}
 
 			if (isset($controllerName['ignores'])) {
@@ -764,7 +764,7 @@ class Application
 			return call_user_func_array($this->local[$method], $param);
 		}
 
-		throw new ApplicationException('$method n\'exist pas.', E_ERROR);
+		throw new ApplicationException($method . 'n\'exist pas.', E_ERROR);
 	}
 
 	/**
