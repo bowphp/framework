@@ -752,19 +752,6 @@ if (!function_exists('set_pdo')) {
     }
 }
 
-if (!function_exists('execute_function')) {
-    /**
-     * lance une fonction de controller ou un multitude de callback
-     * @param callable|string $cb
-     * @param mixed $params
-     * @param array $names
-     * @return mixed
-     */
-    function execute_function($cb, $params, $names = []) {
-        return util()->launchCallback($cb, $params, $names);
-    }
-}
-
 if (!function_exists('str')) {
     /**
      * @return \Bow\Support\Str;
@@ -793,14 +780,14 @@ if (!function_exists('collect')) {
     }
 }
 
-if (!function_exists('crypt')) {
+if (!function_exists('encrypt')) {
     /**
      * Permet de crypt les données passés en paramètre
      *
      * @param string $data
      * @return string
      */
-    function crypt($data) {
+    function encrypt($data) {
         return Security::encrypt($data);
     }
 }
@@ -823,7 +810,7 @@ if (!function_exists('beginTransaction')) {
      *
      * @param $cb
      */
-    function beginTransaction($cb) {
+    function begin_transaction($cb) {
         if ($cb !== null) {
             call_user_func_array($cb, []);
         }
