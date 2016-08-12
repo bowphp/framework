@@ -26,7 +26,7 @@ define('INSERT', Database::INSERT);
 define('UPDATE', Database::UPDATE);
 define('DELETE', Database::DELETE);
 
-if (!function_exists('configuration')) {
+if (!function_exists('config')) {
     /**
      * Application configuration
      * @param string|array $param
