@@ -483,11 +483,12 @@ class Collection
     /**
      * Retourne les données au format JSON
      *
+     * @param int $option
      * @return string
      */
-    public function toJson()
+    public function toJson($option = 0)
     {
-        return json_encode($this->storage);
+        return json_encode($this->storage, $option);
     }
 
     /**

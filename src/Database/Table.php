@@ -12,7 +12,7 @@ use Bow\Exception\TableException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-class Table extends DatabaseTools
+class Table extends DatabaseTools implements \jsonSerializable
 {
     /**
      * @var string
@@ -124,7 +124,7 @@ class Table extends DatabaseTools
     {
 
         if (is_array($column)) {
-            $this->select = implode(', ', $column);
+            $this->select = '`' . implode('`, `', $column) . '`';
             return $this;
         }
 
@@ -742,6 +742,21 @@ class Table extends DatabaseTools
     }
 
     /**
+     * Rétourne tout les enregistrements
+     *
+     * @param array $columns
+     * @return array
+     */
+    public function all($columns = [])
+    {
+        if (count($columns) > 0) {
+            $this->select = '`' . implode('`, `', $columns) . '`';
+        }
+
+        return $this->get();
+    }
+
+    /**
      * Permet de retourner un élément dans la liste de résultat
      *
      * @return mixed
@@ -1184,7 +1199,7 @@ class Table extends DatabaseTools
      */
     public function first()
     {
-        return $this->take(1)->get();
+        return $this->take(1)->getOne();
     }
 
     /**
@@ -1203,7 +1218,7 @@ class Table extends DatabaseTools
         $this->where = $where;
         $this->whereDataBind = $whereData;
 
-        return $this->jump($c - 1)->take(1)->get();
+        return $this->jump($c - 1)->take(1)->getOne();
     }
 
     /**
@@ -1337,6 +1352,23 @@ class Table extends DatabaseTools
     public function lastId($name = null)
     {
         return $this->connection->lastInsertId($name);
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->get();
+    }
+
+    /**
+     * @param int $option
+     * @return string
+     */
+    public function toJson($option = 0)
+    {
+        return json_encode($this->get(), $option);
     }
 
     /**

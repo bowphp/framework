@@ -1,14 +1,15 @@
 <?php
 namespace Bow\Database;
-use Bow\Exception\TableException;
 
+use Bow\Exception\TableException;
+use \Carbon\Carbon;
 /**
  * Class SQLUnit
  *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Database
  */
-class SqlUnity implements \IteratorAggregate
+class SqlUnity implements \IteratorAggregate, \jsonSerializable
 {
     /**
      * @var \StdClass
@@ -74,7 +75,7 @@ class SqlUnity implements \IteratorAggregate
      */
     public function toArray()
     {
-        return (array) $this->data;
+        return (array) $this->serialize();
     }
 
     /**
@@ -111,6 +112,30 @@ class SqlUnity implements \IteratorAggregate
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->data);
+        return new \ArrayIterator($this->serialize());
+    }
+
+    /**
+     *
+     */
+    public function jsonSerialize()
+    {
+        return $this->serialize();
+    }
+
+    /**
+     * @return array
+     */
+    private function serialize()
+    {
+        $data = $this->data;
+
+        foreach($data as $key => $value) {
+            if ($value instanceof Carbon) {
+                $data->$key = (string) $value;
+            }
+        }
+
+        return $data;
     }
 }
