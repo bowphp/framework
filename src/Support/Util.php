@@ -1,13 +1,11 @@
 <?php
 namespace Bow\Support;
 
-use DateTime;
-use InvalidArgumentException;
 use Bow\Exception\UtilException;
 use Bow\Exception\RouterException;
+use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 use Symfony\Component\VarDumper\Dumper\HtmlDumper;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Class Util
@@ -194,34 +192,7 @@ class Util
 			return call_user_func_array($arr, $arg);
 		}
 
-		if (is_array($arr)) {
-			// Lancement de la procedure de lancement recursive.
-			array_reduce($arr, function($next, $cb) use ($arg) {
-				// $next est-il null
-				if (is_null($next)) {
-					// On lance la loader de controller si $cb est un String
-					if (is_string($cb)) {
-						$cb = static::loadController($cb);
-					}
-
-					return call_user_func_array($cb, $arg);
-				} else {
-					// $next est-il a true.
-					if ($next == true) {
-						// On lance la loader de controller si $cb est un String
-						if (is_string($cb)) {
-							$cb = static::loadController($cb);
-						}
-
-						return call_user_func_array($cb, $arg);
-					} else {
-						die();
-					}
-				}
-
-				return $next;
-			});
-		} else {
+		if (!is_array($arr)) {
 			// On lance la loader de controller si $cb est un String
 			$cb = static::loadController($arr);
 
@@ -231,6 +202,31 @@ class Util
 
 			return null;
 		}
+
+		// Lancement de la procedure de lancement recursive.
+		array_reduce($arr, function($next, $cb) use ($arg) {
+			// $next est-il null
+			if (is_null($next)) {
+				// On lance la loader de controller si $cb est un String
+				if (is_string($cb)) {
+					$cb = static::loadController($cb);
+				}
+
+				return call_user_func_array($cb, $arg);
+			}
+
+			// $next est-il a true.
+			if ($next !== true) {
+				die();
+			}
+
+			// On lance la loader de controller si $cb est un String
+			if (is_string($cb)) {
+				$cb = static::loadController($cb);
+			}
+
+			return call_user_func_array($cb, $arg);
+		});
 	}
 
 	/**
@@ -252,33 +248,41 @@ class Util
 
 		return [new $class(), $method];
 	}
-
 	/**
 	 * Lance un var_dump sur les variables passées en paramètre.
 	 *
-	 * @param string $var
 	 * @return void
 	 */
-	public static function dump($var)
+	public static function debug()
 	{
-		$dump = php_sapi_name() == 'cli' ? new CliDumper() : new HtmlDumper();
+		$vars = func_get_args();
 
-		$dump->setStyles([
+		$cloner = new VarCloner();
+		$dumper = 'cli' === PHP_SAPI ? new CliDumper() : new HtmlDumper();
+
+		$dumper->setStyles([
 			'default' => 'background-color:#fff; color:#FF8400; line-height:1.2em; font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:99999; word-break: normal',
 			'num' => 'font-weight:bold; color:#1299DA',
 			'const' => 'font-weight:bold',
-			'str' => 'color:#56DB3A',
+			'str' => 'color:#111111',
 			'note' => 'color:#1299DA',
 			'ref' => 'color:#A0A0A0',
 			'public' => 'color:#FFFFFF',
 			'protected' => 'color:#FFFFFF',
 			'private' => 'color:#FFFFFF',
 			'meta' => 'color:#B729D9',
-			'key' => 'color:#56DB3A',
-			'index' => 'color:#1299DA',
+			'key' => 'color:#5EDB3A',
+			'index' => 'color:#1200DA',
 		]);
 
-		call_user_func_array([$dump, 'dump'], func_get_args());
+		$handler = function ($vars) use ($cloner, $dumper) {
+			foreach($vars as $var) {
+				$dumper->dump($cloner->cloneVar($var));
+			}
+		};
+
+		call_user_func_array($handler, [$vars]);
+		die;
 	}
 
 	/**
@@ -308,7 +312,7 @@ class Util
 		if (is_callable($cb)) {
 			call_user_func_array($cb, [static::class]);
 		} else {
-			static::dump(array_slice(func_get_args(), 1, func_num_args()));
+			static::debug(array_slice(func_get_args(), 1, func_num_args()));
 		}
 	}
 

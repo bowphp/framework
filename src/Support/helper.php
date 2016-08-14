@@ -427,36 +427,25 @@ if (!function_exists('input')) {
     }
 }
 
-if (!function_exists('dump')) {
+if (!function_exists('debug')) {
     /**
-     * dump, fonction de debug de variable
+     * debug, fonction de debug de variable
      * elle vous permet d'avoir un coloration
      * synthaxique des types de donnée.
      */
-    function dump() {
-        call_user_func_array([Util::class, 'dump'], secure(func_get_args()));
+    function debug() {
+        call_user_func_array([Util::class, 'debug'], secure(func_get_args()));
     }
 }
 
-if (!function_exists('dd')) {
-    /**
-     * dd, fonction de debug de variable et termine le processus
-     * elle vous permet d'avoir un coloration
-     * synthaxique des types de donnée.
-     */
-    function dd() {
-        call_user_func_array([Util::class, 'dd'], secure(func_get_args()));
-    }
-}
-
-if (!function_exists('create_csrf')) {
+if (!function_exists('create_csrf_token')) {
     /**
      * create_csrf, fonction permetant de récupérer le token généré
      *
      * @param int $time [optional]
      * @return \StdClass
      */
-    function create_csrf($time = null) {
+    function create_csrf_token($time = null) {
         Security::createCsrfToken($time);
         return Security::getCsrfToken();
     }
@@ -465,12 +454,12 @@ if (!function_exists('create_csrf')) {
 
 if (!function_exists('csrf_token')) {
     /**
-     * create_csrf, fonction permetant de récupérer le token généré
+     * csrf_token, fonction permetant de récupérer le token généré
      *
      * @return string
      */
     function csrf_token() {
-        return create_csrf()->token;
+        return create_csrf_token()->token;
     }
 }
 
@@ -481,7 +470,7 @@ if (!function_exists('csrf_field')) {
      * @return string
      */
     function csrf_field() {
-        return create_csrf()->field;
+        return create_csrf_token()->field;
     }
 }
 
