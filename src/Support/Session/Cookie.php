@@ -74,8 +74,8 @@ class Cookie
             }
         }
 
-        foreach($_COOKIE as $cookie_key => $value) {
-            $_COOKIE[$cookie_key] = Security::decrypt($value);
+        foreach($_COOKIE as $cookie_key => $cookie_value) {
+            $_COOKIE[$cookie_key] = Security::decrypt($cookie_value);
         }
 
         return $_COOKIE;

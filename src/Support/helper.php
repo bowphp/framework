@@ -17,6 +17,7 @@ use Bow\Support\Security;
 use Bow\Database\Database;
 use Bow\Support\Collection;
 use Bow\Support\Session\Event;
+use Bow\Support\Session\Cookie;
 use Bow\Support\Session\Session;
 use Bow\Support\Resource\Storage;
 use Bow\Application\AppConfiguration;
@@ -981,10 +982,29 @@ if (!function_exists('cookie')) {
     /**
      * aliase sur la classe Cookie.
      *
-     * @return \Bow\Support\Session\Cookie
+     * @param null $key
+     * @param null $data
+     * @param int $expirate
+     * @param null $path
+     * @param null $domain
+     * @param bool|false $secure
+     * @param bool|true $http
+     * @return null|string
      */
-    function cookie() {
-        return \Bow\Support\Session\Cookie::class;
+    function cookie($key = null, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true) {
+        if ($key === null) {
+            return Cookie::get();
+        }
+
+        if ($key !== null && $data == null) {
+            return Cookie::get($key);
+        }
+
+        if ($key !== null && $data !== null) {
+            return Cookie::add($key, $data, $expirate, $path, $domain, $secure, $http);
+        }
+
+        return null;
     }
 }
 
