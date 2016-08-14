@@ -790,7 +790,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      * find
      *
      * @param mixed $id
-     * @return array
+     * @return SqlUnity
      * @throws TableException
      */
     public function find($id)
