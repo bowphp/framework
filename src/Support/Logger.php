@@ -28,7 +28,7 @@ class Logger extends AbstractLogger
      */
     public function __construct($mode, $path)
     {
-        $this->debug = $mode;
+        $this->$mode = $mode;
         $this->path  = $path;
     }
 
@@ -54,15 +54,15 @@ class Logger extends AbstractLogger
      */
     public function log($level, $message, array $context = []) {
 
-        if (!in_array($this->debug, ['development', 'production'])) {
-            throw new LoggerException($this->debug . ' n\'est pas définir');
+        if (!in_array($this->mode, ['development', 'production'])) {
+            throw new LoggerException($this->mode . ' n\'est pas définir');
         }
 
-        if ($this->debug === 'development') {
+        if ($this->mode === 'development') {
             die(static::htmlFormat($level, $message, $context));
         }
 
-        if ($this->debug === 'production') {
+        if ($this->mode === 'production') {
             if (!empty($context)) {
                 $message = '\''. $message.'\'' . ' in ' . $context['file'] . ' at ' . $context['line'];
                 if (isset($context['trace'])) {
@@ -211,7 +211,7 @@ class Logger extends AbstractLogger
      */
     public function exceptionHandler(\Exception $e)
     {
-        if ($this->debug === 'development') {
+        if ($this->mode === 'development') {
             $trace = $e->getTrace();
         } else {
             $trace = $e->getTraceAsString();
