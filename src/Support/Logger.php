@@ -28,7 +28,7 @@ class Logger extends AbstractLogger
      */
     public function __construct($mode, $path)
     {
-        $this->$mode = $mode;
+        $this->mode = $mode;
         $this->path  = $path;
     }
 
