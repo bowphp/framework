@@ -70,6 +70,10 @@ class Cookie
             return Security::decrypt($_COOKIE[$key]);
         }
 
+        if (is_callable($default)) {
+            return $default();
+        }
+
         return  $default;
     }
 

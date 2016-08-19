@@ -65,21 +65,21 @@ class Smtp implements Send
      */
     public function __construct(array $param)
     {
-        if (!isset($param["secure"])) {
-            $param["secure"] = false;
+        if (!isset($param['secure'])) {
+            $param['secure'] = false;
 
-            if (!isset($param["tls"])) {
-                $param["tls"] = false;
+            if (!isset($param['tls'])) {
+                $param['tls'] = false;
             }
         }
 
-        $this->url = $param["hostname"];
-        $this->username = $param["username"];
-        $this->password = $param["password"];
-        $this->secure = $param["ssl"];
-        $this->tls = $param["tls"];
-        $this->timeout = $param["timeout"];
-        $this->port = $param["port"];
+        $this->url = $param['hostname'];
+        $this->username = $param['username'];
+        $this->password = $param['password'];
+        $this->secure = $param['ssl'];
+        $this->tls = $param['tls'];
+        $this->timeout = $param['timeout'];
+        $this->port = $param['port'];
     }
 
     private function __clone() {}
@@ -96,33 +96,33 @@ class Smtp implements Send
         $error = true;
         // SMTP command
         if ($this->username !== null) {
-            $this->write("MAIL FROM: <{$this->username}>", 250);
+            $this->write('MAIL FROM: <' . $this->username . '>', 250);
         } else {
             if ($message->getFrom() !== null) {
-                $this->write("MAIL FROM: <" . $message->getFrom() . ">", 250);
+                $this->write('MAIL FROM: <' . $message->getFrom() . '>', 250);
             }
         }
 
         foreach($message->getTo() as $value) {
-            $to = "";
+            $to = '';
             if ($value[0] !== null) {
-                $to .= "{$value[0]} <{$value[1]}>";
+                $to .= $value[0] . '<' . $value[1] . '>';
             } else {
-                $to .= "<{$value[1]}>";
+                $to .= '<' . $value[1] . '>';
             }
-            $this->write("RCPT TO: " . $to, 250);
+            $this->write('RCPT TO: ' . $to, 250);
         }
 
-        $this->write("DATA", 354);
-        $data = "Subject: " . $message->getSubject() . Message::END;
+        $this->write('DATA', 354);
+        $data = 'Subject: ' . $message->getSubject() . Message::END;
         $data .= $message->compileHeaders();
-        $data .= "Content-Type: {$message->getType()}; charset=\"{$message->getCharset()}\"". Message::END;
-        $data .= "Content-Transfer-Encoding: 8bit" . Message::END;
+        $data .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
+        $data .= 'Content-Transfer-Encoding: 8bit' . Message::END;
         $data .= Message::END . $message->getMessage() . Message::END;
         $this->write($data);
 
         try {
-            $this->write(".", 250);
+            $this->write('.', 250);
         } catch(SmtpException $e) {
             echo $e->getMessage();
         }
@@ -147,13 +147,13 @@ class Smtp implements Send
     {
         $url = $this->url;
         if ($this->secure === true) {
-            $url = "ssl://" . $this->url;
+            $url = 'ssl://' . $this->url;
         }
 
         $this->sock = fsockopen($url, $this->port, $errno, $errstr, $this->timeout);
 
         if ($this->sock == null) {
-            throw new SocketException("Can not connect to {$this->url}:{$this->port}", E_USER_ERROR);
+            throw new SocketException('Impossible de se connected à ' . $this->url . ':' . $this->port, E_USER_ERROR);
         }
 
         stream_set_timeout($this->sock, 20, 0);
@@ -162,24 +162,24 @@ class Smtp implements Send
         $host = isset($_SERVER['HTTP_HOST']) && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
         if ($code == 220) {
-            $code = $this->write("EHLO $host", 250);
+            $code = $this->write('EHLO ' . $host, 250, 'HELO');
             if ($code != 250) {
-                $this->write("EHLO $host", 250);
+                $this->write('EHLO ' . $host, 250, 'HELO');
             }
         }
 
         if ($this->tls === true) {
-            $this->write("STARTTLS", 220);
+            $this->write('STARTTLS', 220);
             $secured = stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
             if (!$secured) {
-                throw new ErrorException("Can not secure you connection with tls.",E_ERROR);
+                throw new ErrorException('Impossible de sécuriser votre connection avec tls', E_ERROR);
             }
         }
 
         if ($this->username !== null && $this->password !== null) {
-            $this->write("AUTH LOGIN", 334);
-            $this->write(base64_encode($this->username), $code=334, "username");
-            $this->write(base64_encode($this->password), $code=235, "password");
+            $this->write('AUTH LOGIN', 334);
+            $this->write(base64_encode($this->username), 334, 'username');
+            $this->write(base64_encode($this->password), 235, 'password');
         }
     }
 
@@ -188,7 +188,7 @@ class Smtp implements Send
      */
     private function disconnect()
     {
-        $r = $this->write("QUIT");
+        $r = $this->write('QUIT');
         fclose($this->sock);
         $this->sock = null;
 
@@ -206,8 +206,8 @@ class Smtp implements Send
 
         for (; !feof($this->sock); ) {
             if (($line = fgets($this->sock, 1e3)) != null) {
-                $s = explode(" ", $line)[0];
-                if (preg_match("#^[0-9]+$#", $s)) {
+                $s = explode(' ', $line)[0];
+                if (preg_match('#^[0-9]+$#', $s)) {
                     break;
                 }
             }
@@ -228,15 +228,20 @@ class Smtp implements Send
      */
     private function write($command, $code = null, $message = null)
     {
+        if ($message == null) {
+            $message = $command;
+        }
+
         $command = $command . Message::END;
         fwrite($this->sock, $command, strlen($command));
 
         $response = null;
 
+
         if ($code !== null) {
             $response = $this->read();
             if (!in_array($response, (array) $code)) {
-                throw new SmtpException("Serveur SMTP did not accepted " . (isset($message) ? $message : '') . ". Avec l'error: $response", E_ERROR);
+                throw new SmtpException('Serveur SMTP n\'a pas accepté ' . (isset($message) ? $message : '') . ' avec le code [' . $response . ']', E_ERROR);
             }
         }
 

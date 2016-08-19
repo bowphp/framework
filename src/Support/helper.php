@@ -133,20 +133,27 @@ if (!function_exists('db')) {
      * permet de se connecter sur une autre base de donnée
      * et retourne l'instance de la Database
      *
-     * @param string $database le nom de la configuration de la db
+     * @param string $zone le nom de la configuration de la db
      * @param callable $cb la fonction de rappel
      *
      * @return Database, the Database reference
      */
-    function db($database = null, $cb = null) {
-
-        if (is_string($database)) {
-            switch_to($database, $cb);
-        } else {
-            switch_to('default', $cb);
+    function db($zone = null, callable $cb = null) {
+        if (func_num_args() == 0) {
+            return Database::takeInstance();
         }
 
-        return Database::takeInstance();
+        if (is_string($zone)) {
+            Database::switchTo($zone);
+            if (is_callable($cb)) {
+                if ($cb()) {
+                    Database::switchTo(config('db')->default);
+                }
+            }
+            return Database::takeInstance();
+        }
+
+        throw new InvalidArgumentException('Erreur sur le parametre 1. Type string attendu.');
     }
 }
 
@@ -175,12 +182,12 @@ if (!function_exists('table')) {
      * table aliase Database::table
      *
      * @param string $tableName, le nom d'un table.
-     * @param string $zoneName, le nom de la zone sur laquelle la requete sera faite.
+     * @param string $zone, le nom de la zone sur laquelle la requete sera faite.
      * @return Bow\Database\Table
      */
-    function table($tableName, $zoneName = null) {
-        if (is_string($zoneName)) {
-            db($zoneName);
+    function table($tableName, $zone = null) {
+        if (is_string($zone)) {
+            db($zone);
         }
         return Database::table($tableName);
     }
@@ -663,18 +670,6 @@ if (!function_exists('execute_sql')) {
      */
     function execute_sql(array $option) {
         return Database::query($option);
-    }
-}
-
-if (!function_exists('switch_to')) {
-    /**
-     * switch to, permet de changer de base de donnée.
-     *
-     * @param string $name nom de l'entré
-     * @param callable $cb fonction de callback
-     */
-    function switch_to($name, $cb = null) {
-        Database::switchTo($name, $cb);
     }
 }
 
