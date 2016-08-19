@@ -470,10 +470,14 @@ class Fields
      *
      * @return Schema
      */
-    public function timestamps($field)
+    public function timestamps($field = null)
     {
+        if ($field === null) {
+            $field = 'create_at';
+        }
+
         $this->addField('timestamp', $field, [
-            'null' => false
+            'null' => true
         ]);
 
         return $this;
@@ -534,6 +538,10 @@ class Fields
      */
     public function increment($field = null)
     {
+        if ($field == null) {
+            $field = 'id';
+        }
+
         if ($this->autoincrement === false) {
             if ($this->lastField !== null) {
                 if (in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
@@ -558,16 +566,23 @@ class Fields
     /**
      * primary
      *
+     * @param string|array $field
      * @throws ModelException
      * @return $this
      */
-    public function primary()
+    public function primary($field = null)
     {
         if ($this->primary === null) {
+            if ($field == null) {
+                $field = 'id';
+                $this->addField('int', $field, [
+                    'null' => false
+                ]);
+            }
             return $this->addIndexes('primary');
-        } else {
-            throw new ModelException('Primary key has already defined', E_ERROR);
         }
+
+        throw new ModelException('Primary key has already defined', E_ERROR);
     }
 
     /**
