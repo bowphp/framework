@@ -15,19 +15,19 @@ use Bow\Interfaces\CollectionAccessStatic;
 class Session implements CollectionAccessStatic
 {
 
-	/**
-	 * Session starteur.
-	 */
-	private static function start()
-	{
-		if (PHP_SESSION_ACTIVE != session_status()) {
+    /**
+     * Session starteur.
+     */
+    private static function start()
+    {
+        if (PHP_SESSION_ACTIVE != session_status()) {
             session_name("SESSID");
             if (!isset($_COOKIE["SESSID"])) {
                 session_id(hash("sha256", Security::encrypt(Str::repeat(Security::generateCsrfToken(), 2))));
             }
             session_start();
         }
-	}
+    }
 
     /**
      * @return array
@@ -46,16 +46,16 @@ class Session implements CollectionAccessStatic
         return $arr;
     }
 
-	/**
+    /**
      * has, vérifie l'existance une clé dans la colléction de session
-	 * 
-	 * @param string $key
-	 * @param bool $strict
-	 *
-	 * @return boolean
-	 */
-	public static function has($key, $strict = false)
-	{
+     *
+     * @param string $key
+     * @param bool $strict
+     *
+     * @return boolean
+     */
+    public static function has($key, $strict = false)
+    {
         static::start();
         $isset = isset($_SESSION[$key]);
 
@@ -65,30 +65,30 @@ class Session implements CollectionAccessStatic
             }
         }
 
-		return $isset;
-	}
+        return $isset;
+    }
 
-	/**
+    /**
      * isEmpty, vérifie si une colléction est vide.
-	 * 
-	 *	@return boolean
-	 */
-	public static function isEmpty()
-	{
-		return empty(self::filter());
-	}
+     *
+     *	@return boolean
+     */
+    public static function isEmpty()
+    {
+        return empty(self::filter());
+    }
 
-	/**
+    /**
      * get, permet de récupérer une valeur ou la colléction de valeur.
-	 * 
-	 * @param string $key=null
-	 * @param mixed $default
-	 * 
-	 * @return mixed
-	 */
-	public static function get($key, $default = null)
-	{
-		static::start();
+     *
+     * @param string $key=null
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public static function get($key, $default = null)
+    {
+        static::start();
 
         if (static::has($key)) {
             return $_SESSION[$key];
@@ -100,37 +100,41 @@ class Session implements CollectionAccessStatic
             return $flash;
         }
 
+        if (is_callable($default)) {
+            return $default();
+        }
+
         return $default;
-	}
+    }
 
-	/**
+    /**
      * add, ajoute une entrée dans la colléction
-	 *
-	 * @param string|int $key La clé de la donnée à ajouter
-	 * @param mixed $data La donnée à ajouter
-	 * @param boolean $next Elle permet si elle est a true d'ajouter la donnée si la clé existe
+     *
+     * @param string|int $key La clé de la donnée à ajouter
+     * @param mixed $data La donnée à ajouter
+     * @param boolean $next Elle permet si elle est a true d'ajouter la donnée si la clé existe
      *                      Dans un tableau
-	 *
-	 * @throws InvalidArgumentException
-	 * @return null
-	 */
-	public static function add($key, $data, $next = false)
-	{
-		static::start();
+     *
+     * @throws InvalidArgumentException
+     * @return null
+     */
+    public static function add($key, $data, $next = false)
+    {
+        static::start();
 
-		if ($next === true) {
-			if (static::has($key)) {
-                if (!is_array($_SESSION[$key])) {
-                    $_SESSION[$key] = [$_SESSION[$key]];
-                }
-                array_push($_SESSION[$key], $data);
-			} else {
-				$_SESSION[$key] = $data;
-			}
-		} else {
-			$_SESSION[$key] = $data;
-		}
-	}
+        if ($next !== true) {
+            return $_SESSION[$key] = $data;
+        }
+
+        if (!static::has($key)) {
+            $_SESSION[$key] = $data;
+        }
+
+        if (!is_array($_SESSION[$key])) {
+            $_SESSION[$key] = [$_SESSION[$key]];
+        }
+        array_push($_SESSION[$key], $data);
+    }
 
     /**
      * Retourne la liste des variables de session
@@ -142,29 +146,29 @@ class Session implements CollectionAccessStatic
         return static::filter();
     }
 
-	/**
+    /**
      * remove, supprime une entrée dans la colléction
-	 *
-	 * @param string $key La clé de l'élément a supprimé
-	 *
-	 * @return null
-	 */
-	public static function remove($key)
-	{
+     *
+     * @param string $key La clé de l'élément a supprimé
+     *
+     * @return null
+     */
+    public static function remove($key)
+    {
         self::start();
-		unset($_SESSION[$key]);
-	}
+        unset($_SESSION[$key]);
+    }
 
     /**
      * set
-	 *
+     *
      * @param string $key
      * @param mixed $value
-	 *
+     *
      * @return mixed
      */
-	public static function set($key, $value)
-	{
+    public static function set($key, $value)
+    {
         $old = null;
         static::start();
 
@@ -176,16 +180,16 @@ class Session implements CollectionAccessStatic
         }
 
         return $old;
-	}
+    }
 
     /**
      * flash
      *
      * @param $key
      * @param null $message
-	 *
+     *
      * @throws \ErrorException
-	 *
+     *
      * @return mixed
      */
     public static function flash($key, $message = null)
@@ -217,21 +221,21 @@ class Session implements CollectionAccessStatic
      *
      * @param string $key
      */
-    private static function reFlash($key)
+    private static function reflash($key)
     {
         static::start();
         unset($_SESSION["bow.flash"][$key]);
     }
 
-	/**
-	 * clear, permet de vider le cache sauf csrf|bow.flash
-	 */
-	public static function clear()
-	{
-		self::start();
+    /**
+     * clear, permet de vider le cache sauf csrf|bow.flash
+     */
+    public static function clear()
+    {
+        self::start();
 
-		foreach(self::filter() as $key => $value){
+        foreach(self::filter() as $key => $value){
             unset($_SESSION[$key]);
         }
-	}
+    }
 }

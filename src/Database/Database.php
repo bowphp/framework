@@ -65,6 +65,7 @@ class Database extends DatabaseTools
         if (static::$instance === null) {
             static::$instance = new self();
             static::$config = (object) $config;
+            static::$zone = static::$config->default;
         }
         return static::$config;
     }
@@ -92,21 +93,18 @@ class Database extends DatabaseTools
             return static::takeInstance();
         }
 
+        if (! static::$config instanceof StdClass) {
+            return Util::launchCallback($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
+        }
+
         if (is_callable($zone)) {
             $cb = $zone;
             $zone = null;
         }
 
-
-        if (! static::$config instanceof StdClass) {
-            Util::launchCallback($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
+        if ($zone != null) {
+            static::$zone = $zone;
         }
-
-        if ($zone == null) {
-            $zone = static::$config->default;
-        }
-
-        static::$zone = $zone;
 
         $c = isset(static::$config->connections[static::$zone]) ? static::$config->connections[static::$zone] : null;
 
@@ -154,7 +152,7 @@ class Database extends DatabaseTools
             Util::launchCallback($cb, [$e]);
         }
 
-        Util::launchCallback($cb, false);
+        Util::launchCallback($cb, [false]);
 
         return static::class;
     }
@@ -163,25 +161,21 @@ class Database extends DatabaseTools
      * switchTo, permet de ce connecter a une autre base de donnée.
      *
      * @param string $newZone
-     * @param callable $cb
      * @return void
      */
-    public static function switchTo($newZone, $cb = null)
+    public static function switchTo($newZone)
     {
         if (!is_string($newZone)) {
-            throw new InvalidArgumentException("Paramètre invalide", E_USER_ERROR);
+            throw new InvalidArgumentException('Paramètre invalide', E_USER_ERROR);
         }
 
-        if($newZone !== static::$zone) {
+        if($newZone != static::$zone) {
             static::$db = null;
             static::$zone = $newZone;
-            static::connection($newZone, $cb);
+            static::verifyConnection();
         }
 
-        if (is_callable($cb)) {
-            static::$db = null;
-            static::$zone = "default";
-        }
+        static::takeInstance();
     }
 
     /**
