@@ -982,7 +982,7 @@ if (!function_exists('cookie')) {
      */
     function cookie($key = null, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true) {
         if ($key === null) {
-            return Cookie::get();
+            return Cookie::all();
         }
 
         if ($key !== null && $data == null) {

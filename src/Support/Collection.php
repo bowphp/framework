@@ -231,7 +231,7 @@ class Collection
         } else if ($array instanceof Collection) {
             $this->storage = array_merge($this->storage, $array->toArray());
         } else {
-            throw new \ErrorException(__METHOD__ . "(), must be take 1 parameter to be array or Collection, " . gettype($array) . " given", E_ERROR);
+            throw new \ErrorException(__METHOD__ . '(), must be take 1 parameter to be array or Collection, ' . gettype($array) . ' given', E_ERROR);
         }
 
         return $this;
@@ -354,7 +354,7 @@ class Collection
      */
     public function max($cb = null)
     {
-        return $this->side($cb, "max");
+        return $this->side($cb, 'max');
     }
 
     /**
@@ -366,7 +366,7 @@ class Collection
      */
     public function min($cb = null)
     {
-        return $this->side($cb, "min");
+        return $this->side($cb, 'min');
     }
 
     /**
@@ -387,7 +387,7 @@ class Collection
             }
         });
 
-        $r = call_user_func_array("$type", $data);
+        $r = call_user_func_array($type, $data);
 
         if (is_callable($cb)) {
             call_user_func_array($cb, [$r]);
@@ -474,10 +474,10 @@ class Collection
     public function yieldify()
     {
         foreach ($this->storage as $key => $value) {
-            yield (object) ["value" => $value, "key" => $key, "done" => false];
+            yield (object) ['value' => $value, 'key' => $key, 'done' => false];
         }
 
-        yield (object) ["value" => null, "key" => null, "done" => true];
+        yield (object) ['value' => null, 'key' => null, 'done' => true];
     }
 
     /**
@@ -562,7 +562,7 @@ class Collection
         $data = func_get_args();
 
         array_unshift($data, $this->storage);
-        call_user_func_array("array_push", $data);
+        call_user_func_array('array_push', $data);
 
         $this->storage = $data;
 

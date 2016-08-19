@@ -27,7 +27,7 @@ class Cookie
 
     /**
      * has, vérifie l'existance une clé dans la colléction de session
-     * 
+     *
      * @param string $key
      * @param bool $strict
      *
@@ -48,7 +48,7 @@ class Cookie
 
     /**
      * isEmpty, vérifie si une colléction est vide.
-     * 
+     *
      * @return boolean
      */
     public static function isEmpty()
@@ -59,23 +59,29 @@ class Cookie
     /**
      * get, permet de récupérer une valeur ou la colléction de valeur de cookie.
      *
-     * @param string $key=null
+     * @param string $key
      * @param mixed $default
      *
      * @return mixed
      */
-    public static function get($key = null, $default = null)
+    public static function get($key, $default = null)
     {
-        if ($key !== null) {
-            if (static::has($key)) {
-                return Security::decrypt($_COOKIE[$key]);
-            } else {
-                return  $default;
-            }
+        if (static::has($key)) {
+            return Security::decrypt($_COOKIE[$key]);
         }
 
-        foreach($_COOKIE as $cookie_key => $cookie_value) {
-            $_COOKIE[$cookie_key] = Security::decrypt($cookie_value);
+        return  $default;
+    }
+
+    /**
+     * Retourne tout les valeurs COOKIE
+     *
+     * @return mixed
+     */
+    public static function all()
+    {
+        foreach($_COOKIE as $key => $value) {
+            $_COOKIE[$key] = Security::decrypt($value);
         }
 
         return $_COOKIE;
@@ -83,7 +89,7 @@ class Cookie
 
     /**
      * add, permet d'ajouter une value dans le tableau de cookie.
-     * 
+     *
      * @param string|int $key,     La clé du cookie
      * @param mixed      $data     La donnée a associée
      * @param int        $expirate Le temps de vie du cookie
@@ -105,7 +111,7 @@ class Cookie
 
     /**
      * remove, supprime une entrée dans la table
-     * 
+     *
      * @param string $key
      *
      * @return self
