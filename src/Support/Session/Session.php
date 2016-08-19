@@ -132,6 +132,11 @@ class Session implements CollectionAccessStatic
 		}
 	}
 
+    /**
+     * Retourne la liste des variables de session
+     *
+     * @return array
+     */
     public static function all()
     {
         return static::filter();
