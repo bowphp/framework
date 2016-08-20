@@ -29,43 +29,43 @@ class Response
 	 * ces codes s'il utilise la fonction `header` de php
 	 */
 	private static $header = [
-		200 => "OK",
-		201 => "Created",
-		202 => "Accepted",
-		204 => "No Content",
-		205 => "Reset Content",
-		206 => "Partial Content",
-		300 => "Multipe Choices",
-		301 => "Moved Permanently",
-		302 => "Found",
-		303 => "See Other",
-		304 => "Not Modified",
-		305 => "Use Proxy",
-		307 => "Temporary Redirect",
-		400 => "Bad Request",
-		401 => "Unauthorized",
-		402 => "Payment Required",
-		403 => "Forbidden",
-		404 => "Not Found",
-		405 => "Method Not Allowed",
-		406 => "Not Acceptable",
-		407 => "Proxy Authentication",
-		408 => "Request Time Out",
-		409 => "Conflict",
-		410 => "Gone",
-		411 => "Length Required",
-		412 => "Precondition Failed",
-		413 => "Payload Too Large",
-		414 => "URI Too Long",
-		415 => "Unsupport Media",
-		416 => "Range Not Statisfiable",
-		417 => "Expectation Failed",
-		500 => "Internal Server Error",
-		501	=> "Not Implemented",
-		502	=> "Bad Gateway",
-		503 => "Service Unavailable",
-		504	=> "Gateway Timeout",
-		505	=> "HTTP Version Not Supported",
+		200 => 'OK',
+		201 => 'Created',
+		202 => 'Accepted',
+		204 => 'No Content',
+		205 => 'Reset Content',
+		206 => 'Partial Content',
+		300 => 'Multipe Choices',
+		301 => 'Moved Permanently',
+		302 => 'Found',
+		303 => 'See Other',
+		304 => 'Not Modified',
+		305 => 'Use Proxy',
+		307 => 'Temporary Redirect',
+		400 => 'Bad Request',
+		401 => 'Unauthorized',
+		402 => 'Payment Required',
+		403 => 'Forbidden',
+		404 => 'Not Found',
+		405 => 'Method Not Allowed',
+		406 => 'Not Acceptable',
+		407 => 'Proxy Authentication',
+		408 => 'Request Time Out',
+		409 => 'Conflict',
+		410 => 'Gone',
+		411 => 'Length Required',
+		412 => 'Precondition Failed',
+		413 => 'Payload Too Large',
+		414 => 'URI Too Long',
+		415 => 'Unsupport Media',
+		416 => 'Range Not Statisfiable',
+		417 => 'Expectation Failed',
+		500 => 'Internal Server Error',
+		501	=> 'Not Implemented',
+		502	=> 'Bad Gateway',
+		503 => 'Service Unavailable',
+		504	=> 'Gateway Timeout',
+		505	=> 'HTTP Version Not Supported',
 	];
 
 	/**
@@ -118,7 +118,7 @@ class Response
 	 */
 	public function addHeader($key, $value)
 	{
-		header("$key: $value");
+		header($key.': '.$value);
 		return $this;
 	}
 
@@ -128,42 +128,42 @@ class Response
 	 * @param string|array $path L'url de rédirection
 	 * Si $path est un tableau :
 	 * 	$url = [
-	 * 		"url" => "//"
-	 * 		"?" => [
-	 * 			"name" => "dakia",
-	 * 			"lastname" => "franck",
-	 * 			"id" => "1",
+	 * 		'url' => '//'
+	 * 		'?' => [
+	 * 			'name' => 'dakia',
+	 * 			'lastname' => 'franck',
+	 * 			'id' => '1',
 	 * 		],
-	 * 		"$" => "hello"
+	 * 		'$' => 'hello'
 	 * ];
 	 *
 	 */
 	public function redirect($path)
 	{
 		if (is_string($path)) {
-			$path = ["url" => $path];
+			$path = ['url' => $path];
 		}
 
-		$url = $path["url"];
+		$url = $path['url'];
 
-		if (isset($path["?"])) {
-			$url .= "?";
+		if (isset($path['?'])) {
+			$url .= '?';
 			$i = 0;
-			foreach($path["?"] as $key => $value) {
+			foreach($path['?'] as $key => $value) {
 				if ($i > 0) {
-					$url .= "&";
+					$url .= '&';
 				}
-				$url .= $key . "=" . $value;
+				$url .= $key . '=' . $value;
 				$i++;
 			}
 		}
 
-		if (isset($path["#"])) {
-			$url .= "#" . $path["#"];
+		if (isset($path['#'])) {
+			$url .= '#' . $path['#'];
 		}
 
-		header("Location: " . $url);
-		die();
+		header('Location: ' . $url);
+		die;
 	}
 
 	/**
@@ -192,10 +192,10 @@ class Response
 			$name = basename($file);
 		}
 
-		$this->addHeader("Content-Disposition", "$disposition; filename=$name");
-		$this->addHeader("Content-Type", "$type");
-		$this->addHeader("Content-Length", filesize($file));
-		$this->addHeader("Content-Encoding", "base64");
+		$this->addHeader('Content-Disposition', $disposition.'; filename='.$name);
+		$this->addHeader('Content-Type', $type);
+		$this->addHeader('Content-Length', filesize($file));
+		$this->addHeader('Content-Encoding', 'base64');
 
 		foreach($headers as $key => $value) {
 			$this->addHeader($key, $value);
@@ -208,7 +208,7 @@ class Response
 	 * Modifie les entétes http
 	 *
 	 * @param int  $code 	 Le code de la réponse HTTP
-	 * @param bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a "true"
+	 * @param bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a 'true'
 	 * @return bool|void
 	 */
 	public function code($code, $override = false)
@@ -216,7 +216,7 @@ class Response
 		$r = true;
 
 		if (in_array((int) $code, array_keys(self::$header), true)) {
-			header("HTTP/1.1 $code " . self::$header[$code], $override, $code);
+			header('HTTP/1.1 '. $code .' '. self::$header[$code], $override, $code);
 		} else {
 			$r = false;
 		}
@@ -237,8 +237,9 @@ class Response
 			$end = $code;
 			$code = 200;
 		}
-		$this->forceInUFT8();
-		$this->addHeader("Content-Type", "application/json; charset=UTF-8");
+
+		$this->forceInUTF8();
+		$this->addHeader('Content-Type', 'application/json; charset=UTF-8');
 		$this->code($code);
 		$this->send(json_encode($data), $end);
 	}
@@ -246,10 +247,10 @@ class Response
 	/**
 	 * Permet de forcer l'encodage en utf-8
 	 */
-	public function forceInUFT8()
+	public function forceInUTF8()
 	{
-		mb_internal_encoding("UTF-8");
-		mb_http_output("UTF-8");
+		mb_internal_encoding('UTF-8');
+		mb_http_output('UTF-8');
 	}
 
 	/**
@@ -262,22 +263,22 @@ class Response
 	 */
 	public function sendFile($filename, $bind = [])
 	{
-		$filename = preg_replace("/@|#|\./", "/", $filename);
+		$filename = preg_replace('/@|#|\./', '/', $filename);
 
 		if ($this->config->getViewpath() !== null) {
-			$tmp = $this->config->getViewpath() ."/". $filename . ".php";
+			$tmp = $this->config->getViewpath() .'/'. $filename . '.php';
 			if (!file_exists($tmp)) {
-				$filename = $this->config->getViewpath() ."/". $filename . ".html";
+				$filename = $this->config->getViewpath() .'/'. $filename . '.html';
 			} else {
 				$filename = $tmp;
 			}
 		}
 
 		if (!file_exists($filename)) {
-			throw new ViewException("La vue $filename n'exist pas.", E_ERROR);
+			throw new ViewException('La vue '.$filename.' n\'exist pas.', E_ERROR);
 		}
 
-		extract($bind);
+		@extract($bind);
 		// Rendu du fichier demandé.
 
 		return require $filename;
@@ -298,16 +299,16 @@ class Response
 			$bind = [];
 		}
 
-		$filename = preg_replace("/@|\./", "/", $filename) . $this->config->getTemplateExtension();
+		$filename = preg_replace('/@|\./', '/', $filename) . $this->config->getTemplateExtension();
 
 		// Vérification de l'existance du fichier
 		if ($this->config->getViewpath() !== null) {
-			if (!is_file($this->config->getViewpath() . "/" . $filename)) {
-				throw new ViewException("La vue [$filename] n'exist pas. " . $this->config->getViewpath() . "/" . $filename, E_ERROR);
+			if (!is_file($this->config->getViewpath() . '/' . $filename)) {
+				throw new ViewException('La vue ['.$filename.'] n\'exist pas. ' . $this->config->getViewpath() . '/' . $filename, E_ERROR);
 			}
 		} else {
 			if (!is_file($filename)) {
-				throw new ViewException("La vue [$filename] n'exist pas!.", E_ERROR);
+				throw new ViewException('La vue ['.$filename.'] n\'exist pas!.', E_ERROR);
 			}
 		}
 
@@ -316,7 +317,7 @@ class Response
 			$this->code($code);
 		}
 
-		if ($this->config->getEngine() == "php") {
+		if ($this->config->getTemplateEngine() == 'php') {
 			ob_start();
 			require $filename;
 			$this->send(ob_get_clean());
@@ -324,12 +325,12 @@ class Response
 			// Chargement du template.
 			$template = $this->templateLoader();
 
-			if ($this->config->getEngine() == "twig") {
+			if ($this->config->getTemplateEngine() == 'twig') {
 				$this->send($template->render($filename, $bind));
-			} else if (in_array($this->config->getEngine(), ["mustache", "jade"])) {
+			} else if (in_array($this->config->getTemplateEngine(), ['mustache', 'jade'])) {
 				$this->send($template->render(file_get_contents($filename), $bind));
 			}  else {
-				throw new ResponseException("Le moteur de template n'est pas défini.", E_USER_ERROR);
+				throw new ResponseException('Le moteur de template n\'est pas défini.', E_USER_ERROR);
 			}
 		}
 	}
@@ -342,22 +343,22 @@ class Response
 	 */
 	private function templateLoader()
 	{
-		if ($this->config->getEngine() !== null) {
-			if (!in_array($this->config->getEngine(), ["twig", "mustache", "jade"], true)) {
-				throw new ErrorException("Le moteur de template n'est pas implementé.", E_USER_ERROR);
+		if ($this->config->getTemplateEngine() !== null) {
+			if (!in_array($this->config->getTemplateEngine(), ['twig', 'mustache', 'jade'], true)) {
+				throw new ErrorException('Le moteur de template n\'est pas implementé.', E_USER_ERROR);
 			}
 		} else {
-			throw new ResponseException("Le moteur de template non défini.", E_USER_ERROR);
+			throw new ResponseException('Le moteur de template non défini.', E_USER_ERROR);
 		}
 
 		$tpl = null;
 
-		if ($this->config->getEngine() == "twig") {
+		if ($this->config->getTemplateEngine() == 'twig') {
 			$loader = new \Twig_Loader_Filesystem($this->config->getViewpath());
 			$tpl = new \Twig_Environment($loader, [
 				'cache' => $this->config->getCachepath(),
 				'auto_reload' => $this->config->getCacheAutoReload(),
-				"debug" => $this->config->getLoggerMode() == "develepment" ? true : false
+				'debug' => $this->config->getLoggerMode() == 'develepment' ? true : false
 			]);
 			/**
 			 * - Ajout de variable globale
@@ -370,29 +371,29 @@ class Response
 			 * - Ajout de fonction global
 			 *  dans le cadre de l'utilisation de Twig
 			 */
-			$tpl->addFunction(new \Twig_SimpleFunction("_secure", function($data) {
+			$tpl->addFunction(new \Twig_SimpleFunction('_secure', function($data) {
 				return Security::sanitaze($data, true);
 			}));
-			$tpl->addFunction(new \Twig_SimpleFunction("_sanitaze", function($data) {
+			$tpl->addFunction(new \Twig_SimpleFunction('_sanitaze', function($data) {
 				return Security::sanitaze($data);
 			}));
-			$tpl->addFunction(new \Twig_SimpleFunction("_slugify", [Str::class, "slugify"]));
-		} else if ($this->config->getEngine() == "mustache") {
+			$tpl->addFunction(new \Twig_SimpleFunction('_slugify', [Str::class, 'slugify']));
+		} else if ($this->config->getTemplateEngine() == 'mustache') {
 			$tpl = new \Mustache_Engine([
 				'cache' => $this->config->getCachepath(),
 				'loader' => new \Mustache_Loader_FilesystemLoader($this->config->getViewpath()),
-				"helpers" => [
-					"_secure" => function($data) {
+				'helpers' => [
+					'_secure' => function($data) {
 						return Security::sanitaze($data, true);
 					},
-					"_sanitaze" => function($data) {
+					'_sanitaze' => function($data) {
 						return Security::sanitaze($data);
 					},
-					"_slugify" => function($data) {
+					'_slugify' => function($data) {
 						return Str::slugify($data);
 					},
-					"_public", $this->config->getPublicPath(),
-					"_root", $this->config->getApproot()
+					'_public', $this->config->getPublicPath(),
+					'_root', $this->config->getApproot()
 				]
 			]);
 		} else {
@@ -433,7 +434,7 @@ class Response
 	private function accessControl($allow, $excepted)
 	{
 		if ($excepted === null) {
-			$excepted = "*";
+			$excepted = '*';
 		}
 
 		$this->addHeader($allow, $excepted);
@@ -451,10 +452,10 @@ class Response
 	public function accessControlAllowOrigin(array $excepted)
 	{
 		if (!is_array($excepted)) {
-			throw new \InvalidArgumentException("Attend un tableau." . gettype($excepted) . " donner.", E_USER_ERROR);
+			throw new \InvalidArgumentException('Attend un tableau.' . gettype($excepted) . ' donner.', E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Control-Allow-Origin", implode("|", $excepted));
+		return $this->accessControl('Access-Control-Allow-Origin', implode(', ', $excepted));
 	}
 
 	/**
@@ -467,10 +468,10 @@ class Response
 	public function accessControlAllowMethods(array $excepted)
 	{
 		if (count($excepted) == 0) {
-			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+			throw new ResponseException('Le tableau est vide.' . gettype($excepted) . ' donner.', E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Control-Allow-Methods", implode(", ", $excepted));
+		return $this->accessControl('Access-Control-Allow-Methods', implode(', ', $excepted));
 	}
 
 	/**
@@ -483,10 +484,10 @@ class Response
 	public function accessControlAllowHeaders(array $excepted)
 	{
 		if (count($excepted) == 0) {
-			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+			throw new ResponseException('Le tableau est vide.' . gettype($excepted) . ' donner.', E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Control-Allow-Headers", implode(", ", $excepted));
+		return $this->accessControl('Access-Control-Allow-Headers', implode(', ', $excepted));
 	}
 
 	/**
@@ -496,7 +497,7 @@ class Response
 	 */
 	public function accessControlAllowCredentials()
 	{
-		return $this->accessControl("Access-Control-Allow-Credentials", "true");
+		return $this->accessControl('Access-Control-Allow-Credentials', 'true');
 	}
 
 	/**
@@ -509,10 +510,10 @@ class Response
 	public function accessControlMaxAge($excepted)
 	{
 		if (!is_numeric($excepted)) {
-			throw new ResponseException("La paramtere doit être un entier: " . gettype($excepted) . " donner.", E_USER_ERROR);
+			throw new ResponseException('La paramtere doit être un entier: ' . gettype($excepted) . ' donner.', E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Control-Max-Age", $excepted);
+		return $this->accessControl('Access-Control-Max-Age', $excepted);
 	}
 
 	/**
@@ -525,9 +526,9 @@ class Response
 	public function accessControlExposeHeaders(array $excepted)
 	{
 		if (count($excepted) == 0) {
-			throw new ResponseException("Le tableau est vide." . gettype($excepted) . " donner.", E_USER_ERROR);
+			throw new ResponseException('Le tableau est vide.' . gettype($excepted) . ' donner.', E_USER_ERROR);
 		}
 
-		return $this->accessControl("Access-Control-Expose-Headers", implode(", ", $excepted));
+		return $this->accessControl('Access-Control-Expose-Headers', implode(', ', $excepted));
 	}
 }
