@@ -31,9 +31,10 @@ if (!function_exists('config')) {
     /**
      * Application configuration
      * @param string|array $param
+     * @param mixed $newConfig
      * @return AppConfiguration
      */
-    function config($param = null) {
+    function config($param = null, $newConfig = null) {
         $app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
         $config = AppConfiguration::configure(require $app_dir . '/config/bootstrap.php');
 
@@ -41,40 +42,61 @@ if (!function_exists('config')) {
             return $config;
         }
 
-        if (!in_array($param, ['name', 'engine', 'root', 'public', 'view path', 'logger', 'local', 'config', null])) {
+        if (!in_array($param, ['name', 'engine', 'root', 'public', 'view path', 'logger', 'local', 'key', null])) {
             throw new InvalidArgumentException('Paramètre invalide.', E_USER_ERROR);
         }
 
         switch(true) {
             case $param === 'public':
-                return $config->getPublicPath();
+                if ($newConfig === null) {
+                    return $config->getPublicPath();
+                }
+                $config->setPublicPath($newConfig);
                 break;
             case $param === 'engine':
-                return $config->getEngine();
+                if ($newConfig === null) {
+                    return $config->getTemplateEngine();
+                }
+                $config->setTemplateEngine($newConfig);
                 break;
             case $param === 'root':
+                if ($newConfig === null) {
+
+                }
                 return $config->getApproot();
                 break;
             case $param === 'name':
-                return $config->getAppname();
+                if ($newConfig === null) {
+                    return $config->getAppname();
+                }
+                $config->setAppname($newConfig);
                 break;
             case $param === 'route':
                 return $config->getApplicationRoutes();
                 break;
             case $param === 'view path':
-                return $config->getViewpath();
+                if ($newConfig === null) {
+                    return $config->getViewpath();
+                }
+                $config->setViewpath($newConfig);
                 break;
             case $param === 'logger':
-                return $config->getLoggerMode();
-                break;
-            case $param === 'config':
-                return $config;
+                if ($newConfig === null) {
+                    return $config->getLoggerMode();
+                }
+                $config->setLoggerMode($newConfig);
                 break;
             case $param === 'mail':
                 return $config->getMailConfiguration();
                 break;
             case $param === 'db':
                 return $config->getDatabaseConfiguration();
+                break;
+            case $param === 'key':
+                if ($newConfig === null) {
+                    return $config->getAppkey();
+                }
+                $config->setAppkey($newConfig);
                 break;
         }
 
@@ -93,6 +115,9 @@ Storage::configure(config()->getFtpConfiguration());
 
 // Configuration de Mail.
 Mail::configure(config()->getMailConfiguration());
+
+// Configuration de la Sécurité
+Security::setkey(config('key'));
 
 if (!function_exists('response')) {
     /**
@@ -197,9 +222,9 @@ if (!function_exists('query_maker')) {
     /**
      * fonction d'astuce
      *
-     * @param $sql
-     * @param $data
-     * @param $cb
+     * @param string $sql
+     * @param array $data
+     * @param callable $cb
      * @param $method
      *
      * @return mixed
