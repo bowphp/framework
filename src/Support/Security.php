@@ -34,7 +34,7 @@ class Security
 	 */
 	public static function setkey($key)
 	{
-		AppConfiguration::takeInstance()->setAppkey($key);
+		static::$key = $key;
 	}
 
 	/**
@@ -143,23 +143,23 @@ class Security
 	 */
 	public static function createCsrfToken($time = null)
 	{
-		if (!Session::has('bow.csrf')) {
-			if (is_int($time)) {
-				static::$tokenCsrfExpirateTime = $time;
-			}
-
-			$token = static::generateCsrfToken();
-
-			Session::add('bow.csrf', (object) [
-				'token' => $token,
-				'expirate' => time() + static::$tokenCsrfExpirateTime,
-				'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
-			]);
-
-			return true;
+		if (Session::has('bow.csrf')) {
+			return false;
 		}
 
-		return false;
+		if (is_int($time)) {
+			static::$tokenCsrfExpirateTime = $time;
+		}
+
+		$token = static::encrypt(static::generateCsrfToken());
+
+		Session::add('bow.csrf', (object) [
+			'token' => $token,
+			'expirate' => time() + static::$tokenCsrfExpirateTime,
+			'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
+		]);
+
+		return true;
 	}
 
 	/**
@@ -244,7 +244,6 @@ class Security
 	 */
 	public static function encrypt($data)
 	{
-		static::$key = AppConfiguration::takeInstance()->getAppkey();
 		$iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
 		static::$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
 		$encrypted_data = mcrypt_encrypt(MCRYPT_BLOWFISH, static::$key, $data, MCRYPT_MODE_CBC, static::$iv);
