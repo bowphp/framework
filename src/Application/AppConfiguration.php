@@ -339,9 +339,20 @@ class AppConfiguration
      *
      * @return string
      */
-    public function getEngine()
+    public function getTemplateEngine()
     {
         return $this->config["application"]->template_engine;
+    }
+
+    /**
+     * setEngine retourne le nom du moteur de template définir
+     *
+     * @param string $engine
+     * @return string
+     */
+    public function setTemplateEngine($engine)
+    {
+        return $this->config["application"]->template_engine = $engine;
     }
 
     /**
