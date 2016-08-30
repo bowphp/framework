@@ -79,10 +79,14 @@ class Schema
      *
      * @param string|array $table [optional]
      * @param int $n
-     *
+     * @param array $desciption [
+     *      "column" => [
+     *          "type": "int|longint|bigint|mediumint|smallint|tinyint",
+     *          "auto" => false|true
+     *      ]
      * @return mixed
      */
-    public static function fillTable($table = null, $n = 1)
+    public static function fillTable($table = null, $n = 1, $desciption = [])
     {
         if (is_int($table)) {
             $n = $table;
@@ -91,6 +95,12 @@ class Schema
 
         if (!is_string($table)) {
             $table = static::$table;
+        }
+
+        $table = Database::table($table);
+
+        if (static::$data === null) {
+            static::$data = $desciption;
         }
 
         for($i = 0; $i < $n; $i++) {
@@ -107,14 +117,13 @@ class Schema
                 } else if (in_array($column['type'], ['double', 'float'])) {
                     $value = Filler::float();
                 } else if ($column['type'] == 'timestamp') {
-                    $value = 'CURRENT_TIMESTAMP';
+                    $value = time();
                 } else {
                     $value = Str::slice(Filler::string(), 0, $column['size']);
                 }
-
                 $data[$column['field']] = $value;
             }
-            Database::table($table)->insert($data);
+            $table->insert($data);
         }
     }
 }

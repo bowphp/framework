@@ -725,7 +725,7 @@ class Application
 
 	/**
 	 * Retourne la listes des routes de l'application
-	 * 
+	 *
 	 * @return array Liste des routes définir dans l'application
 	 */
 	public function getRoutes()

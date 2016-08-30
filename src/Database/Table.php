@@ -168,15 +168,15 @@ class Table extends DatabaseTools implements \jsonSerializable
         }
 
         if (!in_array(Str::lower($boolean), ['and', 'or'])) {
-            throw new TableException('le booléen $boolean non accepté', E_ERROR);
+            throw new TableException('le booléen '. $boolean . ' non accepté', E_ERROR);
         }
 
         $this->whereDataBind[$column] = $value;
 
         if ($this->where == null) {
-            $this->where = $column . ' ' . $comp . ':' . $column;
+            $this->where = $column . ' ' . $comp . ' :' . $column;
         } else {
-            $this->where .= $boolean .' '. $column . ' '. $comp .':'. $column;
+            $this->where .= ' ' . $boolean .' '. $column . ' '. $comp .' :'. $column;
         }
 
         return $this;
@@ -218,9 +218,9 @@ class Table extends DatabaseTools implements \jsonSerializable
     {
 
         if (!is_null($this->where)) {
-            $this->where = $column . 'is null';
+            $this->where = '`' . $column . '` is null';
         } else {
-            $this->where = ' ' . $boolean .' ' . $column .' is null';
+            $this->where = ' ' . $boolean .' `' . $column .'` is null';
         }
 
         return $this;
@@ -239,9 +239,9 @@ class Table extends DatabaseTools implements \jsonSerializable
     public function whereNotNull($column, $boolean = 'and')
     {
         if (is_null($this->where)) {
-            $this->where = $column . 'is not null';
+            $this->where = '`'. $column . '` is not null';
         } else {
-            $this->where .= ' ' . $boolean .' ' . $column .' is not null';
+            $this->where .= ' ' . $boolean .' `' . $column .'` is not null';
         }
 
         return $this;
@@ -279,7 +279,7 @@ class Table extends DatabaseTools implements \jsonSerializable
             if ($boolean == 'not') {
                 $this->where .= ' and `'.$column .'`  not between ' . $between;
             } else {
-                $this->where .= ' ' . $boolean . '`' . $column. '` between ' . $between;
+                $this->where .= ' ' . $boolean . ' `' . $column. '` between ' . $between;
             }
         }
 
@@ -372,7 +372,7 @@ class Table extends DatabaseTools implements \jsonSerializable
         if (is_null($this->join)) {
             $this->join = 'inner join `'.$table.'`';
         } else {
-            $this->join .= ',`'.$table.'`';
+            $this->join .= ', `'.$table.'`';
         }
 
         return $this;
@@ -446,7 +446,7 @@ class Table extends DatabaseTools implements \jsonSerializable
         }
 
         if (!preg_match('/on/i', $this->join)) {
-            $this->join .= ' on `'.$column1.'` '.$comp.' '.$column2;
+            $this->join .= ' on `' . $column1 . '` ' . $comp . ' `' . $column2 . '`';
         }
 
         return $this;
@@ -635,7 +635,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      */
     private function executeAgregat($aggregat, $column)
     {
-        $sql = 'select ' . $aggregat . '(`' . $column . '`) from ' . $this->tableName;
+        $sql = 'select ' . $aggregat . '(`' . $column . '`) from `' . $this->tableName . '`';
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
@@ -662,7 +662,6 @@ class Table extends DatabaseTools implements \jsonSerializable
         return (int) $s->fetchColumn();
     }
 
-    // Actionner
     /**
      * Action get, seulement sur la requete de type select
      *
@@ -672,50 +671,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      */
     public function get($cb = null)
     {
-        $sql = 'select ';
-
-        // Ajout de la clause select
-        if (is_null($this->select)) {
-            $sql .= '* from `' . $this->tableName .'`';
-        } else {
-            $sql .= $this->select . ' from `' . $this->tableName . '`';
-            $this->select = null;
-        }
-
-        // Ajout de la clause join
-        if (!is_null($this->join)) {
-            $sql .= ' join ' . $this->join;
-            $this->join = null;
-        }
-
-        // Ajout de la clause where
-        if (!is_null($this->where)) {
-            $sql .= ' where ' . $this->where;
-            $this->where = null;
-        }
-
-        // Ajout de la clause order
-        if (!is_null($this->order)) {
-            $sql .= ' ' . $this->order;
-            $this->order = null;
-        }
-
-        // Ajout de la clause limit
-        if (!is_null($this->limit)) {
-            $sql .= ' limit ' . $this->limit;
-            $this->limit = null;
-        }
-
-        // Ajout de la clause group
-        if (!is_null($this->group)) {
-            $sql .= ' group by ' . $this->group;
-            $this->group = null;
-
-            if (!is_null($this->havin)) {
-                $sql .= ' having ' . $this->havin;
-            }
-        }
-
+        $sql = $this->getSelectStatement();
         // execution de requete.
         $stmt = $this->connection->prepare($sql);
         static::bind($stmt, $this->whereDataBind);
@@ -890,7 +846,7 @@ class Table extends DatabaseTools implements \jsonSerializable
         $n = $this->update($arr);
 
         if (is_callable($callback)) {
-            return call_user_func_array($callback, [$this->getLastError(), $data, $n]);
+            return call_user_func_array($callback, [$n, $data, $this->getLastError()]);
         }
 
         return $data;
@@ -948,7 +904,7 @@ class Table extends DatabaseTools implements \jsonSerializable
         $r = $stmt->fetchColumn();
 
         if (is_callable($cb)) {
-            call_user_func_array($cb, [$this->getResponseOfQuery($r), $r]);
+            call_user_func_array($cb, [$r]);
         }
 
         return (int) $r;
@@ -1053,7 +1009,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      */
     public function increment($column, $step = 1)
     {
-        return $this->crement($column, $step, '+');
+        return $this->incrementAction($column, $step, '+');
     }
 
 
@@ -1067,7 +1023,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      */
     public function decrement($column, $step = 1)
     {
-        return $this->crement($column, $step, '-');
+        return $this->incrementAction($column, $step, '-');
     }
 
     /**
@@ -1079,7 +1035,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      *
      * @return DatabaseErrorHandler
      */
-    private function crement($column, $step = 1, $sign = '')
+    private function incrementAction($column, $step = 1, $sign = '')
     {
         $sql = 'update `' . $this->tableName . '` set `'.$column.'` = `'.$column.'` '.$sign.' '.$step;
 
@@ -1125,7 +1081,7 @@ class Table extends DatabaseTools implements \jsonSerializable
             $nInserted = $this->insertOne($values);
         }
 
-        return $this->getResponseOfQuery($nInserted);
+        return $nInserted;
     }
 
     /**
@@ -1163,18 +1119,13 @@ class Table extends DatabaseTools implements \jsonSerializable
      * Action insertAndGetLastId lance les actions insert et lastInsertId
      *
      * @param array $values
-     * @param bool $withInfo Si a true cette fonction retourn un object ['info' => DatabaseErrorHandler, 'id' => int]
      *
      * @return int|DatabaseErrorHandler
      */
-    public function insertAndGetLastId(array $values, $withInfo = false)
+    public function insertAndGetLastId(array $values)
     {
-        $r = $this->insert($values);
+        $this->insert($values);
         $n = $this->connection->lastInsertId();
-
-        if ($withInfo) {
-            $n = (object) ['info' => $r, 'id' => $n];
-        }
 
         return $n;
     }
@@ -1183,13 +1134,12 @@ class Table extends DatabaseTools implements \jsonSerializable
      * saveAndGetLastId aliase sur action insertAndGetLastId, lance les actions insert et lastInsertId
      *
      * @param array $values
-     * @param bool $withInfo
      *
-     * @return int|DatabaseErrorHandler
+     * @return int
      */
-    public function saveAndGetLastId(array $values, $withInfo = false)
+    public function saveAndGetLastId(array $values)
     {
-        return $this->insertAndGetLastId($values, $withInfo);
+        return $this->insertAndGetLastId($values);
     }
 
     /**
@@ -1289,7 +1239,7 @@ class Table extends DatabaseTools implements \jsonSerializable
             'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),
             'current' => $current,
             'data' => $data,
-            'info' => $this->getResponseOfQuery(count($data))
+            'dbInfo' => $this->getResponseOfQuery(count($data))
         ];
 
         return (object) $data;
@@ -1369,6 +1319,60 @@ class Table extends DatabaseTools implements \jsonSerializable
     public function toJson($option = 0)
     {
         return json_encode($this->get(), $option);
+    }
+
+    /**
+     * Formate la requete select
+     * 
+     * @return string
+     */
+    private function getSelectStatement()
+    {
+        $sql = 'select ';
+
+        // Ajout de la clause select
+        if (is_null($this->select)) {
+            $sql .= '* from `' . $this->tableName .'`';
+        } else {
+            $sql .= $this->select . ' from `' . $this->tableName . '`';
+            $this->select = null;
+        }
+
+        // Ajout de la clause join
+        if (!is_null($this->join)) {
+            $sql .= ' join ' . $this->join;
+            $this->join = null;
+        }
+
+        // Ajout de la clause where
+        if (!is_null($this->where)) {
+            $sql .= ' where ' . $this->where;
+            $this->where = null;
+        }
+
+        // Ajout de la clause order
+        if (!is_null($this->order)) {
+            $sql .= ' ' . $this->order;
+            $this->order = null;
+        }
+
+        // Ajout de la clause limit
+        if (!is_null($this->limit)) {
+            $sql .= ' limit ' . $this->limit;
+            $this->limit = null;
+        }
+
+        // Ajout de la clause group
+        if (!is_null($this->group)) {
+            $sql .= ' group by ' . $this->group;
+            $this->group = null;
+
+            if (!is_null($this->havin)) {
+                $sql .= ' having ' . $this->havin;
+            }
+        }
+
+        return $sql;
     }
 
     /**
