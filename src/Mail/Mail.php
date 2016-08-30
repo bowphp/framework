@@ -18,10 +18,22 @@ class Mail
     private static $instance;
 
     /**
+     * @var \stdClass
+     */
+    private static $config;
+
+    /**
      * Maxi singleton
      */
-    private function __construct() {}
     private function __clone() {}
+
+    /**
+     * @param \stdClass $config
+     */
+    public function __construct(\stdClass $config)
+    {
+        static::$config = $config;
+    }
 
     /**
      * Configure la classe Mail
@@ -32,6 +44,8 @@ class Mail
      */
     public static function configure(\stdClass $config)
     {
+        static::$config = $config;
+
         if (!in_array($config->driver, ["smtp", "mail"])) {
             throw new MailException("Le type n'est pas réconnu.", E_USER_ERROR);
         }
@@ -67,6 +81,10 @@ class Mail
             $bind = [];
         }
 
+        if (!is_callable($cb)) {
+            throw new \InvalidArgumentException('callback paramter invalide.');
+        }
+
         $message = new Message();
         call_user_func_array($cb, [$message]);
 
@@ -92,10 +110,28 @@ class Mail
         $message = new Message();
 
         $message->to($to)->subject($subject)->setMessage($data);
+
         foreach($headers as $key => $value) {
             $message->addHeader($key, $value);
         }
 
         return static::$instance->send($message);
+    }
+
+    /**
+     * Modifie le driver smtp|mail
+     *
+     * @param $driver
+     * @return SimpleMail|Smtp
+     * @throws MailException
+     */
+    public static function setDriver($driver)
+    {
+        if (static::$config == null) {
+            throw new MailException('Mail non configurer.');
+        }
+
+        static::$config->driver = $driver;
+        return static::configure(static::$config);
     }
 }

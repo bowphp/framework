@@ -926,20 +926,18 @@ if (!function_exists('email')) {
     /**
      * Alias sur SimpleMail et Smtp
      *
-     * @param null|string $type Le type de mail.
+     * @param null|string $view la view
+     * @param array $data la view
+     * @param callable|null $callable
      *
-     * @return \Bow\Mail\SimpleMail|\Bow\Mail\Smtp
-     * @throws \Bow\Exception\MailException
+     * @return Mail|bool
      */
-    function email($type = null) {
-
-        $config = config()->getMailConfiguration();
-
-        if (in_array($type, ['mail', 'smtp'])) {
-            $config->driver = $type;
+    function email($view = null, $data = [], callable $callable = null) {
+        if ($view === null) {
+            return Mail::class;
         }
 
-        return Mail::configure($config);
+        return Mail::send($view, $data, $callable);
     }
 }
 
