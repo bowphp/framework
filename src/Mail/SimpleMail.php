@@ -31,20 +31,33 @@ class SimpleMail implements Send
 			throw new InvalidArgumentException("Une erreur est survenu. L'expediteur ou le message ou l'object omit.", E_USER_ERROR);
 		}
 
-		if (count($this->config) > 0) {
+		if (isset($this->config['mail'])) {
+
+			$section = $this->config['mail']['default'];
 
 			if (!$message->fromIsDefined()) {
-				$form = $this->config[0];
-			} else if (!Str::isMail(explode(" ", $message->getFrom())[0])) {
-				$form = $this->config[$message->getFrom()];
+				$form = $this->config['mail'][$section];
+				$message->from($form["address"], $form["username"]);
 			} else {
-				throw new MailException("L'expediteur n'est spécifié.", E_USER_ERROR);
+				if (!Str::isMail($message->getFrom())) {
+					$form = $this->config['mail'][$message->getFrom()];
+					$message->from($form["address"], $form["username"]);
+				}
 			}
-
-			$message->from($form["address"], $form["username"]);
 		}
 
-		$status = @mb_send_mail(implode(", ", $message->getTo()), $message->getSubject(), $message->getMessage(), $message->compileHeaders());
+		$to = '';
+		$message->setDefaultHeader();
+
+		foreach($message->getTo() as $value) {
+			if ($value[0] !== null) {
+				$to .= $value[0] . ' <' . $value[1] . '>';
+			} else {
+				$to .= '<' . $value[1] . '>';
+			}
+		}
+
+		$status = @mb_send_mail($to, $message->getSubject(), $message->getMessage(), $message->compileHeaders());
 
 		return $status;
 	}
@@ -52,9 +65,7 @@ class SimpleMail implements Send
 	/**
 	 * Mise en privé des fonctions magic __clone
 	 */
-	private function __clone()
-	{
-	}
+	private function __clone() { }
 
 	/**
 	 * Construction d'une instance de SimpleMail
