@@ -87,13 +87,13 @@ class Message
 	/**
 	 * Définir les entête par défaut
 	 */
-	protected function setDefaultHeader()
+	public function setDefaultHeader()
 	{
 		$this->headers[] = "Mime-Version: 1.0";
 		$this->headers[] = "Date: " . date("r");
 		$this->headers[] = "X-Mailer: Bow Framework";
 
-		if ($this->from) {
+		if ($this->fromIsDefined()) {
 			$this->headers[] = "From: " . $this->from;
 		}
 
