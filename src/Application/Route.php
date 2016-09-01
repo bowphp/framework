@@ -56,7 +56,7 @@ Class Route
 	public function __construct($path, $cb)
 	{
 		$this->cb = $cb;
-		$this->path = $path;
+		$this->path = str_replace('.', '\.', $path);
 		$this->match = [];
 	}
 
