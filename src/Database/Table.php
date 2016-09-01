@@ -1323,7 +1323,7 @@ class Table extends DatabaseTools implements \jsonSerializable
 
     /**
      * Formate la requete select
-     * 
+     *
      * @return string
      */
     private function getSelectStatement()
