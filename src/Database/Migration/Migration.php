@@ -30,9 +30,10 @@ abstract class Migration
     /**
      * Remplir une table
      * @param int $n
+     * @return int
      */
     public function fill($n = 1)
     {
-        Schema::fillTable(static::$table, $n);
+        return Schema::fillTable(static::$table, $n);
     }
 }
