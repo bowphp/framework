@@ -113,7 +113,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      */
     public function integer($field, $size = 11, $null = false, $default = null)
     {
@@ -128,7 +128,7 @@ class Fields
      * @param bool $size
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      */
     public function tinyInteger($field, $size = null, $null = false, $default = null)
     {
@@ -143,7 +143,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      * @throws \ErrorException
      */
     public function smallint($field, $size = null, $null = false, $default = null)
@@ -159,7 +159,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      * @throws \ErrorException
      */
     public function mediumInteger($field, $size = null, $null = false, $default = null)
@@ -175,7 +175,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      */
     public function bigInteger($field, $size = 20, $null = false, $default = null)
     {
@@ -191,7 +191,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      */
     public function double($field, $size = 20, $left = 0, $null = false, $default = null)
     {
@@ -210,7 +210,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      */
     public function float($field, $size = 20, $left = 0, $null = false, $default = null)
     {
@@ -228,7 +228,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function string($field, $size = 255, $null = false, $default = null)
     {
@@ -244,15 +244,17 @@ class Fields
      * varchar
      *
      * @param string $field
-     * @param int $size
      * @param bool $null
      * @param null|string $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
-    public function longText($field, $size = 255, $null = false, $default = null)
+    public function longText($field, $null = false, $default = null)
     {
-        return $this->loadWhole('longtext', $field, $size, $null, $default);
+        return $this->addField('mediumtext', $field, [
+            'null' => $null,
+            'default' => $default
+        ]);
     }
 
     /**
@@ -262,7 +264,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function mediumText($field, $null = false, $default = null)
     {
@@ -279,7 +281,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function tinyText($field, $null = false, $default = null)
     {
@@ -297,7 +299,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function binary($field, $size = 8, $null = false, $default = null)
     {
@@ -316,7 +318,7 @@ class Fields
      * @param bool $null
      * @param mixed $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function boolean($field, $null = false, $default = null)
     {
@@ -334,7 +336,7 @@ class Fields
      * @param bool $null
      * @param mixed $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function blob($field, $null = false, $default = null)
     {
@@ -351,7 +353,7 @@ class Fields
      * @param bool $null
      * @param mixed $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function tinyBlob($field, $null = false, $default = null)
     {
@@ -368,7 +370,7 @@ class Fields
      * @param bool $null
      * @param mixed $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function longBlob($field, $null = false, $default = null)
     {
@@ -385,7 +387,7 @@ class Fields
      * @param bool $null
      * @param mixed $default
      * @throws \Exception
-     * @return $this
+     * @return Fields
      */
     public function mediumBlob($field, $null = false, $default = null)
     {
@@ -401,7 +403,7 @@ class Fields
      * @param string $field
      * @param bool $null
      *
-     * @return $this
+     * @return Fields
      */
     public function date($field, $null = false)
     {
@@ -418,7 +420,7 @@ class Fields
      * @param string $field
      * @param bool $null
      *
-     * @return $this
+     * @return Fields
      */
     public function year($field, $null = false)
     {
@@ -435,7 +437,7 @@ class Fields
      * @param string $field
      * @param bool $null
      *
-     * @return $this
+     * @return Fields
      */
     public function time($field, $null = false)
     {
@@ -452,7 +454,7 @@ class Fields
      * @param string $field
      * @param string|bool $null
      *
-     * @return Schema
+     * @return Fields
      */
     public function dateTime($field, $null = false)
     {
@@ -468,7 +470,7 @@ class Fields
      *
      * @param string $field
      *
-     * @return Schema
+     * @return Fields
      */
     public function timestamps($field = null)
     {
@@ -491,7 +493,7 @@ class Fields
      * @param bool $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      */
     public function longInteger($field, $size = 20, $null = false, $default = null)
     {
@@ -503,7 +505,7 @@ class Fields
      * @param int $size
      * @param bool|false $null
      * @param string $default
-     * @return Schema
+     * @return Fields
      * @throws ModelException
      */
     public function character($field, $size = 1, $null = false, $default = null)
@@ -519,13 +521,15 @@ class Fields
      * @param string $field
      * @param array $enums
      * @param bool $null
-     * @return Schema
+     * @param string $default
+     * @return Fields
      */
-    public function enumerate($field, array $enums, $null = false)
+    public function enumerate($field, array $enums, $null = false, $default = null)
     {
-        $this->addField('enum', $field, [
-            'default' => $enums,
-            'null' => $null
+        return $this->addField('enum', $field, [
+            'default' => $default,
+            'null' => $null,
+            'value' => $enums
         ]);
     }
 
@@ -534,7 +538,7 @@ class Fields
      *
      * @param string $field
      * @throws ModelException
-     * @return Schema
+     * @return Fields
      */
     public function increment($field = null)
     {
@@ -568,7 +572,7 @@ class Fields
      *
      * @param string|array $field
      * @throws ModelException
-     * @return $this
+     * @return Fields
      */
     public function primary($field = null)
     {
@@ -598,7 +602,7 @@ class Fields
     /**
      * unique
      *
-     * @return Schema
+     * @return Fields
      */
     public function unique()
     {
@@ -610,7 +614,7 @@ class Fields
      *
      * @param string $indexType
      * @throws ModelException
-     * @return Schema
+     * @return Fields
      */
     private function addIndexes($indexType)
     {
@@ -631,7 +635,7 @@ class Fields
      * @param string $field
      * @param string $data
      * @throws ModelException
-     * @return $this
+     * @return Fields
      */
     private function addField($method, $field, $data)
     {
@@ -649,7 +653,18 @@ class Fields
             $this->dataBind = [];
         }
 
-        $this->dataBind[$field] = ['field' => $field, 'type' => $method, 'size' => isset($data['size']) ? $data['size'] : 0, 'auto' => $this->getAutoincrement() == false ?: true];
+        $bind = [
+            'field' => $field,
+            'type' => $method,
+            'size' => isset($data['size']) ? $data['size'] : 0,
+            'auto' => $this->getAutoincrement() == false ?: true
+        ];
+
+        if ($method == 'enum') {
+            $bind['default'] = isset($data['default']) ? $data['default'] : $data['value'][0];
+        }
+
+        $this->dataBind[$field] = $bind;
 
         // default index are at false
         $data['primary'] = false;
@@ -675,7 +690,7 @@ class Fields
      * @param bool        $null
      * @param null|string $default
      *
-     * @return $this
+     * @return Fields
      */
     private function loadWhole($method, $field, $size = 20, $null = false, $default = null)
     {
@@ -754,7 +769,7 @@ class Fields
     }
 
     /**
-     * @param $value
+     * @param bool $value
      */
     public function setAutoincrement($value)
     {

@@ -81,6 +81,7 @@ class Schema
      * @param int $n
      * @param array $desciption [
      *      "column" => [
+     *          "field" => "name",
      *          "type": "int|longint|bigint|mediumint|smallint|tinyint",
      *          "auto" => false|true
      *      ]
@@ -118,8 +119,10 @@ class Schema
                     $value = Filler::float();
                 } else if ($column['type'] == 'timestamp') {
                     $value = time();
+                } else if ($column['type'] == 'enum') {
+                    $value = "'" . $column['default'] . "'";
                 } else {
-                    $value = Str::slice(Filler::string(), 0, $column['size']);
+                    $value = Str::slice(Filler::string(), 0, rand(1, $column['size']));
                 }
                 $data[$column['field']] = $value;
             }

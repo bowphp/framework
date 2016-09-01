@@ -87,7 +87,7 @@ class StatementMaker
                 case 'varchar' :
                 case 'text' :
                 case 'mediumtext' :
-                case 'langtext' :
+                case 'longtext' :
                 case "int" :
                 case "tinyint" :
                 case "smallint" :
@@ -122,19 +122,22 @@ class StatementMaker
                 case "timestamp" :
                 case "time" :
                 case "year" :
-                    $value->each(function ($info, $field) use ($type, &$statement) {
+                    $value->each(function ($info, $field) use ($type) {
                         $this->addFieldType($info, $field, $type);
                         $this->addIndexOrPrimaryKey($info, $field);
                     });
                     break;
                 case "enum" :
-                    $value->each(function ($info, $field) use (&$statement) {
-                        foreach ($info["default"] as $key => $value) {
-                            $info["default"][$key] = "'" . $value . "'";
+                    $value->each(function ($info, $field) {
+                        foreach ($info["value"] as $key => $value) {
+                            $info["value"][$key] = "'" . $value . "'";
                         }
                         $null = $this->getNullType($info["null"]);
-                        $enum = implode(", ", $info["default"]);
-                        $statement .= ", `$field` ENUM($enum) $null";
+                        $enum = implode(", ", $info["value"]);
+                        $this->sql .= "`$field` ENUM($enum) $null";
+                        if ($info["default"] !== null) {
+                            $this->sql .= " DEFAULT '" . $info["default"] . "'";
+                        }
                     });
 
                     break;
@@ -158,7 +161,7 @@ class StatementMaker
 
         $nullType = "NOT NULL";
 
-        if ($null) {
+        if ($null === true) {
             $nullType = "NULL";
         }
 
