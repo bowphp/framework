@@ -60,8 +60,6 @@ class Smtp implements Send
      * Constructor
      *
      * @param array $param
-     *
-     * @return self
      */
     public function __construct(array $param)
     {
@@ -88,7 +86,7 @@ class Smtp implements Send
      * Lance l'envoie de mail
      *
      * @param Message $message
-     * @return self
+     * @return bool
      */
     public function send(Message $message)
     {
@@ -133,7 +131,7 @@ class Smtp implements Send
             $error = false;
         }
 
-        return $error;
+        return (bool) $error;
     }
 
 
