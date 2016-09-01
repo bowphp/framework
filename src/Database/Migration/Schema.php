@@ -20,7 +20,6 @@ class Schema
      * Supprimer une table.
      *
      * @param string $table
-     * @return int
      */
     public static function drop($table)
     {
@@ -98,12 +97,12 @@ class Schema
             $table = static::$table;
         }
 
-        $table = Database::table($table);
+        $database = Database::table($table);
 
         if (static::$data === null) {
             static::$data = $desciption;
         }
-
+        $r = 0;
         for($i = 0; $i < $n; $i++) {
             $data = [];
             foreach(static::$data as $column) {
@@ -126,7 +125,9 @@ class Schema
                 }
                 $data[$column['field']] = $value;
             }
-            $table->insert($data);
+            $r += $database->insert($data);
         }
+
+        return $r;
     }
 }
