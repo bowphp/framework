@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Http;
 
-use StdClass;
 use Bow\Support\Str;
 
 /**
@@ -32,7 +31,7 @@ class Request
      */
     private function __construct()
     {
-        static::$params = new StdClass();
+        static::$params = new \stdClass();
     }
 
     /**
@@ -310,5 +309,31 @@ class Request
     public function protocol()
     {
         return $_SERVER["SERVER_PROTOCOL"];
+    }
+
+    /**
+     * Get Request header
+     *
+     * @param string $key
+     * @return bool|string
+     */
+    public function getHeader($key)
+    {
+        if ($this->hasHeader($key)) {
+            return $_SERVER[$key];
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifir si une entête existe.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function hasHeader($key)
+    {
+        return isset($_SERVER[$key]);
     }
 }
