@@ -67,9 +67,9 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
     {
         $data = $this->data;
         if ($this->mergeTableName !== null) {
-            unset($data->${$this->mergeTableName});
+            unset($data->{$this->mergeTableName});
         }
-        return $this->table->where('id', $this->id)->update($this->serialize($data));
+        return $this->table->where('id', $this->id)->update((array) $this->serialize($data));
     }
 
     /**
