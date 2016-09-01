@@ -207,9 +207,9 @@ class Logger extends AbstractLogger
     }
 
     /**
-     * @param \Exception $e
+     * @param \Exception|\ParseError $e
      */
-    public function exceptionHandler(\Exception $e)
+    public function exceptionHandler($e)
     {
         if ($this->mode === 'development') {
             $trace = $e->getTrace();

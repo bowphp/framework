@@ -1,15 +1,15 @@
 <?php
 namespace Bow\Database;
 
-use Bow\Exception\TableException;
 use \Carbon\Carbon;
+use Bow\Exception\TableException;
 /**
  * Class SQLUnit
  *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Database
  */
-class SqlUnity implements \IteratorAggregate, \jsonSerializable
+class SqlUnity implements \IteratorAggregate, \JsonSerializable
 {
     /**
      * @var \StdClass
@@ -25,6 +25,16 @@ class SqlUnity implements \IteratorAggregate, \jsonSerializable
      * @var Table
      */
     private $table;
+
+    /**
+     * @var string
+     */
+    private $foreign;
+
+    /**
+     * @var string
+     */
+    private $mergeTableName;
 
     /**
      * SqlUnity Contructor
@@ -55,7 +65,11 @@ class SqlUnity implements \IteratorAggregate, \jsonSerializable
      */
     public function save()
     {
-        return $this->table->where('id', $this->id)->update($this->toArray());
+        $data = $this->data;
+        if ($this->mergeTableName !== null) {
+            unset($data->${$this->mergeTableName});
+        }
+        return $this->table->where('id', $this->id)->update($this->serialize($data));
     }
 
     /**
@@ -66,6 +80,35 @@ class SqlUnity implements \IteratorAggregate, \jsonSerializable
     public function delete()
     {
         return $this->table->where('id', $this->id)->delete();
+    }
+
+    /**
+     * Definir la clé étranger
+     *
+     * @param string $id
+     * @return self
+     */
+    public function foreign($id)
+    {
+        $this->foreign = $id;
+        return $this;
+    }
+
+    /**
+     * Join avec une autre table
+     *
+     * @param string $table
+     * @return self
+     */
+    public function merge($table)
+    {
+        $foreign = 'id';
+        if ($this->foreign !== null) {
+            $foreign = $this->foreign;
+        }
+        $this->data->$table = Database::table($table)->where($foreign, $this->id)->get();
+        $this->mergeTableName = $table;
+        return $this;
     }
 
     /**
@@ -108,27 +151,31 @@ class SqlUnity implements \IteratorAggregate, \jsonSerializable
     }
 
     /**
+     * Quand un foreach est lancé sur l'instance de SqlUnit
      * @return \ArrayIterator
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->serialize());
+        return new \ArrayIterator($this->toArray());
     }
 
     /**
-     *
+     * Appel de la metod json_encode sur l'instance de SqlUnit.
      */
     public function jsonSerialize()
     {
-        return $this->serialize();
+        return $this->toArray();
     }
 
     /**
+     * @param array $data
      * @return array
      */
-    private function serialize()
+    private function serialize($data = [])
     {
-        $data = $this->data;
+        if (empty($data)) {
+            $data = $this->data;
+        }
 
         foreach($data as $key => $value) {
             if ($value instanceof Carbon) {
