@@ -119,7 +119,7 @@ class Schema
                 } else if ($column['type'] == 'timestamp') {
                     $value = time();
                 } else if ($column['type'] == 'enum') {
-                    $value = "'" . $column['default'] . "'";
+                    $value = $column['default'];
                 } else {
                     $value = Str::slice(Filler::string(), 0, rand(1, $column['size']));
                 }

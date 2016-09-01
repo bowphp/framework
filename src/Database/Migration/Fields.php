@@ -51,7 +51,7 @@ class Fields
 
     /**
      * define the auto increment field
-     * @var \StdClass
+     * @var \stdClass
      */
     private $autoincrement = false;
 
@@ -468,20 +468,17 @@ class Fields
     /**
      * timestamp
      *
-     * @param string $field
-     *
      * @return Fields
      */
-    public function timestamps($field = null)
+    public function timestamps()
     {
-        if ($field === null) {
-            $field = 'create_at';
-        }
-
-        $this->addField('timestamp', $field, [
+        $this->addField('timestamp', 'create_at', [
             'null' => true
         ]);
 
+        $this->addField('timestamp', 'update_at', [
+            'null' => true
+        ]);
         return $this;
     }
 
@@ -550,16 +547,17 @@ class Fields
             if ($this->lastField !== null) {
                 if (in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
                     $this->autoincrement = $this->lastField;
+                    $this->dataBind[$this->lastField->field]['auto'] = true;
                 } else {
                     throw new ModelException('Cannot add autoincrement to ' . $this->lastField->method, 1);
                 }
             } else {
                 if ($field) {
-                    $this->integer($field)->primary();
                     $this->autoincrement = (object) [
                         'method' => 'int',
                         'field' => $field
                     ];
+                    $this->integer($field)->primary();
                 }
             }
         }
@@ -645,10 +643,6 @@ class Fields
             $this->fields->add($method, new Collection);
         }
 
-        if ($this->fields->get($method)->has($field)) {
-            return $this;
-        }
-
         if (!is_array($this->dataBind)) {
             $this->dataBind = [];
         }
@@ -657,14 +651,24 @@ class Fields
             'field' => $field,
             'type' => $method,
             'size' => isset($data['size']) ? $data['size'] : 0,
-            'auto' => $this->getAutoincrement() == false ?: true
+            'auto' => false
         ];
 
+        if ($this->getAutoincrement() !== false) {
+            if ($this->getAutoincrement()->field == $field) {
+                $bind['auto'] = true;
+            }
+        }
+
         if ($method == 'enum') {
-            $bind['default'] = isset($data['default']) ? $data['default'] : $data['value'][0];
+            $bind['default'] = $data['default'] != null ? $data['default'] : $data['value'][0];
         }
 
         $this->dataBind[$field] = $bind;
+
+        if ($this->fields->get($method)->has($field)) {
+            return $this;
+        }
 
         // default index are at false
         $data['primary'] = false;
@@ -761,7 +765,7 @@ class Fields
     }
 
     /**
-     * @return \StdClass
+     * @return \stdClass
      */
     public function getAutoincrement()
     {
@@ -782,5 +786,14 @@ class Fields
     public function getBindData()
     {
         return $this->dataBind;
+    }
+
+    /**
+     * __call
+     * @throws \ErrorException
+     */
+    public function __call($method, $args)
+    {
+        throw new \ErrorException('Call to undefined method ' . static::class . '::'.$method.'()');
     }
 }

@@ -45,4 +45,29 @@ class Filler
     {
         return time();
     }
+
+    /**
+     * @return string
+     */
+    public static function email()
+    {
+        $emails = [
+            'johndoe@exemple',
+            'foobar@exemple',
+            'barzar@exemple',
+            'luc@exemple',
+            'claude@exemple',
+            'andrew@exemple',
+            'audre@exemple'
+        ];
+        return $emails[rand(0, count($emails) - 1)];
+    }
+
+    /**
+     * @return string
+     */
+    public static function unique()
+    {
+        return Str::lower(uniqid());
+    }
 }
