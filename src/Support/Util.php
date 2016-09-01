@@ -267,11 +267,11 @@ class Util
 			'str' => 'color:#111111',
 			'note' => 'color:#1299DA',
 			'ref' => 'color:#A0A0A0',
-			'public' => 'color:#FFFFFF',
-			'protected' => 'color:#FFFFFF',
-			'private' => 'color:#FFFFFF',
+			'public' => 'color:blue',
+			'protected' => 'color:#111',
+			'private' => 'color:#478',
 			'meta' => 'color:#B729D9',
-			'key' => 'color:#5EDB3A',
+			'key' => 'color:#212',
 			'index' => 'color:#1200DA',
 		]);
 
