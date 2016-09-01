@@ -23,7 +23,7 @@ class SimpleMail implements Send
 	 * @param Message $message
 	 * @throws InvalidArgumentException
 	 * @throws MailException
-	 * @return self
+	 * @return bool
 	 */
 	public function send(Message $message)
 	{
@@ -59,7 +59,7 @@ class SimpleMail implements Send
 
 		$status = @mb_send_mail($to, $message->getSubject(), $message->getMessage(), $message->compileHeaders());
 
-		return $status;
+		return (bool) $status;
 	}
 
 	/**

@@ -213,7 +213,7 @@ class AppConfiguration
      */
     public function getViewpath()
     {
-        return $this->config["application"]->views_path;
+        return trim($this->config["application"]->views_path, '/');
     }
 
     /**
