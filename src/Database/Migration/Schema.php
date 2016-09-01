@@ -121,7 +121,11 @@ class Schema
                 } else if ($column['type'] == 'enum') {
                     $value = $column['default'];
                 } else {
-                    $value = Str::slice(Filler::string(), 0, rand(1, $column['size']));
+                    if (preg_match('/text$/', $column['type'])) {
+                        $value = Str::slice(Filler::string(), 0, 1000);
+                    } else {
+                        $value = Str::slice(Filler::string(), 0, rand(1, $column['size']));
+                    }
                 }
                 $data[$column['field']] = $value;
             }
