@@ -83,11 +83,15 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
     }
 
     /**
+     * Definir la clé étranger
+     *
      * @param string $id
+     * @return self
      */
     public function foreign($id)
     {
         $this->foreign = $id;
+        return $this;
     }
 
     /**
@@ -102,7 +106,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
         if ($this->foreign !== null) {
             $foreign = $this->foreign;
         }
-        $this->{$table} = Database::table($table)->where($foreign, $this->id)->get();
+        $this->data->$table = Database::table($table)->where($foreign, $this->id)->get();
         $this->mergeTableName = $table;
         return $this;
     }
