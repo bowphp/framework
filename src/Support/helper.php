@@ -96,7 +96,7 @@ if (!function_exists('config')) {
                 if ($newConfig === null) {
                     return $config->getAppkey();
                 }
-                $config->setAppkey($newConfig);
+                return $config->setAppkey($newConfig);
                 break;
         }
 
@@ -118,6 +118,9 @@ Mail::configure(config()->getMailConfiguration());
 
 // Configuration de la Sécurité
 Security::setkey(config('key'));
+
+// Initialisation du token
+Security::createCsrfToken();
 
 if (!function_exists('response')) {
     /**

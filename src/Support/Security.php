@@ -2,7 +2,6 @@
 namespace Bow\Support;
 
 use Bow\Support\Session\Session;
-use Bow\Application\AppConfiguration;
 
 /**
  * Class Security
@@ -151,13 +150,15 @@ class Security
             static::$tokenCsrfExpirateTime = $time;
         }
 
-        $token = static::encrypt(static::generateCsrfToken());
+        $token = static::generateCsrfToken();
 
         Session::add('bow.csrf', (object) [
             'token' => $token,
             'expirate' => time() + static::$tokenCsrfExpirateTime,
             'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
         ]);
+
+        Session::add('_token', $token);
 
         return true;
     }
@@ -169,7 +170,7 @@ class Security
      */
     public static function generateCsrfToken()
     {
-        return md5(base64_encode(openssl_random_pseudo_bytes(23)) . date('Y-m-d H:i:s') . uniqid(rand(), true));
+        return base64_encode(base64_encode(openssl_random_pseudo_bytes(23)) . date('Y-m-d H:i:s') . uniqid(rand(), true));
     }
 
     /**
@@ -196,7 +197,7 @@ class Security
                 $time = time();
             }
 
-            if (static::getCsrfToken()->expirate >= (int) $time) {
+            if (Session::has('bow.csrf')->expirate >= (int) $time) {
                 return true;
             }
         }
@@ -217,7 +218,7 @@ class Security
         $status = false;
 
         if (Session::has('bow.csrf')) {
-            if ($token === static::getCsrfToken()->token) {
+            if ($token === Session::has('bow.csrf')->token) {
                 $status = true;
                 if ($strict) {
                     $status = $status && static::tokenCsrfTimeIsExpirate(time());
@@ -234,6 +235,7 @@ class Security
     public static function clearCsrfToken()
     {
         Session::remove('bow.csrf');
+        Session::remove('_token');
     }
 
     /**

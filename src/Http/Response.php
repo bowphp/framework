@@ -371,21 +371,27 @@ class Response
              * - Ajout de variable globale
              * dans le cadre de l'utilisation de Twig
              */
-            $tpl->addGlobal('_public', $this->config->getPublicPath());
-            $tpl->addGlobal('_root', $this->config->getApproot());
+            $tpl->addGlobal('public', $this->config->getPublicPath());
+            $tpl->addGlobal('root', $this->config->getApproot());
 
             /**
              * - Ajout de fonction global
              *  dans le cadre de l'utilisation de Twig
              */
-            $tpl->addFunction(new \Twig_SimpleFunction('_secure', function($data) {
+            $tpl->addFunction(new \Twig_SimpleFunction('secure', function($data) {
                 return Security::sanitaze($data, true);
             }));
-            $tpl->addFunction(new \Twig_SimpleFunction('_sanitaze', function($data) {
+            $tpl->addFunction(new \Twig_SimpleFunction('sanitaze', function($data) {
                 return Security::sanitaze($data);
             }));
+            $tpl->addFunction(new \Twig_SimpleFunction('csrf_field', function() {
+                return Security::getCsrfToken()->field;
+            }));
+            $tpl->addFunction(new \Twig_SimpleFunction('csrf_token', function() {
+                return Security::getCsrfToken()->token;
+            }));
 
-            $tpl->addFunction(new \Twig_SimpleFunction('_slugify', [Str::class, 'slugify']));
+            $tpl->addFunction(new \Twig_SimpleFunction('slugify', [Str::class, 'slugify']));
             return $tpl;
         }
 
@@ -394,17 +400,23 @@ class Response
                 'cache' => $this->config->getCachepath(),
                 'loader' => new \Mustache_Loader_FilesystemLoader($this->config->getViewpath()),
                 'helpers' => [
-                    '_secure' => function($data) {
+                    'secure' => function($data) {
                         return Security::sanitaze($data, true);
                     },
-                    '_sanitaze' => function($data) {
+                    'sanitaze' => function($data) {
                         return Security::sanitaze($data);
                     },
-                    '_slugify' => function($data) {
+                    'slugify' => function($data) {
                         return Str::slugify($data);
                     },
-                    '_public', $this->config->getPublicPath(),
-                    '_root', $this->config->getApproot()
+                    'csrf_token' => function() {
+                        return Security::getCsrfToken()->token;
+                    },
+                    'csrf_field' => function() {
+                        return Security::getCsrfToken()->field;
+                    },
+                    'public', $this->config->getPublicPath(),
+                    'root', $this->config->getApproot()
                 ]
             ]);
         }
