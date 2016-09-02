@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Http;
 
+use Bow\Support\Session\Session;
 use Bow\Support\Str;
 
 /**
@@ -27,11 +28,18 @@ class Request
     public static $params;
 
     /**
+     * @var Input
+     */
+    public static $input;
+
+    /**
      * Constructeur
      */
     private function __construct()
     {
         static::$params = new \stdClass();
+        static::$input = new Input();
+        Session::add('bow.old', static::$input->all());
     }
 
     /**
@@ -54,10 +62,10 @@ class Request
      */
     public function uri()
     {
-        if ($pos = strpos($_SERVER["REQUEST_URI"], "?")) {
-            $uri = substr($_SERVER["REQUEST_URI"], 0, $pos);
+        if ($pos = strpos($_SERVER['REQUEST_URI'], '?')) {
+            $uri = substr($_SERVER['REQUEST_URI'], 0, $pos);
         } else {
-            $uri = $_SERVER["REQUEST_URI"];
+            $uri = $_SERVER['REQUEST_URI'];
         }
 
         return $uri;
@@ -70,7 +78,7 @@ class Request
      */
     public function hostname()
     {
-        return $_SERVER["HTTP_HOST"];
+        return $_SERVER['HTTP_HOST'];
     }
 
     /**
@@ -90,11 +98,11 @@ class Request
      */
     public function origin()
     {
-        if (!isset($_SERVER["REQUEST_SCHEME"])) {
+        if (!isset($_SERVER['REQUEST_SCHEME'])) {
             return 'http://' . $this->hostname();
         }
 
-        return strtolower($_SERVER["REQUEST_SCHEME"]) . "://" . $this->hostname();
+        return strtolower($_SERVER['REQUEST_SCHEME']) . '://' . $this->hostname();
     }
 
     /**
@@ -104,7 +112,7 @@ class Request
      */
     public function time()
     {
-        return $_SESSION["REQUEST_TIME"];
+        return $_SESSION['REQUEST_TIME'];
     }
 
     /**
@@ -114,12 +122,12 @@ class Request
      */
     public function method()
     {
-        $method = $_SERVER["REQUEST_METHOD"];
+        $method = $_SERVER['REQUEST_METHOD'];
 
-        if ($method == "POST") {
-            if (array_key_exists("HTTP_X_HTTP_METHOD", $_SERVER)) {
-                if (in_array($_SERVER["HTTP_X_HTTP_METHOD"], ["PUT", "DELETE"])) {
-                    $method = $_SERVER["HTTP_X_HTTP_METHOD"];
+        if ($method == 'POST') {
+            if (array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
+                if (in_array($_SERVER['HTTP_X_HTTP_METHOD'], ['PUT', 'DELETE'])) {
+                    $method = $_SERVER['HTTP_X_HTTP_METHOD'];
                 }
             }
         }
@@ -134,7 +142,7 @@ class Request
      */
     public function isPost()
     {
-        if ($this->method() == "POST") {
+        if ($this->method() == 'POST') {
             return true;
         }
 
@@ -148,7 +156,7 @@ class Request
      */
     public function isGet()
     {
-        if ($this->method() == "GET") {
+        if ($this->method() == 'GET') {
             return true;
         }
 
@@ -162,7 +170,7 @@ class Request
      */
     public function isPut()
     {
-        if ($this->method() == "PUT" || $this->body()->get("_method", null) == "PUT") {
+        if ($this->method() == 'PUT' || $this->body()->get('_method', null) == 'PUT') {
             return true;
         }
 
@@ -176,7 +184,7 @@ class Request
      */
     public function isDelete()
     {
-        if ($this->method() == "DELETE" || $this->body()->get("_method", null) == "DELETE") {
+        if ($this->method() == 'DELETE' || $this->body()->get('_method', null) == 'DELETE') {
             return true;
         }
 
@@ -190,7 +198,7 @@ class Request
      */
     public static function body()
     {
-        return Input::configure("POST");
+        return static::$input->method('POST');
     }
 
     /**
@@ -200,7 +208,7 @@ class Request
      */
     public static function query()
     {
-        return Input::configure("GET");
+        return static::$input->method('GET');
     }
 
     /**
@@ -210,7 +218,7 @@ class Request
      */
     public static function files()
     {
-        return Input::configure("FILES");
+        return static::$input->method('FILES');
     }
 
     /**
@@ -220,7 +228,19 @@ class Request
      */
     public static function input()
     {
-        return Input::configure("ALL");
+        return static::$input;
+    }
+
+    /**
+     * Accès au donnée de la précédente requete
+     *
+     * @param mixed $key
+     * @return mixed
+     */
+    public static function old($key)
+    {
+        $old = Session::get('bow.old', null);
+        return isset($old[$key]) ? $old[$key] : null;
     }
 
     /**
@@ -230,14 +250,25 @@ class Request
      */
     public function isAjax()
     {
-        if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-            $xhrObj = Str::lower($_SERVER["HTTP_X_REQUESTED_WITH"]);
-            if ($xhrObj == "xmlhttprequest" || $xhrObj == "activexobject") {
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+            $xhrObj = Str::lower($_SERVER['HTTP_X_REQUESTED_WITH']);
+            if ($xhrObj == 'xmlhttprequest' || $xhrObj == 'activexobject') {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Vérifie si une url match avec le pattern
+     *
+     * @param string $match Un regex
+     * @return int
+     */
+    public function is($match)
+    {
+        return preg_match('~' . $match . '~', $this->uri());
     }
 
     /**
@@ -247,7 +278,7 @@ class Request
      */
     public function ip()
     {
-        return $_SERVER["REMOTE_ADDR"];
+        return $_SERVER['REMOTE_ADDR'];
     }
     /**
      * clientPort, Retourne de port du client
@@ -256,7 +287,7 @@ class Request
      */
     public function port()
     {
-        return $_SERVER["REMOTE_PORT"];
+        return $_SERVER['REMOTE_PORT'];
     }
 
     /**
@@ -266,7 +297,7 @@ class Request
      */
     public function referer()
     {
-        return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : "/";
+        return isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/';
     }
 
     /**
@@ -290,11 +321,11 @@ class Request
      */
     public function locale()
     {
-        $local = "";
+        $local = '';
 
-        if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
-            $tmp = explode(";", $_SERVER["HTTP_ACCEPT_LANGUAGE"])[0];
-            preg_match("/^([a-z]+(?:-|_)?[a-z]+)/i", $tmp, $match);
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            $tmp = explode(';', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
+            preg_match('/^([a-z]+(?:-|_)?[a-z]+)/i', $tmp, $match);
             $local = end($match);
         }
 
@@ -308,7 +339,7 @@ class Request
      */
     public function protocol()
     {
-        return $_SERVER["SERVER_PROTOCOL"];
+        return $_SERVER['SERVER_PROTOCOL'];
     }
 
     /**

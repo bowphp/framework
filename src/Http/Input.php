@@ -31,47 +31,15 @@ class Input implements CollectionAccess
     private static $last_method = '';
 
     /**
-     * Contructeur privé
-     *
-     * @param string $method
-     */
-    private function __construct($method = null)
-    {
-        if ($method == "GET") {
-            $this->data = $_GET;
-        } else if ($method == "POST") {
-            $this->data = $_POST;
-        } else if ($method == "FILES") {
-            $this->data = $_FILES;
-        } else {
-            $method = 'ALL';
-            $this->data = array_merge($_POST, $_FILES, $_GET);
-        }
-
-        static::$last_method = $method;
-    }
-
-    /**
      * Fonction magic __clone en <<private>>
      */
     private function __clone()
     {
     }
 
-    /**
-     * Factory permettant de charger les différentes colléctions
-     *
-     * @param $method
-     *
-     * @return Input
-     */
-    public static function configure($method)
+    public function __construct()
     {
-        if ($method == static::$last_method) {
-            return static::$instance;
-        } else {
-            return static::$instance = new self($method);
-        }
+        $this->data = array_merge($_POST, $_GET, $_FILES);
     }
 
     /**
@@ -253,6 +221,23 @@ class Input implements CollectionAccess
     public function all()
     {
         return $this->toArray();
+    }
+
+    /**
+     * @param $method
+     * @return array
+     */
+    public function method($method)
+    {
+        if ($method == "GET") {
+            return $_GET;
+        } else if ($method == "POST") {
+            return $_POST;
+        } else if ($method == "FILES") {
+            return $_FILES;
+        }
+
+        return [];
     }
 
     /**
