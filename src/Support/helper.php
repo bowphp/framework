@@ -968,11 +968,11 @@ if (!function_exists('session')) {
      * session
      *
      * @param string $key
-     * @param mixed $message
+     * @param mixed $value
      * @return mixed
      */
-    function session($key = null, $message = null) {
-        if ($key === null && $message === null) {
+    function session($key = null, $value = null) {
+        if ($key === null && $value === null) {
             return Session::toArray();
         }
 
@@ -980,8 +980,8 @@ if (!function_exists('session')) {
             return Session::get($key);
         }
 
-        if ($key !== null && $message !== null) {
-            return Session::add($key, $message);
+        if ($key !== null && $value !== null) {
+            return Session::add($key, $value);
         }
 
         return null;
