@@ -10,7 +10,7 @@ class Filler
      */
     public static function number()
     {
-        return rand(1, 100);
+        return rand(1, 20);
     }
 
     /**

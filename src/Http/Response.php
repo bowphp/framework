@@ -148,13 +148,11 @@ class Response
 
         if (isset($path['?'])) {
             $url .= '?';
-            $i = 0;
             foreach($path['?'] as $key => $value) {
-                if ($i > 0) {
+                if ($key > 0) {
                     $url .= '&';
                 }
                 $url .= $key . '=' . $value;
-                $i++;
             }
         }
 

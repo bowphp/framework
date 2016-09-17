@@ -211,7 +211,8 @@ class Str
      */
     public static function slugify($str)
     {
-        return preg_replace('/[^a-z0-9]/', '-', strtolower(trim(strip_tags($str))));
+        $temp = preg_replace('/[^a-z0-9]/', '-', strtolower(trim(strip_tags($str))));
+        return preg_replace('/-{2,}/', '-', $temp);
     }
 
     /**

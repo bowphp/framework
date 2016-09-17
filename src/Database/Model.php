@@ -98,7 +98,7 @@ abstract class Model
          */
         if (method_exists($child = new static, $scope)) {
             if (method_exists($table, $method)) {
-                throw new ModelException($method . 'ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
+                throw new ModelException($method . ' ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
             }
             return call_user_func_array([$child, $scope], $args);
         }
@@ -111,6 +111,6 @@ abstract class Model
             return static::carbornize($table, $method, $child);
         }
 
-        throw new ModelException('methode $method n\'est définie.', E_ERROR);
+        throw new ModelException('methode ' . $method . ' n\'est définie.', E_ERROR);
     }
 }

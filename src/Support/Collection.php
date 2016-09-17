@@ -8,7 +8,7 @@ namespace Bow\Support;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-class Collection
+class Collection implements \Countable
 {
     /**
      * @var array
@@ -118,6 +118,16 @@ class Collection
         }
 
         return new Collection($r);
+    }
+
+    /**
+     * Quand on appelera la fonction count sur un object collection.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->storage);
     }
 
     /**

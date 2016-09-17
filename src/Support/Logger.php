@@ -3,6 +3,7 @@ namespace Bow\Support;
 
 use Psr\Log\AbstractLogger;
 use Bow\Exception\LoggerException;
+use Bow\Support\Resource\Storage;
 
 /**
  * Class Logger
@@ -39,6 +40,7 @@ class Logger extends AbstractLogger
     {
         set_error_handler([$this, 'errorHandler']);
         set_exception_handler([$this, 'exceptionHandler']);
+        return $this;
     }
 
     /**
@@ -72,8 +74,10 @@ class Logger extends AbstractLogger
                 }
             }
 
-            Resource\Storage::append($this->path, static::textFormat($level, $message . '\n'));
+            Storage::append($this->path, static::textFormat($level, $message . '\n'));
         }
+
+        return $this;
     }
 
     /**
@@ -180,7 +184,7 @@ class Logger extends AbstractLogger
             </head>
             <body>
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: inline-block; margin: auto; background-color: #eee; padding: 5px; text-align: center">
-                <div style="border: 1px solid #aaa; border-radius: 100px; padding: 8px; width: 950px; text-align: center; margin: auto; background-image: linear-gradient(#ddd, #eee, #dedede); overflow: auto; box-sizing: border-box">
+                <div style="border: 1px solid #aaa; padding: 8px; width: 950px; text-align: center; margin: auto; background-image: linear-gradient(#ddd, #eee, #dedede); overflow: auto; box-sizing: border-box">
                     <h1><i style="font-weight: normal;">' . ucfirst($level) . '</i>: <b> ' . $message . '</b></h1>
                     <p>' . $subErrorMessage . '</i></p>
                 </div>
@@ -216,7 +220,6 @@ class Logger extends AbstractLogger
         } else {
             $trace = $e->getTraceAsString();
         }
-
         $this->addHandler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine(), $trace);
     }
 

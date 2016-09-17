@@ -98,13 +98,16 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
      * Join avec une autre table
      *
      * @param string $table
+     * @param mixed $foreign_key
      * @return self
      */
-    public function merge($table)
+    public function merge($table, $foreign_key = null)
     {
         $foreign = 'id';
-        if ($this->foreign !== null) {
-            $foreign = $this->foreign;
+        if ($foreign_key == null) {
+            if ($this->foreign !== null) {
+                $foreign = $this->foreign;
+            }
         }
         $this->data->$table = Database::table($table)->where($foreign, $this->id)->get();
         $this->mergeTableName = $table;
