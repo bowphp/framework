@@ -1,6 +1,11 @@
 <?php
 namespace Bow\Http;
-
+/**
+ * Class UploadFile
+ *
+ * @author Franck Dakia <dakiafranck@gmail.com>
+ * @package Bow\Http
+ */
 class UploadFile
 {
     /**
