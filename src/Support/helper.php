@@ -726,18 +726,28 @@ if (!function_exists('url')) {
     /**
      * url retourne l'url courant
      *
-     * @param string $url
+     * @param string|null $url
      * @param array $parameters
      *
      * @return string
      */
-    function url($url, array $parameters = []) {
-        $url = request()->url() . ltrim($url, '/');
-        if (count($parameters) > 0) {
-            $url .= '?' . http_build_query($parameters);
+    function url($url = null, array $parameters = []) {
+        $current = trim(request()->url(), '/');
+
+        if (is_array($url)) {
+            $parameters = $url;
+            $url = '';
         }
 
-        return $url;
+        if (is_string($url)) {
+            $current .= '/'.trim($url, '/');
+        }
+
+        if (count($parameters) > 0) {
+            $current .= '?' . http_build_query($parameters);
+        }
+
+        return $current;
     }
 }
 
