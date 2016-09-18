@@ -212,13 +212,28 @@ class Request
     }
 
     /**
-     * Charge la factory RequestData pour le FILES
+     * Charge la factory pour le FILES
      *
-     * @return Input
+     * @param string $key
+     * @return UploadFile
+     */
+    public static function file($key)
+    {
+        return new UploadFile($_FILES[$key]);
+    }
+
+    /**
+     * Charge la factory pour le FILES
+     *
+     * @return array
      */
     public static function files()
     {
-        return static::$input->method('FILES');
+        $files = [];
+        foreach ($_FILES as $key => $file) {
+            $files[] = new UploadFile($file);
+        }
+        return $files;
     }
 
     /**
