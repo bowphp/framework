@@ -941,13 +941,15 @@ if (!function_exists('email')) {
      *
      * @param null|string $view la view
      * @param array $data la view
-     * @param callable|null $callable
+     * @param \Closure $callable
      *
      * @return Mail|bool
      */
-    function email($view = null, $data = [], callable $callable = null) {
+    function email($view = null, $data = [], \Closure $callable) {
         if ($view === null) {
-            return new Mail(config()->getMailConfiguration());
+            $email = new Mail(config()->getMailConfiguration());
+            $email->configure();
+            return $email;
         }
 
         return Mail::send($view, $data, $callable);

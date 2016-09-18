@@ -28,9 +28,9 @@ class Mail
     private function __clone() {}
 
     /**
-     * @param \stdClass $config
+     * @param array $config
      */
-    public function __construct(\stdClass $config)
+    public function __construct($config)
     {
         static::$config = $config;
     }
@@ -38,25 +38,27 @@ class Mail
     /**
      * Configure la classe Mail
      *
-     * @param \stdClass $config La configuration
+     * @param array $config La configuration
      * @throws MailException
      * @return SimpleMail|Smtp
      */
-    public static function configure(\stdClass $config)
+    public static function configure($config = [])
     {
-        static::$config = $config;
+        if (empty(static::$config)) {
+            static::$config = $config;
+        }
 
-        if (!in_array($config->driver, ["smtp", "mail"])) {
+        if (!in_array($config['driver'], ["smtp", "mail"])) {
             throw new MailException("Le type n'est pas réconnu.", E_USER_ERROR);
         }
 
-        if ($config->driver == "mail") {
+        if ($config['driver'] == "mail") {
             if (!self::$instance instanceof SimpleMail) {
-                self::$instance = new SimpleMail($config->mail);
+                self::$instance = new SimpleMail($config['mail']);
             }
         } else {
             if (!self::$instance instanceof Smtp) {
-                self::$instance = new Smtp($config->smtp);
+                self::$instance = new Smtp($config['smtp']);
             }
         }
 
@@ -68,21 +70,17 @@ class Mail
      *
      * @param string $view Le nom de la vue
      * @param array|callable $bind Les données à passer à la vue.
-     * @param callable $cb [optional] La fonction
+     * @param \Closure $cb
      * @return bool
      *
      * @throws \Bow\Exception\ResponseException
      * @throws \Bow\Exception\ViewException
      */
-    public static function send($view, $bind, $cb = null)
+    public static function send($view, $bind, \Closure $cb)
     {
         if (is_callable($bind)) {
             $cb = $bind;
             $bind = [];
-        }
-
-        if (!is_callable($cb)) {
-            throw new \InvalidArgumentException('callback paramter invalide.');
         }
 
         $message = new Message();
