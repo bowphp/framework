@@ -12,7 +12,7 @@ use Bow\Exception\TableException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-class Table extends DatabaseTools implements \jsonSerializable
+class Table extends DatabaseTools implements \JsonSerializable
 {
     /**
      * @var string
@@ -792,7 +792,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      * Lance une execption en case de donnée non trouvé
      *
      * @param int|string $id
-     * @return array
+     * @return SqlUnity
      *
      * @throws TableException
      */
@@ -812,7 +812,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      * Lance une execption en case de donnée non trouvé
      *
      * @param int|string $id
-     * @return \stdClass
+     * @return SqlUnity
      *
      * @throws TableException
      */
@@ -874,7 +874,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      *                                elle récupère en paramètre une instance de DatabaseErrorHanlder
      *                                et les données récupérés par la réquête.
      *
-     * @return DatabaseErrorHandler
+     * @return int
      */
     public function count($column = '*', Callable $cb = null)
     {
@@ -956,7 +956,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      *
      * @param callable $cb
      *
-     * @return DatabaseErrorHandler
+     * @return int
      */
     public function delete(Callable $cb = null)
     {
@@ -989,7 +989,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      * @param string $comp Le type de comparaison
      * @param string $value [optinal] La valeur a comparé
      *
-     * @return DatabaseErrorHandler
+     * @return int
      *
      * @throws TableException
      */
@@ -1059,7 +1059,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      */
     public function truncate()
     {
-        return (bool) $this->connection->exec('truncate ' . $this->tableName);
+        return (bool) $this->connection->exec('truncate `' . $this->tableName . '`;');
     }
 
     /**
@@ -1067,7 +1067,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      *
      * @param array $values Les données a inserer dans la base de donnée.
      *
-     * @return DatabaseErrorHandler
+     * @return int
      */
     public function insert(array $values)
     {
@@ -1089,7 +1089,7 @@ class Table extends DatabaseTools implements \jsonSerializable
      *
      * @param array $values Les données a inserer dans la base de donnée.
      *
-     * @return DatabaseErrorHandler
+     * @return int
      */
     public function save(array $values)
     {
@@ -1254,11 +1254,6 @@ class Table extends DatabaseTools implements \jsonSerializable
     {
         $data = $this->get();
         $coll =  new Collection();
-
-        if (count($data) == 1) {
-            $data = current($data);
-        }
-
         foreach($data as $key => $value) {
             $coll->add($key, $value);
         }
