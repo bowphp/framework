@@ -1,5 +1,5 @@
 # Bow (Framework)
-> The Bow Framework [![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg)](https://papac.github.com/docs)
+> The Bow Framework
 
 [![GitHub version](https://badge.fury.io/gh/papac%2Fframework.svg)](https://badge.fury.io/gh/papac%2Fframework)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/papac/framework/blob/master/LICENSE)
@@ -8,9 +8,8 @@
 Bow est un micro framework écrite pour les debutants qui veulent travail sur un projet un peut plus
 grand.
 
-N'ésitez pas commencez maintenant.
-
 [![start](http://papac.github.com/public/img/1382900391.gif "start bow framework")](http://papac.github.com)
+> N'ésitez pas commencez maintenant.
 
 # require
 
