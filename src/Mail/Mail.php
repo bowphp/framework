@@ -134,4 +134,22 @@ class Mail
         static::$config->driver = $driver;
         return static::configure(static::$config);
     }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     *
+     * @throws \ErrorException
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists(static::class, $name)) {
+            return call_user_func_array([static::class, $name], $arguments);
+        }
+
+        throw new \ErrorException('Cette fonction n\'existe pas. [' . $name . ']', E_ERROR);
+    }
 }

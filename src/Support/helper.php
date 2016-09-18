@@ -947,7 +947,7 @@ if (!function_exists('email')) {
      */
     function email($view = null, $data = [], callable $callable = null) {
         if ($view === null) {
-            return Mail::class;
+            return new Mail(config()->getMailConfiguration());
         }
 
         return Mail::send($view, $data, $callable);
