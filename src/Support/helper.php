@@ -945,7 +945,7 @@ if (!function_exists('email')) {
      *
      * @return Mail|bool
      */
-    function email($view = null, $data = [], \Closure $callable) {
+    function email($view = null, $data = [], \Closure $callable = null) {
         if ($view === null) {
             $email = new Mail(config()->getMailConfiguration());
             $email->configure();
