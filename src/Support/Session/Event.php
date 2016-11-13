@@ -1,7 +1,7 @@
 <?php
 namespace Bow\Support\Session;
 
-use Bow\Support\Util;
+use Bow\Application\Loader;
 use Bow\Support\Collection;
 use Bow\Exception\EventException;
 
@@ -40,7 +40,7 @@ class Event
      */
     public static function on($event, $fn, array $nameSpace = [])
     {
-        if (!is_callable($fn)) {
+        if (! is_callable($fn)) {
             static::$nameSpace = $nameSpace;
             static::addEvent($event, $fn, "events");
             Session::add("bow.event.function", static::$events);
@@ -59,15 +59,12 @@ class Event
     private static function addEvent($eventName, $bindFunction, $eventType)
     {
         $ref = & static::${$eventType};
+
         if ($ref === null) {
             $ref = new Collection();
         }
 
-        if (!$ref->has($eventName)) {
-            $ref->add($eventName, $bindFunction);
-        } else {
-            $ref->add($eventName, $bindFunction);
-        }
+        $ref->add($eventName, $bindFunction);
     }
 
     /**
@@ -75,31 +72,35 @@ class Event
      *
      * @param string $event Le nom de l'évènement
      * @throws EventException
+     *
+     * @return boolean
      */
     public static function emit($event)
     {
         $args = array_slice(func_get_args(), 1);
-        static::$events = Session::get("bow.event.function");
-        $isEmpty = true;
+        static::$events = new Collection(Session::get("bow.event.function"));
 
         if (static::$events instanceof Collection) {
-            static::$events->collectionify($event)->each(function($fn) use ($args) {
-                return Util::launchCallback($fn, $args, static::$nameSpace);
+            static::$events->each(function($fn, $register_event) use ($args, $event)
+            {
+                if ($register_event === $event) {
+                   Loader::launch($fn, $args, static::$nameSpace);
+                }
             });
-            $isEmpty = false;
+            return true;
         }
 
         if (static::$eventCallback instanceof Collection) {
-            static::$eventCallback->collectionify($event)->each(function($fn) use ($args) {
-                return Util::launchCallback($fn, $args);
+            static::$eventCallback->each(function($fn, $register_event) use ($args, $event)
+            {
+                if ($register_event === $event) {
+                    Loader::launch($fn, $args);
+                }
             });
-
-            $isEmpty = false;
+            return true;
         }
 
-        if ($isEmpty) {
-            throw new EventException("Aucun évènement n'est pas enregistré.", E_USER_ERROR);
-        }
+        throw new EventException("Aucun évènement n'est pas enregistré.", E_USER_ERROR);
     }
 
     /**
@@ -113,7 +114,7 @@ class Event
         if (static::$events->has($event)) {
             static::$events->delete($event);
 
-            Util::launchCallback($cb);
+            Loader::launch($cb);
         }
     }
 }
