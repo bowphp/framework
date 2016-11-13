@@ -8,7 +8,7 @@ namespace Bow\Support;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-class Collection implements \Countable
+class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
 {
     /**
      * @var array
@@ -92,7 +92,7 @@ class Collection implements \Countable
 
     /**
      * retourne la liste des valeurs de la collection
-     * @return array
+     * @return Collection
      */
     public function values()
     {
@@ -102,12 +102,12 @@ class Collection implements \Countable
             array_push($r, $value);
         }
 
-        return $r;
+        return new Collection($r);
     }
 
     /**
      * retourne la liste des clés de la collection
-     * @return array
+     * @return Collection
      */
     public function keys()
     {
@@ -128,27 +128,6 @@ class Collection implements \Countable
     public function count()
     {
         return count($this->storage);
-    }
-
-    /**
-     * collectionify, permet de récupérer une valeur ou la colléction de valeur sous forme
-     * d'instance de collection.
-     *
-     * @param string $key La clé de l'élément
-     *
-     * @return Collection
-     */
-    public function collectionify($key)
-    {
-        if ($this->has($key)) {
-            $insData = $this->storage[$key];
-            if (!is_array($insData)) {
-                $insData = [$insData];
-            }
-            return new Collection($insData);
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -269,7 +248,7 @@ class Collection implements \Countable
      *
      * @param callable $cb
      *
-     * @return array
+     * @return Collection
      */
     public function filter($cb)
     {
@@ -413,7 +392,7 @@ class Collection implements \Countable
      * @param array $except Liste des éléments à ignorer
      * @return Collection
      */
-    public function except(array $except)
+    public function excepts(array $except)
     {
         $data = [];
         $this->recursive($this->storage, function($value, $key) use (& $data, $except) {
@@ -430,7 +409,7 @@ class Collection implements \Countable
      *
      * @param bool $collectionify
      *
-     * @return array
+     * @return Collection
      */
     public function reverse($collectionify = false)
     {
@@ -479,7 +458,7 @@ class Collection implements \Countable
     /**
      * yieldify, lance un générateur
      *
-     * @return array
+     * @return \Generator
      */
     public function yieldify()
     {
@@ -637,5 +616,21 @@ class Collection implements \Countable
     public function __unset($name)
     {
         $this->delete($name);
+    }
+
+    /**
+     * jsonSerialize
+     */
+    public function jsonSerialize()
+    {
+        return $this->storage;
+    }
+
+    /**
+     * getIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->storage);
     }
 }
