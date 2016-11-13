@@ -152,13 +152,13 @@ class Util
             $handler = [$instance, 'handle'];
             $status = call_user_func_array($handler, $param);
 
-            // Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
+        // Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
         } else if (is_callable($middleware)) {
             $status = call_user_func_array($middleware, $param);
         }
 
         // On arrêt tout en case de status false.
-        if ($status == false) {
+        if (((bool) $status) == false) {
             return false;
         }
 
@@ -167,9 +167,8 @@ class Util
         // conforme au middleware.
         if (!empty($function_list)) {
             $status = true;
-
             foreach($function_list as $func) {
-                $status = call_user_func_array($func, $param);
+                $status = (bool) call_user_func_array($func, $param);
                 if ($status == false) {
                     return $status;
                 }
@@ -227,6 +226,8 @@ class Util
 
             return call_user_func_array($cb, $arg);
         });
+
+        return null;
     }
 
     /**
@@ -248,6 +249,7 @@ class Util
 
         return [new $class(), $method];
     }
+
     /**
      * Lance un var_dump sur les variables passées en paramètre.
      *
