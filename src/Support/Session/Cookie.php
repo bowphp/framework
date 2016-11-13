@@ -118,7 +118,7 @@ class Cookie
      *
      * @param string $key
      *
-     * @return self
+     * @return array|null
      */
     public static function remove($key)
     {
