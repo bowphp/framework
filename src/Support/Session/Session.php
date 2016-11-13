@@ -96,7 +96,7 @@ class Session implements CollectionAccessStatic
 
         if (isset($_SESSION["bow.flash"][$key])) {
             $flash = $_SESSION["bow.flash"][$key];
-            static::reFlash($key);
+            static::reflash($key);
             return $flash;
         }
 
@@ -116,7 +116,7 @@ class Session implements CollectionAccessStatic
      *                      Dans un tableau
      *
      * @throws InvalidArgumentException
-     * @return null
+     * @return mixed
      */
     public static function add($key, $data, $next = false)
     {
@@ -133,7 +133,8 @@ class Session implements CollectionAccessStatic
         if (!is_array($_SESSION[$key])) {
             $_SESSION[$key] = [$_SESSION[$key]];
         }
-        array_push($_SESSION[$key], $data);
+
+        return array_push($_SESSION[$key], $data);
     }
 
     /**
@@ -151,7 +152,7 @@ class Session implements CollectionAccessStatic
      *
      * @param string $key La clé de l'élément a supprimé
      *
-     * @return null
+     * @return void
      */
     public static function remove($key)
     {
@@ -195,7 +196,8 @@ class Session implements CollectionAccessStatic
     public static function flash($key, $message = null)
     {
         static::start();
-        if (!static::has("bow.flash")) {
+
+        if (! static::has("bow.flash")) {
             $_SESSION["bow.flash"] = [];
         }
 
@@ -232,10 +234,16 @@ class Session implements CollectionAccessStatic
      */
     public static function clear()
     {
-        self::start();
+        static::start();
 
-        foreach(self::filter() as $key => $value){
+        foreach(static::filter() as $key => $value){
             unset($_SESSION[$key]);
         }
+    }
+
+    public static function __toString()
+    {
+        static::start();
+        return json_encode(static::filter());
     }
 }
