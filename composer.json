@@ -18,7 +18,7 @@
         "phpunit/phpunit": "^4.8",
         "monolog/monolog": "^1.17",
         "mustache/mustache": "^2.10",
-        "kylekatarnls/jade-php": "^1.6",
+        "pug-php/pug": "^2.4",
         "nicolab/php-ftp-client": "^1.2"
     },
     "authors": [
