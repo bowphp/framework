@@ -102,15 +102,13 @@ class Actionner
 
         // Execution du middleware si define.
         if (is_string($middleware)) {
-            if (!in_array(ucfirst($middleware), $names['middlewares'], true)) {
+            if (! array_key_exists(ucfirst($middleware), $names['middlewares'])) {
                 throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
             }
-
             // Chargement du middleware
-            $classMiddleware = $names['namespace']['middleware'] . '\\' . ucfirst($middleware);
-
+            $classMiddleware = $names['namespace']['middleware'] . '\\' . ucfirst($names['middlewares'][$middleware]);
             // On vérifie si le middleware définie est une middleware valide.
-            if (!class_exists($classMiddleware)) {
+            if (! class_exists($classMiddleware)) {
                 throw new RouterException($middleware . ' n\'est pas un class middleware.');
             }
 
