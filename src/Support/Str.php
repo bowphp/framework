@@ -97,6 +97,8 @@ class Str
     }
 
     /**
+     * Get the string position
+     *
      * @param $search
      * @param $str
      *
@@ -108,6 +110,8 @@ class Str
     }
 
     /**
+     * Contains
+     *
      * @param $search
      * @param $str
      *

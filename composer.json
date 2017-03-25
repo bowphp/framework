@@ -35,7 +35,7 @@
     ],
     "autoload": {
         "files": [
-            "src/Support/helper.php"
+            "src/Support/loader.php"
         ],
         "psr-4": {
             "Bow\\": "src/"

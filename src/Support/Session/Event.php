@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Support\Session;
 
+use App\Actionner;
 use Bow\Support\Util;
 use Bow\Support\Collection;
 use Bow\Exception\EventException;
@@ -34,13 +35,13 @@ class Event
     /**
      * addEventListener
      *
-     * @param string                $event     Le nom de l'évènement
-     * @param Callable|array|string $fn        La fonction a lancé quand l'évènement se déclanche
-     * @param array                 $nameSpace Le namespace de la classe ou fonction à lancer
+     * @param string $event Le nom de l'évènement
+     * @param Callable|array|string $fn  La fonction a lancé quand l'évènement se déclanche
+     * @param array $nameSpace Le namespace de la classe ou fonction à lancer
      */
     public static function on($event, $fn, array $nameSpace = [])
     {
-        if (!is_callable($fn)) {
+        if (! is_callable($fn)) {
             static::$nameSpace = $nameSpace;
             static::addEvent($event, $fn, "events");
             Session::add("bow.event.function", static::$events);
@@ -74,26 +75,25 @@ class Event
      * emit dispatchEvent
      *
      * @param string $event Le nom de l'évènement
+     * @param array $data Donnée supplementaire
      * @throws EventException
      */
-    public static function emit($event)
+    public static function emit($event, $data = [])
     {
-        $args = array_slice(func_get_args(), 1);
         static::$events = Session::get("bow.event.function");
         $isEmpty = true;
 
         if (static::$events instanceof Collection) {
-            static::$events->collectionify($event)->each(function($fn) use ($args) {
-                return Util::launchCallback($fn, $args, static::$nameSpace);
+            static::$events->collectionify($event)->each(function($fn) use ($data) {
+                return Actionner::call($fn, $data, static::$nameSpace);
             });
             $isEmpty = false;
         }
 
         if (static::$eventCallback instanceof Collection) {
-            static::$eventCallback->collectionify($event)->each(function($fn) use ($args) {
-                return Util::launchCallback($fn, $args);
+            static::$eventCallback->collectionify($event)->each(function($fn) use ($data) {
+                return Actionner::call($fn, $args);
             });
-
             $isEmpty = false;
         }
 
@@ -112,8 +112,7 @@ class Event
     {
         if (static::$events->has($event)) {
             static::$events->delete($event);
-
-            Util::launchCallback($cb);
+            Actionner::call($cb);
         }
     }
 }

@@ -10,10 +10,10 @@ use Bow\Exception\ApplicationException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Core
  */
-class AppConfiguration
+class Configuration
 {
     /**
-     * @var AppConfiguration
+     * @var Configuration
      */
     private static $instance;
 
@@ -79,10 +79,10 @@ class AppConfiguration
      *
      * @param array $config
      *
-     * @return AppConfiguration
+     * @return Configuration
      */
     public static function configure($config) {
-        if (! static::$instance instanceof AppConfiguration) {
+        if (! static::$instance instanceof Configuration) {
             static::$instance = new self($config);
         }
 
@@ -92,10 +92,10 @@ class AppConfiguration
     /**
      * takeInstance singleton
      *
-     * @return AppConfiguration
+     * @return Configuration
      */
     public static function takeInstance() {
-        if (! static::$instance instanceof AppConfiguration) {
+        if (! static::$instance instanceof Configuration) {
             static::configure([]);
         }
 

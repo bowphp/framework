@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Application;
 
+use App\Actionner;
 use Bow\Support\Util;
 use Bow\Http\Request;
 
@@ -166,11 +167,12 @@ Class Route
         foreach ($this->keys as $key => $value) {
             if (!is_int($this->match[$key])) {
                 $params[$value] = $this->match[$key];
-            } else {
-                $tmp = (int) $this->match[$key];
-                $params[$value] = $tmp;
-                $this->match[$key] = $tmp;
+                continue;
             }
+
+            $tmp = (int) $this->match[$key];
+            $params[$value] = $tmp;
+            $this->match[$key] = $tmp;
         }
 
         if ($app !== null) {
@@ -178,7 +180,6 @@ Class Route
         }
 
         $req::$params = (object) $params;
-
-        return Util::launchCallback($this->cb, $this->match, $namespaces);
+        return Actionner::call($this->cb, $this->match, $namespaces);
     }
 }

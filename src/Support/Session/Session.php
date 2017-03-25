@@ -116,7 +116,7 @@ class Session implements CollectionAccessStatic
      *                      Dans un tableau
      *
      * @throws InvalidArgumentException
-     * @return null
+     * @return mixed
      */
     public static function add($key, $data, $next = false)
     {
@@ -126,14 +126,15 @@ class Session implements CollectionAccessStatic
             return $_SESSION[$key] = $data;
         }
 
-        if (!static::has($key)) {
+        if (! static::has($key)) {
             $_SESSION[$key] = $data;
         }
 
-        if (!is_array($_SESSION[$key])) {
+        if (! is_array($_SESSION[$key])) {
             $_SESSION[$key] = [$_SESSION[$key]];
         }
         array_push($_SESSION[$key], $data);
+        return $data;
     }
 
     /**
@@ -156,7 +157,12 @@ class Session implements CollectionAccessStatic
     public static function remove($key)
     {
         self::start();
+        $old = null;
+        if (isset($_SESSION[$key])) {
+            $old = $_SESSION[$key];
+        }
         unset($_SESSION[$key]);
+        return $old;
     }
 
     /**

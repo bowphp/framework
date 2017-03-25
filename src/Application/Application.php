@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Application;
 
+use App\Actionner;
 use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
@@ -78,7 +79,7 @@ class Application
     private $response;
 
     /**
-     * @var AppConfiguration|null
+     * @var Configuration|null
      */
     private $config = null;
 
@@ -100,11 +101,11 @@ class Application
     /**
      * Private construction
      *
-     * @param AppConfiguration $config
+     * @param Configuration $config
      * @param Request $request
      * @param Response $response
      */
-    private function __construct(AppConfiguration $config, Request $request, Response $response)
+    private function __construct(Configuration $config, Request $request, Response $response)
     {
         $this->config = $config;
         $this->request = $request;
@@ -123,12 +124,12 @@ class Application
     /**
      * Pattern Singleton.
      *
-     * @param AppConfiguration $config
+     * @param Configuration $config
      * @param Request $request
      * @param Response $response
      * @return Application
      */
-    public static function make(AppConfiguration $config, Request $request, Response $response)
+    public static function make(Configuration $config, Request $request, Response $response)
     {
         if (static::$inst === null) {
             static::$inst = new static($config, $request, $response);
@@ -156,12 +157,12 @@ class Application
         $this->branch = $branch;
 
         if (is_array($cb)) {
-            Util::launchCallback($cb, $this->request, $this->config->getNamespace());
+            Actionner::call($cb, $this->request, $this->config->getNamespace());
         } else {
-            if (!is_callable($cb)) {
-                throw new ApplicationException('Callback are not define', E_ERROR);
+            if (is_callable($cb)) {
+                call_user_func_array($cb, [$this->request]);
             }
-            call_user_func_array($cb, [$this->request]);
+            throw new ApplicationException('Callback are not define', E_ERROR);
         }
 
         $this->branch = '';
@@ -645,7 +646,7 @@ class Application
             if (isset($controllerName['middleware'])) {
                 $internalMiddleware = $controllerName['middleware'];
                 unset($controllerName['middleware']);
-                $next = Util::launchCallback(['middleware' => $internalMiddleware], $this->request);
+                $next = Actionner::call(['middleware' => $internalMiddleware], $this->request);
                 if ($next === false) {
                     return $this;
                 }

@@ -1,7 +1,7 @@
 <?php
 /*------------------------------------------------
 |
-|	BOW HELPER
+|	BOW LOADED
 |	==========
 |	Définir des liens symbolique de l'ensemble des
 |	fonctions de Bow.
@@ -10,6 +10,7 @@
 
 use Bow\Mail\Mail;
 use Bow\Http\Input;
+use Bow\Http\Cache;
 use Bow\Http\Request;
 use Bow\Support\Util;
 use Bow\Http\Response;
@@ -20,23 +21,23 @@ use Bow\Support\Session\Event;
 use Bow\Support\Session\Cookie;
 use Bow\Support\Session\Session;
 use Bow\Support\Resource\Storage;
-use Bow\Application\AppConfiguration;
+use Bow\Application\Configuration;
 
 define('SELECT', Database::SELECT);
 define('INSERT', Database::INSERT);
 define('UPDATE', Database::UPDATE);
 define('DELETE', Database::DELETE);
 
-if (!function_exists('config')) {
+if (! function_exists('config')) {
     /**
      * Application configuration
      * @param string|array $param
      * @param mixed $newConfig
-     * @return AppConfiguration
+     * @return Configuration|mixed
      */
     function config($param = null, $newConfig = null) {
         $app_dir = dirname(dirname(dirname(dirname(dirname(__DIR__)))));
-        $config = AppConfiguration::configure(require $app_dir . '/config/bootstrap.php');
+        $config = Configuration::configure(require $app_dir . '/config/bootstrap.php');
 
         if ($param === null) {
             return $config;
@@ -98,31 +99,36 @@ if (!function_exists('config')) {
                 }
                 return $config->setAppkey($newConfig);
                 break;
+            case $param === 'cache':
+                if ($newConfig === null) {
+                    return $config->getCachepath();
+                }
+                return $config->setCachepath($newConfig);
+                break;
+            case $param === 'ftp':
+                return $config->getFtpConfiguration();
+                break;
         }
-
         return $config;
     }
 }
 
 // Configuration de la Request et de la Response
 Response::configure(config());
-
+// Configuration du systeme de cache
+Cache::confirgure(config('cache'));
 // Configuration de la base de donnée
-Database::configure(config()->getDatabaseConfiguration());
-
+Database::configure(config('db'));
 // Configuration de la resource de l'application.
-Storage::configure(config()->getFtpConfiguration());
-
+Storage::configure(config('ftp'));
 // Configuration de Mail.
-Mail::configure(config()->getMailConfiguration());
-
+Mail::configure(config('mail'));
 // Configuration de la Sécurité
 Security::setkey(config('key'));
-
 // Initialisation du token
 Security::createCsrfToken();
 
-if (!function_exists('response')) {
+if (! function_exists('response')) {
     /**
      * response, manipule une instance de Response::class
      *
@@ -145,7 +151,7 @@ if (!function_exists('response')) {
     }
 }
 
-if (!function_exists('request')) {
+if (! function_exists('request')) {
     /**
      * répresente le classe Request
      *
@@ -156,7 +162,7 @@ if (!function_exists('request')) {
     }
 }
 
-if (!function_exists('db')) {
+if (! function_exists('db')) {
     /**
      * permet de se connecter sur une autre base de donnée
      * et retourne l'instance de la Database
@@ -171,21 +177,24 @@ if (!function_exists('db')) {
             return Database::takeInstance();
         }
 
-        if (is_string($zone)) {
-            Database::switchTo($zone);
-            if (is_callable($cb)) {
-                if ($cb()) {
-                    Database::switchTo(config('db')->default);
-                }
-            }
-            return Database::takeInstance();
+        if (! is_string($zone)) {
+            throw new InvalidArgumentException('Erreur sur le parametre 1. Type string attendu.');
         }
 
-        throw new InvalidArgumentException('Erreur sur le parametre 1. Type string attendu.');
+        Database::switchTo($zone);
+
+        if (is_callable($cb)) {
+            if ($cb()) {
+                Database::switchTo(config('db')->default);
+            }
+        }
+
+        return Database::takeInstance();
+
     }
 }
 
-if (!function_exists('view')) {
+if (! function_exists('view')) {
     /**
      * view aliase sur Response::view
      *
@@ -193,19 +202,18 @@ if (!function_exists('view')) {
      * @param array|int $data
      * @param int $code
      *
-     * @return Response
+     * @return mixed
      */
     function view($template, $data = [], $code = 200) {
         if (is_int($data)) {
             $code = $data;
             $data = [];
         }
-
-        response()->view($template, $data, $code);
+        return response()->view($template, $data, $code);
     }
 }
 
-if (!function_exists('table')) {
+if (! function_exists('table')) {
     /**
      * table aliase Database::table
      *
@@ -221,7 +229,7 @@ if (!function_exists('table')) {
     }
 }
 
-if (!function_exists('query_maker')) {
+if (! function_exists('query_maker')) {
     /**
      * fonction d'astuce
      *
@@ -253,7 +261,7 @@ if (!function_exists('query_maker')) {
     }
 }
 
-if (!function_exists('last_insert_id')) {
+if (! function_exists('last_insert_id')) {
     /**
      * Retourne le dernier ID suite a une requete INSERT sur un table dont ID est
      * auto_increment.
@@ -266,7 +274,7 @@ if (!function_exists('last_insert_id')) {
     }
 }
 
-if (!function_exists('query_response')) {
+if (! function_exists('query_response')) {
     /**
      * @param string $method
      * @param array $param
@@ -283,7 +291,7 @@ if (!function_exists('query_response')) {
     }
 }
 
-if (!function_exists('db_error')) {
+if (! function_exists('db_error')) {
     /**
      * Retourne les informations de la dernière requete
      *
@@ -294,7 +302,7 @@ if (!function_exists('db_error')) {
     }
 }
 
-if (!function_exists('select')) {
+if (! function_exists('select')) {
     /**
      * statement lance des requete SQL de type SELECT
      *
@@ -316,7 +324,7 @@ if (!function_exists('select')) {
     }
 }
 
-if (!function_exists('select_one')) {
+if (! function_exists('select_one')) {
     /**
      * statement lance des requete SQL de type SELECT
      *
@@ -331,7 +339,7 @@ if (!function_exists('select_one')) {
     }
 }
 
-if (!function_exists('insert')) {
+if (! function_exists('insert')) {
     /**
      * statement lance des requete SQL de type INSERT
      *
@@ -346,7 +354,7 @@ if (!function_exists('insert')) {
     }
 }
 
-if (!function_exists('delete')) {
+if (! function_exists('delete')) {
     /**
      * statement lance des requete SQL de type DELETE
      *
@@ -361,7 +369,7 @@ if (!function_exists('delete')) {
     }
 }
 
-if (!function_exists('update')) {
+if (! function_exists('update')) {
     /**
      * update lance des requete SQL de type UPDATE
      *
@@ -376,7 +384,7 @@ if (!function_exists('update')) {
     }
 }
 
-if (!function_exists('statement')) {
+if (! function_exists('statement')) {
     /**
      * statement lance des requete SQL de type CREATE TABLE|ALTER TABLE|RENAME|DROP TABLE
      *
@@ -390,7 +398,7 @@ if (!function_exists('statement')) {
     }
 }
 
-if (!function_exists('slugify')) {
+if (! function_exists('slugify')) {
     /**
      * slugify, transforme un chaine de caractère en slug
      * eg. la chaine '58 comprendre bow framework' -> '58-comprendre-bow-framework'
@@ -403,7 +411,7 @@ if (!function_exists('slugify')) {
     }
 }
 
-if (!function_exists('body')) {
+if (! function_exists('body')) {
     /**
      * body, fonction de type collection
      * manipule la variable global $_POST
@@ -415,7 +423,7 @@ if (!function_exists('body')) {
     }
 }
 
-if (!function_exists('files')) {
+if (! function_exists('files')) {
     /**
      * files, fonction de type collection
      * manipule la variable global $_FILES
@@ -427,7 +435,7 @@ if (!function_exists('files')) {
     }
 }
 
-if (!function_exists('query')) {
+if (! function_exists('query')) {
     /**
      * query, fonction de type collection
      * manipule la variable global $_GET
@@ -439,7 +447,7 @@ if (!function_exists('query')) {
     }
 }
 
-if (!function_exists('input')) {
+if (! function_exists('input')) {
     /**
      * input, fonction de type collection
      * manipule la variable global $_GET, $_POST, $_FILES
@@ -462,7 +470,7 @@ if (!function_exists('input')) {
     }
 }
 
-if (!function_exists('debug')) {
+if (! function_exists('debug')) {
     /**
      * debug, fonction de debug de variable
      * elle vous permet d'avoir un coloration
@@ -473,7 +481,7 @@ if (!function_exists('debug')) {
     }
 }
 
-if (!function_exists('create_csrf_token')) {
+if (! function_exists('create_csrf_token')) {
     /**
      * create_csrf, fonction permetant de récupérer le token généré
      *
@@ -487,7 +495,7 @@ if (!function_exists('create_csrf_token')) {
 }
 
 
-if (!function_exists('csrf_token')) {
+if (! function_exists('csrf_token')) {
     /**
      * csrf_token, fonction permetant de récupérer le token généré
      *
@@ -498,7 +506,7 @@ if (!function_exists('csrf_token')) {
     }
 }
 
-if (!function_exists('csrf_field')) {
+if (! function_exists('csrf_field')) {
     /**
      * csrf_field, fonction permetant de récupérer un input généré
      *
@@ -509,7 +517,7 @@ if (!function_exists('csrf_field')) {
     }
 }
 
-if (!function_exists('generate_token_csrf')) {
+if (! function_exists('generate_token_csrf')) {
     /**
      * csrf, fonction permetant de générer un token
      *
@@ -520,7 +528,7 @@ if (!function_exists('generate_token_csrf')) {
     }
 }
 
-if (!function_exists('verify_csrf')) {
+if (! function_exists('verify_csrf')) {
     /**
      * verify_token_csrf, fonction permetant de vérifier un token
      *
@@ -533,7 +541,7 @@ if (!function_exists('verify_csrf')) {
     }
 }
 
-if (!function_exists('csrf_time_is_expirate')) {
+if (! function_exists('csrf_time_is_expirate')) {
     /**
      * csrf, fonction permetant de générer un token
      *
@@ -545,7 +553,7 @@ if (!function_exists('csrf_time_is_expirate')) {
     }
 }
 
-if (!function_exists('store')) {
+if (! function_exists('store')) {
     /**
      * store, effecture l'upload d'un fichier vers un repertoire
      * @param array $file, le fichier a uploadé.
@@ -568,7 +576,7 @@ if (!function_exists('store')) {
     }
 }
 
-if (!function_exists('json')) {
+if (! function_exists('json')) {
     /**
      * json, permet de lance des reponses server de type json
      *
@@ -581,7 +589,7 @@ if (!function_exists('json')) {
     }
 }
 
-if (!function_exists('download')) {
+if (! function_exists('download')) {
     /**
      * download, permet de lancer le téléchargement d'un fichier.
      *
@@ -596,7 +604,7 @@ if (!function_exists('download')) {
     }
 }
 
-if (!function_exists('set_response_code')) {
+if (! function_exists('set_response_code')) {
     /**
      * statuscode, permet de changer le code de la reponse du server
      *
@@ -608,7 +616,7 @@ if (!function_exists('set_response_code')) {
     }
 }
 
-if (!function_exists('sanitaze')) {
+if (! function_exists('sanitaze')) {
     /**
      * sanitaze, épure un variable d'information indésiration
      * eg. sanitaze('j\'ai') => j'ai
@@ -625,7 +633,7 @@ if (!function_exists('sanitaze')) {
     }
 }
 
-if (!function_exists('secure')) {
+if (! function_exists('secure')) {
     /**
      * secure, échape les anti-slashes, les balises html
      * eg. secure('j'ai') => j\'ai
@@ -642,7 +650,7 @@ if (!function_exists('secure')) {
     }
 }
 
-if (!function_exists('set_header')) {
+if (! function_exists('set_header')) {
     /**
      * modifie les entêtes HTTP
      *
@@ -654,7 +662,7 @@ if (!function_exists('set_header')) {
     }
 }
 
-if (!function_exists('redirect')) {
+if (! function_exists('redirect')) {
     /**
      * modifie les entêtes HTTP
      *
@@ -665,7 +673,7 @@ if (!function_exists('redirect')) {
     }
 }
 
-if (!function_exists('send_file')) {
+if (! function_exists('send_file')) {
     /**
      * send_file c'est un alias de require, mais vas chargé les fichiers contenu dans
      * la vie de l'application. Ici <code>sendfile</code> résoue le problème de scope.
@@ -678,7 +686,7 @@ if (!function_exists('send_file')) {
     }
 }
 
-if (!function_exists('send')) {
+if (! function_exists('send')) {
     /**
      * alias de echo avec option auto die
      *
@@ -689,7 +697,7 @@ if (!function_exists('send')) {
     }
 }
 
-if (!function_exists('execute_sql')) {
+if (! function_exists('execute_sql')) {
     /**
      * Execute des requêtes sql customisé
      *
@@ -701,7 +709,7 @@ if (!function_exists('execute_sql')) {
     }
 }
 
-if (!function_exists('curl')) {
+if (! function_exists('curl')) {
     /**
      * curl lance un requete vers une autre source de resource
      *
@@ -722,7 +730,7 @@ if (!function_exists('curl')) {
     }
 }
 
-if (!function_exists('url')) {
+if (! function_exists('url')) {
     /**
      * url retourne l'url courant
      *
@@ -752,7 +760,7 @@ if (!function_exists('url')) {
 }
 
 
-if (!function_exists('pdo')) {
+if (! function_exists('pdo')) {
     /**
      * pdo retourne l'instance de la connection PDO
      * @return PDO
@@ -762,7 +770,7 @@ if (!function_exists('pdo')) {
     }
 }
 
-if (!function_exists('set_pdo')) {
+if (! function_exists('set_pdo')) {
     /**
      * modifie l'instance de la connection PDO
      *
@@ -775,7 +783,7 @@ if (!function_exists('set_pdo')) {
     }
 }
 
-if (!function_exists('str')) {
+if (! function_exists('str')) {
     /**
      * @return \Bow\Support\Str;
      */
@@ -785,7 +793,7 @@ if (!function_exists('str')) {
     }
 }
 
-if (!function_exists('collect')) {
+if (! function_exists('collect')) {
 
     /**
      * retourne une instance de collection
@@ -803,7 +811,7 @@ if (!function_exists('collect')) {
     }
 }
 
-if (!function_exists('encrypt')) {
+if (! function_exists('encrypt')) {
     /**
      * Permet de crypt les données passés en paramètre
      *
@@ -815,7 +823,7 @@ if (!function_exists('encrypt')) {
     }
 }
 
-if (!function_exists('decrypt')) {
+if (! function_exists('decrypt')) {
     /**
      * permet de decrypter des données crypté par la function crypt
      *
@@ -827,7 +835,7 @@ if (!function_exists('decrypt')) {
     }
 }
 
-if (!function_exists('beginTransaction')) {
+if (! function_exists('beginTransaction')) {
     /**
      * Debut un transaction. Désactive l'auto commit
      *
@@ -842,7 +850,7 @@ if (!function_exists('beginTransaction')) {
     }
 }
 
-if (!function_exists('rollback')) {
+if (! function_exists('rollback')) {
     /**
      * annuler un rollback
      */
@@ -851,7 +859,7 @@ if (!function_exists('rollback')) {
     }
 }
 
-if (!function_exists('commit')) {
+if (! function_exists('commit')) {
     /**
      * valider une transaction
      */
@@ -860,7 +868,7 @@ if (!function_exists('commit')) {
     }
 }
 
-if (!function_exists('event')) {
+if (! function_exists('event')) {
     /**
      * Alias de la class Event::on
      *
@@ -877,7 +885,7 @@ if (!function_exists('event')) {
     }
 }
 
-if (!function_exists('emit')) {
+if (! function_exists('emit')) {
     /**
      * Alias de la class Event::emit
      *
@@ -893,7 +901,7 @@ if (!function_exists('emit')) {
     }
 }
 
-if (!function_exists('flash')) {
+if (! function_exists('flash')) {
     /**
      * flash
      *
@@ -912,7 +920,7 @@ if (!function_exists('flash')) {
 }
 
 
-if (!function_exists('middleware')) {
+if (! function_exists('middleware')) {
     /**
      * middleware, Permet de lancer un middleware n'import ou dans votre projet
      *
@@ -924,7 +932,7 @@ if (!function_exists('middleware')) {
     }
 }
 
-if (!function_exists('util')) {
+if (! function_exists('util')) {
     /**
      * Alais sur la class Util
      *
@@ -935,7 +943,7 @@ if (!function_exists('util')) {
     }
 }
 
-if (!function_exists('email')) {
+if (! function_exists('email')) {
     /**
      * Alias sur SimpleMail et Smtp
      *
@@ -975,7 +983,7 @@ if (! function_exists('env')) {
     }
 }
 
-if (!function_exists('session')) {
+if (! function_exists('session')) {
     /**
      * session
      *
@@ -1000,7 +1008,7 @@ if (!function_exists('session')) {
     }
 }
 
-if (!function_exists('cookie')) {
+if (! function_exists('cookie')) {
     /**
      * aliase sur la classe Cookie.
      *
@@ -1030,7 +1038,7 @@ if (!function_exists('cookie')) {
     }
 }
 
-if (!function_exists('validate')) {
+if (! function_exists('validate')) {
     /**
      * Elle permet de valider les inforations sur le critère bien définie
      *
@@ -1043,7 +1051,7 @@ if (!function_exists('validate')) {
     }
 }
 
-if (!function_exists('bow_date')){
+if (! function_exists('bow_date')){
     /**
      * @param null $date
      * @return \Bow\Support\DateAccess
@@ -1053,7 +1061,7 @@ if (!function_exists('bow_date')){
     }
 }
 
-if (!function_exists('public_path')) {
+if (! function_exists('public_path')) {
     /**
      * @return string
      */
@@ -1062,7 +1070,7 @@ if (!function_exists('public_path')) {
     }
 }
 
-if (!function_exists('str')) {
+if (! function_exists('str')) {
     /**
      * @return \Bow\Support\Str
      */
@@ -1071,7 +1079,7 @@ if (!function_exists('str')) {
     }
 }
 
-if (!function_exists('route')) {
+if (! function_exists('route')) {
     /**
      * Route
      *
@@ -1096,7 +1104,7 @@ if (!function_exists('route')) {
     }
 }
 
-if (!function_exists('e')) {
+if (! function_exists('e')) {
     /**
      * Echape les tags HTML dans la chaine.
      *
@@ -1108,7 +1116,7 @@ if (!function_exists('e')) {
     }
 }
 
-if (!function_exists('ftp')) {
+if (! function_exists('ftp')) {
     /**
      * Alias sur le connection FTP.
      *

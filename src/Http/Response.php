@@ -7,7 +7,7 @@ use Bow\Support\Str;
 use Bow\Support\Security;
 use Bow\Exception\ViewException;
 use Bow\Exception\ResponseException;
-use Bow\Application\AppConfiguration;
+use Bow\Application\Configuration;
 
 /**
  * Class Response
@@ -70,30 +70,30 @@ class Response
 
     /**
      * Instance de l'application
-     * @var AppConfiguration
+     * @var Configuration
      */
     private $config;
 
     /**
      * Constructeur de l'application
      *
-     * @param AppConfiguration $appConfig
+     * @param Configuration $config
      */
-    private function __construct(AppConfiguration $appConfig)
+    private function __construct(Configuration $config)
     {
-        $this->config = $appConfig;
+        $this->config = $config;
     }
 
     /**
      * Singleton loader
      *
-     * @param AppConfiguration $appConfig
+     * @param Configuration $config
      * @return self
      */
-    public static function configure(AppConfiguration $appConfig)
+    public static function configure(Configuration $config)
     {
         if (self::$instance === null) {
-            self::$instance = new self($appConfig);
+            self::$instance = new self($config);
         }
 
         return self::$instance;

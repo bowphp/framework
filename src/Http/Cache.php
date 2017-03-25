@@ -1,5 +1,6 @@
 <?php
 namespace Bow\Http;
+use Bow\Application\Configuration;
 
 /**
  * Class Cache
@@ -9,50 +10,72 @@ namespace Bow\Http;
  */
 class Cache
 {
-    public function toPublic()
+    /**
+     * @var string
+     */
+    private static $directory;
+
+    /**
+     * Methode de configuration du cache
+     *
+     * @param string $base_directory
+     */
+    public static function confirgure($base_directory)
     {
-
-    }
-
-    public function toPrivate()
-    {
-
+        static::$directory = $base_directory;
     }
 
     /**
-     * @param int $maxAge
+     * Add new enter in the cache system
+     *
+     * @param string $key The cache key
+     * @param mixed $data
      */
-    public function setMaxAge($maxAge)
+    public static function add($key, $data)
     {
+        if (is_callable($data)) {
+            $content = $data();
+        } else {
+            $content = $data;
+        }
 
+        $content = serialize($content);
+
+        file_put_contents(static::$directory.'/bow_'.$key, $content);
     }
 
     /**
-     * @param int $maxAge
+     * Suppression d'entrer dans le cache.
+     *
+     * @param string $key
      */
-    public function setShareMaxAge($maxAge)
+    public static function remove($key)
     {
-
+        @unlink(static::$directory.'/bow_'.$key);
     }
 
-    public function expire()
+    /**
+     * Récupérer une entrée dans le cache
+     *
+     * @param $key
+     * @return mixed
+     */
+    public static function get($key)
     {
-
+        if (static::has($key)) {
+            return unserialize(file_get_contents(static::$directory.'/bow_'.$key));
+        }
+        return null;
     }
 
-    public function setCache(array $cache)
+    /**
+     * Vérifier l'existance d'un entrée dans la cache.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public static function has($key)
     {
-
+        return (bool) @file_exists(static::$directory.'/bow_'.$key);
     }
-
-    public function setNotModified()
-    {
-
-    }
-
-    public function setETag()
-    {
-
-    }
-
 }

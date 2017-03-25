@@ -32,7 +32,7 @@ abstract class Model
      */
     private static function avalableFields()
     {
-        return ['create_at', 'update_at', 'expires_at', 'login_at', 'sigin_at'];
+        return ['created_at', 'updated_at', 'expired_at', 'loged_at', 'sigin_at'];
     }
 
     /**

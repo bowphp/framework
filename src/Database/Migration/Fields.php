@@ -472,11 +472,10 @@ class Fields
      */
     public function timestamps()
     {
-        $this->addField('timestamp', 'create_at', [
+        $this->addField('timestamp', 'created_at', [
             'null' => true
         ]);
-
-        $this->addField('timestamp', 'update_at', [
+        $this->addField('timestamp', 'updated_at', [
             'null' => true
         ]);
         return $this;
@@ -590,7 +589,7 @@ class Fields
     /**
      * indexe
      *
-     * @return Schema
+     * @return Fields
      */
     public function indexe()
     {
@@ -790,6 +789,9 @@ class Fields
 
     /**
      * __call
+     *
+     * @param string $method
+     * @param array $args
      * @throws \ErrorException
      */
     public function __call($method, $args)

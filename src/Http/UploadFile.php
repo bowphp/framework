@@ -140,11 +140,18 @@ class UploadFile
      * @param string $to
      * @return bool
      */
-    public function move($to)
+    public function move($to, $filename = null)
     {
         if (isset($this->file['tmp_name'])) {
             return false;
         }
-        return (bool) move_uploaded_file($this->file['tmp_name'], $to);
+        $save_name = $this->file['tmp_name'];
+        if (is_string($filename)) {
+            $save_name = $filename;
+        }
+        if (! is_dir($to)) {
+            throw new \Exception('Le dossier de sauvegarde n\'existe pas!');
+        }
+        return (bool) move_uploaded_file($save_name, $to);
     }
 }
