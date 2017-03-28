@@ -60,15 +60,12 @@ class Event
     private static function addEvent($eventName, $bindFunction, $eventType)
     {
         $ref = & static::${$eventType};
+
         if ($ref === null) {
             $ref = new Collection();
         }
 
-        if (!$ref->has($eventName)) {
-            $ref->add($eventName, $bindFunction);
-        } else {
-            $ref->add($eventName, $bindFunction);
-        }
+        $ref->add($eventName, $bindFunction);
     }
 
     /**
@@ -77,6 +74,8 @@ class Event
      * @param string $event Le nom de l'évènement
      * @param array $data Donnée supplementaire
      * @throws EventException
+     *
+     * @return boolean
      */
     public static function emit($event, $data = [])
     {
@@ -87,7 +86,7 @@ class Event
             static::$events->collectionify($event)->each(function($fn) use ($data) {
                 return Actionner::call($fn, $data, static::$nameSpace);
             });
-            $isEmpty = false;
+            return true;
         }
 
         if (static::$eventCallback instanceof Collection) {
@@ -97,9 +96,7 @@ class Event
             $isEmpty = false;
         }
 
-        if ($isEmpty) {
-            throw new EventException("Aucun évènement n'est pas enregistré.", E_USER_ERROR);
-        }
+        throw new EventException("Aucun évènement n'est pas enregistré.", E_USER_ERROR);
     }
 
     /**
