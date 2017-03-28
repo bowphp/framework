@@ -47,6 +47,9 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
     public function __construct(Table $table, $id, $data = null) {
         if ($data === null) {
             $data = $table->getOne();
+            if ($data instanceof self) {
+                $data = $data->toArray();
+            }
         }
 
         if ($data == null) {

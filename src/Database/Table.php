@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Database;
 
+use Bow\Application\Configuration;
 use Bow\Support\Str;
 use Bow\Support\Security;
 use Bow\Support\Collection;
@@ -14,6 +15,11 @@ use Bow\Exception\TableException;
  */
 class Table extends DatabaseTools implements \JsonSerializable
 {
+    /**
+     * @var string
+     */
+    private static $definePrimaryKey = 'id';
+
     /**
      * @var string
      */
@@ -102,9 +108,12 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @return Table
      */
-    public static function load($tableName, \PDO $connection)
+    public static function make($tableName, \PDO $connection)
     {
         if (self::$instance === null || self::$_tableName != $tableName) {
+            if (property_exists(static::class, 'primaryKey')) {
+                self::$definePrimaryKey = static::$definePrimaryKey;
+            }
             self::$instance = new self($tableName, $connection);
         }
 
@@ -118,11 +127,10 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param array $column
      *
-     * @return $this
+     * @return Table
      */
     public function select($column)
     {
-
         if (is_array($column)) {
             $this->select = '`' . implode('`, `', $column) . '`';
             return $this;
@@ -148,7 +156,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @throws TableException
      *
-     * @return $this
+     * @return Table
      */
     public function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
@@ -212,7 +220,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      * @param string $column
      * @param string $boolean='and'
      *
-     * @return $this
+     * @return Table
      */
     public function whereNull($column, $boolean = 'and')
     {
@@ -234,7 +242,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      * @param $column
      * @param string $boolean='and|or'
      *
-     * @return $this
+     * @return Table
      */
     public function whereNotNull($column, $boolean = 'and')
     {
@@ -258,7 +266,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @throws TableException
      *
-     * @return $this
+     * @return Table
      */
     public function whereBetween($column, array $range, $boolean = 'and')
     {
@@ -291,7 +299,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param $column
      * @param $range
-     * @return $this
+     * @return Table
      */
     public function whereNotBetween($column, array $range)
     {
@@ -309,7 +317,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @throws TableException
      *
-     * @return $this
+     * @return Table
      */
     public function whereIn($column, array $range, $boolean = 'and')
     {
@@ -351,7 +359,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @throws TableException
      *
-     * @return $this
+     * @return Table
      */
     public function whereNotIn($column, array $range)
     {
@@ -365,7 +373,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param $table
      *
-     * @return $this
+     * @return Table
      */
     public function join($table)
     {
@@ -385,7 +393,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @throws TableException
      *
-     * @return $this
+     * @return Table
      */
     public function leftJoin($table)
     {
@@ -407,7 +415,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param $table
      * @throws TableException
-     * @return $this
+     * @return Table
      */
     public function rightJoin($table)
     {
@@ -433,7 +441,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @throws TableException
      *
-     * @return $this
+     * @return Table
      */
     public function on($column1, $comp = '=', $column2)
     {
@@ -462,7 +470,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @throws TableException
      *
-     * @return $this
+     * @return Table
      */
     public function orOn($column, $comp = '=', $value)
     {
@@ -488,7 +496,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return $this
+     * @return Table
      */
     public function group($column)
     {
@@ -526,7 +534,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      * @param string $column
      * @param string $type
      *
-     * @return $this
+     * @return Table
      */
     public function orderBy($column, $type = 'asc')
     {
@@ -545,7 +553,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      * jump = offset
      *
      * @param int $offset
-     * @return $this
+     * @return Table
      */
     public function jump($offset = 0)
     {
@@ -561,7 +569,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param int $limit
      *
-     * @return $this
+     * @return Table
      */
     public function take($limit)
     {
@@ -582,7 +590,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return Table
+     * @return Table|number|array
      */
     public function max($column)
     {
@@ -594,7 +602,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return Table
+     * @return Table|number|array
      */
     public function min($column)
     {
@@ -606,7 +614,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return Table
+     * @return Table|number|array
      */
     public function avg($column)
     {
@@ -618,7 +626,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return Table
+     * @return Table|number|array
      */
     public function sum($column)
     {
@@ -667,7 +675,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @param callable $cb
      *
-     * @return array Si le mode de séléction unitaire n'est pas active
+     * @return Collection Si le mode de séléction unitaire n'est pas active
      */
     public function get($cb = null)
     {
@@ -684,7 +692,13 @@ class Table extends DatabaseTools implements \JsonSerializable
         $data = Security::sanitaze($stmt->fetchAll());
 
         if (static::$getOne) {
-            $data = current($data);
+            $current = current($data);
+            $id = null;
+            if (isset($current->{self::$definePrimaryKey})) {
+                $id = $current->{self::$definePrimaryKey};
+                unset($current->{self::$definePrimaryKey});
+            }
+            $data = new SqlUnity($this, $id, $current);
             static::$getOne = false;
         }
 
@@ -694,14 +708,23 @@ class Table extends DatabaseTools implements \JsonSerializable
             return call_user_func_array($cb, [$this->getLastError(), $data]);
         }
 
-        return $data;
+        foreach ($data as $key => $value) {
+            $id = null;
+            if (isset($value->{self::$definePrimaryKey})) {
+                $id = $value->{self::$definePrimaryKey};
+                unset($value->{self::$definePrimaryKey});
+            }
+            $data[$key] = new SqlUnity($this, $id, $value);
+        }
+
+        return $this->toCollection();
     }
 
     /**
      * Rétourne tout les enregistrements
      *
      * @param array $columns
-     * @return array
+     * @return Collection
      */
     public function all($columns = [])
     {
@@ -715,7 +738,7 @@ class Table extends DatabaseTools implements \JsonSerializable
     /**
      * Permet de retourner un élément dans la liste de résultat
      *
-     * @return mixed
+     * @return SqlUnity|Collection|null
      */
     public function getOne()
     {
@@ -724,10 +747,10 @@ class Table extends DatabaseTools implements \JsonSerializable
     }
 
     /**
-     *
+     * Demarrer un transaction dans la base de donnée.
      *
      * @param callable $cb
-     * @return $this
+     * @return Table
      */
     public function transition(Callable $cb)
     {
@@ -740,19 +763,6 @@ class Table extends DatabaseTools implements \JsonSerializable
         }
 
         return $this;
-    }
-
-    /**
-     * find
-     *
-     * @param mixed $id
-     * @return SqlUnity
-     * @throws TableException
-     */
-    public function find($id)
-    {
-        $this->where('id', $id);
-        return new SqlUnity($this, $id);
     }
 
     /**
@@ -782,7 +792,7 @@ class Table extends DatabaseTools implements \JsonSerializable
         }
 
         if (count($data) == 1) {
-            $data = end($data);
+            $data = $data->last();
         }
 
         return $data;
@@ -826,7 +836,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      * @param array $arr
      * @param Callable $callback
      *
-     * @return array
+     * @return Collection
      */
     public function findAndModify(array $arr, $callback = null)
     {
@@ -858,7 +868,7 @@ class Table extends DatabaseTools implements \JsonSerializable
      *                                      elle récupère en paramètre une instance de DatabaseErrorHanlder
      *                                      et les données récupérés par la réquête.
      *
-     * @return array
+     * @return Collection|SqlUnity
      */
     public function findOneAndModify(array $arr, Callable $callback = null)
     {
@@ -1072,7 +1082,6 @@ class Table extends DatabaseTools implements \JsonSerializable
     public function insert(array $values)
     {
         $nInserted = 0;
-
         if (isset($values[0]) && is_array($values[0])) {
             foreach($values as $key => $data) {
                 $nInserted += $this->insertOne($data);
@@ -1250,25 +1259,14 @@ class Table extends DatabaseTools implements \JsonSerializable
      *
      * @return Collection
      */
-    public function toCollection()
+    private function toCollection()
     {
         $data = $this->get();
         $coll =  new Collection();
         foreach($data as $key => $value) {
             $coll->add($key, $value);
         }
-
         return $coll;
-    }
-
-    /**
-     * collectionify alias de toCollection.
-     *
-     * @return Collection
-     */
-    public function collectionify()
-    {
-        return $this->toCollection();
     }
 
     /**
@@ -1300,7 +1298,7 @@ class Table extends DatabaseTools implements \JsonSerializable
     }
 
     /**
-     * @return array
+     * @return Collection
      */
     public function jsonSerialize()
     {

@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Database;
 
+use App\Actionner;
 use PDO;
 use StdClass;
 use PDOException;
@@ -58,7 +59,7 @@ class Database extends DatabaseTools
      * Charger la configuration
      *
      * @param object $config
-     * @return array
+     * @return array|object
      */
     public static function configure($config)
     {
@@ -94,7 +95,7 @@ class Database extends DatabaseTools
         }
 
         if (! static::$config instanceof StdClass) {
-            return Util::launchCallback($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
+            return Actionner::call($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
         }
 
         if (is_callable($zone)) {
@@ -109,7 +110,7 @@ class Database extends DatabaseTools
         $c = isset(static::$config->connections[static::$zone]) ? static::$config->connections[static::$zone] : null;
 
         if (is_null($c)) {
-            Util::launchCallback($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre database.php")]);
+            Actionner::call($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre database.php")]);
         }
 
         $db = null;
@@ -149,10 +150,10 @@ class Database extends DatabaseTools
              * Lancement d'exception
              */
             static::$errorInfo = [$e->getCode(), true, $e->getMessage()];
-            Util::launchCallback($cb, [$e]);
+            Actionner::call($cb, [$e]);
         }
 
-        Util::launchCallback($cb, [false]);
+        Actionner::call($cb, [false]);
 
         return static::class;
     }
@@ -341,8 +342,7 @@ class Database extends DatabaseTools
     public static function table($tableName)
     {
         static::verifyConnection();
-
-        return Table::load($tableName, static::$db);
+        return Table::make($tableName, static::$db);
     }
 
     /**

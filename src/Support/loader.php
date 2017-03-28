@@ -43,7 +43,7 @@ if (! function_exists('config')) {
             return $config;
         }
 
-        if (!in_array($param, ['name', 'engine', 'root', 'public', 'view path', 'logger', 'local', 'key', null])) {
+        if (!in_array($param, ['name', 'engine', 'root', 'public', 'view path', 'logger', 'local', 'key', 'cache', 'db', 'name', 'mail', 'ftp', null])) {
             throw new InvalidArgumentException('Paramètre invalide.', E_USER_ERROR);
         }
 

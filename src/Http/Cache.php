@@ -1,6 +1,5 @@
 <?php
 namespace Bow\Http;
-use Bow\Application\Configuration;
 
 /**
  * Class Cache
@@ -38,9 +37,14 @@ class Cache
         } else {
             $content = $data;
         }
+        if (is_array($content)) {
+            $content['__bow_meta'] = ['is_array' => true, 'expire_at' => '+'];
+        } else {
+            $content = [$content];
+            $content['__bow_meta'] = ['is_array' => false, 'expire_at' => '+'];
+        }
 
         $content = serialize($content);
-
         file_put_contents(static::$directory.'/bow_'.$key, $content);
     }
 
@@ -62,10 +66,19 @@ class Cache
      */
     public static function get($key)
     {
-        if (static::has($key)) {
-            return unserialize(file_get_contents(static::$directory.'/bow_'.$key));
+        if (! static::has($key)) {
+            return null;
         }
-        return null;
+
+        $content = unserialize(file_get_contents(static::$directory.'/bow_'.$key));
+        $meta = $content['__bow_meta'];
+        unset($content['__bow_meta']);
+
+        if (! $meta['is_array']) {
+            $content = $content[0];
+        }
+
+        return $content;
     }
 
     /**
@@ -75,6 +88,17 @@ class Cache
      * @return bool
      */
     public static function has($key)
+    {
+        return (bool) @file_exists(static::$directory.'/bow_'.$key);
+    }
+
+    /**
+     * Vérifier l'existance d'un entrée dans la cache.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public static function expired($key)
     {
         return (bool) @file_exists(static::$directory.'/bow_'.$key);
     }

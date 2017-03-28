@@ -177,11 +177,10 @@ class Input implements CollectionAccess
     {
         if ($this->has($key)) {
             $this->data[$key] = $value;
-        } else {
-            throw new ErrorException("Clé non définie", E_NOTICE);
+            return $this;
         }
 
-        return $this;
+        throw new ErrorException("Clé non définie", E_NOTICE);
     }
 
     /**

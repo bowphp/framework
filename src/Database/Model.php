@@ -1,6 +1,8 @@
 <?php
 namespace Bow\Database;
 
+use Bow\Exception\TableException;
+use Bow\Support\Collection;
 use Bow\Support\Str;
 use Bow\Exception\ModelException;
 
@@ -13,11 +15,43 @@ use Bow\Exception\ModelException;
 abstract class Model
 {
     /**
+     * @var string
+     */
+    protected static $primaryKey = 'id';
+
+    /**
+     * @var array
+     */
+    protected $data = [];
+
+    /**
      * Le nom de la table courrente
      *
      * @var string
      */
     protected static $table = null;
+
+    /**
+     * find
+     *
+     * @param mixed $id
+     * @param array $select
+     * @return Collection|SqlUnity
+     * @throws TableException
+     */
+    public function find($id, $select = ['*'])
+    {
+        $table = Database::table(static::$table);
+        $one = false;
+        if (! is_array($id)) {
+            $one = true;
+            $id = [$id];
+        }
+        $table->whereIn(static::$primaryKey, $id);
+        $table->select($select);
+
+        return $one ? $table->getOne() : $table->get();
+    }
 
     /**
      * @return array
