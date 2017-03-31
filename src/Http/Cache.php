@@ -22,6 +22,9 @@ class Cache
     public static function confirgure($base_directory)
     {
         static::$directory = $base_directory;
+        if (! is_dir($base_directory)) {
+            @mkdir($base_directory, 0777);
+        }
     }
 
     /**

@@ -1,9 +1,9 @@
 <?php
 namespace Bow\Database;
 
-use Bow\Exception\TableException;
-use Bow\Support\Collection;
 use Bow\Support\Str;
+use Bow\Support\Collection;
+use Bow\Exception\QueryBuilderException;
 use Bow\Exception\ModelException;
 
 /**
@@ -37,16 +37,18 @@ abstract class Model
      * @param mixed $id
      * @param array $select
      * @return Collection|SqlUnity
-     * @throws TableException
+     * @throws QueryBuilderException
      */
     public function find($id, $select = ['*'])
     {
         $table = Database::table(static::$table);
         $one = false;
+
         if (! is_array($id)) {
             $one = true;
             $id = [$id];
         }
+
         $table->whereIn(static::$primaryKey, $id);
         $table->select($select);
 
@@ -66,7 +68,7 @@ abstract class Model
      */
     private static function avalableFields()
     {
-        return ['created_at', 'updated_at', 'expired_at', 'loged_at', 'sigin_at'];
+        return ['created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at'];
     }
 
     /**
@@ -77,7 +79,7 @@ abstract class Model
      */
     private static function carbornize($data, $method, $child)
     {
-        if (!in_array($method, static::avalableMethods())) {
+        if (! in_array($method, static::avalableMethods())) {
             return $data;
         }
 
@@ -92,7 +94,7 @@ abstract class Model
         }
 
         foreach($data as $value) {
-            if (!is_object($value)) {
+            if (! is_object($value)) {
                 continue;
             }
             foreach($value as $key => $content) {
@@ -117,7 +119,7 @@ abstract class Model
      * @param string $method Le nom de la method a appelé
      * @param array $args    Les arguments a passé à la fonction
      * @throws ModelException
-     * @return \Bow\Database\Table
+     * @return \Bow\Database\Table|array
      */
     public static function __callStatic($method, $args)
     {

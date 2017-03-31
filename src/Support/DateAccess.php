@@ -10,7 +10,7 @@ namespace Bow\Support;
 class DateAccess
 {
     /**
-     * @var string|int
+     * @var int
      */
     private $date;
 
@@ -18,12 +18,17 @@ class DateAccess
      * Constructeur d'instance.
      *
      * @param null|int|string $time
+     * @param string $tz
      */
-    public function __construct($time = null)
+    public function __construct($time = null, $tz = null)
     {
+        if (is_string($tz)) {
+            date_default_timezone_set($tz);
+        }
+
         if ($time === null) {
             $this->date = time();
-        } else if (is_string($time)) {
+        } elseif (is_string($time)) {
             $this->date = strtotime($time);
         } else {
             $this->date = $time;
@@ -169,6 +174,16 @@ class DateAccess
     }
 
     /**
+     * Vérifie si la date est dans le future
+     *
+     * @return bool
+     */
+    public function isPassed()
+    {
+        return time() > $this->date;
+    }
+
+    /**
      * @return bool|string
      */
     public function __toString()
@@ -185,8 +200,14 @@ class DateAccess
         return date_diff(new \DateTime($diffDate), new \DateTime($this->date));
     }
 
-    public function add($format)
+    /**
+     * Permet de formater la date
+     *
+     * @param string $format
+     * @return string
+     */
+    public function format($format)
     {
-
+        return date($this->date, $format);
     }
 }

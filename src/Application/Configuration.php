@@ -94,7 +94,7 @@ class Configuration
      *
      * @return Configuration
      */
-    public static function takeInstance() {
+    public static function instance() {
         if (! static::$instance instanceof Configuration) {
             static::configure([]);
         }

@@ -1,5 +1,8 @@
 <?php
 namespace Bow\Http;
+
+use Bow\Exception\UploadFileException;
+
 /**
  * Class UploadFile
  *
@@ -137,20 +140,23 @@ class UploadFile
     /**
      * Déplacer le fichier uploader dans un répertoire.
      *
-     * @param string $to
+     * @param string $to Le dossier de récéption
+     * @param string|null $filename Le nom du fichier
      * @return bool
+     * @throws UploadFileException
      */
     public function move($to, $filename = null)
     {
         if (isset($this->file['tmp_name'])) {
             return false;
         }
+
         $save_name = $this->file['tmp_name'];
         if (is_string($filename)) {
             $save_name = $filename;
         }
         if (! is_dir($to)) {
-            throw new \Exception('Le dossier de sauvegarde n\'existe pas!');
+            throw new UploadFileException('Le dossier de sauvegarde n\'existe pas!');
         }
         return (bool) move_uploaded_file($save_name, $to);
     }

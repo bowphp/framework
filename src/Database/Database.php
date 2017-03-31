@@ -1,17 +1,16 @@
 <?php
 namespace Bow\Database;
 
-use App\Actionner;
+use Database\Connection\Adapter\MysqlAdapter;
+use Database\Connection\Adapter\SqliteAdapter;
+use Database\Connection\Connection;
 use PDO;
 use StdClass;
-use PDOException;
-use ErrorException;
-use Bow\Support\Str;
-use Bow\Support\Util;
-use Bow\Support\Security;
+use Bow\Security\Security;
 use InvalidArgumentException;
 use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
+use Database\Connection\AbstractConnection;
 
 /**
  * Class Database
@@ -19,14 +18,17 @@ use Bow\Exception\ConnectionException;
  * @author Franck dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-class Database extends DatabaseTools
+class Database
 {
     /**
-     * Instance de PDO
-     *
-     * @var \PDO
+     * @var AbstractConnection;
      */
-    private static $db = null;
+    private static $adapter;
+
+    /**
+     * @var string;
+     */
+    private static $scheme;
 
     /**
      * @var Database
@@ -43,32 +45,20 @@ class Database extends DatabaseTools
      *
      * @var string
      */
-    private static $zone = null;
-    /***
-     * Liste des constantes d'execution de Requete SQL.
-     * Pour le system de de base de donnée ultra minimalise de Bow.
-     */
-    const SELECT = 1;
-    const UPDATE = 2;
-    const DELETE = 3;
-    const INSERT = 4;
+    private static $name = null;
 
-    private final function __construct(){}
-    private final function __clone(){}
     /**
      * Charger la configuration
      *
      * @param object $config
-     * @return array|object
      */
     public static function configure($config)
     {
         if (static::$instance === null) {
             static::$instance = new self();
-            static::$config = (object) $config;
-            static::$zone = static::$config->default;
+            static::$name = $config['default'];
+            static::$config = static::$config[static::$name];
         }
-        return static::$config;
     }
 
     /**
@@ -76,7 +66,7 @@ class Database extends DatabaseTools
      *
      * @return Database
      */
-    public static function takeInstance()
+    public static function instance()
     {
         static::verifyConnection();
         return static::$instance;
@@ -84,99 +74,48 @@ class Database extends DatabaseTools
     /**
      * connection, lance la connection sur la DB
      *
-     * @param null $zone
-     * @param null $cb
+     * @param null $name
      * @return null|Database
+     *
+     * @throws ConnectionException
      */
-    public static function connection($zone = null, $cb = null)
+    public static function connection($name = null)
     {
-        if (static::$db instanceof PDO) {
-            return static::takeInstance();
-        }
-
-        if (! static::$config instanceof StdClass) {
-            return Actionner::call($cb, [new ConnectionException("Le fichier database.php est mal configurer")]);
-        }
-
-        if (is_callable($zone)) {
-            $cb = $zone;
-            $zone = null;
-        }
-
-        if ($zone != null) {
-            static::$zone = $zone;
-        }
-
-        $c = isset(static::$config->connections[static::$zone]) ? static::$config->connections[static::$zone] : null;
-
-        if (is_null($c)) {
-            Actionner::call($cb, [new ConnectionException("La clé '". static::$zone . "' n'est pas définir dans l'entre database.php")]);
-        }
-
-        $db = null;
-
-        try {
-            // Variable contenant les informations sur
-            // utilisateur
-            $username = null;
-            $password = null;
-
-            // Configuration suppelement coté PDO
-            $pdoPostConfiguation = [
-                PDO::ATTR_DEFAULT_FETCH_MODE => static::$config->fetch
-            ];
-
-            switch($c["scheme"]) {
-                case "mysql":
-                    // Construction de la dsn
-                    $dns = "mysql:host=" . $c["mysql"]['hostname'] . ($c["mysql"]['port'] !== null ? ":" . $c["mysql"]["port"] : "") . ";dbname=". $c["mysql"]['database'];
-                    $username = $c["mysql"]["username"];
-                    $password = $c["mysql"]["password"];
-                    $pdoPostConfiguation[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES " . Str::upper($c["mysql"]["charset"]);
-                    break;
-                case "sqlite":
-                    $dns = $c["sqlite"]["driver"] . ":" . $c["sqlite"]["database"];
-                    break;
-                default:
-                    throw new DatabaseException("Vérifiez la configuration de la base de donnée.", E_USER_ERROR);
-                    break;
+        if (static::$adapter === null) {
+            if (static::$config['scheme'] == 'mysql') {
+                static::$adapter = new MysqlAdapter(static::$config['mysql']);
+            } elseif (static::$config['scheme'] == 'sqlite') {
+                static::$adapter = new SqliteAdapter(static::$config['sqlite']);
+            } else {
+                throw new ConnectionException('Ce driver n\'est pas prie en compte.');
             }
-
-            // Connection à la base de donnée.
-            static::$db = new PDO($dns, $username, $password, $pdoPostConfiguation);
-
-        } catch (PDOException $e) {
-            /**
-             * Lancement d'exception
-             */
-            static::$errorInfo = [$e->getCode(), true, $e->getMessage()];
-            Actionner::call($cb, [$e]);
         }
 
-        Actionner::call($cb, [false]);
+        if (static::$adapter->getConnection() instanceof PDO && $name == static::$name) {
+            return static::instance();
+        }
 
-        return static::class;
+        return static::instance();
     }
 
     /**
      * switchTo, permet de ce connecter a une autre base de donnée.
      *
-     * @param string $newZone
+     * @param string $name
      * @return void
      */
-    public static function switchTo($newZone)
+    public static function switchTo($name)
     {
-        if (!is_string($newZone)) {
+        if (! is_string($name)) {
             throw new InvalidArgumentException('Paramètre invalide', E_USER_ERROR);
         }
 
-        if($newZone != static::$zone) {
-            static::$db = null;
-            static::$zone = $newZone;
+        if($name != static::$name) {
+            static::$name = $name;
             static::verifyConnection();
         }
 
-        static::takeInstance();
+        static::instance();
     }
 
     /**
@@ -186,22 +125,22 @@ class Database extends DatabaseTools
      */
     public static function currentZone()
     {
-        return static::$zone;
+        return static::$name;
     }
 
     /**
      * éxécute une requête update
      *
      * @param string $sqlstatement
-     * @param array $bind
+     * @param array $data
      * @return bool
      */
-    public static function update($sqlstatement, array $bind = [])
+    public static function update($sqlstatement, array $data = [])
     {
         static::verifyConnection();
 
         if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sqlstatement)) {
-            return static::executePrepareQuery($sqlstatement, $bind);
+            return static::executePrepareQuery($sqlstatement, $data);
         }
 
         return false;
@@ -211,24 +150,18 @@ class Database extends DatabaseTools
      * éxécute une requête select
      *
      * @param $sqlstatement
-     * @param array $bind
+     * @param array $data
      * @return mixed|null
      */
-    public static function select($sqlstatement, array $bind = [])
+    public static function select($sqlstatement, array $data = [])
     {
         static::verifyConnection();
-
         if (preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
-
-            $pdostatement = static::$db->prepare($sqlstatement);
-            static::bind($pdostatement, $bind);
+            $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+            static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
             $pdostatement->execute();
-
-            static::$errorInfo = $pdostatement->errorInfo();
-
             return Security::sanitaze($pdostatement->fetchAll());
         }
-
         return null;
     }
 
@@ -236,21 +169,16 @@ class Database extends DatabaseTools
      * éxécute une requête select et retourne un seul enregistrement
      *
      * @param $sqlstatement
-     * @param array $bind
+     * @param array $data
      * @return mixed|null
      */
-    public static function selectOne($sqlstatement, array $bind = [])
+    public static function selectOne($sqlstatement, array $data = [])
     {
         static::verifyConnection();
-
         if (preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
-
-            $pdostatement = static::$db->prepare($sqlstatement);
-            static::bind($pdostatement, $bind);
+            $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+            static::$adapter->bind($pdostatement, $data);
             $pdostatement->execute();
-
-            static::$errorInfo = $pdostatement->errorInfo();
-
             return Security::sanitaze($pdostatement->fetch());
         }
 
@@ -261,38 +189,37 @@ class Database extends DatabaseTools
      * éxécute une requête insert
      *
      * @param $sqlstatement
-     * @param array $bind
+     * @param array $data
      * @return null
      */
-    public static function insert($sqlstatement, array $bind = [])
+    public static function insert($sqlstatement, array $data = [])
     {
         static::verifyConnection();
 
-        if (preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)?\s(values\s?\(.+\),?)+|\s?set\s(.+)+);?$/i", $sqlstatement)) {
-
-            $r = 0;
-
-            if (isset($bind[0])) {
-
-                if (is_array($bind[0])) {
-                    foreach ($bind as $key => $value) {
-                        $r += static::executePrepareQuery($sqlstatement, $value);
-                    }
-
-                    return $r;
-                }
-
-                $r = static::executePrepareQuery($sqlstatement, $bind);
-            }
-
-            return $r;
+        if (! preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)?\s(values\s?\(.+\),?)+|\s?set\s(.+)+);?$/i", $sqlstatement)) {
+            return null;
         }
 
-        return null;
+        $collector = [];
+        $r = 0;
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $r += static::executePrepareQuery($sqlstatement, $value);
+                continue;
+            }
+            $collector[$key] = $value;
+        }
+
+        if (! empty($collector)) {
+            return static::executePrepareQuery($sqlstatement, $collector);
+        }
+
+        return $r;
     }
 
     /**
-     * éxécute une requête de type DROP|CREATE TABLE|TRAUNCATE|ALTER TABLE
+     * éxécute une requête de type DROP|CREATE QueryBuilder|TRAUNCATE|ALTER QueryBuilder
      *
      * @param $sqlstatement
      * @return bool
@@ -300,93 +227,41 @@ class Database extends DatabaseTools
     public static function statement($sqlstatement)
     {
         static::verifyConnection();
-
-        if (preg_match("/^(drop|alter\stable|truncate|create\stable|call)\s.+;?$/i", $sqlstatement)) {
-            $r = static::$db->exec($sqlstatement);
-
-            if ($r === 0) {
-                $r = true;
-            }
-
-            return $r;
+        if (! preg_match("/^(drop|alter\sQueryBuilder|truncate|create\sQueryBuilder|call)\s.+;?$/i", $sqlstatement)) {
+            return false;
         }
-
-        return false;
+        return (bool) static::$adapter->getConnection()->exec($sqlstatement);;
     }
 
     /**
      * éxécute une requête delete
      *
      * @param $sqlstatement
-     * @param array $bind
+     * @param array $data
      * @return bool
      */
-    public static function delete($sqlstatement, array $bind = [])
+    public static function delete($sqlstatement, array $data = [])
     {
         static::verifyConnection();
 
         if (preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i", $sqlstatement)) {
-            return static::executePrepareQuery($sqlstatement, $bind);
+            return static::executePrepareQuery($sqlstatement, $data);
         }
 
         return false;
     }
 
     /**
-     * Charge le factory Table
+     * Charge le factory QueryBuilder
      *
-     * @param string $tableName le nom de la table
+     * @param string $QueryBuilderName le nom de la QueryBuilder
      *
-     * @return Table
+     * @return QueryBuilder
      */
-    public static function table($tableName)
+    public static function QueryBuilder($QueryBuilderName)
     {
         static::verifyConnection();
-        return Table::make($tableName, static::$db);
-    }
-
-    /**
-     * Insertion des données dans la DB avec la method query
-     * ====================== USAGE ========================
-     *	$options = [
-     *		"query" => [
-     *			"table" => "nomdelatable",
-     *			"type" => INSERT|SELECT|DELETE|UPDATE,
-     *			"data" => [ les informations a mettre ici dépendent de la requête que l'utilisateur veux faire. ]
-     *		],
-     *		"data" => [ "les données a insérer." ]
-     *	];
-     *
-     * @param array $options
-     * @param bool|false $return
-     * @param bool|false $lastInsertId
-     *
-     * @throws \ErrorException
-     *
-     * @return array|static|\StdClass
-     */
-    public static function query(array $options, $return = false, $lastInsertId = false)
-    {
-        static::verifyConnection();
-
-        $sqlStatement = static::makeQuery($options["query"]);
-        $pdoStatement = static::$db->prepare($sqlStatement);
-
-        static::bind($pdoStatement, isset($options["data"]) ? $options["data"] : []);
-
-        $pdoStatement->execute();
-        static::$errorInfo = $pdoStatement->errorInfo();
-        $data = $pdoStatement->fetchAll();
-
-        if ($return == true) {
-            if ($lastInsertId == false) {
-                $data = empty($data) ? null : Security::sanitaze($data);
-            } else {
-                $data = static::$db->lastInsertId();
-            }
-        }
-
-        return $data;
+        return QueryBuilder::make($QueryBuilderName, static::$adapter->getConnection());
     }
 
     /**
@@ -395,7 +270,7 @@ class Database extends DatabaseTools
     public static function transaction()
     {
         static::verifyConnection();
-        static::$db->beginTransaction();
+        static::$adapter->getConnection()->beginTransaction();
     }
 
     /**
@@ -404,7 +279,7 @@ class Database extends DatabaseTools
     public static function commit()
     {
         static::verifyConnection();
-        static::$db->commit();
+        static::$adapter->getConnection()->commit();
     }
 
     /**
@@ -413,7 +288,7 @@ class Database extends DatabaseTools
     public static function rollback()
     {
         static::verifyConnection();
-        static::$db->rollBack();
+        static::$adapter->getConnection()->rollBack();
     }
 
     /**
@@ -423,12 +298,8 @@ class Database extends DatabaseTools
      */
     private static function verifyConnection()
     {
-        if (! (static::$db instanceof PDO)) {
-            static::connection(static::$zone, function($err) {
-                if ($err instanceof PDOException) {
-                    throw new DatabaseException($err->getMessage(), E_ERROR);
-                }
-            });
+        if (! (static::$adapter->getConnection() instanceof PDO)) {
+            static::connection(static::$name);
         }
     }
     /**
@@ -440,240 +311,22 @@ class Database extends DatabaseTools
     public static function lastInsertId($name = null)
     {
         static::verifyConnection();
-        return (int) static::$db->lastInsertId($name);
-    }
-
-    /**
-     * Récupère la dernière erreur sur la l'object PDO
-     *
-     * @return DatabaseErrorHandler
-     */
-    public static function getLastError()
-    {
-        return new DatabaseErrorHandler(static::$errorInfo);
-    }
-
-    /**
-     * makeQuery, fonction permettant de générer des SQL Statement à la volé.
-     *
-     * @param array $options, ensemble d'information
-     * @param callable $cb = null
-     * @return string $query, la SQL Statement résultant
-     */
-    private static function makeQuery($options, $cb = null)
-    {
-        /** NOTE:
-         *	 | - where
-         *	 | - order
-         *	 | - limit | take.
-         *	 | - grby
-         *	 | - join
-         *
-         *	 Si vous spécifiez un join veillez définir des alias
-         *	 $options = [
-         *	 	"type" => SELECT,
-         * 		"table" => "table as T",
-         *	 	"join" => [
-         * 			"otherTable" => "otherTable as O",
-         *	 		"on" => [
-         *	 			"T.id",
-         *	 			"O.parentId"
-         *	 		]
-         *	 	],
-         *	 	"where" => "T.id = 1",
-         *	 	"order" => ["column", true],
-         *	 	"limit" => "1, 5",
-         *	 	"grby" => "column"
-         *	 ];
-         */
-
-        $query = "";
-
-        switch ($options['type']) {
-            /**
-             * Niveau équivalant à un quelconque SQL Statement de type:
-             *  _________________
-             * | SELECT ? FROM ? |
-             *  -----------------
-             */
-            case self::SELECT:
-                /**
-                 * Initialisation de variable à usage simple
-                 */
-                $join  = '';
-                $where = '';
-                $order = '';
-                $limit = '';
-                $grby  = '';
-                $between = '';
-
-                if (isset($options["join"])) {
-                    $join = " INNER JOIN " . $options['join']["otherTable"] . " ON " . implode(" = ", $options['join']['on']);
-                }
-                /*
-                 * Vérification de l'existance d'un clause:
-                 *  _______
-                 * | WHERE |
-                 *  -------
-                 */
-                if (isset($options['where'])) {
-                    $where = " WHERE " . $options['where'];
-                }
-                /*
-                 * Vérification de l'existance d'un clause:
-                 *  __________
-                 * | ORDER BY |
-                 *  ----------
-                 */
-                if (isset($options['-order'])) {
-                    $order = " ORDER BY " . (is_array($options['-order']) ? implode(", ", $options["-order"]) : $options["-order"]) . " DESC";
-                } else if (isset($options['+order']) || isset($options['order'])) {
-                    $order = " ORDER BY " . (is_array($options['+order']) ? implode(", ", $options["+order"]) : $options["+order"]) . " ASC";
-                }
-
-                /*
-                 * Vérification de l'existance d'un clause:
-                 *  _______
-                 * | LIMIT |
-                 *  -------
-                 */
-                if (isset($options['limit']) || isset($options["take"])) {
-                    if (isset($options['limit'])) {
-                        $param = $options['limit'];
-                    } else {
-                        $param = $options['take'];
-                    }
-                    $param = is_array($param) ? implode(", ", array_map(function($v){
-                        return (int) $v;
-                    }, $param)) : $param;
-                    $limit = " LIMIT " . $param;
-                }
-
-                /**
-                 * Vérification de l'existance d'un clause:
-                 *  ----------
-                 * | GROUP BY |
-                 *  ----------
-                 */
-
-                if (isset($options["grby"])) {
-                    $grby = " GROUP BY " . $options['grby'];
-                    if (isset($options["having"])) {
-                        $grby .= " HAVING " .$options["having"];
-                    }
-                }
-
-                if (isset($options["data"])) {
-
-                    if (is_array($options["data"])) {
-                        $data = implode(", ", $options['data']);
-                    } else {
-                        $data = $options['data'];
-                    }
-
-                } else {
-                    $data = "*";
-                }
-                /**
-                 * Vérification de l'existance d'un clause:
-                 *  ----------
-                 * | BETWEEN  |
-                 *  ----------
-                 */
-
-                if (isset($options["-between"])) {
-                    $between = $options[0] . " NOT BETWEEN " . implode(" AND ", $options["between"][1]);
-                } else if (isset($options["between"])) {
-                    $between = $options[0] . " BETWEEN " . implode(" AND ", $options["between"][1]);
-                }
-
-                /**
-                 * Edition de la SQL Statement facultatif.
-                 * construction de la SQL Statement finale.
-                 */
-                $query = "SELECT " . $data . " FROM " . $options['table'] . $join . $where . ($where !== "" ? $between : "") . $order . $limit . $grby;
-                break;
-            /**
-             * Niveau équivalant à un quelconque
-             * SQL Statement de type:
-             *  _____________
-             * | INSERT INTO |
-             *  -------------
-             */
-            case self::INSERT:
-                /**
-                 * Sécurisation de donnée.
-                 */
-                $field = self::rangeField($options['data']);
-                /**
-                 * Edition de la SQL Statement facultatif.
-                 */
-                $query = "INSERT INTO " . $options['table'] . " SET " . $field;
-                break;
-            /**
-             * Niveau équivalant à un quelconque
-             * SQL Statement de type:
-             *  ________
-             * | UPDATE |
-             *  --------
-             */
-            case self::UPDATE:
-                /**
-                 * Sécurisation de donnée.
-                 */
-                $field = self::rangeField($options['data']);
-                /**
-                 * Edition de la SQL Statement facultatif.
-                 */
-                $query = "UPDATE " . $options['table'] . " SET " . $field . " WHERE " . $options['where'];
-                break;
-            /**
-             * Niveau équivalant à un quelconque
-             * SQL Statement de type:
-             *  _____________
-             * | DELETE FROM |
-             *  ------------
-             */
-            case self::DELETE:
-                /**
-                 * Edition de la SQL Statement facultatif.
-                 */
-                $query = "DELETE FROM " . implode(", ", $options['table']) . " WHERE " . $options['where'];
-                break;
-        }
-        /**
-         * Vérification de l'existance de la fonction de callback
-         */
-        if ($cb !== null) {
-            /** NOTE:
-             * Execution de la fonction de rappel,
-             * qui récupère une erreur ou la query
-             * pour évantuel vérification
-             */
-            call_user_func($cb, isset($query) ?: $query);
-        }
-
-        return $query;
+        return (int) static::$adapter->getConnection()->lastInsertId($name);
     }
 
     /**
      * Execute Les request de type delete insert update
      *
      * @param $sqlstatement
-     * @param array $bind
+     * @param array $data
      * @return mixed
      */
-    private static function executePrepareQuery($sqlstatement, array $bind = [])
+    private static function executePrepareQuery($sqlstatement, array $data = [])
     {
-        $pdostatement = static::$db->prepare($sqlstatement);
-
-        static::bind($pdostatement, $bind);
+        $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+        static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
         $pdostatement->execute();
-        static::$errorInfo = $pdostatement->errorInfo();
-
         $r = $pdostatement->rowCount();
-        $pdostatement->closeCursor();
-
         return $r;
     }
 
@@ -685,7 +338,7 @@ class Database extends DatabaseTools
     public static function getPdo()
     {
         static::verifyConnection();
-        return static::$db;
+        return static::$adapter->getConnection();
     }
 
     /**
@@ -695,7 +348,7 @@ class Database extends DatabaseTools
      */
     public static function setPdo(PDO $pdo)
     {
-        static::$db = $pdo;
+        static::$adapter->setConnection($pdo);
     }
 
     /**

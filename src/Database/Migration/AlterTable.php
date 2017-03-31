@@ -38,7 +38,7 @@ class AlterTable
 
         $cb($columns);
 
-        $sql = (new StatementMaker($columns))->toAlterTableStatement();
+        $sql = (new Statement($columns))->toAlterTableStatement();
 
         if ($this->displaySql) {
             echo $sql . "\n";

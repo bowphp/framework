@@ -37,7 +37,7 @@ class BowAutoload
         spl_autoload_register([__CLASS__, 'load']);
 
         if ($helper) {
-            require_once __DIR__."/Support/helper.php";
+            require_once __DIR__ . "/Support/helper.php";
         }
     }
 }

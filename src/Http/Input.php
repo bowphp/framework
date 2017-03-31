@@ -21,16 +21,6 @@ class Input implements CollectionAccess
     private $data = [];
 
     /**
-     * @static self
-     */
-    private static $instance = null;
-
-    /**
-     * @static string
-     */
-    private static $last_method = '';
-
-    /**
      * Fonction magic __clone en <<private>>
      */
     private function __clone()
@@ -39,7 +29,7 @@ class Input implements CollectionAccess
 
     public function __construct()
     {
-        $this->data = array_merge($_POST, $_GET, $_FILES);
+        $this->data = array_merge($_POST, $_GET);
     }
 
     /**
@@ -54,9 +44,8 @@ class Input implements CollectionAccess
     {
         if ($strict) {
             return isset($this->data[$key]) && !empty($this->data[$key]);
-        } else {
-            return isset($this->data[$key]);
         }
+        return isset($this->data[$key]);
     }
 
     /**
@@ -114,7 +103,7 @@ class Input implements CollectionAccess
      *
      * @return bool
      */
-    public function isValide($key, $eqTo = null)
+    public function isValid($key, $eqTo = null)
     {
         $boolean = $this->has($key, true);
 
@@ -134,9 +123,7 @@ class Input implements CollectionAccess
      */
     public function remove($key)
     {
-        unset($this->data[$key]);
-
-        return $this;
+        throw new \RuntimeException("Method 'add' not exists");
     }
 
     /**
@@ -150,17 +137,7 @@ class Input implements CollectionAccess
      */
     public function add($key, $data, $next = false)
     {
-        if ($this->has($key)) {
-            if ($next) {
-                array_push($this->data[$key], $data);
-            } else {
-                $this->data[$key] = $data;
-            }
-        } else {
-            $this->data[$key] = $data;
-        }
-
-        return $this;
+        throw new \RuntimeException("Method 'add' not exists");
     }
 
     /**
@@ -175,12 +152,7 @@ class Input implements CollectionAccess
      */
     public function set($key, $value)
     {
-        if ($this->has($key)) {
-            $this->data[$key] = $value;
-            return $this;
-        }
-
-        throw new ErrorException("Clé non définie", E_NOTICE);
+        throw new \RuntimeException("Method 'set' not exists");
     }
 
     /**
@@ -190,9 +162,7 @@ class Input implements CollectionAccess
      */
     public function each(Closure $cb)
     {
-        if ($this->isEmpty()) {
-            call_user_func_array($cb, [null, null]);
-        } else {
+        if (! $this->isEmpty()) {
             foreach ($this->data as $key => $value) {
                 call_user_func_array($cb, [$value, $key]);
             }
@@ -230,12 +200,10 @@ class Input implements CollectionAccess
     {
         if ($method == "GET") {
             return $_GET;
-        } else if ($method == "POST") {
-            return $_POST;
-        } else if ($method == "FILES") {
-            return $_FILES;
         }
-
+        if ($method == "POST") {
+            return $_POST;
+        }
         return [];
     }
 
@@ -266,23 +234,18 @@ class Input implements CollectionAccess
     }
 
     /**
-     * __set
+     * __callStatic
      *
-     * @param string $name Le nom de la variable
-     * @param mixed $value La valeur a assigné
-     * @return null
+     * @param string $name
+     * @param array $argmunents
+     *
+     * @return mixed
      */
-    public function __set($name, $value)
+    public static function __callStatic($name, $argmunents)
     {
-        $old = null;
-
-        if ($this->has($name)) {
-            $old = $this->data[$name];
-            $this->data[$name] = $value;
-        } else {
-            $this->data[$name] = $value;
+        if (! method_exists(static::class, $name)) {
+            throw new \RuntimeException('Method '. $name . ' not exists');
         }
-
-        return $old;
+        return call_user_func_array([static::class, $name], $argmunents);
     }
 }

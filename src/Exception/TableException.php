@@ -3,4 +3,4 @@ namespace Bow\Exception;
 
 use ErrorException;
 
-class TableException extends ErrorException {}
+class QueryBuilderException extends ErrorException {}

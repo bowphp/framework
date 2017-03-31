@@ -2,7 +2,8 @@
 namespace Bow\Database;
 
 use \Carbon\Carbon;
-use Bow\Exception\TableException;
+use Bow\Exception\QueryBuilderException;
+
 /**
  * Class SQLUnit
  *
@@ -42,7 +43,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
      * @param Table $table
      * @param mixed $id
      * @param null|\stdClass $data
-     * @throws TableException
+     * @throws QueryBuilderException
      */
     public function __construct(Table $table, $id, $data = null) {
         if ($data === null) {
@@ -53,7 +54,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
         }
 
         if ($data == null) {
-            throw new TableException('Aucune donnée trouvé.', E_ERROR);
+            throw new QueryBuilderException('Aucune donnée trouvé.', E_ERROR);
         }
 
         $this->data = $data;
@@ -131,14 +132,13 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
      * Récuper une valeur dans l'enrégistrement
      *
      * @param $property
-     * @return mixed|void
+     * @return mixed
      */
     public function __get($property)
     {
         if (isset($this->data->$property)) {
             return $this->data->$property;
         }
-
         return null;
     }
 

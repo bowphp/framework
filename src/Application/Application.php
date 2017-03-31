@@ -2,10 +2,9 @@
 namespace Bow\Application;
 
 use App\Actionner;
-use Bow\Support\Util;
 use Bow\Http\Request;
 use Bow\Http\Response;
-use Bow\Support\Logger;
+use Bow\Logger\Logger;
 use InvalidArgumentException;
 use Bow\Exception\ApplicationException;
 
@@ -149,24 +148,12 @@ class Application
     public function group($branch, Callable $cb)
     {
         $branch = rtrim($branch, '/');
-
         if (!preg_match('@^/@', $branch)) {
             $branch = '/' . $branch;
         }
-
         $this->branch = $branch;
-
-        if (is_array($cb)) {
-            Actionner::call($cb, $this->request, $this->config->getNamespace());
-        } else {
-            if (is_callable($cb)) {
-                call_user_func_array($cb, [$this->request]);
-            }
-            throw new ApplicationException('Callback are not define', E_ERROR);
-        }
-
+        call_user_func_array($cb, [$this->request]);
         $this->branch = '';
-
         return $this;
     }
 

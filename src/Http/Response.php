@@ -104,7 +104,7 @@ class Response
      *
      * @return Response
      */
-    public static function takeInstance()
+    public static function instance()
     {
         return self::$instance;
     }

@@ -1,8 +1,8 @@
 <?php
 namespace Bow\Http;
 
-use Bow\Support\Session\Session;
 use Bow\Support\Str;
+use Bow\Session\Session;
 
 /**
  * Class Request
@@ -170,7 +170,7 @@ class Request
      */
     public function isPut()
     {
-        if ($this->method() == 'PUT' || $this->body()->get('_method', null) == 'PUT') {
+        if ($this->method() == 'PUT' || static::$input->get('_method', null) == 'PUT') {
             return true;
         }
 
@@ -184,31 +184,11 @@ class Request
      */
     public function isDelete()
     {
-        if ($this->method() == 'DELETE' || $this->body()->get('_method', null) == 'DELETE') {
+        if ($this->method() == 'DELETE' || static::$input->get('_method', null) == 'DELETE') {
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * Charge la factory RequestData pour le POST
-     *
-     * @return Input
-     */
-    public static function body()
-    {
-        return static::$input->method('POST');
-    }
-
-    /**
-     * Charge la factory RequestData pour le GET
-     *
-     * @return Input
-     */
-    public static function query()
-    {
-        return static::$input->method('GET');
     }
 
     /**
@@ -219,6 +199,9 @@ class Request
      */
     public static function file($key)
     {
+        if (! isset($_FILES[$key])) {
+            return null;
+        }
         return new UploadFile($_FILES[$key]);
     }
 
@@ -295,6 +278,7 @@ class Request
     {
         return $_SERVER['REMOTE_ADDR'];
     }
+
     /**
      * clientPort, Retourne de port du client
      *
@@ -381,5 +365,22 @@ class Request
     public function hasHeader($key)
     {
         return isset($_SERVER[$key]);
+    }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     *
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        if (! method_exists(static::class, $name)) {
+            throw new \RuntimeException('Method ' . $name . ' not exists');
+        }
+
+        return call_user_func_array([static::class, $name], $arguments);
     }
 }

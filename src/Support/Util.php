@@ -105,4 +105,45 @@ class Util
 
         return static::$sep;
     }
+
+
+    /**
+     * rangeField, fonction permettant de sécuriser les données.
+     *
+     * @param array $data, les données à sécuriser
+     *
+     * @return string $field
+     */
+    protected static function rangeField($data)
+    {
+        /**
+         * Construction d'une chaine de format:
+         * key1 = value1, key2 = value2[, keyN = valueN]
+         * Utile pour binder une réquête INSERT|UPDATE|SELECT|DELETE en mode préparer:
+         */
+        $field = '';
+        $i = 0;
+        foreach ($data as $key => $value) {
+            $field .= ($i > 0 ? ', ' : '') . $key . ' = ' . $value;
+            $i++;
+        }
+
+        return $field;
+    }
+
+    /**
+     * Formateur de donnée. key => :value
+     *
+     * @param array $data
+     *
+     * @return array $resultat
+     */
+    protected static function add2points(array $data)
+    {
+        $resultat = [];
+        foreach ($data as $key => $value) {
+            $resultat[$value] = ':' . $value;
+        }
+        return $resultat;
+    }
 }
