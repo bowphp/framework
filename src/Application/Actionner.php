@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace Bow\Application;
 
 use Bow\Exception\RouterException;
 

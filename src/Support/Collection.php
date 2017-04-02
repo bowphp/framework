@@ -32,7 +32,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function first()
     {
-        return array_slice($this->storage, 1);
+        return current($this->storage);
     }
 
     /**
@@ -42,7 +42,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function last()
     {
-        return array_slice($this->storage, $this->length() - 1);
+        $element = end($this->storage);
+        reset($this->storage);
+        return $element;
     }
 
     /**
@@ -168,27 +170,6 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
         }
         return new Collection($data);
     }
-
-    /**
-     * add, ajoute une entrée dans la colléction
-     *
-     * @param string|int $key
-     * @param $data
-     *
-     * @return Collection
-     */
-    public function add($key, $data = null)
-    {
-        if ($data !== null) {
-            $this->storage[$key] = $data;
-        } else {
-            $data = $key;
-            $this->storage[] = $data;
-        }
-
-        return $this;
-    }
-
 
     /**
      * delete, supprime une entrée dans la colléction
@@ -378,7 +359,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function max($cb = null)
     {
-        return $this->side($cb, 'max');
+        return $this->aggregate($cb, 'max');
     }
 
     /**
@@ -390,18 +371,18 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function min($cb = null)
     {
-        return $this->side($cb, 'min');
+        return $this->aggregate($cb, 'min');
     }
 
     /**
-     * side Execute max|min
+     * aggregate Execute max|min
      *
      * @param callable $cb
      * @param string $type
      *
      * @return number
      */
-    private function side($cb = null, $type)
+    private function aggregate($cb = null, $type)
     {
         $data = [];
 

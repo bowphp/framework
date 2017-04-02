@@ -40,12 +40,12 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
     /**
      * SqlUnity Contructor
      *
-     * @param Table $table
+     * @param QueryBuilder $table
      * @param mixed $id
      * @param null|\stdClass $data
      * @throws QueryBuilderException
      */
-    public function __construct(Table $table, $id, $data = null) {
+    public function __construct(QueryBuilder $table, $id, $data = null) {
         if ($data === null) {
             $data = $table->getOne();
             if ($data instanceof self) {

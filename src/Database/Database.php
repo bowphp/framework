@@ -1,16 +1,16 @@
 <?php
 namespace Bow\Database;
 
-use Database\Connection\Adapter\MysqlAdapter;
-use Database\Connection\Adapter\SqliteAdapter;
-use Database\Connection\Connection;
 use PDO;
 use StdClass;
 use Bow\Security\Security;
+use Bow\Support\Collection;
 use InvalidArgumentException;
 use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
-use Database\Connection\AbstractConnection;
+use Bow\Database\Connection\AbstractConnection;
+use Bow\Database\Connection\Adapter\MysqlAdapter;
+use Bow\Database\Connection\Adapter\SqliteAdapter;
 
 /**
  * Class Database
@@ -24,11 +24,6 @@ class Database
      * @var AbstractConnection;
      */
     private static $adapter;
-
-    /**
-     * @var string;
-     */
-    private static $scheme;
 
     /**
      * @var Database
@@ -50,14 +45,14 @@ class Database
     /**
      * Charger la configuration
      *
-     * @param object $config
+     * @param array $config
      */
     public static function configure($config)
     {
         if (static::$instance === null) {
             static::$instance = new self();
             static::$name = $config['default'];
-            static::$config = static::$config[static::$name];
+            static::$config = $config;
         }
     }
 
@@ -81,14 +76,30 @@ class Database
      */
     public static function connection($name = null)
     {
+        if ($name === null) {
+            $name = static::$name;
+        }
+
+        if (! isset(static::$config[$name])) {
+            throw new ConnectionException('La connection de nom ' . $name . ' n\'est pas définie.');
+        }
+
+        if ($name !== static::$name) {
+            static::$adapter = null;
+        }
+
+        $config = static::$config[$name];
+        static::$name = $name;
+
         if (static::$adapter === null) {
-            if (static::$config['scheme'] == 'mysql') {
-                static::$adapter = new MysqlAdapter(static::$config['mysql']);
-            } elseif (static::$config['scheme'] == 'sqlite') {
-                static::$adapter = new SqliteAdapter(static::$config['sqlite']);
+            if ($config['scheme'] == 'mysql') {
+                static::$adapter = new MysqlAdapter($config['mysql']);
+            } elseif ($config['scheme'] == 'sqlite') {
+                static::$adapter = new SqliteAdapter($config['sqlite']);
             } else {
                 throw new ConnectionException('Ce driver n\'est pas prie en compte.');
             }
+            static::$adapter->setFetchMode(static::$config['fetch']);
         }
 
         if (static::$adapter->getConnection() instanceof PDO && $name == static::$name) {
@@ -99,31 +110,11 @@ class Database
     }
 
     /**
-     * switchTo, permet de ce connecter a une autre base de donnée.
-     *
-     * @param string $name
-     * @return void
-     */
-    public static function switchTo($name)
-    {
-        if (! is_string($name)) {
-            throw new InvalidArgumentException('Paramètre invalide', E_USER_ERROR);
-        }
-
-        if($name != static::$name) {
-            static::$name = $name;
-            static::verifyConnection();
-        }
-
-        static::instance();
-    }
-
-    /**
      * currentZone, retourne la zone courante.
      *
      * @return string|null
      */
-    public static function currentZone()
+    public static function getConnectionName()
     {
         return static::$name;
     }
@@ -160,7 +151,7 @@ class Database
             $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
             static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
             $pdostatement->execute();
-            return Security::sanitaze($pdostatement->fetchAll());
+            return new Collection(Security::sanitaze($pdostatement->fetchAll()));
         }
         return null;
     }
@@ -196,8 +187,13 @@ class Database
     {
         static::verifyConnection();
 
-        if (! preg_match("/^insert\sinto\s[\w\d_-`]+\s?(\(.+\)?\s(values\s?\(.+\),?)+|\s?set\s(.+)+);?$/i", $sqlstatement)) {
+        if (! preg_match("/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i", $sqlstatement)) {
             return null;
+        }
+        if (empty($data)) {
+            $pdoStement = static::$adapter->getConnection()->prepare($sqlstatement);
+            $pdoStement->execute();
+            return $pdoStement->rowCount();
         }
 
         $collector = [];
@@ -219,7 +215,7 @@ class Database
     }
 
     /**
-     * éxécute une requête de type DROP|CREATE QueryBuilder|TRAUNCATE|ALTER QueryBuilder
+     * éxécute une requête de type DROP|CREATE TABLE|TRAUNCATE|ALTER QueryBuilder
      *
      * @param $sqlstatement
      * @return bool
@@ -227,10 +223,10 @@ class Database
     public static function statement($sqlstatement)
     {
         static::verifyConnection();
-        if (! preg_match("/^(drop|alter\sQueryBuilder|truncate|create\sQueryBuilder|call)\s.+;?$/i", $sqlstatement)) {
+        if (! preg_match("/^((drop|alter|create)\s+table|truncate|call)(\s+)?.+;?$/i", $sqlstatement)) {
             return false;
         }
-        return (bool) static::$adapter->getConnection()->exec($sqlstatement);;
+        return (bool) static::$adapter->getConnection()->exec($sqlstatement);
     }
 
     /**
@@ -254,23 +250,38 @@ class Database
     /**
      * Charge le factory QueryBuilder
      *
-     * @param string $QueryBuilderName le nom de la QueryBuilder
+     * @param string $table le nom de la QueryBuilder
      *
      * @return QueryBuilder
      */
-    public static function QueryBuilder($QueryBuilderName)
+    public static function table($table)
     {
         static::verifyConnection();
-        return QueryBuilder::make($QueryBuilderName, static::$adapter->getConnection());
+        return QueryBuilder::make($table, static::$adapter->getConnection());
+    }
+
+    /**
+     * Lancement du debut d'un transaction
+     * @param callable $callback
+     */
+    public static function startTransaction(callable $callback = null)
+    {
+        static::verifyConnection();
+        if (! static::$adapter->getConnection()->inTransaction()) {
+            static::$adapter->getConnection()->beginTransaction();
+        }
+        if (is_callable($callback)) {
+            call_user_func_array($callback, []);
+        }
     }
 
     /**
      * Lancement du debut d'un transaction
      */
-    public static function transaction()
+    public static function inTransaction()
     {
         static::verifyConnection();
-        static::$adapter->getConnection()->beginTransaction();
+        return static::$adapter->getConnection()->inTransaction();
     }
 
     /**
@@ -293,12 +304,10 @@ class Database
 
     /**
      * Lance la verification de l'établissement de connection
-     *
-     * @throws ConnectionException
      */
     private static function verifyConnection()
     {
-        if (! (static::$adapter->getConnection() instanceof PDO)) {
+        if (static::$adapter == null) {
             static::connection(static::$name);
         }
     }

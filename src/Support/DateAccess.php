@@ -90,7 +90,7 @@ class DateAccess
      *
      * @return bool|string
      */
-    public function getSecondes()
+    public function getSeconds()
     {
         return date("s", $this->date);
     }
@@ -192,12 +192,12 @@ class DateAccess
     }
 
     /**
-     * @param string $diffDate
+     * @param string $date
      * @return \DateInterval
      */
-    public function diference($diffDate)
+    public function diference($date)
     {
-        return date_diff(new \DateTime($diffDate), new \DateTime($this->date));
+        return date_diff(new \DateTime($date), new \DateTime($this->date));
     }
 
     /**

@@ -2,9 +2,10 @@
 namespace Bow\Database;
 
 use Bow\Support\Str;
+use Bow\Database\Database as DB;
 use Bow\Support\Collection;
-use Bow\Exception\QueryBuilderException;
 use Bow\Exception\ModelException;
+use Bow\Exception\QueryBuilderException;
 
 /**
  * Class Model
@@ -12,8 +13,18 @@ use Bow\Exception\ModelException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-abstract class Model
+abstract class Model extends QueryBuilder
 {
+    /**
+     * @var array
+     */
+    protected static $attributes = [];
+
+    /**
+     * @var array
+     */
+    protected static $dates = [];
+
     /**
      * @var string
      */
@@ -32,6 +43,34 @@ abstract class Model
     protected static $table = null;
 
     /**
+     * Model constructor.
+     *
+     * @param array $data
+     */
+    public function __construct(array $data = [])
+    {
+        static::$attributes = $data;
+        static::initilaizeQueryBuilder();
+        parent::__construct(static::$table, DB::getPdo());
+    }
+    /**
+     * Rétourne tout les enregistrements
+     *
+     * @param array $columns
+     * @return Collection
+     */
+    public static function all($columns = [])
+    {
+        static::initilaizeQueryBuilder();
+
+        if (count($columns) > 0) {
+            static::$instance->select = '`' . implode('`, `', $columns) . '`';
+        }
+
+        return static::$instance->get();
+    }
+
+    /**
      * find
      *
      * @param mixed $id
@@ -39,9 +78,10 @@ abstract class Model
      * @return Collection|SqlUnity
      * @throws QueryBuilderException
      */
-    public function find($id, $select = ['*'])
+    public static function find($id, $select = ['*'])
     {
-        $table = Database::table(static::$table);
+        static::initilaizeQueryBuilder();
+        $table = static::$instance;
         $one = false;
 
         if (! is_array($id)) {
@@ -52,18 +92,88 @@ abstract class Model
         $table->whereIn(static::$primaryKey, $id);
         $table->select($select);
 
-        return $one ? $table->getOne() : $table->get();
+        return $one ? static::first() : $table->get();
     }
 
     /**
+     * Permet de récupèrer le première enregistrement
+     *
+     * @return mixed
+     */
+    public static function first()
+    {
+        static::initilaizeQueryBuilder();
+        return static::take(1)->getOne();
+    }
+
+    /**
+     * Action first, récupère le première enregistrement
+     *
+     * @return mixed
+     */
+    public function last()
+    {
+        $where = $this->where;
+        $whereData = $this->whereDataBind;
+
+        // On compte le tout.
+        $c = $this->count();
+
+        $this->where = $where;
+        $this->whereDataBind = $whereData;
+
+        return $this->jump($c - 1)->take(1)->getOne();
+    }
+
+    /**
+     * Récuper des informations sur la QueryBuilder ensuite les supprimes dans celle-ci
+     *
+     * @param Callable $cb La fonction de rappel qui si definir vous offre en parametre
+     *                     Les données récupés et le nombre d'élément supprimé.
+     *
+     * @return Collection|array
+     */
+    public static function findAndDelete($id, $cb = null)
+    {
+        static::initilaizeQueryBuilder();
+        $data = static::find($id);
+        static::$instance->delete();
+        if (is_callable($cb)) {
+            return call_user_func_array($cb, [$data]);
+        }
+        return $data;
+    }
+
+    /**
+     * Lance une execption en case de donnée non trouvé
+     *
+     * @param int|string $id
+     * @return SqlUnity
+     *
+     * @throws QueryBuilderException
+     */
+    public static function findOrFail($id)
+    {
+        $data = static::find($id);
+        if (count($data) == 0) {
+            throw new QueryBuilderException('Aucune donnée trouver.', E_WARNING);
+        }
+        return $data;
+    }
+
+    /**
+     * Lists des fonctions static
+     *
      * @return array
      */
     private static function avalableMethods()
     {
-        return ['get', 'getOne', 'find'];
+        return ['get', 'first', 'find', 'all'];
     }
 
     /**
+     *
+     *
      * @return array
      */
     private static function avalableFields()
@@ -72,19 +182,19 @@ abstract class Model
     }
 
     /**
-     * @param mixed $data
+     * @param mixed $collection
      * @param string $method
      * @param mixed $child
      * @return array
      */
-    private static function carbornize($data, $method, $child)
+    private static function carbornize($collection, $method, $child)
     {
         if (! in_array($method, static::avalableMethods())) {
-            return $data;
+            return $collection;
         }
 
-        if (!is_array($data)) {
-            $data = [$data];
+        if (is_array($collection)) {
+            $collection = [$collection];
         }
 
         $custumFieldsLists = static::avalableFields();
@@ -93,7 +203,7 @@ abstract class Model
             $custumFieldsLists = array_merge($custumFieldsLists, $child->customDate());
         }
 
-        foreach($data as $value) {
+        foreach($collection as $value) {
             if (! is_object($value)) {
                 continue;
             }
@@ -104,13 +214,13 @@ abstract class Model
             }
         }
 
-        if (count($data) == 1) {
+        if (count($collection) == 1) {
             if ($method == 'getOne' || preg_match('/^find/', $method)) {
-                $data = end($data);
+                $collection = end($collection);
             }
         }
 
-        return $data;
+        return $collection;
     }
 
     /**
@@ -119,13 +229,13 @@ abstract class Model
      * @param string $method Le nom de la method a appelé
      * @param array $args    Les arguments a passé à la fonction
      * @throws ModelException
-     * @return \Bow\Database\Table|array
+     * @return \Bow\Database\QueryBuilder|array
      */
     public static function __callStatic($method, $args)
     {
         $scope = 'scope' . ucfirst($method);
-        $table = Database::table(Str::lower(static::$table));
-
+        static::initilaizeQueryBuilder();
+        $query_build = static::$instance;
         /**
          * Lancement de l'execution des fonctions aliase définir dans les classe
          * héritant de la classe Model.
@@ -133,7 +243,7 @@ abstract class Model
          * Les classes  definir définir avec la montion scope.
          */
         if (method_exists($child = new static, $scope)) {
-            if (method_exists($table, $method)) {
+            if (method_exists($query_build, $method)) {
                 throw new ModelException($method . ' ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
             }
             return call_user_func_array([$child, $scope], $args);
@@ -142,11 +252,50 @@ abstract class Model
         /**
          * Lancement de l'execution des fonctions liée a l'instance de la classe Table
          */
-        if (method_exists($table, $method)) {
-            $table = call_user_func_array([$table, $method], $args);
-            return static::carbornize($table, $method, $child);
+        if (method_exists($query_build, $method)) {
+            $collection = call_user_func_array([$query_build, $method], $args);
+            return static::carbornize($collection, $method, $child);
         }
 
         throw new ModelException('methode ' . $method . ' n\'est définie.', E_ERROR);
+    }
+
+    /**
+     * Permet d'initialiser la connection
+     */
+    private static function initilaizeQueryBuilder()
+    {
+        if (static::$table == null) {
+            static::$table = strtolower(static::class);
+        }
+        if (static::$instance == null) {
+            static::make(static::$table, DB::getPdo());
+        }
+    }
+
+    /**
+     * __get
+     *
+     * @param string $name
+     * @return mixed|null
+     */
+    public function __get($name)
+    {
+        if (! isset(static::$attributes[$name])) {
+            return null;
+        }
+
+        return static::$attributes[$name];
+    }
+
+    /**
+     * __set
+     *
+     * @param string $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        static::$attributes[$name] = $value;
     }
 }

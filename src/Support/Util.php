@@ -114,7 +114,7 @@ class Util
      *
      * @return string $field
      */
-    protected static function rangeField($data)
+    public static function rangeField($data)
     {
         /**
          * Construction d'une chaine de format:
@@ -135,14 +135,25 @@ class Util
      * Formateur de donnée. key => :value
      *
      * @param array $data
+     * @param bool $byKey
      *
      * @return array $resultat
      */
-    protected static function add2points(array $data)
+    public static function add2points(array $data, $byKey = false)
     {
         $resultat = [];
-        foreach ($data as $key => $value) {
-            $resultat[$value] = ':' . $value;
+        if ($byKey == true) {
+            foreach ($data as $key => $value) {
+                if (is_string($value)) {
+                    $resultat[$key] = ':' . $value;
+                } else {
+                    $resultat[$key] = '?';
+                }
+            }
+        } else {
+            foreach ($data as $key => $value) {
+                $resultat[$value] = ':' . $value;
+            }
         }
         return $resultat;
     }

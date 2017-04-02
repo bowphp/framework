@@ -15,6 +15,11 @@ class Cache
     private static $directory;
 
     /**
+     * @var bool
+     */
+    private static $with_meta = false;
+
+    /**
      * Methode de configuration du cache
      *
      * @param string $base_directory
@@ -32,33 +37,68 @@ class Cache
      *
      * @param string $key The cache key
      * @param mixed $data
+     * @param int $time
+     * @return bool
      */
-    public static function add($key, $data)
+    public static function add($key, $data, $time = null)
     {
         if (is_callable($data)) {
             $content = $data();
         } else {
             $content = $data;
         }
-        if (is_array($content)) {
-            $content['__bow_meta'] = ['is_array' => true, 'expire_at' => '+'];
-        } else {
-            $content = [$content];
-            $content['__bow_meta'] = ['is_array' => false, 'expire_at' => '+'];
-        }
 
-        $content = serialize($content);
-        file_put_contents(static::$directory.'/bow_'.$key, $content);
+        $meta['__bow_meta'] = ['expire_to' => $time == null ? '+' : $time];
+        $meta['content'] = $content;
+        return (bool) file_put_contents(static::$directory.md5('/bow_'.$key), serialize($meta));
     }
 
     /**
-     * Suppression d'entrer dans le cache.
+     * Permet d'ajouter un cache qui persistera
      *
-     * @param string $key
+     * @param string $key The cache key
+     * @param mixed $data
+     * @return bool
      */
-    public static function remove($key)
+    public static function forever($key, $data)
     {
-        @unlink(static::$directory.'/bow_'.$key);
+        if (is_callable($data)) {
+            $content = $data();
+        } else {
+            $content = $data;
+        }
+
+        $meta['__bow_meta'] = ['expire_to' => '+'];
+        $meta['content'] = $content;
+        return (bool) file_put_contents(static::$directory.md5('/bow_'.$key), serialize($meta));
+    }
+
+    /**
+     * Add new enter in the cache system
+     *
+     * @param string $key The cache key
+     * @param mixed $data
+     * @return bool
+     */
+    public static function push($key, $data)
+    {
+        if (is_callable($data)) {
+            $content = $data();
+        } else {
+            $content = $data;
+        }
+
+        static::$with_meta = true;
+        $cache = static::get($key);
+        static::$with_meta = false;
+
+        if (is_array($cache['content'])) {
+            array_push($cache['content'], $content);
+        } else {
+            $cache['content'] .= $content;
+        }
+
+        return (bool) file_put_contents(static::$directory.md5('/bow_'.$key), serialize($cache));
     }
 
     /**
@@ -70,18 +110,53 @@ class Cache
     public static function get($key)
     {
         if (! static::has($key)) {
+            static::$with_meta = false;
             return null;
         }
 
-        $content = unserialize(file_get_contents(static::$directory.'/bow_'.$key));
-        $meta = $content['__bow_meta'];
-        unset($content['__bow_meta']);
+        $cache = unserialize(file_get_contents(static::$directory.md5('/bow_'.$key)));
 
-        if (! $meta['is_array']) {
-            $content = $content[0];
+        if (! static::$with_meta) {
+            unset($cache['__bow_meta']);
+            $cache = $cache['content'];
         }
 
-        return $content;
+        return $cache;
+    }
+
+    /**
+     * Permet d'augmenter le temps d'expiration du cache
+     *
+     * @param string $key
+     * @param int $time
+     * @return bool
+     */
+    public static function addTime($key, $time)
+    {
+        static::$with_meta = true;
+        $cache = static::get($key);
+        if ($cache == null) {
+            return false;
+        }
+        static::$with_meta = false;
+
+        if ($cache['__bow_meta']['expire_at'] == '+') {
+            $cache['__bow_meta']['expire_at'] = time();
+        }
+
+        $cache['__bow_meta']['expire_at'] += $time;
+        return true;
+    }
+
+    /**
+     * Permet de supprimer une entrer dans le cache
+     *
+     * @param string $key
+     * @return bool
+     */
+    public static function forget($key)
+    {
+        return (bool) @unlink(static::$directory.md5('/bow_'.$key));
     }
 
     /**
@@ -92,17 +167,25 @@ class Cache
      */
     public static function has($key)
     {
-        return (bool) @file_exists(static::$directory.'/bow_'.$key);
+        $filename = static::$directory.md5('/bow_'.$key);
+        return (bool) @file_exists($filename);
     }
 
     /**
-     * Vérifier l'existance d'un entrée dans la cache.
+     * Permet de vérifier si le cache a expiré
      *
      * @param string $key
      * @return bool
      */
     public static function expired($key)
     {
-        return (bool) @file_exists(static::$directory.'/bow_'.$key);
+        static::$with_meta = true;
+        $cache = static::get($key);
+        if ($cache == null) {
+            return false;
+        }
+        static::$with_meta = false;
+
+        return $cache['__bow_meta']['expire_at'] == '+' ? false : (time() > $cache['__bow_meta']['expire_at']);
     }
 }
