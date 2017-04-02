@@ -3,4 +3,11 @@
     <testsuite>
         <directory suffix=".php">tests/</directory>
     </testsuite>
+    <php>
+        <var name="DB_USER" value="test" />
+        <var name="DB_PASSWORD" value="test" />
+        <var name="DB_DATABASENAME" value="test" />
+        <var name="DB_CHARSET" value="utf8" />
+        <var name="DB_COLLATE" value="utf8_unicode_ci" />
+    </php>
 </phpunit>
