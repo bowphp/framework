@@ -1,9 +1,8 @@
 <?php
 namespace Bow\Database;
 
-use Bow\Support\Str;
-use Bow\Database\Database as DB;
 use Bow\Support\Collection;
+use Bow\Database\Database as DB;
 use Bow\Exception\ModelException;
 use Bow\Exception\QueryBuilderException;
 
@@ -31,11 +30,6 @@ abstract class Model extends QueryBuilder
     protected static $primaryKey = 'id';
 
     /**
-     * @var array
-     */
-    protected $data = [];
-
-    /**
      * Le nom de la table courrente
      *
      * @var string
@@ -51,7 +45,7 @@ abstract class Model extends QueryBuilder
     {
         static::$attributes = $data;
         static::initilaizeQueryBuilder();
-        parent::__construct(static::$table, DB::getPdo());
+        parent::__construct(static::$table, DB::getPdo(), static::class);
     }
     /**
      * Rétourne tout les enregistrements
@@ -67,7 +61,7 @@ abstract class Model extends QueryBuilder
             static::$instance->select = '`' . implode('`, `', $columns) . '`';
         }
 
-        return static::$instance->get();
+        return static::get();
     }
 
     /**
@@ -178,7 +172,10 @@ abstract class Model extends QueryBuilder
      */
     private static function avalableFields()
     {
-        return ['created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at'];
+        return array_merge(
+            static::$dates,
+            ['created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at']
+        );
     }
 
     /**
@@ -269,7 +266,7 @@ abstract class Model extends QueryBuilder
             static::$table = strtolower(static::class);
         }
         if (static::$instance == null) {
-            static::make(static::$table, DB::getPdo());
+            static::make(static::$table, DB::getPdo(), static::class);
         }
     }
 

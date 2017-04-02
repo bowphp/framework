@@ -18,6 +18,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var string
      */
+    private static $classname;
+
+    /**
+     * @var string
+     */
     private static $definePrimaryKey = 'id';
 
     /**
@@ -84,12 +89,18 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * Contructeur
      *
      * @param string $table
+     * @param string $classname
      * @param $connection
      */
-    protected function __construct($table, $connection)
+    protected function __construct($table, $connection, $classname = null)
     {
         self::$connection = $connection;
         static::$table = $table;
+        if ($classname == null) {
+            self::$classname = static::class;
+        } else {
+            self::$classname = $classname;
+        }
     }
 
     // fonction magic __clone
@@ -100,18 +111,18 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param string $table
      * @param \PDO $connection
+     * @param string $classname
      *
      * @return QueryBuilder
      */
-    public static function make($table, \PDO $connection)
+    public static function make($table, \PDO $connection, $classname = null)
     {
         if (static::$instance === null || static::$table != $table) {
             if (property_exists(static::class, 'primaryKey')) {
                 static::$definePrimaryKey = static::$primaryKey;
             }
-            static::$instance = new static($table, $connection);
+            static::$instance = new static($table, $connection, $classname);
         }
-
         return static::$instance;
     }
 
@@ -683,10 +694,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $data = Security::sanitaze($stmt->fetchAll());
         $stmt->closeCursor();
 
+        if (self::$classname) {
+            $classname = self::$classname;
+        } else {
+            $classname = static::class;
+        }
+
         if (static::$getOne) {
             $current = current($data);
             static::$getOne = false;
-            if (static::class === QueryBuilder::class) {
+            if (self::$classname === QueryBuilder::class) {
                 $id = static::$definePrimaryKey;
                 if (isset($current->{static::$definePrimaryKey})) {
                     $id = $current->{static::$definePrimaryKey};
@@ -694,7 +711,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
                 }
                 return new SqlUnity(static::$instance, $id, $current);
             }
-            $classname = static::class;
             return new $classname((array) $current);
         }
 
@@ -703,7 +719,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         foreach ($data as $key => $value) {
-            if (static::class === QueryBuilder::class) {
+            if (self::$classname === QueryBuilder::class) {
                 $id = static::$definePrimaryKey;
                 if (isset($value->{static::$definePrimaryKey})) {
                     $id = $value->{static::$definePrimaryKey};
@@ -711,7 +727,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
                 }
                 $data[$key] = new SqlUnity(static::$instance, $id, $value);
             } else {
-                $classname = static::class;
                 $data[$key] = new $classname((array) $value);
             }
         }
@@ -735,12 +750,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param callable $cb
      * @return QueryBuilder
      */
-    public function transition(Callable $cb)
+    public function transition(callable $cb)
     {
         $where = static::$instance->where;
         $data = static::$instance->get();
-        $bool = call_user_func_array($cb, [$data]);
-        if ($bool === true) {
+        if (call_user_func_array($cb, [$data]) === true) {
             static::$instance->where = $where;
         }
 
