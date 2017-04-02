@@ -1,5 +1,5 @@
 *~
 .idea/
 vendor/
-tests/data
+tests/data/*
 composer.lock
