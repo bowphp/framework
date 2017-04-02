@@ -1,7 +1,5 @@
-tests/storage
-tests/data
 *~
-vendor/
 .idea/
+vendor/
+tests/data
 composer.lock
-src/View
