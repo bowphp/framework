@@ -15,10 +15,6 @@ class Cookie
      * @var array
      */
     private static $isDecrypt = [];
-    /**
-     * @access private
-     */
-    private final function __construct() {}
 
     /**
      * @access private
