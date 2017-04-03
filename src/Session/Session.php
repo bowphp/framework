@@ -20,7 +20,7 @@ class Session implements CollectionAccessStatic
      */
     private static function start()
     {
-        if (PHP_SESSION_ACTIVE != session_status()) {
+        if (PHP_SESSION_DISABLED === session_status()) {
             session_name("SESSID");
             if (!isset($_COOKIE["SESSID"])) {
                 session_id(hash("sha256", Security::encrypt(Str::repeat(Security::generateCsrfToken(), 2))));
@@ -152,7 +152,7 @@ class Session implements CollectionAccessStatic
      *
      * @param string $key La clé de l'élément a supprimé
      *
-     * @return void
+     * @return mixed
      */
     public static function remove($key)
     {
@@ -246,7 +246,12 @@ class Session implements CollectionAccessStatic
         }
     }
 
-    public static function __toString()
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString()
     {
         static::start();
         return json_encode(static::filter());
