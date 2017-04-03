@@ -118,22 +118,20 @@ class Cookie
      *
      * @param string $key
      *
-     * @return array|null
+     * @return mixed
      */
     public static function remove($key)
     {
         $old = null;
-
-        if (static::has($key)) {
-            if (! static::$isDecrypt[$key]) {
-                $old = Security::decrypt($_COOKIE[$key]);
-                unset(static::$isDecrypt[$key]);
-            }
-
-            static::add($key, null, -1000);
-            unset($_COOKIE[$key]);
+        if (! static::has($key)) {
+            return $old;
         }
-
+        if (! static::$isDecrypt[$key]) {
+            $old = Security::decrypt($_COOKIE[$key]);
+            unset(static::$isDecrypt[$key]);
+        }
+        static::add($key, null, -1000);
+        unset($_COOKIE[$key]);
         return $old;
     }
 }
