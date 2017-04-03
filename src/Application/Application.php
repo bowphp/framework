@@ -464,10 +464,10 @@ class Application
             }
         }
 
-        // vérification de l'existance de methode de la requete dans
+        // Vérification de l'existance de methode de la requete dans
         // la collection de route
         if (! isset(static::$routes[$method])) {
-            // vérification et appel de la fonction du branchement 404
+            // Vérification et appel de la fonction du branchement 404
             if (empty($this->errorCode)) {
                 $this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
             }
