@@ -13,19 +13,19 @@ class Actionner
     /**
      * Lanceur de callback
      *
-     * @param callable $cb
+     * @param callable|string|array $actions
      * @param mixed $param
      * @param array $names
      * @throws RouterException
      * @return mixed
      */
-    public static function call($cb, $param = null, array $names = [])
+    public static function call($actions, $param = null, array $names = [])
     {
         $param = is_array($param) ? $param : [$param];
         $function_list = [];
 
         if (! isset($names['namespace'])) {
-            return static::exec($cb, $param);
+            return static::exec($actions, $param);
         }
 
         static::$names = $names;
@@ -34,103 +34,126 @@ class Actionner
             throw new RouterException('L\'autoload n\'est pas défini dans le fichier de configuration', E_ERROR);
         }
 
-
         if (! isset($names['namespace'])) {
             throw new RouterException('Le namespace d\'autoload n\'est pas défini dans le fichier de configuration');
         }
 
-        $middleware = null;
+        $middlewares = [];
 
-        if (is_callable($cb)) {
-            return call_user_func_array($cb, $param);
+        if (is_callable($actions)) {
+            return call_user_func_array($actions, $param);
         }
 
-        if (is_string($cb)) {
-            return call_user_func_array(static::controller($cb), $param);
+        if (is_string($actions)) {
+            return call_user_func_array(static::controller($actions), $param);
         }
 
-        if (is_array($cb)) {
-            if (array_key_exists('middleware', $cb)) {
-                $middleware = $cb['middleware'];
-                unset($cb['middleware']);
+        if (! is_array($actions)) {
+            throw new \InvalidArgumentException('Le premier parametre doit etre un tableau, une chaine, une closure', E_USER_ERROR);
+        }
+
+        if (array_key_exists('middleware', $actions)) {
+            $middlewares = $actions['middleware'];
+            unset($actions['middleware']);
+        }
+
+        foreach ($actions as $key => $action) {
+            if (is_int($key)) {
+                if (is_string($action)) {
+                    $controller = $action['with'].'@'.$action['call'];
+                    array_push($function_list, static::controller($controller));
+                    continue;
+                }
+                if (is_callable($actions)) {
+                    array_push($function_list, static::controller($actions));
+                    $action[$key] = null;
+                }
+                continue;
             }
 
-            if (array_key_exists('uses', $cb)) {
-                if (is_array($cb['uses'])) {
-                    if (isset($cb['uses']['with']) && isset($cb['uses']['call'])) {
-                        if (is_string($cb['uses']['call'])) {
-                            $controller = $cb['uses']['with'] . '@' . $cb['uses']['call'];
-                            array_push($function_list, static::controller($controller));
-                        } else {
-                            foreach($cb['uses']['call'] as $method) {
-                                $controller = $cb['uses']['with'] . '@' . $method;
-                                array_push($function_list,  static::controller($controller));
-                            }
-                        }
-                    } else {
-                        foreach($cb['uses'] as $controller) {
-                            if (is_string($controller)) {
-                                array_push($function_list,  static::controller($controller));
-                            } else if (is_callable($controller)) {
-                                array_push($function_list, $controller);
-                            }
-                        }
-                    }
+            if (isset($action['with']) && isset($action['call'])) {
+                if (is_string($action['call'])) {
+                    $controller = $action['with'].'@'.$action['call'];
+                    array_push($function_list, static::controller($controller));
                 } else {
-                    if (is_string($cb['uses'])) {
-                        array_push($function_list, static::controller($cb['uses']));
-                    } else {
-                        array_push($function_list, $cb['uses']);
+                    foreach($action['call'] as $method) {
+                        $controller = $action['with'].'@'.$method;
+                        array_push($function_list,  static::controller($controller));
                     }
                 }
-
-                unset($cb['uses']);
+                continue;
             }
 
-            if (count($cb) > 0) {
-                foreach($cb as $func) {
-                    if (is_callable($func)) {
-                        array_push($function_list, $func);
-                    } else if (is_string($func)) {
-                        array_push($function_list, static::controller($func));
+            if (is_string($action)) {
+                array_push($function_list, static::controller($cb['uses']));
+                continue;
+            }
+
+            if (is_array($action)) {
+                foreach($action as $controller) {
+                    if (is_string($controller)) {
+                        array_push($function_list,  static::controller($controller));
+                    } else if (is_callable($controller)) {
+                        array_push($function_list, $controller);
                     }
                 }
+                continue;
             }
         }
 
         // Status permettant de bloquer la suite du programme.
         $status = true;
 
-        // Execution du middleware si define.
-        if (is_string($middleware)) {
-            if (! array_key_exists(ucfirst($middleware), $names['middlewares'])) {
-                throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
-            }
-            // Chargement du middleware
-            $classMiddleware = $names['namespace']['middleware'] . '\\' . ucfirst($names['middlewares'][$middleware]);
-            // On vérifie si le middleware définie est une middleware valide.
-            if (! class_exists($classMiddleware)) {
-                throw new RouterException($middleware . ' n\'est pas un class middleware.');
-            }
-
-            $instance = new $classMiddleware();
-            $handler = [$instance, 'handle'];
-            $status = call_user_func_array($handler, $param);
-
-            // Le middleware est un callback. les middleware peuvent être// définir comme des callback par l'utilisteur
-        } else if (is_callable($middleware)) {
-            $status = call_user_func_array($middleware, $param);
+        if (! is_array($middlewares)) {
+            $middlewares = [$middlewares];
         }
 
-        // On arrêt tout en case de status false.
-        if ($status == false) {
-            return false;
+        $middlewares_collection = [];
+
+        foreach ($middlewares as $middleware) {
+            if (is_callable($middleware)) {
+                $middlewares_collection[] = $middleware;
+                continue;
+            }
+            // Execution du middleware si define.
+            if (is_string($middleware)) {
+                if (! array_key_exists(ucfirst($middleware), $names['middlewares'])) {
+                    throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
+                }
+                // Chargement du middleware
+                $class_middleware = $names['namespace']['middleware'] . '\\' . ucfirst($names['middlewares'][$middleware]);
+                // On vérifie si le middleware définie est une middleware valide.
+                if (! class_exists($class_middleware)) {
+                    throw new RouterException($middleware . ' n\'est pas un class middleware.');
+                }
+
+                if (! array_key_exists($class_middleware, $middlewares_collection)) {
+                    $instance = new $class_middleware();
+                    $middlewares_collection[$class_middleware] = [$instance, 'handle'];
+                }
+            }
+        }
+
+        foreach ($middlewares_collection as $middleware) {
+            $status = call_user_func_array($middleware, array_merge([function () {
+                return true;
+            }], $param));
+            if ($status === true) {
+                continue;
+            }
+            if (is_callable($status)) {
+                $status = $status();
+            }
+            if (is_object($status) || is_array($status)) {
+                $status = json_encode($status);
+            }
+            die($status);
         }
 
         // Lancement de l'execution de la liste
         // fonction a execute suivant un ordre
         // conforme au middleware.
-        if (!empty($function_list)) {
+        if (! empty($function_list)) {
             $status = true;
 
             foreach($function_list as $func) {
@@ -140,7 +163,6 @@ class Actionner
                 }
             }
         }
-
         return $status;
     }
 
