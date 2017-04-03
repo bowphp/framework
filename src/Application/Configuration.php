@@ -482,6 +482,16 @@ class Configuration
     }
 
     /**
+     * retourne la configuration des resources locale
+     *
+     * @return array
+     */
+    public function getResourceConfiguration()
+    {
+        return $this->config["resource"];
+    }
+
+    /**
      * retourne la configuration des resources ftp
      *
      * @return array

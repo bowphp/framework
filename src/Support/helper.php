@@ -99,6 +99,12 @@ if (! function_exists('config')) {
             case $param === 'ftp':
                 return $config->getFtpConfiguration();
                 break;
+            case $param === 'resource':
+                return $config->getResourceConfiguration();
+                break;
+            case $param === 'storage':
+                return $config->getDefaultStoragePath();
+                break;
         }
         return $config;
     }
