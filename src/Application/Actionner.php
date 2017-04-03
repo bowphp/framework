@@ -58,44 +58,30 @@ class Actionner
         }
 
         foreach ($actions as $key => $action) {
+            if ($key != 'uses' || !is_int($key)) {
+                continue;
+            }
+
             if (is_int($key)) {
-                if (is_string($action)) {
-                    $controller = $action['with'].'@'.$action['call'];
-                    array_push($function_list, static::controller($controller));
+                if (is_callable($action)) {
+                    array_push($function_list, $action);
                     continue;
                 }
-                if (is_callable($actions)) {
-                    array_push($function_list, static::controller($actions));
-                    $action[$key] = null;
+                if (is_string($action)) {
+                    array_push($function_list, static::controller($action));
+                    continue;
                 }
-                continue;
             }
 
             if (isset($action['with']) && isset($action['call'])) {
                 if (is_string($action['call'])) {
                     $controller = $action['with'].'@'.$action['call'];
                     array_push($function_list, static::controller($controller));
-                } else {
-                    foreach($action['call'] as $method) {
-                        $controller = $action['with'].'@'.$method;
-                        array_push($function_list,  static::controller($controller));
-                    }
+                    continue;
                 }
-                continue;
-            }
-
-            if (is_string($action)) {
-                array_push($function_list, static::controller($cb['uses']));
-                continue;
-            }
-
-            if (is_array($action)) {
-                foreach($action as $controller) {
-                    if (is_string($controller)) {
-                        array_push($function_list,  static::controller($controller));
-                    } else if (is_callable($controller)) {
-                        array_push($function_list, $controller);
-                    }
+                foreach($action['call'] as $method) {
+                    $controller = $action['with'].'@'.$method;
+                    array_push($function_list,  static::controller($controller));
                 }
                 continue;
             }
@@ -117,7 +103,7 @@ class Actionner
             }
             // Execution du middleware si define.
             if (is_string($middleware)) {
-                if (! array_key_exists(ucfirst($middleware), $names['middlewares'])) {
+                if (! array_key_exists($middleware, $names['middlewares'])) {
                     throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
                 }
                 // Chargement du middleware
@@ -154,13 +140,8 @@ class Actionner
         // fonction a execute suivant un ordre
         // conforme au middleware.
         if (! empty($function_list)) {
-            $status = true;
-
             foreach($function_list as $func) {
                 $status = call_user_func_array($func, $param);
-                if ($status == false) {
-                    return $status;
-                }
             }
         }
         return $status;
