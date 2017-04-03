@@ -79,7 +79,7 @@ class Response
      *
      * @param Configuration $config
      */
-    private function __construct(Configuration $config)
+    public function __construct(Configuration $config)
     {
         $this->config = $config;
     }
@@ -207,7 +207,7 @@ class Response
      *
      * @param int  $code 	 Le code de la réponse HTTP
      * @param bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a 'true'
-     * @return bool|void
+     * @return mixed
      */
     public function code($code, $override = false)
     {

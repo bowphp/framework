@@ -18,7 +18,7 @@ class Mail
     private static $instance;
 
     /**
-     * @var \stdClass
+     * @var array
      */
     private static $config;
 
@@ -30,9 +30,9 @@ class Mail
     /**
      * @param array $config
      */
-    public function __construct($config)
+    public function __construct(array $config = [])
     {
-        static::$config = $config;
+        static::configure($config);
     }
 
     /**

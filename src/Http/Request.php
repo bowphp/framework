@@ -35,7 +35,7 @@ class Request
     /**
      * Constructeur
      */
-    private function __construct()
+    public function __construct()
     {
         static::$params = new \stdClass();
         static::$input = new Input();
