@@ -24,18 +24,18 @@ class Actionner
         $param = is_array($param) ? $param : [$param];
         $function_list = [];
 
-        if (!isset($names['namespace'])) {
+        if (! isset($names['namespace'])) {
             return static::exec($cb, $param);
         }
 
         static::$names = $names;
 
-        if (!file_exists($names['autoload'] . '.php')) {
+        if (! file_exists($names['autoload'] . '.php')) {
             throw new RouterException('L\'autoload n\'est pas défini dans le fichier de configuration', E_ERROR);
         }
 
 
-        if (!isset($names['namespace']['app'])) {
+        if (! isset($names['namespace'])) {
             throw new RouterException('Le namespace d\'autoload n\'est pas défini dans le fichier de configuration');
         }
 
