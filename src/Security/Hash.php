@@ -1,5 +1,5 @@
 <?php
-namespace Security;
+namespace Bow\Security;
 
 class Hash
 {
