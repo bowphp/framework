@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Application;
 
+use Bow\Support\DateAccess;
 use Bow\Support\Util;
 use Bow\Exception\ApplicationException;
 
@@ -64,7 +65,7 @@ class Configuration
             }
 
             if (isset($config["application"]->timezone)) {
-                Util::setTimezone($config["application"]->timezone);
+                DateAccess::setTimezone($config["application"]->timezone);
             }
         }
     }
