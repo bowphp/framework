@@ -1,9 +1,8 @@
 <?php
 namespace Bow\Event;
 
-use App\Actionner;
 use Bow\Session\Session;
-use Bow\Support\Collection;
+use Bow\Application\Actionner;
 use Bow\Exception\EventException;
 
 /**
@@ -19,7 +18,7 @@ class Event
     /**
      * @var array
      */
-    private static $events;
+    private static $events = [];
 
     /**
      * @var array
@@ -100,7 +99,7 @@ class Event
      */
     private function hasEvent($event)
     {
-        return array_key_exists(static::$events, $event);
+        return array_key_exists($event, static::$events);
     }
 
     /**
