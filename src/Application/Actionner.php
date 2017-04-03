@@ -94,35 +94,30 @@ class Actionner
             $middlewares = [$middlewares];
         }
 
+        // Collecteur de middleware
         $middlewares_collection = [];
 
         foreach ($middlewares as $middleware) {
-            if (is_callable($middleware)) {
-                $middlewares_collection[] = $middleware;
+            if (! is_string($middleware)) {
                 continue;
             }
-            // Execution du middleware si define.
-            if (is_string($middleware)) {
-                if (! array_key_exists($middleware, $names['middlewares'])) {
-                    throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
-                }
-                // Chargement du middleware
-                $class_middleware = $names['namespace']['middleware'] . '\\' . ucfirst($names['middlewares'][$middleware]);
-                // On vérifie si le middleware définie est une middleware valide.
-                if (! class_exists($class_middleware)) {
-                    throw new RouterException($middleware . ' n\'est pas un class middleware.');
-                }
-
-                if (! array_key_exists($class_middleware, $middlewares_collection)) {
-                    $instance = new $class_middleware();
-                    $middlewares_collection[$class_middleware] = [$instance, 'handle'];
-                }
+            if (! array_key_exists($middleware, $names['middlewares'])) {
+                throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
             }
+            // Chargement du middleware
+            $class_middleware = $names['namespace']['middleware'] . '\\' . ucfirst($names['middlewares'][$middleware]);
+            // On vérifie si le middleware définie est une middleware valide.
+            if (! class_exists($class_middleware)) {
+                throw new RouterException($middleware . ' n\'est pas un class middleware.');
+            }
+            $middlewares_collection[] = $class_middleware;
         }
 
         $next = false;
+        // Exécution du middleware
         foreach ($middlewares_collection as $middleware) {
-            $status = call_user_func_array($middleware, array_merge([$param['request'], function () use ($next) {
+            $instances = static::injector($middleware, 'handle');
+            $status = call_user_func_array([new $middleware(), 'handle'], array_merge($instances, [function () use (& $next) {
                 return $next = true;
             }], $param));
             if ($status === true && $next) {
@@ -130,21 +125,62 @@ class Actionner
                 continue;
             }
             if (is_object($status) || is_array($status)) {
-                $status = json_encode($status);
+                die(json_encode($status));
             }
-            die($status);
+            die();
         }
 
         // Lancement de l'execution de la liste
         // fonction a execute suivant un ordre
         // conforme au middleware.
         if (! empty($function_list)) {
-            unset($param['request']);
             foreach($function_list as $func) {
                 $status = call_user_func_array($func, $param);
             }
         }
         return $status;
+    }
+
+    /**
+     * Permet de lance un middleware
+     *
+     * @param string $middleware
+     * @param array $param
+     * @return bool
+     */
+    public static function middleware($middleware, $param)
+    {
+        $instance = new $middleware();
+        $next = false;
+        $status = call_user_func_array([$instance, 'handle'], array_merge([function () use ($next) {
+            return $next = true;
+        }], $param));
+        return $next && $status;
+    }
+
+    /**
+     * Permet de faire un injection
+     *
+     * @param string $classname
+     * @param string $method
+     * @return array
+     */
+    public static function injector($classname, $method)
+    {
+        $params = [];
+        $reflection = new \ReflectionClass($classname);
+        $parts = preg_split('/(\n|\*)+/', $reflection->getMethod($method)->getDocComment());
+        foreach ($parts as $value) {
+            if (preg_match('/^@param\s+(.+)/', trim($value), $match)) {
+                $param = preg_split('/\s+/', $match[1]);
+                if (class_exists($param[0], true)) {
+                    if (! in_array(strtolower($param[0]), ['\closure', 'closure', 'string', 'array', 'bool', 'int', 'integer', 'object', 'stdclass'])) {
+                        $params[] = new $param[0]();
+                    }
+                }
+            }
+        }
+        return $params;
     }
 
     /**
