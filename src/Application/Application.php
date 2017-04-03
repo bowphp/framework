@@ -18,9 +18,15 @@ use Bow\Exception\ApplicationException;
 class Application
 {
     /**
+     * @var string
+     */
+    private $version = '0.1.1';
+
+    /**
      * @var array
      */
     private $errorCode = [];
+
     /**
      * Définition de contrainte sur un route.
      *
@@ -46,6 +52,7 @@ class Application
      * @var string
      */
     private $currentMethod = '';
+
     /**
      * Enrégistre l'information la route courrante
      *
@@ -753,6 +760,16 @@ class Application
         }
 
         throw new ApplicationException('La methode ' . $method . ' n\'exist pas.', E_ERROR);
+    }
+
+    /**
+     * Permet de récupérer la version de l'application
+     *
+     * @return string
+     */
+    public function version()
+    {
+        return $this->version;
     }
 
     /**

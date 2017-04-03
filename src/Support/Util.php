@@ -22,22 +22,6 @@ class Util
     private static $sep;
 
     /**
-     * setTimeZone, modifie la zone horaire.
-     *
-     * @param string $zone
-     *
-     * @throws \ErrorException
-     */
-    public static function setTimezone($zone)
-    {
-        if (count(explode('/', $zone)) != 2) {
-            throw new UtilException('La définition de la zone est invalide');
-        }
-
-        date_default_timezone_set($zone);
-    }
-
-    /**
      * Lance un var_dump sur les variables passées en paramètre.
      *
      * @return void
