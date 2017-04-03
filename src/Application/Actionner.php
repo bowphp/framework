@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Application;
 
+use Bow\Http\Response;
 use Bow\Exception\RouterException;
 
 class Actionner
@@ -124,8 +125,10 @@ class Actionner
                 $next = false;
                 continue;
             }
-            if (is_object($status) || is_array($status)) {
-                die(json_encode($status));
+            if (($status instanceof \StdClass) || is_array($status) || (!($status instanceof Response))) {
+                if (! empty($status)) {
+                    die(json_encode($status));
+                }
             }
             die();
         }

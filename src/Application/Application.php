@@ -116,9 +116,9 @@ class Application
         $this->request = $request;
         $this->response = $response;
 
-        $logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . '/error.log');
-        $logger->register();
-        $this->logger = $logger;
+//        $logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . '/error.log');
+//        $logger->register();
+//        $this->logger = $logger;
     }
 
     /**

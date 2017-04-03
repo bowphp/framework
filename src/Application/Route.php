@@ -174,7 +174,6 @@ Class Route
         }
 
         $req::$params = (object) $params;
-        $this->match['request'] = $req;
         return Actionner::call($this->cb, $this->match, $namespaces);
     }
 }
