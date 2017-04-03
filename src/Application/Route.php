@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Application;
 
-use App\Actionner;
 use Bow\Http\Request;
 
 /**
