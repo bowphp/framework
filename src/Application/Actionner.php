@@ -120,15 +120,14 @@ class Actionner
             }
         }
 
+        $next = false;
         foreach ($middlewares_collection as $middleware) {
-            $status = call_user_func_array($middleware, array_merge([$param['request'], function () {
-                return true;
+            $status = call_user_func_array($middleware, array_merge([$param['request'], function () use ($next) {
+                return $next = true;
             }], $param));
-            if ($status === true) {
+            if ($status === true && $next) {
+                $next = false;
                 continue;
-            }
-            if (is_callable($status)) {
-                $status = $status();
             }
             if (is_object($status) || is_array($status)) {
                 $status = json_encode($status);
