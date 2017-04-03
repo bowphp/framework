@@ -547,13 +547,15 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      * Ajout après le dernier élément de la collection
      *
      * @param mixed $value
+     * @param int|string $key
      * @return mixed
      */
-    public function push($value)
+    public function push($value, $key = null)
     {
-        $data = func_get_args();
-        foreach ($data as $value) {
+        if ($key == null) {
             $this->storage[] = $value;
+        } else {
+            $this->storage[$key] = $value;
         }
         return $this;
     }
