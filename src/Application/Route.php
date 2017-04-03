@@ -157,7 +157,7 @@ Class Route
      *
      * @return mixed
      */
-    public function call(Request $req, $namespaces, Application $app = null)
+    public function call(Request $req, $namespaces, Application $app)
     {
         $params = [];
 
@@ -173,11 +173,8 @@ Class Route
             $this->match[$key] = $tmp;
         }
 
-        if ($app !== null) {
-            array_unshift($this->match, $app);
-        }
-
         $req::$params = (object) $params;
+        $this->match['request'] = $req;
         return Actionner::call($this->cb, $this->match, $namespaces);
     }
 }

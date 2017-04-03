@@ -121,7 +121,7 @@ class Actionner
         }
 
         foreach ($middlewares_collection as $middleware) {
-            $status = call_user_func_array($middleware, array_merge([function () {
+            $status = call_user_func_array($middleware, array_merge([$param['request'], function () {
                 return true;
             }], $param));
             if ($status === true) {
@@ -140,6 +140,7 @@ class Actionner
         // fonction a execute suivant un ordre
         // conforme au middleware.
         if (! empty($function_list)) {
+            unset($param['request']);
             foreach($function_list as $func) {
                 $status = call_user_func_array($func, $param);
             }

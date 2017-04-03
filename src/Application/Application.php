@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Application;
 
-use App\Actionner;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Logger\Logger;
@@ -494,14 +493,8 @@ class Application
             // execution de la fonction associé à la route.
             if ($route->match($this->request->uri(), $with)) {
                 $this->currentPath = $route->getPath();
-
                 // appel requête fonction
-                if ($this->config->getTakeInstanceOfApplicationInFunction()) {
-                    $response = $route->call($this->request, $this->config->getNamespace(), $this);
-                } else {
-                    $response = $route->call($this->request, $this->config->getNamespace());
-                }
-
+                $response = $route->call($this->request, $this->config->getNamespace(), $this);
                 if (is_string($response)) {
                     $this->response->send($response);
                 } else if (is_array($response) || is_object($response)) {
