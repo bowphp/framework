@@ -412,8 +412,8 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     {
         $data = [];
         $this->recursive($this->storage, function($value, $key) use (& $data, $except) {
-            if (!in_array($key, $except)) {
-                $data[$key] = $value;
+            if (! in_array($key, $except)) {
+                $data[] = $value;
             }
         });
 
@@ -423,27 +423,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     /**
      * reverse
      *
-     * @param bool $collectionify
-     *
      * @return Collection
      */
-    public function reverse($collectionify = false)
+    public function reverse()
     {
-        $r = [];
-
-        for($i = $this->length(); $i > 0; --$i) {
-            $r[] = $this->storage[$i];
-        }
-
-        if ($collectionify) {
-            $c = new Collection($r);
-            foreach($r as $key => $value) {
-                $c->add($key, $value);
-            }
-            $r = $c;
-        }
-
-        return new Collection($r);
+        return new Collection(array_reverse($this->storage));
     }
 
     /**
@@ -514,7 +498,8 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function shift()
     {
-        return array_shift($this->storage);
+        $data = $this->storage;
+        return array_shift($data);
     }
 
     /**
@@ -524,7 +509,8 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function pop()
     {
-        return array_pop($this->storage);
+        $data = $this->storage;
+        return array_pop($data);
     }
 
     /**
@@ -566,12 +552,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     public function push($value)
     {
         $data = func_get_args();
-
-        array_unshift($data, $this->storage);
-        call_user_func_array('array_push', $data);
-
-        $this->storage = $data;
-
+        foreach ($data as $value) {
+            $this->storage[] = $value;
+        }
         return $this;
     }
 
