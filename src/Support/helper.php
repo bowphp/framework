@@ -1104,3 +1104,20 @@ if (! function_exists('cache')) {
         return Cache::add($key, $value);
     }
 }
+
+if (! function_exists('bowhash')) {
+    /**
+     * Alias sur la class Hash.
+     *
+     * @param string $data
+     * @param mixed $hash_value
+     * @return mixed
+     */
+    function bowhash($data, $hash_value = null)
+    {
+        if ($hash_value !== null) {
+            return \Bow\Security\Hash::check($data, $hash_value);
+        }
+        return \Bow\Security\Hash::make($data);
+    }
+}
