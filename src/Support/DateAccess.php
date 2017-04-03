@@ -170,7 +170,7 @@ class DateAccess
      */
     public function isFuture()
     {
-        return time() < $this->date;
+        return microtime(true) < $this->date;
     }
 
     /**
@@ -180,7 +180,7 @@ class DateAccess
      */
     public function isPassed()
     {
-        return time() > $this->date;
+        return microtime(true) > $this->date;
     }
 
     /**
@@ -209,5 +209,20 @@ class DateAccess
     public function format($format)
     {
         return date($this->date, $format);
+    }
+
+    /**
+     * Permet de modifier la zone horaire.
+     *
+     * @param string $zone
+     *
+     * @throws \ErrorException
+     */
+    public static function setTimezone($zone)
+    {
+        if (count(explode('/', $zone)) != 2) {
+            throw new \InvalidArgumentException('La définition de la zone est invalide');
+        }
+        date_default_timezone_set($zone);
     }
 }

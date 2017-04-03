@@ -47,10 +47,13 @@ class Str
      */
     public static function camel($str)
     {
-        $parts = static::split('/_|-|\s+/', $str);
-
+        $parts = preg_split('/(_|-|\s)+/', $str);
         $camel = "";
-        foreach($parts as $value) {
+        foreach($parts as $key => $value) {
+            if ($key == 0) {
+                $camel .= $value;
+                continue;
+            }
             $camel .= ucfirst($value);
         }
 
@@ -93,20 +96,21 @@ class Str
      */
     public static function split($pattern, $str, $limit = null)
     {
-        return mb_split($pattern, $str, $limit);
+        return mb_split($pattern, $str);
     }
 
     /**
      * Get the string position
      *
-     * @param $search
-     * @param $str
+     * @param string $search
+     * @param string $string
+     * @param int $offset
      *
      * @return int
      */
-    public static function pos($search, $str)
+    public static function pos($search, $string, $offset = 0)
     {
-        return mb_strpos($search, $str, null, 'UTF-8');
+        return mb_strpos($string, $search, $offset, 'UTF-8');
     }
 
     /**
@@ -121,13 +125,8 @@ class Str
     {
         if ($search === $str) {
             return true;
-        } else {
-            if (-1 !== static::pos($search, $str)) {
-                return true;
-            }
         }
-
-        return false;
+        return static::pos($search, $str);
     }
 
     /**
@@ -323,7 +322,7 @@ class Str
             throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match('/^[a-zA-Z]+$/', $str);
+        return (bool) preg_match('/^[a-zA-Z]+$/', $str);
     }
 
     /**
