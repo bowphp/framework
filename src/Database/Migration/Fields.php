@@ -638,11 +638,11 @@ class Fields
     {
         $method = strtolower($method);
 
-        if (!$this->fields->has($method)) {
-            $this->fields->add($method, new Collection);
+        if (! $this->fields->has($method)) {
+            $this->fields->push(new Collection, $method);
         }
 
-        if (!is_array($this->dataBind)) {
+        if (! is_array($this->dataBind)) {
             $this->dataBind = [];
         }
 
@@ -674,7 +674,7 @@ class Fields
         $data['unique']  = false;
         $data['indexe']  = false;
 
-        $this->fields->get($method)->add($field, $data);
+        $this->fields->get($method)->push($data, $field);
 
         $this->lastField = (object) [
             'method' => $method,

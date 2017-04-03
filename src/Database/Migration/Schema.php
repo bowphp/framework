@@ -44,7 +44,7 @@ class Schema
         $fields = new Fields($table);
         call_user_func_array($cb, [$fields]);
 
-        $sql = (new StatementMaker($fields))->toCreateTableStatement();
+        $sql = (new Statement($fields))->toCreateTableStatement();
 
         if ($sql == null) {
             die("\033[0;31mPlease check your 'up' method.\033[00m\n");
