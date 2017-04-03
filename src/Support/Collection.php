@@ -594,7 +594,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function __set($name, $value)
     {
-        $this->add($name, $value);
+        $this->storage[$name] = $value;
     }
 
     /**
@@ -616,6 +616,16 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     public function __unset($name)
     {
         $this->delete($name);
+    }
+
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->toJson();
     }
 
     /**

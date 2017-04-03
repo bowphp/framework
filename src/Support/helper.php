@@ -127,7 +127,7 @@ if (! function_exists('response')) {
 
         set_header('Content-Type', $type);
         set_response_code($code);
-        query_response('send', $template);
+        query_response('send', [$template]);
 
         return \Bow\Http\Response::instance();
     }
@@ -201,7 +201,7 @@ if (! function_exists('table')) {
      *
      * @param string $tableName, le nom d'un table.
      * @param string $zone, le nom de la zone sur laquelle la requete sera faite.
-     * @return Bow\Database\Table
+     * @return Bow\Database\QueryBuilder
      */
     function table($tableName, $zone = null) {
         if (is_string($zone)) {
@@ -251,7 +251,7 @@ if (! function_exists('query_response')) {
      */
     function query_response($method, $param) {
         if (method_exists(response(), $method)) {
-            return call_user_func_array([response(), $method], array_slice(func_get_args(), 1));
+            return call_user_func_array([response(), $method], $param);
         }
         return null;
     }
@@ -536,7 +536,7 @@ if (! function_exists('json')) {
      * @return mixed
      */
     function json($data, $code = 200) {
-        return query_response('json', $data, $code);
+        return query_response('json', [$data, $code]);
     }
 }
 

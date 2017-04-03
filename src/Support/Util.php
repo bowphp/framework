@@ -54,7 +54,7 @@ class Util
             }
         };
 
-        call_user_func_array($handler, [$vars]);
+        call_user_func_array($handler, $vars);
         die;
     }
 
