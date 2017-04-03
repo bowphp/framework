@@ -368,6 +368,27 @@ class Request
     }
 
     /**
+     * Permet de récupérer un paramètre définir dans la route.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function getParameter($key)
+    {
+        return isset(static::$params->$key) ? static::$params->$key : null;
+    }
+
+    /**
+     * Permet de récupérer les paramètres définir dans la route.
+     *
+     * @return object
+     */
+    public function getParameters()
+    {
+        return static::$params;
+    }
+
+    /**
      * __call
      *
      * @param string $name
