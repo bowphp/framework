@@ -467,56 +467,49 @@ class Application
 
         // vérification de l'existance de methode de la requete dans
         // la collection de route
-        if (isset(static::$routes[$method])) {
-            foreach (static::$routes[$method] as $key => $route) {
-
-                // route doit être une instance de Route
-                if (! ($route instanceof Route)) {
-                    continue;
-                }
-
-                // récupération du contenu de la where
-                if (isset($this->with[$method][$route->getPath()])) {
-                    $with = $this->with[$method][$route->getPath()];
-                } else {
-                    $with = [];
-                }
-
-                // Lancement de la recherche de la method qui arrivée dans la requete
-                // ensuite lancement de la verification de l'url de la requete
-                // execution de la fonction associé à la route.
-                if ($route->match($this->request->uri(), $with)) {
-                    $this->currentPath = $route->getPath();
-
-                    // appel requête fonction
-                    if ($this->config->getTakeInstanceOfApplicationInFunction()) {
-                        $response = $route->call($this->request, $this->config->getNamespace(), $this);
-                    } else {
-                        $response = $route->call($this->request, $this->config->getNamespace());
-                    }
-
-                    if (is_string($response)) {
-                        $this->response->send($response);
-                    } else if (is_array($response) || is_object($response)) {
-                        $this->response->json($response);
-                    }
-
-                    $error = false;
-                }
-            }
-        }
-
-        // Si la route n'est pas enrégistre alors on lance une erreur 404
-        if ($error === true) {
+        if (! isset(static::$routes[$method])) {
             // vérification et appel de la fonction du branchement 404
             if (empty($this->errorCode)) {
                 $this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
             }
-
             $this->response->code(404);
+            return false;
         }
 
-        return $error;
+        foreach (static::$routes[$method] as $key => $route) {
+            // route doit être une instance de Route
+            if (! ($route instanceof Route)) {
+                continue;
+            }
+
+            // récupération du contenu de la where
+            if (isset($this->with[$method][$route->getPath()])) {
+                $with = $this->with[$method][$route->getPath()];
+            } else {
+                $with = [];
+            }
+
+            // Lancement de la recherche de la method qui arrivée dans la requete
+            // ensuite lancement de la verification de l'url de la requete
+            // execution de la fonction associé à la route.
+            if ($route->match($this->request->uri(), $with)) {
+                $this->currentPath = $route->getPath();
+
+                // appel requête fonction
+                if ($this->config->getTakeInstanceOfApplicationInFunction()) {
+                    $response = $route->call($this->request, $this->config->getNamespace(), $this);
+                } else {
+                    $response = $route->call($this->request, $this->config->getNamespace());
+                }
+
+                if (is_string($response)) {
+                    $this->response->send($response);
+                } else if (is_array($response) || is_object($response)) {
+                    $this->response->json($response);
+                }
+            }
+        }
+        return true;
     }
 
     /**
