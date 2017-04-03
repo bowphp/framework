@@ -246,9 +246,9 @@ class Security
      */
     public static function encrypt($data)
     {
-        $iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
-        static::$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-        $encrypted_data = mcrypt_encrypt(MCRYPT_BLOWFISH, static::$key, $data, MCRYPT_MODE_CBC, static::$iv);
+        $iv_size = @mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
+        static::$iv = @mcrypt_create_iv($iv_size, MCRYPT_RAND);
+        $encrypted_data = @mcrypt_encrypt(MCRYPT_BLOWFISH, static::$key, $data, MCRYPT_MODE_CBC, static::$iv);
 
         return base64_encode($encrypted_data . static::$iv);
     }
