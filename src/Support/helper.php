@@ -6,7 +6,7 @@
 |	Définir des liens symbolique de l'ensemble des
 |	fonctions de Bow.
 |
-*/
+ */
 
 use Bow\Mail\Mail;
 use Bow\Http\Cache;

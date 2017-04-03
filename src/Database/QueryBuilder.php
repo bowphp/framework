@@ -667,7 +667,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         $s = self::$connection->prepare($sql);
         $s->execute();
-        
+
         if ($s->rowCount() > 1) {
             return $s->fetchAll();
         }

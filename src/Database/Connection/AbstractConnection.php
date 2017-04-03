@@ -47,7 +47,7 @@ abstract class AbstractConnection extends DBUtility
     {
         return $this->pdo;
     }
-    
+
     /**
      * Permet de recuperer la connection
      *

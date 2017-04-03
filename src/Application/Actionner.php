@@ -9,6 +9,7 @@ class Actionner
      * @var array All define namesapce
      */
     private static $names;
+
     /**
      * Lanceur de callback
      *
