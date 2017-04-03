@@ -1010,12 +1010,12 @@ if (! function_exists('validate')) {
     }
 }
 
-if (! function_exists('bow_date')){
+if (! function_exists('bowdate')){
     /**
      * @param null $date
      * @return \Bow\Support\DateAccess
      */
-    function bow_date($date = null) {
+    function bowdate($date = null) {
         return new \Bow\Support\DateAccess($date);
     }
 }
