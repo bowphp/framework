@@ -170,7 +170,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return $this->toArray();
+        return array_merge(['id' => $this->id], $this->toArray());
     }
 
     /**
