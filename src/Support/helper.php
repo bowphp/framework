@@ -140,7 +140,7 @@ if (! function_exists('request')) {
      * @return \Bow\Http\Request
      */
     function request() {
-        return \Bow\Http\Request::configure();
+        return \Bow\Http\Request::instance();
     }
 }
 
@@ -531,7 +531,7 @@ if (! function_exists('json')) {
     /**
      * json, permet de lance des reponses server de type json
      *
-     * @param array $data
+     * @param mixed $data
      * @param int $code=200
      * @return mixed
      */
