@@ -61,7 +61,7 @@ abstract class Model extends QueryBuilder
             static::$instance->select = '`' . implode('`, `', $columns) . '`';
         }
 
-        return static::get();
+        return static::$instance->get();
     }
 
     /**
@@ -83,9 +83,11 @@ abstract class Model extends QueryBuilder
             $id = [$id];
         }
 
-        $table->whereIn(static::$primaryKey, $id);
         $table->select($select);
 
+        if (! $one) {
+            $table->whereIn(static::$primaryKey, $id);
+        }
         return $one ? static::first() : $table->get();
     }
 
@@ -97,7 +99,7 @@ abstract class Model extends QueryBuilder
     public static function first()
     {
         static::initilaizeQueryBuilder();
-        return static::take(1)->getOne();
+        return static::$instance->take(1)->getOne();
     }
 
     /**
@@ -153,6 +155,21 @@ abstract class Model extends QueryBuilder
             throw new QueryBuilderException('Aucune donnée trouver.', E_WARNING);
         }
         return $data;
+    }
+
+    /**
+     * save aliase sur l'action insert
+     *
+     * @param array $values Les données a inserer dans la base de donnée.
+     *
+     * @return int
+     */
+    public function save(array $values = [])
+    {
+        if (! empty($values)) {
+            static::$attributes = $values;
+        }
+        return static::$instance->insert(static::$attributes);
     }
 
     /**
@@ -230,28 +247,19 @@ abstract class Model extends QueryBuilder
      */
     public static function __callStatic($method, $args)
     {
-        $scope = 'scope' . ucfirst($method);
         static::initilaizeQueryBuilder();
-        $query_build = static::$instance;
-        /**
-         * Lancement de l'execution des fonctions aliase définir dans les classe
-         * héritant de la classe Model.
-         *
-         * Les classes  definir définir avec la montion scope.
-         */
-        if (method_exists($child = new static, $scope)) {
-            if (method_exists($query_build, $method)) {
+
+        if (method_exists($self = new static(), $method)) {
+            if (method_exists(static::$instance, $method)) {
                 throw new ModelException($method . ' ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
             }
-            return call_user_func_array([$child, $scope], $args);
+            return call_user_func_array([$self, $method], $args);
         }
 
-        /**
-         * Lancement de l'execution des fonctions liée a l'instance de la classe Table
-         */
-        if (method_exists($query_build, $method)) {
-            $collection = call_user_func_array([$query_build, $method], $args);
-            return static::carbornize($collection, $method, $child);
+        // Lancement de l'execution des fonctions liée a l'instance de la classe Table
+        if (method_exists(static::$instance, $method)) {
+            $collection = call_user_func_array([static::$instance, $method], $args);
+            return static::carbornize($collection, $method, $self);
         }
 
         throw new ModelException('methode ' . $method . ' n\'est définie.', E_ERROR);
@@ -294,5 +302,26 @@ abstract class Model extends QueryBuilder
     public function __set($name, $value)
     {
         static::$attributes[$name] = $value;
+    }
+
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode(static::$attributes);
+    }
+
+    /**
+     * Permet de formater le donnée en json quand on appele la
+     * fonction json_encode sur une instance.
+     *
+     * @return string
+     */
+    public function jsonSerialize()
+    {
+        return static::$attributes;
     }
 }

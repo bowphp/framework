@@ -119,9 +119,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         if (static::$instance === null || static::$table != $table) {
             if (property_exists(static::class, 'primaryKey')) {
-                static::$definePrimaryKey = static::$primaryKey;
+                self::$definePrimaryKey = static::$primaryKey;
             }
-            static::$instance = new static($table, $connection, $classname);
+            static::$instance = new self($table, $connection, $classname);
         }
         return static::$instance;
     }
@@ -131,20 +131,20 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * SELECT $column | SELECT column1, column2, ...
      *
-     * @param array $column
+     * @param array $select
      *
      * @return QueryBuilder
      */
-    public function select($column)
+    public function select(array $select = ['*'])
     {
-        if (is_array($column)) {
-            static::$instance->select = '`' . implode('`, `', $column) . '`';
+        if (count($select) == 0) {
             return static::$instance;
         }
 
-        if (is_string($column)) {
-            static::$instance->select = $column;
-            return static::$instance;
+        if (count($select) == 1 && $select[0] == '*') {
+            static::$instance->select = '*';
+        } else {
+            static::$instance->select = '`' . implode('`, `', $select) . '`';
         }
 
         return static::$instance;
@@ -685,6 +685,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public function get($cb = null)
     {
         $sql = static::$instance->getSelectStatement();
+
         // execution de requete.
         $stmt = self::$connection->prepare($sql);
         static::bind($stmt, static::$instance->whereDataBind);
@@ -980,18 +981,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * save aliase sur l'action insert
-     *
-     * @param array $values Les données a inserer dans la base de donnée.
-     *
-     * @return int
-     */
-    public function save(array $values)
-    {
-        return static::$instance->insert($values);
-    }
-
-    /**
      * @see insert
      * @param array $value
      * @return int
@@ -1141,7 +1130,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return static::$instance->get();
+        die(static::$instance->get()->toJson());
+        return static::$instance->get()->toJson();
     }
 
     /**
@@ -1150,7 +1140,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function toJson($option = 0)
     {
-        return json_encode(static::$instance->get(), $option);
+        return json_encode(static::$instance->get()->values(), $option);
     }
 
     /**
@@ -1205,5 +1195,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         return $sql;
+    }
+
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return static::$instance->toJson();
     }
 }
