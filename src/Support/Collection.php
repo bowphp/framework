@@ -99,11 +99,14 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     public function get($key, $default = null)
     {
         if ($this->has($key)) {
-            return $this->storage[$key];
+            return $this->storage[$key] == null ? $default : $this->storage[$key];
         }
+
         if ($default !== null) {
             if (is_callable($default)) {
                 return call_user_func($default);
+            } else {
+                return $default;
             }
         }
 
