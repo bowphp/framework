@@ -208,7 +208,7 @@ class Command
             $mapMethod = ["table", "drop"];
         }
         if ($options->has('--create')) {
-            if ($options->get('--create') == true) {
+            if ($options->get('--create') == '') {
                 throw new \ErrorException(sprintf(self::BAD_COMMAND, ' [--create] '));
             }
             $table = $options->get('--create');
@@ -283,12 +283,15 @@ doc;
             echo "\033[00m";
         }
 
-        if (static::readline("Voulez vous que je crée un model?")) {
-            if (isset($option[0]) && $option[0] == '--model') {
-                if (isset($option[1])) {
-                    $model = $option[1];
+        $options = $this->getParameter('options');
+
+        if ($this->readline("Voulez vous que je crée un model?")) {
+            if ($options->has('--model')) {
+                if ($options->get('--model') !== '') {
+                    $model = $options->get('--model');
                 } else {
                     echo "\033[0;32;7mLe nom du model non spécifié --model=model_name.\033[00m\n";
+                    die();
                 }
             }
 
@@ -403,7 +406,7 @@ class {$controller_name} extends Controller
 CC;
         file_put_contents($this->dirname."/app/Controllers/${controller_name}.php", $controllerRestTemplate);
         echo "\033[0;32mcontroller created \033[00m[{$controller_name}]\033[0;32m\033[00m\n";
-        return 0;
+        return;
     }
 
     /**
@@ -430,7 +433,6 @@ CC;
         }
 
         if ($this->options('--no-plain')) {
-
             $content = <<<CONTENT
     /**
      * Point d'entré de l'application
@@ -519,6 +521,7 @@ class {$controller_name} extends Controller
 }
 CC;
         file_put_contents($this->dirname."/app/Controllers/${controller_name}.php", $controller_template);
+        echo "\033[0;32mcontroller \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m created.\033[00m\n";
     }
 
     /**
@@ -606,9 +609,14 @@ MODEL;
         return 0;
     }
 
+    /**
+     * Permet de générer la clé de securité
+     */
     public function key()
     {
-
+        $key = base64_encode(openssl_random_pseudo_bytes(12) . date('Y-m-d H:i:s') . microtime(true));
+        file_put_contents($this->dirname."/config/.key", $key);
+        echo "Application key => \033[0;32m$key\033[00m\n";
     }
 
     /**

@@ -1,8 +1,8 @@
 <?php
 namespace Bow\Support\Console;
 
-use Psy\Configuration;
 use Psy\Shell;
+use Psy\Configuration;
 
 class Bow
 {
@@ -33,6 +33,10 @@ class Bow
      */
     public function __construct($dirname, Command $command)
     {
+        if ($command->getParameter('trash')) {
+            $this->help();
+            exit(1);
+        }
         $this->dirname = $dirname;
         $this->_command = $command;
     }
@@ -56,7 +60,18 @@ class Bow
             $this->help();
             exit(1);
         }
-        call_user_func_array([$this, $command], []);
+
+        if (! $this->_command->getParameter('action')) {
+            if ($this->_command->getParameter('target') == 'help') {
+                $this->help($command);
+            }
+        }
+
+        try {
+            call_user_func_array([$this, $command], [$this->_command->getParameter('target')]);
+        } catch (\Exception $e) {
+            echo "{$e->getMessage()}"; exit(1);
+        }
     }
 
     /**
@@ -65,7 +80,10 @@ class Bow
     public function migrate()
     {
         $action = $this->_command->getParameter('action');
-        $this->_command->$action();
+        if (! in_array($action, ['up', 'make', 'down'])) {
+            throw new \ErrorException('Bad command. Type "php bow migrate help" or "php bow help migrate" for more information"');
+        }
+        $this->_command->$action($this->_command->getParameter('target'));
     }
 
     /**
@@ -93,6 +111,7 @@ class Bow
 
         // resource.
         $r = fopen("php://stdout", "w");
+
         if ($r) {
             fwrite($r, sprintf("[%s] web server start at http://localhost:%s \033[0;31;7mctrl-c for shutdown it\033[00m\n", date('F d Y H:i:s a'), $port));
         }
@@ -128,7 +147,8 @@ class Bow
      */
     public function generate()
     {
-        $this->_command->getParameter('action');
+        $action = $this->_command->getParameter('action');
+        $this->_command->$action($this->_command->getParameter('target'));
     }
 
     /**
@@ -251,6 +271,6 @@ U;
                 break;
         }
 
-        return 0;
+        exit(0);
     }
 }
