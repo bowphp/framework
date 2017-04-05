@@ -267,6 +267,17 @@ class Application
     {
         return $this->addHttpVerbe('PATCH', $path, $name, $cb);
     }
+    /**
+     * patch, route de tout type PATCH
+     *
+     * @param string 				$path   La route à mapper
+     * @param callable 				$cb     La fonction à lancer
+     * @return Application
+     */
+    public function options($path, Callable $cb)
+    {
+        return $this->addHttpVerbe('OPTIONS', $path, null, $cb);
+    }
 
     /**
      * code, Lance une fonction en fonction du code d'erreur HTTP
@@ -313,16 +324,14 @@ class Application
      */
     private function addHttpVerbe($method, $path, $name, Callable $cb = null)
     {
-        $body = $this->request->body();
+        $input = $this->request->input();
         $flag = true;
 
-        if ($body !== null) {
-            if ($body->has('_method')) {
-                if ($body->get('_method') === $method) {
-                    $this->routeLoader($method, $path, $name, $cb);
-                }
-                $flag = false;
+        if ($input->has('_method')) {
+            if ($input->get('_method') === $method) {
+                $this->routeLoader($method, $path, $name, $cb);
             }
+            $flag = false;
         }
 
         if ($flag) {
