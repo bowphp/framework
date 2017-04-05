@@ -46,7 +46,7 @@ class Request
      * Singletion loader
      * @return null|self
      */
-    public static function configure()
+    public static function instance()
     {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -122,7 +122,7 @@ class Request
      */
     public function method()
     {
-        $method = $_SERVER['REQUEST_METHOD'];
+        $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
 
         if ($method == 'POST') {
             if (array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
