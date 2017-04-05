@@ -63,7 +63,7 @@ class TestQueryBuilder extends \PHPUnit\Framework\TestCase
     public function testSelectChainRows($db)
     {
         $table = $db->table('pets');
-        $pets = $table->get();
+        $pets = $table->select(['name'])->get();
         $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
     }
 }
