@@ -191,7 +191,8 @@ if (! function_exists('view')) {
             $code = $data;
             $data = [];
         }
-        return response()->view($template, $data, $code);
+        response()->code($code);
+        return Bow\View\View::make($template, $data);
     }
 }
 
@@ -643,9 +644,10 @@ if (! function_exists('send_file')) {
      *
      * @param string $filename le nom du fichier
      * @param array $bind les données la exporter
+     * @return mixed
      */
     function send_file($filename, $bind = []) {
-        query_response('sendFile', [$filename, $bind]);
+        return query_response('sendFile', [$filename, $bind]);
     }
 }
 

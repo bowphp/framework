@@ -1,13 +1,10 @@
 <?php
 namespace Bow\Http;
 
-use Jade\Jade;
-use ErrorException;
-use Bow\Support\Str;
-use Bow\Support\Security;
+use Bow\View\View;
 use Bow\Exception\ViewException;
-use Bow\Exception\ResponseException;
 use Bow\Application\Configuration;
+use Bow\Exception\ResponseException;
 
 /**
  * Class Response
@@ -69,34 +66,32 @@ class Response
     ];
 
     /**
-     * Instance de l'application
-     * @var Configuration
+     * @var string
      */
-    private $config;
+    private static $view_path;
 
     /**
-     * Constructeur de l'application
-     *
-     * @param Configuration $config
+     * Response constructor.
+     * @param string $view_path
      */
-    public function __construct(Configuration $config)
+    public function __construct($view_path)
     {
-        $this->config = $config;
+        static::$view_path = $view_path;
     }
 
     /**
-     * Singleton loader
+     * Permet de configurer la classe
      *
-     * @param Configuration $config
-     * @return self
+     * @param $view_path
+     * @return Response
      */
-    public static function configure(Configuration $config)
+    public static function configure($view_path)
     {
         if (self::$instance === null) {
-            self::$instance = new self($config);
+            self::$instance = new self($view_path);
         }
 
-        return self::$instance;
+        return static::instance();
     }
 
     /**
@@ -106,6 +101,8 @@ class Response
      */
     public static function instance()
     {
+
+
         return self::$instance;
     }
 
@@ -252,7 +249,7 @@ class Response
     }
 
     /**
-     * sendFile, require $filename
+     * Permet d'envoyer le contenu d'un fichier au client, simulaire à require
      *
      * @param string $filename
      * @param array $bind
@@ -263,167 +260,23 @@ class Response
     {
         $filename = preg_replace('/@|#|\./', '/', $filename);
 
-        if ($this->config->getViewpath() !== null) {
-            $tmp = $this->config->getViewpath() .'/'. $filename . '.php';
-            if (!file_exists($tmp)) {
-                $filename = $this->config->getViewpath() .'/'. $filename . '.html';
+        if (static::$view_path !== null) {
+            $tmp = static::$view_path .'/'. $filename . '.php';
+            if (! file_exists($tmp)) {
+                $filename = static::$view_path .'/'. $filename . '.html';
             } else {
                 $filename = $tmp;
             }
         }
 
-        if (!file_exists($filename)) {
-            throw new ViewException('La vue '.$filename.' n\'exist pas.', E_ERROR);
+        if (! file_exists($filename)) {
+            throw new ViewException('Le fichier '.$filename.' n\'exist pas.', E_ERROR);
         }
 
         @extract($bind);
         // Rendu du fichier demandé.
 
         return require $filename;
-    }
-
-    /**
-     * render, lance le rendu utilisant le template définir <<mustache|twig|jade>>
-     *
-     * @param string  $filename Le nom de la vue
-     * @param array   $bind     Les données à passer la vue
-     * @param integer|null $code [optional] Le code http
-     * @throws ViewException|ResponseException
-     *
-     * @return bool
-     */
-    public function view($filename, $bind = [], $code = 200)
-    {
-        if (is_int($bind)) {
-            $code = $bind;
-            $bind = [];
-        }
-
-        $filename = preg_replace('/@|\./', '/', $filename) . $this->config->getTemplateExtension();
-
-        // Vérification de l'existance du fichier
-        if ($this->config->getViewpath() !== null) {
-            if (!is_file($this->config->getViewpath() . '/' . $filename)) {
-                throw new ViewException('La vue ['.$filename.'] n\'exist pas. ' . $this->config->getViewpath() . '/' . $filename, E_ERROR);
-            }
-        } else {
-            if (!is_file($filename)) {
-                throw new ViewException('La vue ['.$filename.'] n\'exist pas!.', E_ERROR);
-            }
-        }
-
-        // Modification du code http
-        if ($code !== null) {
-            $this->code($code);
-        }
-
-        if ($this->config->getTemplateEngine() == 'php') {
-            if ($this->config->getViewpath() !== null) {
-                $filename = $this->config->getViewpath() . '/' . $filename;
-            }
-            ob_start();
-            require $filename;
-            return $this->send(ob_get_clean());
-        }
-
-        // Chargement du template.
-        $template = $this->templateLoader();
-
-        if ($this->config->getTemplateEngine() == 'twig') {
-            return $this->send($template->render($filename, $bind));
-        }
-
-        if (in_array($this->config->getTemplateEngine(), ['mustache', 'jade'])) {
-            return $this->send($template->render(file_get_contents($filename), $bind));
-        }
-
-        throw new ResponseException('Le moteur de template n\'est pas défini.', E_USER_ERROR);
-    }
-
-    /**
-     * templateLoader, charge le moteur template à utiliser.
-     *
-     * @throws ErrorException
-     * @return \Twig_Environment|\Mustache_Engine|\Jade\Jade
-     */
-    private function templateLoader()
-    {
-        if ($this->config->getTemplateEngine() !== null) {
-            if (!in_array($this->config->getTemplateEngine(), ['twig', 'mustache', 'jade'], true)) {
-                throw new ErrorException('Le moteur de template n\'est pas implementé.', E_USER_ERROR);
-            }
-        } else {
-            throw new ResponseException('Le moteur de template non défini.', E_USER_ERROR);
-        }
-
-        $tpl = null;
-
-        if ($this->config->getTemplateEngine() == 'twig') {
-            $loader = new \Twig_Loader_Filesystem($this->config->getViewpath());
-            $tpl = new \Twig_Environment($loader, [
-                'cache' => $this->config->getCachepath(),
-                'auto_reload' => $this->config->getCacheAutoReload(),
-                'debug' => $this->config->getLoggerMode() == 'develepment' ? true : false
-            ]);
-            /**
-             * - Ajout de variable globale
-             * dans le cadre de l'utilisation de Twig
-             */
-            $tpl->addGlobal('public', $this->config->getPublicPath());
-            $tpl->addGlobal('root', $this->config->getApproot());
-
-            /**
-             * - Ajout de fonction global
-             *  dans le cadre de l'utilisation de Twig
-             */
-            $tpl->addFunction(new \Twig_SimpleFunction('secure', function($data) {
-                return Security::sanitaze($data, true);
-            }));
-            $tpl->addFunction(new \Twig_SimpleFunction('sanitaze', function($data) {
-                return Security::sanitaze($data);
-            }));
-            $tpl->addFunction(new \Twig_SimpleFunction('csrf_field', function() {
-                return Security::getCsrfToken()->field;
-            }));
-            $tpl->addFunction(new \Twig_SimpleFunction('csrf_token', function() {
-                return Security::getCsrfToken()->token;
-            }));
-
-            $tpl->addFunction(new \Twig_SimpleFunction('slugify', [Str::class, 'slugify']));
-            return $tpl;
-        }
-
-        if ($this->config->getTemplateEngine() == 'mustache') {
-            return new \Mustache_Engine([
-                'cache' => $this->config->getCachepath(),
-                'loader' => new \Mustache_Loader_FilesystemLoader($this->config->getViewpath()),
-                'helpers' => [
-                    'secure' => function($data) {
-                        return Security::sanitaze($data, true);
-                    },
-                    'sanitaze' => function($data) {
-                        return Security::sanitaze($data);
-                    },
-                    'slugify' => function($data) {
-                        return Str::slugify($data);
-                    },
-                    'csrf_token' => function() {
-                        return Security::getCsrfToken()->token;
-                    },
-                    'csrf_field' => function() {
-                        return Security::getCsrfToken()->field;
-                    },
-                    'public', $this->config->getPublicPath(),
-                    'root', $this->config->getApproot()
-                ]
-            ]);
-        }
-
-        return new Jade([
-            'cache' => $this->config->getCachepath(),
-            'prettyprint' => true,
-            'extension' => $this->config->getTemplateExtension()
-        ]);
     }
 
     /**
