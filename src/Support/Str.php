@@ -96,7 +96,7 @@ class Str
      */
     public static function split($pattern, $str, $limit = null)
     {
-        return mb_split($pattern, $str);
+        return mb_split($pattern, $str, $limit);
     }
 
     /**
@@ -116,8 +116,8 @@ class Str
     /**
      * Contains
      *
-     * @param $search
-     * @param $str
+     * @param string $search
+     * @param string $str
      *
      * @return bool
      */

@@ -65,7 +65,7 @@ class Faker
      */
     public static function pseudo(array $additionnal = [])
     {
-        return static::name($additionnal);
+        return Str::replace('/\s+/', '', Str::lower(static::name($additionnal)));
     }
 
     /**
