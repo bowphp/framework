@@ -1013,18 +1013,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * saveAndGetLastId aliase sur action insertAndGetLastId, lance les actions insert et lastInsertId
-     *
-     * @param array $values
-     *
-     * @return int
-     */
-    public function saveAndGetLastId(array $values)
-    {
-        return static::$instance->insertAndGetLastId($values);
-    }
-
-    /**
      * Action drop, supprime la QueryBuilder
      *
      * @return mixed

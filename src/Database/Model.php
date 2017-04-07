@@ -5,6 +5,7 @@ use Bow\Support\Collection;
 use Bow\Database\Database as DB;
 use Bow\Exception\ModelException;
 use Bow\Exception\QueryBuilderException;
+use Carbon\Carbon;
 
 /**
  * Class Model
@@ -17,7 +18,12 @@ abstract class Model extends QueryBuilder
     /**
      * @var array
      */
-    protected static $attributes = [];
+    protected $attributes = [];
+
+    /**
+     * @var array
+     */
+    protected $original = [];
 
     /**
      * @var array
@@ -43,7 +49,8 @@ abstract class Model extends QueryBuilder
      */
     public function __construct(array $data = [])
     {
-        static::$attributes = $data;
+        $this->attributes = $data;
+        $this->original = $data;
         static::initilaizeQueryBuilder();
         parent::__construct(static::$table, DB::getPdo(), static::class);
     }
@@ -161,15 +168,26 @@ abstract class Model extends QueryBuilder
      * save aliase sur l'action insert
      *
      * @param array $values Les données a inserer dans la base de donnée.
-     *
      * @return int
+     * @throws QueryBuilderException
      */
     public function save(array $values = [])
     {
-        if (! empty($values)) {
-            static::$attributes = $values;
+        if (empty($this->attributes)) {
+            if (! empty($values)) {
+                $this->attributes = $values;
+            }
+            return static::$instance->insert($this->attributes);
         }
-        return static::$instance->insert(static::$attributes);
+
+        $primary_key_value = isset($this->original[static::$primaryKey]) ? $this->original[static::$primaryKey] : false;
+
+        if ($primary_key_value === false) {
+            throw new QueryBuilderException('Cette instance ne possede pas l\'id de la table');
+        }
+
+        $this->original[static::$primaryKey] = $primary_key_value;
+        return static::$instance->where(static::$primaryKey, $primary_key_value)->update($this->attributes);
     }
 
     /**
@@ -187,7 +205,7 @@ abstract class Model extends QueryBuilder
      *
      * @return array
      */
-    private static function avalableFields()
+    private static function carbonDates()
     {
         return array_merge(
             static::$dates,
@@ -196,6 +214,8 @@ abstract class Model extends QueryBuilder
     }
 
     /**
+     * Permet de format les attribues de type date en classe carbon
+     *
      * @param mixed $collection
      * @param string $method
      * @param mixed $child
@@ -211,10 +231,10 @@ abstract class Model extends QueryBuilder
             $collection = [$collection];
         }
 
-        $custumFieldsLists = static::avalableFields();
+        $custum_dates_lists = static::carbonDates();
 
         if (method_exists($child, 'customDate')) {
-            $custumFieldsLists = array_merge($custumFieldsLists, $child->customDate());
+            $custum_dates_lists = array_merge($custum_dates_lists, $child->customDate());
         }
 
         foreach($collection as $value) {
@@ -222,7 +242,7 @@ abstract class Model extends QueryBuilder
                 continue;
             }
             foreach($value as $key => $content) {
-                if (in_array($key, $custumFieldsLists)) {
+                if (in_array($key, $custum_dates_lists)) {
                     $value->$key = new \Carbon\Carbon($content);
                 }
             }
@@ -235,6 +255,19 @@ abstract class Model extends QueryBuilder
         }
 
         return $collection;
+    }
+
+    /**
+     * Permet d'initialiser la connection
+     */
+    private static function initilaizeQueryBuilder()
+    {
+        if (static::$table == null) {
+            static::$table = strtolower(static::class);
+        }
+        if (static::$instance == null) {
+            static::make(static::$table, DB::getPdo(), static::class);
+        }
     }
 
     /**
@@ -266,19 +299,6 @@ abstract class Model extends QueryBuilder
     }
 
     /**
-     * Permet d'initialiser la connection
-     */
-    private static function initilaizeQueryBuilder()
-    {
-        if (static::$table == null) {
-            static::$table = strtolower(static::class);
-        }
-        if (static::$instance == null) {
-            static::make(static::$table, DB::getPdo(), static::class);
-        }
-    }
-
-    /**
      * __get
      *
      * @param string $name
@@ -286,11 +306,15 @@ abstract class Model extends QueryBuilder
      */
     public function __get($name)
     {
-        if (! isset(static::$attributes[$name])) {
+        if (! isset($this->attributes[$name])) {
             return null;
         }
+        
+        if (in_array($name, static::carbonDates())) {
+            return new Carbon($this->attributes[$name]);
+        }
 
-        return static::$attributes[$name];
+        return $this->attributes[$name];
     }
 
     /**
@@ -301,7 +325,7 @@ abstract class Model extends QueryBuilder
      */
     public function __set($name, $value)
     {
-        static::$attributes[$name] = $value;
+        $this->attributes[$name] = $value;
     }
 
     /**
@@ -311,7 +335,7 @@ abstract class Model extends QueryBuilder
      */
     public function __toString()
     {
-        return json_encode(static::$attributes);
+        return json_encode($this->attributes);
     }
 
     /**
@@ -322,6 +346,6 @@ abstract class Model extends QueryBuilder
      */
     public function jsonSerialize()
     {
-        return static::$attributes;
+        return $this->attributes;
     }
 }

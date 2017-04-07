@@ -81,7 +81,7 @@ class Database
         }
 
         if (! isset(static::$config[$name])) {
-            throw new ConnectionException('La connection de nom ' . $name . ' n\'est pas définie.');
+            throw new ConnectionException('La connection de nom "' . $name . '" n\'est pas définie.');
         }
 
         if ($name !== static::$name) {
