@@ -4,13 +4,14 @@ namespace Bow\Support\Console;
 
 use Bow\Resource\Storage;
 use Bow\Support\Collection;
+use Bow\Support\Str;
 
 class Command
 {
     /**
      * @var string
      */
-    const BAD_COMMAND = "Bad command.%sPlease type \033[0;32;7m`php bow help or php bow command help` for more information.";
+    const BAD_COMMAND = "Mauvaise commande.%sS'il vous plait tapez la commande \033[0;32;7m`php bow help` ou `php bow command help` pour plus d'information.";
 
     /**
      * @var string
@@ -24,6 +25,7 @@ class Command
 
     /**
      * Command constructor.
+     * @param string $dirname
      */
     public function __construct($dirname)
     {
@@ -51,20 +53,20 @@ class Command
                 continue;
             }
             if ($key == 2) {
-                if (preg_match('/^[a-z_-]+$/', $param)) {
+                if (preg_match('/^[a-z_-]+$/i', $param)) {
                     $this->options['target'] = $param;
                     continue;
                 }
             }
             if (preg_match('/^--[a-z-]+$/', $param)) {
-                $this->options['options'][$param] = '';
+                $this->options['options'][$param] = true;
                 continue;
             }
             if (count($part = explode('=', $param)) == 2) {
                 $this->options['options'][$part[0]] = $part[1];
                 continue;
             }
-            $this->options['trush'][] = $param;
+            $this->options['trash'][] = $param;
         }
 
         if (isset($this->options['options'])) {
@@ -132,6 +134,7 @@ class Command
     private function makeMigration($model, $type)
     {
         if ($model) {
+            $model = strtolower($model);
             $fileParten = $this->dirname.strtolower("/migration/*{$model}*.php");
         } else {
             $fileParten = $this->dirname.strtolower("/migration/*.php");
@@ -165,10 +168,16 @@ class Command
             require $file;
 
             // Formatage de la classe et Execution de la methode up ou down
-            $class = "Create".ucfirst($model)."Table";
+            $class = ucfirst(Str::camel($model));
             $instance = new $class;
-            call_user_func([$instance, strtolower($type)]);
-            $options = $this->getParameter('options');
+            $options = $this->options();
+            $param = [];
+
+            if ($options->has('--display-sql') && $options->get('--display-sql') === true) {
+                $param = [true];
+            }
+
+            call_user_func_array([$instance, strtolower($type)], $param);
 
             if ($options == null) {
                 return;
@@ -194,11 +203,7 @@ class Command
         $mapMethod = ["create", "drop"];
         $table = $model;
 
-        if ($this->getParameter('options') == null) {
-            throw new \ErrorException(sprintf(self::BAD_COMMAND, ''));
-        }
-
-        $options = $this->getParameter('options');
+        $options = $this->options();
 
         if ($options->has('--table')) {
             if ($options->get('--table') == true) {
@@ -207,28 +212,26 @@ class Command
             $table = $options->get('--table');
             $mapMethod = ["table", "drop"];
         }
+
         if ($options->has('--create')) {
-            if ($options->get('--create') == '') {
+            if ($options->get('--create') === true) {
                 throw new \ErrorException(sprintf(self::BAD_COMMAND, ' [--create] '));
             }
             $table = $options->get('--create');
             $mapMethod = ["create", "drop"];
         }
 
-
-        $class_name = ucfirst($table);
+        $class_name = ucfirst(Str::camel($table));
         $migrate = <<<doc
 <?php
 use \Bow\Database\Migration\Fields;
 use \Bow\Database\Migration\Schema;
 use \Bow\Database\Migration\Migration;
 
-class Create{$class_name}Table extends Migration
+class {$class_name} extends Migration
 {
     /**
      * create Table
-     *
-     * @param bool \$display
      */
     public function up()
     {
@@ -247,14 +250,9 @@ class Create{$class_name}Table extends Migration
     }
 }
 doc;
-        if (preg_match("/^[a-z]+$/", $model)) {
-            $model = "create_{$model}_table";
-        }
-
-        $createAt = date("Y_m_d") . "_" . date("His");
-        $file = $this->dirname."/migration/${createAt}_${model}.php";
-        file_put_contents($file, $migrate);
-        Storage::append($this->dirname."/migration/.registers", "{$createAt}_{$model}|$table\n");
+        $create_at = date("Y_m_d") . "_" . date("His");
+        file_put_contents($this->dirname."/migration/${create_at}_${model}.php", $migrate);
+        Storage::append($this->dirname."/migration/.registers", "${create_at}_${model}|$table\n");
 
         echo "\033[0;32mmigration file \033[00m[$model]\033[0;32m created.\033[00m\n";
         return;
@@ -287,7 +285,7 @@ doc;
 
         if ($this->readline("Voulez vous que je crée un model?")) {
             if ($options->has('--model')) {
-                if ($options->get('--model') !== '') {
+                if ($options->get('--model') !== true) {
                     $model = $options->get('--model');
                 } else {
                     echo "\033[0;32;7mLe nom du model non spécifié --model=model_name.\033[00m\n";
@@ -596,7 +594,6 @@ class ${model_name} extends Model
      */
     protected static \$table = "$table_name";
 }
-
 MODEL;
         if (file_exists($this->dirname."/app/${model_name}.php")) {
             echo "\033[0;33mmodel \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m already exist.\033[00m\n";

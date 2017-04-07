@@ -83,6 +83,7 @@ class Bow
         if (! in_array($action, ['up', 'make', 'down'])) {
             throw new \ErrorException('Bad command. Type "php bow migrate help" or "php bow help migrate" for more information"');
         }
+
         $this->_command->$action($this->_command->getParameter('target'));
     }
 
@@ -109,6 +110,10 @@ class Bow
         $hostname = $this->_command->options('--host', 'localhost');
         $settings = $this->_command->getParameter('--php-settings', '');
 
+        if ($settings === true || $settings === null) {
+            $settings = '';
+        }
+
         // resource.
         $r = fopen("php://stdout", "w");
 
@@ -126,9 +131,13 @@ class Bow
      */
     public function console()
     {
-        if (isset($argv[1]) && $argv[1] == 'help') {
+        if ($this->_command->getParameter('target') == 'help') {
             $this->help('console');
             return;
+        }
+
+        if (is_string($this->_command->getParameter('--include'))) {
+            $this->setBootstrap([$this->_command->getParameter('--include')]);
         }
 
         if (! class_exists('\Psy\Shell')) {
@@ -148,6 +157,10 @@ class Bow
     public function generate()
     {
         $action = $this->_command->getParameter('action');
+        if (! in_array($action, ['key', 'resource'])) {
+            throw new \ErrorException(sprintf(''));
+        }
+
         $this->_command->$action($this->_command->getParameter('target'));
     }
 
@@ -193,11 +206,11 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mgenerate:resource\033[00m  Create new REST assicate at a controller
    \033[0;33mgenerate:key\033[00m       Create new app key
 
- \033[0;32mmake\033[00m                 Create a user class
+ \033[0;32mcreate\033[00m                 Create a user class
   option:
-   \033[0;33mmake:middleware\033[00m    Create new middleware
-   \033[0;33mmake:controller\033[00m    Create new controller
-   \033[0;33mmake:model\033[00m         Create new model
+   \033[0;33mcreate:middleware\033[00m    Create new middleware
+   \033[0;33mcreate:controller\033[00m    Create new controller
+   \033[0;33mcreate:model\033[00m         Create new model
 
  \033[0;32mmigrate\033[00m apply a migration in user model
   option:
