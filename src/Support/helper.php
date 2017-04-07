@@ -1127,3 +1127,20 @@ if (! function_exists('bowhash')) {
         return \Bow\Security\Hash::make($data);
     }
 }
+
+if (! function_exists('faker')) {
+    /**
+     * Alias sur la class Filler.
+     *
+     * @param string $type
+     * @return mixed
+     */
+    function faker($type)
+    {
+        $params = array_slice(func_get_args(), 1);
+        if (method_exists(\Bow\Database\Migration\Faker::class, $type)) {
+            return call_user_func_array([\Bow\Database\Migration\Faker::class, $type], $params);
+        }
+        return null;
+    }
+}
