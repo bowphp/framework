@@ -101,8 +101,6 @@ class Response
      */
     public static function instance()
     {
-
-
         return self::$instance;
     }
 
