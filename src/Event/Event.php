@@ -4,6 +4,7 @@ namespace Bow\Event;
 use Bow\Session\Session;
 use Bow\Application\Actionner;
 use Bow\Exception\EventException;
+use Bow\Support\Collection;
 
 /**
  * Class Event
@@ -55,7 +56,7 @@ class Event
         if (! static::hasEvent($event)) {
             static::$events[$event] = [];
         }
-        static::$events[$event][] = (new Listener($fn, $priority));
+        static::$events[$event][] = new Listener($fn, $priority);
         uasort(static::$events[$event], function (Listener $a, Listener $b) {
             return $a->getPriority() < $b->getPriority();
         });
@@ -66,17 +67,26 @@ class Event
      * emit dispatchEvent
      *
      * @param string $event Le nom de l'évènement
+     * @return bool
      */
     public static function emit($event)
     {
         if (! static::hasEvent($event)) {
-            return;
+            return false;
         }
-        $listeners = static::$events[$event];
+        $listeners = new Collection(static::$events[$event]);
         $data = array_slice(func_get_args(), 1);
         $listeners->each(function(Listener $listener) use ($data) {
-            return Actionner::call([$listener, 'call'], $data, static::$nameSpace);
+            if ($listener->getActionType() === 'string') {
+                $callable = $listener->getAction();
+            } else {
+                $callable = [$listener, 'call'];
+            }
+            return Actionner::call($callable, [$data], [
+                'namespace' => [ 'controller' => static::$namespace ]
+            ]);
         });
+        return true;
     }
 
     /**

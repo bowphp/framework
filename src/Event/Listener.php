@@ -15,10 +15,10 @@ class Listener
 
     /**
      * Listener constructor.
-     * @param callable $callable
+     * @param callable|string $callable
      * @param int $priority
      */
-    public function __construct(Callable $callable, $priority)
+    public function __construct($callable, $priority)
     {
         $this->callable = $callable;
         $this->priority = $priority;
@@ -33,6 +33,26 @@ class Listener
     public function call(array $data)
     {
         return call_user_func_array($this->callable, $data);
+    }
+
+    /**
+     * Permet de retourne le type de l'action
+     *
+     * @return string
+     */
+    public function getActionType()
+    {
+        return gettype($this->callable);
+    }
+
+    /**
+     * Permet de retourne l'action à lancer
+     *
+     * @return mixed
+     */
+    public function getAction()
+    {
+        return $this->callable;
     }
 
     /**

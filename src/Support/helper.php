@@ -826,12 +826,12 @@ if (! function_exists('event')) {
      * Alias de la class Event::on
      *
      * @param string $event
-     * @param callable|array $fn
-     * @return Event|null;
+     * @param callable|array|string $fn
+     * @return Event;
      * @throws \Bow\Exception\EventException
      */
     function event($event = null, $fn) {
-        if (! $event) {
+        if ($event === null) {
             return emitter();
         }
         if (! is_string($event)) {
@@ -845,7 +845,7 @@ if (! function_exists('emitter')) {
     /**
      * Alias de la class Event::on
      *
-     * @return Event|null;
+     * @return Event;
      * @throws \Bow\Exception\EventException
      */
     function emitter() {

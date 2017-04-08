@@ -31,10 +31,6 @@ class Actionner
 
         static::$names = $names;
 
-        if (! file_exists($names['autoload'] . '.php')) {
-            throw new RouterException('L\'autoload n\'est pas défini dans le fichier de configuration', E_ERROR);
-        }
-
         if (! isset($names['namespace'])) {
             throw new RouterException('Le namespace d\'autoload n\'est pas défini dans le fichier de configuration');
         }
