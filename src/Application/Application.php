@@ -5,6 +5,7 @@ use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Logger\Logger;
 use InvalidArgumentException;
+use Bow\Exception\RouterException;
 use Bow\Exception\ApplicationException;
 
 /**
@@ -200,10 +201,10 @@ class Application
      */
     public function post($path, $name, Callable $cb = null)
     {
-        $body = $this->request->body();
+        $input = $this->request->input();
 
-        if ($body->has('method')) {
-            $this->specialMethod = $method = strtoupper($body->get('method'));
+        if ($input->has('_method')) {
+            $this->specialMethod = $method = strtoupper($input->get('_method'));
             if (in_array($method, ['DELETE', 'PUT'])) {
                 $this->addHttpVerbe($method, $path, $name, $cb);
             }
@@ -439,8 +440,8 @@ class Application
      * Lanceur de l'application
      *
      * @param callable|null $cb
-     *
      * @return mixed
+     * @throws RouterException
      */
     public function run($cb = null)
     {
@@ -453,8 +454,6 @@ class Application
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
         }
 
-        // drapeaux d'erreur.
-        $error = true;
 
         if (is_callable($cb)) {
             if (call_user_func_array($cb, [$this->request])) {
@@ -472,6 +471,9 @@ class Application
                 $method = $this->specialMethod;
             }
         }
+
+        // drapeaux d'erreur.
+        $error = false;
 
         // Vérification de l'existance de methode de la requete dans
         // la collection de route
@@ -500,17 +502,28 @@ class Application
             // Lancement de la recherche de la method qui arrivée dans la requete
             // ensuite lancement de la verification de l'url de la requete
             // execution de la fonction associé à la route.
-            if ($route->match($this->request->uri(), $with)) {
-                $this->currentPath = $route->getPath();
-                // appel requête fonction
-                $response = $route->call($this->request, $this->config->getNamespace(), $this);
-                if (is_string($response)) {
-                    $this->response->send($response);
-                } else if (is_array($response) || is_object($response)) {
-                    $this->response->json($response);
-                }
+            if (! $route->match($this->request->uri(), $with)) {
+                $error = true;
+                continue;
             }
+
+            $this->currentPath = $route->getPath();
+            // appel requête fonction
+            $response = $route->call($this->request, $this->config->getNamespace(), $this);
+            if (is_string($response)) {
+                $this->response->send($response);
+            } else if (is_array($response) || is_object($response)) {
+                $this->response->json($response);
+            }
+            $error = false;
+            break;
         }
+
+        if ($error) {
+            $this->response->code(404);
+            throw new RouterException('La route n\'existe pas', E_ERROR);
+        }
+
         return true;
     }
 
