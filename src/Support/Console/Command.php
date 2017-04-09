@@ -310,14 +310,6 @@ use Bow\Database\Database;
 class {$controller_name} extends Controller
 {
     /**
-     * Créer une nouvelle instance du controller
-     */
-    public function __construct()
-    {
-        \$this->middleware("crsf");
-    }
-
-    /**
      * Point d'entré
      * GET /$path
      *
@@ -539,8 +531,6 @@ CC;
 <?php
 namespace App\Middleware;
 
-use \Bow\Http\Request;
-
 class {$middleware_name}
 {
     /**
@@ -550,7 +540,7 @@ class {$middleware_name}
      * @param \\Closure \$next
      * @return boolean
      */
-    public function handle(Request \$request, \\Closure \$next)
+    public function handle(\$request, \\Closure \$next)
     {
         // code ici
         return \$next();
