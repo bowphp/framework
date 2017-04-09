@@ -1,7 +1,7 @@
 <?php
 use \Bow\Database\Database;
 
-class TestQueryBuilder extends \PHPUnit\Framework\TestCase
+class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetDatabaseConnection()
     {

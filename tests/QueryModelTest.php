@@ -15,7 +15,7 @@ class Pets extends \Bow\Database\Model
     public static $primaryKey = 'pet_id';
 }
 
-class TestQueryModel extends \PHPUnit\Framework\TestCase
+class QueryModelTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetConnection()
     {

@@ -3,7 +3,7 @@
 use Bow\Support\Collection;
 use Bow\Database\Database;
 
-class TestConnectionAndQuery extends \PHPUnit\Framework\TestCase
+class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
 {
     public function additionProvider()
     {

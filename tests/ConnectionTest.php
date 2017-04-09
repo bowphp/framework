@@ -1,7 +1,7 @@
 <?php
 
 
-class TestConnection extends \PHPUnit_Framework_TestCase
+class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetSqliteConnection()
     {
