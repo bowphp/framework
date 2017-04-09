@@ -349,8 +349,8 @@ class Request
      */
     public function getHeader($key)
     {
-        if ($this->hasHeader($key)) {
-            return $_SERVER[$key];
+        if ($this->hasHeader(strtolower($key))) {
+            return $_SERVER[strtolower($key)];
         }
 
         return false;
