@@ -310,7 +310,7 @@ class Request
     }
 
     /**
-     * retourne la localte de la requête.
+     * retourne la locale de la requête.
      *
      * la locale c'est langue original du client
      * e.g fr => locale = fr_FR // français de france
@@ -332,6 +332,20 @@ class Request
     }
 
     /**
+     * retourne la lang du naviagateur.
+     *
+     * @return string|null
+     */
+    public function lang()
+    {
+        $accept_language = $this->getHeader('accept_language');
+        $language = explode(',', explode(';', $accept_language)[0])[0];
+        preg_match('/([a-z]+)/', $language, $match);
+        return end($match);
+    }
+
+
+    /**
      * le protocol de la requête.
      *
      * @return mixed
@@ -349,8 +363,13 @@ class Request
      */
     public function getHeader($key)
     {
-        if ($this->hasHeader(strtolower($key))) {
-            return $_SERVER[strtolower($key)];
+        $key = strtoupper($key);
+        if ($this->hasHeader($key)) {
+            return $_SERVER[$key];
+        }
+
+        if ($this->hasHeader('HTTP_'.$key)) {
+            return $_SERVER['HTTP_'.$key];
         }
 
         return false;

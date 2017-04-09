@@ -252,21 +252,21 @@ class Configuration
     /**
      * setLogPath configuration du path du répertoir de log
      *
-     * @param string $newLogPath
+     * @param string $new_log_path
      *
      * @throws ApplicationException
      *
      * @return string
      */
-    public function setLoggerPath($newLogPath)
+    public function setLoggerPath($new_log_path)
     {
-        $old = $this->config["application"]->log_direcotory_name;
+        $old = $this->config["application"]->log_directory_name;
 
-        if (!realpath($newLogPath)) {
+        if (! realpath($new_log_path)) {
             throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
         }
 
-        $this->config["application"]->log_direcotory_name = $newLogPath;
+        $this->config["application"]->log_directory_name = $new_log_path;
 
         return $old;
     }
@@ -278,7 +278,7 @@ class Configuration
      */
     public function getLoggerPath()
     {
-        return $this->config["application"]->log_direcotory_name;
+        return $this->config["application"]->log_directory_name;
     }
 
     /**
@@ -472,6 +472,37 @@ class Configuration
     }
 
     /**
+     * retourne la configuration de la languge
+     *
+     * @return array|object
+     */
+    public function getDefaultLang()
+    {
+        return $this->config["application"]->lang;
+    }
+
+    /**
+     * retourne la configuration des mails
+     *
+     * @param string $lang
+     * @return string
+     */
+    public function setDefaultLang($lang)
+    {
+        return $this->config["application"]->lang = $lang;
+    }
+
+    /**
+     * retourne la configuration de la traduction
+     *
+     * @return string
+     */
+    public function getTranslateDirectory()
+    {
+        return $this->config["application"]->translate_directory;
+    }
+
+    /**
      * retourne la configuration des resources locale
      *
      * @return array|object
@@ -499,17 +530,6 @@ class Configuration
     public function getFtpConfiguration()
     {
         return $this->config["resource"]['ftp'];
-    }
-
-    /**
-     * Retourne un booléen qui répresente une décision de configuration
-     * des paramètres sur les callbacks et les methods des controlleurs
-     *
-     * @return bool
-     */
-    public function getTakeInstanceOfApplicationInFunction()
-    {
-        return $this->config["application"]->instance_of_application_in_function;
     }
 
     /**
