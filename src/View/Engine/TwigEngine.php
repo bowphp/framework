@@ -1,8 +1,10 @@
 <?php
 namespace Bow\View\Engine;
 
+use Bow\Support\Str;
 use Bow\Security\Security;
 use Bow\View\EngineAbstract;
+use Bow\Translate\Translator;
 use Bow\Application\Configuration;
 
 class TwigEngine extends EngineAbstract
@@ -53,7 +55,9 @@ class TwigEngine extends EngineAbstract
         $this->template->addFunction(new \Twig_SimpleFunction('csrf_token', function() {
             return Security::getCsrfToken()->token;
         }));
-
+        $this->template->addFunction(new \Twig_SimpleFunction('trans', function($key, $data = [], $choose = null) {
+            return Translator::make($key, $data, $choose);
+        }));
         $this->template->addFunction(new \Twig_SimpleFunction('slugify', [Str::class, 'slugify']));
         return $this->template;
     }

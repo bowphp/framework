@@ -4,6 +4,7 @@ namespace Bow\View\Engine;
 use Bow\Support\Str;
 use Bow\Security\Security;
 use Bow\View\EngineAbstract;
+use Bow\Translate\Translator;
 use Bow\Application\Configuration;
 
 class MustacheEngine extends EngineAbstract
@@ -43,6 +44,9 @@ class MustacheEngine extends EngineAbstract
                 },
                 'csrf_field' => function() {
                     return Security::getCsrfToken()->field;
+                },
+                'trans' => function($key, $data = [], $choose = null) {
+                    return Translator::make($key, $data, $choose);
                 },
                 'public', $config->getPublicPath(),
                 'root', $config->getApproot()
