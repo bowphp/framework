@@ -23,6 +23,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var string
      */
+    protected static $primaryKey = 'id';
+
+    /**
+     * @var string
+     */
     private static $definePrimaryKey = 'id';
 
     /**
@@ -1002,7 +1007,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param array $values
      *
-     * @return int|DatabaseErrorHandler
+     * @return int
      */
     public function insertAndGetLastId(array $values)
     {
@@ -1071,7 +1076,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         // groupé les données
         if (is_int($chunk)) {
-            $data = array_chunk($data, $chunk);
+            $data = array_chunk($data->toArray(), $chunk);
         }
 
         // active la pagination automatique.
@@ -1097,7 +1102,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         if ($value == null) {
             $value = $column;
-            $column = 'id';
+            $column = static::$definePrimaryKey;
         }
         return static::$instance->where($column, $value)->count() > 0 ? true : false;
     }
@@ -1118,7 +1123,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        die(static::$instance->get()->toJson());
         return static::$instance->get()->toJson();
     }
 

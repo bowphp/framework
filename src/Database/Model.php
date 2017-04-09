@@ -1,11 +1,11 @@
 <?php
 namespace Bow\Database;
 
+use Carbon\Carbon;
 use Bow\Support\Collection;
 use Bow\Database\Database as DB;
 use Bow\Exception\ModelException;
 use Bow\Exception\QueryBuilderException;
-use Carbon\Carbon;
 
 /**
  * Class Model
@@ -180,12 +180,19 @@ abstract class Model extends QueryBuilder
             return static::$instance->insert($this->attributes);
         }
 
-        $primary_key_value = isset($this->original[static::$primaryKey]) ? $this->original[static::$primaryKey] : false;
+        $primary_key_value = isset($this->original[static::$primaryKey]) ? $this->original[static::$primaryKey] :
+            (isset($this->attributes[static::$primaryKey]) ? $this->attributes[static::$primaryKey] : false);
 
         if ($primary_key_value === false) {
-            throw new QueryBuilderException('Cette instance ne possede pas l\'id de la table');
+            throw new QueryBuilderException('Cette instance ne possède pas l\'"id" de la table');
         }
 
+        if (! static::$instance->exists(static::$primaryKey, $primary_key_value)) {
+            $n = static::$instance->insert($this->attributes);
+            $user = static::$instance->where(static::$primaryKey, $primary_key_value)->getOne();
+            $this->original = $user->toArray();
+            return $n;
+        }
         $this->original[static::$primaryKey] = $primary_key_value;
         return static::$instance->where(static::$primaryKey, $primary_key_value)->update($this->attributes);
     }
@@ -309,7 +316,7 @@ abstract class Model extends QueryBuilder
         if (! isset($this->attributes[$name])) {
             return null;
         }
-        
+
         if (in_array($name, static::carbonDates())) {
             return new Carbon($this->attributes[$name]);
         }
