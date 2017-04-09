@@ -1146,3 +1146,63 @@ if (! function_exists('faker')) {
         return null;
     }
 }
+
+if (! function_exists('translate')) {
+    /**
+     * @param $key
+     * @param $data
+     * @param bool $choise
+     * @return string
+     */
+    function translate($key, $data, $choise = false)
+    {
+        return '';
+    }
+}
+
+if (! function_exists('trans')) {
+    /**
+     * @param $key
+     * @param $data
+     * @param bool $choise
+     * @return string
+     */
+    function trans($key, $data, $choise = false)
+    {
+        return translate($key, $data, $choise);
+    }
+}
+
+if (! function_exists('lang')) {
+    /**
+     * @param $key
+     * @param $data
+     * @param bool $choise
+     * @return string
+     */
+    function lang($key, $data, $choise = false)
+    {
+        return lang($key, $data, $choise);
+    }
+}
+
+if (! function_exists('get_navigator_local')) {
+
+    /**
+     * Permet de retourner la local du naviagteur
+     *
+     * @return string
+     */
+    function get_navigator_local()
+    {
+        $accept_language = request()->getHeader('accept_language');
+
+        if (is_array($accept_language)) {
+            $accept_language = $accept_language[0];
+        }
+
+        $language = explode(',', explode(';', $accept_language)[0])[0];
+        preg_match('/([a-z]+)/', $language, $match);
+        return end($match);
+    }
+}
