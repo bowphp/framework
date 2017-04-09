@@ -1,5 +1,6 @@
 <?php
 namespace Bow\Http;
+use Bow\Support\Str;
 
 /**
  * Class Cache
@@ -26,7 +27,9 @@ class Cache
      */
     public static function confirgure($base_directory)
     {
-        static::$directory = $base_directory;
+        if (static::$directory === null || static::$directory !== $base_directory) {
+            static::$directory = $base_directory;
+        }
         if (! is_dir($base_directory)) {
             @mkdir($base_directory, 0777);
         }
@@ -50,7 +53,9 @@ class Cache
 
         $meta['__bow_meta'] = ['expire_to' => $time == null ? '+' : $time];
         $meta['content'] = $content;
-        return (bool) file_put_contents(static::$directory.md5('/bow_'.$key), serialize($meta));
+
+        $cache_filename = static::makeHashFilename($key, true);
+        return (bool) file_put_contents($cache_filename, serialize($meta));
     }
 
     /**
@@ -70,7 +75,7 @@ class Cache
 
         $meta['__bow_meta'] = ['expire_to' => '+'];
         $meta['content'] = $content;
-        return (bool) file_put_contents(static::$directory.md5('/bow_'.$key), serialize($meta));
+        return (bool) file_put_contents(static::makeHashFilename($key, true), serialize($meta));
     }
 
     /**
@@ -98,7 +103,7 @@ class Cache
             $cache['content'] .= $content;
         }
 
-        return (bool) file_put_contents(static::$directory.md5('/bow_'.$key), serialize($cache));
+        return (bool) file_put_contents(static::makeHashFilename($key), serialize($cache));
     }
 
     /**
@@ -114,7 +119,7 @@ class Cache
             return null;
         }
 
-        $cache = unserialize(file_get_contents(static::$directory.md5('/bow_'.$key)));
+        $cache = unserialize(file_get_contents(static::makeHashFilename($key)));
 
         if (! static::$with_meta) {
             unset($cache['__bow_meta']);
@@ -156,7 +161,7 @@ class Cache
      */
     public static function forget($key)
     {
-        return (bool) @unlink(static::$directory.md5('/bow_'.$key));
+        return (bool) @unlink(static::makeHashFilename($key));
     }
 
     /**
@@ -167,7 +172,7 @@ class Cache
      */
     public static function has($key)
     {
-        $filename = static::$directory.md5('/bow_'.$key);
+        $filename = static::makeHashFilename($key);
         return (bool) @file_exists($filename);
     }
 
@@ -187,5 +192,33 @@ class Cache
         static::$with_meta = false;
 
         return $cache['__bow_meta']['expire_at'] == '+' ? false : (time() > $cache['__bow_meta']['expire_at']);
+    }
+
+    /**
+     * Permet de formater le fichier
+     * @param string $key
+     * @param bool $make_group_directory
+     * @return string
+     */
+    private static function makeHashFilename($key, $make_group_directory = false)
+    {
+        $hash = hash('sha256', '/bow_'.$key);
+        $group = Str::slice($hash, 0, 2);
+
+        if ($make_group_directory) {
+            if (! is_dir(static::$directory.'/'.$group)) {
+                @mkdir(static::$directory.'/'.$group);
+            }
+        }
+
+       return static::$directory.'/'.$group.'/'.$hash;
+    }
+
+    /**
+     * Permet de vide tout le cache
+     */
+    public static function clear()
+    {
+
     }
 }
