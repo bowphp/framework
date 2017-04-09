@@ -27,7 +27,7 @@ class TwigEngine extends EngineAbstract
         $this->config = $config;
         $loader = new \Twig_Loader_Filesystem($config->getViewpath());
         $this->template = new \Twig_Environment($loader, [
-            'cache' => $config->getCachepath(),
+            'cache' => $config->getCachepath().'/view',
             'auto_reload' => $config->getCacheAutoReload(),
             'debug' => $config->getLoggerMode() == 'develepment' ? true : false
         ]);

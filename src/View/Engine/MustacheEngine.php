@@ -27,7 +27,7 @@ class MustacheEngine extends EngineAbstract
     {
         $this->config = $config;
         $this->template = new \Mustache_Engine([
-            'cache' => $config->getCachepath(),
+            'cache' => $config->getCachepath().'/view',
             'loader' => new \Mustache_Loader_FilesystemLoader($config->getViewpath()),
             'helpers' => [
                 'secure' => function($data) {
