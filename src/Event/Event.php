@@ -24,7 +24,7 @@ class Event
     /**
      * @var array
      */
-    private static $namespace = 'App\\Controller';
+    private static $namespace = 'App\\Controllers';
 
     /**
      * @var Event

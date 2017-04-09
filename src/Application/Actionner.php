@@ -23,7 +23,7 @@ class Actionner
     public static function call($actions, $param = null, array $names = [])
     {
         $param = is_array($param) ? $param : [$param];
-        $function_list = [];
+        $functions = [];
 
         if (! isset($names['namespace'])) {
             return static::exec($actions, $param);
@@ -42,7 +42,8 @@ class Actionner
         }
 
         if (is_string($actions)) {
-            return call_user_func_array(static::controller($actions), $param);
+            $function = static::controller($actions);
+            return call_user_func_array($function['controller'], array_merge($param, $function['injections']));
         }
 
         if (! is_array($actions)) {
@@ -61,11 +62,11 @@ class Actionner
 
             if (is_int($key)) {
                 if (is_callable($action)) {
-                    array_push($function_list, $action);
+                    array_push($functions, $action);
                     continue;
                 }
                 if (is_string($action)) {
-                    array_push($function_list, static::controller($action));
+                    array_push($functions, static::controller($action));
                     continue;
                 }
             }
@@ -73,12 +74,12 @@ class Actionner
             if (isset($action['with']) && isset($action['call'])) {
                 if (is_string($action['call'])) {
                     $controller = $action['with'].'@'.$action['call'];
-                    array_push($function_list, static::controller($controller));
+                    array_push($functions, static::controller($controller));
                     continue;
                 }
                 foreach($action['call'] as $method) {
                     $controller = $action['with'].'@'.$method;
-                    array_push($function_list,  static::controller($controller));
+                    array_push($functions,  static::controller($controller));
                 }
                 continue;
             }
@@ -113,8 +114,8 @@ class Actionner
         $next = false;
         // Exécution du middleware
         foreach ($middlewares_collection as $middleware) {
-            $instances = static::injector($middleware, 'handle');
-            $status = call_user_func_array([new $middleware(), 'handle'], array_merge($instances, [function () use (& $next) {
+            $injections = static::injector($middleware, 'handle');
+            $status = call_user_func_array([new $middleware(), 'handle'], array_merge($injections, [function () use (& $next) {
                 return $next = true;
             }], $param));
             if ($status === true && $next) {
@@ -126,15 +127,20 @@ class Actionner
                     die(json_encode($status));
                 }
             }
-            die();
+            if (is_bool($status)) {
+                $status = '';
+            }
+            die($status);
         }
 
-        // Lancement de l'execution de la liste
-        // fonction a execute suivant un ordre
-        // conforme au middleware.
-        if (! empty($function_list)) {
-            foreach($function_list as $func) {
-                $status = call_user_func_array($func, $param);
+        // Lancement de l'éxècution de la liste des actions definir
+        // Fonction a éxècuté suivant un ordre
+        if (! empty($functions)) {
+            foreach($functions as $function) {
+                $status = call_user_func_array(
+                    $function['controller'],
+                    array_merge($function['injections'], $param)
+                );
             }
         }
         return $status;
@@ -145,16 +151,24 @@ class Actionner
      *
      * @param string $middleware
      * @param array $param
+     * @param \Closure|null $callback
      * @return bool
      */
-    public static function middleware($middleware, $param)
+    public static function middleware($middleware, $param, \Closure $callback = null)
     {
-        $instance = new $middleware();
         $next = false;
-        $status = call_user_func_array([$instance, 'handle'], array_merge([function () use ($next) {
+        $instance = new $middleware();
+        $injections = static::injector($middleware, 'handle');
+
+        $status = call_user_func_array([$instance, 'handle'], array_merge([$injections, function () use (& $next) {
             return $next = true;
         }], $param));
-        return $next && $status;
+
+        if (is_callable($callback)) {
+            $callback();
+        }
+
+        return $next && $status === true;
     }
 
     /**
@@ -171,10 +185,10 @@ class Actionner
         $parts = preg_split('/(\n|\*)+/', $reflection->getMethod($method)->getDocComment());
         foreach ($parts as $value) {
             if (preg_match('/^@param\s+(.+)/', trim($value), $match)) {
-                $param = preg_split('/\s+/', $match[1]);
-                if (class_exists($param[0], true)) {
-                    if (! in_array(strtolower($param[0]), ['\closure', 'closure', 'string', 'array', 'bool', 'int', 'integer', 'object', 'stdclass'])) {
-                        $params[] = new $param[0]();
+                list($class, $variable) = preg_split('/\s+/', $match[1], 2);
+                if (class_exists($class, true)) {
+                    if (! in_array(strtolower($class), ['string', 'array', 'bool', 'int', 'integer', 'double', 'float', 'callable', 'object', 'stdclass', '\closure', 'closure'])) {
+                        $params[] = new $class();
                     }
                 }
             }
@@ -195,41 +209,21 @@ class Actionner
             return call_user_func_array($arr, $arg);
         }
 
-        if (! is_array($arr)) {
-            // On lance la loader de controller si $cb est un String
-            $cb = static::controller($arr);
-
-            if ($cb !== null) {
-                return call_user_func_array($cb, $arg);
-            }
-
-            return null;
+        if (is_array($arr)) {
+            return call_user_func_array($arr, $arg);
         }
 
-        // Lancement de la procedure de lancement recursive.
-        return array_reduce($arr, function($next, $cb) use ($arg) {
-            // $next est-il null
-            if (is_null($next)) {
-                // On lance la loader de controller si $cb est un String
-                if (is_string($cb)) {
-                    $cb = static::controller($cb);
-                }
+        // On lance la loader de controller si $cb est un String
+        $controller = static::controller($arr);
 
-                return call_user_func_array($cb, $arg);
-            }
+        if (is_array($controller)) {
+            return call_user_func_array(
+                $controller['controller'],
+                array_merge($controller['injections'], $arg)
+            );
+        }
 
-            // $next est-il a true.
-            if ($next !== true) {
-                die();
-            }
-
-            // On lance la loader de controller si $cb est un String
-            if (is_string($cb)) {
-                $cb = static::controller($cb);
-            }
-
-            return call_user_func_array($cb, $arg);
-        });
+        return false;
     }
 
     /**
@@ -249,6 +243,11 @@ class Actionner
         list($class, $method) = preg_split('/\.|@/', $controllerName);
         $class = static::$names['namespace']['controller'] . '\\' . ucfirst($class);
 
-        return [new $class(), $method];
+        $injections = static::injector($class, $method);
+
+        return [
+            'controller' => [new $class(), $method],
+            'injections' => $injections
+        ];
     }
 }
