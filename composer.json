@@ -40,5 +40,9 @@
         "psr-4": {
             "Bow\\": "src/"
         }
+    },
+    "suggest": {
+        "mustache/mustache": "Pour le choix du moteur de template 'mustache'",
+        "pug-php/pug": "Pour le choix du moteur de template 'pug'"
     }
 }
