@@ -51,11 +51,10 @@ class Cache
             $content = $data;
         }
 
-        $meta['__bow_meta'] = ['expire_to' => $time == null ? '+' : $time];
+        $meta['__bow_meta'] = ['expire_at' => $time == null ? '+' : $time];
         $meta['content'] = $content;
 
-        $cache_filename = static::makeHashFilename($key, true);
-        return (bool) file_put_contents($cache_filename, serialize($meta));
+        return (bool) file_put_contents(static::makeHashFilename($key, true), serialize($meta));
     }
 
     /**
@@ -73,7 +72,7 @@ class Cache
             $content = $data;
         }
 
-        $meta['__bow_meta'] = ['expire_to' => '+'];
+        $meta['__bow_meta'] = ['expire_at' => '+'];
         $meta['content'] = $content;
         return (bool) file_put_contents(static::makeHashFilename($key, true), serialize($meta));
     }
@@ -109,14 +108,15 @@ class Cache
     /**
      * Récupérer une entrée dans le cache
      *
-     * @param $key
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
-    public static function get($key)
+    public static function get($key, $default = null)
     {
         if (! static::has($key)) {
             static::$with_meta = false;
-            return null;
+            return $default;
         }
 
         $cache = unserialize(file_get_contents(static::makeHashFilename($key)));
@@ -140,17 +140,39 @@ class Cache
     {
         static::$with_meta = true;
         $cache = static::get($key);
+        static::$with_meta = false;
+
         if ($cache == null) {
             return false;
         }
-        static::$with_meta = false;
+
 
         if ($cache['__bow_meta']['expire_at'] == '+') {
             $cache['__bow_meta']['expire_at'] = time();
         }
 
         $cache['__bow_meta']['expire_at'] += $time;
-        return true;
+
+        return (bool) file_put_contents(static::makeHashFilename($key), serialize($cache));;
+    }
+
+    /**
+     * Permet de récuperer le temps d'expiration du cache
+     *
+     * @param string $key
+     * @return bool|string|int
+     */
+    public static function timeOf($key)
+    {
+        static::$with_meta = true;
+        $cache = static::get($key);
+        static::$with_meta = false;
+
+        if ($cache == null) {
+            return false;
+        }
+
+        return $cache['__bow_meta']['expire_at'];
     }
 
     /**
@@ -161,7 +183,20 @@ class Cache
      */
     public static function forget($key)
     {
-        return (bool) @unlink(static::makeHashFilename($key));
+        $filename = static::makeHashFilename($key);
+        if (! file_exists($filename)) {
+            return false;
+        }
+
+        $r = (bool) @unlink($filename);
+        $parts = explode('/', $filename);
+        array_pop($parts);
+        $dirname = implode('/', $parts);
+
+        if (is_dir($dirname)) {
+            @rmdir($dirname);
+        }
+        return $r;
     }
 
     /**
@@ -211,7 +246,7 @@ class Cache
             }
         }
 
-       return static::$directory.'/'.$group.'/'.$hash;
+        return static::$directory.'/'.$group.'/'.$hash;
     }
 
     /**
