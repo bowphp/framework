@@ -13,11 +13,13 @@ grand.
 
 # require
 
-+ php >= 5.5.9
++ php >= 5.6
 + mcrypt
 + mb_string
 + PDO
-+ php5-openssl
++ php-sqlite3
++ php-openssl
++ php-curl
 
 # Contribution
 
@@ -27,3 +29,6 @@ Pour participer au project il faut:
 + Créer un branche qui aura le nom résumé de votre modification `git branch branche-de-vos-traveaux`
 + Faire une publication sur votre dépot `git push origin branche-de-vos-traveaux`
 + Enfin faire un `pull-request`
+
+# Author
+> Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
