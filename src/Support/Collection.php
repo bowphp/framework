@@ -405,7 +405,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     }
 
     /**
-     * Permet d'ignorer la clé que l'on lui donne
+     * Permet de retourne la liste de clé
      * et retourne une instance de Collection.
      *
      * @param array $except Liste des éléments à ignorer
@@ -415,8 +415,27 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     {
         $data = [];
         $this->recursive($this->storage, function($value, $key) use (& $data, $except) {
-            if (! in_array($key, $except)) {
-                $data[] = $value;
+            if (in_array($key, $except)) {
+                $data[$key] = $value;
+            }
+        });
+
+        return new Collection($data);
+    }
+
+    /**
+     * Permet d'ignorer la clé que l'on lui donne
+     * et retourne une instance de Collection.
+     *
+     * @param array $ignores Liste des éléments à ignorer
+     * @return Collection
+     */
+    public function ignores(array $ignores)
+    {
+        $data = [];
+        $this->recursive($this->storage, function($value, $key) use (& $data, $ignores) {
+            if (! in_array($key, $ignores)) {
+                $data[$key] = $value;
             }
         });
 
