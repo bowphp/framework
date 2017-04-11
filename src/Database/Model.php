@@ -213,6 +213,12 @@ abstract class Model extends QueryBuilder
      */
     public static function create(array $data)
     {
+        if (static::$timestmap) {
+            $data = array_merge($data, [
+                'created_at' => date('Y-d-m H:i:s'),
+                'updated_at' => date('Y-d-m H:i:s')
+            ]);
+        }
         $self = new static($data);
         $self->save();
     }

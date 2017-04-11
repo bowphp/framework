@@ -994,17 +994,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     private function insertOne(array $value)
     {
         $fields = array_keys($value);
-        if (static::$timestmap) {
-            $fields = array_merge($fields, [
-                'created_at',
-                'updated_at',
-            ]);
-            $value = array_merge($value, [
-                'created_at' => date('Y-d-m H:i:s'),
-                'updated_at' => date('Y-d-m H:i:s')
-            ]);
-        }
-        dump($value, $fields, static::$timestmap);
+
         $sql = 'insert into `' . static::$table . '` values (';
         $sql .= implode(', ', Util::add2points($fields, true));
         $sql .= ');';
