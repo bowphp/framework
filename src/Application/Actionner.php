@@ -125,10 +125,7 @@ class Actionner
                     die(json_encode($status));
                 }
             }
-            if (is_bool($status)) {
-                $status = '';
-            }
-            return $status;
+            die();
         }
 
         // Lancement de l'éxècution de la liste des actions definir
