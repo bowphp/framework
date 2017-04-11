@@ -60,7 +60,7 @@ class Event
         uasort(static::$events[$event], function (Listener $a, Listener $b) {
             return $a->getPriority() < $b->getPriority();
         });
-        Session::add("bow.event.listener", static::$events);
+        // Session::add("bow.event.listener", static::$events);
     }
 
     /**

@@ -479,10 +479,10 @@ class Application
         // la collection de route
         if (! isset(static::$routes[$method])) {
             // Vérification et appel de la fonction du branchement 404
+            $this->response->code(404);
             if (empty($this->errorCode)) {
                 $this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
             }
-            $this->response->code(404);
             return false;
         }
 
@@ -521,7 +521,7 @@ class Application
 
         if ($error) {
             $this->response->code(404);
-            throw new RouterException('La route n\'existe pas', E_ERROR);
+            throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
         }
 
         return true;

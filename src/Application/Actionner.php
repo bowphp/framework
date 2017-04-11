@@ -102,13 +102,11 @@ class Actionner
             if (! array_key_exists($middleware, $names['middlewares'])) {
                 throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
             }
-            // Chargement du middleware
-            $class_middleware = $names['namespace']['middleware'] . '\\' . ucfirst($names['middlewares'][$middleware]);
             // On vérifie si le middleware définie est une middleware valide.
-            if (! class_exists($class_middleware)) {
-                throw new RouterException($middleware . ' n\'est pas un class middleware.');
+            if (! class_exists($names['middlewares'][$middleware])) {
+                throw new RouterException($names['middlewares'][$middleware] . ' n\'est pas un class middleware.');
             }
-            $middlewares_collection[] = $class_middleware;
+            $middlewares_collection[] = $names['middlewares'][$middleware];
         }
 
         $next = false;
@@ -130,7 +128,7 @@ class Actionner
             if (is_bool($status)) {
                 $status = '';
             }
-            die($status);
+            return $status;
         }
 
         // Lancement de l'éxècution de la liste des actions definir
