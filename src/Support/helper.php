@@ -633,7 +633,7 @@ if (! function_exists('redirect')) {
      * @param string|array $path Le path de rédirection
      */
     function redirect($path) {
-        query_response('redirect', $path);
+        query_response('redirect', [$path]);
     }
 }
 

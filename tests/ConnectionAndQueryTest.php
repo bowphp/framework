@@ -54,7 +54,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
      */
     public function testCreateTable($db)
     {
-        $this->assertInstanceOf(Bow\Database\Database::class, $db);
+        $this->assertInstanceOf(Database::class, $db);
         $db->getPdo()->exec('DROP TABLE IF EXISTS pets');
         $db->getPdo()->exec('CREATE TABLE IF NOT EXISTS pets (id INT, name VARCHAR(255))');
     }

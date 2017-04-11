@@ -13,7 +13,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetInstance($db)
     {
-        $this->assertInstanceOf(\Bow\Database\QueryBuilder::class, $db->table('pets'));
+        $this->assertInstanceOf(\Bow\Database\QueryBuilder\QueryBuilder::class, $db->table('pets'));
     }
 
     /**

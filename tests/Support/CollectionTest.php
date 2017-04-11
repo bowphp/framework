@@ -99,7 +99,7 @@ class TestCollection extends \PHPUnit\Framework\TestCase
      */
     public function testExcepts(Collection $collection)
     {
-        $this->assertEquals(range(2, 10), $collection->excepts([0])->toArray());
+        $this->assertEquals(range(1, 2), $collection->excepts([0, 1])->toArray());
     }
 
     /**

@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Database;
+namespace Bow\Database\Util;
 
 use Bow\Exception\DatabaseException;
 
@@ -24,12 +24,12 @@ class DBError
     /**
      * @var string
      */
-    private $driverCode = null;
+    private $driverCode;
 
     /**
      * @var string
      */
-    private $driverMessage = null;
+    private $driverMessage;
 
     /**
      * @var bool

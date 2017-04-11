@@ -542,17 +542,17 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function toArray()
     {
-        $data = [];
+        $collection = [];
 
-        $this->recursive($this->storage, function($value, $key) use (& $data) {
+        $this->recursive($this->storage, function($value, $key) use (& $collection) {
             if (is_object($value)) {
-                $data[$key] = (array) $value;
+                $collection[$key] = (array) $value;
             } else {
-                $data[$key] = $value;
+                $collection[$key] = $value;
             }
         });
 
-        return $data;
+        return $collection;
     }
 
     /**

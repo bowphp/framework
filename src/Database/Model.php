@@ -6,6 +6,7 @@ use Bow\Support\Collection;
 use Bow\Database\Database as DB;
 use Bow\Exception\ModelException;
 use Bow\Exception\QueryBuilderException;
+use Bow\Database\QueryBuilder\QueryBuilder;
 
 /**
  * Class Model
@@ -15,6 +16,11 @@ use Bow\Exception\QueryBuilderException;
  */
 abstract class Model extends QueryBuilder
 {
+    /**
+     * @var bool
+     */
+    protected static $timestmap = true;
+
     /**
      * @var array
      */
@@ -180,12 +186,17 @@ abstract class Model extends QueryBuilder
             return static::$instance->insert($this->attributes);
         }
 
-        $primary_key_value = isset($this->original[static::$primaryKey]) ? $this->original[static::$primaryKey] :
-            (isset($this->attributes[static::$primaryKey]) ? $this->attributes[static::$primaryKey] : false);
+        $primary_key_value =
+            array_key_exists(static::$primaryKey, $this->original)
+            ? $this->original[static::$primaryKey]
+            : (
+                array_key_exists(static::$primaryKey, $this->attributes)
+                ? $this->attributes[static::$primaryKey] : null
+            );
 
-        if ($primary_key_value === false) {
-            throw new QueryBuilderException('Cette instance ne possède pas l\'"id" de la table');
-        }
+        // if ($primary_key_value === false) {
+        //     throw new QueryBuilderException('Cette instance ne possède pas l\'"id" de la table');
+        // }
 
         if (! static::$instance->exists(static::$primaryKey, $primary_key_value)) {
             $n = static::$instance->insert($this->attributes);
@@ -195,6 +206,15 @@ abstract class Model extends QueryBuilder
         }
         $this->original[static::$primaryKey] = $primary_key_value;
         return static::$instance->where(static::$primaryKey, $primary_key_value)->update($this->attributes);
+    }
+
+    /**
+     * @param array $data
+     */
+    public static function create(array $data)
+    {
+        $self = new static($data);
+        $self->save();
     }
 
     /**
@@ -273,7 +293,7 @@ abstract class Model extends QueryBuilder
             static::$table = strtolower(static::class);
         }
         if (static::$instance == null) {
-            static::make(static::$table, DB::getPdo(), static::class);
+            parent::make(static::$table, DB::getPdo(), static::class);
         }
     }
 
@@ -291,7 +311,7 @@ abstract class Model extends QueryBuilder
 
         if (method_exists($self = new static(), $method)) {
             if (method_exists(static::$instance, $method)) {
-                throw new ModelException($method . ' ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
+                throw new \BadMethodCallException($method . ' ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
             }
             return call_user_func_array([$self, $method], $args);
         }
@@ -302,7 +322,17 @@ abstract class Model extends QueryBuilder
             return static::carbornize($collection, $method, $self);
         }
 
-        throw new ModelException('methode ' . $method . ' n\'est définie.', E_ERROR);
+        throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
+    }
+
+    /**
+     * Permet de retourner les données
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return $this->attributes;
     }
 
     /**

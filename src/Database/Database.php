@@ -8,6 +8,7 @@ use Bow\Support\Collection;
 use InvalidArgumentException;
 use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
+use Bow\Database\QueryBuilder\QueryBuilder;
 use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;

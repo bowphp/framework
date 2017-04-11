@@ -12,7 +12,7 @@ class Pets extends \Bow\Database\Model
     /**
      * @var string
      */
-    public static $primaryKey = 'pet_id';
+    protected static $primaryKey = 'pet_id';
 }
 
 class QueryModelTest extends \PHPUnit\Framework\TestCase
@@ -96,5 +96,18 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     {
         $pet = Pets::first();
         $this->assertInstanceOf(Pets::class, $pet);
+    }
+
+    /**
+     * @depends testGetConnection
+     */
+    public function testInsert($db)
+    {
+        $pet = Pets::insert([
+            'name' => 'Couli',
+            'id' => 1
+        ]);
+
+        $this->assertTrue((bool) $pet);
     }
 }

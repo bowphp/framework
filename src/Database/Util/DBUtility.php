@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Database;
+namespace Bow\Database\Util;
 
 use PDO;
 use PDOStatement;

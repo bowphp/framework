@@ -3,6 +3,7 @@ namespace Bow\Database;
 
 use \Carbon\Carbon;
 use Bow\Exception\QueryBuilderException;
+use Bow\Database\QueryBuilder\QueryBuilder;
 
 /**
  * Class SQLUnit
@@ -23,7 +24,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
     private $id;
 
     /**
-     * @var Table
+     * @var QueryBuilder
      */
     private $table;
 

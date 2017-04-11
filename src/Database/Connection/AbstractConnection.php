@@ -2,7 +2,7 @@
 namespace Bow\Database\Connection;
 
 use PDO;
-use Bow\Database\DBUtility;
+use Bow\Database\Util\DBUtility;
 
 /**
  * Interface ConnectionInterface

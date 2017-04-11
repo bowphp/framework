@@ -1,10 +1,12 @@
 <?php
-namespace Bow\Database;
+namespace Bow\Database\QueryBuilder;
 
 use Bow\Support\Str;
 use Bow\Support\Util;
+use Bow\Database\SqlUnity;
 use Bow\Security\Security;
 use Bow\Support\Collection;
+use Bow\Database\Util\DBUtility;
 use Bow\Exception\QueryBuilderException;
 
 /**
@@ -24,11 +26,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @var string
      */
     protected static $primaryKey = 'id';
-
-    /**
-     * @var string
-     */
-    private static $definePrimaryKey = 'id';
 
     /**
      * @var string
@@ -91,6 +88,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     protected static $getOne = false;
 
     /**
+     * @var bool
+     */
+    protected static $timestmap = false;
+
+    /**
      * Contructeur
      *
      * @param string $table
@@ -123,9 +125,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public static function make($table, \PDO $connection, $classname = null)
     {
         if (static::$instance === null || static::$table != $table) {
-            if (property_exists(static::class, 'primaryKey')) {
-                self::$definePrimaryKey = static::$primaryKey;
-            }
             static::$instance = new self($table, $connection, $classname);
         }
         return static::$instance;
@@ -710,12 +709,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             $current = current($data);
             static::$getOne = false;
             if (self::$classname === QueryBuilder::class) {
-                $id = static::$definePrimaryKey;
-                if (isset($current->{static::$definePrimaryKey})) {
-                    $id = $current->{static::$definePrimaryKey};
-                    unset($current->{static::$definePrimaryKey});
+                $id = static::$primaryKey;
+                $id_value = null;
+                if (isset($current->{$id})) {
+                    $id_value = $current->{$id};
+                    unset($current->{$id});
                 }
-                return new SqlUnity(static::$instance, $id, $current);
+                return new SqlUnity(static::$instance, $id_value, $current);
             }
             return new $classname((array) $current);
         }
@@ -726,12 +726,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         foreach ($data as $key => $value) {
             if (self::$classname === QueryBuilder::class) {
-                $id = static::$definePrimaryKey;
-                if (isset($value->{static::$definePrimaryKey})) {
-                    $id = $value->{static::$definePrimaryKey};
-                    unset($value->{static::$definePrimaryKey});
+                $id = static::$primaryKey;
+                $id_value = null;
+                if (isset($value->{$id})) {
+                    $id_value = $value->{$id};
+                    unset($value->{$id});
                 }
-                $data[$key] = new SqlUnity(static::$instance, $id, $value);
+                $data[$key] = new SqlUnity(static::$instance, $id_value, $value);
             } else {
                 $data[$key] = new $classname((array) $value);
             }
@@ -992,11 +993,25 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     private function insertOne(array $value)
     {
+        $fields = array_keys($value);
+        if (static::$timestmap) {
+            $fields = array_merge($fields, [
+                'created_at',
+                'updated_at',
+            ]);
+            $value = array_merge($value, [
+                'created_at' => date('Y-d-m H:i:s'),
+                'updated_at' => date('Y-d-m H:i:s')
+            ]);
+        }
+        dump($value, $fields, static::$timestmap);
         $sql = 'insert into `' . static::$table . '` values (';
-        $sql .= implode(', ', Util::add2points(array_keys($value), true));
+        $sql .= implode(', ', Util::add2points($fields, true));
         $sql .= ');';
+
         $stmt = self::$connection->prepare($sql);
         static::$instance->bind($stmt, $value);
+
         $stmt->execute();
 
         return (int) $stmt->rowCount();
@@ -1102,7 +1117,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         if ($value == null) {
             $value = $column;
-            $column = static::$definePrimaryKey;
+            $column = static::$primaryKey;
         }
         return static::$instance->where($column, $value)->count() > 0 ? true : false;
     }

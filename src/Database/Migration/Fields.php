@@ -473,10 +473,12 @@ class Fields
     public function timestamps()
     {
         $this->addField('timestamp', 'created_at', [
-            'null' => true
+            'null' => true,
+            'default' => 'CURRENT_TIMESTAMP'
         ]);
         $this->addField('timestamp', 'updated_at', [
-            'null' => true
+            'null' => true,
+            'default' => 'CURRENT_TIMESTAMP'
         ]);
         return $this;
     }
