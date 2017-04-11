@@ -1011,10 +1011,10 @@ if (! function_exists('validate')) {
      *
      * @param array $inputs Les données a validé
      * @param array $rules  Les critaires de validation
-     * @return \Bow\Support\Validate\Validate
+     * @return \Bow\Validation\Validate
      */
     function validate(array $inputs, array $rules) {
-        return \Bow\Support\Validate\Validator::make($inputs, $rules);
+        return \Bow\Validation\Validator::make($inputs, $rules);
     }
 }
 
