@@ -214,7 +214,39 @@ class Input implements CollectionAccess
      */
     public function toArray()
     {
-        return (array) $this->data;
+        return $this->data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function excepts(array $exceptions)
+    {
+        $data = [];
+
+        foreach ($exceptions as $exception) {
+            if (isset($this->data[$exception])) {
+                $data[$exception] = $this->data[$exception];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function ignores(array $ignores)
+    {
+        $data = $this->data;
+
+        foreach ($ignores as $ignore) {
+            if (isset($data[$ignore])) {
+                unset($data[$ignore]);
+            }
+        }
+
+        return $data;
     }
 
     /**
