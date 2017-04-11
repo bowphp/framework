@@ -4,6 +4,8 @@ namespace Bow\Http;
 use Closure;
 use ErrorException;
 use Bow\Support\Collection;
+use Bow\Validation\Validate;
+use Bow\Validation\Validator;
 use Bow\Interfaces\CollectionAccess;
 
 /**
@@ -221,6 +223,17 @@ class Input implements CollectionAccess
     public function toObject()
     {
         return (object) $this->data;
+    }
+
+    /**
+     * Permet de valider les données entrantes
+     *
+     * @param array $rule
+     * @return  Validate
+     */
+    public function validate(array $rule)
+    {
+        return Validator::make($this->data, $rule);
     }
 
     /**
