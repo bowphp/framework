@@ -3,7 +3,7 @@
 
 [![GitHub version](https://badge.fury.io/gh/papac%2Fframework.svg)](https://badge.fury.io/gh/papac%2Fframework)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/papac/framework/blob/master/LICENSE)
-[![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg)](https://papac.github.com/docs)
+[![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg)](https://papac.github.com/bow)
 
 Bow est un micro framework écrir pour les débutants qui veulent travail sur un projet un peut plus
 grand.
