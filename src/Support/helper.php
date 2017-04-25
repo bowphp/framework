@@ -429,7 +429,11 @@ if (! function_exists('debug')) {
      * synthaxique des types de donnée.
      */
     function debug() {
-        call_user_func_array([Util::class, 'debug'], secure(func_get_args()));
+        array_map(function($x) {
+            call_user_func_array([Util::class, 'debug'], $x);
+        }, secure(func_get_args()));
+
+        die(1);
     }
 }
 
