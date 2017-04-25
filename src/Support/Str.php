@@ -61,6 +61,23 @@ class Str
     }
 
     /**
+     * Snake case
+     *
+     * @param $value
+     * @param string $delimiter
+     * @return mixed
+     */
+    public static function snake($value, $delimiter = '_')
+    {
+        if (! ctype_lower($value)) {
+            $value = preg_replace('/\s+/u', '', $value);
+            $value = static::lower(preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $value));
+        }
+
+        return $value;
+    }
+
+    /**
      * slice
      *
      * @param string $str
