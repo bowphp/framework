@@ -8,7 +8,6 @@
 Bow est un micro framework écrir pour les débutants qui veulent travail sur un projet un peut plus
 grand.
 
-[![start](http://papac.github.com/public/img/1382900391.gif "start bow framework")](http://papac.github.com)
 > N'ésitez pas commencez maintenant.
 
 # require
@@ -32,3 +31,4 @@ Pour participer au project il faut:
 
 # Author
 > Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
+> SVP s'il y a un bogue sur le projet veillez me contacté.
