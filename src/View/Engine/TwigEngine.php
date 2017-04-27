@@ -1,6 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
+use Bow\Session\Session;
 use Bow\Support\Str;
 use Bow\Security\Security;
 use Bow\View\EngineAbstract;
@@ -59,6 +60,21 @@ class TwigEngine extends EngineAbstract
             return Translator::make($key, $data, $choose);
         }));
         $this->template->addFunction(new \Twig_SimpleFunction('slugify', [Str::class, 'slugify']));
+        $this->template->addFunction(new \Twig_SimpleFunction('session', function ($key = null, $value = null){
+            if ($key === null && $value === null) {
+                return new Session();
+            }
+
+            if (Session::has($key)) {
+                return Session::get($key);
+            }
+
+            if ($key !== null && $value !== null) {
+                return Session::add($key, $value);
+            }
+
+            return null;
+        }));
         return $this->template;
     }
 

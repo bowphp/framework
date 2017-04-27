@@ -14,12 +14,17 @@ use Bow\Database\QueryBuilder\QueryBuilder;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-abstract class Model extends QueryBuilder
+abstract class Model extends QueryBuilder implements \ArrayAccess
 {
     /**
      * @var bool
      */
     protected static $timestmap = true;
+
+    /**
+     * @var bool
+     */
+    protected static $isAutoincrement = true;
 
     /**
      * @var array
@@ -40,6 +45,11 @@ abstract class Model extends QueryBuilder
      * @var string
      */
     protected static $primaryKey = 'id';
+
+    /**
+     * @var string
+     */
+    protected static $primaryKeyType = 'int';
 
     /**
      * Le nom de la table courrente
@@ -200,27 +210,53 @@ abstract class Model extends QueryBuilder
 
         if (! static::$instance->exists(static::$primaryKey, $primary_key_value)) {
             $n = static::$instance->insert($this->attributes);
-            $user = static::$instance->where(static::$primaryKey, $primary_key_value)->getOne();
-            $this->original = $user->toArray();
+            $primary_key_value = static::$instance->getLastInsertId();
+
+            if (static::$primaryKeyType == 'int') {
+                $primary_key_value = (int) $primary_key_value;
+            } elseif (static::$primaryKeyType == 'float') {
+                $primary_key_value = (float) $primary_key_value;
+            } elseif (static::$primaryKeyType == 'double') {
+                $primary_key_value = (double) $primary_key_value;
+            }
+
+            $this->attributes[static::$primaryKey] = $primary_key_value;
+            $this->original = $this->attributes;
             return $n;
         }
+
+
         $this->original[static::$primaryKey] = $primary_key_value;
         return static::$instance->where(static::$primaryKey, $primary_key_value)->update($this->attributes);
     }
 
     /**
      * @param array $data
+     * @return self
      */
     public static function create(array $data)
     {
         if (static::$timestmap) {
             $data = array_merge($data, [
-                'created_at' => date('Y-d-m H:i:s'),
-                'updated_at' => date('Y-d-m H:i:s')
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
             ]);
         }
+
+        if (! array_key_exists(static::$primaryKey, $data)) {
+            if (static::$isAutoincrement) {
+                $data[static::$primaryKey] = null;
+            } else {
+                if (static::$primaryKeyType == 'string') {
+                    $data[static::$primaryKey] = '';
+                }
+            }
+        }
+
         $self = new static($data);
         $self->save();
+
+        return $self;
     }
 
     /**
@@ -309,7 +345,7 @@ abstract class Model extends QueryBuilder
      * @param string $method Le nom de la method a appelé
      * @param array $args    Les arguments a passé à la fonction
      * @throws ModelException
-     * @return \Bow\Database\QueryBuilder|array
+     * @return \Bow\Database\QueryBuilder\QueryBuilder|array
      */
     public static function __callStatic($method, $args)
     {
@@ -390,5 +426,40 @@ abstract class Model extends QueryBuilder
     public function jsonSerialize()
     {
         return $this->attributes;
+    }
+
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     */
+    public function offsetSet($offset, $value) {
+        if (is_null($offset)) {
+            $this->attributes[] = $value;
+        } else {
+            $this->attributes[$offset] = $value;
+        }
+    }
+
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists($offset) {
+        return isset($this->attributes[$offset]);
+    }
+
+    /**
+     * @param mixed $offset
+     */
+    public function offsetUnset($offset) {
+        unset($this->attributes[$offset]);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return mixed|null
+     */
+    public function offsetGet($offset) {
+        return isset($this->attributes[$offset]) ? $this->attributes[$offset] : null;
     }
 }

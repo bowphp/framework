@@ -281,7 +281,7 @@ doc;
             echo "\033[00m";
         }
 
-        $options = $this->getParameter('options');
+        $options = $this->options();
 
         if ($this->readline("Voulez vous que je crée un model?")) {
             if ($options->has('--model')) {

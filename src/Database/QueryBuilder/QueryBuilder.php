@@ -45,7 +45,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var array
      */
-    protected $whereDataBind = [];
+    protected $whereDataBinding = [];
 
     /**
      * @var string
@@ -189,7 +189,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             throw new QueryBuilderException('Le booléen '. $boolean . ' non accepté', E_ERROR);
         }
 
-        static::$instance->whereDataBind[$column] = $value;
+        static::$instance->whereDataBinding[$column] = $value;
 
         if (static::$instance->where == null) {
             static::$instance->where = $column . ' ' . $comp . ' :' . $column;
@@ -692,8 +692,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         // execution de requete.
         $stmt = self::$connection->prepare($sql);
-        static::bind($stmt, static::$instance->whereDataBind);
-        static::$instance->whereDataBind = [];
+        static::bind($stmt, static::$instance->whereDataBinding);
+        static::$instance->whereDataBinding = [];
         $stmt->execute();
 
         $data = Security::sanitaze($stmt->fetchAll());
@@ -797,9 +797,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         $stmt = self::$connection->prepare($sql);
-        static::bind($stmt, static::$instance->whereDataBind);
+        static::bind($stmt, static::$instance->whereDataBinding);
 
-        static::$instance->whereDataBind = [];
+        static::$instance->whereDataBinding = [];
         $stmt->execute();
 
         $r = $stmt->fetchColumn();
@@ -829,8 +829,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         if (!is_null(static::$instance->where)) {
             $sql .= ' where ' . static::$instance->where;
             static::$instance->where = null;
-            $data = array_merge($data, static::$instance->whereDataBind);
-            static::$instance->whereDataBind = [];
+            $data = array_merge($data, static::$instance->whereDataBinding);
+            static::$instance->whereDataBinding = [];
         }
 
         $stmt = self::$connection->prepare($sql);
@@ -866,8 +866,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         $stmt = self::$connection->prepare($sql);
 
-        static::bind($stmt, static::$instance->whereDataBind);
-        static::$instance->whereDataBind = [];
+        static::bind($stmt, static::$instance->whereDataBinding);
+        static::$instance->whereDataBinding = [];
         $stmt->execute();
 
         $r = $stmt->rowCount();
@@ -942,7 +942,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         $stmt = self::$connection->prepare($sql);
-        static::$instance->bind($stmt, static::$instance->whereDataBind);
+        static::$instance->bind($stmt, static::$instance->whereDataBinding);
         $stmt->execute();
 
         return (int) $stmt->rowCount();
@@ -1069,12 +1069,12 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         // sauvegarde des informations sur le where
         $where = static::$instance->where;
-        $dataBind = static::$instance->whereDataBind;
+        $dataBind = static::$instance->whereDataBinding;
         $data = static::$instance->jump($jump)->take($n)->get();
 
         // reinitialisation du where
         static::$instance->where = $where;
-        static::$instance->whereDataBind = $dataBind;
+        static::$instance->whereDataBinding = $dataBind;
 
         // On compte le nombre de page qui reste
         $restOfPage = ceil(static::$instance->count() / $n) - $current;

@@ -430,10 +430,9 @@ if (! function_exists('debug')) {
      */
     function debug() {
         array_map(function($x) {
-            call_user_func_array([Util::class, 'debug'], $x);
+            call_user_func_array([Util::class, 'debug'], [$x]);
         }, secure(func_get_args()));
-
-        die(1);
+        die;
     }
 }
 
@@ -964,7 +963,7 @@ if (! function_exists('session')) {
      */
     function session($key = null, $value = null) {
         if ($key === null && $value === null) {
-            return Session::toArray();
+            return new Session();
         }
 
         if (Session::has($key)) {

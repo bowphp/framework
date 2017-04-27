@@ -256,4 +256,20 @@ class Session implements CollectionAccessStatic
         static::start();
         return json_encode(static::filter());
     }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists(static::class, $name)) {
+            return call_user_func_array([static::class, $name], $arguments);
+        }
+
+        new \BadMethodCallException('La methode ' . $name . ' n\'exist pas.');
+    }
 }

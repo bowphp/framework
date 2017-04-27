@@ -49,13 +49,15 @@ class Util
         ]);
 
         $handler = function ($vars) use ($cloner, $dumper) {
+            if (! is_array($vars)) {
+                $vars = [$vars];
+            }
             foreach($vars as $var) {
                 $dumper->dump($cloner->cloneVar($var));
             }
         };
 
-        call_user_func_array($handler, $vars);
-        die;
+        call_user_func_array($handler, [$vars]);
     }
 
     /**
