@@ -1,0 +1,24 @@
+language: php
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+php:
+  - 5.6
+  - 7.0
+  - nightly
+  - hhvm
+
+install:
+  - composer install --prefer-dist
+
+matrix:
+  allow_failures:
+    - php: nightly
+  fast_finish: true
+
+script:
+  - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
