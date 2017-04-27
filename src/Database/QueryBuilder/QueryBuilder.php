@@ -20,12 +20,12 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var string
      */
-    private static $classname;
+    private $classname;
 
     /**
      * @var string
      */
-    protected static $primaryKey = 'id';
+    private $primaryKey = 'id';
 
     /**
      * @var string
@@ -35,42 +35,42 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var string
      */
-    protected $select = null;
+    private $select = null;
 
     /**
      * @var string
      */
-    protected $where = null;
+    private $where = null;
 
     /**
      * @var array
      */
-    protected $whereDataBinding = [];
+    private $whereDataBinding = [];
 
     /**
      * @var string
      */
-    protected $join = null;
+    private $join = null;
 
     /**
      * @var string
      */
-    protected $limit = null;
+    private $limit = null;
 
     /**
      * @var string
      */
-    protected $group = null;
+    private $group = null;
 
     /**
      * @var string
      */
-    protected $havin = null;
+    private $havin = null;
 
     /**
      * @var string
      */
-    protected $order = null;
+    private $order = null;
 
     /**
      * @var QueryBuilder
@@ -80,17 +80,12 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var \PDO
      */
-    private static $connection;
+    private $connection;
 
     /**
      * @var bool
      */
-    protected static $getOne = false;
-
-    /**
-     * @var bool
-     */
-    protected static $timestmap = false;
+    private $getOne = false;
 
     /**
      * Contructeur
@@ -101,12 +96,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     protected function __construct($table, $connection, $classname = null)
     {
-        self::$connection = $connection;
         static::$table = $table;
+        $this->connection = $connection;
+
         if ($classname == null) {
-            self::$classname = static::class;
+            $this->classname = static::class;
         } else {
-            self::$classname = $classname;
+            $this->classname = $classname;
         }
     }
 
@@ -125,7 +121,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public static function make($table, \PDO $connection, $classname = null)
     {
         if (static::$instance === null || static::$table != $table) {
-            static::$instance = new self($table, $connection, $classname);
+            static::$instance = new static($table, $connection, $classname);
         }
         return static::$instance;
     }
@@ -142,16 +138,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public function select(array $select = ['*'])
     {
         if (count($select) == 0) {
-            return static::$instance;
+            return $this;
         }
 
         if (count($select) == 1 && $select[0] == '*') {
-            static::$instance->select = '*';
+            $this->select = '*';
         } else {
-            static::$instance->select = '`' . implode('`, `', $select) . '`';
+            $this->select = '`' . implode('`, `', $select) . '`';
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -189,15 +185,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             throw new QueryBuilderException('Le booléen '. $boolean . ' non accepté', E_ERROR);
         }
 
-        static::$instance->whereDataBinding[$column] = $value;
+        $this->whereDataBinding[$column] = $value;
 
-        if (static::$instance->where == null) {
-            static::$instance->where = $column . ' ' . $comp . ' :' . $column;
+        if ($this->where == null) {
+            $this->where = $column . ' ' . $comp . ' :' . $column;
         } else {
-            static::$instance->where .= ' ' . $boolean .' '. $column . ' '. $comp .' :'. $column;
+            $this->where .= ' ' . $boolean .' '. $column . ' '. $comp .' :'. $column;
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -213,13 +209,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function orWhere($column, $comp = '=', $value = null)
     {
-        if (is_null(static::$instance->where)) {
+        if (is_null($this->where)) {
             throw new QueryBuilderException('Cette fonction ne peut pas être utiliser sans un where avant.', E_ERROR);
         }
 
-        static::$instance->where($column, $comp, $value, 'or');
+        $this->where($column, $comp, $value, 'or');
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -234,13 +230,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function whereNull($column, $boolean = 'and')
     {
-        if (!is_null(static::$instance->where)) {
-            static::$instance->where = '`' . $column . '` is null';
+        if (!is_null($this->where)) {
+            $this->where = '`' . $column . '` is null';
         } else {
-            static::$instance->where = ' ' . $boolean .' `' . $column .'` is null';
+            $this->where = ' ' . $boolean .' `' . $column .'` is null';
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -255,13 +251,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function whereNotNull($column, $boolean = 'and')
     {
-        if (is_null(static::$instance->where)) {
-            static::$instance->where = '`'. $column . '` is not null';
+        if (is_null($this->where)) {
+            $this->where = '`'. $column . '` is not null';
         } else {
-            static::$instance->where .= ' ' . $boolean .' `' . $column .'` is not null';
+            $this->where .= ' ' . $boolean .' `' . $column .'` is not null';
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -286,21 +282,21 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         $between = implode(' and ', $range);
 
-        if (is_null(static::$instance->where)) {
+        if (is_null($this->where)) {
             if ($boolean == 'not') {
-                static::$instance->where = '`' . $column.'` not between ' . $between;
+                $this->where = '`' . $column.'` not between ' . $between;
             } else {
-                static::$instance->where = '`' . $column . '` between ' . $between;
+                $this->where = '`' . $column . '` between ' . $between;
             }
         } else {
             if ($boolean == 'not') {
-                static::$instance->where .= ' and `'.$column .'`  not between ' . $between;
+                $this->where .= ' and `'.$column .'`  not between ' . $between;
             } else {
-                static::$instance->where .= ' ' . $boolean . ' `' . $column. '` between ' . $between;
+                $this->where .= ' ' . $boolean . ' `' . $column. '` between ' . $between;
             }
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -312,9 +308,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function whereNotBetween($column, array $range)
     {
-        static::$instance->whereBetween($column, $range, 'not');
+        $this->whereBetween($column, $range, 'not');
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -343,21 +339,21 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         $in = implode(', ', $range);
 
-        if (is_null(static::$instance->where)) {
+        if (is_null($this->where)) {
             if ($boolean == 'not') {
-                static::$instance->where = '`' . $column . '` not in ('.$in.')';
+                $this->where = '`' . $column . '` not in ('.$in.')';
             } else {
-                static::$instance->where = '`' . $column .'` in ('.$in.')';
+                $this->where = '`' . $column .'` in ('.$in.')';
             }
         } else {
             if ($boolean == 'not') {
-                static::$instance->where .= ' and `' . $column . '` not in ('.$in.')';
+                $this->where .= ' and `' . $column . '` not in ('.$in.')';
             } else {
-                static::$instance->where .= ' and `'.$column.'` in ('.$in.')';
+                $this->where .= ' and `'.$column.'` in ('.$in.')';
             }
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -372,9 +368,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function whereNotIn($column, array $range)
     {
-        static::$instance->whereIn($column, $range, 'not');
+        $this->whereIn($column, $range, 'not');
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -386,13 +382,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function join($QueryBuilder)
     {
-        if (is_null(static::$instance->join)) {
-            static::$instance->join = 'inner join `'.$QueryBuilder.'`';
+        if (is_null($this->join)) {
+            $this->join = 'inner join `'.$QueryBuilder.'`';
         } else {
-            static::$instance->join .= ', `'.$QueryBuilder.'`';
+            $this->join .= ', `'.$QueryBuilder.'`';
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -406,17 +402,36 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function leftJoin($QueryBuilder)
     {
-        if (is_null(static::$instance->join)) {
-            static::$instance->join = 'left join `'.$QueryBuilder.'`';
+        if (is_null($this->join)) {
+            $this->join = 'left join `'.$QueryBuilder.'`';
         } else {
-            if (!preg_match('/^(inner|right)\sjoin\s.*/', static::$instance->join)) {
-                static::$instance->join .= ', `'.$QueryBuilder.'`';
+            if (!preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
+                $this->join .= ', `'.$QueryBuilder.'`';
             } else {
                 throw new QueryBuilderException('La clause inner join est dèja initalisé.', E_ERROR);
             }
         }
 
-        return static::$instance;
+        return $this;
+    }
+    
+    /**
+     * Action first, récupère le première enregistrement
+     *
+     * @return mixed
+     */
+    public function last()
+    {
+        $where = $this->where;
+        $whereData = $this->whereDataBinding;
+
+        // On compte le tout.
+        $c = $this->count();
+
+        $this->where = $where;
+        $this->whereDataBinding = $whereData;
+
+        return $this->jump($c - 1)->take(1)->getOne();
     }
 
     /**
@@ -428,16 +443,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function rightJoin($QueryBuilder)
     {
-        if (is_null(static::$instance->join)) {
-            static::$instance->join = 'right join `'.$QueryBuilder.'`';
+        if (is_null($this->join)) {
+            $this->join = 'right join `'.$QueryBuilder.'`';
         } else {
-            if (!preg_match('/^(inner|left)\sjoin\s.*/', static::$instance->join)) {
-                static::$instance->join .= ', `'.$QueryBuilder.'`';
+            if (!preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
+                $this->join .= ', `'.$QueryBuilder.'`';
             } else {
                 throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
             }
         }
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -454,19 +469,19 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function on($column1, $comp = '=', $column2)
     {
-        if (is_null(static::$instance->join)) {
+        if (is_null($this->join)) {
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
-        if (!static::$instance->isComporaisonOperator($comp)) {
+        if (!$this->isComporaisonOperator($comp)) {
             $column2 = $comp;
         }
 
-        if (!preg_match('/on/i', static::$instance->join)) {
-            static::$instance->join .= ' on `' . $column1 . '` ' . $comp . ' `' . $column2 . '`';
+        if (!preg_match('/on/i', $this->join)) {
+            $this->join .= ' on `' . $column1 . '` ' . $comp . ' `' . $column2 . '`';
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -483,21 +498,21 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function orOn($column, $comp = '=', $value)
     {
-        if (is_null(static::$instance->join)) {
+        if (is_null($this->join)) {
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
-        if (!static::$instance->isComporaisonOperator($comp)) {
+        if (!$this->isComporaisonOperator($comp)) {
             $value = $comp;
         }
 
-        if (preg_match('/on/i', static::$instance->join)) {
-            static::$instance->join .= ' or `'.$column.'` '.$comp.' '.$value;
+        if (preg_match('/on/i', $this->join)) {
+            $this->join .= ' or `'.$column.'` '.$comp.' '.$value;
         } else {
             throw new QueryBuilderException('La clause <b>on</b> n\'est pas initialisé.', E_ERROR);
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -509,11 +524,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function group($column)
     {
-        if (is_null(static::$instance->group)) {
-            static::$instance->group = $column;
+        if (is_null($this->group)) {
+            $this->group = $column;
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -526,14 +541,14 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function having($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        if (!static::$instance->isComporaisonOperator($comp)) {
+        if (!$this->isComporaisonOperator($comp)) {
             $value = $comp;
             $comp = '=';
         }
-        if (is_null(static::$instance->havin)) {
-            static::$instance->havin = '`'.$column.'` '.$comp.' '.$value;
+        if (is_null($this->havin)) {
+            $this->havin = '`'.$column.'` '.$comp.' '.$value;
         } else {
-            static::$instance->havin .= ' '.$boolean.' `'.$column.'` '.$comp.' '.$value;
+            $this->havin .= ' '.$boolean.' `'.$column.'` '.$comp.' '.$value;
         }
     }
 
@@ -547,15 +562,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function orderBy($column, $type = 'asc')
     {
-        if (is_null(static::$instance->order)) {
+        if (is_null($this->order)) {
             if (!in_array($type, ['asc', 'desc'])) {
                 $type = 'asc';
             }
 
-            static::$instance->order = 'order by `'.$column.'` '.$type;
+            $this->order = 'order by `'.$column.'` '.$type;
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -566,11 +581,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function jump($offset = 0)
     {
-        if (is_null(static::$instance->limit)) {
-            static::$instance->limit = $offset.', ';
+        if (is_null($this->limit)) {
+            $this->limit = $offset.', ';
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -582,17 +597,17 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function take($limit)
     {
-        if (is_null(static::$instance->limit)) {
-            static::$instance->limit = $limit;
-            return static::$instance;
+        if (is_null($this->limit)) {
+            $this->limit = $limit;
+            return $this;
         }
 
-        if (preg_match('/^([\d]+),$/', static::$instance->limit, $match)) {
+        if (preg_match('/^([\d]+),$/', $this->limit, $match)) {
             array_shift($match);
-            static::$instance->limit = $match[0].', '.$limit;
+            $this->limit = $match[0].', '.$limit;
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -604,7 +619,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function max($column)
     {
-        return static::$instance->executeAgregat('max', $column);
+        return $this->executeAgregat('max', $column);
     }
 
     /**
@@ -616,7 +631,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function min($column)
     {
-        return static::$instance->executeAgregat('min', $column);
+        return $this->executeAgregat('min', $column);
     }
 
     /**
@@ -628,7 +643,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function avg($column)
     {
-        return static::$instance->executeAgregat('avg', $column);
+        return $this->executeAgregat('avg', $column);
     }
 
     /**
@@ -640,7 +655,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function sum($column)
     {
-        return static::$instance->executeAgregat('sum', $column);
+        return $this->executeAgregat('sum', $column);
     }
 
     /**
@@ -655,21 +670,21 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         $sql = 'select ' . $aggregat . '(`' . $column . '`) from `' . static::$table . '`';
 
-        if (!is_null(static::$instance->where)) {
-            $sql .= ' where ' . static::$instance->where;
-            static::$instance->where = null;
+        if (!is_null($this->where)) {
+            $sql .= ' where ' . $this->where;
+            $this->where = null;
         }
 
-        if (!is_null(static::$instance->group)) {
-            $sql .= ' ' . static::$instance->group;
-            static::$instance->group = null;
+        if (!is_null($this->group)) {
+            $sql .= ' ' . $this->group;
+            $this->group = null;
 
-            if (!isNull(static::$instance->havin)){
-                $sql .= ' having ' . static::$instance->havin;
+            if (!isNull($this->havin)){
+                $sql .= ' having ' . $this->havin;
             }
         }
 
-        $s = self::$connection->prepare($sql);
+        $s = $this->connection->prepare($sql);
         $s->execute();
 
         if ($s->rowCount() > 1) {
@@ -688,34 +703,34 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function get($cb = null)
     {
-        $sql = static::$instance->getSelectStatement();
+        $sql = $this->getSelectStatement();
 
         // execution de requete.
-        $stmt = self::$connection->prepare($sql);
-        static::bind($stmt, static::$instance->whereDataBinding);
-        static::$instance->whereDataBinding = [];
+        $stmt = $this->connection->prepare($sql);
+        static::bind($stmt, $this->whereDataBinding);
+        $this->whereDataBinding = [];
         $stmt->execute();
 
         $data = Security::sanitaze($stmt->fetchAll());
         $stmt->closeCursor();
 
-        if (self::$classname) {
-            $classname = self::$classname;
+        if ($this->classname) {
+            $classname = $this->classname;
         } else {
             $classname = static::class;
         }
 
-        if (static::$getOne) {
+        if ($this->getOne) {
             $current = current($data);
-            static::$getOne = false;
-            if (self::$classname === QueryBuilder::class) {
-                $id = static::$primaryKey;
+            $this->getOne = false;
+            if ($this->classname === QueryBuilder::class) {
+                $id = $this->primaryKey;
                 $id_value = null;
                 if (isset($current->{$id})) {
                     $id_value = $current->{$id};
                     unset($current->{$id});
                 }
-                return new SqlUnity(static::$instance, $id_value, $current);
+                return new SqlUnity($this, $id_value, $current);
             }
             return new $classname((array) $current);
         }
@@ -725,14 +740,14 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         foreach ($data as $key => $value) {
-            if (self::$classname === QueryBuilder::class) {
-                $id = static::$primaryKey;
+            if ($this->classname === QueryBuilder::class) {
+                $id = $this->primaryKey;
                 $id_value = null;
                 if (isset($value->{$id})) {
                     $id_value = $value->{$id};
                     unset($value->{$id});
                 }
-                $data[$key] = new SqlUnity(static::$instance, $id_value, $value);
+                $data[$key] = new SqlUnity($this, $id_value, $value);
             } else {
                 $data[$key] = new $classname((array) $value);
             }
@@ -747,8 +762,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function getOne()
     {
-        static::$getOne = true;
-        return static::$instance->get();
+        $this->getOne = true;
+        return $this->get();
     }
 
     /**
@@ -759,13 +774,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function transition(callable $cb)
     {
-        $where = static::$instance->where;
-        $data = static::$instance->get();
+        $where = $this->where;
+        $data = $this->get();
         if (call_user_func_array($cb, [$data]) === true) {
-            static::$instance->where = $where;
+            $this->where = $where;
         }
 
-        return static::$instance;
+        return $this;
     }
 
     /**
@@ -791,15 +806,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         $sql = 'select count(' . $column . ') from `' . static::$table .'`';
 
-        if (static::$instance->where !== null) {
-            $sql .= ' where ' . static::$instance->where;
-            static::$instance->where = null;
+        if ($this->where !== null) {
+            $sql .= ' where ' . $this->where;
+            $this->where = null;
         }
 
-        $stmt = self::$connection->prepare($sql);
-        static::bind($stmt, static::$instance->whereDataBinding);
+        $stmt = $this->connection->prepare($sql);
+        static::bind($stmt, $this->whereDataBinding);
 
-        static::$instance->whereDataBinding = [];
+        $this->whereDataBinding = [];
         $stmt->execute();
 
         $r = $stmt->fetchColumn();
@@ -826,14 +841,14 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $sql = 'update `' . static::$table . '` set ';
         $sql .= Util::rangeField(Util::add2points(array_keys($data)));
 
-        if (!is_null(static::$instance->where)) {
-            $sql .= ' where ' . static::$instance->where;
-            static::$instance->where = null;
-            $data = array_merge($data, static::$instance->whereDataBinding);
-            static::$instance->whereDataBinding = [];
+        if (!is_null($this->where)) {
+            $sql .= ' where ' . $this->where;
+            $this->where = null;
+            $data = array_merge($data, $this->whereDataBinding);
+            $this->whereDataBinding = [];
         }
 
-        $stmt = self::$connection->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $data = Security::sanitaze($data, true);
         static::bind($stmt, $data);
 
@@ -859,15 +874,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         $sql = 'delete from `' . static::$table . '`';
 
-        if (!is_null(static::$instance->where)) {
-            $sql .= ' where ' . static::$instance->where;
-            static::$instance->where = null;
+        if (!is_null($this->where)) {
+            $sql .= ' where ' . $this->where;
+            $this->where = null;
         }
 
-        $stmt = self::$connection->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
 
-        static::bind($stmt, static::$instance->whereDataBinding);
-        static::$instance->whereDataBinding = [];
+        static::bind($stmt, $this->whereDataBinding);
+        $this->whereDataBinding = [];
         $stmt->execute();
 
         $r = $stmt->rowCount();
@@ -892,8 +907,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function remove($column, $comp = '=', $value = null)
     {
-        static::$instance->where = null;
-        return static::$instance->where($column, $comp, $value)->delete();
+        $this->where = null;
+        return $this->where($column, $comp, $value)->delete();
     }
 
     /**
@@ -906,7 +921,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function increment($column, $step = 1)
     {
-        return static::$instance->incrementAction($column, $step, '+');
+        return $this->incrementAction($column, $step, '+');
     }
 
 
@@ -920,7 +935,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function decrement($column, $step = 1)
     {
-        return static::$instance->incrementAction($column, $step, '-');
+        return $this->incrementAction($column, $step, '-');
     }
 
     /**
@@ -936,13 +951,13 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         $sql = 'update `' . static::$table . '` set `'.$column.'` = `'.$column.'` '.$sign.' '.$step;
 
-        if (!is_null(static::$instance->where)) {
-            $sql .= ' ' . static::$instance->where;
-            static::$instance->where = null;
+        if (!is_null($this->where)) {
+            $sql .= ' ' . $this->where;
+            $this->where = null;
         }
 
-        $stmt = self::$connection->prepare($sql);
-        static::$instance->bind($stmt, static::$instance->whereDataBinding);
+        $stmt = $this->connection->prepare($sql);
+        $this->bind($stmt, $this->whereDataBinding);
         $stmt->execute();
 
         return (int) $stmt->rowCount();
@@ -955,7 +970,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function truncate()
     {
-        return (bool) self::$connection->exec('truncate `' . static::$table . '`;');
+        return (bool) $this->connection->exec('truncate `' . static::$table . '`;');
     }
 
     /**
@@ -972,7 +987,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         foreach ($values as $key => $value) {
             if (is_array($value)) {
-                $nInserted += static::$instance->insertOne($value);
+                $nInserted += $this->insertOne($value);
             } else {
                 $resets[$key] = $value;
             }
@@ -980,7 +995,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         if (! empty($resets)) {
-            $nInserted += static::$instance->insertOne($resets);
+            $nInserted += $this->insertOne($resets);
         }
 
         return $nInserted;
@@ -999,8 +1014,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $sql .= implode(', ', Util::add2points($fields, true));
         $sql .= ');';
 
-        $stmt = self::$connection->prepare($sql);
-        static::$instance->bind($stmt, $value);
+        $stmt = $this->connection->prepare($sql);
+        $this->bind($stmt, $value);
 
         $stmt->execute();
 
@@ -1016,8 +1031,8 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function insertAndGetLastId(array $values)
     {
-        static::$instance->insert($values);
-        $n = self::$connection->lastInsertId();
+        $this->insert($values);
+        $n = $this->connection->lastInsertId();
 
         return $n;
     }
@@ -1029,7 +1044,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function drop()
     {
-        return (bool) self::$connection->exec('drop table ' . static::$table);
+        return (bool) $this->connection->exec('drop table ' . static::$table);
     }
 
     /**
@@ -1068,16 +1083,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         // sauvegarde des informations sur le where
-        $where = static::$instance->where;
-        $dataBind = static::$instance->whereDataBinding;
-        $data = static::$instance->jump($jump)->take($n)->get();
+        $where = $this->where;
+        $dataBind = $this->whereDataBinding;
+        $data = $this->jump($jump)->take($n)->get();
 
         // reinitialisation du where
-        static::$instance->where = $where;
-        static::$instance->whereDataBinding = $dataBind;
+        $this->where = $where;
+        $this->whereDataBinding = $dataBind;
 
         // On compte le nombre de page qui reste
-        $restOfPage = ceil(static::$instance->count() / $n) - $current;
+        $restOfPage = ceil($this->count() / $n) - $current;
 
         // groupé les données
         if (is_int($chunk)) {
@@ -1107,9 +1122,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         if ($value == null) {
             $value = $column;
-            $column = static::$primaryKey;
+            $column = $this->primaryKey;
         }
-        return static::$instance->where($column, $value)->count() > 0 ? true : false;
+        return $this->where($column, $value)->count() > 0 ? true : false;
     }
 
     /**
@@ -1120,7 +1135,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function getLastInsertId($name = null)
     {
-        return self::$connection->lastInsertId($name);
+        return $this->connection->lastInsertId($name);
     }
 
     /**
@@ -1128,7 +1143,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return static::$instance->get()->toJson();
+        return $this->get()->toJson();
     }
 
     /**
@@ -1137,7 +1152,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function toJson($option = 0)
     {
-        return json_encode(static::$instance->get()->values(), $option);
+        return json_encode($this->get()->values(), $option);
     }
 
     /**
@@ -1150,44 +1165,44 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $sql = 'select ';
 
         // Ajout de la clause select
-        if (is_null(static::$instance->select)) {
+        if (is_null($this->select)) {
             $sql .= '* from `' . static::$table .'`';
         } else {
-            $sql .= static::$instance->select . ' from `' . static::$table . '`';
-            static::$instance->select = null;
+            $sql .= $this->select . ' from `' . static::$table . '`';
+            $this->select = null;
         }
 
         // Ajout de la clause join
-        if (!is_null(static::$instance->join)) {
-            $sql .= ' join ' . static::$instance->join;
-            static::$instance->join = null;
+        if (!is_null($this->join)) {
+            $sql .= ' join ' . $this->join;
+            $this->join = null;
         }
 
         // Ajout de la clause where
-        if (!is_null(static::$instance->where)) {
-            $sql .= ' where ' . static::$instance->where;
-            static::$instance->where = null;
+        if (!is_null($this->where)) {
+            $sql .= ' where ' . $this->where;
+            $this->where = null;
         }
 
         // Ajout de la clause order
-        if (!is_null(static::$instance->order)) {
-            $sql .= ' ' . static::$instance->order;
-            static::$instance->order = null;
+        if (!is_null($this->order)) {
+            $sql .= ' ' . $this->order;
+            $this->order = null;
         }
 
         // Ajout de la clause limit
-        if (!is_null(static::$instance->limit)) {
-            $sql .= ' limit ' . static::$instance->limit;
-            static::$instance->limit = null;
+        if (!is_null($this->limit)) {
+            $sql .= ' limit ' . $this->limit;
+            $this->limit = null;
         }
 
         // Ajout de la clause group
-        if (!is_null(static::$instance->group)) {
-            $sql .= ' group by ' . static::$instance->group;
-            static::$instance->group = null;
+        if (!is_null($this->group)) {
+            $sql .= ' group by ' . $this->group;
+            $this->group = null;
 
-            if (!is_null(static::$instance->havin)) {
-                $sql .= ' having ' . static::$instance->havin;
+            if (!is_null($this->havin)) {
+                $sql .= ' having ' . $this->havin;
             }
         }
 
@@ -1201,6 +1216,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function __toString()
     {
-        return static::$instance->toJson();
+        return $this->toJson();
     }
 }

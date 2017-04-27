@@ -14,49 +14,54 @@ use Bow\Database\QueryBuilder\QueryBuilder;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-abstract class Model extends QueryBuilder implements \ArrayAccess
+abstract class Model implements \ArrayAccess
 {
     /**
      * @var bool
      */
-    protected static $timestmap = true;
+    protected $timestmaps = true;
 
     /**
      * @var bool
      */
-    protected static $isAutoincrement = true;
+    protected $isAutoincrement = true;
 
     /**
      * @var array
      */
-    protected $attributes = [];
+    private $attributes = [];
 
     /**
      * @var array
      */
-    protected $original = [];
+    private $original = [];
 
     /**
      * @var array
      */
-    protected static $dates = [];
+    protected $dates = [];
 
     /**
      * @var string
      */
-    protected static $primaryKey = 'id';
+    protected $primaryKey = 'id';
 
     /**
      * @var string
      */
-    protected static $primaryKeyType = 'int';
+    protected $primaryKeyType = 'int';
 
     /**
      * Le nom de la table courrente
      *
      * @var string
      */
-    protected static $table = null;
+    protected $table = null;
+
+    /**
+     * @var QueryBuilder
+     */
+    protected static $instance;
 
     /**
      * Model constructor.
@@ -67,8 +72,7 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
     {
         $this->attributes = $data;
         $this->original = $data;
-        static::initilaizeQueryBuilder();
-        parent::__construct(static::$table, DB::getPdo(), static::class);
+        static::initializeQueryBuilder();
     }
     /**
      * Rétourne tout les enregistrements
@@ -78,7 +82,7 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
      */
     public static function all($columns = [])
     {
-        static::initilaizeQueryBuilder();
+        static::initializeQueryBuilder();
 
         if (count($columns) > 0) {
             static::$instance->select = '`' . implode('`, `', $columns) . '`';
@@ -97,8 +101,8 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
      */
     public static function find($id, $select = ['*'])
     {
-        static::initilaizeQueryBuilder();
-        $table = static::$instance;
+        static::initializeQueryBuilder();
+
         $one = false;
 
         if (! is_array($id)) {
@@ -106,12 +110,13 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
             $id = [$id];
         }
 
-        $table->select($select);
-
+        $static = new static();
+        static::$instance->select($select);
         if (! $one) {
-            $table->whereIn(static::$primaryKey, $id);
+            static::$instance->whereIn($static->primaryKey, $id);
         }
-        return $one ? static::first() : $table->get();
+
+        return $one ? static::first() : static::$instance->get();
     }
 
     /**
@@ -121,27 +126,8 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
      */
     public static function first()
     {
-        static::initilaizeQueryBuilder();
+        static::initializeQueryBuilder();
         return static::$instance->take(1)->getOne();
-    }
-
-    /**
-     * Action first, récupère le première enregistrement
-     *
-     * @return mixed
-     */
-    public function last()
-    {
-        $where = $this->where;
-        $whereData = $this->whereDataBind;
-
-        // On compte le tout.
-        $c = $this->count();
-
-        $this->where = $where;
-        $this->whereDataBind = $whereData;
-
-        return $this->jump($c - 1)->take(1)->getOne();
     }
 
     /**
@@ -154,12 +140,13 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
      */
     public static function findAndDelete($id, $cb = null)
     {
-        static::initilaizeQueryBuilder();
         $data = static::find($id);
         static::$instance->delete();
+
         if (is_callable($cb)) {
             return call_user_func_array($cb, [$data]);
         }
+
         return $data;
     }
 
@@ -174,9 +161,11 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
     public static function findOrFail($id)
     {
         $data = static::find($id);
+
         if (count($data) == 0) {
             throw new QueryBuilderException('Aucune donnée trouver.', E_WARNING);
         }
+
         return $data;
     }
 
@@ -197,37 +186,37 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
         }
 
         $primary_key_value =
-            array_key_exists(static::$primaryKey, $this->original)
-            ? $this->original[static::$primaryKey]
+            array_key_exists($this->primaryKey, $this->original)
+            ? $this->original[$this->primaryKey]
             : (
-                array_key_exists(static::$primaryKey, $this->attributes)
-                ? $this->attributes[static::$primaryKey] : null
+                array_key_exists($this->primaryKey, $this->attributes)
+                ? $this->attributes[$this->primaryKey] : null
             );
 
         // if ($primary_key_value === false) {
         //     throw new QueryBuilderException('Cette instance ne possède pas l\'"id" de la table');
         // }
 
-        if (! static::$instance->exists(static::$primaryKey, $primary_key_value)) {
+        if (! static::$instance->exists($this->primaryKey, $primary_key_value)) {
             $n = static::$instance->insert($this->attributes);
             $primary_key_value = static::$instance->getLastInsertId();
 
-            if (static::$primaryKeyType == 'int') {
+            if ($this->primaryKeyType == 'int') {
                 $primary_key_value = (int) $primary_key_value;
-            } elseif (static::$primaryKeyType == 'float') {
+            } elseif ($this->primaryKeyType == 'float') {
                 $primary_key_value = (float) $primary_key_value;
-            } elseif (static::$primaryKeyType == 'double') {
+            } elseif ($this->primaryKeyType == 'double') {
                 $primary_key_value = (double) $primary_key_value;
             }
 
-            $this->attributes[static::$primaryKey] = $primary_key_value;
+            $this->attributes[$this->primaryKey] = $primary_key_value;
             $this->original = $this->attributes;
             return $n;
         }
 
 
-        $this->original[static::$primaryKey] = $primary_key_value;
-        return static::$instance->where(static::$primaryKey, $primary_key_value)->update($this->attributes);
+        $this->original[$this->primaryKey] = $primary_key_value;
+        return static::$instance->where($this->primaryKey, $primary_key_value)->update($this->attributes);
     }
 
     /**
@@ -236,27 +225,57 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
      */
     public static function create(array $data)
     {
-        if (static::$timestmap) {
+        $static = new static();
+
+        if ($static->timestmaps) {
             $data = array_merge($data, [
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
         }
 
-        if (! array_key_exists(static::$primaryKey, $data)) {
-            if (static::$isAutoincrement) {
-                $data[static::$primaryKey] = null;
+        if (! array_key_exists($static->primaryKey, $data)) {
+            if ($static->isAutoincrement) {
+                $data[$static->primaryKey] = null;
             } else {
-                if (static::$primaryKeyType == 'string') {
-                    $data[static::$primaryKey] = '';
+                if ($static->primaryKeyType == 'string') {
+                    $data[$static->primaryKey] = '';
                 }
             }
         }
 
-        $self = new static($data);
-        $self->save();
+        $static->setAttributes($data);
+        $static->save();
 
-        return $self;
+        return $static;
+    }
+
+    /**
+     * Model where starter
+     *
+     * @param $column
+     * @param string $comp
+     * @param null $value
+     * @param string $boolean
+     * @return QueryBuilder
+     */
+    public static function where($column, $comp = '=', $value = null, $boolean = 'and')
+    {
+        if (static::$instance == null) {
+            $static = new static();
+            static::$instance = QueryBuilder::make($static->table, DB::getPdo(), static::class);
+        }
+        return static::$instance->where($column, $comp, $value, $boolean);
+    }
+
+    /**
+     * Assigne des valeurs aux attributes de la classe
+     *
+     * @param array $data
+     */
+    public function setAttributes(array $data)
+    {
+        $this->attributes = $data;
     }
 
     /**
@@ -274,68 +293,25 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
      *
      * @return array
      */
-    private static function carbonDates()
+    private function carbonDates()
     {
         return array_merge(
-            static::$dates,
+            $this->dates,
             ['created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at']
         );
     }
 
     /**
-     * Permet de format les attribues de type date en classe carbon
-     *
-     * @param mixed $collection
-     * @param string $method
-     * @param mixed $child
-     * @return array
-     */
-    private static function carbornize($collection, $method, $child)
-    {
-        if (! in_array($method, static::avalableMethods())) {
-            return $collection;
-        }
-
-        if (is_array($collection)) {
-            $collection = [$collection];
-        }
-
-        $custum_dates_lists = static::carbonDates();
-
-        if (method_exists($child, 'customDate')) {
-            $custum_dates_lists = array_merge($custum_dates_lists, $child->customDate());
-        }
-
-        foreach($collection as $value) {
-            if (! is_object($value)) {
-                continue;
-            }
-            foreach($value as $key => $content) {
-                if (in_array($key, $custum_dates_lists)) {
-                    $value->$key = new \Carbon\Carbon($content);
-                }
-            }
-        }
-
-        if (count($collection) == 1) {
-            if ($method == 'getOne' || preg_match('/^find/', $method)) {
-                $collection = end($collection);
-            }
-        }
-
-        return $collection;
-    }
-
-    /**
      * Permet d'initialiser la connection
      */
-    private static function initilaizeQueryBuilder()
+    private static function initializeQueryBuilder()
     {
-        if (static::$table == null) {
-            static::$table = strtolower(static::class);
-        }
         if (static::$instance == null) {
-            parent::make(static::$table, DB::getPdo(), static::class);
+            $static = new static();
+            if ($static->table == null) {
+                $static->table = strtolower(static::class);
+            }
+            static::$instance = QueryBuilder::make($static->table, DB::getPdo(), static::class);
         }
     }
 
@@ -349,19 +325,19 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
      */
     public static function __callStatic($method, $args)
     {
-        static::initilaizeQueryBuilder();
+        static::initializeQueryBuilder();
 
-        if (method_exists($self = new static(), $method)) {
+        if (method_exists($static = new static(), $method)) {
             if (method_exists(static::$instance, $method)) {
                 throw new \BadMethodCallException($method . ' ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
             }
-            return call_user_func_array([$self, $method], $args);
+            return call_user_func_array([$static, $method], $args);
         }
 
         // Lancement de l'execution des fonctions liée a l'instance de la classe Table
         if (method_exists(static::$instance, $method)) {
             $collection = call_user_func_array([static::$instance, $method], $args);
-            return static::carbornize($collection, $method, $self);
+            return $collection;
         }
 
         throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
@@ -389,7 +365,7 @@ abstract class Model extends QueryBuilder implements \ArrayAccess
             return null;
         }
 
-        if (in_array($name, static::carbonDates())) {
+        if (in_array($name, $this->carbonDates())) {
             return new Carbon($this->attributes[$name]);
         }
 
