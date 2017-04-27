@@ -92,21 +92,23 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param string $table
      * @param string $classname
+     * @param string $primaryKey
      * @param $connection
      */
-    protected function __construct($table, $connection, $classname = null)
+    protected function __construct($table, $connection, $classname = null, $primaryKey = 'id')
     {
-        static::$table = $table;
-        $this->connection = $connection;
-
         if ($classname == null) {
             $this->classname = static::class;
         } else {
             $this->classname = $classname;
         }
+
+        static::$table = $table;
+        $this->connection = $connection;
+        $this->primaryKey = $primaryKey;
     }
 
-    // fonction magic __clone
+    // Vérrou sur la methode magic __clone
     private function __clone() {}
 
     /**
@@ -115,13 +117,17 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param string $table
      * @param \PDO $connection
      * @param string $classname
+     * @param string $primaryKey
      *
      * @return QueryBuilder
      */
-    public static function make($table, \PDO $connection, $classname = null)
+    public static function make($table, \PDO $connection, $classname = null, $primaryKey = 'id')
     {
         if (static::$instance === null || static::$table != $table) {
-            static::$instance = new static($table, $connection, $classname);
+            if (is_null($primaryKey)) {
+                $primaryKey = 'id';
+            }
+            static::$instance = new static($table, $connection, $classname, $primaryKey);
         }
         return static::$instance;
     }
@@ -696,18 +702,19 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
     /**
      * Action get, seulement sur la requete de type select
-     *
-     * @param callable $cb
-     *
+     * @param array $columns
      * @return Collection|SqlUnity Si le mode de séléction unitaire n'est pas active
      */
-    public function get($cb = null)
+    public function get(array $columns = [])
     {
-        $sql = $this->getSelectStatement();
+        if (count($columns)) {
+            $this->select($columns);
+        }
 
-        // execution de requete.
-        $stmt = $this->connection->prepare($sql);
+        // Execution de requete.
+        $stmt = $this->connection->prepare($this->getSelectStatement());
         static::bind($stmt, $this->whereDataBinding);
+
         $this->whereDataBinding = [];
         $stmt->execute();
 

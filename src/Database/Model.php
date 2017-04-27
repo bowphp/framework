@@ -373,7 +373,7 @@ abstract class Model implements \ArrayAccess
                 $static->table = strtolower($table);
             }
 
-            static::$instance = QueryBuilder::make($static->table, DB::getPdo(), static::class);
+            static::$instance = QueryBuilder::make($static->table, DB::getPdo(), static::class, $static->primaryKey);
         }
     }
 
