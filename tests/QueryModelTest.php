@@ -7,12 +7,12 @@ class Pets extends \Bow\Database\Model
     /**
      * @var string
      */
-    public static $table = "pets";
+    protected $table = "pets";
 
     /**
      * @var string
      */
-    protected static $primaryKey = 'pet_id';
+    protected $primaryKey = 'pet_id';
 }
 
 class QueryModelTest extends \PHPUnit\Framework\TestCase
@@ -25,7 +25,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetConnection
      */
-    public function testInstanceOfModel($db)
+    public function testInstanceOfModel(Bow\Database\Database $db)
     {
         $pet = new Pets();
         $pet = $pet->get()->first();
@@ -35,7 +35,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetConnection
      */
-    public function testInstanceOfModel2($db)
+    public function testInstanceOfModel2(Bow\Database\Database $db)
     {
         $pet = new Pets();
         $pet = $pet->take(1)->get()->first();
@@ -45,16 +45,16 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetConnection
      */
-    public function testInstanceCollectionOf($db)
+    public function testInstanceCollectionOf(Bow\Database\Database $db)
     {
-        $pets = Pets::get();
+        $pets = Pets::all();
         $this->assertInstanceOf(Bow\Support\Collection::class, $pets);
     }
 
     /**
      * @depends testGetConnection
      */
-    public function testChainSelectOf($db)
+    public function testChainSelectOf(Bow\Database\Database $db)
     {
         $pets = Pets::where('id', 1)->select(['name'])->get();
         $this->assertInstanceOf(Bow\Support\Collection::class, $pets);
@@ -63,7 +63,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetConnection
      */
-    public function testCountOf($db)
+    public function testCountOf(Bow\Database\Database $db)
     {
         $pets = Pets::count();
         $this->assertEquals(is_int($pets), true);
@@ -72,27 +72,27 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetConnection
      */
-    public function testCountSelectCountOf($db)
+    public function testCountSelectCountOf(Bow\Database\Database $db)
     {
         $b = Pets::count();
-        $a = Pets::get()->count();
+        $a = Pets::all()->count();
         $this->assertEquals($a, $b);
     }
 
     /**
      * @depends testGetConnection
      */
-    public function testNotCountSelectCountOf($db)
+    public function testNotCountSelectCountOf(Bow\Database\Database $db)
     {
         $b = Pets::where('id', 1)->count();
-        $a = Pets::get()->count();
+        $a = Pets::all()->count();
         $this->assertNotEquals($a, $b);
     }
 
     /**
      * @depends testGetConnection
      */
-    public function testSaveOf($db)
+    public function testSaveOf(Bow\Database\Database $db)
     {
         $pet = Pets::first();
         $this->assertInstanceOf(Pets::class, $pet);
@@ -101,13 +101,13 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetConnection
      */
-    public function testInsert($db)
+    public function testInsert(Bow\Database\Database $db)
     {
-        $pet = Pets::insert([
+        $pet = Pets::create([
             'name' => 'Couli',
             'id' => 1
         ]);
 
-        $this->assertTrue((bool) $pet);
+        $this->assertInstanceOf(Pets::class, $pet);
     }
 }

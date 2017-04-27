@@ -11,7 +11,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testGetInstance($db)
+    public function testGetInstance(Bow\Database\Database $db)
     {
         $this->assertInstanceOf(\Bow\Database\QueryBuilder\QueryBuilder::class, $db->table('pets'));
     }
@@ -19,7 +19,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testInsertRows($db)
+    public function testInsertRows(Bow\Database\Database $db)
     {
         $table = $db->table('pets');
 
@@ -34,7 +34,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testInsertMutilRows($db)
+    public function testInsertMutilRows(Bow\Database\Database $db)
     {
         $table = $db->table('pets');
 
@@ -50,7 +50,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectRows($db)
+    public function testSelectRows(Bow\Database\Database $db)
     {
         $table = $db->table('pets');
         $pets = $table->get();
@@ -60,7 +60,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectChainRows($db)
+    public function testSelectChainRows(Bow\Database\Database $db)
     {
         $table = $db->table('pets');
         $pets = $table->select(['name'])->get();
