@@ -1065,7 +1065,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param integer $n nombre d'element a récupérer
      * @param integer $current la page courrant
      * @param integer $chunk le nombre l'élément par groupe que l'on veux faire.
-     * @return \stdClass
+     * @return Collection
      */
     public function paginate($n, $current = 0, $chunk = null)
     {
@@ -1107,7 +1107,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             'data' => $data
         ];
 
-        return (object) $data;
+        return new Collection($data);
     }
 
     /**

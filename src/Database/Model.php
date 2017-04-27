@@ -24,7 +24,7 @@ abstract class Model implements \ArrayAccess
     /**
      * @var bool
      */
-    protected $isAutoincrement = true;
+    protected $autoincrement = true;
 
     /**
      * @var array
@@ -92,6 +92,17 @@ abstract class Model implements \ArrayAccess
     }
 
     /**
+     * Permet de récupèrer le première enregistrement
+     *
+     * @return mixed
+     */
+    public static function first()
+    {
+        static::initializeQueryBuilder();
+        return static::$instance->take(1)->getOne();
+    }
+
+    /**
      * find
      *
      * @param mixed $id
@@ -112,22 +123,12 @@ abstract class Model implements \ArrayAccess
 
         $static = new static();
         static::$instance->select($select);
+
         if (! $one) {
             static::$instance->whereIn($static->primaryKey, $id);
         }
 
         return $one ? static::first() : static::$instance->get();
-    }
-
-    /**
-     * Permet de récupèrer le première enregistrement
-     *
-     * @return mixed
-     */
-    public static function first()
-    {
-        static::initializeQueryBuilder();
-        return static::$instance->take(1)->getOne();
     }
 
     /**
@@ -170,56 +171,6 @@ abstract class Model implements \ArrayAccess
     }
 
     /**
-     * save aliase sur l'action insert
-     *
-     * @param array $values Les données a inserer dans la base de donnée.
-     * @return int
-     * @throws QueryBuilderException
-     */
-    public function save(array $values = [])
-    {
-        if (empty($this->attributes)) {
-            if (! empty($values)) {
-                $this->attributes = $values;
-            }
-            return static::$instance->insert($this->attributes);
-        }
-
-        $primary_key_value =
-            array_key_exists($this->primaryKey, $this->original)
-            ? $this->original[$this->primaryKey]
-            : (
-                array_key_exists($this->primaryKey, $this->attributes)
-                ? $this->attributes[$this->primaryKey] : null
-            );
-
-        // if ($primary_key_value === false) {
-        //     throw new QueryBuilderException('Cette instance ne possède pas l\'"id" de la table');
-        // }
-
-        if (! static::$instance->exists($this->primaryKey, $primary_key_value)) {
-            $n = static::$instance->insert($this->attributes);
-            $primary_key_value = static::$instance->getLastInsertId();
-
-            if ($this->primaryKeyType == 'int') {
-                $primary_key_value = (int) $primary_key_value;
-            } elseif ($this->primaryKeyType == 'float') {
-                $primary_key_value = (float) $primary_key_value;
-            } elseif ($this->primaryKeyType == 'double') {
-                $primary_key_value = (double) $primary_key_value;
-            }
-
-            $this->attributes[$this->primaryKey] = $primary_key_value;
-            $this->original = $this->attributes;
-            return $n;
-        }
-
-
-        $this->original[$this->primaryKey] = $primary_key_value;
-        return static::$instance->where($this->primaryKey, $primary_key_value)->update($this->attributes);
-    }
-
-    /**
      * @param array $data
      * @return self
      */
@@ -235,7 +186,7 @@ abstract class Model implements \ArrayAccess
         }
 
         if (! array_key_exists($static->primaryKey, $data)) {
-            if ($static->isAutoincrement) {
+            if ($static->autoincrement) {
                 $data[$static->primaryKey] = null;
             } else {
                 if ($static->primaryKeyType == 'string') {
@@ -261,15 +212,111 @@ abstract class Model implements \ArrayAccess
      */
     public static function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        if (static::$instance == null) {
-            $static = new static();
-            static::$instance = QueryBuilder::make($static->table, DB::getPdo(), static::class);
-        }
+        static::initializeQueryBuilder();
         return static::$instance->where($column, $comp, $value, $boolean);
     }
 
     /**
-     * Assigne des valeurs aux attributes de la classe
+     * paginate
+     *
+     * @param integer $n nombre d'element a récupérer
+     * @param integer $current la page courrant
+     * @param integer $chunk le nombre l'élément par groupe que l'on veux faire.
+     * @return Collection
+     */
+    public static function paginate($n, $current = 0, $chunk = null)
+    {
+        static::initializeQueryBuilder();
+        return static::$instance->paginate($n, $current, $chunk);
+    }
+
+    /**
+     * Permet de compter le nombre d'enregistrement
+     *
+     * @param string $column
+     * @return int
+     */
+    public static function count($column = '*')
+    {
+        static::initializeQueryBuilder();
+        return static::$instance->count($column);
+    }
+
+    /**
+     * Permet de récupérer la valeur de clé primaire
+     *
+     * @return mixed|null
+     */
+    private function getPrimaryKeyValue()
+    {
+        if (array_key_exists($this->primaryKey, $this->original)) {
+            return $this->original[$this->primaryKey];
+        }
+
+        if (array_key_exists($this->primaryKey, $this->attributes)) {
+            return $this->attributes[$this->primaryKey];
+        }
+
+        return null;
+    }
+
+    /**
+     * save aliase sur l'action insert
+     *
+     * @param array $values Les données a inserer dans la base de donnée.
+     * @return int
+     * @throws QueryBuilderException
+     */
+    public function save(array $values = [])
+    {
+        if (empty($this->attributes)) {
+            if (! empty($values)) {
+                $this->attributes = $values;
+            }
+            return static::$instance->insert($this->attributes);
+        }
+
+        $primary_key_value = $this->getPrimaryKeyValue();
+
+        if (static::$instance->exists($this->primaryKey, $primary_key_value)) {
+            $this->original[$this->primaryKey] = $primary_key_value;
+            return static::$instance->where($this->primaryKey, $primary_key_value)->update($this->attributes);
+        }
+
+        $n = static::$instance->insert($this->attributes);
+        $primary_key_value = static::$instance->getLastInsertId();
+
+        if ($this->primaryKeyType == 'int') {
+            $primary_key_value = (int) $primary_key_value;
+        } elseif ($this->primaryKeyType == 'float') {
+            $primary_key_value = (float) $primary_key_value;
+        } elseif ($this->primaryKeyType == 'double') {
+            $primary_key_value = (double) $primary_key_value;
+        }
+
+        $this->attributes[$this->primaryKey] = $primary_key_value;
+        $this->original = $this->attributes;
+        return $n;
+    }
+
+    /**
+     * Permet de supprimer un enregistrement
+     *
+     * @return int
+     */
+    public function delete()
+    {
+        $primary_key_value = $this->getPrimaryKeyValue();
+
+        if (static::$instance->exists($this->primaryKey, $primary_key_value)) {
+            return static::$instance->delete();
+        }
+
+        return 0;
+    }
+
+    /**
+     * Permet d'Assigner des valeurs aux attribues de la classe
      *
      * @param array $data
      */
@@ -279,21 +326,32 @@ abstract class Model implements \ArrayAccess
     }
 
     /**
-     * Lists des fonctions static
+     * Permet de récupérer la liste des attributes.
      *
      * @return array
      */
-    private static function avalableMethods()
+    public function getAttributes()
     {
-        return ['get', 'first', 'find', 'all'];
+        return $this->attributes;
     }
 
     /**
+     * Permet de récupérer un attribue
      *
+     * @param string $name
+     * @return mixed|null
+     */
+    public function getAttribute($name)
+    {
+        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
+    }
+
+    /**
+     * Listes des propriétés mutables
      *
      * @return array
      */
-    private function carbonDates()
+    private function mutableAttributes()
     {
         return array_merge(
             $this->dates,
@@ -307,40 +365,16 @@ abstract class Model implements \ArrayAccess
     private static function initializeQueryBuilder()
     {
         if (static::$instance == null) {
+
             $static = new static();
+
             if ($static->table == null) {
-                $static->table = strtolower(static::class);
+                $table = end(explode('\\', static::class));
+                $static->table = strtolower($table);
             }
+
             static::$instance = QueryBuilder::make($static->table, DB::getPdo(), static::class);
         }
-    }
-
-    /**
-     * Facade, implementation de la fonction magic __callStatic de PHP
-     *
-     * @param string $method Le nom de la method a appelé
-     * @param array $args    Les arguments a passé à la fonction
-     * @throws ModelException
-     * @return \Bow\Database\QueryBuilder\QueryBuilder|array
-     */
-    public static function __callStatic($method, $args)
-    {
-        static::initializeQueryBuilder();
-
-        if (method_exists($static = new static(), $method)) {
-            if (method_exists(static::$instance, $method)) {
-                throw new \BadMethodCallException($method . ' ne peut pas être utiliser comme fonction d\'aliase.', E_ERROR);
-            }
-            return call_user_func_array([$static, $method], $args);
-        }
-
-        // Lancement de l'execution des fonctions liée a l'instance de la classe Table
-        if (method_exists(static::$instance, $method)) {
-            $collection = call_user_func_array([static::$instance, $method], $args);
-            return $collection;
-        }
-
-        throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
     }
 
     /**
@@ -353,45 +387,6 @@ abstract class Model implements \ArrayAccess
         return $this->attributes;
     }
 
-    /**
-     * __get
-     *
-     * @param string $name
-     * @return mixed|null
-     */
-    public function __get($name)
-    {
-        if (! isset($this->attributes[$name])) {
-            return null;
-        }
-
-        if (in_array($name, $this->carbonDates())) {
-            return new Carbon($this->attributes[$name]);
-        }
-
-        return $this->attributes[$name];
-    }
-
-    /**
-     * __set
-     *
-     * @param string $name
-     * @param $value
-     */
-    public function __set($name, $value)
-    {
-        $this->attributes[$name] = $value;
-    }
-
-    /**
-     * __toString
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return json_encode($this->attributes);
-    }
 
     /**
      * Permet de formater le donnée en json quand on appele la
@@ -437,5 +432,64 @@ abstract class Model implements \ArrayAccess
      */
     public function offsetGet($offset) {
         return isset($this->attributes[$offset]) ? $this->attributes[$offset] : null;
+    }
+
+    /**
+     * __get
+     *
+     * @param string $name
+     * @return mixed|null
+     */
+    public function __get($name)
+    {
+        if (! isset($this->attributes[$name])) {
+            return null;
+        }
+
+        if (in_array($name, $this->mutableAttributes())) {
+            return new Carbon($this->attributes[$name]);
+        }
+
+        return $this->attributes[$name];
+    }
+
+    /**
+     * __set
+     *
+     * @param string $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        $this->attributes[$name] = $value;
+    }
+
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->attributes);
+    }
+
+    /**
+     * Facade, implementation de la fonction magic __callStatic de PHP
+     *
+     * @param string $method Le nom de la method a appelé
+     * @param array $args    Les arguments a passé à la fonction
+     * @return \Bow\Database\QueryBuilder\QueryBuilder|array
+     * @throws ModelException
+     */
+    public static function __callStatic($method, $args)
+    {
+        $static = new static();
+
+        if (method_exists($static, $method)) {
+            return call_user_func_array([$static, $method], $args);
+        }
+
+        throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
     }
 }
