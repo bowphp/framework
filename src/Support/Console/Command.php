@@ -294,7 +294,7 @@ doc;
             }
 
             $this->model($model);
-            $modelNamespace = "\nuse App\\" . ucfirst($model);
+            $modelNamespace = "\nuse App\\".ucfirst($model).';';
 
             if ($this->readline('Voulez vous que je crée une migration pour ce model? ')) {
                 $this->make($model);
@@ -582,7 +582,7 @@ class ${model_name} extends Model
      *
      * @var string
      */
-    protected static \$table = "$table_name";
+    protected \$table = "$table_name";
 }
 MODEL;
         if (file_exists($this->dirname."/app/${model_name}.php")) {
