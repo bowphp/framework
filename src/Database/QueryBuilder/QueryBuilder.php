@@ -1090,6 +1090,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $data = [
             'next' => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
             'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),
+            'total' => (int) ($restOfPage + $current),
             'current' => $current,
             'data' => $data
         ];
