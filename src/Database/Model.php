@@ -72,7 +72,8 @@ abstract class Model implements \ArrayAccess
     {
         $this->attributes = $data;
         $this->original = $data;
-        static::initializeQueryBuilder();
+
+        static::prepareQueryBuilder();
     }
     /**
      * Rétourne tout les enregistrements
@@ -82,7 +83,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function all($columns = [])
     {
-        static::initializeQueryBuilder();
+        static::prepareQueryBuilder();
 
         if (count($columns) > 0) {
             static::$instance->select = '`' . implode('`, `', $columns) . '`';
@@ -98,7 +99,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function first()
     {
-        static::initializeQueryBuilder();
+        static::prepareQueryBuilder();
         return static::$instance->take(1)->getOne();
     }
 
@@ -112,7 +113,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function find($id, $select = ['*'])
     {
-        static::initializeQueryBuilder();
+        static::prepareQueryBuilder();
 
         $one = false;
 
@@ -212,7 +213,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        static::initializeQueryBuilder();
+        static::prepareQueryBuilder();
         return static::$instance->where($column, $comp, $value, $boolean);
     }
 
@@ -226,7 +227,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function paginate($n, $current = 0, $chunk = null)
     {
-        static::initializeQueryBuilder();
+        static::prepareQueryBuilder();
         return static::$instance->paginate($n, $current, $chunk);
     }
 
@@ -238,8 +239,36 @@ abstract class Model implements \ArrayAccess
      */
     public static function count($column = '*')
     {
-        static::initializeQueryBuilder();
+        static::prepareQueryBuilder();
         return static::$instance->count($column);
+    }
+
+    /**
+     * Permet d'initialiser la connection
+     */
+    private static function prepareQueryBuilder()
+    {
+        if (static::$instance == null) {
+            $reflection = new \ReflectionClass(static::class);
+
+            $tableProperty = $reflection->getProperty('table');
+            $primaryKeyProperty = $reflection->getProperty('primaryKey');
+
+            $tableProperty->setAccessible(true);
+            $primaryKeyProperty->setAccessible(true);
+
+            if ($tableProperty->getValue() == null) {
+                $table = strtolower(end(explode('\\', static::class)));
+            } else {
+                $table = $tableProperty->getValue();
+            }
+
+            $primaryKey = $primaryKeyProperty->getValue();
+            $tableProperty->setAccessible(false);
+            $primaryKeyProperty->setAccessible(false);
+
+            static::$instance = QueryBuilder::make($table, DB::getPdo(), static::class, $primaryKey);
+        }
     }
 
     /**
@@ -357,24 +386,6 @@ abstract class Model implements \ArrayAccess
             $this->dates,
             ['created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at']
         );
-    }
-
-    /**
-     * Permet d'initialiser la connection
-     */
-    private static function initializeQueryBuilder()
-    {
-        if (static::$instance == null) {
-
-            $static = new static();
-
-            if ($static->table == null) {
-                $table = end(explode('\\', static::class));
-                $static->table = strtolower($table);
-            }
-
-            static::$instance = QueryBuilder::make($static->table, DB::getPdo(), static::class, $static->primaryKey);
-        }
     }
 
     /**
