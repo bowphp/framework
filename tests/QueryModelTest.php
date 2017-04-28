@@ -17,7 +17,7 @@ class Pets extends \Bow\Database\Model
     /**
      * @var bool
      */
-    protected $timpstamps = false;
+    protected $timestamps = false;
 }
 
 class QueryModelTest extends \PHPUnit\Framework\TestCase
