@@ -583,13 +583,12 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public function take($limit)
     {
         if (is_null($this->limit)) {
-            $this->limit = $limit;
+            $this->limit = (int) $limit;
             return $this;
         }
 
-        if (preg_match('/^([\d]+),$/', $this->limit, $match)) {
-            array_shift($match);
-            $this->limit = $match[0].', '.$limit;
+        if (preg_match('/^([\d]+),\s$/', $this->limit, $match)) {
+            $this->limit = end($match).', '.$limit;
         }
 
         return $this;
@@ -686,7 +685,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function get(array $columns = [])
     {
-        if (count($columns)) {
+        if (count($columns) > 0) {
             $this->select($columns);
         }
 
@@ -1194,7 +1193,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             }
         }
 
-        return $sql;
+        return $sql.';';
     }
 
     /**
