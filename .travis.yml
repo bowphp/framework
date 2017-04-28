@@ -25,7 +25,6 @@ env:
 
 before_script:
   - if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
-  - sudo apt-get install -qq  mysql-server mysql-client
   - mysql -u root -e 'CREATE DATABASE IF NOT EXISTS test;'
 
 install:
