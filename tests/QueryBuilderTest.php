@@ -53,6 +53,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     public function testSelectRows(Bow\Database\Database $db)
     {
         $table = $db->table('pets');
+        $this->assertInstanceOf(\Bow\Database\QueryBuilder\QueryBuilder::class, $table);
         $pets = $table->get();
         $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
     }
