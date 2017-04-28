@@ -1,5 +1,9 @@
 language: php
 
+branches:
+  only:
+    - master
+
 sudo: false
 
 services:
@@ -16,13 +20,11 @@ php:
   - hhvm
 env:
   - DB_NAME=test
-env:
   - DB_USER=travis
-env:
   - DB_PASSWORD=''
 
 before_script:
-  - [ ! -d tests/data/cache ] && mkdir -p ./tests/data/cache
+  - if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
   - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
 
 install:
