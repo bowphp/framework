@@ -22,7 +22,7 @@ env:
   - DB_PASSWORD=''
 
 before_script:
-  - if [ ! -d tests/data/cache ]; then mkdir -p ./tests/data/cache fi
+  - [ ! -d tests/data/cache ] && mkdir -p ./tests/data/cache
   - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
 
 install:
