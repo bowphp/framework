@@ -142,7 +142,7 @@ class Security
      */
     public static function createCsrfToken($time = null)
     {
-        if (Session::has('bow.csrf')) {
+        if (Session::has('__bow.csrf')) {
             return false;
         }
 
@@ -152,7 +152,7 @@ class Security
 
         $token = static::generateCsrfToken();
 
-        Session::add('bow.csrf', (object) [
+        Session::add('__bow.csrf', (object) [
             'token' => $token,
             'expirate' => time() + static::$tokenCsrfExpirateTime,
             'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
@@ -180,7 +180,7 @@ class Security
      */
     public static function getCsrfToken()
     {
-        return Session::get('bow.csrf');
+        return Session::get('__bow.csrf');
     }
 
     /**
@@ -192,12 +192,12 @@ class Security
      */
     public static function tokenCsrfTimeIsExpirate($time = null)
     {
-        if (Session::has('bow.csrf')) {
+        if (Session::has('__bow.csrf')) {
             if ($time === null) {
                 $time = time();
             }
 
-            if (Session::has('bow.csrf')->expirate >= (int) $time) {
+            if (Session::has('__bow.csrf')->expirate >= (int) $time) {
                 return true;
             }
         }
@@ -217,8 +217,8 @@ class Security
     {
         $status = false;
 
-        if (Session::has('bow.csrf')) {
-            if ($token === Session::has('bow.csrf')->token) {
+        if (Session::has('__bow.csrf')) {
+            if ($token === Session::has('__bow.csrf')->token) {
                 $status = true;
                 if ($strict) {
                     $status = $status && static::tokenCsrfTimeIsExpirate(time());
@@ -234,7 +234,7 @@ class Security
      */
     public static function clearCsrfToken()
     {
-        Session::remove('bow.csrf');
+        Session::remove('__bow.csrf');
         Session::remove('_token');
     }
 
@@ -262,12 +262,12 @@ class Security
      */
     public static function decrypt($encrypted_data)
     {
-        $iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
+        $iv_size = @mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
         $encrypted_data = base64_decode($encrypted_data);
         $start = strlen($encrypted_data) - $iv_size;
         $iv = substr($encrypted_data, $start, $iv_size);
         $encrypted_data = substr($encrypted_data, 0, $start);
-        $decrypted_data = mcrypt_decrypt(MCRYPT_BLOWFISH, static::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
+        $decrypted_data = @mcrypt_decrypt(MCRYPT_BLOWFISH, static::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
 
         return static::sanitaze(trim($decrypted_data));
     }

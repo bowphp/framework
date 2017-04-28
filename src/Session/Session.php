@@ -38,7 +38,7 @@ class Session implements CollectionAccessStatic
         static::start();
 
         foreach($_SESSION as $key => $value) {
-            if (!in_array($key, ["bow.flash", "bow.event.listener", "bow.csrf", "bow.cookie.secure"])) {
+            if (!in_array($key, ["__bow.flash", "__bow.old", "__bow.event.listener", "__bow.csrf", "__bow.cookie.secure"])) {
                 $arr[$key] = $value;
             }
         }
@@ -94,8 +94,8 @@ class Session implements CollectionAccessStatic
             return $_SESSION[$key];
         }
 
-        if (isset($_SESSION["bow.flash"][$key])) {
-            $flash = $_SESSION["bow.flash"][$key];
+        if (isset($_SESSION["__bow.flash"][$key])) {
+            $flash = $_SESSION["__bow.flash"][$key];
             static::reflash($key);
             return $flash;
         }
@@ -191,26 +191,24 @@ class Session implements CollectionAccessStatic
     /**
      * flash
      *
-     * @param $key
-     * @param null $message
-     *
-     * @throws \ErrorException
-     *
+     * @param mixed $key
+     * @param mixed $message
      * @return mixed
      */
     public static function flash($key, $message = null)
     {
         static::start();
 
-        if (! static::has("bow.flash")) {
-            $_SESSION["bow.flash"] = [];
+        if (! static::has("__bow.flash")) {
+            $_SESSION["__bow.flash"] = [];
         }
 
         if ($message !== null) {
-            $_SESSION["bow.flash"][$key] = $message;
+            $_SESSION["__bow.flash"][$key] = $message;
+            return null;
         }
 
-        return static::get($key);
+        return isset($_SESSION["__bow.flash"][$key]) ? $_SESSION["__bow.flash"][$key] : null;
     }
 
     /**
@@ -231,7 +229,7 @@ class Session implements CollectionAccessStatic
     private static function reflash($key)
     {
         static::start();
-        unset($_SESSION["bow.flash"][$key]);
+        unset($_SESSION["__bow.flash"][$key]);
     }
 
     /**
