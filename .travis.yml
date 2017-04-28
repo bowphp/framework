@@ -2,6 +2,9 @@ language: php
 
 sudo: false
 
+services:
+  - mysql
+
 cache:
   directories:
     - $HOME/.composer/cache
@@ -11,6 +14,14 @@ php:
   - 7.0
   - nightly
   - hhvm
+env:
+  - DB_NAME=test
+  - DB_USER=travis
+  - DB_PASSWORD=''
+
+before_script:
+  - if [ ! -d tests/data/cache ]; then && mkdir -p ./tests/data/cache fi
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
 
 install:
   - composer install --prefer-dist
