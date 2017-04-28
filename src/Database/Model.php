@@ -19,7 +19,7 @@ abstract class Model implements \ArrayAccess
     /**
      * @var bool
      */
-    protected $timpstamps = true;
+    protected $timestamps = true;
 
     /**
      * @var bool
@@ -124,47 +124,49 @@ abstract class Model implements \ArrayAccess
 
         $static = new static();
         static::$instance->select($select);
+        static::$instance->whereIn($static->primaryKey, $id);
 
-        if (! $one) {
-            static::$instance->whereIn($static->primaryKey, $id);
-        }
-
-        return $one ? static::first() : static::$instance->get();
+        return $one ? static::$instance->getOne() : static::$instance->get();
     }
 
     /**
      * Récuper des informations sur la QueryBuilder ensuite les supprimes dans celle-ci
      *
-     * @param Callable $cb La fonction de rappel qui si definir vous offre en parametre
-     *                     Les données récupés et le nombre d'élément supprimé.
+     * @param mixed $id
+     * @param array $select
      *
      * @return Collection|array
      */
-    public static function findAndDelete($id, $cb = null)
+    public static function findAndDelete($id, $select = ['*'])
     {
-        $data = static::find($id);
+        $data = static::find($id, $select);
         static::$instance->delete();
-
-        if (is_callable($cb)) {
-            return call_user_func_array($cb, [$data]);
-        }
-
         return $data;
     }
 
     /**
      * Lance une execption en case de donnée non trouvé
      *
-     * @param int|string $id
+     * @param mixed $id
+     * @param array|callable $select
+     * @param callable $callable
      * @return SqlUnity
      *
      * @throws QueryBuilderException
      */
-    public static function findOrFail($id)
+    public static function findOrFail($id, $select = ['*'], callable $callable = null)
     {
-        $data = static::find($id);
+        if (is_callable($select)) {
+            $callable = $select;
+            $select = ['*'];
+        }
+
+        $data = static::find($id, $select);
 
         if (count($data) == 0) {
+            if (is_callable($callable)) {
+                return $callable();
+            }
             throw new QueryBuilderException('Aucune donnée trouver.', E_WARNING);
         }
 
@@ -179,7 +181,7 @@ abstract class Model implements \ArrayAccess
     {
         $static = new static();
 
-        if ($static->timpstamps) {
+        if ($static->timestamps) {
             $data = array_merge($data, [
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')

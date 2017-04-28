@@ -311,18 +311,17 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function whereIn($column, array $range, $boolean = 'and')
     {
-        if (count($range) > 2) {
-            $range = array_slice($range, 0, 2);
-        } else {
-
-            if (count($range) == 0) {
-                throw new QueryBuilderException('Le paramètre 2 ne doit pas être un QueryBuilderau vide.', E_ERROR);
-            }
-
-            $range = [$range[0], $range[0]];
+        if (count($range) == 0) {
+            throw new QueryBuilderException('Le paramètre 2 ne doit pas être un QueryBuilderau vide.', E_ERROR);
         }
 
-        $in = implode(', ', $range);
+        $map = array_map(function() {
+            return '?';
+        }, $range);
+
+        $this->whereDataBinding = array_merge($range, $this->whereDataBinding);
+
+        $in = implode(', ', $map);
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
@@ -690,7 +689,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         // Execution de requete.
-        $stmt = $this->connection->prepare($this->getSelectStatement());
+        $sql = $this->getSelectStatement();
+
+        $stmt = $this->connection->prepare($sql);
         static::bind($stmt, $this->whereDataBinding);
 
         $this->whereDataBinding = [];
@@ -708,6 +709,10 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         if ($this->getOne) {
             $current = current($data);
             $this->getOne = false;
+
+            if ($current == false) {
+                return null;
+            }
 
             if ($loadClassName !== QueryBuilder::class) {
                 return new $loadClassName((array) $current);
@@ -750,6 +755,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public function getOne()
     {
         $this->getOne = true;
+        $this->limit = 1;
         return $this->get();
     }
 
