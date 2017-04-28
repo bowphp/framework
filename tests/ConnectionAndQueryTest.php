@@ -22,11 +22,11 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
                 'scheme' => 'mysql',
                 'mysql' => [
                     'hostname' => 'localhost',
-                    'username' => $GLOBALS['DB_USER'],
-                    'password' => $GLOBALS['DB_PASSWORD'],
-                    'database' => $GLOBALS['DB_DATABASENAME'],
-                    'charset'  => $GLOBALS['DB_CHARSET'],
-                    'collation' => $GLOBALS['DB_COLLATE'],
+                    'username' => getenv('DB_USER') ? getenv('DB_USER') : 'travis',
+                    'password' => getenv('DB_PASSWORD') ? getenv('DB_PASSWORD') : '',
+                    'database' => getenv('DB_NAME') ? getenv('DB_NAME') : 'test',
+                    'charset'  => getenv('DB_CHARSET') ? getenv('DB_CHARSET') : 'utf8',
+                    'collation' => getenv('DB_COLLATE') ? getenv('DB_COLLATE') : '',
                     'port' => null,
                     'socket' => null
                 ]
@@ -52,7 +52,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testCreateTable($db)
+    public function testCreateTable(Database $db)
     {
         $this->assertInstanceOf(Database::class, $db);
         $db->getPdo()->exec('DROP TABLE IF EXISTS pets');
@@ -62,7 +62,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSimpleInsertTable($db)
+    public function testSimpleInsertTable(Database $db)
     {
         $this->assertEquals($db->insert("INSERT INTO pets VALUES (1, 'Bob'), (2, 'Milo');"), 2);
     }
@@ -70,7 +70,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testArrayInsertTable($db)
+    public function testArrayInsertTable(Database $db)
     {
         $this->assertEquals($db->insert("INSERT INTO pets VALUES(:id, :name);", [
             "id" => 3,
@@ -81,7 +81,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testArrayMultileInsertTable($db)
+    public function testArrayMultileInsertTable(Database $db)
     {
         $this->assertEquals($db->insert("INSERT INTO pets VALUES(:id, :name);", [
             [ "id" => 4, 'name' => 'Ploy'],
@@ -92,7 +92,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectTable($db)
+    public function testSelectTable(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets");
         $this->assertInstanceOf(Collection::class, $pets);
@@ -101,7 +101,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelect2Table($db)
+    public function testSelect2Table(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets");
         $this->assertEquals(count($pets), 5);
@@ -110,7 +110,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectWithGetOneElementTable($db)
+    public function testSelectWithGetOneElementTable(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets WHERE id = :id", [
             'id' => 1
@@ -121,7 +121,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectWithNotGetElementTable($db)
+    public function testSelectWithNotGetElementTable(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets WHERE id = :id", [
             'id' => 6
@@ -133,7 +133,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectOneTable($db)
+    public function testSelectOneTable(Database $db)
     {
         $pets = $db->selectOne("SELECT * FROM pets WHERE id = :id", [
             'id' => 1
@@ -155,7 +155,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testDeleteTable($db)
+    public function testDeleteTable(Database $db)
     {
         $r = $db->delete("DELETE FROM pets WHERE id = :id", [
             'id' => 1
@@ -166,7 +166,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testTransactionTable($db)
+    public function testTransactionTable(Database $db)
     {
         $db->startTransaction(function () use ($db) {
             $r = $db->delete("DELETE FROM pets WHERE id = :id", [
@@ -181,7 +181,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testRollbackTable($db)
+    public function testRollbackTable(Database $db)
     {
         $r = 0;
         $db->startTransaction(function () use ($db, & $r) {
@@ -203,7 +203,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testStementTable($db)
+    public function testStementTable(Database $db)
     {
         $r = $db->statement("DROP TABLE pets");
         $this->assertEquals(is_bool($r), true);
@@ -212,7 +212,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testStement2Table($db)
+    public function testStement2Table(Database $db)
     {
         $r = $db->statement('CREATE TABLE IF NOT EXISTS pets (id INT, name VARCHAR(255))');
         $this->assertEquals(is_bool($r), true);

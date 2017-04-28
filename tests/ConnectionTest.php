@@ -17,11 +17,11 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     {
         $mysqlAdapter = new \Bow\Database\Connection\Adapter\MysqlAdapter([
             'hostname' => 'localhost',
-            'username' => getenv('DB_USER'),
-            'password' => getenv('DB_PASSWORD'),
-            'database' => getenv('DB_NAME'),
-            'charset'  => getenv('DB_CHARSET'),
-            'collation' => getenv('DB_COLLATE'),
+            'username' => getenv('DB_USER') ? getenv('DB_USER') : 'travis',
+            'password' => getenv('DB_PASSWORD') ? getenv('DB_PASSWORD') : '',
+            'database' => getenv('DB_NAME') ? getenv('DB_NAME') : 'test',
+            'charset'  => getenv('DB_CHARSET') ? getenv('DB_CHARSET') : 'utf8',
+            'collation' => getenv('DB_COLLATE') ? getenv('DB_COLLATE') : '',
             'port' => null,
             'socket' => null
         ]);
@@ -32,11 +32,11 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     {
         $mysqlAdapter = new \Bow\Database\Connection\Adapter\MysqlAdapter([
             'hostname' => 'localhost',
-            'username' => $GLOBALS['DB_USER'],
-            'password' => $GLOBALS['DB_PASSWORD'],
-            'database' => $GLOBALS['DB_DATABASENAME'],
-            'charset'  => $GLOBALS['DB_CHARSET'],
-            'collation' => $GLOBALS['DB_COLLATE'],
+            'username' => getenv('DB_USER') ? getenv('DB_USER') : 'travis',
+            'password' => getenv('DB_PASSWORD') ? getenv('DB_PASSWORD') : '',
+            'database' => getenv('DB_NAME') ? getenv('DB_NAME') : 'test',
+            'charset'  => getenv('DB_CHARSET') ? getenv('DB_CHARSET') : 'utf8',
+            'collation' => getenv('DB_COLLATE') ? getenv('DB_COLLATE') : '',
             'port' => null,
             'socket' => null
         ]);
