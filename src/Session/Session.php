@@ -87,7 +87,7 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (static::has($key)) {
+        if (isset($_SESSION[$key])) {
             return $_SESSION[$key];
         }
 
