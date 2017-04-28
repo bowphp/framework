@@ -20,7 +20,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var string
      */
-    private $classname;
+    private $loadClassName;
 
     /**
      * @var string
@@ -30,7 +30,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var string
      */
-    private static $table;
+    private $table;
 
     /**
      * @var string
@@ -91,46 +91,25 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * Contructeur
      *
      * @param string $table
-     * @param string $classname
+     * @param string $loadClassName
      * @param string $primaryKey
      * @param $connection
      */
-    protected function __construct($table, $connection, $classname = null, $primaryKey = 'id')
+    public function __construct($table, $connection, $loadClassName = null, $primaryKey = 'id')
     {
-        if ($classname == null) {
-            $this->classname = static::class;
+        if ($loadClassName == null) {
+            $this->loadClassName = static::class;
         } else {
-            $this->classname = $classname;
+            $this->loadClassName = $loadClassName;
         }
 
-        static::$table = $table;
         $this->connection = $connection;
         $this->primaryKey = $primaryKey;
+        $this->table = $table;
     }
 
     // Vérrou sur la methode magic __clone
     private function __clone() {}
-
-    /**
-     * Charge le singleton
-     *
-     * @param string $table
-     * @param \PDO $connection
-     * @param string $classname
-     * @param string $primaryKey
-     *
-     * @return QueryBuilder
-     */
-    public static function make($table, \PDO $connection, $classname = null, $primaryKey = 'id')
-    {
-        if (static::$instance === null || static::$table != $table) {
-            if (is_null($primaryKey)) {
-                $primaryKey = 'id';
-            }
-            static::$instance = new static($table, $connection, $classname, $primaryKey);
-        }
-        return static::$instance;
-    }
 
     /**
      * select, ajout de champ à séléction.
@@ -674,7 +653,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     private function executeAgregat($aggregat, $column)
     {
-        $sql = 'select ' . $aggregat . '(`' . $column . '`) from `' . static::$table . '`';
+        $sql = 'select ' . $aggregat . '(`' . $column . '`) from `' . $this->table . '`';
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
@@ -721,44 +700,46 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $data = Security::sanitaze($stmt->fetchAll());
         $stmt->closeCursor();
 
-        if ($this->classname) {
-            $classname = $this->classname;
+        if ($this->loadClassName) {
+            $loadClassName = $this->loadClassName;
         } else {
-            $classname = static::class;
+            $loadClassName = static::class;
         }
 
         if ($this->getOne) {
             $current = current($data);
             $this->getOne = false;
-            if ($this->classname === QueryBuilder::class) {
-                $id = $this->primaryKey;
-                $id_value = null;
-                if (isset($current->{$id})) {
-                    $id_value = $current->{$id};
-                    unset($current->{$id});
-                }
-                return new SqlUnity($this, $id_value, $current);
-            }
-            return new $classname((array) $current);
-        }
 
-        if (is_callable($cb)) {
-            return call_user_func_array($cb, [$data]);
+            if ($loadClassName !== QueryBuilder::class) {
+                return new $loadClassName((array) $current);
+            }
+
+            $id = $this->primaryKey;
+            $id_value = null;
+            if (isset($current->{$id})) {
+                $id_value = $current->{$id};
+                unset($current->{$id});
+            }
+            return new SqlUnity($this, $id_value, $current);
         }
 
         foreach ($data as $key => $value) {
-            if ($this->classname === QueryBuilder::class) {
-                $id = $this->primaryKey;
-                $id_value = null;
-                if (isset($value->{$id})) {
-                    $id_value = $value->{$id};
-                    unset($value->{$id});
-                }
-                $data[$key] = new SqlUnity($this, $id_value, $value);
-            } else {
-                $data[$key] = new $classname((array) $value);
+            if ($loadClassName !== QueryBuilder::class) {
+                $data[$key] = new $loadClassName((array) $value);
+                continue;
             }
+
+            $id = $this->primaryKey;
+            $id_value = null;
+
+            if (isset($value->{$id})) {
+                $id_value = $value->{$id};
+                unset($value->{$id});
+            }
+
+            $data[$key] = new SqlUnity($this, $id_value, $value);
         }
+
         return new Collection($data);
     }
 
@@ -811,7 +792,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             $column = '`' . $column . '`';
         }
 
-        $sql = 'select count(' . $column . ') from `' . static::$table .'`';
+        $sql = 'select count(' . $column . ') from `' . $this->table .'`';
 
         if ($this->where !== null) {
             $sql .= ' where ' . $this->where;
@@ -845,7 +826,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function update(array $data = [], Callable $cb = null)
     {
-        $sql = 'update `' . static::$table . '` set ';
+        $sql = 'update `' . $this->table . '` set ';
         $sql .= Util::rangeField(Util::add2points(array_keys($data)));
 
         if (!is_null($this->where)) {
@@ -879,7 +860,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function delete(Callable $cb = null)
     {
-        $sql = 'delete from `' . static::$table . '`';
+        $sql = 'delete from `' . $this->table . '`';
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
@@ -956,7 +937,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     private function incrementAction($column, $step = 1, $sign = '')
     {
-        $sql = 'update `' . static::$table . '` set `'.$column.'` = `'.$column.'` '.$sign.' '.$step;
+        $sql = 'update `' . $this->table . '` set `'.$column.'` = `'.$column.'` '.$sign.' '.$step;
 
         if (!is_null($this->where)) {
             $sql .= ' ' . $this->where;
@@ -977,7 +958,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function truncate()
     {
-        return (bool) $this->connection->exec('truncate `' . static::$table . '`;');
+        return (bool) $this->connection->exec('truncate `' . $this->table . '`;');
     }
 
     /**
@@ -1017,7 +998,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         $fields = array_keys($value);
 
-        $sql = 'insert into `' . static::$table . '` values (';
+        $sql = 'insert into `' . $this->table . '` values (';
         $sql .= implode(', ', Util::add2points($fields, true));
         $sql .= ');';
 
@@ -1051,7 +1032,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function drop()
     {
-        return (bool) $this->connection->exec('drop table ' . static::$table);
+        return (bool) $this->connection->exec('drop table ' . $this->table);
     }
 
     /**
@@ -1173,9 +1154,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         // Ajout de la clause select
         if (is_null($this->select)) {
-            $sql .= '* from `' . static::$table .'`';
+            $sql .= '* from `' . $this->table .'`';
         } else {
-            $sql .= $this->select . ' from `' . static::$table . '`';
+            $sql .= $this->select . ' from `' . $this->table . '`';
             $this->select = null;
         }
 

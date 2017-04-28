@@ -19,7 +19,7 @@ abstract class Model implements \ArrayAccess
     /**
      * @var bool
      */
-    protected $timestmaps = true;
+    protected $timpstamps = true;
 
     /**
      * @var bool
@@ -179,7 +179,7 @@ abstract class Model implements \ArrayAccess
     {
         $static = new static();
 
-        if ($static->timestmaps) {
+        if ($static->timpstamps) {
             $data = array_merge($data, [
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -250,24 +250,16 @@ abstract class Model implements \ArrayAccess
     {
         if (static::$instance == null) {
             $reflection = new \ReflectionClass(static::class);
+            $properties = $reflection->getDefaultProperties();
 
-            $tableProperty = $reflection->getProperty('table');
-            $primaryKeyProperty = $reflection->getProperty('primaryKey');
-
-            $tableProperty->setAccessible(true);
-            $primaryKeyProperty->setAccessible(true);
-
-            if ($tableProperty->getValue() == null) {
+            if ($properties['table'] == null) {
                 $table = strtolower(end(explode('\\', static::class)));
             } else {
-                $table = $tableProperty->getValue();
+                $table = $properties['table'];
             }
 
-            $primaryKey = $primaryKeyProperty->getValue();
-            $tableProperty->setAccessible(false);
-            $primaryKeyProperty->setAccessible(false);
-
-            static::$instance = QueryBuilder::make($table, DB::getPdo(), static::class, $primaryKey);
+            $primaryKey = $properties['primaryKey'];
+            static::$instance = new QueryBuilder($table, DB::getPdo(), static::class, $primaryKey);
         }
     }
 
@@ -485,20 +477,29 @@ abstract class Model implements \ArrayAccess
         return json_encode($this->attributes);
     }
 
+    public function __call($method, $arguments)
+    {
+        if (method_exists(static::$instance, $method)) {
+            return call_user_func_array([static::$instance, $method], $arguments);
+        }
+
+        throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
+    }
+
     /**
      * Facade, implementation de la fonction magic __callStatic de PHP
      *
      * @param string $method Le nom de la method a appelé
-     * @param array $args    Les arguments a passé à la fonction
+     * @param array $arguments  Les arguments a passé à la fonction
      * @return \Bow\Database\QueryBuilder\QueryBuilder|array
      * @throws ModelException
      */
-    public static function __callStatic($method, $args)
+    public static function __callStatic($method, $arguments)
     {
         $static = new static();
 
         if (method_exists($static, $method)) {
-            return call_user_func_array([$static, $method], $args);
+            return call_user_func_array([$static, $method], $arguments);
         }
 
         throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);

@@ -252,13 +252,15 @@ class Database
      * Charge le factory QueryBuilder
      *
      * @param string $table le nom de la QueryBuilder
+     * @param string $loadClassName
+     * @param string $primaryKey
      *
      * @return QueryBuilder
      */
-    public static function table($table)
+    public static function table($table, $loadClassName = null, $primaryKey = null)
     {
         static::verifyConnection();
-        return QueryBuilder::make($table, static::$adapter->getConnection());
+        return new QueryBuilder($table, static::$adapter->getConnection(), $loadClassName, $primaryKey);
     }
 
     /**

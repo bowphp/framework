@@ -12,7 +12,12 @@ class Pets extends \Bow\Database\Model
     /**
      * @var string
      */
-    protected $primaryKey = 'pet_id';
+    protected $primaryKey = 'id';
+
+    /**
+     * @var bool
+     */
+    protected $timpstamps = false;
 }
 
 class QueryModelTest extends \PHPUnit\Framework\TestCase
@@ -28,7 +33,8 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testInstanceOfModel(Bow\Database\Database $db)
     {
         $pet = new Pets();
-        $pet = $pet->get()->first();
+        $pet = $pet->first();
+
         $this->assertInstanceOf(Pets::class, $pet);
     }
 
