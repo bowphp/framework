@@ -19,9 +19,7 @@ php:
   - nightly
   - hhvm
 env:
-  - DB_NAME=test
   - DB_USER=travis
-  - DB_PASSWORD=''
 
 before_script:
   - if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
