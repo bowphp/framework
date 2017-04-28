@@ -48,7 +48,7 @@ abstract class DBUtility
             if (is_string($key)) {
                 $pdoStatement->bindValue(':' . $key, $value, $param);
             } else {
-                $pdoStatement->bindValue($key, $value, $param);
+                $pdoStatement->bindValue($key + 1, $value, $param);
             }
         }
 
