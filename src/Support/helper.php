@@ -873,18 +873,15 @@ if (! function_exists('emit')) {
 
 if (! function_exists('flash')) {
     /**
-     * flash
-     *
+     * Permet ajouter un nouveau flash
      * e.g flash('error', 'An error occured');
      *
      * @param string $key Le nom du niveau soit ('error', 'info', 'warn', 'danger','success')
-     * @param string $message Le message du flash, Dans le case ou le message n'est pas
-     *                        spécifié la fonction rétourne le message du flash concerné
-     *                        par la clé
+     * @param string $message Le message du flash
      *
      * @return mixed
      */
-    function flash($key, $message = null) {
+    function flash($key, $message) {
         return Session::flash($key, $message);
     }
 }

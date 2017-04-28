@@ -57,15 +57,12 @@ class Session implements CollectionAccessStatic
     public static function has($key, $strict = false)
     {
         static::start();
-        $isset = isset($_SESSION[$key]);
 
-        if ($strict) {
-            if ($isset) {
-                $isset = $isset && !empty($_SESSION[$key]);
-            }
+        if (! isset($_SESSION[$key])) {
+            return isset($_SESSION['__bow.flash'][$key]);
         }
 
-        return $isset;
+        return true;
     }
 
     /**
@@ -96,7 +93,7 @@ class Session implements CollectionAccessStatic
 
         if (isset($_SESSION["__bow.flash"][$key])) {
             $flash = $_SESSION["__bow.flash"][$key];
-            static::reflash($key);
+            unset($_SESSION["__bow.flash"][$key]);
             return $flash;
         }
 
@@ -223,13 +220,11 @@ class Session implements CollectionAccessStatic
 
     /**
      * Vide le système de flash.
-     *
-     * @param string $key
      */
-    private static function reflash($key)
+    public static function clearFash()
     {
         static::start();
-        unset($_SESSION["__bow.flash"][$key]);
+        $_SESSION["__bow.flash"] = [];
     }
 
     /**
