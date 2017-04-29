@@ -122,8 +122,11 @@ class Bow
         }
 
         fclose($r);
+
+        $doc_root = $this->dirname.'/public';
+
         // lancement du serveur.
-        return shell_exec("php -S $hostname:$port server.php $settings");
+        return shell_exec("php -S $hostname:$port -t $doc_root ".$this->serve_filename." $settings");
     }
 
     /**
