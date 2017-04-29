@@ -246,6 +246,17 @@ abstract class Model implements \ArrayAccess
     }
 
     /**
+     * Permet de rétourne le query builder
+     *
+     * @return QueryBuilder
+     */
+    public static function query()
+    {
+        static::prepareQueryBuilder();
+        return static::$instance;
+    }
+
+    /**
      * Permet d'initialiser la connection
      */
     private static function prepareQueryBuilder()
@@ -332,7 +343,7 @@ abstract class Model implements \ArrayAccess
         $primary_key_value = $this->getPrimaryKeyValue();
 
         if (static::$instance->exists($this->primaryKey, $primary_key_value)) {
-            return static::$instance->delete();
+            return static::$instance->where($this->primaryKey, $primary_key_value)->delete();
         }
 
         return 0;
