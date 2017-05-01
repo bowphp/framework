@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Support\Test;
+namespace Bow\Support\Testing;
 
 
 use PHPUnit\Framework\TestCase;

@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Support\Test;
+namespace Bow\Support\Testing;
 
 use Bow\Http\Client\Parser;
 use Bow\Http\Client\HttpClient;
@@ -86,7 +86,7 @@ class BowTestCase extends TestCase
      * @param array $params
      * @return Behovior
      */
-    public function visite($method, $url, array $params = [])
+    public function visit($method, $url, array $params = [])
     {
         $method = strtolower($method);
         if (! method_exists($this, $method)) {
