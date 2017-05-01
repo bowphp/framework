@@ -1,5 +1,5 @@
 <?php
-namespace Http\Client;
+namespace Bow\Http\Client;
 
 class HttpClient
 {
@@ -9,31 +9,38 @@ class HttpClient
     private $ch;
 
     /**
-     * @var Parser
+     * @var string
      */
-    private $parser;
+    private $url;
 
     /**
      * Constructeur d'instance.
      */
-    public function __construct()
+    public function __construct($url = null)
     {
-        $this->ch = curl_init();
-        $this->parser = new Parser($this->ch);
+        if (! function_exists('curl_init')) {
+            throw new \BadFunctionCallException('Installer la librairie cURL de php.');
+        }
+
+        if (is_string($url)) {
+            $this->ch = curl_init($url);
+            $this->url = $url;
+        }
     }
 
     /**
      * Make get requete
      *
      * @param string $url
+     * @param array $data
      * @return Parser
      */
-    public function get($url)
+    public function get($url, array $data = [])
     {
-        $this->ch = curl_init();
         $this->resetAndAssociateUrl($url);
+        $this->addFields($data);
 
-        return $this->parser;
+        return new Parser($this->ch);
     }
 
     /**
@@ -43,7 +50,7 @@ class HttpClient
      * @param array $data
      * @return Parser
      */
-    public function post($url, $data)
+    public function post($url, array $data = [])
     {
         $this->resetAndAssociateUrl($url);
 
@@ -51,7 +58,7 @@ class HttpClient
             $this->addFields($data);
         }
 
-        return $this->parser;
+        return new Parser($this->ch);
     }
 
     /**
@@ -69,7 +76,7 @@ class HttpClient
             $this->addFields($data);
         }
 
-        return $this->parser;
+        return new Parser($this->ch);
     }
 
     /**
@@ -79,15 +86,16 @@ class HttpClient
      */
     private function resetAndAssociateUrl($url)
     {
-        curl_reset($this->ch);
-        curl_setopt($this->ch, CURLOPT_URL, urlencode($url));
+        if (! is_resource($this->ch)) {
+            $this->ch = curl_init($url);
+        }
     }
 
     /**
      * @param array $data
      */
     private function addFields(array $data) {
-        if (!empty($data)) {
+        if (! empty($data)) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
         }
     }

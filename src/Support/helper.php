@@ -670,18 +670,41 @@ if (! function_exists('curl')) {
     /**
      * curl lance un requete vers une autre source de resource
      *
+     * @param string $method
      * @param string $url
+     * @param array $params
+     * @param bool $return
+     * @param string $header
      * @return array|null
      */
-    function curl($url) {
+    function curl($method, $url, array $params = [], $return = false, & $header = null) {
         $ch = curl_init($url);
 
-        if (! curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)) {
-            curl_close($ch);
-            return null;
+        $options = [
+            'CURLOPT_POSTFIELDS' => http_build_query($params)
+        ];
+
+        if ($return == true) {
+            if (! curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)) {
+                curl_close($ch);
+                return null;
+            }
         }
 
+        if ($method == 'POST') {
+            $options['CURLOPT_POST'] = 1;
+        }
+
+        // Set curl option
+        curl_setopt_array($ch, $options);
+
+        // Execute curl
         $data = curl_exec($ch);
+
+        if ($header !== null) {
+            $header = curl_getinfo($ch);
+        }
+
         curl_close($ch);
         return $data;
     }
