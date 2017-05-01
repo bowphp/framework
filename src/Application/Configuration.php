@@ -143,6 +143,14 @@ class Configuration
     }
 
     /**
+     * Retourne la visibité du log
+     */
+    public function getDisplayHtmlLog()
+    {
+        return $this->config['application']->display_html_log;
+    }
+
+    /**
      * Retourne la liste de Routes nommés
      *
      * @return array
