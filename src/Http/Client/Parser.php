@@ -19,7 +19,7 @@ class Parser
     private $ch;
 
     /**
-     * @var string
+     * @var array
      */
     private $header;
 
@@ -165,13 +165,14 @@ class Parser
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getHeaders()
     {
         if (! $this->executed) {
             $this->execute();
         }
+
         return $this->header;
     }
 
