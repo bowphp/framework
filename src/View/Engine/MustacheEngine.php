@@ -29,28 +29,35 @@ class MustacheEngine extends EngineAbstract
         $this->template = new \Mustache_Engine([
             'cache' => $config->getCachepath().'/view',
             'loader' => new \Mustache_Loader_FilesystemLoader($config->getViewpath()),
+            'partials_loader' => is_dir($config->getViewpath().'/partials')
+                ? new \Mustache_Loader_FilesystemLoader($config->getViewpath().'/partials')
+                : null,
             'helpers' => [
-                'secure' => function($data) {
+                'secure' => function ($data) {
                     return Security::sanitaze($data, true);
                 },
-                'sanitaze' => function($data) {
+                'sanitaze' => function ($data) {
                     return Security::sanitaze($data);
                 },
-                'slugify' => function($data) {
+                'slugify' => function ($data) {
                     return Str::slugify($data);
                 },
-                'csrf_token' => function() {
+                'csrf_token' => function () {
                     return Security::getCsrfToken()->token;
                 },
-                'csrf_field' => function() {
+                'csrf_field' => function () {
                     return Security::getCsrfToken()->field;
                 },
-                'trans' => function($key, $data = [], $choose = null) {
+                'trans' => function ($key, $data = [], $choose = null) {
                     return Translator::make($key, $data, $choose);
                 },
                 'public', $config->getPublicPath(),
-                'root', $config->getApproot()
-            ]
+                'root', $config->getApproot(),
+                'escape' => function($value) {
+                    return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+                }
+            ],
+
         ]);
     }
 
