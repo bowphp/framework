@@ -60,6 +60,6 @@ class MustacheEngine extends EngineAbstract
     public function render($filename, array $data = [])
     {
         $filename = $this->checkParseFile($filename);
-        $this->template->render(file_get_contents($filename), $data);
+        return $this->template->render(file_get_contents($this->config->getViewpath().'/'.$filename), $data);
     }
 }

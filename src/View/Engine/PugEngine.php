@@ -26,6 +26,7 @@ class PugEngine extends EngineAbstract
     {
         $this->config = $config;
         $this->template = new Pug([
+            'basedir' => $config->getViewpath(),
             'cache' => $config->getCachepath(),
             'prettyprint' => true,
             'extension' => $config->getTemplateExtension()
@@ -38,6 +39,6 @@ class PugEngine extends EngineAbstract
     public function render($filename, array $data = [])
     {
         $filename = $this->checkParseFile($filename);
-        return $this->template->render(file_get_contents($this->config->getViewpath().'/'.$filename), $data);
+        return $this->template->render($this->config->getViewpath().'/'.$filename, $data);
     }
 }
