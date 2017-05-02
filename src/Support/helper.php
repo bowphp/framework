@@ -1177,7 +1177,7 @@ if (! function_exists('trans')) {
      * @param bool $choose
      * @return string
      */
-    function trans($key, $data, $choose = null)
+    function trans($key, $data = [], $choose = null)
     {
         return \Bow\Translate\Translator::make($key, $data, $choose);
     }
