@@ -38,11 +38,11 @@ abstract class EngineAbstract
 
         // Vérification de l'existance du fichier
         if ($this->config->getViewpath() !== null) {
-            if (!is_file($this->config->getViewpath() . '/' . $filename)) {
+            if (! file_exists($this->config->getViewpath() . '/' . $filename)) {
                 throw new ViewException('La vue ['.$filename.'] n\'exist pas. ' . $this->config->getViewpath() . '/' . $filename, E_ERROR);
             }
         } else {
-            if (! is_file($filename)) {
+            if (! file_exists($filename)) {
                 throw new ViewException('La vue ['.$filename.'] n\'exist pas!.', E_ERROR);
             }
         }

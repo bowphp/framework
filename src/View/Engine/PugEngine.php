@@ -16,7 +16,7 @@ class PugEngine extends EngineAbstract
     /**
      * @var Pug
      */
-    private $templte;
+    private $template;
 
     /**
      * PugEngine constructor.
@@ -25,7 +25,7 @@ class PugEngine extends EngineAbstract
     public function __construct(Configuration $config)
     {
         $this->config = $config;
-        $this->templte = new Pug([
+        $this->template = new Pug([
             'cache' => $config->getCachepath(),
             'prettyprint' => true,
             'extension' => $config->getTemplateExtension()
@@ -38,6 +38,6 @@ class PugEngine extends EngineAbstract
     public function render($filename, array $data = [])
     {
         $filename = $this->checkParseFile($filename);
-        return $this->templte->render(file_get_contents($filename), $data);
+        return $this->template->render(file_get_contents($this->config->getViewpath().'/'.$filename), $data);
     }
 }
