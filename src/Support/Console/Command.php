@@ -636,7 +636,7 @@ use Bow\Http\RequestValidator as Validator;
 class {$name} extends Validator
 {
 	/**
-	 * Règle
+	 * Règle de validation
 	 * 
 	 * @var array
 	 */
