@@ -86,7 +86,7 @@ abstract class Model implements \ArrayAccess
         static::prepareQueryBuilder();
 
         if (count($columns) > 0) {
-            static::$instance->select = '`' . implode('`, `', $columns) . '`';
+            static::$instance->select($columns);
         }
 
         return static::$instance->get();
