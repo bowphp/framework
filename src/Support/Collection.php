@@ -13,7 +13,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     /**
      * @var array
      */
-    private $storage = [];
+    protected $storage = [];
 
     /**
      * Constructeur d'instance.
@@ -531,8 +531,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
      */
     public function pop()
     {
-        $data = $this->storage;
-        return array_pop($data);
+        return array_pop($this->storage);
     }
 
     /**

@@ -5,7 +5,7 @@ use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Database\SqlUnity;
 use Bow\Security\Security;
-use Bow\Support\Collection;
+use Bow\Database\Collection;
 use Bow\Database\Util\DBUtility;
 use Bow\Exception\QueryBuilderException;
 
