@@ -292,6 +292,23 @@ class Fields
     }
 
     /**
+     * text
+     *
+     * @param string $field
+     * @param bool $null
+     * @param null|string $default
+     * @throws \Exception
+     * @return Fields
+     */
+    public function text($field, $null = false, $default = null)
+    {
+        return $this->addField('text', $field, [
+            'null' => $null,
+            'default' => $default
+        ]);
+    }
+
+    /**
      * binary
      *
      * @param string $field
