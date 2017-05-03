@@ -38,6 +38,12 @@ class Behovior
         Assert::assertArraySubset($data, json_decode($json), $message);
     }
 
+    public function mustBeExactText($data, $message = '')
+    {
+        $text = $this->parser->raw();
+        Assert::assertEquals($text, $data, $message);
+    }
+
     public function headerExists($header, $message = '')
     {
         Assert::assertArrayHasKey($header, $this->parser->getHeaders(), $message);
