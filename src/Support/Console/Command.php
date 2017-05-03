@@ -631,11 +631,9 @@ MODEL;
 
 namespace App\Validation;
 
-use Bow\Http\Input;
-use Bow\Validation\Validate;
-use Bow\Validation\Validator;
+use Bow\Http\RequestValidator as Validator;
 
-class {$name}
+class {$name} extends Validator
 {
 	/**
 	 * Règle
@@ -643,70 +641,8 @@ class {$name}
 	 * @var array
 	 */
 	protected \$rules = [
-
+        // code
     ];
-
-    /**
-     * @var Validate
-     */
-    protected \$validate;
-
-    /**
-     * TodoValidation constructor.
-     */
-    public function __construct()
-    {
-        \$input = new Input();
-    	\$this->validate = Validator::make(\$input->all(), \$this->rules);
-    }
-
-    /**
-     * Permet de verifier si la réquete
-     */
-	public function fails()
-	{
-		return \$this->validate->fails();
-	}
-
-	/**
-	 * Permet de récupérer le validateur
-	 * 
-	 * @return Validate
-	 */
-	public function getValidation()
-	{
-		return \$this->validate;
-	}
-
-	/**
-	 * Permet de récupérer le message du de la dernier erreur 
-	 * 
-	 * @return Validate
-	 */
-	public function getMessage()
-	{
-		return \$this->validate->getLastMessage();
-	}
-
-	/**
-	 * Permet de récupérer tout les messages d'erreur
-	 * 
-	 * @return Validate
-	 */
-	public function getMessages()
-	{
-		return \$this->validate->getMessages();
-	}
-
-	/**
-	 * Permet de lancer une exception
-	 * 
-	 * @return Validate
-	 */
-	public function throwError()
-	{
-		return \$this->validate->throwError();
-	}
 }
 VALIDATOR;
 
