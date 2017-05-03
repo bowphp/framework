@@ -93,7 +93,7 @@ class Bow
     public function create()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['middleware', 'controller', 'model'])) {
+        if (! in_array($action, ['middleware', 'controller', 'model', 'validator'])) {
             $this->help('create');
             exit(0);
         }
@@ -168,6 +168,54 @@ class Bow
     }
 
     /**
+     * Permet de supprimer les caches
+     *
+     * @throws \ErrorException
+     */
+    public function clear()
+    {
+        if (in_array($this->_command->getParameter('target'), ['view', 'cache', 'all'])) {
+            throw new \ErrorException(sprintf(''));
+        }
+
+        $storage = $this->dirname.'/storage';
+
+        if ($this->_command->getParameter('target') == 'cache') {
+            $this->unlinks($storage.'/cache/bow');
+            return;
+        }
+
+        if ($this->_command->getParameter('target') == 'view') {
+            $this->unlinks($storage.'/cache/view');
+            return;
+        }
+
+        $this->unlinks($storage.'/cache/bow');
+        $this->unlinks($storage.'/cache/view');
+    }
+
+    /**
+     * @param $dirname
+     */
+    private function unlinks($dirname) {
+        $resource = opendir($dirname);
+        while ($output = readdir($resource)) {
+            if (is_dir($dirname.'/'.$output)) {
+                if (! in_array($output, ['.'])) {
+                    $this->unlinks($dirname.'/'.$output);
+                }
+            } else {
+                if (file_exists($dirname.'/'.$output)) {
+                    if ($output != '.gitkeep') {
+                        unlink($dirname.'/'.$output);
+                    }
+                }
+            }
+        }
+        closedir($resource);
+    }
+
+    /**
      * Permet de changer les fichiers de demarage
      *
      * @param array $bootstrap
@@ -214,13 +262,20 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mcreate:middleware\033[00m    Create new middleware
    \033[0;33mcreate:controller\033[00m    Create new controller
    \033[0;33mcreate:model\033[00m         Create new model
+   \033[0;33mcreate:validator\033[00m     Create new validator
 
  \033[0;32mmigrate\033[00m apply a migration in user model
   option:
    \033[0;33mmigrate:make\033[00m       Create a new migration
    \033[0;33mmigrate:down\033[00m       Drop migration
    \033[0;33mmigrate:up\033[00m         Update or create table of the migration
-
+ 
+\033[0;32mclear\033[00m for clear cache information
+   option:
+   \033[0;33mclear:view\033[00m        Clear view cached information
+   \033[0;33mclear:cache\033[00m       Clear cache information
+   \033[0;33mclear:all\033[00m         Clear all cache information
+   
  \033[0;32mconsole\033[00m show psysh php REPL for debug you code.
  \033[0;32mserver\033[00m run a local web server.
 
@@ -237,7 +292,7 @@ USAGE;
                 echo <<<U
 \n\033[0;32mcreate\033[00m create a user class\n
     [option]
-    --with-model[=name]  Create a model associte at controller
+    --with-model[=name]     Create a model associte at controller
     --no-plain              Create a plain controller
 
     * you can use --no-plain --with-model
@@ -245,6 +300,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:controller name [option]  For create a new controlleur
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:middleware name           For create a new middleware
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:model name                For create a new model
+    \033[0;33m$\033[00m php \033[0;33mbow\033[00m create:validator name            For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create help                      For display this
 
 U;
@@ -283,6 +339,16 @@ U;
 \n\033[0;32mconsole\033[00m show psysh php REPL\n
     php bow console
     >>> //test you code here.
+U;
+                break;
+
+            case 'clear':
+                echo <<<U
+\n\033[0;32mclear\033[00m for clear cache information\n
+   option:
+   \033[0;33mclear:view\033[00m        Clear view cached information
+   \033[0;33mclear:cache\033[00m       Clear cache information
+   \033[0;33mclear:all\033[00m         Clear all cache information
 U;
                 break;
         }

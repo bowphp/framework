@@ -591,8 +591,7 @@ MODEL;
         }
 
         file_put_contents($this->dirname."/app/${model_name}.php", $model);
-
-        echo "\033[0;32mmodel created \033[00m[${model_name}]\033[0;32m\033[00m\n";
+        echo "\033[00m[${model_name}]\033[0;32m \e[0;32mmodel created \033[00m\n";
         return 0;
     }
 
@@ -604,6 +603,116 @@ MODEL;
         $key = base64_encode(openssl_random_pseudo_bytes(12) . date('Y-m-d H:i:s') . microtime(true));
         file_put_contents($this->dirname."/config/.key", $key);
         echo "Application key => \033[0;32m$key\033[00m\n";
+    }
+
+    /**
+     * Permet de créer un validator
+     *
+     * @param string $name
+     * @return int
+     */
+    public function validator($name)
+    {
+        if (! is_dir($this->dirname.'/app/Validation')) {
+            mkdir($this->dirname.'/app/Validation');
+        }
+
+        if (! preg_match('/validator/i', $name)) {
+            $name = ucfirst($name).'Validator';
+        }
+
+        if (file_exists($this->dirname.'/app/Validation/'.$name.'.php')) {
+            echo "\033[0;33mvalidator \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m already exist.\033[00m\n";
+            return 0;
+        }
+
+        $validation = <<<VALIDATOR
+<?php
+
+namespace App\Validation;
+
+use Bow\Http\Input;
+use Bow\Validation\Validate;
+use Bow\Validation\Validator;
+
+class {$name}
+{
+	/**
+	 * Règle
+	 * 
+	 * @var array
+	 */
+	protected \$rules = [
+
+    ];
+
+    /**
+     * @var Validate
+     */
+    protected \$validate;
+
+    /**
+     * TodoValidation constructor.
+     */
+    public function __construct()
+    {
+        \$input = new Input();
+    	\$this->validate = Validator::make(\$input->all(), \$this->rules);
+    }
+
+    /**
+     * Permet de verifier si la réquete
+     */
+	public function fails()
+	{
+		return \$this->validate->fails();
+	}
+
+	/**
+	 * Permet de récupérer le validateur
+	 * 
+	 * @return Validate
+	 */
+	public function getValidation()
+	{
+		return \$this->validate;
+	}
+
+	/**
+	 * Permet de récupérer le message du de la dernier erreur 
+	 * 
+	 * @return Validate
+	 */
+	public function getMessage()
+	{
+		return \$this->validate->getLastMessage();
+	}
+
+	/**
+	 * Permet de récupérer tout les messages d'erreur
+	 * 
+	 * @return Validate
+	 */
+	public function getMessages()
+	{
+		return \$this->validate->getMessages();
+	}
+
+	/**
+	 * Permet de lancer une exception
+	 * 
+	 * @return Validate
+	 */
+	public function throwError()
+	{
+		return \$this->validate->throwError();
+	}
+}
+VALIDATOR;
+
+        file_put_contents($this->dirname.'/app/Validation/'.$name.'.php', $validation);
+        echo "\033[00m[${name}]\033[0;32m \e[0;32mvalidatoar created \033[00m\n";
+        return 0;
     }
 
     /**
