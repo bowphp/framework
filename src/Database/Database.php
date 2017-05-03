@@ -224,10 +224,10 @@ class Database
     public static function statement($sqlstatement)
     {
         static::verifyConnection();
-        if (! preg_match("/^((drop|alter|create)\s+table|truncate|call)(\s+)?.+;?$/i", $sqlstatement)) {
+        if (! preg_match("/^((drop|alter|create)\s+table|truncate|call)(\s+)?(.+?);?$/i", $sqlstatement)) {
             return false;
         }
-        return (bool) static::$adapter->getConnection()->exec($sqlstatement);
+        return static::$adapter->getConnection()->exec($sqlstatement) === 0;
     }
 
     /**
