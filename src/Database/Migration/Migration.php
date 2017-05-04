@@ -26,14 +26,4 @@ abstract class Migration
      * Supprimer ou Met à jour une table
      */
     abstract public function down();
-
-    /**
-     * Remplir une table
-     * @param int $n
-     * @return int
-     */
-    public function fill($n = 1)
-    {
-        return Schema::fillTable(static::$table, $n);
-    }
 }
