@@ -23,6 +23,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     private $loadClassName;
 
     /**
+     * @var bool
+     */
+    private $loadDataInClass = true;
+
+    /**
      * @var string
      */
     private $primaryKey = 'id';
@@ -714,6 +719,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
                 return null;
             }
 
+            // Permet de retourner les données de façon brute
+            if (! $this->loadDataInClass) {
+                return $current;
+            }
+
             if ($loadClassName !== QueryBuilder::class) {
                 return new $loadClassName((array) $current);
             }
@@ -725,6 +735,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
                 unset($current->{$id});
             }
             return new SqlUnity($this, $id_value, $current);
+        }
+
+        // Permet de retourner les données de façon brute
+        if (! $this->loadDataInClass) {
+            new Collection($data);
         }
 
         foreach ($data as $key => $value) {
@@ -1201,6 +1216,67 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         return $sql.';';
+    }
+
+    /**
+     * Permet de retour le nom de la clé primaire
+     *
+     * @return string
+     */
+    public function getPrimaryKey()
+    {
+        return $this->primaryKey;
+    }
+
+    /**
+     * Permet de modifier le nom de la clé primaire
+     *
+     * @param string $primaryKey
+     */
+    public function setPrimaryKey($primaryKey)
+    {
+        $this->primaryKey = $primaryKey;
+    }
+
+    /**
+     * Permet muter la classe a charge
+     *
+     * @param string $loadClassName
+     */
+    public function setLoadClassName($loadClassName)
+    {
+        $this->loadClassName = $loadClassName;
+    }
+
+    /**
+     * Permet de modifier le mom de la table
+     *
+     * @param string $table
+     */
+    public function setTableName($table)
+    {
+        $this->table = $table;
+    }
+
+    /**
+     * Permet de définir les données à associer
+     *
+     * @param array $whereDataBinding
+     */
+    public function setWhereDataBinding($whereDataBinding)
+    {
+        $this->whereDataBinding = $whereDataBinding;
+    }
+
+    /**
+     * Permet d'activer ou désactiver le chargement des données
+     * dans un classe
+     *
+     * @param bool $loadDataInClass
+     */
+    public function setDataLoadingInClass($loadDataInClass)
+    {
+        $this->loadDataInClass = $loadDataInClass;
     }
 
     /**
