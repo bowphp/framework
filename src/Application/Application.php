@@ -658,7 +658,7 @@ class Application
             if (isset($controllerName['middleware'])) {
                 $internalMiddleware = $controllerName['middleware'];
                 unset($controllerName['middleware']);
-                $next = Actionner::call(['middleware' => $internalMiddleware], $this->request);
+                $next = Actionner::call(['middleware' => $internalMiddleware], [$this->request]);
                 if ($next === false) {
                     return $this;
                 }
@@ -683,30 +683,41 @@ class Application
         // Association de url prédéfinie
         foreach ($valideMethod as $key => $value) {
             // on vérifie si la methode de appelé est ignoré
-            if (!in_array($value['call'], $ignoreMethod)) {
+            if (in_array($value['call'], $ignoreMethod)) {
+                continue;
+            }
 
-                // Formate controlleur
-                $bindController = $controller . '@' . $value['call'];
-                $path = $url . $value['url'];
-                $this->namedRoute($path, strtolower(preg_replace('/controller/i', '',$controller)) . '.' . $value['call']);
+            // Formate controlleur
+            $bindController = $controller . '@' . $value['call'];
+            $path = $url . $value['url'];
 
-                // Lancement de la methode de mapping de route.
-                call_user_func_array([$this, $value['method']], [rtrim($path, '/'), $bindController]);
+            $this->namedRoute(
+                $path,
+                strtolower(preg_replace('/controller/i', '', $controller)) . '.' . $value['call']
+            );
 
-                // Association des critères définies
-                if (!empty($where)) {
-                    $data = [];
-                    if (preg_match('/:id/', $path)) {
-                        if (isset($where['id'])) {
-                            $data = $where;
-                        } else {
-                            $data = ['id' => $where[0]];
-                        }
-                    }
+            // Lancement de la methode de mapping de route.
+            call_user_func_array(
+                [$this, $value['method']],
+                [rtrim($path, '/'), $bindController]
+            );
 
-                    $this->where(array_merge($data, $where));
+            // Association des critères définies
+            if (empty($where)) {
+                continue;
+            }
+
+            $data = [];
+
+            if (preg_match('/:id/', $path)) {
+                if (isset($where['id'])) {
+                    $data = $where;
+                } else {
+                    $data = ['id' => $where[0]];
                 }
             }
+
+            $this->where(array_merge($data, $where));
         }
 
         return $this;

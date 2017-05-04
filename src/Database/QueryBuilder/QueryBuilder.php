@@ -730,16 +730,18 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
             $id = $this->primaryKey;
             $id_value = null;
+
             if (isset($current->{$id})) {
                 $id_value = $current->{$id};
                 unset($current->{$id});
             }
+
             return new SqlUnity($this, $id_value, $current);
         }
 
         // Permet de retourner les données de façon brute
         if (! $this->loadDataInClass) {
-            new Collection($data);
+            new \Bow\Support\Collection($data);
         }
 
         foreach ($data as $key => $value) {
@@ -765,7 +767,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * Permet de retourner un élément dans la liste de résultat
      *
-     * @return SqlUnity|Collection|null
+     * @return SqlUnity|Collection|Collection|null
      */
     public function getOne()
     {
@@ -1148,7 +1150,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * @return Collection
+     * @return string
      */
     public function jsonSerialize()
     {
