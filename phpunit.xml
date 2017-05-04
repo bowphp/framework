@@ -4,8 +4,7 @@
         <directory suffix=".php">tests/</directory>
     </testsuite>
     <php>
-        <env name="DB_USER" value="travis"/>
-        <env name="DB_PASSWORD" value=""/>
+        <env name="DB_PASSWORD" value="test"/>
         <env name="DB_NAME" value="test"/>
         <env name="DB_CHARSET" value="utf8"/>
         <env name="DB_COLLATE" value="utf8_unicode_ci"/>

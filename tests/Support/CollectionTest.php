@@ -71,7 +71,7 @@ class TestCollection extends \PHPUnit\Framework\TestCase
      */
     public function testReserve(Collection $collection)
     {
-        $this->assertEquals(array_reverse(range(1, 10)), $collection->reverse()->toArray());
+        $this->assertEquals(array_reverse(range(1, 9)), $collection->reverse()->toArray());
     }
 
     /**
@@ -108,7 +108,7 @@ class TestCollection extends \PHPUnit\Framework\TestCase
      */
     public function testPush(Collection $collection)
     {
-        $collection->push(11);
-        $this->assertEquals(range(1, 11), $collection->toArray());
+        $collection->push(10);
+        $this->assertEquals(range(1, 10), $collection->toArray());
     }
 }

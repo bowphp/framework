@@ -22,9 +22,9 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
                 'scheme' => 'mysql',
                 'mysql' => [
                     'hostname' => 'localhost',
-                    'username' => getenv('DB_USER') ? getenv('DB_USER') : 'travis',
-                    'password' => getenv('DB_PASSWORD') ? getenv('DB_PASSWORD') : '',
-                    'database' => getenv('DB_NAME') ? getenv('DB_NAME') : 'test',
+                    'username' => getenv('DB_USER') ? getenv('DB_USER') : 'test',
+                    'password' => getenv('DB_USER') == 'travis' ? '' : getenv('DB_PASSWORD'),
+                    'database' => 'test',
                     'charset'  => getenv('DB_CHARSET') ? getenv('DB_CHARSET') : 'utf8',
                     'collation' => getenv('DB_COLLATE') ? getenv('DB_COLLATE') : '',
                     'port' => null,
