@@ -161,7 +161,7 @@ class Application
             $branch = '/' . $branch;
         }
         $this->branch = $branch;
-        call_user_func_array($cb, [$this->request]);
+        call_user_func_array($cb, [$this]);
         $this->branch = '';
         return $this;
     }
@@ -482,9 +482,11 @@ class Application
         if (! isset(static::$routes[$method])) {
             // Vérification et appel de la fonction du branchement 404
             $this->response->code(404);
+
             if (empty($this->errorCode)) {
                 $this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
             }
+
             return false;
         }
 
@@ -494,36 +496,42 @@ class Application
                 continue;
             }
 
-            // récupération du contenu de la where
+            // Récupération du contenu des critères défini
             if (isset($this->with[$method][$route->getPath()])) {
                 $with = $this->with[$method][$route->getPath()];
             } else {
                 $with = [];
             }
 
-            // Lancement de la recherche de la method qui arrivée dans la requete
-            // ensuite lancement de la verification de l'url de la requete
-            // execution de la fonction associé à la route.
+            // Lancement de la recherche de la methode qui arrivée dans la requête
+            // ensuite lancement de la vérification de l'url de la requête
             if (! $route->match($this->request->uri(), $with)) {
                 $error = true;
                 continue;
             }
 
             $this->currentPath = $route->getPath();
-            // appel requête fonction
+
+            // Appel de l'action associer à la route
             $response = $route->call($this->request, $this->config->getNamespace(), $this);
+
             if (is_string($response)) {
                 $this->response->send($response);
             } else if (is_array($response) || is_object($response)) {
                 $this->response->json($response);
             }
+
             $error = false;
+
             break;
         }
 
+        // Gestion de erreur
         if ($error) {
             $this->response->code(404);
-            throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
+            if (empty($this->errorCode)) {
+                throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
+            }
         }
 
         return true;
