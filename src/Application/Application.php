@@ -820,7 +820,7 @@ class Application
     {
         $code = http_response_code();
 
-        if ($code == 404) {
+        if ($code == 404 || ! isset($this->errorCode[$code])) {
             return;
         }
 
