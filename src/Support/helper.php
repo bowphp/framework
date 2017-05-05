@@ -149,30 +149,31 @@ if (! function_exists('db')) {
      * permet de se connecter sur une autre base de donnée
      * et retourne l'instance de la DB
      *
-     * @param string $zone le nom de la configuration de la db
+     * @param string $name le nom de la configuration de la db
      * @param callable $cb la fonction de rappel
      *
      * @return DB, the DB reference
      */
-    function db($zone = null, callable $cb = null) {
+    function db($name = null, callable $cb = null) {
         if (func_num_args() == 0) {
             return DB::instance();
         }
 
-        if (! is_string($zone)) {
+        if (! is_string($name)) {
             throw new InvalidArgumentException('Erreur sur le parametre 1. Type string attendu.');
         }
 
-        DB::connection($zone);
+        $last_connection = DB::getConnectionName();
 
-        if (is_callable($cb)) {
-            if ($cb()) {
-                DB::switchTo(config('db')['default']);
-            }
+        if ($last_connection !== $name) {
+            DB::connection($name);
         }
 
-        return DB::instance();
-
+        if (is_callable($cb)) {
+            return $cb();
+        } else {
+            return DB::connection($last_connection);
+        }
     }
 }
 
@@ -202,7 +203,7 @@ if (! function_exists('table')) {
      *
      * @param string $tableName, le nom d'un table.
      * @param string $zone, le nom de la zone sur laquelle la requete sera faite.
-     * @return Bow\Database\QueryBuilder
+     * @return Bow\Database\QueryBuilder\QueryBuilder
      */
     function table($tableName, $zone = null) {
         if (is_string($zone)) {
@@ -380,6 +381,7 @@ if (! function_exists('file')) {
      * files, fonction de type collection
      * manipule la variable global $_FILES
      *
+     * @param string $key
      * @return \Bow\Http\UploadFile|null
      */
     function file($key) {
