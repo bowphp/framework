@@ -33,4 +33,14 @@ class Collection extends \Bow\Support\Collection
     {
         return  json_encode($this->toArray(), $option = 0);
     }
+
+    /**
+     * Permet de supprimer tout les enrégistrement séléctionnés
+     */
+    public function dropAll()
+    {
+        $this->each(function (Model $model) {
+            $model->delete();
+        });
+    }
 }
