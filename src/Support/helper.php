@@ -376,27 +376,19 @@ if (! function_exists('slugify')) {
     }
 }
 
-if (! function_exists('file')) {
-    /**
-     * files, fonction de type collection
-     * manipule la variable global $_FILES
-     *
-     * @param string $key
-     * @return \Bow\Http\UploadFile|null
-     */
-    function file($key) {
-        return request()->file($key);
-    }
-}
-
 if (! function_exists('files')) {
     /**
      * files, fonction de type collection
      * manipule la variable global $_FILES
      *
-     * @return array
+     * @param string $key
+     * @return array|\Bow\Http\UploadFile
      */
-    function files() {
+    function files($key = null) {
+        if ($key !== null) {
+            return request()->file($key);
+        }
+
         return request()->files();
     }
 }
