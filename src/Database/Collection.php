@@ -25,4 +25,12 @@ class Collection extends \Bow\Support\Collection
 
         return $arr;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function toJson($option = 0)
+    {
+        return  json_encode($this->toArray(), $option = 0);
+    }
 }
