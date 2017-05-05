@@ -820,12 +820,13 @@ class Application
     {
         $code = http_response_code();
 
-        if ($code == 400 || ! in_array($code, array_keys($this->errorCode))) {
+        if ($code == 404) {
             return;
         }
 
         $this->response->code($code);
         $r = call_user_func($this->errorCode[$code]);
+
         $this->response->send($r);
     }
 }
