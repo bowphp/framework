@@ -8,7 +8,7 @@ namespace Bow\Support;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
-class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
+class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \ArrayAccess
 {
     /**
      * @var array
@@ -665,5 +665,40 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate
     public function getIterator()
     {
         return new \ArrayIterator($this->storage);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return $this->has($offset);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return mixed
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->set($offset, $value);
+    }
+
+    /**
+     * @param mixed $offset
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->storage[$offset]);
     }
 }
