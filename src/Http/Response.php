@@ -3,7 +3,6 @@ namespace Bow\Http;
 
 use Bow\View\View;
 use Bow\Exception\ViewException;
-use Bow\Application\Configuration;
 use Bow\Exception\ResponseException;
 
 /**
@@ -223,6 +222,7 @@ class Response
      * @param mixed $data Les données à transformer en JSON
      * @param int 	$code Le code de la réponse HTTP
      * @param bool 	$end  Quand est à true il termine le processus
+     * @return bool
      */
     public function json($data, $code = 200, $end = false)
     {
@@ -234,7 +234,7 @@ class Response
         $this->forceInUTF8();
         $this->addHeader('Content-Type', 'application/json; charset=UTF-8');
         $this->code($code);
-        $this->send(json_encode($data), $end);
+        return $this->send(json_encode($data), $end);
     }
 
     /**
@@ -297,6 +297,18 @@ class Response
         }
 
         return true;
+    }
+
+    /**
+     * Permet de faire le rendu d'une vue.
+     *
+     * @param $template
+     * @param array $data
+     * @return string
+     */
+    public function view($template, $data = [])
+    {
+        return View::make($template, $data);
     }
 
     /**

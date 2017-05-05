@@ -490,6 +490,13 @@ abstract class Model implements \ArrayAccess
         return json_encode($this->attributes);
     }
 
+    /**
+     * __call
+     *
+     * @param string $method
+     * @param array $arguments
+     * @return mixed
+     */
     public function __call($method, $arguments)
     {
         if (method_exists(static::$instance, $method)) {

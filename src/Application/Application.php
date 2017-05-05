@@ -527,14 +527,26 @@ class Application
         }
 
         // Gestion de erreur
-        if ($error) {
-            $this->response->code(404);
-            if (empty($this->errorCode)) {
-                throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
-            }
+        if (! $error) {
+            return true;
         }
 
-        return true;
+        $this->response->code(404);
+
+        if (! in_array(404, array_keys($this->errorCode))) {
+            if ($this->config->getNotFoundFilename() != false) {
+                return $this->response->send(
+                    $this->response->view($this->config->getNotFoundFilename())
+                );
+            }
+
+            throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
+        }
+
+        $this->response->code(404);
+        $r = call_user_func($this->errorCode[404]);
+
+        return $this->response->send($r, true);
     }
 
     /**
@@ -807,9 +819,13 @@ class Application
     public function __destruct()
     {
         $code = http_response_code();
-        if (in_array($code, array_keys($this->errorCode))) {
-            $this->response->code($code);
-            call_user_func($this->errorCode[$code]);
+
+        if ($code == 400 || ! in_array($code, array_keys($this->errorCode))) {
+            return;
         }
+
+        $this->response->code($code);
+        $r = call_user_func($this->errorCode[$code]);
+        $this->response->send($r);
     }
 }

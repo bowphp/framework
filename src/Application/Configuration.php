@@ -225,6 +225,18 @@ class Configuration
     }
 
     /**
+     * @return string
+     */
+    public function getNotFoundFilename()
+    {
+        if (! isset($this->config['application']->not_found_file_name)) {
+            return false;
+        }
+
+        return $this->config['application']->not_found_file_name;
+    }
+
+    /**
      * setCachePath
      *
      * @param string $newCachePath
