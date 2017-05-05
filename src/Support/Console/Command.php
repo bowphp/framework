@@ -178,18 +178,44 @@ class Command
             }
 
             call_user_func_array([$instance, strtolower($type)], $param);
-
-            if ($options == null) {
-                return;
-            }
-
-            if ($options->has('--seed')) {
-                $n = (int) $options->get('--seed', 1);
-                $r = call_user_func_array([$instance, 'fill'], [$n]);
-                $s = $r > 1 ? 's' : '';
-                echo "\033[0;33m$r\033[00m \033[0;32mseed$s in \033[00m[$model] \033[0;32mmigration\033[00m\n";
-            }
         }
+
+        exit(0);
+    }
+
+    public function seeder($name)
+    {
+        $seeder_filename = $this->dirname."/migration/seeders/{$name}_seeder.php";
+
+        if (file_exists($seeder_filename)) {
+            echo "\033[0;31mLe seeder '$name' exists déja.\033[00m";
+            exit(1);
+        }
+
+        $options = $this->options();
+        $num = 5;
+
+        if ($options->has('--n-seed') && is_int($options->get('--n-seed'))) {
+            $num = $options->get('--n-seed', 5);
+        }
+
+        $content = <<<SEEDER
+<?php
+
+\$seeds['$name'] = [];
+
+foreach (range(1, $num) as \$key) {
+    \$seeds['$name'][] = [
+        'id' => faker('autoincrement', 1),
+        'name' => faker('name')
+    ];
+}
+
+return \$seeds;
+SEEDER;
+        file_put_contents($seeder_filename, $content);
+        echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a été bien créer.\033[00m\n";
+        exit(0);
     }
 
     /**
@@ -254,8 +280,8 @@ doc;
         file_put_contents($this->dirname."/migration/${create_at}_${model}.php", $migrate);
         Storage::append($this->dirname."/migration/.registers", "${create_at}_${model}|$table\n");
 
-        echo "\033[0;32mmigration file \033[00m[$model]\033[0;32m created.\033[00m\n";
-        return;
+        echo "\033[0;32mmLe file de migration \033[00m[$model]\033[0;32m a été bien créer.\033[00m\n";
+        exit(0);
     }
 
     /**
@@ -289,7 +315,7 @@ doc;
                     $model = $options->get('--model');
                 } else {
                     echo "\033[0;32;7mLe nom du model non spécifié --model=model_name.\033[00m\n";
-                    die();
+                    exit(1);
                 }
             }
 
@@ -395,8 +421,8 @@ class {$controller_name} extends Controller
 }
 CC;
         file_put_contents($this->dirname."/app/Controllers/${controller_name}.php", $controllerRestTemplate);
-        echo "\033[0;32mcontroller created \033[00m[{$controller_name}]\033[0;32m\033[00m\n";
-        return;
+        echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien créer.\033[00m\n";
+        exit(0);
     }
 
     /**
@@ -418,8 +444,8 @@ CC;
         }
 
         if (file_exists($this->dirname."/app/Controllers/$controller_name.php")) {
-            echo "\033[0;31mcontroller \033[0;33m\033[0;31m[$controller_name]\033[00m\033[0;31m already exist.\033[00m\n";
-            return;
+            echo "\033[0;31mLe controlleur \033[0;33m\033[0;31m[$controller_name]\033[00m\033[0;31m existe déja.\033[00m\n";
+            exit(1);
         }
 
         if ($this->options('--no-plain')) {
@@ -511,7 +537,8 @@ class {$controller_name} extends Controller
 }
 CC;
         file_put_contents($this->dirname."/app/Controllers/${controller_name}.php", $controller_template);
-        echo "\033[0;32mcontroller \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m created.\033[00m\n";
+        echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien créer.\033[00m\n";
+        exit(0);
     }
 
     /**
@@ -523,8 +550,8 @@ CC;
         $middleware_name = ucfirst($middleware_name);
 
         if (file_exists($this->dirname."/app/Middleware/$middleware_name.php")) {
-            echo "\033[0;31mmiddleware \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m already exist.\033[00m\n";
-            return 0;
+            echo "\033[0;31mLe middleware \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m existe déja.\033[00m\n";
+            exit(1);
         }
 
         $middleware_template = <<<CM
@@ -548,9 +575,9 @@ class {$middleware_name}
 }
 CM;
         file_put_contents($this->dirname."/app/Middleware/$middleware_name.php", $middleware_template);
-        echo "\033[0;32mmiddleware \033[00m[{$middleware_name}]\033[0;32m created.\033[00m\n";
+        echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien créer.\033[00m\n";
 
-        return 0;
+        exit(0);
     }
 
     /**
@@ -586,13 +613,13 @@ class ${model_name} extends Model
 }
 MODEL;
         if (file_exists($this->dirname."/app/${model_name}.php")) {
-            echo "\033[0;33mmodel \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m already exist.\033[00m\n";
-            return 0;
+            echo "\033[0;33mLe model \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m existe déja.\033[00m\n";
+            exit(1);
         }
 
         file_put_contents($this->dirname."/app/${model_name}.php", $model);
-        echo "\033[00m[${model_name}]\033[0;32m \e[0;32mmodel created \033[00m\n";
-        return 0;
+        echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien créer.\033[00m\n";
+        exit(0);
     }
 
     /**
@@ -603,6 +630,7 @@ MODEL;
         $key = base64_encode(openssl_random_pseudo_bytes(12) . date('Y-m-d H:i:s') . microtime(true));
         file_put_contents($this->dirname."/config/.key", $key);
         echo "Application key => \033[0;32m$key\033[00m\n";
+        exit(0);
     }
 
     /**
@@ -622,7 +650,7 @@ MODEL;
         }
 
         if (file_exists($this->dirname.'/app/Validation/'.$name.'.php')) {
-            echo "\033[0;33mvalidator \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m already exist.\033[00m\n";
+            echo "\033[0;33mLe validateur \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m existe déja.\033[00m\n";
             return 0;
         }
 
@@ -647,7 +675,7 @@ class {$name} extends Validator
 VALIDATOR;
 
         file_put_contents($this->dirname.'/app/Validation/'.$name.'.php', $validation);
-        echo "\033[00m[${name}]\033[0;32m \e[0;32mvalidatoar created \033[00m\n";
+        echo "\033[0;32mLe validateur \033[00m[${name}]\033[0;32m a été bien créer.\033[00m\n";
         return 0;
     }
 
@@ -660,6 +688,7 @@ VALIDATOR;
     private function readline($message)
     {
         echo "\033[0;32m$message y/N\033[00m >>> ";
+
         $input = readline();
 
         if (strtolower($input) == "y") {

@@ -3,6 +3,7 @@ namespace Bow\Support\Console;
 
 use Psy\Shell;
 use Psy\Configuration;
+use Bow\Database\Database;
 
 class Bow
 {
@@ -93,12 +94,49 @@ class Bow
     public function create()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['middleware', 'controller', 'model', 'validator'])) {
+        if (! in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder'])) {
             $this->help('create');
             exit(0);
         }
 
         $this->_command->$action($this->_command->getParameter('target'));
+    }
+
+    /**
+     * Permet de lancer le seeding
+     */
+    public function seed()
+    {
+        $table_name = $this->_command->getParameter('target');
+
+        if (is_string($table_name) && ! file_exists($this->dirname."/migration/seeders/{$table_name}_seeder.php")) {
+            echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
+            exit(1);
+        }
+
+        if (is_null($table_name)) {
+            $seeds_filenames = glob($this->dirname.'/migration/seeders/*_seeder.php');
+        } else {
+            $seeds_filenames = [$this->dirname."/migration/seeders/{$table_name}_seeder.php"];
+        }
+
+        $seed_collection = [];
+
+        foreach ($seeds_filenames as $filename) {
+            $seed_collection = array_merge(require $filename, $seed_collection);
+        }
+
+        try {
+            foreach ($seed_collection as $table => $seed) {
+                $n = Database::table($table)->insert($seed);
+                echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." pours '$table'\n\033[00m";
+            }
+        } catch(\Exception $e) {
+            echo $e->getMessage();
+            exit(1);
+        }
+
+        exit(0);
     }
 
     /**
@@ -140,7 +178,12 @@ class Bow
         }
 
         if (is_string($this->_command->getParameter('--include'))) {
-            $this->setBootstrap([$this->_command->getParameter('--include')]);
+            $this->setBootstrap(
+                array_merge(
+                    [$this->bootstrap],
+                    [$this->_command->getParameter('--include')]
+                )
+            );
         }
 
         if (! class_exists('\Psy\Shell')) {
@@ -263,6 +306,7 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mcreate:controller\033[00m    Create new controller
    \033[0;33mcreate:model\033[00m         Create new model
    \033[0;33mcreate:validator\033[00m     Create new validator
+   \033[0;33mcreate:seeder\033[00m        Create new table fake seeder
 
  \033[0;32mmigrate\033[00m apply a migration in user model
   option:
@@ -300,7 +344,8 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:controller name [option]  For create a new controlleur
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:middleware name           For create a new middleware
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:model name                For create a new model
-    \033[0;33m$\033[00m php \033[0;33mbow\033[00m create:validator name            For create a new validator
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:validator name            For create a new validator
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:seeder name [--n-seed=n]  For create a new table seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create help                      For display this
 
 U;
