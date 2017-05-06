@@ -107,7 +107,12 @@ class Bow
      */
     public function seed()
     {
-        $table_name = $this->_command->getParameter('target');
+        if ($this->_command->getParameter('action') != null || $this->_command->getParameter('target') != null) {
+            echo "\033[0;32mCommand not found\033[00m\033[00m\n";
+            exit(1);
+        }
+
+        $table_name = $this->_command->getParameter('--only');
 
         if (is_string($table_name) && ! file_exists($this->dirname."/migration/seeders/{$table_name}_seeder.php")) {
             echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
@@ -314,11 +319,15 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mmigrate:down\033[00m       Drop migration
    \033[0;33mmigrate:up\033[00m         Update or create table of the migration
  
-\033[0;32mclear\033[00m for clear cache information
+\033[0;32mclear\033[00m for clear cache information [not supported]
    option:
    \033[0;33mclear:view\033[00m        Clear view cached information
    \033[0;33mclear:cache\033[00m       Clear cache information
    \033[0;33mclear:all\033[00m         Clear all cache information
+   
+\033[0;32mseed\033[00m Make seeding
+   option: --only=name
+   \033[0;33mseed \033[00m [option]    Make seeding for all or one table
    
  \033[0;32mconsole\033[00m show psysh php REPL for debug you code.
  \033[0;32mserver\033[00m run a local web server.
@@ -390,10 +399,19 @@ U;
             case 'clear':
                 echo <<<U
 \n\033[0;32mclear\033[00m for clear cache information\n
-   option:
+
    \033[0;33mclear:view\033[00m        Clear view cached information
    \033[0;33mclear:cache\033[00m       Clear cache information
    \033[0;33mclear:all\033[00m         Clear all cache information
+U;
+                break;
+
+            case 'seed':
+                echo <<<U
+\n\033[0;32mseed\033[00m table\n
+   option: --only=name
+   
+   \033[0;33mseed \033[00m [option]    Make seeding for all or one table
 U;
                 break;
         }
