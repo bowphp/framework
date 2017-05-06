@@ -56,6 +56,6 @@ class Collection extends \Bow\Support\Collection
      */
     public function jsonSerialize()
     {
-        return json_encode($this->toArray());
+        return $this->toArray();
     }
 }
