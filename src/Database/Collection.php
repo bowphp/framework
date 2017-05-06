@@ -4,8 +4,7 @@ namespace Bow\Database;
 class Collection extends \Bow\Support\Collection
 {
     /**
-     * Collection constructor.
-     * @param array $arr
+     * @inheritdoc
      */
     public function __construct(array $arr = [])
     {
@@ -13,7 +12,7 @@ class Collection extends \Bow\Support\Collection
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
     public function toArray()
     {
@@ -42,5 +41,21 @@ class Collection extends \Bow\Support\Collection
         $this->each(function (Model $model) {
             $model->delete();
         });
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __toString()
+    {
+        return json_encode($this->toArray());
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function jsonSerialize()
+    {
+        return json_encode($this->toArray());
     }
 }
