@@ -1163,7 +1163,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function toJson($option = 0)
     {
-        return json_encode($this->get()->values(), $option);
+        return json_encode($this->get()->toArray(), $option);
     }
 
     /**

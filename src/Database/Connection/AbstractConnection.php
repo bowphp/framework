@@ -78,4 +78,24 @@ abstract class AbstractConnection extends DBUtility
         $this->fetch = $fetch;
         $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, $fetch);
     }
+
+    /**
+     * Permet de récupérer la configuration
+     *
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * Permet de récupérer le prefix des tables
+     *
+     * @return mixed|string
+     */
+    public function getTablePrefix()
+    {
+        return isset($this->config['prefix']) ? $this->config['prefix'] : '';
+    }
 }

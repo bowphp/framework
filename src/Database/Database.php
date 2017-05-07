@@ -121,6 +121,16 @@ class Database
     }
 
     /**
+     * Permet de retouner l'instance de l'adapteur
+     *
+     * @return AbstractConnection
+     */
+    public static function getConnectionAdapter()
+    {
+        return static::$adapter;
+    }
+
+    /**
      * éxécute une requête update
      *
      * @param string $sqlstatement
@@ -260,6 +270,7 @@ class Database
     public static function table($table, $loadClassName = null, $primaryKey = null)
     {
         static::verifyConnection();
+        $table = static::$adapter->getTablePrefix().$table;
         return new QueryBuilder($table, static::$adapter->getConnection(), $loadClassName, $primaryKey);
     }
 

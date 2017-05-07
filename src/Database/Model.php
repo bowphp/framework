@@ -272,6 +272,7 @@ abstract class Model implements \ArrayAccess
             }
 
             $primaryKey = $properties['primaryKey'];
+            $table = DB::getConnectionAdapter()->getTablePrefix().$table;
             static::$instance = new QueryBuilder($table, DB::getPdo(), static::class, $primaryKey);
         }
     }

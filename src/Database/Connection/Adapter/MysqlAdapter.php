@@ -29,7 +29,7 @@ class MysqlAdapter extends AbstractConnection
     public function connection()
     {
         // Construction de la dsn
-        $dns  = "mysql:host=" . $this->config['hostname'];
+        $dns  = "mysql:host=" . (isset($this->config['socket']) && $this->config['socket'] !== null ? $this->config['socket'] : $this->config['hostname']);
         $dns .= isset($this->config['port']) && $this->config['port'] !== null ? ":" . $this->config["port"] : "";
         $dns .= ";dbname=". $this->config['database'];
         $username = $this->config["username"];
