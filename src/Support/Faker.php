@@ -212,6 +212,6 @@ class Faker
             $gen = $data[rand(0, count($data) - 1)];
         }
 
-        return static::$selections[$key] = $gen;
+        return static::$selections[$key][] = $gen;
     }
 }
