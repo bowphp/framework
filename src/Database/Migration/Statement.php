@@ -77,9 +77,12 @@ class Statement
         /**
          * Les informations entrées par l'utilisateur.
          */
-        $fields = $this->columns->getDefineFields();
+        $fields = $this->columns->getFieldsRangs();
 
-        $fields->each(function (Collection $value, $type) {
+        $fields->each(function ($value) {
+            $info = $value['data'];
+            $field = $value['field'];
+            $type = $value['type'];
 
             switch ($type) {
                 case 'char' :
@@ -100,23 +103,21 @@ class Statement
                 case "blob" :
                 case "mediumblob" :
                 case "longblob" :
-                    $value->each(function ($info, $field) use ($type) {
-                        $this->addFieldType($info, $field, $type);
-                        if (in_array($type, ["int", "longint", "bigint", "mediumint", "smallint", "tinyint"], true)) {
-                            if ($this->columns->getAutoincrement() !== false) {
-                                if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
-                                    $this->sql .= " AUTO_INCREMENT";
-                                }
-                                $this->columns->setAutoincrement(false);
+                    $this->addFieldType($info, $field, $type);
+                    if (in_array($type, ["int", "longint", "bigint", "mediumint", "smallint", "tinyint"], true)) {
+                        if ($this->columns->getAutoincrement() !== false) {
+                            if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
+                                $this->sql .= " AUTO_INCREMENT";
                             }
+                            $this->columns->setAutoincrement(false);
                         }
+                    }
 
-                        if ($info["default"]) {
-                            $this->sql .= " DEFAULT " . $info["default"];
-                        }
+                    if ($info["default"]) {
+                        $this->sql .= " DEFAULT " . $info["default"];
+                    }
 
-                        $this->addIndexOrPrimaryKey($info, $field);
-                    });
+                    $this->addIndexOrPrimaryKey($info, $field);
                     break;
 
                 case "date" :
@@ -124,24 +125,19 @@ class Statement
                 case "timestamp" :
                 case "time" :
                 case "year" :
-                    $value->each(function ($info, $field) use ($type) {
-                        $this->addFieldType($info, $field, $type);
-                        $this->addIndexOrPrimaryKey($info, $field);
-                    });
+                    $this->addFieldType($info, $field, $type);
+                    $this->addIndexOrPrimaryKey($info, $field);
                     break;
                 case "enum" :
-                    $value->each(function ($info, $field) {
-                        foreach ($info["value"] as $key => $value) {
-                            $info["value"][$key] = "'" . $value . "'";
-                        }
-                        $null = $this->getNullType($info["null"]);
-                        $enum = implode(", ", $info["value"]);
-                        $this->sql .= "`$field` ENUM($enum) $null";
-                        if ($info["default"] !== null) {
-                            $this->sql .= " DEFAULT '" . $info["default"] . "'";
-                        }
-                    });
-
+                    foreach ($info["value"] as $key => $value) {
+                        $info["value"][$key] = "'" . $value . "'";
+                    }
+                    $null = $this->getNullType($info["null"]);
+                    $enum = implode(", ", $info["value"]);
+                    $this->sql .= "`$field` ENUM($enum) $null";
+                    if ($info["default"] !== null) {
+                        $this->sql .= " DEFAULT '" . $info["default"] . "'";
+                    }
                     break;
             }
         });

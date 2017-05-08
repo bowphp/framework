@@ -14,6 +14,11 @@ class Fields
     private $fields;
 
     /**
+     * @var array
+     */
+    private $rangs = [];
+
+    /**
      * define the primary key
      *
      * @var bool
@@ -72,7 +77,7 @@ class Fields
      */
     public function __construct($table)
     {
-        $this->fields  = new Collection;
+        $this->fields = new Collection;
         $this->table = $table;
         return $this;
     }
@@ -688,6 +693,7 @@ class Fields
 
         $this->dataBind[$field] = $bind;
 
+        // Verifie l'existance d'un champs
         if ($this->fields->get($method)->has($field)) {
             return $this;
         }
@@ -697,12 +703,15 @@ class Fields
         $data['unique']  = false;
         $data['indexe']  = false;
 
-        $this->fields->get($method)->push($data, $field);
+        // Permet de rendre les champs unique.
+        $this->fields->get($method)->push(true, $field);
 
         $this->lastField = (object) [
             'method' => $method,
             'field'  => $field
         ];
+
+        $this->rangs[] = ['type' => $method, 'field' => $field, 'data' => $data];
 
         return $this;
     }
@@ -724,22 +733,18 @@ class Fields
             $default = is_bool($null) ? null : $null;
             $null = $size;
             $size = 11;
-        } else {
-            if (is_string($size)) {
-                $default = $size;
-                $size    = 11;
-                $null    = false;
-            } else {
-                if (is_string($null)) {
-                    $default = $null;
-                    $null    = false;
-                }
-            }
+        } elseif (is_string($size)) {
+            $default = $size;
+            $size = 11;
+            $null = false;
+        } elseif (is_string($null)) {
+            $default = $null;
+            $null = false;
         }
 
         $this->addField($method, $field, [
-            'size'    => $size,
-            'null'    => $null,
+            'size' => $size,
+            'null' => $null,
             'default' => $default
         ]);
 
@@ -752,6 +757,14 @@ class Fields
     public function getDefineFields()
     {
         return $this->fields;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getFieldsRangs()
+    {
+        return new Collection($this->rangs);
     }
 
     /**
