@@ -109,15 +109,16 @@ class Faker
     }
 
     /**
+     * @param int $time
      * @return string
      */
     public static function date($time = null)
     {
         if ($time == null) {
-            $time = time();
+            $time = 0;
         }
 
-        return date("Y-m-d H:i:s", $time);
+        return date("Y-m-d H:i:s", time() + $time);
     }
 
     /**
