@@ -30,11 +30,23 @@ class Faker
     /**
      * @var array
      */
+    const TAGS = [
+        'php', 'js', 'marketing', 'aws', 'informatique', 'tutoriel', 'réunion',
+        'assurances', 'c#', 'web', 'python', 'c++', 'ruby', 'rails', 'pascal',
+        'java', 'javascript', 'closure', 'hackaton', 'street', 'pays', 'la paix',
+        'vivre', 'santé', 'virus', 'bot', 'arduino', 'rasberypy', 'bluemix', 'cloud',
+        'djongo', ''
+    ];
+
+    /**
+     * @var array
+     */
     private static $selections = [];
 
     /**
      * @param array $additionnal_names
      * @param bool $random
+     * @return string
      */
     public static function name(array $additionnal_names = [], $random = false)
     {
@@ -49,12 +61,7 @@ class Faker
             return $names[rand(0, count($names) - 1)];
         }
 
-        $name = $names[0];
-        while (in_array($name, static::$selections)) {
-            $name = $names[rand(0, count($names) - 1)];
-        }
-        static::$selections[] = $name;
-        return $name;
+        return static::gen($names, 'name');
     }
 
     /**
@@ -75,15 +82,7 @@ class Faker
             return str_replace(' ', '', strtolower($name));
         }, self::NAMES);
 
-        $password = $passwords[0];
-
-        while (in_array($password, static::$selections)) {
-            $password = $passwords[rand(0, count($passwords) - 1)];
-        }
-
-        static::$selections[] = $password;
-
-        return $password;
+        return static::gen($passwords, 'password');
     }
 
     /**
@@ -101,6 +100,10 @@ class Faker
      */
     public static function string($size = 255, $multi = 1)
     {
+        if ($size == null) {
+            $size = 255;
+        }
+
         $str = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
         return Str::slice(Str::repeat($str, $multi), 0, $size);
     }
@@ -108,9 +111,13 @@ class Faker
     /**
      * @return string
      */
-    public static function date()
+    public static function date($time = null)
     {
-        return date("Y-m-d H:i:s");
+        if ($time == null) {
+            $time = time();
+        }
+
+        return date("Y-m-d H:i:s", $time);
     }
 
     /**
@@ -137,15 +144,8 @@ class Faker
     public static function email(array $additionnal_emails = [])
     {
         $emails = array_merge(self::EMAILS, $additionnal_emails);
-        $email = $emails[0];
 
-        while (in_array($email, static::$selections)) {
-            $email = $emails[rand(0, count($emails) - 1)];
-        }
-
-        static::$selections[] = $email;
-
-        return $email;
+        return static::gen($emails, 'email');
     }
 
     /**
@@ -177,10 +177,41 @@ class Faker
     }
 
     /**
+     * @param int $by
      * @return string
      */
-    public static function tags()
+    public static function tags($by = 2)
     {
-        return 'js, php, coding, aws';
+        $tags = [];
+        while (count($tags) <= $by) {
+            $tag = static::TAGS[rand(0, $by)];
+            if (! in_array($tag, $tags)) {
+                $tags[] = static::TAGS[
+                    rand(0, count(static::TAGS))
+                ];
+            }
+        }
+
+        return implode(', ', $tags);
+    }
+
+    /**
+     * @param $data
+     * @param $key
+     * @return mixed
+     */
+    private static function gen($data, $key)
+    {
+        if (isset(static::$selections[$key])) {
+            static::$selections[$key] = [];
+        }
+
+        $gen = $data[0];
+
+        while (in_array($gen , static::$selections)) {
+            $gen = $data[rand(0, count($data) - 1)];
+        }
+
+        return static::$selections[$key] = $gen;
     }
 }
