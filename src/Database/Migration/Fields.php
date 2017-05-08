@@ -136,6 +136,16 @@ class Fields
     }
 
     /**
+     * @param $field
+     * @param null $default
+     * @return Fields
+     */
+    public function boolean($field, $default = null)
+    {
+        return $this->tinyInteger($field, 1, false, $default);
+    }
+
+    /**
      * smallint
      *
      * @param string $field
@@ -146,7 +156,7 @@ class Fields
      * @return Fields
      * @throws \ErrorException
      */
-    public function smallint($field, $size = null, $null = false, $default = null)
+    public function smallInteger($field, $size = null, $null = false, $default = null)
     {
         return $this->loadWhole('smallint', $field, $size, $null, $default);
     }
@@ -327,25 +337,6 @@ class Fields
         ]);
     }
 
-
-    /**
-     * boolean
-     *
-     * @param string $field
-     * @param bool $null
-     * @param mixed $default
-     * @throws \Exception
-     * @return Fields
-     */
-    public function boolean($field, $null = false, $default = null)
-    {
-        return $this->addField('tinyint', $field, [
-            'null' => $null,
-            'default' => $default,
-            'size' => 1
-        ]);
-    }
-
     /**
      * blob
      *
@@ -493,10 +484,12 @@ class Fields
             'null' => true,
             'default' => 'CURRENT_TIMESTAMP'
         ]);
+
         $this->addField('timestamp', 'updated_at', [
             'null' => true,
             'default' => 'CURRENT_TIMESTAMP'
         ]);
+
         return $this;
     }
 
@@ -561,24 +554,31 @@ class Fields
             $field = 'id';
         }
 
-        if ($this->autoincrement === false) {
-            if ($this->lastField !== null) {
-                if (in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
-                    $this->autoincrement = $this->lastField;
-                    $this->dataBind[$this->lastField->field]['auto'] = true;
-                } else {
-                    throw new ModelException('Cannot add autoincrement to ' . $this->lastField->method, 1);
-                }
-            } else {
-                if ($field) {
-                    $this->autoincrement = (object) [
-                        'method' => 'int',
-                        'field' => $field
-                    ];
-                    $this->integer($field)->primary();
-                }
-            }
+        if ($this->autoincrement !== false) {
+            return $this;
         }
+
+        if ($this->lastField !== null) {
+            if (! in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
+                throw new ModelException('Cannot add autoincrement to ' . $this->lastField->method, 1);
+            }
+
+            $this->autoincrement = $this->lastField;
+            $this->dataBind[$this->lastField->field]['auto'] = true;
+
+            return $this;
+        }
+
+        if (! $field) {
+            return $this;
+        }
+
+        $this->autoincrement = (object) [
+            'method' => 'int',
+            'field' => $field
+        ];
+
+        $this->integer($field)->primary();
 
         return $this;
     }
@@ -592,17 +592,19 @@ class Fields
      */
     public function primary($field = null)
     {
-        if ($this->primary === null) {
-            if ($field == null) {
-                $field = 'id';
-                $this->addField('int', $field, [
-                    'null' => false
-                ]);
-            }
-            return $this->addIndexes('primary');
+        if ($this->primary !== null) {
+            throw new ModelException('Primary key has already defined', E_ERROR);
         }
 
-        throw new ModelException('Primary key has already defined', E_ERROR);
+        if ($field === null) {
+            $field = 'id';
+            $this->addField('int', $field, [
+                'null' => false,
+                'auto' => true
+            ]);
+        }
+
+        return $this->addIndexes('primary');
     }
 
     /**
@@ -639,7 +641,9 @@ class Fields
         }
 
         $last = $this->lastField;
-        $this->fields->get($last->method)->update($last->field, [$indexType => true]);
+        $this->fields->get($last->method)->update(
+            $last->field, [$indexType => true]
+        );
 
         return $this;
     }

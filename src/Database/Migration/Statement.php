@@ -32,7 +32,7 @@ class Statement
      *
      * @return null|string
      */
-    public function toCreateTableStatement()
+    public function makeCreateTableStatement()
     {
         if (($statement = $this->makeSqlStatement()) !== null) {
             return "CREATE TABLE `" . $this->columns->getTableName() . "` ($statement) ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";
@@ -46,7 +46,7 @@ class Statement
      *
      * @return null|string
      */
-    public function toAlterTableStatement()
+    public function makeAlterTableStatement()
     {
         if (($statement = $this->makeSqlStatement()) !== null) {
 
@@ -110,9 +110,11 @@ class Statement
                                 $this->columns->setAutoincrement(false);
                             }
                         }
+
                         if ($info["default"]) {
                             $this->sql .= " DEFAULT " . $info["default"];
                         }
+
                         $this->addIndexOrPrimaryKey($info, $field);
                     });
                     break;
@@ -200,16 +202,18 @@ class Statement
         if ($info["primary"]) {
             $this->sql .= " PRIMARY KEY";
             $info["primary"] = false;
-        } else {
-            if ($info["unique"]) {
-                $this->sql .= " UNIQUE";
-                $info["unique"] = false;
-            } else {
-                if (isset($info["indexes"])) {
-                    $this->sql .= ", INDEXE `" . $this->columns->getTableName() . "_indexe_" . $field . "` (`" . $field . "`)";
-                    $info["indexes"] = false;
-                }
-            }
+            return;
+        }
+
+        if ($info["unique"]) {
+            $this->sql .= " UNIQUE";
+            $info["unique"] = false;
+            return;
+        }
+
+        if (isset($info["indexes"])) {
+            $this->sql .= ", INDEXE `" . $this->columns->getTableName() . "_indexe_" . $field . "` (`" . $field . "`)";
+            $info["indexes"] = false;
         }
     }
 }

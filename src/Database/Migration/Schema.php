@@ -22,6 +22,8 @@ class Schema
      */
     public static function drop($table)
     {
+        $table = Database::getConnectionAdapter()->getTablePrefix().$table;
+
         if ((bool) Database::statement('DROP TABLE ' . $table . ';')) {
             echo "\033[0;32m$table table droped.\033[00m\n";
         } else {
@@ -38,12 +40,12 @@ class Schema
      */
     public static function create($table, Callable $cb, $displaySql = false)
     {
-        static::$table = $table;
+        $table = Database::getConnectionAdapter()->getTablePrefix().$table;
 
         $fields = new Fields($table);
         call_user_func_array($cb, [$fields]);
 
-        $sql = (new Statement($fields))->toCreateTableStatement();
+        $sql = (new Statement($fields))->makeCreateTableStatement();
 
         if ($sql == null) {
             die("\033[0;31mPlease check your 'up' method.\033[00m\n");
@@ -69,6 +71,7 @@ class Schema
      */
     public static function table($table, Callable $cb, $displaySql = false)
     {
+        $table = Database::getConnectionAdapter()->getTablePrefix().$table;
         call_user_func_array($cb, [new AlterTable($table, $displaySql)]);
     }
 }
