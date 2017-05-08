@@ -150,7 +150,7 @@ class Bow
         }
 
         if ($this->_command->getParameter('target') !== null) {
-            $table_name = $this->_command->getParameter('targer');
+            $table_name = $this->_command->getParameter('target');
             if (is_string($table_name) && ! file_exists($this->dirname."/migration/seeders/{$table_name}_seeder.php")) {
                 echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
                 exit(1);
