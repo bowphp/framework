@@ -1,7 +1,5 @@
 <?php
-namespace Bow\Database\Migration;
-
-use Bow\Support\Str;
+namespace Bow\Support;
 
 class Faker
 {
