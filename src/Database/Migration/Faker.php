@@ -177,4 +177,12 @@ class Faker
         }
         return ++static::$autoincrement;
     }
+
+    /**
+     * @return string
+     */
+    public static function tags()
+    {
+        return 'js, php, coding, aws';
+    }
 }

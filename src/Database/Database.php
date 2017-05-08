@@ -127,6 +127,7 @@ class Database
      */
     public static function getConnectionAdapter()
     {
+        static::verifyConnection();
         return static::$adapter;
     }
 
