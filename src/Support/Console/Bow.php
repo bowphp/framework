@@ -31,12 +31,12 @@ class Bow
      * Bow constructor.
      * @param string $dirname
      * @param Command $command
+     * @throws \ErrorException
      */
     public function __construct($dirname, Command $command)
     {
         if ($command->getParameter('trash')) {
-            $this->help();
-            exit(1);
+            throw new \ErrorException('Bad command. Type "php bow help" for more information"');
         }
         $this->dirname = $dirname;
         $this->_command = $command;
@@ -58,6 +58,7 @@ class Bow
     public function call($command)
     {
         if (! method_exists($this, $command)) {
+            echo "\033[0;31mBad command.\033[00m\n";
             $this->help();
             exit(1);
         }
@@ -77,26 +78,46 @@ class Bow
 
     /**
      * Permet de lancer un migration
+     *
+     * @throws \ErrorException
      */
     public function migrate()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['up', 'make', 'down'])) {
-            throw new \ErrorException('Bad command. Type "php bow migrate help" or "php bow help migrate" for more information"');
+        if (! in_array($action, ['up', 'down', null])) {
+            throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
         }
 
-        $this->_command->$action($this->_command->getParameter('target'));
+        if ($action == null) {
+            $action = 'up';
+            if ($this->_command->getParameter('target') !== null || $this->_command->getParameter('trash') !== null) {
+                throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
+            }
+        }
+
+        $target = $this->_command->getParameter('target');
+
+        if ($this->_command->getParameter('target') == '--all') {
+            $target = null;
+        }
+
+        $this->_command->$action($target);
     }
 
     /**
      * Permet de créer des fichiers
+     *
+     * @throws \ErrorException
      */
     public function create()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder'])) {
-            $this->help('create');
-            exit(0);
+        if (! in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration'])) {
+            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
+        }
+
+        if ($action == 'migration') {
+            $action = 'make';
         }
 
         $this->_command->$action($this->_command->getParameter('target'));
@@ -107,33 +128,47 @@ class Bow
      */
     public function seed()
     {
-        if ($this->_command->getParameter('action') != null || $this->_command->getParameter('target') != null) {
+        if ($this->_command->getParameter('action') != null) {
             echo "\033[0;32mCommand not found\033[00m\033[00m\n";
             exit(1);
         }
 
-        $table_name = $this->_command->getParameter('--only');
+        $options = $this->_command->options();
 
-        if (is_string($table_name) && ! file_exists($this->dirname."/migration/seeders/{$table_name}_seeder.php")) {
-            echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
-            exit(1);
+        if ($options->has('--all')) {
+            if ($this->_command->getParameter('target') !== null) {
+                echo "\033[0;31mCommand not found\033[00m\033[00m\n";
+                exit(1);
+            }
         }
 
-        if (is_null($table_name)) {
+        $seeds_filenames = [];
+
+        if ($options->get('--all')) {
             $seeds_filenames = glob($this->dirname.'/migration/seeders/*_seeder.php');
-        } else {
+            goto seed;
+        }
+
+        if ($this->_command->getParameter('target') !== null) {
+            $table_name = $this->_command->getParameter('targer');
+            if (is_string($table_name) && ! file_exists($this->dirname."/migration/seeders/{$table_name}_seeder.php")) {
+                echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
+                exit(1);
+            }
             $seeds_filenames = [$this->dirname."/migration/seeders/{$table_name}_seeder.php"];
         }
 
+        seed:
         $seed_collection = [];
 
         foreach ($seeds_filenames as $filename) {
-            $seed_collection = array_merge(require $filename, $seed_collection);
+            $seeds = require $filename;
+            $seed_collection = array_merge($seeds, $seed_collection);
         }
 
         try {
-            foreach ($seed_collection as $table => $seed) {
-                $n = Database::table($table)->insert($seed);
+            foreach ($seed_collection as $table => $seeds) {
+                $n = Database::table($table)->insert($seeds);
                 echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." pours '$table'\n\033[00m";
             }
         } catch(\Exception $e) {
@@ -177,11 +212,6 @@ class Bow
      */
     public function console()
     {
-        if ($this->_command->getParameter('target') == 'help') {
-            $this->help('console');
-            return;
-        }
-
         if (is_string($this->_command->getParameter('--include'))) {
             $this->setBootstrap(
                 array_merge(
@@ -296,7 +326,7 @@ class Bow
 
 Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|--table|--seed]
 
-\033[0;31mcommand\033[00m:
+\033[0;32mcommand\033[00m:
 
  \033[0;33mhelp\033[00m display command helper
 
@@ -312,10 +342,10 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mcreate:model\033[00m         Create new model
    \033[0;33mcreate:validator\033[00m     Create new validator
    \033[0;33mcreate:seeder\033[00m        Create new table fake seeder
+   \033[0;33mcreate:migration\033[00m     Create a new migration
 
  \033[0;32mmigrate\033[00m apply a migration in user model
   option:
-   \033[0;33mmigrate:make\033[00m       Create a new migration
    \033[0;33mmigrate:down\033[00m       Drop migration
    \033[0;33mmigrate:up\033[00m         Update or create table of the migration
  
@@ -326,8 +356,7 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mclear:all\033[00m         Clear all cache information
    
 \033[0;32mseed\033[00m Make seeding
-   option: --only=name
-   \033[0;33mseed \033[00m [option]    Make seeding for all or one table
+   \033[0;33mseed \033[00m [table_name, --all]    Make seeding for all or one table
    
  \033[0;32mconsole\033[00m show psysh php REPL for debug you code.
  \033[0;32mserver\033[00m run a local web server.
@@ -355,6 +384,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:model name                For create a new model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:validator name            For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:seeder name [--n-seed=n]  For create a new table seeder
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:migration name            For create a new table migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create help                      For display this
 
 U;
@@ -374,14 +404,14 @@ U;
                 echo <<<U
 \n\033[0;32mmigrate\033[00m apply a migration in user model\n
     [option]
-    --seed[--seed=n]      Fill table for n value
+    [--add-seed [--n-seed=n]] For create new seeder
     --create=table_name   Change name of table
     --table=table_name    Alter migration table
+    --all                 Avalable flat for down command
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:make name [option]     Create a new migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:up name [option]       Up the specify migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name              Down migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate [option]               Up all defined migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate                        Up all defined migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate help                   For display this
 
 U;

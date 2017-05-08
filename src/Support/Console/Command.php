@@ -42,6 +42,7 @@ class Command
             if ($key == 0) {
                 continue;
             }
+
             if ($key == 1) {
                 if (preg_match('/^[a-z]+:[a-z]+$/', $param)) {
                     $part = explode(':', $param);
@@ -52,20 +53,24 @@ class Command
                 $this->options['command'] = $param;
                 continue;
             }
+
             if ($key == 2) {
-                if (preg_match('/^[a-z_-]+$/i', $param)) {
+                if (preg_match('/^[a-z_]+$/i', $param)) {
                     $this->options['target'] = $param;
                     continue;
                 }
             }
+
             if (preg_match('/^--[a-z-]+$/', $param)) {
                 $this->options['options'][$param] = true;
                 continue;
             }
+
             if (count($part = explode('=', $param)) == 2) {
                 $this->options['options'][$part[0]] = $part[1];
                 continue;
             }
+
             $this->options['trash'][] = $param;
         }
 
@@ -133,18 +138,34 @@ class Command
      */
     private function makeMigration($model, $type)
     {
-        if ($model) {
+        $options = $this->options();
+        $param = [];
+
+        if ($options->has('--display-sql') && $options->get('--display-sql') === true) {
+            $param = [true];
+        }
+
+        if ($type == 'down') {
+            if (is_null($model)) {
+                if ($options->get('--all') === null) {
+                    echo Color::danger("cette commande est super dangereuse. Alors veuillez ajout le flag --all pour assurer bow.");
+                    exit(1);
+                }
+            }
+        }
+
+        if (! is_null($model)) {
             $model = strtolower($model);
             $fileParten = $this->dirname.strtolower("/migration/*{$model}*.php");
         } else {
             $fileParten = $this->dirname.strtolower("/migration/*.php");
         }
 
-        if ($model == null) {
-            $type = "up";
-        }
-
         $register = ["file" => [], "tables" => []];
+
+        if (! file_exists($this->dirname."/migration/.registers")) {
+            throw new \ErrorException('Le fichier de registre de bow est introvable.');
+        }
 
         foreach(file($this->dirname."/migration/.registers") as $r) {
             $tmp = explode("|", $r);
@@ -170,12 +191,6 @@ class Command
             // Formatage de la classe et Execution de la methode up ou down
             $class = ucfirst(Str::camel($model));
             $instance = new $class;
-            $options = $this->options();
-            $param = [];
-
-            if ($options->has('--display-sql') && $options->get('--display-sql') === true) {
-                $param = [true];
-            }
 
             call_user_func_array([$instance, strtolower($type)], $param);
         }
@@ -183,6 +198,9 @@ class Command
         exit(0);
     }
 
+    /**
+     * @param $name
+     */
     public function seeder($name)
     {
         $seeder_filename = $this->dirname."/migration/seeders/{$name}_seeder.php";
@@ -202,16 +220,16 @@ class Command
         $content = <<<SEEDER
 <?php
 
-\$seeds['$name'] = [];
+\$seeds = [];
 
 foreach (range(1, $num) as \$key) {
-    \$seeds['$name'][] = [
+    \$seeds[] = [
         'id' => faker('autoincrement', 1),
         'name' => faker('name')
     ];
 }
 
-return \$seeds;
+return ['$name' => \$seeds];
 SEEDER;
         file_put_contents($seeder_filename, $content);
         echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a été bien créer.\033[00m\n";
@@ -231,8 +249,16 @@ SEEDER;
 
         $options = $this->options();
 
+        if (file_exists($this->dirname."/migration/.registers")) {
+            @touch($this->dirname."/migration/.registers");
+        }
+
+        if ($options->has('--create') && $options->has('--table')) {
+            throw new \ErrorException('Bad command.');
+        }
+
         if ($options->has('--table')) {
-            if ($options->get('--table') == true) {
+            if ($options->get('--table') === true) {
                 throw new \ErrorException(sprintf(self::BAD_COMMAND, ' [--table] '));
             }
             $table = $options->get('--table');
@@ -247,7 +273,7 @@ SEEDER;
             $mapMethod = ["create", "drop"];
         }
 
-        $class_name = ucfirst(Str::camel($table));
+        $class_name = ucfirst(Str::camel($model));
         $migrate = <<<doc
 <?php
 use \Bow\Database\Migration\Fields;
@@ -278,7 +304,7 @@ class {$class_name} extends Migration
 doc;
         $create_at = date("Y_m_d") . "_" . date("His");
         file_put_contents($this->dirname."/migration/${create_at}_${model}.php", $migrate);
-        Storage::append($this->dirname."/migration/.registers", "${create_at}_${model}|$table\n");
+        Storage::append($this->dirname."/migration/.registers", "${create_at}_${model}|$class_name\n");
 
         echo "\033[0;32mmLe file de migration \033[00m[$model]\033[0;32m a été bien créer.\033[00m\n";
         exit(0);
