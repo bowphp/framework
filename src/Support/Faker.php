@@ -202,13 +202,13 @@ class Faker
      */
     private static function gen($data, $key)
     {
-        if (isset(static::$selections[$key])) {
+        if (! isset(static::$selections[$key])) {
             static::$selections[$key] = [];
         }
 
         $gen = $data[0];
 
-        while (in_array($gen , static::$selections)) {
+        while (in_array($gen , static::$selections[$key])) {
             $gen = $data[rand(0, count($data) - 1)];
         }
 
