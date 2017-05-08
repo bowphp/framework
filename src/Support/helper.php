@@ -1152,8 +1152,8 @@ if (! function_exists('faker')) {
     function faker($type)
     {
         $params = array_slice(func_get_args(), 1);
-        if (method_exists(\Bow\Database\Migration\Faker::class, $type)) {
-            return call_user_func_array([\Bow\Database\Migration\Faker::class, $type], $params);
+        if (method_exists(\Bow\Support\Faker::class, $type)) {
+            return call_user_func_array([\Bow\Support\Faker::class, $type], $params);
         }
         return null;
     }
