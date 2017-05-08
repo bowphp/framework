@@ -188,7 +188,7 @@ class Faker
             $tag = static::TAGS[rand(0, $by)];
             if (! in_array($tag, $tags)) {
                 $tags[] = static::TAGS[
-                    rand(0, count(static::TAGS))
+                    rand(0, count(static::TAGS) - 1)
                 ];
             }
         }
