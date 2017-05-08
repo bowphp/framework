@@ -79,9 +79,8 @@ class Statement
          */
         $fields = $this->columns->getFieldsRangs();
 
-        $fields->each(function ($value) {
+        $fields->each(function ($value, $field) {
             $info = $value['data'];
-            $field = $value['field'];
             $type = $value['type'];
 
             switch ($type) {
@@ -105,7 +104,7 @@ class Statement
                 case "longblob" :
                     $this->addFieldType($info, $field, $type);
                     if (in_array($type, ["int", "longint", "bigint", "mediumint", "smallint", "tinyint"], true)) {
-                        if ($this->columns->getAutoincrement() !== false) {
+                        if ($this->columns->getAutoincrement() instanceof \stdClass) {
                             if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
                                 $this->sql .= " AUTO_INCREMENT";
                             }
@@ -113,11 +112,11 @@ class Statement
                         }
                     }
 
+                    $this->addIndexOrPrimaryKey($info, $field);
+
                     if ($info["default"]) {
                         $this->sql .= " DEFAULT " . $info["default"];
                     }
-
-                    $this->addIndexOrPrimaryKey($info, $field);
                     break;
 
                 case "date" :

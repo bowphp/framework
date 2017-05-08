@@ -555,35 +555,28 @@ class Fields
      */
     public function increment($field = null)
     {
-        if ($field == null) {
-            $field = 'id';
+        if (is_string($field)) {
+            $this->autoincrement = (object) [
+                'method' => 'int',
+                'field' => $field
+            ];
+            return $this->integer($field)->primary();
         }
 
         if ($this->autoincrement !== false) {
             return $this;
         }
 
-        if ($this->lastField !== null) {
-            if (! in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
-                throw new ModelException('Cannot add autoincrement to ' . $this->lastField->method, 1);
-            }
-
-            $this->autoincrement = $this->lastField;
-            $this->dataBind[$this->lastField->field]['auto'] = true;
-
+        if ($this->lastField === null) {
             return $this;
         }
 
-        if (! $field) {
-            return $this;
+        if (! in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
+            throw new ModelException('Cannot add autoincrement to ' . $this->lastField->method, 1);
         }
 
-        $this->autoincrement = (object) [
-            'method' => 'int',
-            'field' => $field
-        ];
-
-        $this->integer($field)->primary();
+        $this->autoincrement = $this->lastField;
+        $this->dataBind[$this->lastField->field]['auto'] = true;
 
         return $this;
     }
@@ -646,10 +639,7 @@ class Fields
         }
 
         $last = $this->lastField;
-        $this->fields->get($last->method)->update(
-            $last->field, [$indexType => true]
-        );
-
+        $this->rangs[$last->field]['data'][$indexType] = true;
         return $this;
     }
 
@@ -681,7 +671,7 @@ class Fields
             'auto' => false
         ];
 
-        if ($this->getAutoincrement() !== false) {
+        if ($this->getAutoincrement() instanceof \stdClass) {
             if ($this->getAutoincrement()->field == $field) {
                 $bind['auto'] = true;
             }
@@ -711,7 +701,7 @@ class Fields
             'field'  => $field
         ];
 
-        $this->rangs[] = ['type' => $method, 'field' => $field, 'data' => $data];
+        $this->rangs[$field] = ['type' => $method, 'data' => $data, 'bind' => $bind];
 
         return $this;
     }
@@ -809,10 +799,12 @@ class Fields
 
     /**
      * @param bool $value
+     * @return Fields
      */
     public function setAutoincrement($value)
     {
         $this->autoincrement = $value;
+        return $this;
     }
 
     /**
