@@ -86,11 +86,12 @@ class Faker
     }
 
     /**
+     * @param int $end
      * @return int
      */
-    public static function number()
+    public static function number($end = 100)
     {
-        return rand(1, 100);
+        return rand(1, $end);
     }
 
     /**
@@ -140,11 +141,16 @@ class Faker
 
     /**
      * @param array $additionnal_emails
+     * @param bool $random
      * @return string
      */
-    public static function email(array $additionnal_emails = [])
+    public static function email(array $additionnal_emails = [], $random = false)
     {
         $emails = array_merge(self::EMAILS, $additionnal_emails);
+
+        if ($random) {
+            return $emails[rand(0, count($emails) - 1)];
+        }
 
         return static::gen($emails, 'email');
     }
