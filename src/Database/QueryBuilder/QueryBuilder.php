@@ -1231,6 +1231,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
+     * Permet de récupérer le nom classe à charger
+     *
+     * @return null|string
+     */
+    public function getLoadClassName()
+    {
+        return $this->loadClassName;
+    }
+
+    /**
      * Permet de modifier le nom de la clé primaire
      *
      * @param string $primaryKey

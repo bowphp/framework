@@ -61,7 +61,7 @@ abstract class Model implements \ArrayAccess
     /**
      * @var QueryBuilder
      */
-    protected static $instance;
+    private static $builder;
 
     /**
      * Model constructor.
@@ -86,10 +86,10 @@ abstract class Model implements \ArrayAccess
         static::prepareQueryBuilder();
 
         if (count($columns) > 0) {
-            static::$instance->select($columns);
+            self::$builder->select($columns);
         }
 
-        return static::$instance->get();
+        return self::$builder->get();
     }
 
     /**
@@ -100,7 +100,7 @@ abstract class Model implements \ArrayAccess
     public static function first()
     {
         static::prepareQueryBuilder();
-        return static::$instance->take(1)->getOne();
+        return self::$builder->take(1)->getOne();
     }
 
     /**
@@ -123,10 +123,10 @@ abstract class Model implements \ArrayAccess
         }
 
         $static = new static();
-        static::$instance->select($select);
-        static::$instance->whereIn($static->primaryKey, $id);
+        self::$builder->select($select);
+        self::$builder->whereIn($static->primaryKey, $id);
 
-        return $one ? static::$instance->getOne() : static::$instance->get();
+        return $one ? self::$builder->getOne() : self::$builder->get();
     }
 
     /**
@@ -140,7 +140,7 @@ abstract class Model implements \ArrayAccess
     public static function findAndDelete($id, $select = ['*'])
     {
         $data = static::find($id, $select);
-        static::$instance->delete();
+        self::$builder->delete();
         return $data;
     }
 
@@ -216,7 +216,7 @@ abstract class Model implements \ArrayAccess
     public static function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
         static::prepareQueryBuilder();
-        return static::$instance->where($column, $comp, $value, $boolean);
+        return self::$builder->where($column, $comp, $value, $boolean);
     }
 
     /**
@@ -230,7 +230,7 @@ abstract class Model implements \ArrayAccess
     public static function paginate($n, $current = 0, $chunk = null)
     {
         static::prepareQueryBuilder();
-        return static::$instance->paginate($n, $current, $chunk);
+        return self::$builder->paginate($n, $current, $chunk);
     }
 
     /**
@@ -242,7 +242,7 @@ abstract class Model implements \ArrayAccess
     public static function count($column = '*')
     {
         static::prepareQueryBuilder();
-        return static::$instance->count($column);
+        return self::$builder->count($column);
     }
 
     /**
@@ -253,7 +253,7 @@ abstract class Model implements \ArrayAccess
     public static function query()
     {
         static::prepareQueryBuilder();
-        return static::$instance;
+        return self::$builder;
     }
 
     /**
@@ -261,20 +261,24 @@ abstract class Model implements \ArrayAccess
      */
     private static function prepareQueryBuilder()
     {
-        if (static::$instance == null) {
-            $reflection = new \ReflectionClass(static::class);
-            $properties = $reflection->getDefaultProperties();
-
-            if ($properties['table'] == null) {
-                $table = strtolower(end(explode('\\', static::class)));
-            } else {
-                $table = $properties['table'];
+        if (self::$builder instanceof QueryBuilder) {
+            if (self::$builder->getLoadClassName() === static::class) {
+                return;
             }
-
-            $primaryKey = $properties['primaryKey'];
-            $table = DB::getConnectionAdapter()->getTablePrefix().$table;
-            static::$instance = new QueryBuilder($table, DB::getPdo(), static::class, $primaryKey);
         }
+
+        $reflection = new \ReflectionClass(static::class);
+        $properties = $reflection->getDefaultProperties();
+
+        if ($properties['table'] == null) {
+            $table = strtolower(end(explode('\\', static::class)));
+        } else {
+            $table = $properties['table'];
+        }
+
+        $primaryKey = $properties['primaryKey'];
+        $table = DB::getConnectionAdapter()->getTablePrefix().$table;
+        self::$builder = new QueryBuilder($table, DB::getPdo(), static::class, $primaryKey);
     }
 
     /**
@@ -308,18 +312,18 @@ abstract class Model implements \ArrayAccess
             if (! empty($values)) {
                 $this->attributes = $values;
             }
-            return static::$instance->insert($this->attributes);
+            return self::$builder->insert($this->attributes);
         }
 
         $primary_key_value = $this->getPrimaryKeyValue();
 
-        if (static::$instance->exists($this->primaryKey, $primary_key_value)) {
+        if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
             $this->original[$this->primaryKey] = $primary_key_value;
-            return static::$instance->where($this->primaryKey, $primary_key_value)->update($this->attributes);
+            return self::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
         }
 
-        $n = static::$instance->insert($this->attributes);
-        $primary_key_value = static::$instance->getLastInsertId();
+        $n = self::$builder->insert($this->attributes);
+        $primary_key_value = self::$builder->getLastInsertId();
 
         if ($this->primaryKeyType == 'int') {
             $primary_key_value = (int) $primary_key_value;
@@ -343,8 +347,8 @@ abstract class Model implements \ArrayAccess
     {
         $primary_key_value = $this->getPrimaryKeyValue();
 
-        if (static::$instance->exists($this->primaryKey, $primary_key_value)) {
-            return static::$instance->where($this->primaryKey, $primary_key_value)->delete();
+        if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
+            return self::$builder->where($this->primaryKey, $primary_key_value)->delete();
         }
 
         return 0;
@@ -500,8 +504,8 @@ abstract class Model implements \ArrayAccess
      */
     public function __call($method, $arguments)
     {
-        if (method_exists(static::$instance, $method)) {
-            return call_user_func_array([static::$instance, $method], $arguments);
+        if (method_exists(self::$builder, $method)) {
+            return call_user_func_array([self::$builder, $method], $arguments);
         }
 
         throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
