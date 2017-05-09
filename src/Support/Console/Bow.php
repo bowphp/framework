@@ -151,7 +151,7 @@ class Bow
 
         if ($this->_command->getParameter('target') !== null) {
             $table_name = $this->_command->getParameter('target');
-            if (is_string($table_name) && ! file_exists($this->dirname."/migration/seeders/{$table_name}_seeder.php")) {
+            if (! is_string($table_name) || ! file_exists($this->dirname."/migration/seeders/{$table_name}_seeder.php")) {
                 echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
                 exit(1);
             }
@@ -169,10 +169,10 @@ class Bow
         try {
             foreach ($seed_collection as $table => $seeds) {
                 $n = Database::table($table)->insert($seeds);
-                echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." pours '$table'\n\033[00m";
+                echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." sur la table '$table'\n\033[00m";
             }
         } catch(\Exception $e) {
-            echo $e->getMessage();
+            echo Color::red($e->getMessage());
             exit(1);
         }
 
