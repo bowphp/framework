@@ -225,7 +225,9 @@ class Command
 foreach (range(1, $num) as \$key) {
     \$seeds[] = [
         'id' => faker('autoincrement', 1),
-        'name' => faker('name')
+        'name' => faker('name'),
+        'created_at' => faker('date'),
+        'update_at' => faker('date')
     ];
 }
 
