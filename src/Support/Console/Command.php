@@ -593,7 +593,7 @@ class {$middleware_name}
      * @param \\Closure \$next
      * @return boolean
      */
-    public function handle(\$request, \\Closure \$next)
+    public function checker(\$request, \\Closure \$next)
     {
         // code ici
         return \$next();

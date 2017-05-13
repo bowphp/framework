@@ -112,8 +112,8 @@ class Actionner
         $next = false;
         // Exécution du middleware
         foreach ($middlewares_collection as $middleware) {
-            $injections = static::injector($middleware, 'handle');
-            $status = call_user_func_array([new $middleware(), 'handle'], array_merge($injections, [function () use (& $next) {
+            $injections = static::injector($middleware, 'checker');
+            $status = call_user_func_array([new $middleware(), 'checker'], array_merge($injections, [function () use (& $next) {
                 return $next = true;
             }], $param));
             if ($status === true && $next) {
@@ -153,9 +153,9 @@ class Actionner
     {
         $next = false;
         $instance = new $middleware();
-        $injections = static::injector($middleware, 'handle');
+        $injections = static::injector($middleware, 'checker');
 
-        $status = call_user_func_array([$instance, 'handle'], array_merge([$injections, function () use (& $next) {
+        $status = call_user_func_array([$instance, 'checker'], array_merge([$injections, function () use (& $next) {
             return $next = true;
         }], $param));
 
