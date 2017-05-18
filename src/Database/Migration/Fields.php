@@ -83,6 +83,33 @@ class Fields
     }
 
     /**
+     * @param $size
+     */
+    public function size($size)
+    {
+        $this->rangs[$this->lastField->field]['bind']['size'] = $size;
+        $this->rangs[$this->lastField->field]['data']['size'] = $size;
+    }
+
+    /**
+     * @param $default
+     */
+    public function defautl($default)
+    {
+        $this->rangs[$this->lastField->field]['bind']['default'] = $default;
+        $this->rangs[$this->lastField->field]['data']['default'] = $default;
+    }
+
+    /**
+     *
+     */
+    public function nullable()
+    {
+        $this->rangs[$this->lastField->field]['bind']['null'] = true;
+        $this->rangs[$this->lastField->field]['data']['null'] = true;
+    }
+
+    /**
      * charset, set the model default character name
      *
      * @param $character
@@ -170,16 +197,13 @@ class Fields
      * mediumint
      *
      * @param string $field
-     * @param bool $size
-     * @param bool $null
-     * @param null|string $default
      *
      * @return Fields
      * @throws \ErrorException
      */
-    public function mediumInteger($field, $size = null, $null = false, $default = null)
+    public function mediumInteger($field)
     {
-        return $this->loadWhole('mediumint', $field, $size, $null, $default);
+        return $this->loadWhole('mediumint', $field, null, false, null);
     }
 
     /**
@@ -677,8 +701,8 @@ class Fields
             }
         }
 
-        if ($method == 'enum') {
-            $bind['default'] = $data['default'] != null ? $data['default'] : $data['value'][0];
+        if (isset($data['default']) &&  $data['default'] != null) {
+            $bind['default'] = $data['default'];
         }
 
         $this->dataBind[$field] = $bind;
