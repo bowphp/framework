@@ -125,7 +125,7 @@ class Actionner
                     die(json_encode($status));
                 }
             }
-            die();
+            exit;
         }
 
         // Lancement de l'éxècution de la liste des actions definir
@@ -179,8 +179,8 @@ class Actionner
         $reflection = new \ReflectionClass($classname);
         $parts = preg_split('/(\n|\*)+/', $reflection->getMethod($method)->getDocComment());
         foreach ($parts as $value) {
-            if (preg_match('/^@param\s+(.+)/', trim($value), $match)) {
-                list($class, $variable) = preg_split('/\s+/', $match[1], 2);
+            if (preg_match('/^@param\s+(.+)\s+\$/', trim($value), $match)) {
+                $class = trim($match[1]);
                 if (class_exists($class, true)) {
                     if (! in_array(strtolower($class), ['string', 'array', 'bool', 'int', 'integer', 'double', 'float', 'callable', 'object', 'stdclass', '\closure', 'closure'])) {
                         $params[] = new $class();
@@ -235,7 +235,7 @@ class Actionner
             return null;
         }
 
-        list($class, $method) = preg_split('/\.|@/', $controllerName);
+        list($class, $method) = preg_split('/\.|@|#|->|/', $controllerName);
         $class = static::$names['namespace']['controller'] . '\\' . ucfirst($class);
 
         $injections = static::injector($class, $method);
