@@ -12,6 +12,7 @@ use Bow\Mail\Mail;
 use Bow\Http\Cache;
 use Bow\Http\Input;
 use Bow\Event\Event;
+use Bow\Support\Env;
 use Bow\Support\Util;
 use Bow\Session\Cookie;
 use Bow\Session\Session;
@@ -30,6 +31,7 @@ if (! function_exists('config')) {
      */
     function config($param = null, $newConfig = null) {
         $config = Configuration::instance();
+
         if ($param === null) {
             return $config;
         }
@@ -628,9 +630,16 @@ if (! function_exists('redirect')) {
      * modifie les entêtes HTTP
      *
      * @param string|array $path Le path de rédirection
+     * @return \Bow\Http\Redirect
      */
-    function redirect($path) {
-        query_response('redirect', [$path]);
+    function redirect($path = null) {
+        $redirect = new \Bow\Http\Redirect();
+
+        if ($path !== null) {
+            $redirect->to($path);
+        }
+
+        return $redirect;
     }
 }
 
@@ -911,17 +920,6 @@ if (! function_exists('middleware')) {
     }
 }
 
-if (! function_exists('util')) {
-    /**
-     * Alais sur la class Util
-     *
-     * @return Util
-     */
-    function util() {
-        return Util::class;
-    }
-}
-
 if (! function_exists('email')) {
     /**
      * Alias sur SimpleMail et Smtp
@@ -1079,7 +1077,7 @@ if (! function_exists('route')) {
             $url = str_replace(':'. $key, $value, $url);
         }
 
-        return request()->origin() . request()->hostname() . $url;
+        return rtrim(app_env('BASE_URL'), '/') .'/'.  ltrim($url, '');
     }
 }
 
@@ -1169,5 +1167,28 @@ if (! function_exists('trans')) {
     function trans($key, $data = [], $choose = null)
     {
         return \Bow\Translate\Translator::make($key, $data, $choose);
+    }
+}
+
+if (! function_exists('app_env')) {
+    /**
+     * @param $key
+     * @param $default
+     * @return string
+     */
+    function app_env($key, $default = null)
+    {
+        Env::load(config()->getEnvirementFile());
+        return Env::get($key, $default);
+    }
+}
+
+if (! function_exists('app_mode')) {
+    /**
+     * @return string
+     */
+    function app_mode()
+    {
+        return app_env('MODE');
     }
 }
