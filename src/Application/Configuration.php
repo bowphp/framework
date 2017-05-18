@@ -82,11 +82,12 @@ class Configuration
      * @return Configuration
      */
     public static function configure($config) {
-        if (! static::$instance instanceof Configuration) {
-            static::$instance = new self($config);
+
+        if (! self::$instance instanceof Configuration) {
+            self::$instance = new self($config);
         }
 
-        return static::$instance;
+        return self::$instance;
     }
 
     /**
@@ -95,11 +96,11 @@ class Configuration
      * @return Configuration
      */
     public static function instance() {
-        if (! static::$instance instanceof Configuration) {
-            static::configure([]);
+        if (! self::$instance instanceof Configuration) {
+            self::configure([]);
         }
 
-        return static::$instance;
+        return self::$instance;
     }
 
     /**
@@ -563,7 +564,7 @@ class Configuration
      */
     public function setMailDriver($driver) {
 
-        if (!in_array($driver, ["mail", "smtp"])) {
+        if (! in_array($driver, ["mail", "smtp"])) {
             throw new ApplicationException("$driver n'est valide", E_ERROR);
         }
 
@@ -571,5 +572,25 @@ class Configuration
         $this->config["mail"]->driver = $driver;
 
         return $old;
+    }
+
+    /**
+     * Permet de récupérer le chemin du fichier d'.envfile.json
+     *
+     * @return mixed
+     */
+    public function getEnvirementFile()
+    {
+        return $this->config['envfile'];
+    }
+
+    /**
+     * Permet de récupérer le root de base de l'application
+     *
+     * @return mixed
+     */
+    public function getApplicationBaseDirectory()
+    {
+        return $this->config['app_base_dirname'];
     }
 }
