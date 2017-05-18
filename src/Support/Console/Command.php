@@ -372,7 +372,7 @@ class {$controller_name} extends Controller
      */
     public function index(\$id = null)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -382,7 +382,7 @@ class {$controller_name} extends Controller
      */
     public function create()
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -392,7 +392,7 @@ class {$controller_name} extends Controller
      */
     public function store()
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -405,7 +405,7 @@ class {$controller_name} extends Controller
      */
     public function show(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -418,7 +418,7 @@ class {$controller_name} extends Controller
      */
     public function edit(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -431,7 +431,7 @@ class {$controller_name} extends Controller
      */
     public function update(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -444,7 +444,7 @@ class {$controller_name} extends Controller
      */
     public function destroy(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 }
 CC;
@@ -478,6 +478,7 @@ CC;
 
         if ($this->options('--no-plain')) {
             $content = <<<CONTENT
+    
     /**
      * Point d'entré de l'application
      *
@@ -486,7 +487,7 @@ CC;
      */
     public function index(\$id = null)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -494,7 +495,7 @@ CC;
      */
     public function create()
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -502,7 +503,7 @@ CC;
      */
     public function store()
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -513,7 +514,7 @@ CC;
      */
     public function show(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -524,7 +525,7 @@ CC;
      */
     public function edit(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -535,7 +536,7 @@ CC;
      */
     public function update(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 
     /**
@@ -546,12 +547,12 @@ CC;
      */
     public function destroy(\$id)
     {
-        // code ici
+        // Codez Ici
     }
 CONTENT;
         } else {
             $content = <<<CONTENT
-    '// Écrivez votre code ici.';
+// Écrivez votre code ici
 CONTENT;
         }
 
@@ -597,7 +598,7 @@ class {$middleware_name}
      */
     public function checker(\$request, \\Closure \$next)
     {
-        // code ici
+        // Codez Ici
         return \$next();
     }
 }
@@ -647,6 +648,9 @@ MODEL;
 
         file_put_contents($this->dirname."/app/${model_name}.php", $model);
         echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien créer.\033[00m\n";
+        if ($this->options('-m')) {
+            $this->make('create_'.strtolower($model_name).'_table');
+        }
         exit(0);
     }
 
