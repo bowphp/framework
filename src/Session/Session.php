@@ -27,11 +27,7 @@ class Session implements CollectionAccessStatic
      */
     private static function start()
     {
-        if (PHP_SESSION_ACTIVE !== session_status()) {
-            session_name("SESSID");
-            if (! isset($_COOKIE["SESSID"])) {
-                session_id(hash("sha256", Security::encrypt(Str::repeat(Security::generateCsrfToken(), 2))));
-            }
+        if (PHP_SESSION_DISABLED == session_status() || PHP_SESSION_NONE == session_status()) {
             session_start();
         }
     }
