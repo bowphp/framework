@@ -99,8 +99,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function first()
     {
-        static::prepareQueryBuilder();
-        return self::$builder->take(1)->getOne();
+        return self::query()->take(1)->getOne();
     }
 
     /**
@@ -126,7 +125,7 @@ abstract class Model implements \ArrayAccess
         self::$builder->select($select);
         self::$builder->whereIn($static->primaryKey, $id);
 
-        return $one ? self::$builder->getOne() : self::$builder->get();
+        return $one ? self::$builder->first() : self::$builder->get();
     }
 
     /**
@@ -216,8 +215,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        static::prepareQueryBuilder();
-        return self::$builder->where($column, $comp, $value, $boolean);
+        return self::query()->where($column, $comp, $value, $boolean);
     }
 
     /**
@@ -230,8 +228,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function paginate($n, $current = 0, $chunk = null)
     {
-        static::prepareQueryBuilder();
-        return self::$builder->paginate($n, $current, $chunk);
+        return self::query()->paginate($n, $current, $chunk);
     }
 
     /**
@@ -242,8 +239,7 @@ abstract class Model implements \ArrayAccess
      */
     public static function count($column = '*')
     {
-        static::prepareQueryBuilder();
-        return self::$builder->count($column);
+        return self::query()->count($column);
     }
 
     /**
@@ -258,7 +254,29 @@ abstract class Model implements \ArrayAccess
     }
 
     /**
+     * Permet de faire une réquete avec la close DISTINCT
+     *
+     * @param string $column
+     * @return QueryBuilder
+     */
+    public static function distinct($column)
+    {
+        return self::query()->select(['distinct '.$column]);
+    }
+
+    /**
+     * @param array $select
+     * @return QueryBuilder
+     */
+    public static function select(array $select)
+    {
+        return self::query()->select($select);
+    }
+
+    /**
      * Permet d'initialiser la connection
+     *
+     * @return void
      */
     private static function prepareQueryBuilder()
     {
@@ -285,7 +303,7 @@ abstract class Model implements \ArrayAccess
     /**
      * Permet de récupérer la valeur de clé primaire
      *
-     * @return mixed|null
+     * @return mixed
      */
     private function getPrimaryKeyValue()
     {
