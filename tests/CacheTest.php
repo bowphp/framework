@@ -21,9 +21,11 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         $r = Cache::add('lastname', function () {
             return 'Franck';
         });
-        $r = Cache::add('age', function () {
+
+        $r = $r && Cache::add('age', function () {
             return 25;
         }, 20000);
+
         $this->assertEquals($r, true);
     }
 
