@@ -181,7 +181,7 @@ Class Route
      *
      * @return mixed
      */
-    public function call(Request $req, $namespaces, Application $app)
+    public function call(Request $req, $namespaces)
     {
         $params = [];
 

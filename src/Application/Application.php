@@ -512,7 +512,7 @@ class Application
             $this->currentPath = $route->getPath();
 
             // Appel de l'action associer à la route
-            $response = $route->call($this->request, $this->config->getNamespace(), $this);
+            $response = $route->call($this->request, $this->config->getNamespace());
 
             if (is_string($response)) {
                 $this->response->send($response);
