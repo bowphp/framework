@@ -203,7 +203,7 @@ class Command
      */
     public function seeder($name)
     {
-        $seeder_filename = $this->dirname."/migration/seeders/{$name}_seeder.php";
+        $seeder_filename = $this->dirname."/seeders/{$name}_seeder.php";
 
         if (file_exists($seeder_filename)) {
             echo "\033[0;31mLe seeder '$name' exists déja.\033[00m";
