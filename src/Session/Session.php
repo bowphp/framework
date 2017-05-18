@@ -14,6 +14,13 @@ use Bow\Interfaces\CollectionAccessStatic;
  */
 class Session implements CollectionAccessStatic
 {
+    /**
+     * Session constructor.
+     */
+    public function __construct()
+    {
+        static::start();
+    }
 
     /**
      * Session starteur.
@@ -30,6 +37,9 @@ class Session implements CollectionAccessStatic
     }
 
     /**
+     * Permet de filter les variables définie par l'utilisateur
+     * et celles utilisé par le framework.
+     *
      * @return array
      */
     private static function filter()
@@ -47,7 +57,7 @@ class Session implements CollectionAccessStatic
     }
 
     /**
-     * has, vérifie l'existance une clé dans la colléction de session
+     * Permet de vérifier l'existance une clé dans la colléction de session
      *
      * @param string $key
      * @param bool $strict
@@ -66,7 +76,7 @@ class Session implements CollectionAccessStatic
     }
 
     /**
-     * isEmpty, vérifie si une colléction est vide.
+     * Permet de vérifier si une colléction est vide.
      *
      *	@return boolean
      */
@@ -76,7 +86,7 @@ class Session implements CollectionAccessStatic
     }
 
     /**
-     * get, permet de récupérer une valeur ou la colléction de valeur.
+     * Permet de récupérer une valeur ou la colléction de valeur.
      *
      * @param string $key=null
      * @param mixed $default
@@ -105,7 +115,7 @@ class Session implements CollectionAccessStatic
     }
 
     /**
-     * add, ajoute une entrée dans la colléction
+     * Permet d'ajouter une entrée dans la colléction
      *
      * @param string|int $key La clé de la donnée à ajouter
      * @param mixed $data La donnée à ajouter
@@ -263,6 +273,6 @@ class Session implements CollectionAccessStatic
             return call_user_func_array([static::class, $name], $arguments);
         }
 
-        new \BadMethodCallException('La methode ' . $name . ' n\'exist pas.');
+        throw new \BadMethodCallException('La methode ' . $name . ' n\'exist pas.');
     }
 }

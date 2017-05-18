@@ -237,7 +237,7 @@ class Request
      */
     public static function old($key)
     {
-        $old = Session::get('bow.old', null);
+        $old = Session::get('__bow.old', null);
         return isset($old[$key]) ? $old[$key] : null;
     }
 

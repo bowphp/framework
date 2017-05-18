@@ -2,6 +2,7 @@
 namespace Bow\Security;
 
 use Bow\Session\Session;
+use Bow\Support\Str;
 
 /**
  * Class Security
@@ -170,7 +171,9 @@ class Security
      */
     public static function generateCsrfToken()
     {
-        return base64_encode(base64_encode(openssl_random_pseudo_bytes(23)) . date('Y-m-d H:i:s') . uniqid(rand(), true));
+        $salt = date('Y-m-d H:i:s', time() - 10000) . uniqid(rand(), true);
+        $token = base64_encode(base64_encode(openssl_random_pseudo_bytes(6)) . $salt);
+        return Str::slice(hash('sha256', $token), 1, 62);
     }
 
     /**

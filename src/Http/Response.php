@@ -117,58 +117,6 @@ class Response
     }
 
     /**
-     * redirect, permet de lancer une redirection vers l'url passé en paramêtre
-     *
-     * @param string|array $path L'url de rédirection
-     * Si $path est un tableau :
-     * 	$url = [
-     * 		'url' => '//'
-     * 		'?' => [
-     * 			'name' => 'dakia',
-     * 			'lastname' => 'franck',
-     * 			'id' => '1',
-     * 		],
-     * 		'$' => 'hello'
-     * ];
-     *
-     */
-    public function redirect($path)
-    {
-        if (is_string($path)) {
-            $path = ['url' => $path];
-        }
-
-        $url = $path['url'];
-
-        if (isset($path['?'])) {
-            $url .= '?';
-            foreach($path['?'] as $key => $value) {
-                if ($key > 0) {
-                    $url .= '&';
-                }
-                $url .= $key . '=' . $value;
-            }
-        }
-
-        if (isset($path['#'])) {
-            $url .= '#' . $path['#'];
-        }
-
-        header('Location: ' . $url);
-        die;
-    }
-
-    /**
-     * redirectTo404, rédirige vers 404
-     * @return self
-     */
-    public function redirectTo404()
-    {
-        $this->code(404);
-        return $this;
-    }
-
-    /**
      * Télécharger le fichier donnée en argument
      *
      * @param string $file
