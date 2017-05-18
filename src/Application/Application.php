@@ -4,7 +4,6 @@ namespace Bow\Application;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Logger\Logger;
-use InvalidArgumentException;
 use Bow\Exception\RouterException;
 use Bow\Exception\ApplicationException;
 
@@ -26,6 +25,11 @@ class Application
      * @var array
      */
     private $errorCode = [];
+
+    /**
+     * @var array
+     */
+    private $globaleMiddleware = [];
 
     /**
      * Définition de contrainte sur un route.
@@ -72,7 +76,7 @@ class Application
      *
      * @var array
      */
-    private static $routes = [];
+    private $routes = [];
 
     /**
      * @var Request
@@ -176,65 +180,66 @@ class Application
     }
 
     /**
+     * Permet d'associer un firewall sur une url
+     *
+     * @param array $middleware
+     */
+    public function firewall($middleware = [])
+    {
+        $this->globaleMiddleware = is_array($middleware) ? $middleware : [$middleware];
+    }
+
+    /**
      * get, route de type GET ou bien retourne les variable ajoutés dans Bow
      *
-     * @param string 				$path   La route à mapper
-     * @param Callable|string|array $name [optinal]   Le nom de la route ou la fonction à lancer.
-     * @param callable|null 		$cb   [optinal]   La fonction à lancer
+     * @param string $path La route à mapper
+     * @param callable|array $cb  La fonction à lancer
+     *
      * @return Application|string
      */
-    public function get($path, $name = null, $cb = null)
+    public function get($path, $cb)
     {
-        if ($name === null) {
-            $key = $path;
-
-            if (in_array($key, $this->local)) {
-                return $this->local[$key];
-            }
-
-            if (($method = $this->getConfigMethod($key, 'get')) !== false) {
-                return $this->config->$method();
-            }
-
-            return null;
-        }
-
-        return $this->routeLoader('GET', $path, $name, $cb);
+        return $this->routeLoader('GET', $path, $cb);
     }
 
     /**
      * post, route de type POST
      *
-     * @param string 				$path   La route à mapper
-     * @param Callable|string|array $name   Le nom de la route ou la fonction à lancer.
-     * @param callable 				$cb   [optional]  La fonction à lancer
+     * @param string $path La route à mapper
+     * @param callable $cb La fonction à lancer
+     *
      * @return Application
      */
-    public function post($path, $name, Callable $cb = null)
+    public function post($path, $cb)
     {
         $input = $this->request->input();
 
         if ($input->has('_method')) {
-            $this->specialMethod = $method = strtoupper($input->get('_method'));
+
+            $method = strtoupper($input->get('_method'));
+
             if (in_array($method, ['DELETE', 'PUT'])) {
-                $this->addHttpVerbe($method, $path, $name, $cb);
+                $this->specialMethod = $method;
+                $this->addHttpVerbe($method, $path, $cb);
             }
+
             return $this;
         }
 
-        return $this->routeLoader('POST', $path, $name, $cb);
+        return $this->routeLoader('POST', $path, $cb);
     }
 
     /**
-     * any, route de tout type GET|POST|DELETE|PUT
+     * any, route de tout type GET|POST|DELETE|PUT|OPTIONS|PATCH
      *
-     * @param string   $path La route à mapper
-     * @param Callable $cb   La fonction à lancer
+     * @param string $path La route à mapper
+     * @param Callable $cb La fonction à lancer
+     *
      * @return Application
      */
     public function any($path, Callable $cb)
     {
-        foreach(['post', 'delete', 'put', 'get'] as $function) {
+        foreach(['options', 'patch', 'post', 'delete', 'put', 'get'] as $function) {
             $this->$function($path, $cb);
         }
 
@@ -244,40 +249,40 @@ class Application
     /**
      * delete, route de tout type DELETE
      *
-     * @param string 				$path   La route à mapper
-     * @param Callable|string|array $name   Le nom de la route ou la fonction à lancer.
-     * @param callable 				$cb     La fonction à lancer
+     * @param string $path La route à mapper
+     * @param callable $cb La fonction à lancer
+     *
      * @return Application
      */
-    public function delete($path, $name, Callable $cb = null)
+    public function delete($path, $cb)
     {
-        return $this->addHttpVerbe('DELETE', $path, $name, $cb);
+        return $this->addHttpVerbe('DELETE', $path, $cb);
     }
 
     /**
      * put, route de tout type PUT
      *
-     * @param string 				$path   La route à mapper
-     * @param Callable|string|array $name   Le nom de la route ou la fonction à lancer.
-     * @param callable 				$cb     La fonction à lancer
+     * @param string $path La route à mapper
+     * @param callable $cb La fonction à lancer
+     *
      * @return Application
      */
-    public function put($path, $name, Callable $cb = null)
+    public function put($path, $cb)
     {
-        return $this->addHttpVerbe('PUT', $path, $name, $cb);
+        return $this->addHttpVerbe('PUT', $path, $cb);
     }
 
     /**
      * patch, route de tout type PATCH
      *
-     * @param string 				$path   La route à mapper
-     * @param Callable|string|array $name   Le nom de la route ou la fonction à lancer.
-     * @param callable 				$cb     La fonction à lancer
+     * @param string $path La route à mapper
+     * @param callable $cb La fonction à lancer
+     *
      * @return Application
      */
-    public function patch($path, $name, Callable $cb = null)
+    public function patch($path, $cb)
     {
-        return $this->addHttpVerbe('PATCH', $path, $name, $cb);
+        return $this->addHttpVerbe('PATCH', $path, $cb);
     }
     /**
      * patch, route de tout type PATCH
@@ -288,7 +293,7 @@ class Application
      */
     public function options($path, Callable $cb)
     {
-        return $this->addHttpVerbe('OPTIONS', $path, null, $cb);
+        return $this->addHttpVerbe('OPTIONS', $path, $cb);
     }
 
     /**
@@ -316,7 +321,7 @@ class Application
     {
         foreach($methods as $method) {
             if ($this->request->method() === strtoupper($method)) {
-                $this->routeLoader(strtoupper($method), $path , $cb, null);
+                $this->routeLoader(strtoupper($method), $path , $cb);
             }
         }
 
@@ -327,77 +332,62 @@ class Application
      * addHttpVerbe, permet d'ajouter les autres verbes http
      * [PUT, DELETE, UPDATE, HEAD, PATCH]
      *
-     * @param string  				$method La methode HTTP
-     * @param string 				$path   La route à mapper
-     * @param Callable|string|array $name   Le nom de la route ou la fonction à lancer.
-     * @param callable 				$cb     La fonction à lancer
+     * @param string $method La methode HTTP
+     * @param string $path La route à mapper
+     * @param callable|array|string $cb La fonction à lancer
      *
      * @return Application
      */
-    private function addHttpVerbe($method, $path, $name, $cb = null)
+    private function addHttpVerbe($method, $path, $cb)
     {
         $input = $this->request->input();
-        $flag = true;
 
         if ($input->has('_method')) {
             if ($input->get('_method') === $method) {
-                $this->routeLoader($method, $path, $name, $cb);
+                $method = $input->get('_method');
             }
-            $flag = false;
         }
 
-        if ($flag) {
-            $this->routeLoader($method, $path, $name, $cb);
-        }
-
-        return $this;
+        return $this->routeLoader($method, $path, $cb);
     }
 
     /**
      * routeLoader, lance le chargement d'une route.
      *
-     * @param string  				$method La methode HTTP
-     * @param string 				$path   La route à mapper
-     * @param Callable|string|array $name   Le nom de la route ou la fonction à lancer.
-     * @param Callable|string|array $cb     La fonction à lancer
+     * @param string $method La methode HTTP
+     * @param string $path La route à mapper
+     * @param Callable|string|array $cb La fonction à lancer
      *
      * @return Application
      */
-    private function routeLoader($method, $path, $name, $cb = null)
+    private function routeLoader($method, $path, $cb)
     {
 
-        if (!preg_match('@^/@', $path)) {
+        if (! preg_match('@^/@', $path)) {
             $path = '/' . $path;
         }
 
         // construction du path original en fonction de la configuration de l'application
         $path = $this->config->getApproot() . $this->branch . $path;
 
-        if (is_callable($name)) {
-            $cb = $name;
-            $name = null;
-        }
-
-        if (is_array($name)) {
-            $cb = $name;
-            $name = null;
-            if (isset($cb['name'])) {
-                $name = $cb['name'];
-                unset($cb['name']);
-            }
-        }
-
-        if (is_string($name)) {
-            if (!preg_match('/^[a-z]+(\.|@)[a-z]+$/i', $name)) {
-                $this->namedRoute($path, $name);
-            } else {
-                $cb = $name;
-                $name = null;
-            }
-        }
-
         // Ajout d'un nouvelle route sur l'en definie.
-        static::$routes[$method][] = new Route($path, $cb);
+        if ($this->globaleMiddleware !== null) {
+            if (is_array($cb)) {
+                if (isset($cb['middleware'])) {
+                    if (! is_array($cb['middleware'])) {
+                        $cb['middleware'] = [$cb['middleware']];
+                    }
+
+                    $cb['middleware'] = array_merge($this->globaleMiddleware, $cb['middleware']);
+                } else {
+                    $cb['middleware'] = $this->globaleMiddleware;
+                }
+            } else {
+                $cb = ['middleware' => $this->globaleMiddleware, 'call' => $cb];
+            }
+        }
+
+        $this->routes[$method][] = new Route($path, $cb);
 
         // route courante
         $this->currentPath = $path;
@@ -488,7 +478,7 @@ class Application
 
         // Vérification de l'existance de methode de la requete dans
         // la collection de route
-        if (! isset(static::$routes[$method])) {
+        if (! isset($this->routes[$method])) {
             // Vérification et appel de la fonction du branchement 404
             $this->response->code(404);
 
@@ -499,7 +489,7 @@ class Application
             return false;
         }
 
-        foreach (static::$routes[$method] as $key => $route) {
+        foreach ($this->routes[$method] as $key => $route) {
             // route doit être une instance de Route
             if (! ($route instanceof Route)) {
                 continue;
@@ -559,56 +549,13 @@ class Application
     }
 
     /**
-     * Set, permet de rédéfinir quelque élément de la configuartion de
-     * façon élégante.
+     * Permet de donner des noms au url.
      *
-     * @param string $key
-     * @param string $value
-     *
-     * @throws InvalidArgumentException
-     *
-     * @return Application|string
+     * @param $name
      */
-    public function set($key, $value)
+    public function named($name)
     {
-        $method = $this->getConfigMethod($key, 'set');
-
-        // Vérification de l
-        if ($method) {
-            if (method_exists($this->config, $method)) {
-                return $this->config->$method($value);
-            }
-        } else {
-            $this->local[$key] = $value;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string $key
-     * @param string $prefix
-     *
-     * @return string|bool
-     */
-    private function getConfigMethod($key, $prefix)
-    {
-        switch ($key) {
-            case 'view':
-                $method = 'Viewpath';
-                break;
-            case 'engine':
-                $method = 'Engine';
-                break;
-            case 'root':
-                $method = 'Approot';
-                break;
-            default:
-                $method = false;
-                break;
-        }
-
-        return is_string($method) ? $prefix . $method : $method;
+        $this->namedRoute($this->currentPath, $name);
     }
 
     /**
@@ -630,7 +577,7 @@ class Application
      */
     public function resources($url, $controllerName, array $where = [])
     {
-        if (!is_string($controllerName) && !is_array($controllerName)) {
+        if (! is_string($controllerName) && ! is_array($controllerName)) {
             throw new ApplicationException('Le premier paramètre doit être un array ou une chaine de caractère', 1);
         }
 
@@ -762,9 +709,9 @@ class Application
      */
     private function namedRoute($uri, $name)
     {
-        $route[$name] = $uri;
         $routes = $this->config->getApplicationRoutes();
-        $routes = array_merge($routes, $route);
+        $routes = array_merge($routes, [$name => $uri]);
+
         $this->config->setApplicationRoutes($routes);
     }
 
@@ -775,7 +722,7 @@ class Application
      */
     public function getRoutes()
     {
-        return static::$routes;
+        return $this->routes;
     }
 
     /**
@@ -786,7 +733,7 @@ class Application
      */
     public function getMethodRoutes($method)
     {
-        return static::$routes[$method];
+        return $this->routes[$method];
     }
 
     /**
