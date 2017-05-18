@@ -50,9 +50,9 @@ class Actionner
             throw new \InvalidArgumentException('Le premier parametre doit etre un tableau, une chaine, une closure', E_USER_ERROR);
         }
 
-        if (array_key_exists('middleware', $actions)) {
-            $middlewares = $actions['middleware'];
-            unset($actions['middleware']);
+        if (array_key_exists('firewall', $actions)) {
+            $middlewares = $actions['firewall'];
+            unset($actions['firewall']);
         }
 
         foreach ($actions as $key => $action) {
@@ -99,14 +99,14 @@ class Actionner
             if (! is_string($middleware)) {
                 continue;
             }
-            if (! array_key_exists($middleware, $names['middlewares'])) {
+            if (! array_key_exists($middleware, $names['firewalls'])) {
                 throw new RouterException($middleware . ' n\'est pas un middleware définir.', E_ERROR);
             }
             // On vérifie si le middleware définie est une middleware valide.
-            if (! class_exists($names['middlewares'][$middleware])) {
-                throw new RouterException($names['middlewares'][$middleware] . ' n\'est pas un class middleware.');
+            if (! class_exists($names['firewalls'][$middleware])) {
+                throw new RouterException($names['firewalls'][$middleware] . ' n\'est pas un class middleware.');
             }
-            $middlewares_collection[] = $names['middlewares'][$middleware];
+            $middlewares_collection[] = $names['firewalls'][$middleware];
         }
 
         $next = false;

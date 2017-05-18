@@ -578,19 +578,19 @@ CC;
     {
         $middleware_name = ucfirst($middleware_name);
 
-        if (file_exists($this->dirname."/app/Middleware/$middleware_name.php")) {
-            echo "\033[0;31mLe middleware \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m existe déja.\033[00m\n";
+        if (file_exists($this->dirname."/app/Firewall/$middleware_name.php")) {
+            echo "\033[0;31mLe firewall \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m existe déja.\033[00m\n";
             exit(1);
         }
 
         $middleware_template = <<<CM
 <?php
-namespace App\Middleware;
+namespace App\Firewall;
 
 class {$middleware_name}
 {
     /**
-     * Fonction de lancement du middleware.
+     * Fonction de lancement du firewall.
      * 
      * @param \\Bow\\Http\\Request \$request
      * @param \\Closure \$next
@@ -603,8 +603,8 @@ class {$middleware_name}
     }
 }
 CM;
-        file_put_contents($this->dirname."/app/Middleware/$middleware_name.php", $middleware_template);
-        echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien créer.\033[00m\n";
+        file_put_contents($this->dirname."/app/Firewall/$middleware_name.php", $middleware_template);
+        echo "\033[0;32mLe firewall \033[00m[{$middleware_name}]\033[0;32m a été bien créer.\033[00m\n";
 
         exit(0);
     }
@@ -648,9 +648,11 @@ MODEL;
 
         file_put_contents($this->dirname."/app/${model_name}.php", $model);
         echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien créer.\033[00m\n";
+
         if ($this->options('-m')) {
             $this->make('create_'.strtolower($model_name).'_table');
         }
+
         exit(0);
     }
 
@@ -661,8 +663,9 @@ MODEL;
     {
         $key = base64_encode(openssl_random_pseudo_bytes(12) . date('Y-m-d H:i:s') . microtime(true));
         file_put_contents($this->dirname."/config/.key", $key);
+
         echo "Application key => \033[0;32m$key\033[00m\n";
-        exit(0);
+        exit;
     }
 
     /**
