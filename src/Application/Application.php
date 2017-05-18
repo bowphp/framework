@@ -29,7 +29,7 @@ class Application
     /**
      * @var array
      */
-    private $globaleMiddleware = [];
+    private $globaleFirewall = [];
 
     /**
      * Définition de contrainte sur un route.
@@ -182,11 +182,11 @@ class Application
     /**
      * Permet d'associer un firewall sur une url
      *
-     * @param array $middleware
+     * @param array $firewall
      */
-    public function firewall($middleware = [])
+    public function firewall($firewall = [])
     {
-        $this->globaleMiddleware = is_array($middleware) ? $middleware : [$middleware];
+        $this->globaleFirewall = is_array($firewall) ? $firewall : [$firewall];
     }
 
     /**
@@ -371,19 +371,19 @@ class Application
         $path = $this->config->getApproot() . $this->branch . $path;
 
         // Ajout d'un nouvelle route sur l'en definie.
-        if ($this->globaleMiddleware !== null) {
+        if ($this->globaleFirewall !== null) {
             if (is_array($cb)) {
-                if (isset($cb['middleware'])) {
-                    if (! is_array($cb['middleware'])) {
-                        $cb['middleware'] = [$cb['middleware']];
+                if (isset($cb['firewall'])) {
+                    if (! is_array($cb['firewall'])) {
+                        $cb['firewall'] = [$cb['firewall']];
                     }
 
-                    $cb['middleware'] = array_merge($this->globaleMiddleware, $cb['middleware']);
+                    $cb['firewall'] = array_merge($this->globaleFirewall, $cb['firewall']);
                 } else {
-                    $cb['middleware'] = $this->globaleMiddleware;
+                    $cb['firewall'] = $this->globaleFirewall;
                 }
             } else {
-                $cb = ['middleware' => $this->globaleMiddleware, 'call' => $cb];
+                $cb = ['firewall' => $this->globaleFirewall, 'call' => $cb];
             }
         }
 
@@ -623,10 +623,16 @@ class Application
         ];
 
         if (is_array($controllerName)) {
-            if (isset($controllerName['middleware'])) {
-                $internalMiddleware = $controllerName['middleware'];
-                unset($controllerName['middleware']);
-                $next = Actionner::call(['middleware' => $internalMiddleware], [$this->request]);
+            if (isset($controllerName['firewall'])) {
+                $internalFirewall = $controllerName['firewall'];
+                unset($controllerName['firewall']);
+
+                $next = Actionner::call(
+                    ['firewall' => $internalFirewall],
+                    [$this->request],
+                    $this->config->getNamespace()
+                );
+
                 if ($next === false) {
                     return $this;
                 }
