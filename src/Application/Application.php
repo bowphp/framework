@@ -39,7 +39,7 @@ class Application
      *
      * @var string
      */
-    private $branch = '';
+    private $branch = null;
 
     /**
      * @var string
@@ -157,12 +157,21 @@ class Application
     public function group($branch, Callable $cb)
     {
         $branch = rtrim($branch, '/');
-        if (!preg_match('@^/@', $branch)) {
+
+        if (! preg_match('@^/@', $branch)) {
             $branch = '/' . $branch;
         }
-        $this->branch = $branch;
+
+        if ($this->branch !== null) {
+            $this->branch .= $branch;
+        } else {
+            $this->branch = $branch;
+        }
+
         call_user_func_array($cb, [$this]);
+
         $this->branch = '';
+
         return $this;
     }
 
@@ -325,7 +334,7 @@ class Application
      *
      * @return Application
      */
-    private function addHttpVerbe($method, $path, $name, Callable $cb = null)
+    private function addHttpVerbe($method, $path, $name, $cb = null)
     {
         $input = $this->request->input();
         $flag = true;
@@ -350,11 +359,11 @@ class Application
      * @param string  				$method La methode HTTP
      * @param string 				$path   La route à mapper
      * @param Callable|string|array $name   Le nom de la route ou la fonction à lancer.
-     * @param callable 				$cb     La fonction à lancer
+     * @param Callable|string|array $cb     La fonction à lancer
      *
      * @return Application
      */
-    private function routeLoader($method, $path, $name, Callable $cb = null)
+    private function routeLoader($method, $path, $name, $cb = null)
     {
 
         if (!preg_match('@^/@', $path)) {
