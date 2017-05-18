@@ -81,26 +81,28 @@ class Configuration
      *
      * @return Configuration
      */
-    public static function configure($config) {
-
-        if (! self::$instance instanceof Configuration) {
-            self::$instance = new self($config);
+    public static function configure($config)
+    {
+        if (! static::$instance instanceof Configuration) {
+            static::$instance = new static($config);
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     /**
      * takeInstance singleton
      *
      * @return Configuration
+     * @throws ApplicationException
      */
-    public static function instance() {
-        if (! self::$instance instanceof Configuration) {
-            self::configure([]);
+    public static function instance()
+    {
+        if (! static::$instance instanceof Configuration) {
+            throw new ApplicationException('Application n\'a pas charge les confirgurations');
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     /**

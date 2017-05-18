@@ -29,7 +29,7 @@ class BowTestCase extends TestCase
     public function get($url, array $param = [])
     {
         $http = new HttpClient($this->formatUrl($url));
-        return $http->get($param);
+        return $http->get($url, $param);
     }
 
     /**
@@ -40,7 +40,7 @@ class BowTestCase extends TestCase
     public function post($url, array $param = [])
     {
         $http = new HttpClient($this->formatUrl($url));
-        return $http->post($param);
+        return $http->post($url, $param);
     }
 
     /**
@@ -51,7 +51,7 @@ class BowTestCase extends TestCase
     public function put($url, array $param = [])
     {
         $http = new HttpClient($this->formatUrl($url));
-        return $http->put($param);
+        return $http->put($url, $param);
     }
 
     /**
@@ -89,6 +89,7 @@ class BowTestCase extends TestCase
     public function visit($method, $url, array $params = [])
     {
         $method = strtolower($method);
+
         if (! method_exists($this, $method)) {
             throw new \BadMethodCallException('La methode ' . $method . ' n\'exist pas');
         }

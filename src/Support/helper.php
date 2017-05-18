@@ -1,11 +1,11 @@
 <?php
 /**
-|
-|	BOW LOADER
-|	==========
-|	Définir des liens symbolique de l'ensemble des
-|	fonctions de Bow.
-|
+ |
+ |	BOW LOADER
+ |	==========
+ |	Définir des liens symbolique de l'ensemble des
+ |	fonctions de Bow.
+ |
  */
 
 use Bow\Mail\Mail;
@@ -1178,7 +1178,10 @@ if (! function_exists('app_env')) {
      */
     function app_env($key, $default = null)
     {
-        Env::load(config()->getEnvirementFile());
+        if (! Env::isLoaded()) {
+            Env::load(config()->getEnvirementFile());
+        }
+
         return Env::get($key, $default);
     }
 }

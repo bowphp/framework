@@ -6,12 +6,20 @@ class Env
     private static $env;
 
     /**
+     * @return bool
+     */
+    public static function isLoaded()
+    {
+        return static::$env !== null;
+    }
+
+    /**
      * @param string $filename
      */
     public static function load($filename)
     {
         if (static::$env == null) {
-            static::$env = json_decode($filename);
+            static::$env = json_decode(file_get_contents($filename));
         }
     }
 

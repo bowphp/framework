@@ -89,6 +89,12 @@ class Behovior
         return $this;
     }
 
+    public function withAttachements($attach)
+    {
+        $this->parser->addAttach($attach);
+        return $this;
+    }
+
     public function logResponse()
     {
         var_dump($this->parser->raw());

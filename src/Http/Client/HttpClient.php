@@ -79,6 +79,11 @@ class HttpClient
         return new Parser($this->ch);
     }
 
+    public function addAttach($attach)
+    {
+        return $this;
+    }
+
     /**
      * Reset alway connection
      *

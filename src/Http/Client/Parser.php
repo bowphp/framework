@@ -29,6 +29,11 @@ class Parser
     private $executed;
 
     /**
+     * @var array
+     */
+    private $attach = [];
+
+    /**
      * Parser constructor.
      *
      * @param $ch
@@ -284,6 +289,30 @@ class Parser
             $this->execute();
         }
         return $this->header['content_type'];
+    }
+
+    /**
+     * @param $attach
+     */
+    public function addAttach($attach)
+    {
+        $this->attach = array_merge($this->attach, $attach);
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttach()
+    {
+        return $this->attach;
+    }
+
+    /**
+     * @param $attachs
+     */
+    public function setAttach($attachs)
+    {
+        $this->attach = $attachs;
     }
 
     /**
