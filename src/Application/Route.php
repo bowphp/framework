@@ -70,6 +70,16 @@ Class Route
     }
 
     /**
+     * Retourne l'action a executé sur la route currente
+     *
+     * @return mixed
+     */
+    public function getAction()
+    {
+        return $this->cb;
+    }
+
+    /**
      * match, vérifie si le url de la REQUEST est conforme à celle définir par le routeur
      *
      * @param string $uri L'url de la requête
@@ -109,28 +119,30 @@ Class Route
         // Dans le case ou le dévéloppeur n'a pas ajouté de contrainte sur
         // les variables capturées
         if (empty($this->with)) {
-            $path = preg_replace('~:\w+~', '([^\s]+)', $this->path);
-            preg_match_all('~:([\w]+)~', $this->path, $this->keys);
-            array_shift($this->keys);
-            $this->keys = $this->keys[0];
-        } else {
-            // Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
-            // capturées
-            if (preg_match_all('~:([\w]+)~', $this->path, $match)) {
-                $tmpPath =  $this->path;
-                $this->keys = $match[1];
+            $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
+            preg_match_all('~:([\w]+?)~', $this->path, $this->keys);
 
-                // Assication des critrères personnalisé.
-                foreach ($match[1] as $key => $value) {
-                    if (array_key_exists($value, $this->with)) {
-                        $tmpPath = preg_replace('~:' . $value . '~', '(' . $this->with[$value] . ')', $tmpPath);
-                    }
-                }
+            $this->keys = end($this->keys);
 
-                // Dans le case ou le path différent on récupère, on récupère celle dans $tmpPath
-                if ($tmpPath !== $this->path) {
-                    $path = $tmpPath;
+            return $this->testUri($path, $uri);
+        }
+
+        // Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
+        // capturées
+        if (preg_match_all('~:([\w]+)~', $this->path, $match)) {
+            $tmpPath =  $this->path;
+            $this->keys = end($match);
+
+            // Assication des critrères personnalisé.
+            foreach ($this->keys as $key => $value) {
+                if (array_key_exists($value, $this->with)) {
+                    $tmpPath = preg_replace('~:' . $value . '~', '(' . $this->with[$value] . ')', $tmpPath);
                 }
+            }
+
+            // Dans le case ou le path différent on récupère, on récupère celle dans $tmpPath
+            if ($tmpPath !== $this->path) {
+                $path = $tmpPath;
             }
 
             // On rend vide le table d'association de critère personnalisé.
@@ -138,7 +150,19 @@ Class Route
         }
 
         // Vérifcation de url et path PARSER
+        return $this->testUri($path, $uri);
+    }
+
+    /**
+     * @param $path
+     * @param $uri
+     * @return bool
+     */
+    private function testUri($path, $uri)
+    {
+        // Vérifcation de url et path PARSER
         $path = str_replace('~', '\\~', $path);
+
         if (preg_match('~^'. $path . '$~', $uri, $match)) {
             array_shift($match);
             $this->match = str_replace('/', '', $match);
@@ -174,6 +198,7 @@ Class Route
         }
 
         $req::$params = (object) $params;
+
         return Actionner::call($this->cb, $this->match, $namespaces);
     }
 }
