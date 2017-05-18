@@ -74,7 +74,11 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
         if ($this->mergeTableName !== null) {
             unset($data->{$this->mergeTableName});
         }
-        return $this->table->where('id', $this->id)->update((array) $this->serialize($data));
+
+        return $this->table->where(
+            $this->table->getPrimaryKey(),
+            $this->id
+        )->update((array) $this->serialize($data));
     }
 
     /**
@@ -84,7 +88,10 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
      */
     public function delete()
     {
-        return $this->table->where('id', $this->id)->delete();
+        return $this->table->where(
+            $this->table->getPrimaryKey(),
+            $this->id
+        )->delete();
     }
 
     /**
@@ -171,7 +178,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return array_merge(['id' => $this->id], $this->toArray());
+        return array_merge([$this->table->getPrimaryKey() => $this->id], $this->toArray());
     }
 
     /**

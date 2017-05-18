@@ -25,6 +25,7 @@ abstract class DBUtility
 
         foreach ($data as $key => $value) {
             $param = PDO::PARAM_INT;
+
             if (preg_match('/[a-zA-Z_-]+|éàèëïùöôîüµ$£!?\.\+,;:/', $value)) {
                 /**
                  * SÉCURIATION DES DONNÉS

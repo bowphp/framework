@@ -777,6 +777,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
+     * Alias de getOne
+     *
+     * @return SqlUnity|Collection|Collection|null
+     */
+    public function first()
+    {
+        return $this->getOne();
+    }
+
+    /**
      * Demarrer un transaction dans la base de donnée.
      *
      * @param callable $cb

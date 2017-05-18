@@ -190,10 +190,11 @@ abstract class Model implements \ArrayAccess
 
         if (! array_key_exists($static->primaryKey, $data)) {
             if ($static->autoincrement) {
-                $data[$static->primaryKey] = null;
+                $id_value = [$static->primaryKey => null];
+                $data = array_merge($id_value, $data);
             } else {
                 if ($static->primaryKeyType == 'string') {
-                    $data[$static->primaryKey] = '';
+                    $data = array_merge([$static->primaryKey => ''], $data);
                 }
             }
         }
@@ -352,6 +353,21 @@ abstract class Model implements \ArrayAccess
         }
 
         return 0;
+    }
+
+    /**
+     * Permet de mettre le timestamp à jour.
+     *
+     * @return bool
+     */
+    public function touch()
+    {
+        if ($this->timestamps) {
+            $this->updated_at = date('Y-m-d H:i:s');
+            return (bool) $this->save();
+        }
+
+        return false;
     }
 
     /**
@@ -523,8 +539,8 @@ abstract class Model implements \ArrayAccess
     {
         $static = new static();
 
-        if (method_exists($static, $method)) {
-            return call_user_func_array([$static, $method], $arguments);
+        if (method_exists($static::$builder, $method)) {
+            return call_user_func_array([$static::$builder, $method], $arguments);
         }
 
         throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
