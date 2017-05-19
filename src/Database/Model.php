@@ -17,6 +17,11 @@ use Bow\Database\QueryBuilder\QueryBuilder;
 abstract class Model implements \ArrayAccess
 {
     /**
+     * @var array
+     */
+    protected $descriptions = [];
+
+    /**
      * @var bool
      */
     protected $timestamps = true;
@@ -274,6 +279,59 @@ abstract class Model implements \ArrayAccess
     }
 
     /**
+     * @param string $table
+     * @return QueryBuilder
+     */
+    public static function join($table)
+    {
+        return self::query()->join($table);
+    }
+
+    /**
+     * @param string $column
+     * @return int
+     */
+    public static function increment($column)
+    {
+        return self::query()->increment($column);
+    }
+
+    /**
+     * @param string $column
+     * @return int
+     */
+    public static function decrement($column)
+    {
+        return self::query()->decrement($column);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function truncate()
+    {
+        return self::query()->truncate();
+    }
+
+    /**
+     * @param string $column
+     * @param mixed $value
+     * @return bool
+     */
+    public static function exists($column, $value)
+    {
+        return self::query()->exists($column, $value);
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function last()
+    {
+        return self::query()->last();
+    }
+
+    /**
      * Permet d'initialiser la connection
      *
      * @return void
@@ -329,8 +387,15 @@ abstract class Model implements \ArrayAccess
     {
         if (empty($this->attributes)) {
             if (! empty($values)) {
-                $this->attributes = $values;
+                if (! empty($this->descriptions)) {
+                    foreach ($this->descriptions as $description) {
+                        $this->attributes[$description] = $values[$description];
+                    }
+                } else {
+                    $this->attributes = $values;
+                }
             }
+
             return self::$builder->insert($this->attributes);
         }
 
@@ -428,7 +493,11 @@ abstract class Model implements \ArrayAccess
     {
         return array_merge(
             $this->dates,
-            ['created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at']
+            [
+                'created_at', 'updated_at',
+                'expired_at', 'logged_at',
+                'sigined_at'
+            ]
         );
     }
 
@@ -438,18 +507,6 @@ abstract class Model implements \ArrayAccess
      * @return array
      */
     public function toArray()
-    {
-        return $this->attributes;
-    }
-
-
-    /**
-     * Permet de formater le donnée en json quand on appele la
-     * fonction json_encode sur une instance.
-     *
-     * @return string
-     */
-    public function jsonSerialize()
     {
         return $this->attributes;
     }
