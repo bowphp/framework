@@ -54,25 +54,27 @@ class Configuration
          */
         $this->config = $config;
 
-        if (isset($config["application"])) {
-            if (isset($config["application"]->app_root)) {
-                $this->approot = $config["application"]->app_root;
-            }
+        if (! isset($this->config["application"])) {
+            return;
+        }
 
-            if (is_file($config["application"]->app_key)) {
-                $this->app_key = file_get_contents($config["application"]->app_key);
-            }
+        if (isset($this->config["application"]->app_root)) {
+            $this->approot = $this->config["application"]->app_root;
+        }
 
-            if (isset($config["application"]->timezone)) {
-                DateAccess::setTimezone($config["application"]->timezone);
-            }
+        if (is_file($this->config["application"]->app_key)) {
+            $this->app_key = file_get_contents($this->config["application"]->app_key);
+        }
+
+        if (isset($this->config["application"]->timezone)) {
+            DateAccess::setTimezone($this->config["application"]->timezone);
         }
     }
 
     /**
      * Ferméture de la fonction magic __clone pour optimizer le singleton
      */
-    private final function __clone(){}
+    private final function __clone() { }
 
     /**
      * takeInstance singleton
@@ -83,11 +85,11 @@ class Configuration
      */
     public static function configure($config)
     {
-        if (! static::$instance instanceof Configuration) {
-            static::$instance = new static($config);
+        if (! self::$instance instanceof Configuration) {
+            self::$instance = new self($config);
         }
 
-        return static::$instance;
+        return self::$instance;
     }
 
     /**
@@ -98,11 +100,20 @@ class Configuration
      */
     public static function instance()
     {
-        if (! static::$instance instanceof Configuration) {
+        if (! self::$instance instanceof Configuration) {
             throw new ApplicationException('L\'application n\'a pas chargé les confirgurations');
         }
 
-        return static::$instance;
+        return self::$instance;
+    }
+
+    /**
+     * @param $application
+     */
+    public function setAllConfiguration($application)
+    {
+        $this->config = array_merge($this->config, $application);
+        self::$instance = new self($this->config);
     }
 
     /**
@@ -574,6 +585,30 @@ class Configuration
         $this->config["mail"]->driver = $driver;
 
         return $old;
+    }
+
+    /**
+     * @param $mail
+     */
+    public function setMailConfig($mail)
+    {
+        $this->config['mail'] = $mail;
+    }
+
+    /**
+     * @param $database
+     */
+    public function setDatabaseConfig($database)
+    {
+        $this->config['database'] = $database;
+    }
+
+    /**
+     * @param $resource
+     */
+    public function setResourceConfig($resource)
+    {
+        $this->config['resource'] = $resource;
     }
 
     /**
