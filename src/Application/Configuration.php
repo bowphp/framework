@@ -99,7 +99,7 @@ class Configuration
     public static function instance()
     {
         if (! static::$instance instanceof Configuration) {
-            throw new ApplicationException('Application n\'a pas charge les confirgurations');
+            throw new ApplicationException('L\'application n\'a pas chargé les confirgurations');
         }
 
         return static::$instance;
