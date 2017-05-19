@@ -32,6 +32,6 @@ class Env
      */
     public static function get($key, $default = null)
     {
-        return isset(static::$env[$key]) ? static::$env[$key] : $default;
+        return isset(static::$env->$key) ? static::$env->$key : $default;
     }
 }
