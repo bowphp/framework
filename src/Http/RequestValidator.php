@@ -13,7 +13,15 @@ abstract class RequestValidator extends Validator
      */
     protected $rules = [];
 
+    /**
+     * @var array
+     */
     protected $keys = ['*'];
+
+    /**
+     * @var array
+     */
+    private $data;
 
     /**
      * @var Validate
@@ -72,6 +80,16 @@ abstract class RequestValidator extends Validator
     public function getMessages()
     {
         return $this->validate->getMessages();
+    }
+
+    /**
+     * Permet de récupérer les données de la validation
+     *
+     * @return array
+     */
+    public function getValidationData()
+    {
+        return $this->data;
     }
 
     /**
