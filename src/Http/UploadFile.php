@@ -34,8 +34,9 @@ class UploadFile
     public function getExtension()
     {
         if (isset($this->file['name'])) {
-            return array_pop(explode('.', $this->file['name']));
+            return pathinfo($this->file['name'], PATHINFO_EXTENSION);
         }
+
         return null;
     }
 
@@ -57,7 +58,7 @@ class UploadFile
      *
      * @return mixed
      */
-    public function getSize()
+    public function getFilesize()
     {
         if (isset($this->file['size'])) {
             return $this->file['size'];
@@ -72,7 +73,7 @@ class UploadFile
      */
     public function isValid()
     {
-        return count($this->file) === 4;
+        return count($this->file) === 5;
     }
 
     /**
@@ -82,10 +83,11 @@ class UploadFile
      */
     public function isUploaded()
     {
-        if (isset($this->file['tmp_name'], $this->file['error'])) {
+        if (! isset($this->file['tmp_name'], $this->file['error'])) {
             return false;
         }
-        return is_uploaded_file($this->file['tmp_name']) && $this->file['error'] !== 0;
+
+        return is_uploaded_file($this->file['tmp_name']) && $this->file['error'] === UPLOAD_ERR_OK;
     }
 
     /**
@@ -143,21 +145,25 @@ class UploadFile
      * @param string $to Le dossier de récéption
      * @param string|null $filename Le nom du fichier
      * @return bool
-     * @throws UploadFileException
+     * @throws \Exception\UploadFileException
      */
     public function move($to, $filename = null)
     {
-        if (isset($this->file['tmp_name'])) {
+        if (! isset($this->file['tmp_name'])) {
             return false;
         }
 
         $save_name = $this->file['tmp_name'];
+
         if (is_string($filename)) {
             $save_name = $filename;
         }
+
         if (! is_dir($to)) {
-            throw new UploadFileException('Le dossier de sauvegarde n\'existe pas!');
+            throw new \Exception\UploadFileException('Le dossier de sauvegarde n\'existe pas!');
         }
-        return (bool) move_uploaded_file($save_name, $to);
+
+        $resolve = rtrim($to, '/').'/'.$save_name;
+        return (bool) move_uploaded_file($this->file['tmp_name'], $resolve);
     }
 }
