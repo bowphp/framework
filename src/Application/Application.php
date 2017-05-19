@@ -175,6 +175,7 @@ class Application
         call_user_func_array($cb, [$this]);
 
         $this->branch = '';
+        $this->globaleFirewall = [];
 
         return $this;
     }
@@ -371,7 +372,7 @@ class Application
         $path = $this->config->getApproot() . $this->branch . $path;
 
         // Ajout d'un nouvelle route sur l'en definie.
-        if ($this->globaleFirewall !== null) {
+        if (! empty($this->globaleFirewall)) {
             if (is_array($cb)) {
                 if (isset($cb['firewall'])) {
                     if (! is_array($cb['firewall'])) {
@@ -383,7 +384,7 @@ class Application
                     $cb['firewall'] = $this->globaleFirewall;
                 }
             } else {
-                $cb = ['firewall' => $this->globaleFirewall, 'call' => $cb];
+                $cb = ['firewall' => $this->globaleFirewall, 'uses' => $cb];
             }
         }
 

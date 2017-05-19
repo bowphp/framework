@@ -43,7 +43,7 @@ class Actionner
 
         if (is_string($actions)) {
             $function = static::controller($actions);
-            return call_user_func_array($function['controller'], array_merge($param, $function['injections']));
+            return call_user_func_array($function['controller'], array_merge($function['injections'], $param));
         }
 
         if (! is_array($actions)) {
