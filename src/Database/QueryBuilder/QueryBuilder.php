@@ -78,11 +78,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     private $order = null;
 
     /**
-     * @var QueryBuilder
-     */
-    protected static $instance;
-
-    /**
      * @var \PDO
      */
     private $connection;
@@ -112,9 +107,6 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $this->primaryKey = $primaryKey;
         $this->table = $table;
     }
-
-    // Vérrou sur la methode magic __clone
-    private function __clone() {}
 
     /**
      * select, ajout de champ à séléction.
@@ -171,7 +163,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             throw new QueryBuilderException('Valeur de comparaison non définir', E_ERROR);
         }
 
-        if (!in_array(Str::lower($boolean), ['and', 'or'])) {
+        if (! in_array(Str::lower($boolean), ['and', 'or'])) {
             throw new QueryBuilderException('Le booléen '. $boolean . ' non accepté', E_ERROR);
         }
 
@@ -393,17 +385,17 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         if (is_null($this->join)) {
             $this->join = 'left join `'.$QueryBuilder.'`';
-        } else {
-            if (!preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
-                $this->join .= ', `'.$QueryBuilder.'`';
-            } else {
-                throw new QueryBuilderException('La clause inner join est dèja initalisé.', E_ERROR);
-            }
+            return $this;
         }
 
-        return $this;
+        if (! preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
+            $this->join .= ', `'.$QueryBuilder.'`';
+            return $this;
+        }
+
+        throw new QueryBuilderException('La clause inner join est dèja initalisé.', E_ERROR);
     }
-    
+
     /**
      * Action first, récupère le première enregistrement
      *
@@ -434,14 +426,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         if (is_null($this->join)) {
             $this->join = 'right join `'.$QueryBuilder.'`';
-        } else {
-            if (!preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
-                $this->join .= ', `'.$QueryBuilder.'`';
-            } else {
-                throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
-            }
+            return $this;
         }
-        return $this;
+
+        if (! preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
+            $this->join .= ', `'.$QueryBuilder.'`';
+            return $this;
+        }
+
+        throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
+
     }
 
     /**
@@ -462,7 +456,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
-        if (!$this->isComporaisonOperator($comp)) {
+        if (! $this->isComporaisonOperator($comp)) {
             $column2 = $comp;
         }
 
@@ -491,17 +485,16 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
-        if (!$this->isComporaisonOperator($comp)) {
+        if (! $this->isComporaisonOperator($comp)) {
             $value = $comp;
         }
 
         if (preg_match('/on/i', $this->join)) {
             $this->join .= ' or `'.$column.'` '.$comp.' '.$value;
-        } else {
-            throw new QueryBuilderException('La clause <b>on</b> n\'est pas initialisé.', E_ERROR);
+            return $this;
         }
 
-        return $this;
+        throw new QueryBuilderException('La clause <b>on</b> n\'est pas initialisé.', E_ERROR);
     }
 
     /**
@@ -552,12 +545,14 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public function orderBy($column, $type = 'asc')
     {
         if (is_null($this->order)) {
-            if (!in_array($type, ['asc', 'desc'])) {
-                $type = 'asc';
-            }
-
-            $this->order = 'order by `'.$column.'` '.$type;
+            return $this;
         }
+
+        if (!in_array($type, ['asc', 'desc'])) {
+            $type = 'asc';
+        }
+
+        $this->order = 'order by `'.$column.'` '.$type;
 
         return $this;
     }
@@ -861,7 +856,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $sql = 'update `' . $this->table . '` set ';
         $sql .= Util::rangeField(Util::add2points(array_keys($data)));
 
-        if (!is_null($this->where)) {
+        if (! is_null($this->where)) {
             $sql .= ' where ' . $this->where;
             $this->where = null;
             $data = array_merge($data, $this->whereDataBinding);
@@ -986,7 +981,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * Action truncate, vide la QueryBuilder
      *
-     * @return mixed
+     * @return bool
      */
     public function truncate()
     {
@@ -1194,35 +1189,35 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         // Ajout de la clause join
-        if (!is_null($this->join)) {
+        if (! is_null($this->join)) {
             $sql .= ' join ' . $this->join;
             $this->join = null;
         }
 
         // Ajout de la clause where
-        if (!is_null($this->where)) {
+        if (! is_null($this->where)) {
             $sql .= ' where ' . $this->where;
             $this->where = null;
         }
 
         // Ajout de la clause order
-        if (!is_null($this->order)) {
+        if (! is_null($this->order)) {
             $sql .= ' ' . $this->order;
             $this->order = null;
         }
 
         // Ajout de la clause limit
-        if (!is_null($this->limit)) {
+        if (! is_null($this->limit)) {
             $sql .= ' limit ' . $this->limit;
             $this->limit = null;
         }
 
         // Ajout de la clause group
-        if (!is_null($this->group)) {
+        if (! is_null($this->group)) {
             $sql .= ' group by ' . $this->group;
             $this->group = null;
 
-            if (!is_null($this->havin)) {
+            if (! is_null($this->havin)) {
                 $sql .= ' having ' . $this->havin;
             }
         }
