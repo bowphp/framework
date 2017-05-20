@@ -1134,12 +1134,17 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @return bool
      * @throws QueryBuilderException
      */
-    public function exists($column, $value = null)
+    public function exists($column = null, $value = null)
     {
+        if ($value == null && $value == null) {
+            return $this->count() > 0 ? true : false;
+        }
+
         if ($value == null) {
             $value = $column;
             $column = $this->primaryKey;
         }
+
         return $this->where($column, $value)->count() > 0 ? true : false;
     }
 

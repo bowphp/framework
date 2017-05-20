@@ -326,7 +326,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $value
      * @return bool
      */
-    public static function exists($column, $value)
+    public static function exists($column = null, $value = null)
     {
         return self::query()->exists($column, $value);
     }
