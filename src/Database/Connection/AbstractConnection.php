@@ -98,4 +98,14 @@ abstract class AbstractConnection extends DBUtility
     {
         return isset($this->config['prefix']) ? $this->config['prefix'] : '';
     }
+
+    /**
+     * Permet de récupérer le type d'encodage
+     *
+     * @return mixed|string
+     */
+    public function getCharset()
+    {
+        return isset($this->config['charset']) ? $this->config['charset'] : 'utf8';
+    }
 }
