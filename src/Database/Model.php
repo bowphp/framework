@@ -340,6 +340,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * @param $limit
+     * @return QueryBuilder
+     */
+    public static function take($limit)
+    {
+        return self::query()->take($limit);
+    }
+
+    /**
      * Permet d'initialiser la connection
      *
      * @return void
@@ -611,27 +620,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __call($method, $arguments)
     {
-        if (method_exists(self::$builder, $method)) {
-            return call_user_func_array([self::$builder, $method], $arguments);
-        }
-
-        throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);
-    }
-
-    /**
-     * Facade, implementation de la fonction magic __callStatic de PHP
-     *
-     * @param string $method Le nom de la method a appelé
-     * @param array $arguments  Les arguments a passé à la fonction
-     * @return \Bow\Database\QueryBuilder\QueryBuilder|array
-     * @throws ModelException
-     */
-    public static function __callStatic($method, $arguments)
-    {
-        $static = new static();
-
-        if (method_exists($static::$builder, $method)) {
-            return call_user_func_array([$static::$builder, $method], $arguments);
+        if (method_exists(self::query(), $method)) {
+            return call_user_func_array([self::query(), $method], $arguments);
         }
 
         throw new \BadMethodCallException('methode ' . $method . ' n\'est définie.', E_ERROR);

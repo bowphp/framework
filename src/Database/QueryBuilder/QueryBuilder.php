@@ -889,7 +889,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     {
         $sql = 'delete from `' . $this->table . '`';
 
-        if (!is_null($this->where)) {
+        if (! is_null($this->where)) {
             $sql .= ' where ' . $this->where;
             $this->where = null;
         }
