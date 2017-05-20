@@ -159,13 +159,16 @@ class Database
     public static function select($sqlstatement, array $data = [])
     {
         static::verifyConnection();
-        if (preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
-            $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
-            static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
-            $pdostatement->execute();
-            return new Collection(Security::sanitaze($pdostatement->fetchAll()));
+
+        if (! preg_match("/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i", $sqlstatement)) {
+            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
-        return null;
+
+        $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+        static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
+        $pdostatement->execute();
+
+        return new Collection(Security::sanitaze($pdostatement->fetchAll()));
     }
 
     /**
@@ -178,14 +181,16 @@ class Database
     public static function selectOne($sqlstatement, array $data = [])
     {
         static::verifyConnection();
-        if (preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
-            $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
-            static::$adapter->bind($pdostatement, $data);
-            $pdostatement->execute();
-            return Security::sanitaze($pdostatement->fetch());
+
+        if (! preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
+            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
-        return null;
+        $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+        static::$adapter->bind($pdostatement, $data);
+        $pdostatement->execute();
+
+        return Security::sanitaze($pdostatement->fetch());
     }
 
     /**
@@ -200,8 +205,9 @@ class Database
         static::verifyConnection();
 
         if (! preg_match("/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i", $sqlstatement)) {
-            return null;
+            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
+
         if (empty($data)) {
             $pdoStement = static::$adapter->getConnection()->prepare($sqlstatement);
             $pdoStement->execute();
@@ -235,9 +241,11 @@ class Database
     public static function statement($sqlstatement)
     {
         static::verifyConnection();
+
         if (! preg_match("/^((drop|alter|create)\s+table|truncate|call)(\s+)?(.+?);?$/i", $sqlstatement)) {
-            return false;
+            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
+
         return static::$adapter->getConnection()->exec($sqlstatement) === 0;
     }
 
@@ -252,11 +260,11 @@ class Database
     {
         static::verifyConnection();
 
-        if (preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i", $sqlstatement)) {
-            return static::executePrepareQuery($sqlstatement, $data);
+        if (! preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i", $sqlstatement)) {
+            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
-        return false;
+        return static::executePrepareQuery($sqlstatement, $data);
     }
 
     /**
@@ -282,9 +290,11 @@ class Database
     public static function startTransaction(callable $callback = null)
     {
         static::verifyConnection();
+
         if (! static::$adapter->getConnection()->inTransaction()) {
             static::$adapter->getConnection()->beginTransaction();
         }
+
         if (is_callable($callback)) {
             call_user_func_array($callback, []);
         }
@@ -349,8 +359,10 @@ class Database
     {
         $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
         static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
+
         $pdostatement->execute();
         $r = $pdostatement->rowCount();
+
         return $r;
     }
 
