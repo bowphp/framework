@@ -14,7 +14,7 @@ use Bow\Database\QueryBuilder\QueryBuilder;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-abstract class Model implements \ArrayAccess
+abstract class Model implements \ArrayAccess, \JsonSerializable
 {
     /**
      * @var array
@@ -544,6 +544,14 @@ abstract class Model implements \ArrayAccess
      */
     public function offsetGet($offset) {
         return isset($this->attributes[$offset]) ? $this->attributes[$offset] : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    function jsonSerialize()
+    {
+        return $this->attributes;
     }
 
     /**
