@@ -32,7 +32,21 @@ class Statement
      *
      * @return null|string
      */
-    public function makeCreateTableStatement()
+    public function makeSqliteCreateTableStatement()
+    {
+        if (($statement = $this->makeSqlStatement()) !== null) {
+            return "CREATE TABLE `" . $this->columns->getTableName() . "` ($statement) DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";
+        }
+
+        return null;
+    }
+
+    /**
+     * Génère une chaine requête de type CREATE
+     *
+     * @return null|string
+     */
+    public function makeMysqlCreateTableStatement()
     {
         if (($statement = $this->makeSqlStatement()) !== null) {
             return "CREATE TABLE `" . $this->columns->getTableName() . "` ($statement) ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";

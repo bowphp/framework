@@ -40,25 +40,33 @@ class Schema
      */
     public static function create($table, Callable $cb, $displaySql = false)
     {
-        $table = Database::getConnectionAdapter()->getTablePrefix().$table;
+        $adapter = Database::getConnectionAdapter();
+        $table = $adapter->getTablePrefix().$table;
 
         $fields = new Fields($table);
         call_user_func_array($cb, [$fields]);
 
-        $sql = (new Statement($fields))->makeCreateTableStatement();
+        $charset =$adapter->getCharset();
+
+        $fields->charset($charset);
+        $statement = new Statement($fields);
+
+        if ($adapter->getName() == 'mysql') {
+            $sql = $statement->makeMysqlCreateTableStatement();
+        } else {
+            $sql = $statement->makeSqliteCreateTableStatement();
+        }
 
         if ($sql == null) {
-            die("\033[0;31mPlease check your 'up' method.\033[00m\n");
+            die("\033[0;31mSVP vérifiez votre methode 'up'.\033[00m\n");
         }
 
         if ($displaySql) {
             echo $sql . "\n";
         }
 
-        static::$data = $fields->getBindData();
-
         if (Database::statement($sql)) {
-            echo "\033[0;32m$table table created.\033[00m\n";
+            echo "\033[0;32mLa table $table a été créer.\033[00m\n";
         }
     }
 
