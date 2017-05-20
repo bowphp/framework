@@ -169,20 +169,19 @@ class Response
      *
      * @param mixed $data Les données à transformer en JSON
      * @param int 	$code Le code de la réponse HTTP
-     * @param bool 	$end  Quand est à true il termine le processus
      * @return bool
      */
-    public function json($data, $code = 200, $end = false)
+    public function json($data, $code = 200, array $headers = [])
     {
-        if (is_bool($code)) {
-            $end = $code;
-            $code = 200;
-        }
-
         $this->forceInUTF8();
         $this->addHeader('Content-Type', 'application/json; charset=UTF-8');
+
+        foreach ($headers as $key => $value) {
+            $this->addHeader($key, $value);
+        }
+
         $this->code($code);
-        return $this->send(json_encode($data), $end);
+        return $this->send(json_encode($data), false);
     }
 
     /**
