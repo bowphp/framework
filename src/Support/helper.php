@@ -1052,7 +1052,7 @@ if (! function_exists('str')) {
      * @return \Bow\Support\Str
      */
     function str() {
-        return \Bow\Support\Str::class;
+        return new \Bow\Support\Str();
     }
 }
 
@@ -1123,7 +1123,7 @@ if (! function_exists('cache')) {
     }
 }
 
-if (! function_exists('bowhash')) {
+if (! function_exists('bow_hash')) {
     /**
      * Alias sur la class Hash.
      *
@@ -1131,7 +1131,7 @@ if (! function_exists('bowhash')) {
      * @param mixed $hash_value
      * @return mixed
      */
-    function bowhash($data, $hash_value = null)
+    function bow_hash($data, $hash_value = null)
     {
         if ($hash_value !== null) {
             return \Bow\Security\Hash::check($data, $hash_value);
