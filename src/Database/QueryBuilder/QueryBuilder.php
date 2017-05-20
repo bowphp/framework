@@ -1226,13 +1226,23 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * Permet de retour le nom de la clé primaire
+     * Permet de retourner le nom de la clé primaire
      *
      * @return string
      */
     public function getPrimaryKey()
     {
         return $this->primaryKey;
+    }
+
+    /**
+     * Permet de retourner le nom de la table.
+     *
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table;
     }
 
     /**
