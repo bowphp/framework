@@ -456,7 +456,6 @@ class Application
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
         }
 
-
         if (is_callable($cb)) {
             if (call_user_func_array($cb, [$this->request])) {
                 die();
