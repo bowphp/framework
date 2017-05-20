@@ -36,8 +36,10 @@ class Bow
     public function __construct($dirname, Command $command)
     {
         if ($command->getParameter('trash')) {
-            throw new \ErrorException('Bad command. Type "php bow help" for more information"');
+            echo Color::red('Bad command. Type "php bow help" for more information"');
+            exit(1);
         }
+
         $this->dirname = $dirname;
         $this->_command = $command;
     }
@@ -58,14 +60,14 @@ class Bow
     public function call($command)
     {
         if (! method_exists($this, $command)) {
-            echo "\033[0;31mBad command.\033[00m\n";
-            $this->help();
+            echo Color::red("Bad $command command .\n");
             exit(1);
         }
 
         if (! $this->_command->getParameter('action')) {
             if ($this->_command->getParameter('target') == 'help') {
                 $this->help($command);
+                exit(0);
             }
         }
 
@@ -239,7 +241,8 @@ class Bow
     {
         $action = $this->_command->getParameter('action');
         if (! in_array($action, ['key', 'resource'])) {
-            throw new \ErrorException(sprintf(''));
+            echo Color::red("Bad $action command");
+            exit(1);
         }
 
         $this->_command->$action($this->_command->getParameter('target'));

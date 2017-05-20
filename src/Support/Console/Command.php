@@ -309,7 +309,7 @@ doc;
         Storage::append($this->dirname."/migration/.registers", "${create_at}_${model}|$class_name\n");
 
         echo "\033[0;32mmLe file de migration \033[00m[$model]\033[0;32m a été bien créer.\033[00m\n";
-        exit(0);
+        return;
     }
 
     /**
@@ -319,8 +319,16 @@ doc;
     public function resource($controller_name)
     {
         $path = preg_replace("/controller/", "", strtolower($controller_name));
+        $filename = $this->dirname."/app/Controllers/${controller_name}.php";
+
+        if (file_exists($filename)) {
+            echo Color::danger('Le controlleur existe déja');
+            exit(1);
+        }
+
         $model = ucfirst($path);
         $modelNamespace = '';
+
 
         if (static::readline("Voulez vous que je crée les vues associées?")) {
             $model = strtolower($model);
@@ -329,7 +337,7 @@ doc;
             echo "\033[0;33;7m";
             foreach(["create", "edit", "show", "index", "update", "delete"] as $value) {
                 $file = $this->dirname."/app/views/$model/$value.twig";
-                file_put_contents($file, "{# Vue '$value' du model '$model' #}");
+                file_put_contents($file, "<!-- Vue '$value' du model '$model' -->");
                 echo "$file\n";
             }
             echo "\033[00m";
@@ -724,13 +732,18 @@ VALIDATOR;
     {
         echo "\033[0;32m$message y/N\033[00m >>> ";
 
-        $input = readline();
+        $input = strtolower(trim(readline()));
+
+        if (in_array($input, ['y', 'n'])) {
+            echo Color::red('Choix invalide');
+            return false;
+        }
 
         if (strtolower($input) == "y") {
             return true;
         }
 
-        if (strtolower($input) == 'n' || $input == '') {
+        if (strtolower($input) == 'n' || strlen($input) == 0) {
             return false;
         }
 
