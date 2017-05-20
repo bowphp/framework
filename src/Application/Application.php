@@ -19,7 +19,7 @@ class Application
     /**
      * @var string
      */
-    private $version = '0.1.1';
+    private $version = '0.2.1';
 
     /**
      * @var array
@@ -639,9 +639,9 @@ class Application
                 }
             }
 
-            if (isset($controllerName['use'])) {
-                $controller = $controllerName['use'];
-                unset($controllerName['use']);
+            if (isset($controllerName['uses'])) {
+                $controller = $controllerName['uses'];
+                unset($controllerName['uses']);
             }
 
             if (isset($controllerName['ignores'])) {
