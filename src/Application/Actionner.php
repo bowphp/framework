@@ -92,25 +92,33 @@ class Actionner
             $firewalls = [$firewalls];
         }
 
-        // Collecteur de middleware
+        // Collecteur de firewall
         $firewalls_collection = [];
 
         foreach ($firewalls as $firewall) {
             if (! is_string($firewall)) {
                 continue;
             }
+
+            if (class_exists($firewall)) {
+                $firewalls_collection[] = $firewall;
+                continue;
+            }
+
             if (! array_key_exists($firewall, $names['firewalls'])) {
-                throw new RouterException($firewall . ' n\'est pas un middleware définir.', E_ERROR);
+                throw new RouterException($firewall . ' n\'est pas un firewall définir.', E_ERROR);
             }
-            // On vérifie si le middleware définie est une middleware valide.
+
+            // On vérifie si le firewall définie est une firewall valide.
             if (! class_exists($names['firewalls'][$firewall])) {
-                throw new RouterException($names['firewalls'][$firewall] . ' n\'est pas un class middleware.');
+                throw new RouterException($names['firewalls'][$firewall] . ' n\'est pas un class firewall.');
             }
+
             $firewalls_collection[] = $names['firewalls'][$firewall];
         }
 
         $next = false;
-        // Exécution du middleware
+        // Exécution du firewall
         foreach ($firewalls_collection as $firewall) {
             $injections = static::injector($firewall, 'checker');
 
@@ -148,18 +156,18 @@ class Actionner
     }
 
     /**
-     * Permet de lance un middleware
+     * Permet de lance un firewall
      *
-     * @param string $middleware
+     * @param string $firewall
      * @param array $param
-     * @param \Closure|null $callback
+     * @param callable $callback
      * @return bool
      */
-    public static function middleware($middleware, $param, \Closure $callback = null)
+    public static function firewall($firewall, $param, callable $callback = null)
     {
         $next = false;
-        $instance = new $middleware();
-        $injections = static::injector($middleware, 'checker');
+        $instance = new $firewall();
+        $injections = static::injector($firewall, 'checker');
 
         $status = call_user_func_array([$instance, 'checker'], array_merge([$injections, function () use (& $next) {
             return $next = true;
@@ -169,7 +177,7 @@ class Actionner
             $callback();
         }
 
-        return $next && $status === true;
+        return ($next && $status) === true;
     }
 
     /**
