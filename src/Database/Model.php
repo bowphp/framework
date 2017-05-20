@@ -134,6 +134,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Permet de retourner le description de la table
+     */
+    public static function describe()
+    {
+        return Database::select('desc '. self::query()->getTable());
+    }
+
+    /**
      * Récuper des informations sur la QueryBuilder ensuite les supprimes dans celle-ci
      *
      * @param mixed $id
