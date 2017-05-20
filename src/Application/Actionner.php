@@ -241,7 +241,7 @@ class Actionner
             return null;
         }
 
-        list($class, $method) = preg_split('/\.|@|#|->|/', $controllerName);
+        list($class, $method) = preg_split('/\.|@|#|->/', $controllerName);
         $class = static::$names['namespace']['controller'] . '\\' . ucfirst($class);
 
         $injections = static::injector($class, $method);
