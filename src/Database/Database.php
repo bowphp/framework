@@ -5,7 +5,6 @@ use PDO;
 use StdClass;
 use Bow\Security\Security;
 use Bow\Support\Collection;
-use InvalidArgumentException;
 use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
 use Bow\Database\QueryBuilder\QueryBuilder;
