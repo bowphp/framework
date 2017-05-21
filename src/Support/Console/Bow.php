@@ -276,24 +276,14 @@ class Bow
     }
 
     /**
-     * @param $dirname
+     * @param string $dirname
      */
     private function unlinks($dirname) {
-        $resource = opendir($dirname);
-        while ($output = readdir($resource)) {
-            if (is_dir($dirname.'/'.$output)) {
-                if (! in_array($output, ['.'])) {
-                    $this->unlinks($dirname.'/'.$output);
-                }
-            } else {
-                if (file_exists($dirname.'/'.$output)) {
-                    if ($output != '.gitkeep') {
-                        unlink($dirname.'/'.$output);
-                    }
-                }
-            }
+        $glob = glob($dirname);
+
+        foreach ($glob as $item) {
+            @unlink($item);
         }
-        closedir($resource);
     }
 
     /**
@@ -334,12 +324,12 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
  \033[0;33mhelp\033[00m display command helper
 
  \033[0;32mgenerate\033[00m create a new app key and resources
-  option:
+
    \033[0;33mgenerate:resource\033[00m  Create new REST assicate at a controller
    \033[0;33mgenerate:key\033[00m       Create new app key
 
  \033[0;32mcreate\033[00m                 Create a user class
-  option:
+
    \033[0;33mcreate:middleware\033[00m    Create new middleware
    \033[0;33mcreate:controller\033[00m    Create new controller
    \033[0;33mcreate:model\033[00m         Create new model
@@ -348,19 +338,19 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mcreate:migration\033[00m     Create a new migration
 
  \033[0;32mmigrate\033[00m apply a migration in user model
-  option:
+  option: [table_name|--all]
    \033[0;33mmigrate:down\033[00m       Drop migration
    \033[0;33mmigrate:up\033[00m         Update or create table of the migration
- 
-\033[0;32mclear\033[00m for clear cache information [not supported]
-   option:
+
+ \033[0;32mclear\033[00m for clear cache information [not supported]
+
    \033[0;33mclear:view\033[00m        Clear view cached information
    \033[0;33mclear:cache\033[00m       Clear cache information
    \033[0;33mclear:all\033[00m         Clear all cache information
    
-\033[0;32mseed\033[00m Make seeding
-   \033[0;33mseed \033[00m [table_name, --all]    Make seeding for all or one table
-   
+ \033[0;32mseed\033[00m Make seeding
+   \033[0;33mseed \033[00m [table_name]    Make seeding for all or one table
+
  \033[0;32mconsole\033[00m show psysh php REPL for debug you code.
  \033[0;32mserver\033[00m run a local web server.
 
@@ -407,10 +397,8 @@ U;
                 echo <<<U
 \n\033[0;32mmigrate\033[00m apply a migration in user model\n
     [option]
-    [--add-seed [--n-seed=n]] For create new seeder
     --create=table_name   Change name of table
     --table=table_name    Alter migration table
-    --all                 Avalable flat for down command
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:up name [option]       Up the specify migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name              Down migration
@@ -442,7 +430,7 @@ U;
             case 'seed':
                 echo <<<U
 \n\033[0;32mseed\033[00m table\n
-   option: --only=name
+   option: [name]
    
    \033[0;33mseed \033[00m [option]    Make seeding for all or one table
 U;
