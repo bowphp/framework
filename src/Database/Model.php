@@ -214,6 +214,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $static->setAttributes($data);
         $static->save();
 
+        if (emitter()->binded(strtolower(static::class).'.oncreate')) {
+            emitter()->emit(strtolower(static::class).'.oncreate');
+        }
+
         return $static;
     }
 
@@ -349,6 +353,39 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Permet d'associer listerner
+     *
+     * @param callable $cb
+     */
+    public static function deleted(callable $cb)
+    {
+        $env = str_replace('\\', '.', strtolower(static::class));
+        event($env.'.ondelete', $cb);
+    }
+
+    /**
+     * Permet d'associer un listerner
+     *
+     * @param callable $cb
+     */
+    public static function created(callable $cb)
+    {
+        $env = str_replace('\\', '.', strtolower(static::class));
+        event($env.'.oncreate', $cb);
+    }
+
+    /**
+     * Permet d'associer un listerner
+     *
+     * @param callable $cb
+     */
+    public static function updated(callable $cb)
+    {
+        $env = str_replace('\\', '.', strtolower(static::class));
+        event($env.'.onupdate', $cb);
+    }
+
+    /**
      * Permet d'initialiser la connection
      *
      * @return void
@@ -372,6 +409,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $primaryKey = $properties['primaryKey'];
         $table = DB::getConnectionAdapter()->getTablePrefix().$table;
+
         self::$builder = new QueryBuilder($table, DB::getPdo(), static::class, $primaryKey);
     }
 
@@ -420,7 +458,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
             $this->original[$this->primaryKey] = $primary_key_value;
-            return self::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
+            $r = self::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
+            $env = str_replace('\\', '.', strtolower(static::class));
+
+            if (emitter()->binded($env.'.onupdate')) {
+                emitter()->emit($env.'.onupdate');
+            }
+
+            return $r;
         }
 
         $n = self::$builder->insert($this->attributes);
@@ -436,6 +481,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $this->attributes[$this->primaryKey] = $primary_key_value;
         $this->original = $this->attributes;
+
         return $n;
     }
 
@@ -449,7 +495,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $primary_key_value = $this->getPrimaryKeyValue();
 
         if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
-            return self::$builder->where($this->primaryKey, $primary_key_value)->delete();
+            $r = self::$builder->where($this->primaryKey, $primary_key_value)->delete();
+            $env = str_replace('\\', '.', strtolower(static::class));
+
+            if (emitter()->binded($env.'.ondelete')) {
+                emitter()->emit($env.'.ondelete');
+            }
+
+            return $r;
         }
 
         return 0;
@@ -532,7 +585,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         if (is_null($offset)) {
             $this->attributes[] = $value;
         } else {
@@ -544,14 +598,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $offset
      * @return bool
      */
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return isset($this->attributes[$offset]);
     }
 
     /**
      * @param mixed $offset
      */
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         unset($this->attributes[$offset]);
     }
 
@@ -559,7 +615,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $offset
      * @return mixed|null
      */
-    public function offsetGet($offset) {
+    public function offsetGet($offset)
+    {
         return isset($this->attributes[$offset]) ? $this->attributes[$offset] : null;
     }
 
