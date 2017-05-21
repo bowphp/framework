@@ -184,6 +184,7 @@ class Cache
     public static function forget($key)
     {
         $filename = static::makeHashFilename($key);
+
         if (! file_exists($filename)) {
             return false;
         }
@@ -221,9 +222,11 @@ class Cache
     {
         static::$with_meta = true;
         $cache = static::get($key);
+
         if ($cache == null) {
             return false;
         }
+
         static::$with_meta = false;
 
         return $cache['__bow_meta']['expire_at'] == '+' ? false : (time() > $cache['__bow_meta']['expire_at']);
@@ -254,6 +257,10 @@ class Cache
      */
     public static function clear()
     {
+        $glob = glob(static::$directory);
 
+        foreach ($glob as $item) {
+            @unlink($item);
+        }
     }
 }
