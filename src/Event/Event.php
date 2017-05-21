@@ -2,9 +2,9 @@
 namespace Bow\Event;
 
 use Bow\Session\Session;
+use Bow\Support\Collection;
 use Bow\Application\Actionner;
 use Bow\Exception\EventException;
-use Bow\Support\Collection;
 
 /**
  * Class Event
@@ -54,7 +54,7 @@ class Event
      */
     public static function on($event, $fn, $priority = 0)
     {
-        if (! self::hasEvent($event)) {
+        if (! self::binded($event)) {
             self::$events[$event] = [];
         }
 
@@ -75,7 +75,7 @@ class Event
      */
     public static function emit($event)
     {
-        if (! self::hasEvent($event)) {
+        if (! self::binded($event)) {
             return false;
         }
 
@@ -83,12 +83,14 @@ class Event
         $data = array_slice(func_get_args(), 1);
 
         $listeners->each(function(Listener $listener) use ($data) {
+
             if ($listener->getActionType() === 'string') {
                 $callable = $listener->getAction();
             } else {
                 $callable = [$listener, 'call'];
             }
-            return Actionner::call($callable, [$data], [
+
+            return Actionner::call($callable, $data, [
                 'namespace' => [ 'controller' => self::$namespace ]
             ]);
         });
@@ -103,7 +105,7 @@ class Event
      */
     public static function off($event)
     {
-        if (self::hasEvent($event)) {
+        if (self::binded($event)) {
             unset(self::$events[$event]);
         }
     }
@@ -111,10 +113,10 @@ class Event
     /**
      * Permet de vérifier si un evenement est déja enregistre au moin un fois.
      *
-     * @param $event
+     * @param string $event
      * @return bool
      */
-    private function hasEvent($event)
+    public static function binded($event)
     {
         return array_key_exists($event, self::$events);
     }
@@ -128,9 +130,10 @@ class Event
      */
     public function __call($name, $arguments)
     {
-        if (method_exists(self::class, $name)) {
-            return call_user_func_array([self::class, $name], $arguments);
+        if (method_exists(self::$instance, $name)) {
+            return call_user_func_array([self::$instance, $name], $arguments);
         }
+
         throw new \RuntimeException('La methode '.$name.' n\'exists pas.');
     }
 }
