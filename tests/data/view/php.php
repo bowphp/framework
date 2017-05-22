@@ -1,1 +1,1 @@
-<p><?php echo $name; ?> see hello world</p>
+<p><?php echo isset($name) ? $name : 'bow'; ?> see hello world</p>
