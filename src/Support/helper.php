@@ -1106,6 +1106,19 @@ if (! function_exists('ftp')) {
     }
 }
 
+if (! function_exists('s3')) {
+    /**
+     * Alias sur le connection S3.
+     *
+     * @param null|array $c configuration S3
+     * @return \Bow\Resource\AWS\AwsS3Client
+     */
+    function s3($c = null)
+    {
+        return Storage::s3($c);
+    }
+}
+
 if (! function_exists('cache')) {
     /**
      * Alias sur le connection FTP.
