@@ -480,7 +480,7 @@ class Application
         // la collection de route
         if (! isset($this->routes[$method])) {
             // Vérification et appel de la fonction du branchement 404
-            $this->response->code(404);
+            $this->response->statusCode(404);
 
             if (empty($this->errorCode)) {
                 $this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
@@ -530,7 +530,7 @@ class Application
             return true;
         }
 
-        $this->response->code(404);
+        $this->response->statusCode(404);
 
         if (! in_array(404, array_keys($this->errorCode))) {
             if ($this->config->getNotFoundFilename() != false) {
@@ -542,7 +542,7 @@ class Application
             throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
         }
 
-        $this->response->code(404);
+        $this->response->statusCode(404);
         $r = call_user_func($this->errorCode[404]);
 
         return $this->response->send($r, true);
@@ -786,7 +786,7 @@ class Application
             return;
         }
 
-        $this->response->code($code);
+        $this->response->statusCode($code);
         $r = call_user_func($this->errorCode[$code]);
 
         $this->response->send($r);
