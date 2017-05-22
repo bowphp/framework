@@ -6,7 +6,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase
 {
     public function testCreateCache()
     {
-        Cache::confirgure(__DIR__.'/data/cache');
+        Cache::confirgure(__DIR__.'/data/cache/bow');
         $r = Cache::add('name', 'Dakia');
         $this->assertEquals($r, true);
     }
@@ -41,6 +41,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase
             'city' => "Abidjan",
             'country' => "Cote d'ivoire"
         ]);
+
         $this->assertEquals($r, true);
     }
 
@@ -58,6 +59,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase
     {
         $r1 = Cache::has('name');
         $r2 = Cache::has('jobs');
+
         $this->assertEquals(true, $r1);
         $this->assertEquals(false, $r2);
     }
