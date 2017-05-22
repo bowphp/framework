@@ -25,15 +25,19 @@ class Session implements CollectionAccessStatic
     /**
      * Session starteur.
      */
-    private static function start()
+    public static function start()
     {
-        if (PHP_SESSION_NONE == session_status()) {
-            session_name("SESSID");
-            if (! isset($_COOKIE["SESSID"])) {
-                session_id(hash("sha256", Security::encrypt(uniqid(microtime(false)))));
-            }
-            session_start();
+        if (PHP_SESSION_ACTIVE != session_status()) {
+            return true;
         }
+
+        session_name("BSESSID");
+
+        if (! isset($_COOKIE["SESSID"])) {
+            session_id(hash("sha256", Security::encrypt(uniqid(microtime(false)))));
+        }
+
+        return @session_start();
     }
 
     /**
@@ -48,7 +52,7 @@ class Session implements CollectionAccessStatic
         static::start();
 
         foreach($_SESSION as $key => $value) {
-            if (!in_array($key, ["__bow.flash", "__bow.old", "__bow.event.listener", "__bow.csrf", "__bow.cookie.secure"])) {
+            if (! in_array($key, ["__bow.flash", "__bow.old", "__bow.event.listener", "__bow.csrf", "__bow.cookie.secure"])) {
                 $arr[$key] = $value;
             }
         }
@@ -212,7 +216,7 @@ class Session implements CollectionAccessStatic
 
         if ($message !== null) {
             $_SESSION["__bow.flash"][$key] = $message;
-            return null;
+            return true;
         }
 
         return isset($_SESSION["__bow.flash"][$key]) ? $_SESSION["__bow.flash"][$key] : null;
