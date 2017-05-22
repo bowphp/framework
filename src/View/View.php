@@ -120,7 +120,8 @@ class View
      */
     public function cachable($cachabled)
     {
-        $this->cachabled = $cachabled;
+        static::$instance = null;
+        $this->getTemplate()->cachable($cachabled);
         return $this;
     }
 
