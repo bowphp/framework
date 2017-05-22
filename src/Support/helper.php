@@ -1,11 +1,11 @@
 <?php
 /**
- |
- |	BOW LOADER
- |	==========
- |	Définir des liens symbolique de l'ensemble des
- |	fonctions de Bow.
- |
+|
+|	BOW LOADER
+|	==========
+|	Définir des liens symbolique de l'ensemble des
+|	fonctions de Bow.
+|
  */
 
 use Bow\Mail\Mail;
@@ -1047,6 +1047,15 @@ if (! function_exists('public_path')) {
     }
 }
 
+if (! function_exists('stockage_path')) {
+    /**
+     * @return string
+     */
+    function stockage_path() {
+        return config()->getDefaultStoragePath();
+    }
+}
+
 if (! function_exists('str')) {
     /**
      * @return \Bow\Support\Str
@@ -1093,14 +1102,24 @@ if (! function_exists('e')) {
     }
 }
 
+if (! function_exists('form')) {
+    /**
+     * @return \Bow\Http\Form
+     */
+    function form()
+    {
+        return \Bow\Http\Form::singleton();
+    }
+}
+
 if (! function_exists('ftp')) {
     /**
      * Alias sur le connection FTP.
      *
-     * @param null|array $c configuration FTP
+     * @param array $c configuration FTP
      * @return \Bow\Resource\Ftp\FTP
      */
-    function ftp($c = null)
+    function ftp(array $c = [])
     {
         return Storage::ftp($c);
     }
@@ -1110,10 +1129,10 @@ if (! function_exists('s3')) {
     /**
      * Alias sur le connection S3.
      *
-     * @param null|array $c configuration S3
+     * @param array $c configuration S3
      * @return \Bow\Resource\AWS\AwsS3Client
      */
-    function s3($c = null)
+    function s3(array $c = [])
     {
         return Storage::s3($c);
     }
@@ -1132,6 +1151,7 @@ if (! function_exists('cache')) {
         if ($key !== null && $value === null) {
             return Cache::get($key);
         }
+
         return Cache::add($key, $value);
     }
 }
@@ -1163,9 +1183,11 @@ if (! function_exists('faker')) {
     function faker($type)
     {
         $params = array_slice(func_get_args(), 1);
+
         if (method_exists(\Bow\Support\Faker::class, $type)) {
             return call_user_func_array([\Bow\Support\Faker::class, $type], $params);
         }
+
         return null;
     }
 }

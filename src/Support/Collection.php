@@ -220,6 +220,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
         foreach ($this->storage as $key => $value) {
             call_user_func_array($cb, [$value, $key]);
         }
+
         return $this;
     }
 
@@ -414,6 +415,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     public function excepts(array $except)
     {
         $data = [];
+
         $this->recursive($this->storage, function($value, $key) use (& $data, $except) {
             if (in_array($key, $except)) {
                 $data[$key] = $value;
@@ -433,6 +435,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     public function ignores(array $ignores)
     {
         $data = [];
+
         $this->recursive($this->storage, function($value, $key) use (& $data, $ignores) {
             if (! in_array($key, $ignores)) {
                 $data[$key] = $value;
@@ -465,6 +468,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
         if (! $this->has($key)) {
             return false;
         }
+
         if (! is_array($this->storage[$key]) || $overide === true) {
             $this->storage[$key] = $data;
             return true;
@@ -578,6 +582,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
         } else {
             $this->storage[$key] = $value;
         }
+
         return $this;
     }
 
