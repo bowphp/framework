@@ -1,6 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
+use Bow\Http\Form;
 use Bow\Session\Session;
 use Bow\Support\Str;
 use Bow\Security\Security;
@@ -22,11 +23,13 @@ class TwigEngine extends EngineAbstract
 
     /**
      * TwigEngine constructor.
+     * @param Configuration $config
      */
     public function __construct(Configuration $config)
     {
         $this->config = $config;
         $loader = new \Twig_Loader_Filesystem($config->getViewpath());
+
         $this->template = new \Twig_Environment($loader, [
             'cache' => $config->getCachepath().'/view',
             'auto_reload' => $config->getCacheAutoReload(),
@@ -47,19 +50,29 @@ class TwigEngine extends EngineAbstract
         $this->template->addFunction(new \Twig_SimpleFunction('secure', function($data) {
             return Security::sanitaze($data, true);
         }));
+
         $this->template->addFunction(new \Twig_SimpleFunction('sanitaze', function($data) {
             return Security::sanitaze($data);
         }));
+
         $this->template->addFunction(new \Twig_SimpleFunction('csrf_field', function() {
             return Security::getCsrfToken()->field;
         }));
+
         $this->template->addFunction(new \Twig_SimpleFunction('csrf_token', function() {
             return Security::getCsrfToken()->token;
         }));
+
+        $this->template->addFunction(new \Twig_SimpleFunction('form', function() {
+            return Form::singleton();
+        }));
+
         $this->template->addFunction(new \Twig_SimpleFunction('trans', function($key, $data = [], $choose = null) {
             return Translator::make($key, $data, $choose);
         }));
+
         $this->template->addFunction(new \Twig_SimpleFunction('slugify', [Str::class, 'slugify']));
+
         $this->template->addFunction(new \Twig_SimpleFunction('session', function ($key = null, $value = null){
             if ($key === null && $value === null) {
                 return new Session();
@@ -75,6 +88,7 @@ class TwigEngine extends EngineAbstract
 
             return null;
         }));
+
         return $this->template;
     }
 
@@ -85,5 +99,13 @@ class TwigEngine extends EngineAbstract
     {
         $filename = $this->checkParseFile($filename);
         return $this->template->render($filename, $data);
+    }
+
+    /**
+     * @return \Twig_Environment|\Twig_Loader_Filesystem
+     */
+    public function getTemplate()
+    {
+        return $this->template;
     }
 }
