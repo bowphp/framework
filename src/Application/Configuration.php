@@ -52,7 +52,7 @@ class Configuration
             $this->approot = $this->config['application']['app_root'];
         }
 
-        if (is_file($this->config['application']['app_key'])) {
+        if (isset($this->config['application']['app_key']) && is_file($this->config['application']['app_key'])) {
             $this->app_key = file_get_contents($this->config['application']['app_key']);
         }
 
@@ -115,6 +115,17 @@ class Configuration
     {
         return $this->app_key;
     }
+
+    /**
+     * Retourne Application key
+     *
+     * @return string
+     */
+    public function getCipher()
+    {
+        return $this->config['application']['cipher'];
+    }
+
     /**
      * configure, Application key
      *
