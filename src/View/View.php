@@ -52,7 +52,9 @@ class View
         }
 
         static::$config = $config;
-        static::$template = new static::$container[static::$config->getTemplateEngine()]($config);
+        static::$template = new static::$container[
+            static::$config->getTemplateEngine()
+        ]($config);
     }
 
     /**
@@ -116,13 +118,10 @@ class View
 
     /**
      * @param $cachabled
-     * @return View
      */
     public function cachable($cachabled)
     {
-        static::$instance = null;
-        $this->getTemplate()->cachable($cachabled);
-        return $this;
+        $this->cachabled = $cachabled;
     }
 
     /**

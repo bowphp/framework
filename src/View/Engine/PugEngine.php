@@ -29,12 +29,9 @@ class PugEngine extends EngineAbstract
         $pug_config = [
             'basedir' => $config->getViewpath(),
             'prettyprint' => true,
-            'extension' => $config->getTemplateExtension()
+            'extension' => $config->getTemplateExtension(),
+            'cache' => $config->getCachepath().'/view'
         ];
-
-        if ($this->isCachable()) {
-            $pug_config['cache'] = $config->getCachepath().'/view';
-        }
 
         $this->template = new Pug($pug_config);
     }

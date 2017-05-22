@@ -63,7 +63,7 @@ class MustacheEngine extends EngineAbstract
         ];
 
         $this->template = new \Mustache_Engine([
-            'cache' => $this->isCachable() == true ? $config->getCachepath().'/view' : null,
+            'cache' => $config->getCachepath().'/view',
             'loader' => $loader,
             'partials_loader' => $partial_loader,
             'helpers' => $helpers

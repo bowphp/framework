@@ -39,7 +39,7 @@ class PHPEngine extends EngineAbstract
         extract($data);
         ob_start();
 
-        if ($this->isCachable() && file_exists($cache_hash_filename)) {
+        if (file_exists($cache_hash_filename)) {
             if (filemtime($cache_hash_filename) >= fileatime($filename)) {
                 require $cache_hash_filename;
                 return ob_get_clean();
@@ -49,13 +49,11 @@ class PHPEngine extends EngineAbstract
         require $filename;
         $data = ob_get_clean();
 
-        if ($this->isCachable()) {
-            // Mise en cache
-            file_put_contents(
-                $cache_hash_filename,
-                file_get_contents($filename)
-            );
-        }
+        // Mise en cache
+        file_put_contents(
+            $cache_hash_filename,
+            file_get_contents($filename)
+        );
 
         return $data;
     }

@@ -24,21 +24,17 @@ class TwigEngine extends EngineAbstract
     /**
      * TwigEngine constructor.
      * @param Configuration $config
-     * @param bool $cached
      */
-    public function __construct(Configuration $config, $cached = true)
+    public function __construct(Configuration $config)
     {
         $this->config = $config;
         $loader = new \Twig_Loader_Filesystem($config->getViewpath());
 
         $env = [
             'auto_reload' => $config->getCacheAutoReload(),
-            'debug' => true
+            'debug' => true,
+            'cache' => $config->getCachepath().'/view'
         ];
-
-        if ($cached) {
-            $env['cache'] = $config->getCachepath().'/view';
-        }
 
         $this->template = new \Twig_Environment($loader, $env);
 
