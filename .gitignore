@@ -3,3 +3,4 @@
 vendor/
 tests/data/*
 composer.lock
+!tests/data/view
