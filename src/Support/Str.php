@@ -260,8 +260,10 @@ class Str
      */
     public static function isMail($email)
     {
-        if (!is_string($email)) {
-            throw new \ErrorException('accept string ' . gettype($email) . ' given');
+        $parts = explode('@', $email);
+
+        if (! is_string($email) || count($parts) != 2) {
+            return false;
         }
 
         return preg_match('/^[a-zA-Z0-9-_.]+@[a-z0-9-_.]{2,}\.[a-z]{2,6}$/', $email);
