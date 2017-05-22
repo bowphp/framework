@@ -1,6 +1,8 @@
 <?php
 namespace Bow\Resource;
 
+use Bow\Resource\Ftp\FTP;
+use Bow\Resource\AWS\AwsS3Client;
 use Bow\Exception\ResourceException;
 
 /**
@@ -17,9 +19,14 @@ class Storage
     private static $config;
 
     /**
-     * @var Ftp\FTP
+     * @var FTP
      */
     private static $ftp;
+
+    /**
+     * @var AwsS3Client
+     */
+    private static $s3;
 
     /**
      * UploadFile, fonction permettant de uploader un fichier
@@ -34,12 +41,12 @@ class Storage
      */
     public static function store($file, $location, $size, array $extension, callable $cb)
     {
-        if (!is_uploaded_file($file['tmp_name'])) {
+        if (! is_uploaded_file($file['tmp_name'])) {
             return call_user_func_array($cb, ['error']);
         }
 
         if (is_string($size)) {
-            if (!preg_match('/^([0-9]+)(k|m)$/', strtolower($size), $match)) {
+            if (! preg_match('/^([0-9]+)(k|m)$/', strtolower($size), $match)) {
                 throw new \InvalidArgumentException('Taille invalide.', E_USER_ERROR);
             }
 
@@ -57,7 +64,7 @@ class Storage
             return call_user_func_array($cb, ['size']);
         }
 
-        if (!in_array(pathinfo($file['name'], PATHINFO_EXTENSION), $extension, true)) {
+        if (! in_array(pathinfo($file['name'], PATHINFO_EXTENSION), $extension, true)) {
             return call_user_func_array($cb, ['extension']);
         }
 
@@ -283,36 +290,54 @@ class Storage
      * Lance la connection au ftp.
      *
      * @param array $config
-     * @return Ftp\FTP
+     * @return FTP
      */
     public static function ftp($config = null)
     {
-        if (static::$ftp == null) {
-            if ($config == null) {
-                $config = static::$config;
-            } else {
-                static::$config = $config;
-            }
+        if (static::$ftp instanceof FTP) {
+            return static::$ftp;
+        }
 
-            if (!isset($config['tls'])) {
-                $config['tls'] = false;
-            }
+        if ($config == null) {
+            $config = static::$config['ftp'];
+        }
 
-            if (!isset($config['timeout'])) {
-                $config['timeout'] = 90;
-            }
+        if (! isset($config['tls'])) {
+            $config['tls'] = false;
+        }
 
-            static::$ftp = new Ftp\FTP();
-            static::$ftp->connect($config['hostname'], $config['username'], $config['password'], $config['port'], $config['tls'], $config['timeout']);
+        if (!isset($config['timeout'])) {
+            $config['timeout'] = 90;
+        }
 
-            if (isset($config['root'])) {
-                if ($config['root'] !== null) {
-                    static::$ftp->chdir($config['root']);
-                }
+        static::$ftp = new FTP();
+        static::$ftp->connect($config['hostname'], $config['username'], $config['password'], $config['port'], $config['tls'], $config['timeout']);
+
+        if (isset($config['root'])) {
+            if ($config['root'] !== null) {
+                static::$ftp->chdir($config['root']);
             }
         }
 
         return static::$ftp;
+    }
+
+    /**
+     * @param array $config
+     * @return AwsS3Client
+     */
+    public static function s3(array $config = [])
+    {
+        if (static::$s3 instanceof AwsS3Client) {
+            return static::$s3;
+        }
+
+        if (empty($config)) {
+            $config = static::$config['s3'];
+        }
+
+        static::$s3 = new AwsS3Client($config);
+        return static::$s3;
     }
 
     /**

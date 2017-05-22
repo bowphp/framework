@@ -120,7 +120,7 @@ class FTP
     /**
      * Liste le contenu de dossier distant.
      *
-     * @param array $dirname
+     * @param string $dirname
      * @return array
      */
     public function listDirectory($dirname)
@@ -131,7 +131,7 @@ class FTP
     /**
      * Liste le contenu de dossier distant de façon brute.
      *
-     * @param array $dirname
+     * @param string $dirname
      * @return array
      */
     public function rawListDirectory($dirname)
@@ -158,6 +158,15 @@ class FTP
     }
 
     /**
+     * @param string $dirname
+     * @return bool
+     */
+    public function chdir($dirname)
+    {
+        return ftp_chdir($this->ftp, $dirname);
+    }
+
+    /**
      * Lecteur de contenu de TMp
      *
      * @return null|string
@@ -178,7 +187,7 @@ class FTP
      */
     public function __call($method, array $arguments)
     {
-        if (!function_exists('ftp_' . $method)) {
+        if (! function_exists('ftp_' . $method)) {
             throw new \ErrorException('La methode ' . $method . ' est inconnu.', E_USER_ERROR);
         }
 
