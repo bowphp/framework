@@ -81,19 +81,21 @@ class Translator
 
         $translation_contents = $translation_contents[$map[1]];
 
-        if (is_string($translation_contents)) {
-            if ($choose !== null) {
-                list($single, $pluriel) = explode('|', $translation_filename);
-                if ($choose > 1 && is_string($pluriel)) {
-                    $translation_contents = $pluriel;
-                } else {
-                    $translation_contents = $single;
-                }
-            }
-            return static::format($translation_contents, $data);
+        if (! is_string($translation_contents)) {
+            return $translation;
         }
 
-        return $translation_contents;
+        if (is_int($choose)) {
+            list($single, $pluriel) = explode('|', $translation_filename);
+
+            if ($choose > 1 && is_string($pluriel)) {
+                $translation_contents = $pluriel;
+            } else {
+                $translation_contents = $single;
+            }
+        }
+
+        return static::format($translation_contents, $data);
     }
 
     /**
@@ -108,6 +110,7 @@ class Translator
         foreach ($values as $key => $value) {
             $str = str_replace(':'.$key, $value, $str);
         }
+
         return $str;
     }
 }
