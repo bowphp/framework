@@ -102,12 +102,13 @@ class Smtp implements Send
         }
 
         foreach($message->getTo() as $value) {
-            $to = '';
+
             if ($value[0] !== null) {
-                $to .= $value[0] . '<' . $value[1] . '>';
+                $to = $value[0] . '<' . $value[1] . '>';
             } else {
-                $to .= '<' . $value[1] . '>';
+                $to = '<' . $value[1] . '>';
             }
+
             $this->write('RCPT TO: ' . $to, 250);
         }
 
