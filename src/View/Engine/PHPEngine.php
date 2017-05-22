@@ -13,11 +13,6 @@ class PHPEngine extends EngineAbstract
     protected $name = 'php';
 
     /**
-     * @var Configuration
-     */
-    private $config;
-
-    /**
      * PHPEngine constructor.
      * @param Configuration $config
      */
@@ -31,16 +26,37 @@ class PHPEngine extends EngineAbstract
      */
     public function render($filename, array $data = [])
     {
+        $hash_filename = $filename;
         $filename = $this->checkParseFile($filename);
 
         if ($this->config->getViewpath() !== null) {
             $filename = $this->config->getViewpath() . '/' . $filename;
         }
 
+        $cache_hash_filename = '_PHP_'.hash('sha256', $hash_filename).'.php';
+        $cache_hash_filename = $this->config->getCachepath().'/view/'.$cache_hash_filename;
+
+        extract($data);
         ob_start();
 
-        require $filename;
+        if ($this->isCachable() && file_exists($cache_hash_filename)) {
+            if (filemtime($cache_hash_filename) >= fileatime($filename)) {
+                require $cache_hash_filename;
+                return ob_get_clean();
+            }
+        }
 
-        return ob_get_clean();
+        require $filename;
+        $data = ob_get_clean();
+
+        if ($this->isCachable()) {
+            // Mise en cache
+            file_put_contents(
+                $cache_hash_filename,
+                file_get_contents($filename)
+            );
+        }
+
+        return $data;
     }
 }

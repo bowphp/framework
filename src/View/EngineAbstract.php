@@ -17,6 +17,11 @@ abstract class EngineAbstract
     protected $config;
 
     /**
+     * @var bool
+     */
+    protected $cachabled = true;
+
+    /**
      * Permet de transforme le code du temple en code html
      *
      * @param string $filename
@@ -39,11 +44,11 @@ abstract class EngineAbstract
         // Vérification de l'existance du fichier
         if ($this->config->getViewpath() !== null) {
             if (! file_exists($this->config->getViewpath() . '/' . $filename)) {
-                throw new ViewException('La vue ['.$filename.'] n\'exist pas. ' . $this->config->getViewpath() . '/' . $filename, E_ERROR);
+                throw new ViewException('La vue ['.$filename.'] n\'existe pas. ' . $this->config->getViewpath() . '/' . $filename, E_ERROR);
             }
         } else {
             if (! file_exists($filename)) {
-                throw new ViewException('La vue ['.$filename.'] n\'exist pas!.', E_ERROR);
+                throw new ViewException('La vue ['.$filename.'] n\'existe pas!.', E_ERROR);
             }
         }
 
@@ -58,5 +63,21 @@ abstract class EngineAbstract
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @param $cachabled
+     */
+    public function cachable($cachabled)
+    {
+        $this->cachabled = $cachabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCachable()
+    {
+        return $this->cachabled === true;
     }
 }

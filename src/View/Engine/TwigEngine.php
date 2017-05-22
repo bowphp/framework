@@ -24,24 +24,30 @@ class TwigEngine extends EngineAbstract
     /**
      * TwigEngine constructor.
      * @param Configuration $config
+     * @param bool $cached
      */
-    public function __construct(Configuration $config)
+    public function __construct(Configuration $config, $cached = true)
     {
         $this->config = $config;
         $loader = new \Twig_Loader_Filesystem($config->getViewpath());
 
-        $this->template = new \Twig_Environment($loader, [
-            'cache' => $config->getCachepath().'/view',
+        $env = [
             'auto_reload' => $config->getCacheAutoReload(),
-            'debug' => $config->getLoggerMode() == 'develepment' ? true : false
-        ]);
+            'debug' => true
+        ];
+
+        if ($cached) {
+            $env['cache'] = $config->getCachepath().'/view';
+        }
+
+        $this->template = new \Twig_Environment($loader, $env);
 
         /**
          * - Ajout de variable globale
          * dans le cadre de l'utilisation de Twig
          */
-        $this->template->addGlobal('public', $config->getPublicPath());
-        $this->template->addGlobal('root', $config->getApproot());
+        $this->template->addGlobal('_public', $config->getPublicPath());
+        $this->template->addGlobal('_root', $config->getApproot());
 
         /**
          * - Ajout de fonction global
@@ -98,6 +104,7 @@ class TwigEngine extends EngineAbstract
     public function render($filename, array $data = [])
     {
         $filename = $this->checkParseFile($filename);
+
         return $this->template->render($filename, $data);
     }
 

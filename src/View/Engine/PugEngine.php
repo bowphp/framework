@@ -25,12 +25,18 @@ class PugEngine extends EngineAbstract
     public function __construct(Configuration $config)
     {
         $this->config = $config;
-        $this->template = new Pug([
+
+        $pug_config = [
             'basedir' => $config->getViewpath(),
-            'cache' => $config->getCachepath().'/view',
             'prettyprint' => true,
             'extension' => $config->getTemplateExtension()
-        ]);
+        ];
+
+        if ($this->isCachable()) {
+            $pug_config['cache'] = $config->getCachepath().'/view';
+        }
+
+        $this->template = new Pug($pug_config);
     }
 
     /**
@@ -39,6 +45,10 @@ class PugEngine extends EngineAbstract
     public function render($filename, array $data = [])
     {
         $filename = $this->checkParseFile($filename);
-        return $this->template->render($this->config->getViewpath().'/'.$filename, $data);
+
+        return $this->template->render(
+            $this->config->getViewpath().'/'.$filename,
+            $data
+        );
     }
 }

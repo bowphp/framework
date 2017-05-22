@@ -1,8 +1,8 @@
 <?php
 namespace Bow\View;
 
-use Bow\Application\Configuration;
 use Bow\Exception\ViewException;
+use Bow\Application\Configuration;
 
 class View
 {
@@ -22,13 +22,18 @@ class View
     private static $template;
 
     /**
+     * @var bool
+     */
+    private $cachabled = true;
+
+    /**
      * @var array
      */
     private static $container = [
-        'twig' => \Bow\View\Engine\TwigEngine::class,
-        'php' => \Bow\View\Engine\PHPEngine::class,
-        'mustache' => \Bow\View\Engine\MustacheEngine::class,
-        'pug' => \Bow\View\Engine\PugEngine::class
+        'twig' => Engine\TwigEngine::class,
+        'php' => Engine\PHPEngine::class,
+        'mustache' => Engine\MustacheEngine::class,
+        'pug' => Engine\PugEngine::class
     ];
 
     /**
@@ -65,9 +70,9 @@ class View
      *
      * @return View
      */
-    public static function instance()
+    public static function singleton()
     {
-        if (static::$instance === null) {
+        if (! static::$instance instanceof View) {
             static::$instance = new self(self::$config);
         }
 
@@ -79,14 +84,12 @@ class View
      *
      * @param string $viewname
      * @param array $data
-     * @param int $code
      * @return string
      * @throws ViewException
      */
-    public static function make($viewname, array $data = [], $code = 200)
+    public static function make($viewname, array $data = [])
     {
-        static::instance();
-        return static::$instance->getTemplate()->render($viewname, $data);
+        return static::singleton()->getTemplate()->render($viewname, $data);
     }
 
     /**
@@ -100,10 +103,36 @@ class View
     }
 
     /**
-     * @return string
+     * @param string $engine
+     * @return View
      */
-    public function __toString()
+    public function setEngine($engine)
     {
-        return static::make('');
+        static::$instance = null;
+        static::$config->setTemplateEngine($engine);
+
+        return $this;
+    }
+
+    /**
+     * @param $cachabled
+     * @return View
+     */
+    public function cachable($cachabled)
+    {
+        $this->cachabled = $cachabled;
+        return $this;
+    }
+
+    /**
+     * @param string $extension
+     * @return View
+     */
+    public function setExtension($extension)
+    {
+        static::$instance = null;
+        static::$config->setTemplateExtension($extension);
+
+        return $this;
     }
 }
