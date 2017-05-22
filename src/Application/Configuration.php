@@ -25,17 +25,7 @@ class Configuration
     /**
      * @var string
      */
-    private $public = "";
-
-    /**
-     * @var string
-     */
-    private $template_extension = ".php";
-
-    /**
-     * @var string
-     */
-    private $app_key = "Eda4W+AyMDE2LTAyLTE2IDIwOjM2OjE0";
+    private $public = '';
 
     /**
      * @var array
@@ -54,20 +44,20 @@ class Configuration
          */
         $this->config = $config;
 
-        if (! isset($this->config["application"])) {
+        if (! isset($this->config['application'])) {
             return;
         }
 
-        if (isset($this->config["application"]->app_root)) {
-            $this->approot = $this->config["application"]->app_root;
+        if (isset($this->config['application']['app_root'])) {
+            $this->approot = $this->config['application']['app_root'];
         }
 
-        if (is_file($this->config["application"]->app_key)) {
-            $this->app_key = file_get_contents($this->config["application"]->app_key);
+        if (is_file($this->config['application']['app_key'])) {
+            $this->app_key = file_get_contents($this->config['application']['app_key']);
         }
 
-        if (isset($this->config["application"]->timezone)) {
-            DateAccess::setTimezone($this->config["application"]->timezone);
+        if (isset($this->config['application']['timezone'])) {
+            DateAccess::setTimezone($this->config['application']['timezone']);
         }
     }
 
@@ -139,7 +129,7 @@ class Configuration
         $old = $this->app_key;
 
         if (!is_string($key)) {
-            throw new ApplicationException("Le paramètre doit être une chaine de caractère.", E_USER_ERROR);
+            throw new ApplicationException('Le paramètre doit être une chaine de caractère.', E_USER_ERROR);
         }
 
         $this->app_key = $key;
@@ -180,20 +170,14 @@ class Configuration
      * @param string $newAppName
      *
      * @throws ApplicationException
-     *
-     * @return string
      */
     public function setAppname($newAppName)
     {
-        $old = $newAppName;
-
-        if (!is_string($newAppName)) {
-            throw new ApplicationException("Le parametre doit etre une chaine de carrectere.", E_USER_ERROR);
+        if (! is_string($newAppName)) {
+            throw new ApplicationException('Le parametre doit etre une chaine de carrectere.', E_USER_ERROR);
         }
 
-        $this->config["application"]->app_name = $newAppName;
-
-        return $old;
+        $this->config['application']['app_name'] = $newAppName;
     }
 
     /**
@@ -203,7 +187,7 @@ class Configuration
      */
     public function getAppname()
     {
-        return $this->config["application"]->app_name;
+        return $this->config['application']->app_name;
     }
 
     /**
@@ -217,13 +201,13 @@ class Configuration
      */
     public function setViewpath($viewPath)
     {
-        $old = $this->config["application"]->views_path;
+        $old = $this->config['application']['views_path'];
 
         if (!realpath($viewPath)) {
-            throw new ApplicationException("Ce chemin n'est pas valide.", E_USER_ERROR);
+            throw new ApplicationException('Ce chemin n\'est pas valide.', E_USER_ERROR);
         }
 
-        $this->config["application"]->views_path = $viewPath;
+        $this->config['application']['views_path'] = $viewPath;
 
         return $old;
     }
@@ -235,7 +219,7 @@ class Configuration
      */
     public function getViewpath()
     {
-        return rtrim($this->config["application"]->views_path, '/');
+        return rtrim($this->config['application']['views_path'], '/');
     }
 
     /**
@@ -243,11 +227,11 @@ class Configuration
      */
     public function getNotFoundFilename()
     {
-        if (! isset($this->config['application']->not_found_file_name)) {
+        if (! isset($this->config['application']['not_found_file_name'])) {
             return false;
         }
 
-        return $this->config['application']->not_found_file_name;
+        return $this->config['application']['not_found_file_name'];
     }
 
     /**
@@ -261,13 +245,13 @@ class Configuration
      */
     public function setCachepath($newCachePath)
     {
-        $old = $this->config["application"]->template_cache_folder;
+        $old = $this->config['application']['template_cache_folder'];
 
         if (!realpath($newCachePath)) {
-            throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
+            throw new ApplicationException('Ce chemin n\'est valide.', E_USER_ERROR);
         }
 
-        $this->config["application"]->template_cache_folder = $newCachePath;
+        $this->config['application']['template_cache_folder'] = $newCachePath;
 
         return $old;
     }
@@ -279,7 +263,7 @@ class Configuration
      */
     public function getCachepath()
     {
-        return $this->config["application"]->template_cache_folder;
+        return $this->config['application']['template_cache_folder'];
     }
 
     /**
@@ -293,13 +277,13 @@ class Configuration
      */
     public function setLoggerPath($new_log_path)
     {
-        $old = $this->config["application"]->log_directory_name;
+        $old = $this->config['application']['log_directory_name'];
 
         if (! realpath($new_log_path)) {
-            throw new ApplicationException("Ce chemin n'est valide.", E_USER_ERROR);
+            throw new ApplicationException('Ce chemin n\'est valide.', E_USER_ERROR);
         }
 
-        $this->config["application"]->log_directory_name = $new_log_path;
+        $this->config['application']['log_directory_name'] = $new_log_path;
 
         return $old;
     }
@@ -311,41 +295,7 @@ class Configuration
      */
     public function getLoggerPath()
     {
-        return $this->config["application"]->log_directory_name;
-    }
-
-    /**
-     * Modifie le niveau de log
-     * Deux valeur possible development | production
-     *
-     * @param string $log
-     *
-     * @throws ApplicationException
-     *
-     * @return string
-     */
-    public function setLoggerMode($log)
-    {
-        $old = $this->config["application"]->debug;
-
-        if (!in_array($log, ["development", "production"])) {
-            throw new ApplicationException("$log n'est pas accepte. <i>development|production</i>", E_USER_ERROR);
-        }
-
-        $this->config["application"]->debug = $log;
-
-        return $old;
-    }
-
-    /**
-     * Retoure de niveau du log
-     * Deux valeur possible development | production
-     *
-     * @return string
-     */
-    public function getLoggerMode()
-    {
-        return $this->config["application"]->debug;
+        return $this->config['application']['log_directory_name'];
     }
 
     /**
@@ -355,7 +305,7 @@ class Configuration
      */
     public function getTimezone()
     {
-        return $this->config["application"]->timezone;
+        return $this->config['application']['timezone'];
     }
 
     /**
@@ -365,7 +315,7 @@ class Configuration
      */
     public function getNamespace()
     {
-        return $this->config["application"]->classes;
+        return $this->config['application']['classes'];
     }
 
     /**
@@ -375,7 +325,7 @@ class Configuration
      */
     public function getTemplateEngine()
     {
-        return $this->config["application"]->template_engine;
+        return $this->config['application']['template_engine'];
     }
 
     /**
@@ -386,7 +336,7 @@ class Configuration
      */
     public function setTemplateEngine($engine)
     {
-        return $this->config["application"]->template_engine = $engine;
+        return $this->config['application']['template_engine'] = $engine;
     }
 
     /**
@@ -422,8 +372,8 @@ class Configuration
      */
     public function getPublicPath()
     {
-        if (isset($this->config["application"]->static_files_directory)) {
-            return $this->config["application"]->static_files_directory;
+        if (isset($this->config['application']['static_files_directory'])) {
+            return $this->config['application']['static_files_directory'];
         }
 
         return $this->public;
@@ -437,9 +387,9 @@ class Configuration
      */
     public function setPublicPath($public)
     {
-        if (isset($this->config["application"]->static_files_directory)) {
-            $old = $this->config["application"]->static_files_directory;
-            $this->$this->config["application"]->static_files_directory = $public;
+        if (isset($this->config['application']['static_files_directory'])) {
+            $old = $this->config['application']['static_files_directory'];
+            $this->$this->config['application']['static_files_directory'] = $public;
         } else {
             $old = $this->public;
             $this->public = $public;
@@ -457,10 +407,10 @@ class Configuration
      */
     public function setTemplateExtension($extension)
     {
-        $old = $this->config["application"]->template_extension;
+        $old = $this->config['application']['template_extension'];
 
         if (is_string($extension)) {
-            $this->config["application"]->template_extension = $extension;
+            $this->config['application']['template_extension'] = $extension;
         }
 
         return $old;
@@ -473,7 +423,7 @@ class Configuration
      */
     public function getTemplateExtension()
     {
-        return $this->config["application"]->template_extension;
+        return $this->config['application']['template_extension'];
     }
 
     /**
@@ -481,7 +431,7 @@ class Configuration
      */
     public function getCacheAutoReload()
     {
-        return $this->config["application"]->template_auto_reload_cache_views;
+        return $this->config['application']['template_auto_reload_cache_views'];
     }
 
     /**
@@ -491,7 +441,7 @@ class Configuration
      */
     public function getDatabaseConfiguration()
     {
-        return $this->config["database"];
+        return $this->config['database'];
     }
 
     /**
@@ -501,7 +451,7 @@ class Configuration
      */
     public function getMailConfiguration()
     {
-        return $this->config["mail"];
+        return $this->config['mail'];
     }
 
     /**
@@ -511,7 +461,7 @@ class Configuration
      */
     public function getDefaultLang()
     {
-        return $this->config["application"]->lang;
+        return $this->config['application']['lang'];
     }
 
     /**
@@ -522,7 +472,7 @@ class Configuration
      */
     public function setDefaultLang($lang)
     {
-        return $this->config["application"]->lang = $lang;
+        return $this->config['application']['lang'] = $lang;
     }
 
     /**
@@ -532,7 +482,7 @@ class Configuration
      */
     public function getTranslateDirectory()
     {
-        return $this->config["application"]->translate_directory;
+        return $this->config['application']['translate_directory'];
     }
 
     /**
@@ -542,7 +492,7 @@ class Configuration
      */
     public function getDefaultStoragePath()
     {
-        return $this->config["resource"]['storage'];
+        return $this->config['resource']['storage'];
     }
 
     /**
@@ -552,7 +502,7 @@ class Configuration
      */
     public function getResourceConfiguration()
     {
-        return $this->config["resource"];
+        return $this->config['resource'];
     }
 
     /**
@@ -562,7 +512,7 @@ class Configuration
      */
     public function getFtpConfiguration()
     {
-        return $this->config["resource"]['ftp'];
+        return $this->config['resource']['ftp'];
     }
 
     /**
@@ -577,12 +527,12 @@ class Configuration
      */
     public function setMailDriver($driver) {
 
-        if (! in_array($driver, ["mail", "smtp"])) {
-            throw new ApplicationException("$driver n'est valide", E_ERROR);
+        if (! in_array($driver, ['mail', 'smtp'])) {
+            throw new ApplicationException('$driver n\'est valide', E_ERROR);
         }
 
-        $old = $this->config["mail"]->driver;
-        $this->config["mail"]->driver = $driver;
+        $old = $this->config['mail']['driver'];
+        $this->config['mail']['driver'] = $driver;
 
         return $old;
     }

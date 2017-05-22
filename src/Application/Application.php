@@ -121,11 +121,9 @@ class Application
         $this->request = $request;
         $this->response = $response;
 
-        if ($config->getDisplayHtmlLog()) {
-            $logger = new Logger($config->getLoggerMode(), $config->getLoggerPath() . '/error.log');
-            $logger->register();
-            $this->logger = $logger;
-        }
+        $logger = new Logger(app_env('MODE'), $config->getLoggerPath() . '/error.log');
+        $logger->register();
+        $this->logger = $logger;
     }
 
     /**
