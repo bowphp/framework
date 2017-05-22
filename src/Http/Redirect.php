@@ -63,7 +63,7 @@ class Redirect
      */
     public function to404()
     {
-        Response::instance()->code(404);
+        Response::instance()->statusCode(404);
 
         return $this;
     }
@@ -75,7 +75,7 @@ class Redirect
      */
     public function back(array $data = [])
     {
-        $referer = Request::instance()->referer();
+        $referer = Request::singleton()->referer();
 
         $this->to($referer, $data);
     }

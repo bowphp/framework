@@ -151,7 +151,7 @@ class Response
      * @param bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a 'true'
      * @return mixed
      */
-    public function code($code, $override = false)
+    public function statusCode($code, $override = false)
     {
         $r = true;
 
@@ -169,6 +169,7 @@ class Response
      *
      * @param mixed $data Les données à transformer en JSON
      * @param int 	$code Le code de la réponse HTTP
+     * @param array $headers
      * @return bool
      */
     public function json($data, $code = 200, array $headers = [])
@@ -180,7 +181,7 @@ class Response
             $this->addHeader($key, $value);
         }
 
-        $this->code($code);
+        $this->statusCode($code);
         return $this->send(json_encode($data), false);
     }
 

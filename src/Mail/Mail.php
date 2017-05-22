@@ -3,6 +3,7 @@ namespace Bow\Mail;
 
 use Bow\Exception\MailException;
 use Bow\Http\Response;
+use Bow\View\View;
 
 /**
  * Class Mail
@@ -86,9 +87,7 @@ class Mail
         $message = new Message();
         call_user_func_array($cb, [$message]);
 
-        ob_start();
-        Response::takeInstance()->view($view, $bind, null);
-        $data = ob_get_clean();
+        $data = View::make($view, $bind);
 
         $message->setMessage($data);
         return self::$instance->send($message);
@@ -101,7 +100,7 @@ class Mail
      * @param string $subject L'objet du mail
      * @param string $data Le message du meail
      * @param array  $headers [optinal] Les entêtes additionnel du mail.
-     * @return SimpleMail|Smtp
+     * @return mixed
      */
     public static function raw($to, $subject, $data, array $headers = [])
     {
@@ -129,7 +128,7 @@ class Mail
             throw new MailException('Mail non configurer.');
         }
 
-        static::$config->driver = $driver;
+        static::$config['driver'] = $driver;
         return static::configure(static::$config);
     }
 

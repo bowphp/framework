@@ -128,7 +128,7 @@ if (! function_exists('response')) {
         }
 
         set_header('Content-Type', $type);
-        set_response_code($code);
+        status_code($code);
         query_response('send', [$template]);
 
         return \Bow\Http\Response::instance();
@@ -194,7 +194,7 @@ if (! function_exists('view')) {
             $code = $data;
             $data = [];
         }
-        response()->code($code);
+        response()->statusCode($code);
         return Bow\View\View::make($template, $data);
     }
 }
@@ -555,15 +555,15 @@ if (! function_exists('download')) {
     }
 }
 
-if (! function_exists('set_response_code')) {
+if (! function_exists('status_code')) {
     /**
      * statuscode, permet de changer le code de la reponse du server
      *
      * @param int $code=200
      * @return mixed
      */
-    function set_response_code($code) {
-        return response()->code($code);
+    function status_code($code) {
+        return response()->statusCode($code);
     }
 }
 
@@ -1227,7 +1227,7 @@ if (! function_exists('abort')) {
      */
     function abort($code)
     {
-        response()->code($code);
+        response()->statusCode($code);
         die();
     }
 }

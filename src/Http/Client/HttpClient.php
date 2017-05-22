@@ -15,6 +15,7 @@ class HttpClient
 
     /**
      * Constructeur d'instance.
+     * @param string $url
      */
     public function __construct($url = null)
     {
@@ -79,6 +80,10 @@ class HttpClient
         return new Parser($this->ch);
     }
 
+    /**
+     * @param $attach
+     * @return $this
+     */
     public function addAttach($attach)
     {
         return $this;

@@ -65,6 +65,7 @@ class Actionner
                     array_push($functions, $action);
                     continue;
                 }
+
                 if (is_string($action)) {
                     array_push($functions, static::controller($action));
                     continue;
@@ -77,6 +78,7 @@ class Actionner
                     array_push($functions, static::controller($controller));
                     continue;
                 }
+
                 foreach($action['call'] as $method) {
                     $controller = $action['with'].'@'.$method;
                     array_push($functions,  static::controller($controller));
@@ -152,6 +154,7 @@ class Actionner
                 );
             }
         }
+
         return $status;
     }
 
@@ -159,19 +162,24 @@ class Actionner
      * Permet de lance un firewall
      *
      * @param string $firewall
-     * @param array $param
      * @param callable $callback
      * @return bool
      */
-    public static function firewall($firewall, $param, callable $callback = null)
+    public static function firewall($firewall, callable $callback = null)
     {
         $next = false;
-        $instance = new $firewall();
-        $injections = static::injector($firewall, 'checker');
+        $injections = [];
 
-        $status = call_user_func_array([$instance, 'checker'], array_merge([$injections, function () use (& $next) {
+        if (is_string($firewall) && class_exists($firewall)) {
+            $instance = [new $firewall(), 'checker'];
+            $injections = static::injector($firewall, 'checker');
+        } else {
+            $instance = $firewall;
+        }
+
+        $status = call_user_func_array($instance, array_merge([$injections, function () use (& $next) {
             return $next = true;
-        }], $param));
+        }]));
 
         if (is_callable($callback)) {
             $callback();
@@ -191,17 +199,26 @@ class Actionner
     {
         $params = [];
         $reflection = new \ReflectionClass($classname);
-        $parts = preg_split('/(\n|\*)+/', $reflection->getMethod($method)->getDocComment());
+
+        $parts = preg_split(
+            '/(\n|\*)+/',
+            $reflection->getMethod($method)->getDocComment()
+        );
+
         foreach ($parts as $value) {
-            if (preg_match('/^@param\s+(.+)\s+\$/', trim($value), $match)) {
-                $class = trim($match[1]);
-                if (class_exists($class, true)) {
-                    if (! in_array(strtolower($class), ['string', 'array', 'bool', 'int', 'integer', 'double', 'float', 'callable', 'object', 'stdclass', '\closure', 'closure'])) {
-                        $params[] = new $class();
-                    }
+            if (! preg_match('/^@param\s+(.+)\s+\$/', trim($value), $match)) {
+                continue;
+            }
+
+            $class = trim($match[1]);
+
+            if (class_exists($class, true)) {
+                if (! in_array(strtolower($class), ['string', 'array', 'bool', 'int', 'integer', 'double', 'float', 'callable', 'object', 'stdclass', '\closure', 'closure'])) {
+                    $params[] = new $class();
                 }
             }
         }
+
         return $params;
     }
 

@@ -185,7 +185,7 @@ class Message
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function compileHeaders()
     {
@@ -268,10 +268,12 @@ class Message
      */
     private function type($data, $type)
     {
-        if (!$this->message) {
+        if (! $this->message) {
             $this->type = $type;
             $this->message = $data;
         }
+
+        return $this;
     }
 
     /**

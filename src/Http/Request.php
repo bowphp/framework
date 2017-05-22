@@ -39,14 +39,14 @@ class Request
     {
         static::$params = new \stdClass();
         static::$input = new Input();
-        Session::add('bow.old', static::$input->all());
+        Session::add('__bow.old', static::$input->all());
     }
 
     /**
      * Singletion loader
      * @return null|self
      */
-    public static function instance()
+    public static function singleton()
     {
         if (self::$instance === null) {
             self::$instance = new self();

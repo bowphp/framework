@@ -153,7 +153,7 @@ class Cache
 
         $cache['__bow_meta']['expire_at'] += $time;
 
-        return (bool) file_put_contents(static::makeHashFilename($key), serialize($cache));;
+        return (bool) file_put_contents(static::makeHashFilename($key), serialize($cache));
     }
 
     /**
