@@ -15,30 +15,43 @@ class ViewTest extends \PHPUnit\Framework\TestCase
     {
         View::configure($this->config());
         View::singleton()->cachable(false);
-        $resultat = View::make('twig', ['name' => 'bow']);
-        $this->assertEquals(trim($resultat), '<p>bow see hello world</p>');
+
+        $resultat = View::make('twig', ['name' => 'bow', 'engine' => 'twig']);
+        $this->assertEquals(trim($resultat), '<p>bow see hello world by twig</p>');
     }
 
     public function testMustacheCompilation()
     {
-        View::singleton()->cachable(false)->setEngine('mustache')->setExtension('.tpl');
+        View::singleton()->setEngine('mustache')->setExtension('.tpl')->cachable(false);
 
-        $resultat = View::make('mustache', ['name' => 'bow']);
-        $this->assertEquals(trim($resultat), '<p>bow see hello world</p>');
+        $resultat = View::make('mustache', ['name' => 'bow', 'engine' => 'mustache']);
+        $this->assertEquals(trim($resultat), '<p>bow see hello world by mustache</p>');
     }
 
     public function testPugCompilation()
     {
-        View::singleton()->cachable(false)->setEngine('pug')->setExtension('.pug');
-        $resultat = View::make('pug', ['name' => 'bow']);
-        $this->assertEquals(trim($resultat), '<p>bow see hello world</p>');
-        @unlink(__DIR__.'/data/cache/view/CeCm7UI4pbH_339llpkuqpiQxwVYQ7Bqr7lMdJJXWY05Z0ED7b0K5WbtH_9lgYvqRDhrm2DDAKcKD3hcOXxYYg.php');
+        View::singleton()->setEngine('pug')->setExtension('.pug')->cachable(false);
+
+        $resultat = View::make('pug', ['name' => 'bow', 'engine' => 'pug']);
+        $this->assertEquals(trim($resultat), '<p>bow see hello world by pug</p>');
     }
 
     public function testPHPCompilation()
     {
-        View::singleton()->cachable(false)->setEngine('php')->setExtension('.php');
-        $resultat = View::make('php', ['name' => 'bow']);
-        $this->assertEquals(trim($resultat), '<p>bow see hello world</p>');
+        View::singleton()->setEngine('php')->setExtension('.php')->cachable(false);
+        $resultat = View::make('php', ['name' => 'bow', 'engine' => 'php']);
+        $this->assertEquals(trim($resultat), '<p>bow see hello world by php</p>');
+    }
+
+    public function __destruct()
+    {
+        foreach (glob(__DIR__.'/data/cache/view/*.php') as $value) {
+            @unlink($value);
+        }
+
+        foreach (glob(__DIR__.'/data/cache/view/*/*.php') as $value) {
+            @unlink($value);
+            @rmdir(dirname($value));
+        }
     }
 }

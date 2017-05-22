@@ -19,7 +19,6 @@ class EventTest extends \PHPUnit\Framework\TestCase
     {
         Event::emit('user.created', 'created');
     }
-
     
     public function testEventEmit2()
     {
