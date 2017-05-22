@@ -449,6 +449,11 @@ class Application
             return true;
         }
 
+        if (app_env('MODE') == 'down') {
+            abort(503);
+            return true;
+        }
+
         // Ajout de l'entête X-Powered-By
         if (!$this->disableXpoweredBy) {
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
