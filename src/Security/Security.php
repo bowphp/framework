@@ -20,38 +20,49 @@ class Security
     /**
      * @var string
      */
-    private static $key = "";
+    private static $key;
 
     /**
      * @var null
      */
-    private static $iv = null;
+    private static $iv;
+
+    /**
+     * @var string
+     */
+    private static $cipher = 'AES-256-CBC';
 
     /**
      * setKey modifie la clé de cryptage
      *
      * @param string $key
+     * @param string $cipher
      */
-    public static function setkey($key)
+    public static function setkey($key, $cipher = null)
     {
         static::$key = $key;
+
+        if ($cipher) {
+            static::$cipher = $cipher;
+        }
     }
 
     /**
      * Les attaques de types xss
      *
      * @param array $verifyData
-     * @param array $enableData
+     * @param array $enableKeys
      *
      * @return bool
      */
-    public static function verifiySideBySide($verifyData, $enableData)
+    public static function verifiySideBySide($verifyData, $enableKeys)
     {
         $error = false;
 
         foreach ($verifyData as $key => $value) {
-            if (!in_array($key, $enableData)) {
+            if (! in_array($key, $enableKeys)) {
                 $error = true;
+                break;
             }
         }
 
@@ -249,11 +260,7 @@ class Security
      */
     public static function encrypt($data)
     {
-        $iv_size = @mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
-        static::$iv = @mcrypt_create_iv($iv_size, MCRYPT_RAND);
-        $encrypted_data = @mcrypt_encrypt(MCRYPT_BLOWFISH, static::$key, $data, MCRYPT_MODE_CBC, static::$iv);
-
-        return base64_encode($encrypted_data . static::$iv);
+        return base64_encode($data);
     }
 
     /**
@@ -265,13 +272,6 @@ class Security
      */
     public static function decrypt($encrypted_data)
     {
-        $iv_size = @mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
-        $encrypted_data = base64_decode($encrypted_data);
-        $start = strlen($encrypted_data) - $iv_size;
-        $iv = substr($encrypted_data, $start, $iv_size);
-        $encrypted_data = substr($encrypted_data, 0, $start);
-        $decrypted_data = @mcrypt_decrypt(MCRYPT_BLOWFISH, static::$key, $encrypted_data, MCRYPT_MODE_CBC, $iv);
-
-        return static::sanitaze(trim($decrypted_data));
+        return static::sanitaze(base64_decode(trim($encrypted_data)));
     }
 }
