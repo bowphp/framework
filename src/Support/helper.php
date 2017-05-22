@@ -1186,6 +1186,17 @@ if (! function_exists('app_env')) {
     }
 }
 
+if (! function_exists('abort')) {
+    /**
+     * @param int $code
+     */
+    function abort($code)
+    {
+        response()->code($code);
+        die();
+    }
+}
+
 if (! function_exists('app_mode')) {
     /**
      * @return string

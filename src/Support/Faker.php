@@ -123,11 +123,17 @@ class Faker
     }
 
     /**
+     * @param bool $negation
      * @return float
      */
-    public static function float()
+    public static function float($negation = false)
     {
         $a = rand(1, 100) . "." . rand(1, 100);
+
+        if ($negation) {
+            $a = '-'.$a;
+        }
+
         return (float) $a;
     }
 

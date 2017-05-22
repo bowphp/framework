@@ -63,8 +63,31 @@ class Event
         uasort(self::$events[$event], function (Listener $a, Listener $b) {
             return $a->getPriority() < $b->getPriority();
         });
+    }
 
-        // Session::add("bow.event.listener", self::$events);
+    /**
+     * @param string $event
+     * @param callable|array|string $fn
+     * @param int $priority
+     */
+    public static function once($event, $fn, $priority = 0)
+    {
+
+    }
+
+    /**
+     * @param string $event
+     * @param array|string $fn
+     * @param int $priority
+     */
+    public static function onTransmission($event, $fn, $priority = 0)
+    {
+        if (! self::binded($event)) {
+            self::$events[$event] = [];
+        }
+
+        self::$events[$event][] = new Listener($fn, $priority);
+        Session::add("__bow.event.listener", self::$events);
     }
 
     /**
@@ -90,7 +113,7 @@ class Event
                 $callable = [$listener, 'call'];
             }
 
-            return Actionner::call($callable, $data, [
+            return Actionner::call($callable, [$data], [
                 'namespace' => [ 'controller' => self::$namespace ]
             ]);
         });

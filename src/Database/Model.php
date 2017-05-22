@@ -4,7 +4,6 @@ namespace Bow\Database;
 use Carbon\Carbon;
 use Bow\Support\Collection;
 use Bow\Database\Database as DB;
-use Bow\Exception\ModelException;
 use Bow\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder\QueryBuilder;
 
@@ -19,7 +18,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * @var array
      */
-    protected $descriptions = [];
+    protected $describeOrder = [];
 
     /**
      * @var bool
@@ -29,7 +28,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * @var bool
      */
-    protected $autoincrement = true;
+    protected $autoIncrement = true;
 
     /**
      * @var array
@@ -104,7 +103,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function first()
     {
-        return self::query()->take(1)->getOne();
+        return self::query()->take(1)->first();
     }
 
     /**
@@ -153,6 +152,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $data = static::find($id, $select);
         self::$builder->delete();
+
         return $data;
     }
 
@@ -179,7 +179,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             if (is_callable($callable)) {
                 return $callable();
             }
-            throw new QueryBuilderException('Aucune donnée trouver.', E_WARNING);
+
+            abort(404);
         }
 
         return $data;
@@ -201,7 +202,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         if (! array_key_exists($static->primaryKey, $data)) {
-            if ($static->autoincrement) {
+            if ($static->autoIncrement) {
                 $id_value = [$static->primaryKey => null];
                 $data = array_merge($id_value, $data);
             } else {
@@ -213,10 +214,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $static->setAttributes($data);
         $static->save();
-
-        if (emitter()->binded(strtolower(static::class).'.oncreate')) {
-            emitter()->emit(strtolower(static::class).'.oncreate');
-        }
 
         return $static;
     }
@@ -360,7 +357,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function deleted(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-        event($env.'.ondelete', $cb);
+
+        if (! emitter()->binded($env.'.ondelete')) {
+            event($env.'.ondelete', $cb);
+        }
     }
 
     /**
@@ -371,7 +371,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function created(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-        event($env.'.oncreate', $cb);
+
+        if (! emitter()->binded($env.'.oncreated')) {
+            event($env . '.oncreate', $cb);
+        }
     }
 
     /**
@@ -382,7 +385,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function updated(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-        event($env.'.onupdate', $cb);
+
+        if (! emitter()->binded($env.'.onupdate')) {
+            event($env.'.onupdate', $cb);
+        }
     }
 
     /**
@@ -434,39 +440,29 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * save aliase sur l'action insert
      *
-     * @param array $values Les données a inserer dans la base de donnée.
      * @return int
      * @throws QueryBuilderException
      */
-    public function save(array $values = [])
+    public function save()
     {
-        if (empty($this->attributes)) {
-            if (! empty($values)) {
-                if (! empty($this->descriptions)) {
-                    foreach ($this->descriptions as $description) {
-                        $this->attributes[$description] = $values[$description];
-                    }
-                } else {
-                    $this->attributes = $values;
-                }
-            }
-
-            return self::$builder->insert($this->attributes);
-        }
-
         $primary_key_value = $this->getPrimaryKeyValue();
 
-        if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
-            $this->original[$this->primaryKey] = $primary_key_value;
-            $r = self::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
-            $env = str_replace('\\', '.', strtolower(static::class));
+        if ($primary_key_value != null) {
+            if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
 
-            if (emitter()->binded($env.'.onupdate')) {
-                emitter()->emit($env.'.onupdate');
+                $this->original[$this->primaryKey] = $primary_key_value;
+                $r = self::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
+
+                $env = str_replace('\\', '.', strtolower(static::class));
+
+                if (emitter()->binded($env.'.onupdate')) {
+                    emitter()->emit($env.'.onupdate');
+                }
+
+                return $r;
             }
-
-            return $r;
         }
+
 
         $n = self::$builder->insert($this->attributes);
         $primary_key_value = self::$builder->getLastInsertId();
@@ -482,6 +478,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->attributes[$this->primaryKey] = $primary_key_value;
         $this->original = $this->attributes;
 
+        if (emitter()->binded(strtolower(static::class).'.oncreate')) {
+            emitter()->emit(strtolower(static::class).'.oncreate');
+        }
+
         return $n;
     }
 
@@ -494,18 +494,22 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $primary_key_value = $this->getPrimaryKeyValue();
 
-        if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
-            $r = self::$builder->where($this->primaryKey, $primary_key_value)->delete();
-            $env = str_replace('\\', '.', strtolower(static::class));
-
-            if (emitter()->binded($env.'.ondelete')) {
-                emitter()->emit($env.'.ondelete');
-            }
-
-            return $r;
+        if ($primary_key_value == null) {
+            return 0;
         }
 
-        return 0;
+        if (! self::$builder->exists($this->primaryKey, $primary_key_value)) {
+            return 0;
+        }
+
+        $r = self::$builder->where($this->primaryKey, $primary_key_value)->delete();
+        $env = str_replace('\\', '.', strtolower(static::class));
+
+        if ($r !== 0 && emitter()->binded($env.'.ondelete')) {
+            emitter()->emit($env.'.ondelete');
+        }
+
+        return $r;
     }
 
     /**
@@ -515,12 +519,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function touch()
     {
-        if ($this->timestamps) {
-            $this->updated_at = date('Y-m-d H:i:s');
-            return (bool) $this->save();
+        if (! $this->timestamps) {
+            return false;
         }
 
-        return false;
+        $this->setAttribute('updated_at', date('Y-m-d H:i:s'));
+        return (bool) $this->save();
     }
 
     /**
@@ -531,6 +535,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function setAttributes(array $data)
     {
         $this->attributes = $data;
+    }
+
+    /**
+     * Permet d'Assigner une valeur
+     *
+     * @param string $key
+     * @param array $data
+     */
+    public function setAttribute($key, $data)
+    {
+        $this->attributes[$key] = $data;
     }
 
     /**
