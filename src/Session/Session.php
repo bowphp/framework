@@ -27,7 +27,7 @@ class Session implements CollectionAccessStatic
      */
     public static function start()
     {
-        if (PHP_SESSION_ACTIVE != session_status()) {
+        if (PHP_SESSION_ACTIVE == session_status()) {
             return true;
         }
 
