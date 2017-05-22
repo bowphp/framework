@@ -170,9 +170,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $this->whereDataBinding[$column] = $value;
 
         if ($this->where == null) {
-            $this->where = $column . ' ' . $comp . ' :' . $column;
+            $this->where = '('. $column . ' ' . $comp . ' :' . $column . ')';
         } else {
-            $this->where .= ' ' . $boolean .' '. $column . ' '. $comp .' :'. $column;
+            $this->where .= ' ' . $boolean . ' ('. $column . ' '. $comp .' :'. $column. ')';
         }
 
         return $this;
@@ -195,9 +195,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             throw new QueryBuilderException('Cette fonction ne peut pas être utiliser sans un where avant.', E_ERROR);
         }
 
-        $this->where($column, $comp, $value, 'or');
-
-        return $this;
+        return $this->where($column, $comp, $value, 'or');
     }
 
     /**
@@ -212,10 +210,10 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      */
     public function whereNull($column, $boolean = 'and')
     {
-        if (!is_null($this->where)) {
-            $this->where = '`' . $column . '` is null';
+        if (is_null($this->where)) {
+            $this->where = '(`' . $column . '` is null)';
         } else {
-            $this->where = ' ' . $boolean .' `' . $column .'` is null';
+            $this->where .= ' ' . $boolean .' (`' . $column .'` is null)';
         }
 
         return $this;
@@ -234,9 +232,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public function whereNotNull($column, $boolean = 'and')
     {
         if (is_null($this->where)) {
-            $this->where = '`'. $column . '` is not null';
+            $this->where = '(`'. $column . '` is not null)';
         } else {
-            $this->where .= ' ' . $boolean .' `' . $column .'` is not null';
+            $this->where .= ' ' . $boolean .' (`' . $column .'` is not null)';
         }
 
         return $this;
@@ -266,15 +264,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
-                $this->where = '`' . $column.'` not between ' . $between;
+                $this->where = '(`' . $column.'` not between ' . $between . ')';
             } else {
-                $this->where = '`' . $column . '` between ' . $between;
+                $this->where = '(`' . $column . '` between ' . $between . ')';
             }
         } else {
             if ($boolean == 'not') {
-                $this->where .= ' and `'.$column .'`  not between ' . $between;
+                $this->where .= ' and (`'.$column .'` not between ' . $between . ')';
             } else {
-                $this->where .= ' ' . $boolean . ' `' . $column. '` between ' . $between;
+                $this->where .= ' ' . $boolean . ' (`' . $column. '` between ' . $between . ')';
             }
         }
 
@@ -322,15 +320,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
-                $this->where = '`' . $column . '` not in ('.$in.')';
+                $this->where = '(`' . $column . '` not in ('.$in.'))';
             } else {
-                $this->where = '`' . $column .'` in ('.$in.')';
+                $this->where = '(`' . $column .'` in ('.$in.'))';
             }
         } else {
             if ($boolean == 'not') {
-                $this->where .= ' and `' . $column . '` not in ('.$in.')';
+                $this->where .= ' and (`' . $column . '` not in ('.$in.'))';
             } else {
-                $this->where .= ' and `'.$column.'` in ('.$in.')';
+                $this->where .= ' and (`'.$column.'` in ('.$in.'))';
             }
         }
 
