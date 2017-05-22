@@ -9,8 +9,6 @@ namespace Bow\Http;
  */
 class Form
 {
-    private final function __construct() {}
-    private final function __clone() {}
     private static $form = "";
 
     /**
@@ -21,29 +19,65 @@ class Form
     private static $with = [];
 
     /**
+     * @var Form
+     */
+    private static $instance;
+
+    /**
+     * @return Form
+     */
+    public static function singleton()
+    {
+        if (! static::$instance instanceof Form) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
+    /**
      * Permet de récupérer une valeur dans la tableau $with
      *
      * @param $key
+     * @param $default
      * @return string
      */
-    private static function getAssociateValue($key)
+    private static function getAssociateValue($key, $default = '')
     {
-        return isset(static::$with[$key]) ? static::$with[$key] : '';
+        return isset(static::$with[$key]) ? static::$with[$key] : $default;
+    }
+
+    /**
+     * Permet de récupérer une valeur dans la tableau $with
+     *
+     * @param array $attributes
+     * @return string
+     */
+    private static function formatAttributes($attributes)
+    {
+        $attr = '';
+
+        foreach ($attributes as $key => $attribute) {
+            $attr .= $key .'="'.$attribute.'" ';
+        }
+
+        return trim($attr);
     }
 
     /**
      * Ajout le tag <input type="text">
      *
      * @param string $name
-     * @param string $value=""
-     * @param string $placeholder=null
+     * @param string $value
+     * @param array $attributes
      *
      * @return void
      */
-    public static function text($name, $value = "", $placeholder = null)
+    public static function text($name, $value = "", $attributes = [])
     {
-        $value = static::getAssociateValue($name);
-        self::$form .= "<input type=\"text\" value=\"{$value}\" name=\"{$name}\" ".(is_string($placeholder) ? 'placeholder="' . $placeholder . '"' : '')."/>";
+        $value = static::getAssociateValue($name, $value);
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<input type=\"text\" value=\"{$value}\" name=\"{$name}\" ".$attributes."/>";
     }
 
     /**
@@ -51,14 +85,15 @@ class Form
      *
      * @param string $name
      * @param string $value=""
-     * @param string $placeholder=null
+     * @param array $attributes
      *
      * @return void
      */
-    public static function password($name, $value = "", $placeholder = null)
+    public static function password($name, $value = "", $attributes = [])
     {
-        $value = static::getAssociateValue($name);
-        self::$form .= "<input type=\"password\" name=\"{$name}\" value=\"{$value}\" ".(is_string($placeholder) ? 'placeholder="' . $placeholder . '"' : '')."/>";
+        $value = static::getAssociateValue($name, $value);
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<input type=\"password\" name=\"{$name}\" value=\"{$value}\" ".$attributes."/>";
     }
 
 
@@ -67,52 +102,73 @@ class Form
      *
      * @param string $name
      * @param string $value=""
-     * @param string $placeholder=null
+     * @param array $attributes
      *
      * @return void
      */
-    public static function hidden($name, $value = "", $placeholder = null)
+    public static function hidden($name, $value = "", $attributes = [])
     {
-        $value = static::getAssociateValue($name);
-        self::$form .= "<input type=\"hidden\" value=\"{$value}\" name=\"{$name}\" ".(is_string($placeholder) ? 'placeholder="' . $placeholder . '"' : '')."/>";
+        $value = static::getAssociateValue($name, $value);
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<input type=\"hidden\" value=\"{$value}\" name=\"{$name}\" ".$attributes."/>";
     }
 
     /**
      * Ajout le tag <input type="file">
      *
      * @param string $name
+     * @param array $attributes
      *
      * @return void
      */
-    public static function file($name)
+    public static function file($name, array $attributes = [])
     {
-        self::$form .= "<input type=\"file\" name=\"{$name}\"/>";
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<input type=\"file\" name=\"{$name}\" ".$attributes."/>";
     }
 
     /**
      * Ajout le tag <input type="submit">
      *
      * @param string $value
+     * @param array $attributes
      *
      * @return void
      */
-    public static function submit($value)
+    public static function submit($value, array $attributes = [])
     {
-        self::$form .= "<button type=\"submit\">{$value}</button>";
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<button type=\"submit\" ".$attributes.">{$value}</button>";
+    }
+
+    /**
+     * Ajout le tag <input type="submit">
+     *
+     * @param string $value
+     * @param array $attributes
+     *
+     * @return void
+     */
+    public static function button($value, array $attributes = [])
+    {
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<button ".$attributes.">{$value}</button>";
     }
 
     /**
      * Ajout le tag <textarea></textarea>
      *
      * @param string $name
-     * @param string $text
+     * @param string $value
+     * @param array $attributes
      *
      * @return void
      */
-    public static function textarea($name, $text = "")
+    public static function textarea($name, $value = "", array $attributes = [])
     {
-        $text = static::getAssociateValue($name);
-        self::$form .= "<textarea name=\"{$name}\">" . $text . "</textarea>";
+        $value = static::getAssociateValue($name, $value);
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<textarea name=\"{$name}\" ".$attributes.">" . $value . "</textarea>";
     }
 
     /**
@@ -126,7 +182,7 @@ class Form
      */
     public static function checkbox($name, $checked = false,  $value = "")
     {
-        $value = static::getAssociateValue($name);
+        $value = static::getAssociateValue($name, $value);
         self::$form .= "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" ". ($checked == true ? 'cheched' : '')."/>";
     }
 
@@ -141,7 +197,7 @@ class Form
      */
     public static function radio($name, $checked = false, $value = "")
     {
-        $value = static::getAssociateValue($name);
+        $value = static::getAssociateValue($name, $value);
         self::$form .= "<input type=\"radio\" name=\"{$name}\" value=\"{$value}\" " . ($checked == true ? 'cheched' : '')."/>";
     }
 
@@ -151,12 +207,14 @@ class Form
      * @param string $name
      * @param array $options
      * @param string|null $selected
+     * @param array $attributes
      *
      * @return void
      */
-    public static function select($name, array $options = [], $selected = null)
+    public static function select($name, array $options = [], $selected = null, array $attributes = [])
     {
-        self::$form .= "<select name=\"$name\">";
+        $attributes = static::formatAttributes($attributes);
+        self::$form .= "<select name=\"$name\" ".$attributes.">";
         $oldValue = static::getAssociateValue($name);
 
         foreach($options as $key => $value) {
@@ -181,6 +239,7 @@ class Form
     public static function addFieldSet($legend = null)
     {
         self::$form .= "<fieldset>";
+
         if (is_string($legend)) {
             self::$form .= "<legend>{$legend}</legend>";
         }
@@ -243,5 +302,19 @@ class Form
     public static function with($data)
     {
         static::$with = $data;
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed|null
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists(static::class, $name)) {
+            return call_user_func_array([static::class, $name], $arguments);
+        }
+
+        return null;
     }
 }
