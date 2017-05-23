@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Session;
 
-use Bow\Support\Str;
 use Bow\Security\Security;
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
