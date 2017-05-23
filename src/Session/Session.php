@@ -33,7 +33,7 @@ class Session implements CollectionAccessStatic
 
         session_name("BSESSID");
 
-        if (! isset($_COOKIE["SESSID"])) {
+        if (! isset($_COOKIE["BSESSID"])) {
             session_id(hash("sha256", Security::encrypt(uniqid(microtime(false)))));
         }
 
