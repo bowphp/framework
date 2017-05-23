@@ -1,4 +1,4 @@
 <?php
-namespace Exception;
+namespace Bow\Exception;
 
 class UploadFileException extends \Exception {}

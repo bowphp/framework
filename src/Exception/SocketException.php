@@ -1,7 +1,4 @@
 <?php
 namespace Bow\Exception;
 
-class SocketException extends \Exception
-{
-
-}
+class SocketException extends \Exception {}
