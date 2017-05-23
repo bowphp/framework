@@ -205,8 +205,6 @@ class Logger extends AbstractLogger
      */
     public function errorHandler($errno, $errmsg, $filename, $line)
     {
-        var_dump($errmsg);
-        debug($errno);
         $this->addHandler($errno, $errmsg, $filename, $line, []);
     }
 
