@@ -1,5 +1,9 @@
 <?php
 
+if (getenv('DB_USER') == 'travis') {
+    return;
+}
+
 use Bow\Mail\Mail;
 use Bow\View\View;
 
