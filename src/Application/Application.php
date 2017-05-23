@@ -121,10 +121,10 @@ class Application
         $this->config = $config;
         $this->request = $request;
         $this->response = $response;
-
-        $logger = new Logger(app_env('MODE'), $config->getLoggerPath() . '/error.log');
-        $logger->register();
-        $this->logger = $logger;
+//
+//        $logger = new Logger(app_env('MODE'), $config->getLoggerPath() . '/error.log');
+//        $logger->register();
+//        $this->logger = $logger;
     }
 
     /**
