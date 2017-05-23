@@ -110,9 +110,10 @@ class Storage
      */
     public static function put($file, $content)
     {
-        $filename = basename($file);
-        $dirname = str_replace($filename, '', $file);
-        static::makeDirectory(rtrim($dirname, '/'));
+        $file = static::resolvePath($file);
+        $dirname = dirname($file);
+
+        static::makeDirectory($dirname);
 
         return file_put_contents($file, $content);
     }
@@ -125,11 +126,13 @@ class Storage
      */
     public static function delete($file)
     {
+        $file = static::resolvePath($file);
+
         if (is_dir($file)) {
-            return rmdir($file);
+            return @rmdir($file);
         }
 
-        return unlink($file);
+        return @unlink($file);
     }
 
     /**
@@ -140,7 +143,7 @@ class Storage
      */
     public static function files($dirname)
     {
-        $dirname = rtrim($dirname, '/');
+        $dirname = static::resolvePath($dirname);
         $directoryContents = glob($dirname."/*");
 
         return array_filter($directoryContents, function($file)
@@ -157,7 +160,7 @@ class Storage
      */
     public static function directories($dirname)
     {
-        $directoryContents = glob($dirname."/*");
+        $directoryContents = glob(static::resolvePath($dirname)."/*");
 
         return array_filter($directoryContents, function($file)
         {
@@ -168,19 +171,19 @@ class Storage
     /**
      * Crée un répertoire
      *
-     * @param string $files
+     * @param string $dirname
      * @param int $mode
      * @param bool $recursive
      * @return boolean
      */
-    public static function makeDirectory($files, $mode = 0777, $recursive = false)
+    public static function makeDirectory($dirname, $mode = 0777, $recursive = false)
     {
         if (is_bool($mode)) {
             $recursive = $mode;
             $mode = 0777;
         }
 
-        return @mkdir($files, $mode, $recursive);
+        return @mkdir(static::resolvePath($dirname), $mode, $recursive);
     }
 
     /**
@@ -191,7 +194,9 @@ class Storage
      */
     public static function get($filename)
     {
-        if (!(is_file($filename) && stream_is_local($filename))) {
+        $filename = static::resolvePath($filename);
+
+        if (! (is_file($filename) && stream_is_local($filename))) {
             return null;
         }
 
@@ -238,6 +243,8 @@ class Storage
      */
     public static function exists($filename)
     {
+        $filename = static::resolvePath($filename);
+
         if (is_dir($filename)) {
             $tmp = getcwd();
             $r = chdir($filename);
@@ -258,7 +265,7 @@ class Storage
     public static function extension($filename)
     {
         if (static::exists($filename)) {
-            return pathinfo($filename, PATHINFO_EXTENSION);
+            return pathinfo(static::resolvePath($filename), PATHINFO_EXTENSION);
         }
 
         return null;
@@ -272,7 +279,7 @@ class Storage
      */
     public static function isFile($filename)
     {
-        return is_file($filename);
+        return is_file(static::resolvePath($filename));
     }
 
     /**
@@ -283,7 +290,7 @@ class Storage
      */
     public static function isDirectory($dirname)
     {
-        return is_dir($dirname);
+        return is_dir(static::resolvePath($dirname));
     }
 
     /**
@@ -338,6 +345,21 @@ class Storage
 
         static::$s3 = new AwsS3Client($config);
         return static::$s3;
+    }
+
+    /**
+     * @param $filename
+     * @return string
+     */
+    public static function resolvePath($filename)
+    {
+        $path = realpath(static::$config['storage']);
+
+        if (preg_match('~^'.$path.'~', $filename)) {
+            return $filename;
+        }
+
+        return rtrim($path, '/').'/'.ltrim($filename, '/');
     }
 
     /**

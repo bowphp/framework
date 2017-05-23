@@ -100,6 +100,7 @@ class UploadFile
         if (isset($this->file['name'])) {
             return null;
         }
+
         return basename($this->file['name']);
     }
 
@@ -126,17 +127,19 @@ class UploadFile
         if (isset($this->file['tmp_name'])) {
             return null;
         }
+
         return file_get_contents($this->file['tmp_name']);
     }
 
     /**
-     * Le nom hash md5 du fichier
+     * Permet de hash du fichier
      *
+     * @param string $method
      * @return string
      */
-    public function getHashName()
+    public function getHashName($method = 'md5')
     {
-        return md5($this->getBasename());
+        return hash($method, md5($this->getBasename()));
     }
 
     /**
@@ -145,7 +148,7 @@ class UploadFile
      * @param string $to Le dossier de récéption
      * @param string|null $filename Le nom du fichier
      * @return bool
-     * @throws \Exception\UploadFileException
+     * @throws UploadFileException
      */
     public function move($to, $filename = null)
     {
@@ -153,14 +156,14 @@ class UploadFile
             return false;
         }
 
-        $save_name = $this->file['tmp_name'];
+        $save_name = $this->file['name'];
 
         if (is_string($filename)) {
             $save_name = $filename;
         }
 
         if (! is_dir($to)) {
-            throw new \Exception\UploadFileException('Le dossier de sauvegarde n\'existe pas!');
+            @mkdir($to, 0777, true);
         }
 
         $resolve = rtrim($to, '/').'/'.$save_name;
