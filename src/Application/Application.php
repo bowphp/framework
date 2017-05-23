@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Application;
 
+use Bow\Firewall\ApplicationCsrfFirewall;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Logger\Logger;
@@ -182,10 +183,12 @@ class Application
      * Permet d'associer un firewall sur une url
      *
      * @param array $firewall
+     * @return Application
      */
     public function firewall($firewall = [])
     {
         $this->globaleFirewall = is_array($firewall) ? $firewall : [$firewall];
+        return $this;
     }
 
     /**
@@ -455,7 +458,7 @@ class Application
         }
 
         // Ajout de l'entête X-Powered-By
-        if (!$this->disableXpoweredBy) {
+        if (! $this->disableXpoweredBy) {
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
         }
 
@@ -474,6 +477,8 @@ class Application
             if ($this->specialMethod !== null) {
                 $method = $this->specialMethod;
             }
+
+            $this->executeApplicationNativeFirewall();
         }
 
         // drapeaux d'erreur.
@@ -555,10 +560,12 @@ class Application
      * Permet de donner des noms au url.
      *
      * @param $name
+     * @return Application
      */
     public function named($name)
     {
         $this->namedRoute($this->currentPath, $name);
+        return $this;
     }
 
     /**
@@ -743,6 +750,15 @@ class Application
     public function getMethodRoutes($method)
     {
         return $this->routes[$method];
+    }
+
+    private function executeApplicationNativeFirewall()
+    {
+        $status = Actionner::firewall(ApplicationCsrfFirewall::class);
+
+        if (! $status) {
+            abort(500);
+        }
     }
 
     /**

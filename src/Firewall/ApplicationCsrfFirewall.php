@@ -10,11 +10,10 @@ class ApplicationCsrfFirewall
      * Fonction de lancement du firewall.
      *
      * @param \Bow\Http\Request $request
-     * @param \Bow\Http\Response $response
      * @param \Closure $next
      * @return boolean
      */
-    public function checker($request, $response, \Closure $next)
+    public function checker($request, \Closure $next)
     {
         if (! ($request->isPost() || $request->isPut())) {
             return $next();
@@ -25,8 +24,8 @@ class ApplicationCsrfFirewall
                 return $next();
             }
 
-            $response->statusCode(401);
-            return $response->send('unauthorize.');
+            response()->statusCode(401);
+            return response()->send('unauthorize.');
         }
 
         $input = new Input();

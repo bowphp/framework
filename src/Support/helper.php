@@ -74,12 +74,6 @@ if (! function_exists('config')) {
                 }
                 $config->setViewpath($newConfig);
                 break;
-            case $param === 'logger':
-                if ($newConfig === null) {
-                    return $config->getLoggerMode();
-                }
-                $config->setLoggerMode($newConfig);
-                break;
             case $param === 'mail':
                 return $config->getMailConfiguration();
                 break;
@@ -142,7 +136,7 @@ if (! function_exists('request')) {
      * @return \Bow\Http\Request
      */
     function request() {
-        return \Bow\Http\Request::instance();
+        return \Bow\Http\Request::singleton();
     }
 }
 

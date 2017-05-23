@@ -56,25 +56,23 @@ class Logger extends AbstractLogger
      */
     public function log($level, $message, array $context = []) {
 
-        if (!in_array($this->mode, ['development', 'production'])) {
+        if (! in_array($this->mode, ['development', 'production'])) {
             throw new LoggerException($this->mode . ' n\'est pas définir');
         }
 
-        if ($this->mode === 'development') {
-            die(static::htmlFormat($level, $message, $context));
-        }
-
-        if ($this->mode === 'production') {
-            if (!empty($context)) {
-                $message = '\''. $message.'\'' . ' in ' . $context['file'] . ' at ' . $context['line'];
-                if (isset($context['trace'])) {
-                    if (is_string($context['trace'])) {
-                        $message .= $context['trace'];
-                    }
+        if (! empty($context)) {
+            $message = '\''. $message.'\'' . ' in ' . $context['file'] . ' at ' . $context['line'];
+            if (isset($context['trace'])) {
+                if (is_string($context['trace'])) {
+                    $message .= $context['trace'];
                 }
             }
+        }
 
-            Storage::append($this->path, static::textFormat($level, $message . '\n'));
+        Storage::append($this->path, static::textFormat($level, $message . '\n'));
+
+        if ($this->mode === 'development') {
+            die(static::htmlFormat($level, $message, $context));
         }
 
         return $this;
@@ -90,7 +88,7 @@ class Logger extends AbstractLogger
      */
     private function textFormat($level, $message)
     {
-        return sprintf('[%s] [client: %s:%d] [%s] %s', date('D Y-m-d H:i:s'), $_SERVER['REMOTE_ADDR'], $_SERVER['REMOTE_PORT'], $level, $message);
+        return sprintf("[%s] [client: %s:%d] [%s] %s", date('D Y-m-d H:i:s'), $_SERVER['REMOTE_ADDR'], $_SERVER['REMOTE_PORT'], $level, $message);
     }
 
     /**
@@ -207,6 +205,8 @@ class Logger extends AbstractLogger
      */
     public function errorHandler($errno, $errmsg, $filename, $line)
     {
+        var_dump($errmsg);
+        debug($errno);
         $this->addHandler($errno, $errmsg, $filename, $line, []);
     }
 
@@ -245,6 +245,7 @@ class Logger extends AbstractLogger
         switch($errno) {
             case E_ERROR:
             case E_USER_ERROR:
+            case E_CORE_ERROR:
                 $this->error($errstr,  $context);
                 break;
             case E_WARNING:

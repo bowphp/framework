@@ -113,7 +113,7 @@ class Configuration
      */
     public function getAppkey()
     {
-        return $this->app_key;
+        return $this->config['application']['app_key'];
     }
 
     /**

@@ -177,7 +177,7 @@ class Actionner
             $instance = $firewall;
         }
 
-        $status = call_user_func_array($instance, array_merge([$injections, function () use (& $next) {
+        $status = call_user_func_array($instance, array_merge($injections, [function () use (& $next) {
             return $next = true;
         }]));
 
