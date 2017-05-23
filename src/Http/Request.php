@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Http;
 
+use Bow\Support\Collection;
 use Bow\Support\Str;
 use Bow\Session\Session;
 
@@ -195,14 +196,31 @@ class Request
      * Charge la factory pour le FILES
      *
      * @param string $key
-     * @return UploadFile
+     * @return UploadFile|Collection
      */
     public static function file($key)
     {
         if (! isset($_FILES[$key])) {
             return null;
         }
-        return new UploadFile($_FILES[$key]);
+
+        if (! is_array($_FILES[$key]['name'])) {
+            return new UploadFile($_FILES[$key]);
+        }
+
+        $files = $_FILES[$key];
+        $collect = [];
+
+        foreach ($files['name'] as $key => $name) {
+            $file['name'] = $name;
+            $file['type'] = $files['type'][$key];
+            $file['size'] = $files['size'][$key];
+            $file['error'] = $files['error'][$key];
+            $file['tmp_name'] = $files['tmp_name'][$key];
+            $collect[] = new UploadFile($file);
+        }
+
+        return new Collection($collect);
     }
 
     /**
@@ -213,9 +231,11 @@ class Request
     public static function files()
     {
         $files = [];
+
         foreach ($_FILES as $key => $file) {
-            $files[] = new UploadFile($file);
+            $files[$key] = static::file($key);
         }
+
         return $files;
     }
 
