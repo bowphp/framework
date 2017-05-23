@@ -164,7 +164,15 @@ class Command
         $register = ["file" => [], "tables" => []];
 
         if (! file_exists($this->dirname."/migration/.registers")) {
-            throw new \ErrorException('Le fichier de registre de bow est introvable.');
+            echo Color::red('Le fichier de registre de bow est introvable.');
+            exit(0);
+        }
+
+        $registers = file($this->dirname."/migration/.registers");
+
+        if (count($registers) == 0) {
+            echo Color::red('Le fichier de registre de bow est vide.');
+            exit(0);
         }
 
         foreach(file($this->dirname."/migration/.registers") as $r) {
@@ -175,11 +183,12 @@ class Command
 
         foreach(glob($fileParten) as $file) {
             if (! file_exists($file)) {
-                throw new \ErrorException("$file n'existe pas.", E_USER_ERROR);
+                echo Color::red("$file n'existe pas.");
+                exit();
             }
 
             // Collection des fichiers de migration.
-            $filename = preg_replace("@^(" . $this->dirname."/migration/)|(\.php)$@", "", $file);
+            $filename = preg_replace("@^(".$this->dirname."/migration/)|(\.php)$@", "", $file);
 
             if (in_array($filename, $register["file"])) {
                 $num = array_flip($register["file"])[$filename];
@@ -190,6 +199,12 @@ class Command
 
             // Formatage de la classe et Execution de la methode up ou down
             $class = ucfirst(Str::camel($model));
+
+            if (! class_exists($class)) {
+                echo Color::red("Classe \"{$class}\" introvable. Vérifiez vos fichier de régistre.");
+                exit(1);
+            }
+
             $instance = new $class;
 
             call_user_func_array([$instance, strtolower($type)], $param);

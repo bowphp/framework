@@ -110,7 +110,7 @@ class Util
         $field = '';
         $i = 0;
         foreach ($data as $key => $value) {
-            $field .= ($i > 0 ? ', ' : '') . $key . ' = ' . $value;
+            $field .= ($i > 0 ? ', ' : '') . '`'.$key . '` = ' . $value;
             $i++;
         }
 
