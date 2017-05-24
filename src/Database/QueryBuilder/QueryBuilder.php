@@ -156,11 +156,11 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         // Ajout de matcher sur id.
         if ($comp == '=' && $value === null) {
             $value = $column;
-            $column = 'id';
+            $column = $this->getPrimaryKey();
         }
 
         if ($value === null) {
-            throw new QueryBuilderException('Valeur de comparaison non définir', E_ERROR);
+            throw new QueryBuilderException('Valeur de comparaison non définie', E_ERROR);
         }
 
         if (! in_array(Str::lower($boolean), ['and', 'or'])) {
