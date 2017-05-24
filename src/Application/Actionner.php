@@ -56,7 +56,12 @@ class Actionner
         }
 
         foreach ($actions as $key => $action) {
-            if ($key != 'uses' || !is_int($key)) {
+            if ($key != 'uses' && !is_int($key)) {
+                continue;
+            }
+
+            if (is_string($action)) {
+                array_push($functions, static::controller($action));
                 continue;
             }
 
