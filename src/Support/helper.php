@@ -1235,3 +1235,13 @@ if (! function_exists('app_mode')) {
         return app_env('MODE');
     }
 }
+
+if (! function_exists('app_lang')) {
+    /**
+     * @return string
+     */
+    function app_lang()
+    {
+        return request()->lang();
+    }
+}
