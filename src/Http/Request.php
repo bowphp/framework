@@ -99,7 +99,7 @@ class Request
      */
     public function origin()
     {
-        if (!isset($_SERVER['REQUEST_SCHEME'])) {
+        if (! isset($_SERVER['REQUEST_SCHEME'])) {
             return 'http://' . $this->hostname();
         }
 
@@ -240,6 +240,15 @@ class Request
     }
 
     /**
+     * @param mixed $key
+     * @return bool
+     */
+    public static function hasFile($key)
+    {
+        return isset($_FILES[$key]);
+    }
+
+    /**
      * Change le factory RequestData pour tout les entrés PHP (GET, FILES, POST)
      *
      * @return Input
@@ -257,7 +266,7 @@ class Request
      */
     public static function old($key)
     {
-        $old = Session::get('__bow.old', null);
+        $old = Session::get('__bow.old', []);
         return isset($old[$key]) ? $old[$key] : null;
     }
 
@@ -443,5 +452,27 @@ class Request
         }
 
         return call_user_func_array([static::class, $name], $arguments);
+    }
+
+    /**
+     * @param $property
+     * @return mixed
+     */
+    public static function session($property = null)
+    {
+        if (is_null($property)) {
+            return new Session();
+        }
+
+        return Session::get($property);
+    }
+
+    /**
+     * @param $property
+     * @return mixed
+     */
+    public function __get($property)
+    {
+        return static::$input->get($property);
     }
 }
