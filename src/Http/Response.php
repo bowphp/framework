@@ -1,8 +1,8 @@
 <?php
 namespace Bow\Http;
 
+use Bow\Support\Str;
 use Bow\View\View;
-use Bow\Exception\ViewException;
 use Bow\Exception\ResponseException;
 
 /**
@@ -63,20 +63,6 @@ class Response
         504	=> 'Gateway Timeout',
         505	=> 'HTTP Version Not Supported',
     ];
-
-    /**
-     * @var string
-     */
-    private static $view_path;
-
-    /**
-     * Response constructor.
-     * @param string $view_path
-     */
-    public function __construct($view_path)
-    {
-        static::$view_path = $view_path;
-    }
 
     /**
      * Permet de configurer la classe
@@ -174,7 +160,6 @@ class Response
      */
     public function json($data, $code = 200, array $headers = [])
     {
-        $this->forceInUTF8();
         $this->addHeader('Content-Type', 'application/json; charset=UTF-8');
 
         foreach ($headers as $key => $value) {
@@ -183,46 +168,6 @@ class Response
 
         $this->statusCode($code);
         return $this->send(json_encode($data), false);
-    }
-
-    /**
-     * Permet de forcer l'encodage en utf-8
-     */
-    public function forceInUTF8()
-    {
-        mb_internal_encoding('UTF-8');
-        mb_http_output('UTF-8');
-    }
-
-    /**
-     * Permet d'envoyer le contenu d'un fichier au client, simulaire à require
-     *
-     * @param string $filename
-     * @param array $bind
-     * @throws ViewException
-     * @return mixed
-     */
-    public function sendFile($filename, $bind = [])
-    {
-        $filename = preg_replace('/@|#|\./', '/', $filename);
-
-        if (static::$view_path !== null) {
-            $tmp = static::$view_path .'/'. $filename . '.php';
-            if (! file_exists($tmp)) {
-                $filename = static::$view_path .'/'. $filename . '.html';
-            } else {
-                $filename = $tmp;
-            }
-        }
-
-        if (! file_exists($filename)) {
-            throw new ViewException('Le fichier '.$filename.' n\'exist pas.', E_ERROR);
-        }
-
-        @extract($bind);
-        // Rendu du fichier demandé.
-
-        return require $filename;
     }
 
     /**
@@ -240,11 +185,11 @@ class Response
 
         echo $data;
 
-        if ($stop) {
-            die();
+        if (! $stop) {
+            return true;
         }
 
-        return true;
+        die();
     }
 
     /**

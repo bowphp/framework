@@ -266,7 +266,7 @@ class Str
             return false;
         }
 
-        return preg_match('/^[a-zA-Z0-9-_.]+@[a-z0-9-_.]{2,}\.[a-z]{2,6}$/', $email);
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
     /**
@@ -444,6 +444,15 @@ class Str
         }
 
         return trim($sentence);
+    }
+
+    /**
+     * Permet de forcer l'encodage en utf-8
+     */
+    public static function forceInUTF8()
+    {
+        mb_internal_encoding('UTF-8');
+        mb_http_output('UTF-8');
     }
 
     /**
