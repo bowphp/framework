@@ -383,7 +383,8 @@ class Request
      */
     public function getHeader($key)
     {
-        $key = strtoupper($key);
+        $key = str_replace('-', '_', strtoupper($key));
+
         if ($this->hasHeader($key)) {
             return $_SERVER[$key];
         }
@@ -392,7 +393,7 @@ class Request
             return $_SERVER['HTTP_'.$key];
         }
 
-        return false;
+        return null;
     }
 
     /**

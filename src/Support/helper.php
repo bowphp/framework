@@ -1080,7 +1080,7 @@ if (! function_exists('route')) {
             $url = str_replace(':'. $key, $value, $url);
         }
 
-        return rtrim(app_env('BASE_URL'), '/') .'/'.  ltrim($url, '');
+        return rtrim(app_env('BASE_URL'), '/').'/'.ltrim($url, '/');
     }
 }
 

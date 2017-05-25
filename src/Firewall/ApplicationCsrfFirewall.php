@@ -20,7 +20,7 @@ class ApplicationCsrfFirewall
         }
 
         if ($request->isAjax()) {
-            if ($request->getHeader('X-CSRF-TOKEN') === session('_token')) {
+            if ($request->getHeader('x-csrf-token') === session('_token')) {
                 return $next();
             }
 
