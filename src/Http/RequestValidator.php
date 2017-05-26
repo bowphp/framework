@@ -1,8 +1,10 @@
 <?php
 namespace Bow\Http;
 
+use Bow\Resource\Storage;
 use Bow\Validation\Validate;
 use Bow\Validation\Validator;
+use Psy\Exception\ErrorException;
 
 abstract class RequestValidator extends Validator
 {
@@ -19,14 +21,24 @@ abstract class RequestValidator extends Validator
     protected $keys = ['*'];
 
     /**
+     * @var Validate
+     */
+    protected $validate;
+
+    /**
      * @var array
      */
     private $data;
 
     /**
-     * @var Validate
+     * @var UploadFile
      */
-    protected $validate;
+    private $file;
+
+    /**
+     * @var bool
+     */
+    private $upload_started = false;
 
     /**
      * TodoValidation constructor.
@@ -100,5 +112,48 @@ abstract class RequestValidator extends Validator
     public function throwError()
     {
         $this->validate->throwError();
+    }
+
+    /**
+     * Permet de démmarrer le système upload
+     *
+     * @param $key
+     */
+    public function startUploadFor($key)
+    {
+        if (! $this->upload_started) {
+            $this->upload_started = true;
+            $this->file = Request::file($key);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasFile()
+    {
+        return is_null($this->file) ? false : $this->file->isUploaded() && $this->file->isValid();
+    }
+
+    /**
+     * Permet de faire upload de fichier
+     *
+     * @param string $dirname
+     * @param string $filename
+     * @param bool $overidre_extension
+     * @throws ErrorException
+     * @return string
+     */
+    public function makeUpload($dirname, $filename, $overidre_extension = false)
+    {
+        if (! $this->upload_started) {
+            throw new ErrorException('Lancez la methode "startUploadFile" avant');
+        }
+        if ($overidre_extension) {
+            $filename = $filename.'.'.$this->file->getExtension();
+        }
+
+        $this->file->move(Storage::resolvePath($dirname), $filename);
+        return '/'.ltrim(rtrim($dirname, '/'), '/').'/'.ltrim($filename, '/');
     }
 }
