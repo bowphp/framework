@@ -14,24 +14,20 @@ use Bow\Interfaces\CollectionAccess;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Http
  */
-class Input implements CollectionAccess
+class Input implements CollectionAccess, \ArrayAccess
 {
 
     /**
      * @var array
      */
-    private $data = [];
+    private $input = [];
 
     /**
-     * Fonction magic __clone en <<private>>
+     * Input constructor.
      */
-    private function __clone()
-    {
-    }
-
     public function __construct()
     {
-        $this->data = array_merge($_POST, $_GET);
+        $this->input = array_merge($_POST, $_GET);
     }
 
     /**
@@ -45,9 +41,10 @@ class Input implements CollectionAccess
     public function has($key, $strict = false)
     {
         if ($strict) {
-            return isset($this->data[$key]) && !empty($this->data[$key]);
+            return isset($this->input[$key]) && !empty($this->input[$key]);
         }
-        return isset($this->data[$key]);
+
+        return isset($this->input[$key]);
     }
 
     /**
@@ -57,7 +54,7 @@ class Input implements CollectionAccess
      */
     public function isEmpty()
     {
-        return empty($this->data);
+        return empty($this->input);
     }
 
     /**
@@ -69,7 +66,7 @@ class Input implements CollectionAccess
      */
     public function get($key, $default = null)
     {
-        return $this->has($key) ? $this->data[$key] : $default;
+        return $this->has($key) ? $this->input[$key] : $default;
     }
 
     /**
@@ -88,7 +85,7 @@ class Input implements CollectionAccess
             $keyWasDefine = func_get_args();
         }
 
-        foreach ($this->data as $key => $value) {
+        foreach ($this->input as $key => $value) {
             if (!in_array($key, $keyWasDefine)) {
                 $data[$key] = $value;
             }
@@ -98,7 +95,7 @@ class Input implements CollectionAccess
     }
 
     /**
-     * vérifie si le contenu de $this->data poccedent la $key n'est pas vide.
+     * vérifie si le contenu de $this->input poccedent la $key n'est pas vide.
      *
      * @param string $key
      * @param string $eqTo
@@ -165,25 +162,10 @@ class Input implements CollectionAccess
     public function each(Closure $cb)
     {
         if (! $this->isEmpty()) {
-            foreach ($this->data as $key => $value) {
+            foreach ($this->input as $key => $value) {
                 call_user_func_array($cb, [$value, $key]);
             }
         }
-    }
-
-    /**
-     * __get
-     *
-     * @param string $name Le nom de la variable
-     * @return null
-     */
-    public function __get($name)
-    {
-        if ($this->has($name)) {
-            return $this->data[$name];
-        }
-
-        return null;
     }
 
     /**
@@ -214,7 +196,7 @@ class Input implements CollectionAccess
      */
     public function toArray()
     {
-        return $this->data;
+        return $this->input;
     }
 
     /**
@@ -225,8 +207,8 @@ class Input implements CollectionAccess
         $data = [];
 
         foreach ($exceptions as $exception) {
-            if (isset($this->data[$exception])) {
-                $data[$exception] = $this->data[$exception];
+            if (isset($this->input[$exception])) {
+                $data[$exception] = $this->input[$exception];
             }
         }
 
@@ -238,7 +220,7 @@ class Input implements CollectionAccess
      */
     public function ignores(array $ignores)
     {
-        $data = $this->data;
+        $data = $this->input;
 
         foreach ($ignores as $ignore) {
             if (isset($data[$ignore])) {
@@ -250,14 +232,6 @@ class Input implements CollectionAccess
     }
 
     /**
-     * @inheritdoc
-     */
-    public function toObject()
-    {
-        return (object) $this->data;
-    }
-
-    /**
      * Permet de valider les données entrantes
      *
      * @param array $rule
@@ -265,7 +239,7 @@ class Input implements CollectionAccess
      */
     public function validate(array $rule)
     {
-        return Validator::make($this->data, $rule);
+        return Validator::make($this->input, $rule);
     }
 
     /**
@@ -275,7 +249,15 @@ class Input implements CollectionAccess
      */
     public function toCollection()
     {
-        return new Collection($this->data);
+        return new Collection($this->input);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function toObject()
+    {
+        return (object) $this->input;
     }
 
     /**
@@ -292,5 +274,52 @@ class Input implements CollectionAccess
             throw new \RuntimeException('Method '. $name . ' not exists');
         }
         return call_user_func_array([static::class, $name], $argmunents);
+    }
+
+    /**
+     * __get
+     *
+     * @param string $name Le nom de la variable
+     * @return null
+     */
+    public function __get($name)
+    {
+        if ($this->has($name)) {
+            return $this->input[$name];
+        }
+
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetExists($offset)
+    {
+        return $this->has($offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->input[$offset] = $value;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->input[$offset]);
     }
 }
