@@ -2,6 +2,7 @@
 <phpunit colors="true" bootstrap="tests/bootstrap.php">
     <testsuite>
         <directory suffix=".php">tests/</directory>
+        <exclude>./tests/SessionTest.php</exclude>
     </testsuite>
     <php>
         <env name="DB_PASSWORD" value="test"/>
