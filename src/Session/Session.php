@@ -14,6 +14,11 @@ use Bow\Interfaces\CollectionAccessStatic;
 class Session implements CollectionAccessStatic
 {
     /**
+     * @var array
+     */
+    private static $keys = [];
+
+    /**
      * Session constructor.
      */
     public function __construct()
@@ -71,7 +76,7 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (! isset($_SESSION[$key])) {
+        if (! isset(static::$keys[$key])) {
             return isset($_SESSION['__bow.flash'][$key]);
         }
 
@@ -100,7 +105,7 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (isset($_SESSION[$key])) {
+        if (static::has($key)) {
             return $_SESSION[$key];
         }
 
@@ -143,7 +148,10 @@ class Session implements CollectionAccessStatic
         if (! is_array($_SESSION[$key])) {
             $_SESSION[$key] = [$_SESSION[$key]];
         }
+
         array_push($_SESSION[$key], $data);
+        static::$keys[$key] = true;
+
         return $data;
     }
 
@@ -168,7 +176,7 @@ class Session implements CollectionAccessStatic
     {
         self::start();
         $old = null;
-        if (isset($_SESSION[$key])) {
+        if (static::has($key)) {
             $old = $_SESSION[$key];
         }
         unset($_SESSION[$key]);
@@ -248,6 +256,7 @@ class Session implements CollectionAccessStatic
         static::start();
 
         foreach(static::filter() as $key => $value){
+            unset(static::$keys[$key]);
             unset($_SESSION[$key]);
         }
 
