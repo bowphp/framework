@@ -729,6 +729,13 @@ class {$name} extends Validator
 	protected \$rules = [
         // code
     ];
+    
+	/**
+	 * Liste des clés à valider
+	 * 
+	 * @var array
+	 */
+	protected \$keys = ['*'];
 }
 VALIDATOR;
 
