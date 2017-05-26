@@ -2,7 +2,6 @@
 namespace Bow\Database;
 
 use Carbon\Carbon;
-use Bow\Support\Collection;
 use Bow\Database\Database as DB;
 use Bow\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder\QueryBuilder;
@@ -99,7 +98,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Permet de récupèrer le première enregistrement
      *
-     * @return mixed
+     * @return static|null
      */
     public static function first()
     {
@@ -111,7 +110,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param mixed $id
      * @param array $select
-     * @return Collection|SqlUnity
+     * @return Collection|static
      * @throws QueryBuilderException
      */
     public static function find($id, $select = ['*'])
@@ -146,7 +145,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $id
      * @param array $select
      *
-     * @return Collection|array
+     * @return Collection|static|null
      */
     public static function findAndDelete($id, $select = ['*'])
     {
@@ -161,7 +160,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param mixed $id
      * @param array|callable $select
-     * @return SqlUnity
+     * @return static
      *
      * @throws QueryBuilderException
      */
@@ -182,7 +181,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
     /**
      * @param array $data
-     * @return self
+     * @return static
      */
     public static function create(array $data)
     {
@@ -327,7 +326,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * @return mixed
+     * @return static|null
      */
     public static function last()
     {
