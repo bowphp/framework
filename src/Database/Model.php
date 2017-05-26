@@ -161,25 +161,19 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param mixed $id
      * @param array|callable $select
-     * @param callable $callable
      * @return SqlUnity
      *
      * @throws QueryBuilderException
      */
-    public static function findOrFail($id, $select = ['*'], callable $callable = null)
+    public static function findOrFail($id, $select = ['*'])
     {
-        if (is_callable($select)) {
-            $callable = $select;
-            $select = ['*'];
-        }
-
         $data = static::find($id, $select);
 
-        if (count($data) == 0) {
-            if (is_callable($callable)) {
-                return $callable();
-            }
+        if (is_null($data)) {
+            abort(404);
+        }
 
+        if (count($data) == 0) {
             abort(404);
         }
 
