@@ -192,6 +192,21 @@ class Application
     }
 
     /**
+     * Permet de fermer le firewall
+     *
+     * @return Application
+     * @throws ApplicationException
+     */
+    public function close() {
+        if (empty($this->globaleFirewall)) {
+            throw new ApplicationException('Aucune flux firewall ouvert.');
+        }
+        
+        $this->globaleFirewall = [];
+        return $this;
+    }
+
+    /**
      * get, route de type GET ou bien retourne les variable ajoutés dans Bow
      *
      * @param string $path La route à mapper
