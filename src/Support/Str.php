@@ -256,7 +256,7 @@ class Str
      *
      * @throws \ErrorException
      *
-     * @return int
+     * @return bool
      */
     public static function isMail($email)
     {
@@ -266,7 +266,7 @@ class Str
             return false;
         }
 
-        return filter_var($email, FILTER_VALIDATE_EMAIL);
+        return (bool) filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
     /**
@@ -279,7 +279,7 @@ class Str
      *
      * @throws \ErrorException
      *
-     * @return int
+     * @return bool
      */
     public static function isDomain($domain)
     {
@@ -287,7 +287,7 @@ class Str
             throw new \ErrorException('Accept string ' . gettype($domain) . ' given');
         }
 
-        return preg_match('/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/', $domain);
+        return  (bool) preg_match('/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/', $domain);
     }
 
     /**
@@ -297,7 +297,7 @@ class Str
      *
      * @throws \ErrorException
      *
-     * @return int
+     * @return bool
      */
     public static function isAlphaNum($str)
     {
@@ -305,7 +305,7 @@ class Str
             throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match('/^[a-zA-Z0-9]+$/', $str);
+        return (bool) preg_match('/^[a-zA-Z0-9]+$/', $str);
     }
 
     /**
@@ -315,7 +315,7 @@ class Str
      *
      * @throws \ErrorException
      *
-     * @return int
+     * @return bool
      */
     public static function isNumeric($str)
     {
@@ -323,7 +323,7 @@ class Str
             throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
+        return  (bool) preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
     }
 
     /**
@@ -333,7 +333,7 @@ class Str
      *
      * @throws \ErrorException
      *
-     * @return int
+     * @return bool
      */
     public static function isAlpha($str)
     {
@@ -351,7 +351,7 @@ class Str
      *
      * @throws \ErrorException
      *
-     * @return int
+     * @return bool
      */
     public static function isSlug($str)
     {
@@ -359,7 +359,7 @@ class Str
             throw new \ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
+        return  (bool) preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
     }
 
     /**
