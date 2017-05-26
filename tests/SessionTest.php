@@ -1,5 +1,9 @@
 <?php
 
+if (getenv('DB_USER') == 'travis') {
+    return;
+}
+
 use Bow\Session\Session;
 
 class SessionTest extends \PHPUnit\Framework\TestCase

@@ -20,22 +20,23 @@ class TestStr extends \PHPUnit\Framework\TestCase
 
     public function testIsLower()
     {
-        $this->assertEquals(Str::isLower('papac'), true);
+        $this->assertTrue(Str::isLower('papac'));
     }
 
     public function testIsUpper()
     {
-        $this->assertEquals(Str::isUpper('PAPAC'), true);
+        $this->assertTrue(Str::isUpper('PAPAC'));
     }
 
     public function testIsNumeric()
     {
-        $this->assertEquals(Str::isNumeric('10'), true);
+        $this->assertTrue(Str::isNumeric('10'));
     }
 
     public function testIsDomain()
     {
-        $this->assertEquals(Str::isDomain('https://www.github.com'), true);
+        $this->assertTrue(Str::isDomain('https://www.github.com'));
+        $this->assertFalse(Str::isDomain('httpsgithub.'));
     }
 
     public function testIsAlpha()
@@ -45,17 +46,18 @@ class TestStr extends \PHPUnit\Framework\TestCase
 
     public function testIsAlphaNumeric()
     {
-        $this->assertEquals(Str::isAlphaNum('12340papac'), true);
+        $this->assertTrue(Str::isAlphaNum('12340papac'));
     }
 
     public function testIsEmail()
     {
-        $this->assertEquals(Str::isMail('d_dakia.franck-gil10@gmail-il.com'), true);
+        $this->assertTrue(Str::isMail('john@doe.com'));
+        $this->assertFalse(Str::isMail('john@doe'));
     }
 
     public function testIsSlug()
     {
-        $this->assertEquals(Str::isSlug('comment-faire-un-site-web-avec-php'), true);
+        $this->assertTrue(Str::isSlug('comment-faire-un-site-web-avec-php'));
     }
 
     public function testToSlug()
