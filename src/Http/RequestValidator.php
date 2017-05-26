@@ -47,13 +47,13 @@ abstract class RequestValidator extends Validator
     {
         $input = new Input();
 
-        if (count($this->keys) == 1 && $this->keys[0] === '*') {
-            $data = $input->all();
+        if ((count($this->keys) == 1 && $this->keys[0] === '*') || count($this->keys) == 0) {
+            $this->data = $input->all();
         } else {
-            $data = $input->excepts($this->keys);
+            $this->data = $input->excepts($this->keys);
         }
 
-        $this->validate = Validator::make($data, $this->rules);
+        $this->validate = Validator::make($this->data, $this->rules);
     }
 
     /**
