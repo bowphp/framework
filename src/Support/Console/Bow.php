@@ -330,7 +330,7 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
 
  \033[0;32mcreate\033[00m                 Create a user class
 
-   \033[0;33mcreate:middleware\033[00m    Create new middleware
+   \033[0;33mcreate:firewall\033[00m      Create new firewall
    \033[0;33mcreate:controller\033[00m    Create new controller
    \033[0;33mcreate:model\033[00m         Create new model
    \033[0;33mcreate:validator\033[00m     Create new validator
@@ -373,7 +373,7 @@ USAGE;
     * you can use --no-plain --with-model
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:controller name [option]  For create a new controlleur
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:middleware name           For create a new middleware
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:firewall name             For create a new firewall
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:model name                For create a new model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:validator name            For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:seeder name [--n-seed=n]  For create a new table seeder
@@ -399,9 +399,10 @@ U;
     [option]
     --create=table_name   Change name of table
     --table=table_name    Alter migration table
+    --all                 Optionnel
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:up name [option]       Up the specify migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name              Down migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name [--all]      Down migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate                        Up all defined migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate help                   For display this
 
