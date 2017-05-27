@@ -53,10 +53,7 @@ class PHPEngine extends EngineAbstract
         file_put_contents(
             $cache_hash_filename,
             <<<PHP
-<?php ob_start(); ?>
-$content
-<?php \$__bow_php_rendering_content = ob_get_clean(); ?>
-
+<?php ob_start(); ?>$content<?php \$__bow_php_rendering_content = ob_get_clean(); ?>
 <?php 
 return \$__bow_php_rendering_content;
 PHP
