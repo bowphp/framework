@@ -350,12 +350,11 @@ if (! function_exists('statement')) {
      * statement lance des requete SQL de type CREATE TABLE|ALTER TABLE|RENAME|DROP TABLE
      *
      * @param string $sql
-     * @param array $data
      *
      * @return int
      */
-    function statement($sql, array $data = []) {
-        return query_maker($sql, $data, null, 'statement');
+    function statement($sql) {
+        return query_maker($sql, [], null, 'statement');
     }
 }
 
@@ -856,6 +855,43 @@ if (! function_exists('event')) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
         return call_user_func_array([emitter(), 'on'], [$event, $fn]);
+    }
+}
+
+if (! function_exists('event_once')) {
+    /**
+     * Alias de la class Event::once
+     *
+     * @param string $event
+     * @param callable|array|string $fn
+     * @return Event;
+     * @throws \Bow\Exception\EventException
+     */
+    function event_once($event, $fn) {
+        if (! is_string($event)) {
+            throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
+        }
+        return call_user_func_array([emitter(), 'once'], [$event, $fn]);
+    }
+}
+
+if (! function_exists('event_transmisson')) {
+    /**
+     * Alias de la class Event::once
+     *
+     * @param string $event
+     * @param callable|array|string $fn
+     * @return Event;
+     * @throws \Bow\Exception\EventException
+     */
+    function event_transmisson($event = null, $fn) {
+        if ($event === null) {
+            return emitter();
+        }
+        if (! is_string($event)) {
+            throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
+        }
+        return call_user_func_array([emitter(), 'onTransmission'], [$event, $fn]);
     }
 }
 

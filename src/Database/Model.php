@@ -350,10 +350,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function deleted(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-
-        if (! emitter()->binded($env.'.ondelete')) {
-            event($env.'.ondelete', $cb);
-        }
+        event_once($env.'.ondelete', $cb);
     }
 
     /**
@@ -364,10 +361,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function created(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-
-        if (! emitter()->binded($env.'.oncreated')) {
-            event($env . '.oncreate', $cb);
-        }
+        event_once($env . '.oncreate', $cb);
     }
 
     /**
@@ -378,10 +372,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function updated(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-
-        if (! emitter()->binded($env.'.onupdate')) {
-            event($env.'.onupdate', $cb);
-        }
+        event_once($env.'.onupdate', $cb);
     }
 
     /**

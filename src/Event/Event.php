@@ -67,27 +67,32 @@ class Event
 
     /**
      * @param string $event
+     * @param array|string $fn
+     * @param int $priority
+     * @throws EventException
+     */
+    public static function onTransmission($event, $fn, $priority = 0)
+    {
+        if (! self::binded($event)) {
+            self::$events['__bow.transmission.event'][$event] = [];
+        }
+
+        if (! is_string($fn)) {
+            throw new EventException('Transmission event must be string fonction name');
+        }
+
+        self::$events['__bow.transmission.event'][$event][] = new Listener($fn, $priority);
+        Session::add("__bow.event.listener", self::$events['__bow.transmission.event']);
+    }
+
+    /**
+     * @param string $event
      * @param callable|array|string $fn
      * @param int $priority
      */
     public static function once($event, $fn, $priority = 0)
     {
-
-    }
-
-    /**
-     * @param string $event
-     * @param array|string $fn
-     * @param int $priority
-     */
-    public static function onTransmission($event, $fn, $priority = 0)
-    {
-        if (! self::binded($event)) {
-            self::$events[$event] = [];
-        }
-
-        self::$events[$event][] = new Listener($fn, $priority);
-        Session::add("__bow.event.listener", self::$events);
+        self::$events['__bow.once.event'][$event] = new Listener($fn, $priority);
     }
 
     /**
@@ -98,11 +103,24 @@ class Event
      */
     public static function emit($event)
     {
+        if (isset(self::$events['__bow.once.event'][$event])) {
+            $listener = self::$events['__bow.once.event'][$event];
+            $data = array_slice(func_get_args(), 1);
+
+            return $listener->call($data);
+        }
+
         if (! self::binded($event)) {
             return false;
         }
 
-        $listeners = new Collection(self::$events[$event]);
+        if (isset(self::$events[$event])) {
+            $events = self::$events[$event];
+        } else {
+            $events = self::$events['__bow.transmission.event'][$event];
+        }
+
+        $listeners = new Collection($events);
         $data = array_slice(func_get_args(), 1);
 
         $listeners->each(function(Listener $listener) use ($data) {
@@ -129,7 +147,7 @@ class Event
     public static function off($event)
     {
         if (self::binded($event)) {
-            unset(self::$events[$event]);
+            unset(self::$events[$event], self::$events['__bow.transmission.event'][$event], self::$events['__bow.once.event'][$event]);
         }
     }
 
@@ -141,7 +159,13 @@ class Event
      */
     public static function binded($event)
     {
-        return array_key_exists($event, self::$events);
+        return array_key_exists($event, self::$events)
+            || array_key_exists($event,
+                isset(self::$events['__bow.transmission.event']) ? self::$events['__bow.transmission.event'] : []
+            )
+            || array_key_exists($event,
+                isset(self::$events['__bow.once.event']) ? self::$events['__bow.once.event'] : []
+            );
     }
 
     /**
