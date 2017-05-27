@@ -32,6 +32,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase
     public function testGetCallbackCache()
     {
         $this->assertEquals(Cache::get('lastname'), 'Franck');
+        $this->assertEquals(Cache::get('age'), 25);
     }
 
     public function testAddArrayCache()

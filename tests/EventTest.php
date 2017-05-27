@@ -25,7 +25,6 @@ class EventTest extends \PHPUnit\Framework\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
         statement('create table if not exists pets (id int, name varchar(255));');
     }
 
