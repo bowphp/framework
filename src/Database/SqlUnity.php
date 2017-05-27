@@ -2,6 +2,7 @@
 namespace Bow\Database;
 
 use \Carbon\Carbon;
+use Bow\Database\Relations\Simple;
 use Bow\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder\QueryBuilder;
 
@@ -11,7 +12,7 @@ use Bow\Database\QueryBuilder\QueryBuilder;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Database
  */
-class SqlUnity implements \IteratorAggregate, \JsonSerializable
+class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
 {
     /**
      * @var \StdClass
@@ -115,14 +116,17 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable
      */
     public function merge($table, $foreign_key = null)
     {
-        $foreign = 'id';
+        $foreign = $table.'_id';
+
         if ($foreign_key == null) {
             if ($this->foreign !== null) {
                 $foreign = $this->foreign;
             }
         }
+
         $this->data->$table = Database::table($table)->where($foreign, $this->id)->get();
         $this->mergeTableName = $table;
+
         return $this;
     }
 
