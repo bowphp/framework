@@ -84,7 +84,7 @@ class BowTestCase extends TestCase
      * @param $method
      * @param $url
      * @param array $params
-     * @return Behovior
+     * @return Behavior
      */
     public function visit($method, $url, array $params = [])
     {
@@ -94,6 +94,6 @@ class BowTestCase extends TestCase
             throw new \BadMethodCallException('La methode ' . $method . ' n\'exist pas');
         }
 
-        return new Behovior($this->$method($url, $params));
+        return new Behavior($this->$method($url, $params));
     }
 }

@@ -1,17 +1,10 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: papac
- * Date: 5/1/17
- * Time: 2:42 PM
- */
 
 namespace Bow\Support\Testing;
 
-
 use Bow\Http\Client\Parser;
 
-class Behovior
+class Behavior
 {
     /**
      * @var Parser
@@ -30,28 +23,33 @@ class Behovior
     public function mustBeJson($message = '')
     {
         Assert::assertJson($this->parser->toJson(), $message);
+        return $this;
     }
 
     public function mustBeExactJson($data, $message = '')
     {
         $json = $this->parser->toJson();
         Assert::assertArraySubset($data, json_decode($json), $message);
+        return $this;
     }
 
     public function mustBeExactText($data, $message = '')
     {
         $text = $this->parser->raw();
         Assert::assertEquals($text, $data, $message);
+        return $this;
     }
 
     public function headerExists($header, $message = '')
     {
         Assert::assertArrayHasKey($header, $this->parser->getHeaders(), $message);
+        return $this;
     }
 
     public function mustBeArray($message = '')
     {
         Assert::assertTrue(is_array($this->parser->toArray()), $message);
+        return $this;
     }
 
     public function statusCodeMustBe($code)
@@ -64,28 +62,24 @@ class Behovior
     {
         $type = $this->parser->getContentType();
         Assert::assertEquals($content_type, current(preg_split('/;(\s+)?/', $type)), $message);
-
         return $this;
     }
 
     public function contentTypeMustBeJson($message = '')
     {
         $this->contentTypeMustBe('application/json', $message);
-
         return $this;
     }
 
     public function contentTypeMustBeText($message = '')
     {
         $this->contentTypeMustBe('text/plain', $message);
-
         return $this;
     }
 
     public function contentTypeMustBeHtml($message = '')
     {
         $this->contentTypeMustBe('text/html', $message);
-
         return $this;
     }
 
@@ -95,18 +89,8 @@ class Behovior
         return $this;
     }
 
-    public function logResponse()
+    public function assertJson($data)
     {
-        var_dump($this->parser->raw());
-    }
-
-    public function logResponseToArray()
-    {
-        var_dump($this->parser->toArray());
-    }
-
-    public function logError()
-    {
-        var_dump($this->parser->getErrorMessage());
+        return $this->mustBeExactJson($data);
     }
 }
