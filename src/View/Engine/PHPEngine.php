@@ -37,22 +37,29 @@ class PHPEngine extends EngineAbstract
         $cache_hash_filename = $this->config->getCachepath().'/view/'.$cache_hash_filename;
 
         extract($data);
-        ob_start();
 
         if (file_exists($cache_hash_filename)) {
             if (filemtime($cache_hash_filename) >= fileatime($filename)) {
-                require $cache_hash_filename;
-                return ob_get_clean();
+                 return require $cache_hash_filename;
             }
         }
 
-        require $filename;
+        ob_start();
+         require $filename;
         $data = ob_get_clean();
 
+        $content = file_get_contents($filename);
         // Mise en cache
         file_put_contents(
             $cache_hash_filename,
-            file_get_contents($filename)
+            <<<PHP
+<?php ob_start(); ?>
+$content
+<?php \$__bow_php_rendering_content = ob_get_clean(); ?>
+
+<?php 
+return \$__bow_php_rendering_content;
+PHP
         );
 
         return $data;
