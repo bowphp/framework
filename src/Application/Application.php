@@ -1,12 +1,12 @@
 <?php
 namespace Bow\Application;
 
-use Bow\Firewall\ApplicationCsrfFirewall;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Logger\Logger;
 use Bow\Exception\RouterException;
 use Bow\Exception\ApplicationException;
+use Bow\Firewall\ApplicationCsrfFirewall;
 
 /**
  * Create and maintener by diagnostic developpers teams:
@@ -201,7 +201,7 @@ class Application
         if (empty($this->globaleFirewall)) {
             throw new ApplicationException('Aucune flux firewall ouvert.');
         }
-        
+
         $this->globaleFirewall = [];
         return $this;
     }
@@ -231,19 +231,18 @@ class Application
     {
         $input = $this->request->input();
 
-        if ($input->has('_method')) {
-
-            $method = strtoupper($input->get('_method'));
-
-            if (in_array($method, ['DELETE', 'PUT'])) {
-                $this->specialMethod = $method;
-                $this->addHttpVerbe($method, $path, $cb);
-            }
-
-            return $this;
+        if (! $input->has('_method')) {
+            return $this->routeLoader('POST', $path, $cb);
         }
 
-        return $this->routeLoader('POST', $path, $cb);
+        $method = strtoupper($input->get('_method'));
+
+        if (in_array($method, ['DELETE', 'PUT'])) {
+            $this->specialMethod = $method;
+            $this->addHttpVerbe($method, $path, $cb);
+        }
+
+        return $this;
     }
 
     /**
@@ -418,7 +417,7 @@ class Application
     /**
      * Lance une personnalisation de route.
      *
-     * @param string $var
+     * @param array|string $var
      * @param string $regexContrainte
      *
      * @return Application
@@ -767,6 +766,9 @@ class Application
         return $this->routes[$method];
     }
 
+    /**
+     * Permet de lancer les middlewares par defaut
+     */
     private function executeApplicationNativeFirewall()
     {
         $status = Actionner::firewall(ApplicationCsrfFirewall::class);
