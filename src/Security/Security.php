@@ -206,14 +206,18 @@ class Security
      */
     public static function tokenCsrfTimeIsExpirate($time = null)
     {
-        if (Session::has('__bow.csrf')) {
-            if ($time === null) {
-                $time = time();
-            }
+        if (! Session::has('__bow.csrf')) {
+            return false;
+        }
 
-            if (Session::has('__bow.csrf')->expirate >= (int) $time) {
-                return true;
-            }
+        if ($time === null) {
+            $time = time();
+        }
+
+        $csrf = Session::get('__bow.csrf');
+
+        if ($csrf->expirate >= (int) $time) {
+            return true;
         }
 
         return false;
@@ -229,15 +233,21 @@ class Security
      */
     public static function verifyCsrfToken($token, $strict = false)
     {
-        $status = false;
 
-        if (Session::has('__bow.csrf')) {
-            if ($token === Session::has('__bow.csrf')->token) {
-                $status = true;
-                if ($strict) {
-                    $status = $status && static::tokenCsrfTimeIsExpirate(time());
-                }
-            }
+        if (! Session::has('__bow.csrf')) {
+            return false;
+        }
+
+        $csrf = Session::get('__bow.csrf');
+
+        if ($token != $csrf->token) {
+            return false;
+        }
+
+        $status = true;
+
+        if ($strict) {
+            $status = $status && static::tokenCsrfTimeIsExpirate(time());
         }
 
         return $status;

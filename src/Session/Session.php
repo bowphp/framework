@@ -19,6 +19,18 @@ class Session implements CollectionAccessStatic
     private static $keys = [];
 
     /**
+     * @var array
+     */
+    const CORE_KEY = [
+        "__bow.flash",
+        "__bow.old",
+        "__bow.event.listener",
+        "__bow.csrf",
+        "__bow.cookie.secure",
+        "__bow.session.key.cache"
+    ];
+
+    /**
      * Session constructor.
      */
     public function __construct()
@@ -41,7 +53,15 @@ class Session implements CollectionAccessStatic
             session_id(hash("sha256", Security::encrypt(uniqid(microtime(false)))));
         }
 
-        return @session_start();
+        $started = @session_start();
+
+        $_SESSION["__bow.csrf"] = new \stdClass();
+        $_SESSION["__bow.session.key.cache"] = [];
+        $_SESSION["__bow.event.listener"] = [];
+        $_SESSION["__bow.flash"] = [];
+        $_SESSION["__bow.old"] = [];
+
+        return $started;
     }
 
     /**
@@ -56,7 +76,7 @@ class Session implements CollectionAccessStatic
         static::start();
 
         foreach($_SESSION as $key => $value) {
-            if (! in_array($key, ["__bow.flash", "__bow.old", "__bow.event.listener", "__bow.csrf", "__bow.cookie.secure"])) {
+            if (! in_array($key, static::CORE_KEY)) {
                 $arr[$key] = $value;
             }
         }
@@ -76,7 +96,7 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (! isset(static::$keys[$key])) {
+        if (! array_key_exists($key, $_SESSION["__bow.session.key.cache"])) {
             return isset($_SESSION['__bow.flash'][$key]);
         }
 
@@ -105,14 +125,14 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (static::has($key)) {
-            return $_SESSION[$key];
-        }
-
         if (isset($_SESSION["__bow.flash"][$key])) {
             $flash = $_SESSION["__bow.flash"][$key];
             unset($_SESSION["__bow.flash"][$key]);
             return $flash;
+        }
+
+        if (static::has($key)) {
+            return $_SESSION[$key];
         }
 
         if (is_callable($default)) {
@@ -126,33 +146,34 @@ class Session implements CollectionAccessStatic
      * Permet d'ajouter une entrée dans la colléction
      *
      * @param string|int $key La clé de la donnée à ajouter
-     * @param mixed $data La donnée à ajouter
+     * @param mixed $value La donnée à ajouter
      * @param boolean $next Elle permet si elle est a true d'ajouter la donnée si la clé existe
      *                      Dans un tableau
      *
      * @throws InvalidArgumentException
      * @return mixed
      */
-    public static function add($key, $data, $next = false)
+    public static function add($key, $value, $next = false)
     {
         static::start();
 
-        if ($next !== true) {
-            return $_SESSION[$key] = $data;
+        if (! isset($_SESSION["__bow.session.key.cache"])) {
+            $_SESSION["__bow.session.key.cache"] = [];
+        }
+
+        $_SESSION["__bow.session.key.cache"][$key] = true;
+
+        if ($next == false) {
+            return $_SESSION[$key] = $value;
         }
 
         if (! static::has($key)) {
-            $_SESSION[$key] = $data;
+            $_SESSION[$key] = [];
         }
 
-        if (! is_array($_SESSION[$key])) {
-            $_SESSION[$key] = [$_SESSION[$key]];
-        }
+        $_SESSION[$key] = array_merge($_SESSION[$key], $value);
 
-        array_push($_SESSION[$key], $data);
-        static::$keys[$key] = true;
-
-        return $data;
+        return $value;
     }
 
     /**
@@ -175,10 +196,13 @@ class Session implements CollectionAccessStatic
     public static function remove($key)
     {
         self::start();
+
         $old = null;
+
         if (static::has($key)) {
             $old = $_SESSION[$key];
         }
+
         unset($_SESSION[$key]);
         return $old;
     }
@@ -193,15 +217,18 @@ class Session implements CollectionAccessStatic
      */
     public static function set($key, $value)
     {
-        $old = null;
         static::start();
+
+        $old = null;
+        $_SESSION['__bow.session.key.cache'][$key] = true;
 
         if (static::has($key)) {
             $old = $_SESSION[$key];
             $_SESSION[$key] = $value;
-        } else {
-            $_SESSION[$key] = $value;
+            return $old;
         }
+
+        $_SESSION[$key] = $value;
 
         return $old;
     }
