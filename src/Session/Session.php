@@ -147,7 +147,7 @@ class Session implements CollectionAccessStatic
      *
      * @param string|int $key La clé de la donnée à ajouter
      * @param mixed $value La donnée à ajouter
-     * @param boolean $next Elle permet si elle est a true d'ajouter la donnée si la clé existe
+     * @param boolean $next Elle permet, si elle est a true d'ajouter la donnée si la clé existe
      *                      Dans un tableau
      *
      * @throws InvalidArgumentException
@@ -171,7 +171,11 @@ class Session implements CollectionAccessStatic
             $_SESSION[$key] = [];
         }
 
-        $_SESSION[$key] = array_merge($_SESSION[$key], $value);
+        if (! is_array($_SESSION[$key])) {
+            $_SESSION[$key] = [$_SESSION[$key]];
+        }
+
+        $_SESSION[$key] = array_merge($_SESSION[$key], [$value]);
 
         return $value;
     }
