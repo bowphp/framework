@@ -31,7 +31,7 @@ class Capsule implements \ArrayAccess
     public function make($key)
     {
         if (isset($this->factories[$key])) {
-            return $this->factories[$key]();
+            return $this->factories[$key]($this);
         }
 
         if (isset($this->instances[$key])) {
@@ -39,7 +39,7 @@ class Capsule implements \ArrayAccess
         }
 
         if (! isset($this->registers[$key])) {
-            return null;
+            return $this->resolve($key);
         }
 
         if (is_callable($this->registers[$key])) {
@@ -87,13 +87,10 @@ class Capsule implements \ArrayAccess
     /**
      * @param string $key
      * @return mixed
+     * @throws \ErrorException
      */
-    private function resolve($key)
+    public function resolve($key)
     {
-        if (! $this->offsetExists($key)) {
-            return null;
-        }
-
         $reflection = new \ReflectionClass($key);
 
         if (! $reflection->isInstantiable()) {
@@ -110,7 +107,7 @@ class Capsule implements \ArrayAccess
 
         foreach ($parameters as $parameter) {
             if ($parameter->getClass()) {
-                $parameters_lists[] = $this->make($parameter->getName());
+                $parameters_lists[] = $this->make($parameter->getClass()->getName());
             } else {
                 $parameters_lists[] = $parameter->getDefaultValue();
             }
