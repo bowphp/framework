@@ -13,6 +13,11 @@ class MysqlAdapter extends AbstractConnection
     protected $name = 'mysql';
 
     /**
+     * Port par defaut
+     */
+    const PORT = 3306;
+
+    /**
      * MysqlAdapter constructor.
      *
      * @param array $config
@@ -29,19 +34,36 @@ class MysqlAdapter extends AbstractConnection
     public function connection()
     {
         // Construction de la dsn
-        $dns  = "mysql:host=" . (isset($this->config['socket']) && $this->config['socket'] != null ? $this->config['socket'] : $this->config['hostname']);
-        $dns .= isset($this->config['port']) && $this->config['port'] != null ? ":" . $this->config["port"] : "";
-        $dns .= ";dbname=". $this->config['database'];
+        if (isset($this->config['socket']) && $this->config['socket'] != null) {
+            $hostname = $this->config['socket'];
+        } else {
+            $hostname = $this->config['hostname'];
+        }
+
+        $port = '';
+
+        if ($hostname != 'localhost') {
+            if (isset($this->config['port']) && $this->config['port'] !== null) {
+                $port = ':'.$this->config['port'];
+            } else {
+                $port = ':'.self::PORT;
+            }
+        }
+
+        // Formatage des paramètres de connection
+        $host  = "mysql:host=".$hostname.$port;
+        $database = "dbname=".$this->config['database'];
         $username = $this->config["username"];
         $password = $this->config["password"];
+
         // Configuration suppelement coté PDO
         $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => $this->fetch,
+            PDO::ATTR_DEFAULT_FETCH_MODE => isset($this->config['fetch']) ? $this->config['fetch'] : $this->fetch,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . Str::upper($this->config["charset"]),
             PDO::ATTR_ORACLE_NULLS => PDO::NULL_EMPTY_STRING
         ];
 
-        $this->pdo = new PDO($dns, $username, $password, $options);
+        $this->pdo = new PDO($host.';'.$database, $username, $password, $options);
     }
 }
