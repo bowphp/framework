@@ -355,16 +355,21 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * clause join
      *
-     * @param $QueryBuilder
+     * @param string $table
+     * @param callable $callabe
      *
      * @return QueryBuilder
      */
-    public function join($QueryBuilder)
+    public function join($table, callable $callabe = null)
     {
         if (is_null($this->join)) {
-            $this->join = 'inner join `'.$QueryBuilder.'`';
+            $this->join = 'inner join `'.$table.'`';
         } else {
-            $this->join .= ', `'.$QueryBuilder.'`';
+            $this->join .= ', `'.$table.'`';
+        }
+
+        if (is_callable($callabe)) {
+            $callabe($this);
         }
 
         return $this;
@@ -373,21 +378,27 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * clause left join
      *
-     * @param $QueryBuilder
+     * @param string $table
+     * @param callable $callable
      *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
-    public function leftJoin($QueryBuilder)
+    public function leftJoin($table, callable $callable = null)
     {
         if (is_null($this->join)) {
-            $this->join = 'left join `'.$QueryBuilder.'`';
+            $this->join = 'left join `'.$table.'`';
+            if (is_callable($callable)) {
+                $callable($this);
+            }
             return $this;
         }
 
         if (! preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
-            $this->join .= ', `'.$QueryBuilder.'`';
+            $this->join .= ', `'.$table.'`';
+            if (is_callable($callable)) {
+                $callable($this);
+            }
             return $this;
         }
 
@@ -395,45 +406,33 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * Action first, récupère le première enregistrement
-     *
-     * @return mixed
-     */
-    public function last()
-    {
-        $where = $this->where;
-        $whereData = $this->whereDataBinding;
-
-        // On compte le tout.
-        $c = $this->count();
-
-        $this->where = $where;
-        $this->whereDataBinding = $whereData;
-
-        return $this->jump($c - 1)->take(1)->getOne();
-    }
-
-    /**
      * clause right join
      *
-     * @param $QueryBuilder
+     * @param string $table
+     * @param callable $callable
+     *
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function rightJoin($QueryBuilder)
+    public function rightJoin($table, callable $callable)
     {
         if (is_null($this->join)) {
-            $this->join = 'right join `'.$QueryBuilder.'`';
+            $this->join = 'right join `'.$table.'`';
+            if (is_callable($callable)) {
+                $callable($this);
+            }
             return $this;
         }
 
         if (! preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
-            $this->join .= ', `'.$QueryBuilder.'`';
+            $this->join .= ', `'.$table.'`';
+            if (is_callable($callable)) {
+                $callable($this);
+            }
             return $this;
         }
 
         throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
-
     }
 
     /**
@@ -687,7 +686,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         // Execution de requete.
-        $sql = $this->getSelectStatement();
+        $sql = $this->toSql();
 
         $stmt = $this->connection->prepare($sql);
         static::bind($stmt, $this->whereDataBinding);
@@ -777,6 +776,25 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     public function first()
     {
         return $this->getOne();
+    }
+
+    /**
+     * Action first, récupère le première enregistrement
+     *
+     * @return mixed
+     */
+    public function last()
+    {
+        $where = $this->where;
+        $whereData = $this->whereDataBinding;
+
+        // On compte le tout.
+        $c = $this->count();
+
+        $this->where = $where;
+        $this->whereDataBinding = $whereData;
+
+        return $this->jump($c - 1)->take(1)->getOne();
     }
 
     /**
@@ -1179,7 +1197,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @return string
      */
-    private function getSelectStatement()
+    public function toSql()
     {
         $sql = 'select ';
 
