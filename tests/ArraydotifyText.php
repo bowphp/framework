@@ -13,7 +13,7 @@ class ArraydotifyText extends \PHPUnit\Framework\TestCase
     protected $collection = [
         'name' => 'bow',
         'lastname' => 'framework',
-        'bio' => '',
+        'bio' => 'The php micro framework',
         'author' => [
             'name' => 'Franck Dakia',
             'email' => 'dakiafranck@gmail.com'
@@ -43,16 +43,16 @@ class ArraydotifyText extends \PHPUnit\Framework\TestCase
 
     public function testGetCodeName()
     {
-        $this->assertTrue($this->dot['code.name'] == 'bow');
+        $this->assertEquals($this->dot['code.name'], 'bow');
     }
 
     public function testGetCodeLastname()
     {
-        $this->assertTrue($this->dot['code.lastname'] == 'framework');
+        $this->assertEquals($this->dot['code.lastname'], 'framework');
     }
 
     public function testGetCodeLocation()
     {
-        $this->assertTrue(is_array($this->dot['code.location']));
+        $this->assertEquals($this->dot['code.location.state.abr'], 'CI');
     }
 }
