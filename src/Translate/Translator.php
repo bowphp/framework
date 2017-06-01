@@ -1,6 +1,8 @@
 <?php
 namespace Bow\Translate;
 
+use Bow\Support\Arraydotify;
+
 class Translator
 {
     /**
@@ -42,60 +44,84 @@ class Translator
     }
 
     /**
+     * @return Translator
+     */
+    public static function singleton()
+    {
+        return static::$instance;
+    }
+
+    /**
      * Permet de faire la tranduction
      *
-     * @param string $translation
+     * @param string $key
      * @param array $data
-     * @param int $choose
+     * @param bool $plurial
      * @return string
      */
-    public static function make($translation, $data = [], $choose = null)
+    public static function make($key, array $data = [], $plurial = false)
     {
-        if (! is_string($translation)) {
+        if (! is_string($key)) {
             throw new \InvalidArgumentException('La premier parametre doit etre une chaine de carractère.', E_USER_ERROR);
         }
 
-        if (is_int($data)) {
-            $choose = $data;
-            $data = [];
-        }
-
-        $base_dir = static::$directory.'/'.static::$lang;
-        $map = explode('.', $translation);
+        $map = explode('.', $key);
 
         if (count($map) == 1) {
-            return $translation;
+            return $key;
         }
 
-        $translation_filename = $base_dir.'/'.$map[0].'.php';
+        // Formatage du path de fichier de la translation
+        $translation_filename = static::$directory.'/'.static::$lang.'/'.current($map).'.php';
 
         if (! file_exists($translation_filename)) {
-            return $translation;
+            return $key;
         }
 
-        $translation_contents = require $translation_filename;
+        array_shift($map);
+        $key = implode('.', $map);
 
-        if (! isset($translation_contents[$map[1]])) {
-            return $translation;
+        $contents = require $translation_filename;
+        $translations = Arraydotify::make($contents);
+
+        if (! isset($translations[$key])) {
+            return $key;
         }
 
-        $translation_contents = $translation_contents[$map[1]];
+        $value = $translations[$key];
+        $parts = explode('|', $value);
 
-        if (! is_string($translation_contents)) {
-            return $translation;
-        }
-
-        if (is_int($choose)) {
-            list($single, $pluriel) = explode('|', $translation_filename);
-
-            if ($choose > 1 && is_string($pluriel)) {
-                $translation_contents = $pluriel;
+        if ($plurial === true) {
+            if (isset($parts[1])) {
+                $value = $parts[1];
             } else {
-                $translation_contents = $single;
+                return $key;
             }
+        } else {
+            $value = $parts[0];
         }
 
-        return static::format($translation_contents, $data);
+        return static::format($value, $data);
+    }
+
+    /**
+     * @param $key
+     * @param array $data
+     * @return string
+     */
+    public static function single($key, array $data = [])
+    {
+        return static::make($key, $data);
+    }
+
+    /**
+     * @param $key
+     * @param array $data
+     * @return string
+     */
+    public static function pluiral($key, array $data = [])
+    {
+        return static::make($key, $data, true);
     }
 
     /**
@@ -105,12 +131,28 @@ class Translator
      * @param array $values
      * @return string
      */
-    private static function format($str, array $values)
+    private static function format($str, array $values = [])
     {
         foreach ($values as $key => $value) {
-            $str = str_replace(':'.$key, $value, $str);
+            $str = preg_replace('/\{\{\s*'.$key.'\s*\}\}/', $value, $str);
         }
 
         return $str;
+    }
+
+    /**
+     * __call
+     *
+     * @param $name
+     * @param $arguments
+     * @return string
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists(static::class, $name)) {
+            return call_user_func_array([static::class, $name], $arguments);
+        }
+
+        throw new \BadMethodCallException('undefined method '.$name);
     }
 }
