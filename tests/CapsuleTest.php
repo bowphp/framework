@@ -35,11 +35,9 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
             return new \stdClass();
         });
         self::$capsule->bind('MyClass', function ($c) {
-            fwrite(STDOUT, uniqid().'-');
             return new MyClass($c['\Bow\Support\Collection']);
         });
         self::$capsule->factory('\Bow\Support\Collection', function () {
-            fwrite(STDOUT, uniqid().'-');
             return new \Bow\Support\Collection();
         });
     }
@@ -57,6 +55,8 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
 
     public function testMakeMyClassContainer()
     {
-        $this->assertInstanceOf(MyClass::class, self::$capsule->make('MyClass'));
+        $myclass = self::$capsule->make('MyClass');
+        $this->assertInstanceOf(MyClass::class, $myclass);
+        $this->assertInstanceOf(\Bow\Support\Collection::class, $myclass->getCollection());
     }
 }
