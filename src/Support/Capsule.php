@@ -7,7 +7,22 @@ class Capsule implements \ArrayAccess
     /**
      * @var array
      */
-    private $container = [];
+    private $registers = [];
+
+    /**
+     * @var array
+     */
+    private $instances = [];
+
+    /**
+     * @var array
+     */
+    private $factories = [];
+
+    /**
+     * @var array
+     */
+    private $key = [];
 
     /**
      * @param string $key
@@ -15,16 +30,28 @@ class Capsule implements \ArrayAccess
      */
     public function make($key)
     {
-        if (is_callable($this->container[$key])) {
-            return $this->container[$key]($this);
+        if (isset($this->factories[$key])) {
+            return $this->factories[$key]();
         }
 
-        if (! is_object($this->container[$key])) {
-            return $this[$key];
+        if (isset($this->instances[$key])) {
+            return $this->instances[$key];
         }
 
-        if (method_exists($this->container[$key], '__invoke')) {
-            return $this->container[$key]($this);
+        if (! isset($this->registers[$key])) {
+            return null;
+        }
+
+        if (is_callable($this->registers[$key])) {
+            return $this->instances[$key] = $this->registers[$key]($this);
+        }
+
+        if (! is_object($this->registers[$key])) {
+            return $this->instances[$key] = $this->resolve($key);
+        }
+
+        if (method_exists($this->registers[$key], '__invoke')) {
+            return  $this->instances[$key] = $this->registers[$key]($this);
         }
 
         return null;
@@ -32,20 +59,64 @@ class Capsule implements \ArrayAccess
 
     /**
      * @param string $key
-     * @return mixed
+     * @param mixed $value
      */
-    public function get($key)
+    public function bind($key, $value)
     {
-        return $this[$key];
+        $this->key[$key] = true;
+        $this[$key] = $value;
+    }
+
+    /**
+     * @param $key
+     * @param \Closure $value
+     */
+    public function factory($key, \Closure $value)
+    {
+        $this->factories[$key] = $value;
+    }
+
+    /**
+     * @param $instance
+     */
+    public function instance($instance)
+    {
+        $this->factories[] = $instance;
     }
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @return mixed
      */
-    public function set($key, $value)
+    private function resolve($key)
     {
-        $this[$key] = $value;
+        if (! $this->offsetExists($key)) {
+            return null;
+        }
+
+        $reflection = new \ReflectionClass($key);
+
+        if (! $reflection->isInstantiable()) {
+            return $key;
+        }
+
+        $constructor = $reflection->getConstructor();
+        if (! $constructor) {
+            return $reflection->newInstance();
+        }
+
+        $parameters = $constructor->getParameters();
+        $parameters_lists = [];
+
+        foreach ($parameters as $parameter) {
+            if ($parameter->getClass()) {
+                $parameters_lists[] = $this->make($parameter->getName());
+            } else {
+                $parameters_lists[] = $parameter->getDefaultValue();
+            }
+        }
+
+        return $reflection->newInstanceArgs($parameters_lists);
     }
 
     /**
@@ -53,7 +124,7 @@ class Capsule implements \ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return isset($this->container[$offset]);
+        return isset($this->key[$offset]);
     }
 
     /**
@@ -69,7 +140,7 @@ class Capsule implements \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $this->container[$offset] = $value;
+        $this->registers[$offset] = $value;
     }
 
     /**
@@ -77,6 +148,6 @@ class Capsule implements \ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        unset($this->container[$offset]);
+        unset($this->registers[$offset]);
     }
 }
