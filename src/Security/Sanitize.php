@@ -64,6 +64,7 @@ class Sanitize
     /**
      * Permet de nettoye rune chaine de caractère
      * ',<tag>,&nbsp;
+     *
      * @param string $data les données a sécurisé
      * @return string
      */
