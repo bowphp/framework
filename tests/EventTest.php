@@ -10,13 +10,13 @@ class EventTable extends \Bow\Database\Model
     {
         parent::__construct($data);
         EventTable::created(function() {
-            echo 'Created';
+            // fwrite(STDOUT, 'Created');
         });
         EventTable::deleted(function() {
-            echo 'Deleted';
+            // fwrite(STDOUT, 'Deleted');
         });
         EventTable::updated(function() {
-            echo 'Updated';
+            // fwrite(STDOUT, 'Updated');
         });
     }
 }
