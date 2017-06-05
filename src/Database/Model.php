@@ -350,7 +350,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function deleted(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-        event_once($env.'.ondelete', $cb);
+        add_event_once($env.'.ondelete', $cb);
     }
 
     /**
@@ -361,7 +361,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function created(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-        event_once($env . '.oncreate', $cb);
+        add_event_once($env . '.oncreate', $cb);
     }
 
     /**
@@ -372,7 +372,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function updated(callable $cb)
     {
         $env = str_replace('\\', '.', strtolower(static::class));
-        event_once($env.'.onupdate', $cb);
+        add_event_once($env.'.onupdate', $cb);
     }
 
     /**
@@ -439,7 +439,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
                 $env = str_replace('\\', '.', strtolower(static::class));
 
-                if (emitter()->binded($env.'.onupdate')) {
+                if (emitter()->bound($env.'.onupdate')) {
                     emitter()->emit($env.'.onupdate');
                 }
 
@@ -462,7 +462,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->attributes[$this->primaryKey] = $primary_key_value;
         $this->original = $this->attributes;
 
-        if (emitter()->binded(strtolower(static::class).'.oncreate')) {
+        if (emitter()->bound(strtolower(static::class).'.oncreate')) {
             emitter()->emit(strtolower(static::class).'.oncreate');
         }
 
@@ -489,7 +489,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $r = self::$builder->where($this->primaryKey, $primary_key_value)->delete();
         $env = str_replace('\\', '.', strtolower(static::class));
 
-        if ($r !== 0 && emitter()->binded($env.'.ondelete')) {
+        if ($r !== 0 && emitter()->bound($env.'.ondelete')) {
             emitter()->emit($env.'.ondelete');
         }
 

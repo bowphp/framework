@@ -2,13 +2,33 @@
 
 namespace Bow\Http;
 
+use Bow\Session\Session;
+
 class Redirect
 {
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * @var Response
+     */
+    private $response;
+
+    /**
+     * Redirect constructor.
+     */
+    public function __construct()
+    {
+        $this->request = Request::singleton();
+        $this->response = Response::singleton();
+    }
+
     /**
      * redirect, permet de lancer une redirection vers l'url passé en paramêtre
      *
      * @param string|array $path L'url de rédirection
-     * @param array $data des données a récupéré dans la page de rédirection
      *
      *  Si $path est un tableau :
      *
@@ -24,7 +44,7 @@ class Redirect
      * ];
      *
      */
-    public function to($path, array $data = [])
+    public function to($path)
     {
         if (is_string($path)) {
             $path = ['url' => $path];
@@ -46,37 +66,29 @@ class Redirect
             $url .= '#' . $path['#'];
         }
 
-        if (empty($data)) {
-            if (isset($path['data'])) {
-                $data = $path['data'];
-            }
-        }
-
         header('Location: ' . $url);
         exit;
     }
 
     /**
-     * Permet de rédiriger vers 404
-     *
-     * @return self
+     * @param array $data
      */
-    public function to404()
+    public function withInput(array $data)
     {
-        Response::instance()->statusCode(404);
-
-        return $this;
+        Session::add('__bow.old', $data);
     }
 
     /**
      * Permet de faire une rédirection sur l'url précédent
      *
+     * @param int $status
      * @param array $data
      */
-    public function back(array $data = [])
+    public function back($status = 302, array $data = [])
     {
-        $referer = Request::singleton()->referer();
+        $this->withInput($data);
+        $this->response->statusCode($status);
 
-        $this->to($referer, $data);
+        $this->to($this->request->referer());
     }
 }

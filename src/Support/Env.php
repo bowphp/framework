@@ -32,6 +32,27 @@ class Env
      */
     public static function get($key, $default = null)
     {
+        $value = getenv(Str::upper($key));
+
+        if (! is_null($value)) {
+            return $value;
+        }
+
         return isset(static::$env->$key) ? static::$env->$key : $default;
+    }
+
+    /**
+     * Permet de modifier l'information de l'environement
+     *
+     * @param string $key
+     * @param null $value
+     */
+    public static function set($key, $value)
+    {
+        if (isset(static::$env->$key)) {
+            static::$env->$key = $value;
+        }
+
+        putenv(Str::upper($key) . '=' . $value);
     }
 }

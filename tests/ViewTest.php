@@ -6,9 +6,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 {
     public function config()
     {
-        return \Bow\Application\Configuration::configure([
-            'application' => require realpath(__DIR__.'/config/application.php')
-        ]);
+        return \Bow\Application\Configuration::configure(__DIR__);
     }
 
     public function testTwigCompilation()

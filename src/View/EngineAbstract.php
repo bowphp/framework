@@ -34,12 +34,12 @@ abstract class EngineAbstract
      */
     protected function checkParseFile($filename)
     {
-        $filename = preg_replace('/@|\./', '/', $filename) . $this->config->getTemplateExtension();
+        $filename = preg_replace('/@|\./', '/', $filename) . $this->config['view.extension'];
 
         // Vérification de l'existance du fichier
-        if ($this->config->getViewpath() !== null) {
-            if (! file_exists($this->config->getViewpath() . '/' . $filename)) {
-                throw new ViewException('La vue ['.$filename.'] n\'existe pas. ' . $this->config->getViewpath() . '/' . $filename, E_ERROR);
+        if ($this->config['view.path'] !== null) {
+            if (! file_exists($this->config['view.path'].'/'.$filename)) {
+                throw new ViewException('La vue ['.$filename.'] n\'existe pas. ' . $this->config['view.path'] . '/' . $filename, E_ERROR);
             }
         } else {
             if (! file_exists($filename)) {

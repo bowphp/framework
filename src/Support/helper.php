@@ -15,6 +15,7 @@ use Bow\Event\Event;
 use Bow\Support\Env;
 use Bow\Support\Util;
 use Bow\Session\Cookie;
+use Bow\Support\Capsule;
 use Bow\Session\Session;
 use Bow\Resource\Storage;
 use Bow\Security\Security;
@@ -22,87 +23,40 @@ use Bow\Support\Collection;
 use Bow\Database\Database as DB;
 use Bow\Application\Configuration;
 
+if (! function_exists('app')) {
+    /**
+     * @param null $key
+     * @param array $setting
+     * @return \Bow\Support\Capsule|mixed
+     */
+    function app($key = null, $setting = []) {
+        $capsule = Capsule::getInstance();
+
+        if ($key == null && $setting == null) {
+            return $capsule;
+        }
+
+        if ($setting == null) {
+            return $capsule->make($key);
+        }
+
+        return $capsule->makeWith($key, $setting);
+    }
+}
+
 if (! function_exists('config')) {
     /**
      * Application configuration
-     * @param string|array $param
-     * @param mixed $newConfig
+     * @param string|array $key
+     * @param mixed $setting
      * @return Configuration|mixed
      */
-    function config($param = null, $newConfig = null) {
-        $config = Configuration::instance();
-
-        if ($param === null) {
-            return $config;
-        }
-
-        if (!in_array($param, ['name', 'engine', 'root', 'public', 'view path', 'logger', 'local', 'key', 'cache', 'db', 'name', 'mail', 'ftp', 'resource', 'storage', null])) {
-            throw new InvalidArgumentException('Paramètre invalide.', E_USER_ERROR);
-        }
-
-        switch(true) {
-            case $param === 'public':
-                if ($newConfig === null) {
-                    return $config->getPublicPath();
-                }
-                $config->setPublicPath($newConfig);
-                break;
-            case $param === 'engine':
-                if ($newConfig === null) {
-                    return $config->getTemplateEngine();
-                }
-                $config->setTemplateEngine($newConfig);
-                break;
-            case $param === 'root':
-                if ($newConfig === null) {
-
-                }
-                return $config->getApproot();
-                break;
-            case $param === 'name':
-                if ($newConfig === null) {
-                    return $config->getAppname();
-                }
-                $config->setAppname($newConfig);
-                break;
-            case $param === 'route':
-                return $config->getApplicationRoutes();
-                break;
-            case $param === 'view path':
-                if ($newConfig === null) {
-                    return $config->getViewpath();
-                }
-                $config->setViewpath($newConfig);
-                break;
-            case $param === 'mail':
-                return $config->getMailConfiguration();
-                break;
-            case $param === 'db':
-                return $config->getDatabaseConfiguration();
-                break;
-            case $param === 'key':
-                if ($newConfig === null) {
-                    return $config->getAppkey();
-                }
-                return $config->setAppkey($newConfig);
-                break;
-            case $param === 'cache':
-                if ($newConfig === null) {
-                    return $config->getCachepath();
-                }
-                return $config->setCachepath($newConfig);
-                break;
-            case $param === 'ftp':
-                return $config->getFtpConfiguration();
-                break;
-            case $param === 'resource':
-                return $config->getResourceConfiguration();
-                break;
-            case $param === 'storage':
-                return $config->getDefaultStoragePath();
-                break;
-        }
-        return $config;
+    function config($key = null, $setting = null) {
+        app('config', function () {
+            return Configuration::singleton();
+        });
+        $config = app('config');
+        return $config($key, $setting);
     }
 }
 
@@ -117,15 +71,21 @@ if (! function_exists('response')) {
      */
     function response($template = null, $code = 200, $type = 'text/html') {
 
+        app()->bind('response', function () {
+            return new \Bow\Http\Response();
+        });
+
+        $response = app('response');
+        $response->statusCode($code);
+
         if (is_null($template)) {
-            return \Bow\Http\Response::instance();
+            return $response;
         }
 
-        set_header('Content-Type', $type);
-        status_code($code);
-        query_response('send', [$template]);
+        $response->addHeader('Content-Type', $type);
+        $response->send($template);
 
-        return \Bow\Http\Response::instance();
+        return $response;
     }
 }
 
@@ -136,7 +96,11 @@ if (! function_exists('request')) {
      * @return \Bow\Http\Request
      */
     function request() {
-        return \Bow\Http\Request::singleton();
+        app()->bind('request', function () {
+            return \Bow\Http\Request::singleton();
+        });
+
+        return app('request');
     }
 }
 
@@ -237,21 +201,6 @@ if (! function_exists('query_maker')) {
         }
 
         return $rs;
-    }
-}
-
-if (! function_exists('query_response')) {
-    /**
-     * @param string $method
-     * @param array $param
-     *
-     * @return mixed
-     */
-    function query_response($method, $param) {
-        if (method_exists(response(), $method)) {
-            return call_user_func_array([response(), $method], $param);
-        }
-        return null;
     }
 }
 
@@ -529,7 +478,7 @@ if (! function_exists('json')) {
      * @return mixed
      */
     function json($data, $code = 200) {
-        return query_response('json', [$data, $code]);
+        return response()->json('json', [$data, $code]);
     }
 }
 
@@ -541,10 +490,9 @@ if (! function_exists('download')) {
      * @param null|string $name
      * @param array $headers
      * @param string $disposition
-     * @return mixed
      */
     function download($file, $name, $headers, $disposition) {
-        return query_response('download', [$file, $name, $headers, $disposition]);
+        response()->download($file, $name, $headers, $disposition);
     }
 }
 
@@ -572,7 +520,7 @@ if (! function_exists('sanitaze')) {
         if (is_numeric($data)) {
             return $data;
         } else {
-            return Security::sanitaze($data);
+            return \Bow\Security\Sanitize::make($data);
         }
     }
 }
@@ -589,7 +537,7 @@ if (! function_exists('secure')) {
         if (is_numeric($data)) {
             return $data;
         } else {
-            return Security::sanitaze($data, true);
+            return \Bow\Security\Sanitize::secure($data);
         }
     }
 }
@@ -602,7 +550,7 @@ if (! function_exists('set_header')) {
      * @param string $value la valeur à assigner
      */
     function set_header($key, $value) {
-        query_response('addHeader', [$key, $value]);
+        response()->addHeader($key, $value);
     }
 }
 
@@ -636,20 +584,6 @@ if (! function_exists('redirect')) {
     }
 }
 
-if (! function_exists('send_file')) {
-    /**
-     * send_file c'est un alias de require, mais vas chargé les fichiers contenu dans
-     * la vie de l'application. Ici <code>sendfile</code> résoue le problème de scope.
-     *
-     * @param string $filename le nom du fichier
-     * @param array $bind les données la exporter
-     * @return mixed
-     */
-    function send_file($filename, $bind = []) {
-        return query_response('sendFile', [$filename, $bind]);
-    }
-}
-
 if (! function_exists('send')) {
     /**
      * alias de echo avec option auto die
@@ -658,7 +592,7 @@ if (! function_exists('send')) {
      * @return mixed
      */
     function send($data) {
-        return query_response('send', [$data]);
+        return response()->send($data);
     }
 }
 
@@ -790,7 +724,7 @@ if (! function_exists('encrypt')) {
      * @return string
      */
     function encrypt($data) {
-        return Security::encrypt($data);
+        return \Bow\Security\Crypto::encrypt($data);
     }
 }
 
@@ -802,7 +736,7 @@ if (! function_exists('decrypt')) {
      * @return string
      */
     function decrypt($data) {
-        return Security::decrypt($data);
+        return \Bow\Security\Crypto::decrypt($data);
     }
 }
 
@@ -838,7 +772,7 @@ if (! function_exists('commit')) {
     }
 }
 
-if (! function_exists('event')) {
+if (! function_exists('add_event')) {
     /**
      * Alias de la class Event::on
      *
@@ -847,18 +781,16 @@ if (! function_exists('event')) {
      * @return Event;
      * @throws \Bow\Exception\EventException
      */
-    function event($event = null, $fn) {
-        if ($event === null) {
-            return emitter();
-        }
+    function add_event($event, $fn) {
         if (! is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
+
         return call_user_func_array([emitter(), 'on'], [$event, $fn]);
     }
 }
 
-if (! function_exists('event_once')) {
+if (! function_exists('add_event_once')) {
     /**
      * Alias de la class Event::once
      *
@@ -867,7 +799,7 @@ if (! function_exists('event_once')) {
      * @return Event;
      * @throws \Bow\Exception\EventException
      */
-    function event_once($event, $fn) {
+    function add_event_once($event, $fn) {
         if (! is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
@@ -875,7 +807,7 @@ if (! function_exists('event_once')) {
     }
 }
 
-if (! function_exists('event_transmisson')) {
+if (! function_exists('add_transmisson_event')) {
     /**
      * Alias de la class Event::once
      *
@@ -884,10 +816,7 @@ if (! function_exists('event_transmisson')) {
      * @return Event;
      * @throws \Bow\Exception\EventException
      */
-    function event_transmisson($event = null, $fn) {
-        if ($event === null) {
-            return emitter();
-        }
+    function add_transmisson_event($event = null, $fn) {
         if (! is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
@@ -907,14 +836,14 @@ if (! function_exists('emitter')) {
     }
 }
 
-if (! function_exists('emit')) {
+if (! function_exists('emit_event')) {
     /**
      * Alias de la class Event::emit
      *
      * @param string $event
      * @throws \Bow\Exception\EventException
      */
-    function emit($event) {
+    function emit_event($event) {
         if (! is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
@@ -937,19 +866,6 @@ if (! function_exists('flash')) {
     }
 }
 
-
-if (! function_exists('middleware')) {
-    /**
-     * middleware, Permet de lancer un middleware n'import ou dans votre projet
-     *
-     * @param string $name Le nom du middleware a lancé
-     * @return mixed
-     */
-    function middleware($name) {
-        return \Bow\Application\Actionner::call($name, request(), config()->getNamespace());
-    }
-}
-
 if (! function_exists('email')) {
     /**
      * Alias sur SimpleMail et Smtp
@@ -968,25 +884,6 @@ if (! function_exists('email')) {
         }
 
         return Mail::send($view, $data, $callable);
-    }
-}
-
-if (! function_exists('env')) {
-    /**
-     * env manipule les variables d'environement du server.
-     *
-     * @param $key
-     * @param null $value
-     *
-     * @return bool|string
-     */
-    function env($key, $value = null) {
-        if ($value !== null) {
-            return getenv(\Bow\Support\Str::upper($key));
-        } else {
-            return putenv(\Bow\Support\Str::upper($key) . '=' . $value);
-        }
-
     }
 }
 
@@ -1045,7 +942,7 @@ if (! function_exists('cookie')) {
     }
 }
 
-if (! function_exists('validate')) {
+if (! function_exists('validator')) {
     /**
      * Elle permet de valider les inforations sur le critère bien définie
      *
@@ -1053,17 +950,17 @@ if (! function_exists('validate')) {
      * @param array $rules  Les critaires de validation
      * @return \Bow\Validation\Validate
      */
-    function validate(array $inputs, array $rules) {
+    function validator(array $inputs, array $rules) {
         return \Bow\Validation\Validator::make($inputs, $rules);
     }
 }
 
-if (! function_exists('bowdate')){
+if (! function_exists('bow_date')){
     /**
      * @param null $date
      * @return \Bow\Support\DateAccess
      */
-    function bowdate($date = null) {
+    function bow_date($date = null) {
         return new \Bow\Support\DateAccess($date);
     }
 }
@@ -1104,7 +1001,7 @@ if (! function_exists('route')) {
      * @return string
      */
     function route($name, array $data = []) {
-        $routes = config()->getApplicationRoutes();
+        $routes = config('app.routes');
 
         if (! isset($routes[$name])) {
             throw new \InvalidArgumentException($name .'n\'est pas un nom définie.', E_USER_ERROR);
@@ -1116,7 +1013,7 @@ if (! function_exists('route')) {
             $url = str_replace(':'. $key, $value, $url);
         }
 
-        return rtrim(app_env('BASE_URL'), '/').'/'.ltrim($url, '/');
+        return rtrim(env('BASE_URL'), '/').'/'.ltrim($url, '/');
     }
 }
 
@@ -1186,6 +1083,17 @@ if (! function_exists('cache')) {
     }
 }
 
+if (! function_exists('back')) {
+    /**
+     * @param int $status
+     * @param array $headers
+     */
+    function back($status = 302, $headers = [])
+    {
+        redirect()->back($status, $headers);
+    }
+}
+
 if (! function_exists('bow_hash')) {
     /**
      * Alias sur la class Hash.
@@ -1196,9 +1104,10 @@ if (! function_exists('bow_hash')) {
      */
     function bow_hash($data, $hash_value = null)
     {
-        if ($hash_value !== null) {
+        if (is_null($hash_value)) {
             return \Bow\Security\Hash::check($data, $hash_value);
         }
+
         return \Bow\Security\Hash::make($data);
     }
 }
@@ -1235,13 +1144,13 @@ if (! function_exists('trans')) {
     }
 }
 
-if (! function_exists('app_env')) {
+if (! function_exists('env')) {
     /**
      * @param $key
      * @param $default
      * @return string
      */
-    function app_env($key, $default = null)
+    function env($key, $default = null)
     {
         if (! Env::isLoaded()) {
             Env::load(config()->getEnvirementFile());
@@ -1268,7 +1177,7 @@ if (! function_exists('app_mode')) {
      */
     function app_mode()
     {
-        return app_env('MODE');
+        return env('MODE');
     }
 }
 

@@ -54,7 +54,7 @@ class Event
      */
     public static function on($event, $fn, $priority = 0)
     {
-        if (! self::binded($event)) {
+        if (! self::bound($event)) {
             self::$events[$event] = [];
         }
 
@@ -73,7 +73,7 @@ class Event
      */
     public static function onTransmission($event, $fn, $priority = 0)
     {
-        if (! self::binded($event)) {
+        if (! self::bound($event)) {
             self::$events['__bow.transmission.event'][$event] = [];
         }
 
@@ -110,7 +110,7 @@ class Event
             return $listener->call($data);
         }
 
-        if (! self::binded($event)) {
+        if (! self::bound($event)) {
             return false;
         }
 
@@ -146,7 +146,7 @@ class Event
      */
     public static function off($event)
     {
-        if (self::binded($event)) {
+        if (self::bound($event)) {
             unset(self::$events[$event], self::$events['__bow.transmission.event'][$event], self::$events['__bow.once.event'][$event]);
         }
     }
@@ -157,7 +157,7 @@ class Event
      * @param string $event
      * @return bool
      */
-    public static function binded($event)
+    public static function bound($event)
     {
         return array_key_exists($event, self::$events)
             || array_key_exists($event,

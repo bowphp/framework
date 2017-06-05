@@ -14,12 +14,6 @@ use Bow\Exception\ResponseException;
 class Response
 {
     /**
-     * Singleton
-     * @var self
-     */
-    private static $instance = null;
-
-    /**
      * Liste de code http valide pour l'application
      * Sauf que l'utilisateur poura lui même rédéfinir
      * ces codes s'il utilise la fonction `header` de php
@@ -65,28 +59,20 @@ class Response
     ];
 
     /**
-     * Permet de configurer la classe
-     *
-     * @param $view_path
-     * @return Response
+     * @var Response
      */
-    public static function configure($view_path)
-    {
-        if (self::$instance === null) {
-            self::$instance = new self($view_path);
-        }
-
-        return static::instance();
-    }
+    private static $instance;
 
     /**
-     * Retourne l'instance de Response
-     *
      * @return Response
      */
-    public static function instance()
+    public static function singleton()
     {
-        return self::$instance;
+        if (is_null(static::$instance)) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
     }
 
     /**

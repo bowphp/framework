@@ -27,10 +27,10 @@ class PugEngine extends EngineAbstract
         $this->config = $config;
 
         $pug_config = [
-            'basedir' => $config->getViewpath(),
+            'basedir' => $config['view.path'],
             'prettyprint' => true,
-            'extension' => $config->getTemplateExtension(),
-            'cache' => $config->getCachepath().'/view'
+            'extension' => $config['view.extension'],
+            'cache' => $config['view.cache'].'/view'
         ];
 
         $this->template = new Pug($pug_config);
@@ -44,7 +44,7 @@ class PugEngine extends EngineAbstract
         $filename = $this->checkParseFile($filename);
 
         return $this->template->render(
-            $this->config->getViewpath().'/'.$filename,
+            $this->config['view.path'].'/'.$filename,
             $data
         );
     }

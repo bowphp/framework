@@ -1,12 +1,13 @@
 <?php
 namespace Bow\Application;
 
+use Bow\Event\Event;
 use Bow\Http\Request;
 use Bow\Http\Response;
-use Bow\Logger\Logger;
 use Bow\Exception\RouterException;
 use Bow\Exception\ApplicationException;
 use Bow\Firewall\ApplicationCsrfFirewall;
+use Bow\Support\DateAccess;
 
 /**
  * Create and maintener by diagnostic developpers teams:
@@ -25,12 +26,12 @@ class Application
     /**
      * @var array
      */
-    private $errorCode = [];
+    private $error_code = [];
 
     /**
      * @var array
      */
-    private $globaleFirewall = [];
+    private $globale_firewall = [];
 
     /**
      * Définition de contrainte sur un route.
@@ -44,33 +45,26 @@ class Application
      *
      * @var string
      */
-    private $branch = null;
+    private $branch;
 
     /**
      * @var string
      */
-    private $specialMethod = null;
+    private $special_method;
 
     /**
      * Method Http courrante.
      *
-     * @var string
+     * @var array
      */
-    private $currentMethod = '';
-
-    /**
-     * Enrégistre l'information la route courrante
-     *
-     * @var string
-     */
-    private $currentPath = '';
+    private $current;
 
     /**
      * Patter Singleton
      *
      * @var Application
      */
-    private static $inst = null;
+    private static $instance;
 
     /**
      * Collecteur de route.
@@ -92,7 +86,7 @@ class Application
     /**
      * @var Configuration|null
      */
-    private $config = null;
+    private $config;
 
     /**
      * @var array
@@ -102,12 +96,7 @@ class Application
     /**
      * @var bool
      */
-    private $disableXpoweredBy = false;
-
-    /**
-     * @var Logger
-     */
-    private $logger;
+    private $disable_x_powered_by = false;
 
     /**
      * Private construction
@@ -121,10 +110,37 @@ class Application
         $this->config = $config;
         $this->request = $request;
         $this->response = $response;
-//
-//        $logger = new Logger(app_env('MODE'), $config->getLoggerPath() . '/error.log');
-//        $logger->register();
-//        $this->logger = $logger;
+        DateAccess::setTimezone($this->config['app.timezone']);
+
+        /**
+         * Chargement des services
+         */
+        $services = $this->config['app.classes.serivces'];
+
+        foreach ($services as $service) {
+            if (! $service instanceof Services) {
+                continue;
+            }
+
+            $service = new $service($this);
+            $service_called_name = call_user_func([$service, 'getName']);
+
+            /**
+             * Configuration du service
+             */
+            call_user_func_array([$service, 'make'], [$config]);
+            if (Event::bound($service_called_name.'.services.stared')) {
+                Event::emit($service_called_name.'.services.stared');
+            }
+
+            /**
+             * Démarrage du service.
+             */
+            call_user_func_array([$service, 'start'], []);
+            if (Event::bound($service_called_name.'.services.maked')) {
+                Event::emit($service_called_name.'.services.maked');
+            }
+        }
     }
 
     /**
@@ -142,11 +158,11 @@ class Application
      */
     public static function make(Configuration $config, Request $request, Response $response)
     {
-        if (static::$inst === null) {
-            static::$inst = new static($config, $request, $response);
+        if (is_null(static::$instance)) {
+            static::$instance = new static($config, $request, $response);
         }
 
-        return static::$inst;
+        return static::$instance;
     }
 
     /**
@@ -174,7 +190,7 @@ class Application
         call_user_func_array($cb, [$this]);
 
         $this->branch = '';
-        $this->globaleFirewall = [];
+        $this->globale_firewall = [];
 
         return $this;
     }
@@ -187,7 +203,7 @@ class Application
      */
     public function firewall($firewall = [])
     {
-        $this->globaleFirewall = is_array($firewall) ? $firewall : [$firewall];
+        $this->globale_firewall = is_array($firewall) ? $firewall : [$firewall];
         return $this;
     }
 
@@ -198,11 +214,11 @@ class Application
      * @throws ApplicationException
      */
     public function close() {
-        if (empty($this->globaleFirewall)) {
+        if (empty($this->globale_firewall)) {
             throw new ApplicationException('Aucune flux firewall ouvert.');
         }
 
-        $this->globaleFirewall = [];
+        $this->globale_firewall = [];
         return $this;
     }
 
@@ -238,7 +254,7 @@ class Application
         $method = strtoupper($input->get('_method'));
 
         if (in_array($method, ['DELETE', 'PUT'])) {
-            $this->specialMethod = $method;
+            $this->special_method = $method;
             $this->addHttpVerbe($method, $path, $cb);
         }
 
@@ -255,8 +271,8 @@ class Application
      */
     public function any($path, Callable $cb)
     {
-        foreach(['options', 'patch', 'post', 'delete', 'put', 'get'] as $function) {
-            $this->$function($path, $cb);
+        foreach(['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
+            $this->$method($path, $cb);
         }
 
         return $this;
@@ -300,6 +316,7 @@ class Application
     {
         return $this->addHttpVerbe('PATCH', $path, $cb);
     }
+
     /**
      * patch, route de tout type PATCH
      *
@@ -321,7 +338,7 @@ class Application
      */
     public function code($code, callable $cb)
     {
-        $this->errorCode[$code] = $cb;
+        $this->error_code[$code] = $cb;
         return $this;
     }
 
@@ -384,32 +401,31 @@ class Application
         }
 
         // construction du path original en fonction de la configuration de l'application
-        $path = $this->config->getApproot() . $this->branch . $path;
+        $path = $this->config['app.root'] . $this->branch . $path;
 
         // Ajout d'un nouvelle route sur l'en definie.
-        if (! empty($this->globaleFirewall)) {
+        if (! empty($this->globale_firewall)) {
             if (is_array($cb)) {
                 if (isset($cb['firewall'])) {
                     if (! is_array($cb['firewall'])) {
                         $cb['firewall'] = [$cb['firewall']];
                     }
 
-                    $cb['firewall'] = array_merge($this->globaleFirewall, $cb['firewall']);
+                    $cb['firewall'] = array_merge($this->globale_firewall, $cb['firewall']);
                 } else {
-                    $cb['firewall'] = $this->globaleFirewall;
+                    $cb['firewall'] = $this->globale_firewall;
                 }
             } else {
-                $cb = ['firewall' => $this->globaleFirewall, 'uses' => $cb];
+                $cb = ['firewall' => $this->globale_firewall, 'uses' => $cb];
             }
         }
 
         $this->routes[$method][] = new Route($path, $cb);
 
         // route courante
-        $this->currentPath = $path;
-
         // methode courante
-        $this->currentMethod = $method;
+        $this->current['path'] = $path;
+        $this->current['method'] = $method;
 
         return $this;
     }
@@ -436,16 +452,16 @@ class Application
             // courante dont la valeur est un tableau, ensuite dans ce tableau on crée une
             // autre entré avec comme clé le path définie par le developpeur et pour valeur
             // les contraintes sur les variables.
-            $this->with[$this->currentMethod] = [];
-            $this->with[$this->currentMethod][$this->currentPath] = $otherRule;
+            $this->with[$this->current['method']] = [];
+            $this->with[$this->current['method']][$this->current['path']] = $otherRule;
         } else {
             // Quand le tableau de collection des contraintes sur les variables n'est pas vide
             // On vérifie l'existance de clé portant le nom de la methode HTTP courant
             // si la elle existe alors on fusionne l'ancien contenu avec la nouvelle.
-            if (array_key_exists($this->currentMethod, $this->with)) {
-                $this->with[$this->currentMethod] = array_merge(
-                    $this->with[$this->currentMethod],
-                    [$this->currentPath => $otherRule]
+            if (array_key_exists($this->current['method'], $this->with)) {
+                $this->with[$this->current['method']] = array_merge(
+                    $this->with[$this->current['method']],
+                    [$this->current['path'] => $otherRule]
                 );
             }
         }
@@ -456,30 +472,23 @@ class Application
     /**
      * Lanceur de l'application
      *
-     * @param callable|null $cb
      * @return mixed
      * @throws RouterException
      */
-    public function run($cb = null)
+    public function run()
     {
         if (php_sapi_name() == 'cli') {
             return true;
         }
 
-        if (app_env('MODE') == 'down') {
+        if (env('MODE') == 'down') {
             abort(503);
             return true;
         }
 
         // Ajout de l'entête X-Powered-By
-        if (! $this->disableXpoweredBy) {
+        if (! $this->disable_x_powered_by) {
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
-        }
-
-        if (is_callable($cb)) {
-            if (call_user_func_array($cb, [$this->request])) {
-                die();
-            }
         }
 
         $this->branch = '';
@@ -488,11 +497,11 @@ class Application
         // vérification de l'existance d'une methode spécial
         // de type DELETE, PUT
         if ($method == 'POST') {
-            if ($this->specialMethod !== null) {
-                $method = $this->specialMethod;
+            if ($this->special_method !== null) {
+                $method = $this->special_method;
             }
 
-            $this->executeApplicationNativeFirewall();
+            $this->executeNativeFirewall();
         }
 
         // drapeaux d'erreur.
@@ -504,7 +513,7 @@ class Application
             // Vérification et appel de la fonction du branchement 404
             $this->response->statusCode(404);
 
-            if (empty($this->errorCode)) {
+            if (empty($this->error_code)) {
                 $this->response->send('Cannot ' . $method . ' ' . $this->request->uri() . ' 404');
             }
 
@@ -531,10 +540,10 @@ class Application
                 continue;
             }
 
-            $this->currentPath = $route->getPath();
+            $this->current['path'] = $route->getPath();
 
             // Appel de l'action associer à la route
-            $response = $route->call($this->request, $this->config->getNamespace());
+            $response = $route->call($this->request, $this->config['app.classes']);
 
             if (is_string($response)) {
                 $this->response->send($response);
@@ -543,7 +552,6 @@ class Application
             }
 
             $error = false;
-
             break;
         }
 
@@ -554,20 +562,19 @@ class Application
 
         $this->response->statusCode(404);
 
-        if (! in_array(404, array_keys($this->errorCode))) {
-            if ($this->config->getNotFoundFilename() != false) {
-                return $this->response->send(
-                    $this->response->view($this->config->getNotFoundFilename())
-                );
-            }
-
-            throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
+        if (in_array(404, array_keys($this->error_code))) {
+            $this->response->statusCode(404);
+            $r = call_user_func($this->error_code[404]);
+            return $this->response->send($r, true);
         }
 
-        $this->response->statusCode(404);
-        $r = call_user_func($this->errorCode[404]);
+        if ($this->config['view.404'] != false) {
+            return $this->response->send(
+                $this->response->view($this->config['view.404'])
+            );
+        }
 
-        return $this->response->send($r, true);
+        throw new RouterException('La route "'.$this->request->uri().'" n\'existe pas', E_ERROR);
     }
 
     /**
@@ -578,16 +585,16 @@ class Application
      */
     public function named($name)
     {
-        $this->namedRoute($this->currentPath, $name);
+        $this->namedRoute($this->current['path'], $name);
         return $this;
     }
 
     /**
      * d'active l'ecriture le l'entête X-Powered-By
      */
-    public function disableXPoweredBy()
+    public function disable_x_powered_by()
     {
-        $this->disableXpoweredBy = true;
+        $this->disable_x_powered_by = true;
     }
 
     /**
@@ -654,7 +661,7 @@ class Application
                 $next = Actionner::call(
                     ['firewall' => $internalFirewall],
                     [$this->request],
-                    $this->config->getNamespace()
+                    $this->config['app.classes']
                 );
 
                 if ($next === false) {
@@ -722,16 +729,6 @@ class Application
     }
 
     /**
-     * Fonction retournant une instance de logger.
-     *
-     * @return Logger
-     */
-    public function log()
-    {
-        return $this->logger;
-    }
-
-    /**
      * Ajout une route nommé.
      *
      * @param string $uri  L'url pointant sur la route.
@@ -739,10 +736,8 @@ class Application
      */
     private function namedRoute($uri, $name)
     {
-        $routes = $this->config->getApplicationRoutes();
-        $routes = array_merge($routes, [$name => $uri]);
-
-        $this->config->setApplicationRoutes($routes);
+        $routes = $this->config['app.routes'];
+        $this->config['app.routes'] = array_merge($routes, [$name => $uri]);
     }
 
     /**
@@ -752,7 +747,7 @@ class Application
      */
     public function getRoutes()
     {
-        return $this->routes;
+        return $this->config['app.routes'];
     }
 
     /**
@@ -769,7 +764,7 @@ class Application
     /**
      * Permet de lancer les middlewares par defaut
      */
-    private function executeApplicationNativeFirewall()
+    private function executeNativeFirewall()
     {
         $status = Actionner::firewall(ApplicationCsrfFirewall::class);
 
@@ -818,12 +813,12 @@ class Application
     {
         $code = http_response_code();
 
-        if ($code == 404 || ! isset($this->errorCode[$code])) {
+        if ($code == 404 || ! isset($this->error_code[$code])) {
             return;
         }
 
         $this->response->statusCode($code);
-        $r = call_user_func($this->errorCode[$code]);
+        $r = call_user_func($this->error_code[$code]);
 
         $this->response->send($r);
     }

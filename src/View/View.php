@@ -2,12 +2,11 @@
 namespace Bow\View;
 
 use Bow\Exception\ViewException;
-use Bow\Application\Configuration;
 
 class View
 {
     /**
-     * @var Configuration
+     * @var array
      */
     private static $config;
 
@@ -38,31 +37,31 @@ class View
 
     /**
      * View constructor.
-     * @param Configuration $config
+     * @param array $config
      * @throws ViewException
      */
-    public function __construct(Configuration $config)
+    public function __construct($config)
     {
-        if (static::$config->getTemplateEngine() === null) {
+        $engine = $config['view.engine'];
+
+        if (is_null($engine)) {
             throw new ViewException('Le moteur de template non défini.', E_USER_ERROR);
         }
 
-        if (! in_array(static::$config->getTemplateEngine(), ['twig', 'mustache', 'pug', 'php'], true)) {
+        if (! in_array($engine, ['twig', 'mustache', 'pug', 'php'], true)) {
             throw new ViewException('Le moteur de template n\'est pas implementé.', E_USER_ERROR);
         }
 
         static::$config = $config;
-        static::$template = new static::$container[
-            static::$config->getTemplateEngine()
-        ]($config);
+        static::$template = new static::$container[$engine]($config);
     }
 
     /**
      * Permet de configurer la classe
      *
-     * @param Configuration $config
+     * @param array $config
      */
-    public static function configure(Configuration $config)
+    public static function configure($config)
     {
         static::$config = $config;
     }
@@ -111,7 +110,7 @@ class View
     public function setEngine($engine)
     {
         static::$instance = null;
-        static::$config->setTemplateEngine($engine);
+        static::$config['view.engine'] = $engine;
 
         return $this;
     }
@@ -131,7 +130,7 @@ class View
     public function setExtension($extension)
     {
         static::$instance = null;
-        static::$config->setTemplateExtension($extension);
+        static::$config['view.extension'] = $extension;
 
         return $this;
     }

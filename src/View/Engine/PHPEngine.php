@@ -29,12 +29,12 @@ class PHPEngine extends EngineAbstract
         $hash_filename = $filename;
         $filename = $this->checkParseFile($filename);
 
-        if ($this->config->getViewpath() !== null) {
-            $filename = $this->config->getViewpath() . '/' . $filename;
+        if ($this->config['view.path'] !== null) {
+            $filename = $this->config['view.path'] . '/' . $filename;
         }
 
         $cache_hash_filename = '_PHP_'.hash('sha1', $hash_filename).'.php';
-        $cache_hash_filename = $this->config->getCachepath().'/view/'.$cache_hash_filename;
+        $cache_hash_filename = $this->config['view.cache'].'/view/'.$cache_hash_filename;
 
         extract($data);
 

@@ -27,13 +27,13 @@ class MustacheEngine extends EngineAbstract
     {
         $this->config = $config;
 
-        $partial_loader = is_dir($config->getViewpath().'/partials') ?
-            new \Mustache_Loader_FilesystemLoader($config->getViewpath().'/partials', [
-                'extension' => $this->config->getTemplateExtension()
+        $partial_loader = is_dir($config['view.path'].'/partials') ?
+            new \Mustache_Loader_FilesystemLoader($config['view.path'].'/partials', [
+                'extension' => $this->config['view.extension']
             ]) : null;
 
-        $loader = new \Mustache_Loader_FilesystemLoader($config->getViewpath(), [
-            'extension' => $this->config->getTemplateExtension()
+        $loader = new \Mustache_Loader_FilesystemLoader($config['view.path'], [
+            'extension' => $this->config['view.extension']
         ]);
 
         $helpers = [
@@ -55,15 +55,15 @@ class MustacheEngine extends EngineAbstract
             'trans' => function ($key, $data = [], $choose = null) {
                 return Translator::make($key, $data, $choose);
             },
-            '_public', $config->getPublicPath(),
-            '_root', $config->getApproot(),
+            '_public', $config['app.static'],
+            '_root', $config['app.root'],
             'escape' => function($value) {
                 return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
             }
         ];
 
         $this->template = new \Mustache_Engine([
-            'cache' => $config->getCachepath().'/view',
+            'cache' => $config['view.cache'].'/view',
             'loader' => $loader,
             'partials_loader' => $partial_loader,
             'helpers' => $helpers

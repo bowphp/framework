@@ -1,12 +1,13 @@
 <?php
-namespace Bow\Http;
+namespace Bow\Validation;
 
+use Bow\Http\Input;
+use Bow\Http\Request;
+use Bow\Http\UploadFile;
 use Bow\Resource\Storage;
-use Bow\Validation\Validate;
-use Bow\Validation\Validator;
 use Psy\Exception\ErrorException;
 
-abstract class RequestValidator extends Validator
+abstract class RequestValidation extends Validator
 {
     /**
      * Règle
@@ -149,6 +150,7 @@ abstract class RequestValidator extends Validator
         if (! $this->upload_started) {
             throw new ErrorException('Lancez la methode "startUploadFile" avant');
         }
+
         if ($overidre_extension) {
             $filename = $filename.'.'.$this->file->getExtension();
         }

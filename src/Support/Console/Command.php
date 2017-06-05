@@ -717,7 +717,7 @@ MODEL;
 
 namespace App\Validation;
 
-use Bow\Http\RequestValidator as Validator;
+use Bow\Validation\RequestValidation as Validator;
 
 class {$name} extends Validator
 {

@@ -25,13 +25,38 @@ class Capsule implements \ArrayAccess
     private $key = [];
 
     /**
+     * @var array
+     */
+    private $parameters = [];
+
+    /**
+     * @var Capsule
+     */
+    private static $instance;
+
+    /**
+     * @return mixed
+     */
+    public static function getInstance()
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
+    /**
      * @param string $key
      * @return mixed
      */
     public function make($key)
     {
         if (isset($this->factories[$key])) {
-            return $this->factories[$key]($this);
+            return call_user_func_array(
+                $this->factories[$key],
+                array_merge([$this], $this->parameters)
+            );
         }
 
         if (isset($this->instances[$key])) {
@@ -43,7 +68,10 @@ class Capsule implements \ArrayAccess
         }
 
         if (is_callable($this->registers[$key])) {
-            return $this->instances[$key] = $this->registers[$key]($this);
+            return $this->instances[$key] = call_user_func_array(
+                $this->registers[$key],
+                array_merge([$this], $this->parameters)
+            );
         }
 
         if (! is_object($this->registers[$key])) {
@@ -55,6 +83,11 @@ class Capsule implements \ArrayAccess
         }
 
         return null;
+    }
+
+    public function makeWith($key, $parameters = [])
+    {
+
     }
 
     /**
@@ -111,6 +144,10 @@ class Capsule implements \ArrayAccess
             } else {
                 $parameters_lists[] = $parameter->getDefaultValue();
             }
+        }
+
+        if (! empty($this->parameters)) {
+            $parameters_lists = $this->parameters;
         }
 
         return $reflection->newInstanceArgs($parameters_lists);
