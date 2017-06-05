@@ -110,6 +110,10 @@ class Application
         $this->config = $config;
         $this->request = $request;
         $this->response = $response;
+
+        /**
+         * Application de la timezone
+         */
         DateAccess::setTimezone($this->config['app.timezone']);
 
         /**
