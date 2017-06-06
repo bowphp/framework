@@ -47,6 +47,10 @@ class ViewTest extends \PHPUnit\Framework\TestCase
             @unlink($value);
         }
 
+        foreach (glob(__DIR__.'/data/cache/*.php') as $value) {
+            @unlink($value);
+        }
+
         foreach (glob(__DIR__.'/data/cache/view/*/*.php') as $value) {
             @unlink($value);
             @rmdir(dirname($value));
