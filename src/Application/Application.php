@@ -119,16 +119,11 @@ class Application
         /**
          * Chargement des services
          */
-        $services = $this->config['app.classes.serivces'];
+        $services = $this->config['app.classes.services'];
 
         foreach ($services as $service) {
-            if (! $service instanceof Services) {
-                continue;
-            }
-
             $service = new $service($this);
             $service_called_name = call_user_func([$service, 'getName']);
-
             /**
              * Configuration du service
              */
@@ -136,7 +131,6 @@ class Application
             if (Event::bound($service_called_name.'.services.stared')) {
                 Event::emit($service_called_name.'.services.stared');
             }
-
             /**
              * Démarrage du service.
              */
@@ -547,7 +541,7 @@ class Application
             $this->current['path'] = $route->getPath();
 
             // Appel de l'action associer à la route
-            $response = $route->call($this->request, $this->config['app.classes']);
+            $response = $route->call($this->request, $this->config['app']['classes']);
 
             if (is_string($response)) {
                 $this->response->send($response);

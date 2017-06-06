@@ -1,12 +1,13 @@
 <?php
 namespace Bow\View;
 
+use Bow\Application\Configuration;
 use Bow\Exception\ViewException;
 
 class View
 {
     /**
-     * @var array
+     * @var Configuration
      */
     private static $config;
 
@@ -37,10 +38,10 @@ class View
 
     /**
      * View constructor.
-     * @param array $config
+     * @param Configuration $config
      * @throws ViewException
      */
-    public function __construct($config)
+    public function __construct(Configuration $config)
     {
         $engine = $config['view.engine'];
 

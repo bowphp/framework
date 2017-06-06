@@ -123,7 +123,7 @@ class Configuration implements \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        return $this->config->offsetSet($offset, $value);
+       $this->config->offsetSet($offset, $value);
     }
 
     /**

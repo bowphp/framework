@@ -69,7 +69,7 @@ class TwigEngine extends EngineAbstract
             return Form::singleton();
         }));
 
-        $this->template->addFunction(new \Twig_SimpleFunction('trans', function($key, $data = [], $choose = false) {
+        $this->template->addFunction(new \Twig_SimpleFunction('trans', function($key, $data = [], $choose = null) {
             return Translator::make($key, $data, $choose);
         }));
 

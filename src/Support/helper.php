@@ -52,7 +52,7 @@ if (! function_exists('config')) {
      * @return Configuration|mixed
      */
     function config($key = null, $setting = null) {
-        app('config', function () {
+        app()->bind('config', function () {
             return Configuration::singleton();
         });
         $config = app('config');
@@ -537,7 +537,7 @@ if (! function_exists('secure')) {
         if (is_numeric($data)) {
             return $data;
         } else {
-            return \Bow\Security\Sanitize::secure($data);
+            return \Bow\Security\Sanitize::make($data, true);
         }
     }
 }
@@ -1152,11 +1152,11 @@ if (! function_exists('env')) {
      */
     function env($key, $default = null)
     {
-        if (! Env::isLoaded()) {
-            Env::load(config()->getEnvirementFile());
+        if (Env::isLoaded()) {
+            return Env::get($key, $default);
         }
 
-        return Env::get($key, $default);
+        return $default;
     }
 }
 

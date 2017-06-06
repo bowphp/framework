@@ -30,7 +30,7 @@ class PugEngine extends EngineAbstract
             'basedir' => $config['view.path'],
             'prettyprint' => true,
             'extension' => $config['view.extension'],
-            'cache' => $config['view.cache'].'/view'
+            'cache' => $config['view.cache']
         ];
 
         $this->template = new Pug($pug_config);

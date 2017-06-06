@@ -34,7 +34,7 @@ class Env
     {
         $value = getenv(Str::upper($key));
 
-        if (! is_null($value)) {
+        if (is_string($value)) {
             return $value;
         }
 
