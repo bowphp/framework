@@ -697,7 +697,7 @@ MODEL;
      * @param string $name
      * @return int
      */
-    public function validator($name)
+    public function validation($name)
     {
         if (! is_dir($this->dirname.'/app/Validation')) {
             mkdir($this->dirname.'/app/Validation');

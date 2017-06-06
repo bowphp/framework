@@ -111,10 +111,10 @@ class Bow
      *
      * @throws \ErrorException
      */
-    public function create()
+    public function add()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration', 'service'])) {
+        if (! in_array($action, ['firewall', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
             throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
         }
 
@@ -328,15 +328,15 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mgenerate:resource\033[00m  Create new REST assicate at a controller
    \033[0;33mgenerate:key\033[00m       Create new app key
 
- \033[0;32mcreate\033[00m                 Create a user class
+ \033[0;32madd\033[00m                  Create a user class
 
-   \033[0;33mcreate:firewall\033[00m      Create new firewall
-   \033[0;33mcreate:service\033[00m       Create new service
-   \033[0;33mcreate:controller\033[00m    Create new controller
-   \033[0;33mcreate:model\033[00m         Create new model
-   \033[0;33mcreate:validator\033[00m     Create new validator
-   \033[0;33mcreate:seeder\033[00m        Create new table fake seeder
-   \033[0;33mcreate:migration\033[00m     Create a new migration
+   \033[0;33madd:firewall\033[00m      Create new firewall
+   \033[0;33madd:service\033[00m       Create new service
+   \033[0;33madd:controller\033[00m    Create new controller
+   \033[0;33madd:model\033[00m         Create new model
+   \033[0;33madd:validator\033[00m     Create new validator
+   \033[0;33madd:seeder\033[00m        Create new table fake seeder
+   \033[0;33madd:migration\033[00m     Create a new migration
 
  \033[0;32mmigrate\033[00m apply a migration in user model
   option: [table_name|--all]
@@ -364,7 +364,7 @@ USAGE;
             case 'help':
                 echo "\033[0;33mhelp\033[00m display command helper\n";
                 break;
-            case 'create':
+            case 'add':
                 echo <<<U
 \n\033[0;32mcreate\033[00m create a user class\n
     [option]
@@ -373,14 +373,14 @@ USAGE;
 
     * you can use --no-plain --with-model
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:controller name [option]  For create a new controlleur
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:firewall name             For create a new firewall
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:service name              For create a new service
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:model name                For create a new model
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:validator name            For create a new validator
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:seeder name [--n-seed=n]  For create a new table seeder
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:migration name            For create a new table migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create help                      For display this
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  For create a new controlleur
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:firewall name             For create a new firewall
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name                For create a new model
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validator name            For create a new validator
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--n-seed=n]  For create a new table seeder
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new table migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
 
 U;
 
