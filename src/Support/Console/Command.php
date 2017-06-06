@@ -753,7 +753,7 @@ VALIDATOR;
     public function service($name)
     {
         if (! is_dir($this->dirname.'/app/Services')) {
-            mkdir($this->dirname.'/app/Validation');
+            mkdir($this->dirname.'/app/Services');
         }
 
         if (! preg_match('/service/i', $name)) {

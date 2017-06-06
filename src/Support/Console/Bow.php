@@ -114,7 +114,7 @@ class Bow
     public function create()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration'])) {
+        if (! in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration', 'service'])) {
             throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
         }
 
