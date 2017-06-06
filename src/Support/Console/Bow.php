@@ -331,6 +331,7 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
  \033[0;32mcreate\033[00m                 Create a user class
 
    \033[0;33mcreate:firewall\033[00m      Create new firewall
+   \033[0;33mcreate:service\033[00m       Create new service
    \033[0;33mcreate:controller\033[00m    Create new controller
    \033[0;33mcreate:model\033[00m         Create new model
    \033[0;33mcreate:validator\033[00m     Create new validator
@@ -374,6 +375,7 @@ USAGE;
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:controller name [option]  For create a new controlleur
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:firewall name             For create a new firewall
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:service name              For create a new service
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:model name                For create a new model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:validator name            For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m create:seeder name [--n-seed=n]  For create a new table seeder

@@ -745,6 +745,60 @@ VALIDATOR;
     }
 
     /**
+     * Permet de créer un validator
+     *
+     * @param string $name
+     * @return int
+     */
+    public function service($name)
+    {
+        if (! is_dir($this->dirname.'/app/Services')) {
+            mkdir($this->dirname.'/app/Validation');
+        }
+
+        if (! preg_match('/service/i', $name)) {
+            $name = ucfirst($name).'Service';
+        }
+
+        if (file_exists($this->dirname.'/app/Services/'.$name.'.php')) {
+            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m existe déja.\033[00m\n";
+            return 0;
+        }
+
+        $validation = <<<VALIDATOR
+<?php
+
+namespace App\Services;
+
+use Bow\Application\Configuration;
+use \Bow\Application\Services as BowService;
+
+class {$name} extends BowService
+{
+    /**
+     * Démarre le serivce
+     */
+    public function start()
+    {
+        //
+    }
+
+    /**
+     * @param Configuration \$config
+     */
+    public function make(\$config)
+    {
+        //
+    }
+}
+VALIDATOR;
+
+        file_put_contents($this->dirname.'/app/Services/'.$name.'.php', $validation);
+        echo "\033[0;32mLe service \033[00m[${name}]\033[0;32m a été bien créer.\033[00m\n";
+        return 0;
+    }
+
+    /**
      * Read ligne
      *
      * @param string $message
