@@ -377,7 +377,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:firewall name             For create a new firewall
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name                For create a new model
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validator name            For create a new validator
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--n-seed=n]  For create a new table seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new table migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
