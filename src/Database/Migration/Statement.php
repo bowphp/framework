@@ -35,7 +35,7 @@ class Statement
     public function makeSqliteCreateTableStatement()
     {
         if (($statement = $this->makeSqlStatement()) !== null) {
-            return "CREATE TABLE `" . $this->columns->getTableName() . "` ($statement) DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";
+            return "CREATE TABLE IF NOT EXISTS `" . $this->columns->getTableName() . "` ($statement) DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";
         }
 
         return null;
@@ -49,7 +49,7 @@ class Statement
     public function makeMysqlCreateTableStatement()
     {
         if (($statement = $this->makeSqlStatement()) !== null) {
-            return "CREATE TABLE `" . $this->columns->getTableName() . "` ($statement) ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";
+            return "CREATE TABLE IF NOT EXISTS `" . $this->columns->getTableName() . "` ($statement) ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharacter() . ";";
         }
 
         return null;
