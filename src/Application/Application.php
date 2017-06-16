@@ -8,6 +8,7 @@ use Bow\Exception\RouterException;
 use Bow\Exception\ApplicationException;
 use Bow\Firewall\ApplicationCsrfFirewall;
 use Bow\Support\DateAccess;
+use function class_uses;
 
 /**
  * Create and maintener by diagnostic developpers teams:
@@ -122,6 +123,10 @@ class Application
         $services = $this->config['app.classes.services'];
 
         foreach ($services as $service) {
+            if (! class_uses($service)) {
+                continue;
+            }
+
             $service = new $service($this);
             $service_called_name = call_user_func([$service, 'getName']);
             /**
