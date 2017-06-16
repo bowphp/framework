@@ -1,11 +1,9 @@
 <?php
 /**
-|
-|	BOW LOADER
-|	==========
-|	Définir des liens symbolique de l'ensemble des
-|	fonctions de Bow.
-|
+ * BOW HELPER
+ * ==========
+ * Définir des liens symbolique de l'ensemble de
+ * fonctions de Bow
  */
 
 use Bow\Mail\Mail;
@@ -754,6 +752,17 @@ if (! function_exists('start_transaction')) {
     }
 }
 
+if (! function_exists('transaction_started')) {
+    /**
+     * Vérifie l'existance d"une transaction en cours
+     *
+     * @return bool
+     */
+    function transaction_started() {
+        return DB::getPdo()->inTransaction();
+    }
+}
+
 if (! function_exists('rollback')) {
     /**
      * annuler un rollback
@@ -887,28 +896,40 @@ if (! function_exists('email')) {
     }
 }
 
+if (! function_exists('raw_email')) {
+    /**
+     * Alias sur SimpleMail et Smtp
+     *
+     * @param string array $to
+     * @param string $subject
+     * @param string $message
+     * @param array $headers
+     * @return Mail|mixed
+     */
+    function raw_email($to, $subject, $message, array $headers = []) {
+        return Mail::raw($to, $subject, $message, $headers);
+    }
+}
+
 if (! function_exists('session')) {
     /**
      * session
      *
-     * @param string $key
      * @param mixed $value
      * @return mixed
      */
-    function session($key = null, $value = null) {
-        if ($key === null && $value === null) {
+    function session($value = null) {
+        if ($value === null) {
             return new Session();
         }
 
-        if (Session::has($key)) {
-            return Session::get($key);
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                Session::add($key, $value);
+            }
         }
 
-        if ($key !== null && $value !== null) {
-            return Session::add($key, $value);
-        }
-
-        return null;
+        return Session::get($value, null);
     }
 }
 
@@ -970,16 +991,16 @@ if (! function_exists('public_path')) {
      * @return string
      */
     function public_path() {
-        return config()->getPublicPath();
+        return config('app.static');
     }
 }
 
-if (! function_exists('stockage_path')) {
+if (! function_exists('storage_path')) {
     /**
      * @return string
      */
-    function stockage_path() {
-        return config()->getDefaultStoragePath();
+    function storage_path() {
+        return config('resource.storage');
     }
 }
 
