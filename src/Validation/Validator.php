@@ -1,7 +1,11 @@
 <?php
 namespace Bow\Validation;
 
+use Bow\Database\Database;
 use Bow\Support\Str;
+use function explode;
+use function is_float;
+use function var_dump;
 
 /**
  * Class Validator
@@ -12,6 +16,44 @@ use Bow\Support\Str;
  */
 class Validator
 {
+    /**
+     * @var bool
+     */
+    private $fail = false;
+
+    /**
+     * @var string
+     */
+    private $lastMessage;
+
+    /**
+     * @var array
+     */
+    private $errors = [];
+
+    /**
+     * @var array
+     */
+    private $inputs = [];
+
+    /**
+     * @var array
+     */
+    private $compiles = [
+        'Max',
+        'Min',
+        'Lower',
+        'Upper',
+        'Size',
+        'Same',
+        'Alpha',
+        'AlphaNum',
+        'Number',
+        'Email',
+        'In',
+        'Exists'
+    ];
+
     /**
      * Tout les marqueurs possible.
      *
@@ -39,9 +81,17 @@ class Validator
      */
     public static function make(array $inputs, array $rules)
     {
-        $isFails = false;
-        $errors = [];
-        $message = "";
+        return (new static())->validate($inputs, $rules);
+    }
+
+    /**
+     * @param array $inputs
+     * @param array $rules
+     * @return Validate
+     */
+    public function validate(array $inputs, array $rules)
+    {
+        $this->inputs = $inputs;
 
         foreach($rules as $key => $rule) {
             /**
@@ -55,139 +105,292 @@ class Validator
                 }
 
                 // Erreur listes.
-                $errors[$key] = [];
+                $this->errors[$key] = [];
 
                 // Masque sur la règle required
                 if ($masque == "required") {
-                    if (!isset($inputs[$key])) {
-                        $message = "Le champs \"$key\" est requis.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
+                    if (! isset($inputs[$key])) {
+                        $this->lastMessage = $message = "Le champs \"$key\" est requis.";
+                        $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                        $this->fail = true;
                     }
                 } else {
-                    if (!isset($inputs[$key])) {
-                        $message = "Le champs \"$key\" n'est pas défini dans les données à valider.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
+                    if (! isset($inputs[$key])) {
+                        $this->lastMessage = $message = "Le champs \"$key\" n'est pas défini dans les données à valider.";
+                        $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                        $this->fail = true;
                         continue;
                     }
                 }
 
-                // Masque sur la règle min
-                if (preg_match("/^min:(\d+)$/", $masque, $match)) {
-                    $length = (int) end($match);
-                    if (Str::len($inputs[$key]) < $length) {
-                        $message = "Le champs \"$key\" doit avoir un contenu minimal de $length.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle max
-                if (preg_match("/^max:(\d+)$/", $masque, $match)) {
-                    $length = (int) end($match);
-                    if (Str::len($inputs[$key]) > $length) {
-                        $message = "Le champs \"$key\" doit avoir un contenu maximal de $length.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle size
-                if (preg_match("/^size:(\d+)$/", $masque, $match)) {
-                    $length = (int) end($match);
-                    if (Str::len($inputs[$key]) == $length) {
-                        $message = "Le champs \"$key\" doit avoir un contenu de $length caractère(s).";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle in
-                if (preg_match("/^in:\((.+)\)$/", $masque, $match)) {
-                    $values = explode(",", end($match));
-                    foreach($values as $index => $value) {
-                        $values[$index] = trim($value);
-                    }
-
-                    if (!in_array($inputs[$key], $values)) {
-                        $message = "Le champs \"$key\" doit avoir un contenu une valeur dans " . implode(", ", $values) . ".";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle eq
-                if (preg_match("/^eq:(.+)$/", $masque, $match)) {
-                    $value = (string) end($match);
-                    if ($inputs[$key] == $value) {
-                        $message = "Le champs \"$key\" doit avoir un contenu égal à '$value'.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle email.
-                if (preg_match("/^email$/", $masque, $match)) {
-                    if (!Str::isMail($inputs[$key])) {
-                        $message = "Le champs $key doit avoir un contenu au format email.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle number
-                if (preg_match("/^number$/", $masque, $match)) {
-                    if (!is_numeric($inputs[$key])) {
-                        $message = "Le champs \"$key\" doit avoir un contenu en numérique.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle alphanum
-                if (preg_match("/^alphanum$/", $masque)) {
-                    if (!Str::isAlphaNum($inputs[$key])) {
-                        $message = "Le champs \"$key\" doit avoir un contenu en alphanumérique.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle upper
-                if (preg_match("/^upper/", $masque)) {
-                    if (!Str::isUpper($inputs[$key])) {
-                        $message = "Le champs \"$key\" doit avoir un contenu en majiscule.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle lower
-                if (preg_match("/^lower/", $masque)) {
-                    if (!Str::isLower($inputs[$key])) {
-                        $message = "Le champs \"$key\" doit avoir un contenu en miniscule.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
-                }
-
-                // Masque sur la règle alpha
-                if (preg_match("/^alpha$/", $masque)) {
-                    if (!Str::isAlpha($inputs[$key])) {
-                        $message = "Le champs \"$key\" doit avoir un contenu en alphabetique.";
-                        $errors[$key][] = ["masque" => $masque, "message" => $message];
-                        $isFails = true;
-                    }
+                foreach ($this->compiles as $compile) {
+                    $this->{'compile'.$compile}($key, $masque);
                 }
 
                 // On nettoye la lsite des erreurs si la clé est valide
-                if (empty($errors[$key])) {
-                    unset($errors[$key]);
+                if (empty($this->errors[$key])) {
+                    unset($this->errors[$key]);
                 }
             }
         }
 
-        return new Validate($isFails, $message, $errors);
+        return new Validate($this->fail, $this->lastMessage, $this->errors);
+    }
+
+    /**
+     * Masque sur la règle min
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileMin($key, $masque)
+    {
+        if (preg_match("/^min:(\d+)$/", $masque, $match)) {
+            $length = (int) end($match);
+            if (Str::len($this->inputs[$key]) < $length) {
+                $this->lastMessage = "Le champs \"$key\" doit avoir un contenu minimal de $length.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle max
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileMax($key, $masque)
+    {
+        if (preg_match("/^max:(\d+)$/", $masque, $match)) {
+            $length = (int) end($match);
+            if (Str::len($this->inputs[$key]) > $length) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu maximal de $length.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle same
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileSame($key, $masque)
+    {
+        if (preg_match("/^same:(.+)$/", $masque, $match)) {
+            $value = (string) end($match);
+            if ($this->inputs[$key] == $value) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu égal à '$value'.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle email.
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileEmail($key, $masque)
+    {
+        if (preg_match("/^email$/", $masque, $match)) {
+            if (!Str::isMail($this->inputs[$key])) {
+                $message = "Le champs $key doit avoir un contenu au format email.";
+                $errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle number
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileNumber($key, $masque)
+    {
+        if (preg_match("/^number$/", $masque, $match)) {
+            if (!is_numeric($this->inputs[$key])) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en numérique.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle int
+     *
+     * @param $key
+     * @param $masque
+     */
+    private function compileInt($key, $masque)
+    {
+        if (preg_match("/^int$/", $masque, $match)) {
+            if (!is_int($this->inputs[$key])) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu de type entier.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle float$
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileFloat($key, $masque)
+    {
+        if (preg_match("/^float$/", $masque, $match)) {
+            if (!is_float($this->inputs[$key])) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu de type réel.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alphanum
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileAlphaNum($key, $masque)
+    {
+        if (preg_match("/^alphanum$/", $masque)) {
+            if (!Str::isAlphaNum($this->inputs[$key])) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en alphanumérique.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle in
+     *
+     * @param $key
+     * @param $masque
+     */
+    private function compileIn($key, $masque)
+    {
+        if (preg_match("/^in:(.+)$/", $masque, $match)) {
+            $values = explode(",", end($match));
+
+            foreach($values as $index => $value) {
+                $values[$index] = trim($value);
+            }
+
+            if (!in_array($this->inputs[$key], $values)) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu une valeur dans " . implode(", ", $values) . ".";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle size
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileSize($key, $masque)
+    {
+        if (preg_match("/^size:(\d+)$/", $masque, $match)) {
+            $length = (int) end($match);
+            if (Str::len($this->inputs[$key]) == $length) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu de $length caractère(s).";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle lower
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileLower($key, $masque)
+    {
+        if (preg_match("/^lower/", $masque)) {
+            if (!Str::isLower($this->inputs[$key])) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en miniscule.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle upper
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileUpper($key, $masque)
+    {
+        if (preg_match("/^upper/", $masque)) {
+            if (!Str::isUpper($this->inputs[$key])) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en majiscule.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alpha
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileAlpha($key, $masque)
+    {
+        if (preg_match("/^alpha$/", $masque)) {
+            if (!Str::isAlpha($this->inputs[$key])) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en alphabetique.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alpha
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    private function compileExists($key, $masque)
+    {
+        if (preg_match("/^exists:(.+)$/", $masque, $match)) {
+            $catch = end($match);
+            $parts = explode(',', $catch);
+
+            if (count($parts) == 1) {
+                $exists = Database::table($parts[0])->exists();
+            } else {
+                $exists = Database::table($parts[0])->exists($parts[1]);
+            }
+
+            if (! $exists) {
+                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en alphabetique.";
+                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->fail = true;
+            }
+        }
     }
 }
