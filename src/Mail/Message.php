@@ -129,13 +129,16 @@ class Message
     }
 
     /**
-     * @param $listDesc
+     * @param array $list_desc
+     * @return $this
      */
-    public function toList(array $listDesc)
+    public function toList(array $list_desc)
     {
-        foreach($listDesc as $name => $to) {
+        foreach($list_desc as $name => $to) {
             $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
         }
+
+        return $this;
     }
 
     /**

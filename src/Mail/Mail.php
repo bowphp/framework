@@ -4,6 +4,7 @@ namespace Bow\Mail;
 use Bow\Exception\MailException;
 use Bow\Http\Response;
 use Bow\View\View;
+use function is_array;
 
 /**
  * Class Mail
@@ -96,7 +97,7 @@ class Mail
     /**
      * Envoye de mail simulaire a la fonction mail de PHP
      *
-     * @param string $to Le destinateur
+     * @param string|array $to Le destinateur
      * @param string $subject L'objet du mail
      * @param string $data Le message du meail
      * @param array  $headers [optinal] Les entêtes additionnel du mail.
@@ -104,14 +105,16 @@ class Mail
      */
     public static function raw($to, $subject, $data, array $headers = [])
     {
-        $message = new Message();
+        if (! is_array($to)) {
+            $to = [$to];
+        }
 
-        $message->to($to)->subject($subject)->setMessage($data);
+        $message = new Message();
+        $message->toList($to)->subject($subject)->setMessage($data);
 
         foreach($headers as $key => $value) {
             $message->addHeader($key, $value);
         }
-
         return static::$instance->send($message);
     }
 
