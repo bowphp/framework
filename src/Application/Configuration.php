@@ -1,9 +1,9 @@
 <?php
 namespace Bow\Application;
 
+use Bow\Support\Env;
 use Bow\Support\Arraydotify;
 use Bow\Exception\ApplicationException;
-use Bow\Support\Env;
 
 /**
  * Class AppConfiguratio
