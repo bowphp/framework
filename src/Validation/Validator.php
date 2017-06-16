@@ -1,11 +1,8 @@
 <?php
 namespace Bow\Validation;
 
-use Bow\Database\Database;
 use Bow\Support\Str;
-use function explode;
-use function is_float;
-use function var_dump;
+use Bow\Database\Database;
 
 /**
  * Class Validator
@@ -19,27 +16,27 @@ class Validator
     /**
      * @var bool
      */
-    private $fail = false;
+    protected $fail = false;
 
     /**
      * @var string
      */
-    private $lastMessage;
+    protected $lastMessage;
 
     /**
      * @var array
      */
-    private $errors = [];
+    protected $errors = [];
 
     /**
      * @var array
      */
-    private $inputs = [];
+    protected $inputs = [];
 
     /**
      * @var array
      */
-    private $compiles = [
+    protected $compiles = [
         'Max',
         'Min',
         'Lower',
@@ -51,6 +48,7 @@ class Validator
         'Number',
         'Email',
         'In',
+        'Int',
         'Exists'
     ];
 
@@ -81,7 +79,8 @@ class Validator
      */
     public static function make(array $inputs, array $rules)
     {
-        return (new static())->validate($inputs, $rules);
+        $v = new static();
+        return $v->validate($inputs, $rules);
     }
 
     /**
@@ -143,7 +142,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileMin($key, $masque)
+    protected function compileMin($key, $masque)
     {
         if (preg_match("/^min:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
@@ -161,7 +160,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileMax($key, $masque)
+    protected function compileMax($key, $masque)
     {
         if (preg_match("/^max:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
@@ -179,11 +178,11 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileSame($key, $masque)
+    protected function compileSame($key, $masque)
     {
         if (preg_match("/^same:(.+)$/", $masque, $match)) {
             $value = (string) end($match);
-            if ($this->inputs[$key] == $value) {
+            if ($this->inputs[$key] != $value) {
                 $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu égal à '$value'.";
                 $this->errors[$key][] = ["masque" => $masque, "message" => $message];
                 $this->fail = true;
@@ -197,7 +196,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileEmail($key, $masque)
+    protected function compileEmail($key, $masque)
     {
         if (preg_match("/^email$/", $masque, $match)) {
             if (!Str::isMail($this->inputs[$key])) {
@@ -214,7 +213,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileNumber($key, $masque)
+    protected function compileNumber($key, $masque)
     {
         if (preg_match("/^number$/", $masque, $match)) {
             if (!is_numeric($this->inputs[$key])) {
@@ -231,7 +230,7 @@ class Validator
      * @param $key
      * @param $masque
      */
-    private function compileInt($key, $masque)
+    protected function compileInt($key, $masque)
     {
         if (preg_match("/^int$/", $masque, $match)) {
             if (!is_int($this->inputs[$key])) {
@@ -248,7 +247,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileFloat($key, $masque)
+    protected function compileFloat($key, $masque)
     {
         if (preg_match("/^float$/", $masque, $match)) {
             if (!is_float($this->inputs[$key])) {
@@ -265,7 +264,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileAlphaNum($key, $masque)
+    protected function compileAlphaNum($key, $masque)
     {
         if (preg_match("/^alphanum$/", $masque)) {
             if (!Str::isAlphaNum($this->inputs[$key])) {
@@ -282,7 +281,7 @@ class Validator
      * @param $key
      * @param $masque
      */
-    private function compileIn($key, $masque)
+    protected function compileIn($key, $masque)
     {
         if (preg_match("/^in:(.+)$/", $masque, $match)) {
             $values = explode(",", end($match));
@@ -305,11 +304,11 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileSize($key, $masque)
+    protected function compileSize($key, $masque)
     {
         if (preg_match("/^size:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
-            if (Str::len($this->inputs[$key]) == $length) {
+            if (Str::len($this->inputs[$key]) != $length) {
                 $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu de $length caractère(s).";
                 $this->errors[$key][] = ["masque" => $masque, "message" => $message];
                 $this->fail = true;
@@ -323,7 +322,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileLower($key, $masque)
+    protected function compileLower($key, $masque)
     {
         if (preg_match("/^lower/", $masque)) {
             if (!Str::isLower($this->inputs[$key])) {
@@ -340,7 +339,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileUpper($key, $masque)
+    protected function compileUpper($key, $masque)
     {
         if (preg_match("/^upper/", $masque)) {
             if (!Str::isUpper($this->inputs[$key])) {
@@ -357,7 +356,7 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileAlpha($key, $masque)
+    protected function compileAlpha($key, $masque)
     {
         if (preg_match("/^alpha$/", $masque)) {
             if (!Str::isAlpha($this->inputs[$key])) {
@@ -374,16 +373,16 @@ class Validator
      * @param string $key
      * @param string $masque
      */
-    private function compileExists($key, $masque)
+    protected function compileExists($key, $masque)
     {
         if (preg_match("/^exists:(.+)$/", $masque, $match)) {
             $catch = end($match);
             $parts = explode(',', $catch);
 
             if (count($parts) == 1) {
-                $exists = Database::table($parts[0])->exists();
+                $exists = Database::table($parts[0])->where($key, $this->inputs[$key])->exists();
             } else {
-                $exists = Database::table($parts[0])->exists($parts[1]);
+                $exists = Database::table($parts[0])->where($parts[1], $this->inputs[$key])->exists();
             }
 
             if (! $exists) {
