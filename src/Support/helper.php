@@ -159,15 +159,17 @@ if (! function_exists('table')) {
     /**
      * table aliase DB::table
      *
-     * @param string $tableName, le nom d'un table.
-     * @param string $zone, le nom de la zone sur laquelle la requete sera faite.
+     * @param string $name
+     * @param string $class.
+     * @param string $primary_key
+     * @param string $connexion
      * @return Bow\Database\QueryBuilder\QueryBuilder
      */
-    function table($tableName, $zone = null) {
-        if (is_string($zone)) {
-            db($zone);
+    function table($name, $class = null, $primary_key = null, $connexion = null) {
+        if (is_string($connexion)) {
+            db($connexion);
         }
-        return DB::table($tableName);
+        return DB::table($name, $class, $primary_key);
     }
 }
 
