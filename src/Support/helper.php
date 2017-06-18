@@ -16,7 +16,7 @@ use Bow\Session\Cookie;
 use Bow\Support\Capsule;
 use Bow\Session\Session;
 use Bow\Resource\Storage;
-use Bow\Security\Security;
+use Bow\Security\Tokenize;
 use Bow\Support\Collection;
 use Bow\Database\Database as DB;
 use Bow\Application\Configuration;
@@ -380,8 +380,7 @@ if (! function_exists('create_csrf_token')) {
      * @return \StdClass
      */
     function create_csrf_token($time = null) {
-        Security::createCsrfToken($time);
-        return Security::getCsrfToken();
+        return Tokenize::csrf($time);
     }
 }
 
@@ -415,7 +414,7 @@ if (! function_exists('generate_token_csrf')) {
      * @return string
      */
     function gen_csrf_token() {
-        return Security::generateCsrfToken();
+        return Tokenize::make();
     }
 }
 
@@ -428,7 +427,7 @@ if (! function_exists('verify_csrf')) {
      * @return string
      */
     function verify_csrf($token, $strict = false) {
-        return Security::verifyCsrfToken($token, $strict);
+        return Tokenize::verify($token, $strict);
     }
 }
 
@@ -440,7 +439,7 @@ if (! function_exists('csrf_time_is_expirate')) {
      * @return string
      */
     function csrf_time_is_expirate($time = null) {
-        return Security::tokenCsrfTimeIsExpirate($time);
+        return Tokenize::csrfExpirated($time);
     }
 }
 
@@ -460,7 +459,7 @@ if (! function_exists('store')) {
             $cb = $extension;
             $extension = $size;
             $size = $location;
-            $location = config()->getDefaultStoragePath();
+            $location = storage_path();
         }
 
         return Storage::store($file, $location, $size, $extension, $cb);
@@ -472,11 +471,12 @@ if (! function_exists('json')) {
      * json, permet de lance des reponses server de type json
      *
      * @param mixed $data
-     * @param int $code=200
+     * @param int $code
+     * @param array $headers
      * @return mixed
      */
-    function json($data, $code = 200) {
-        return response()->json('json', [$data, $code]);
+    function json($data, $code = 200, array $headers = []) {
+        return response()->json($data, $code, $headers);
     }
 }
 
