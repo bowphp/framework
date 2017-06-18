@@ -1,7 +1,7 @@
 <?php
 namespace Bow\Session;
 
-use Bow\Security\Security;
+use Bow\Security\Crypto;
 
 /**
  * Class Cookie
@@ -63,7 +63,7 @@ class Cookie
     public static function get($key, $default = null)
     {
         if (static::has($key)) {
-            return Security::decrypt($_COOKIE[$key]);
+            return Crypto::decrypt($_COOKIE[$key]);
         }
 
         if (is_callable($default)) {
@@ -81,7 +81,7 @@ class Cookie
     public static function all()
     {
         foreach($_COOKIE as $key => $value) {
-            $_COOKIE[$key] = Security::decrypt($value);
+            $_COOKIE[$key] = Crypto::decrypt($value);
         }
 
         return $_COOKIE;
@@ -103,7 +103,7 @@ class Cookie
     public static function add($key, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
     {
         if ($data !== null) {
-            $data = Security::encrypt($data);
+            $data = Crypto::encrypt($data);
         }
 
         return setcookie($key, $data, time() + $expirate, $path, $domain, $secure, $http);
@@ -119,15 +119,19 @@ class Cookie
     public static function remove($key)
     {
         $old = null;
+
         if (! static::has($key)) {
             return $old;
         }
+
         if (! static::$isDecrypt[$key]) {
-            $old = Security::decrypt($_COOKIE[$key]);
+            $old = Crypto::decrypt($_COOKIE[$key]);
             unset(static::$isDecrypt[$key]);
         }
+
         static::add($key, null, -1000);
         unset($_COOKIE[$key]);
+
         return $old;
     }
 }
