@@ -21,7 +21,7 @@ class Arraydotify implements \ArrayAccess
     public function __construct(array $array = [])
     {
         $this->array = $this->dotify($array);
-        $this->updateOrigin();
+        $this->origin = $array;
     }
 
     /**
