@@ -2,6 +2,17 @@
 
 namespace Bow\Security;
 
+use Bow\Support\Str;
+use function mcrypt_create_iv;
+use function microtime;
+use const null;
+use function openssl_cipher_iv_length;
+use function openssl_decrypt;
+use function openssl_encrypt;
+use function sha1;
+use const true;
+use function var_dump;
+
 class Crypto
 {
     /**
@@ -10,11 +21,23 @@ class Crypto
     private static $key = '';
 
     /**
-     * @param $key
+     * @var string
      */
-    public static function setKey($key)
+    private static $cipher = 'AES-256-CBC';
+
+    /**
+     * Crypto constructor
+     *
+     * @param string $key
+     * @param string $cipher
+     */
+    public static function setKey($key, $cipher = null)
     {
         static::$key = $key;
+
+        if ($cipher) {
+            static::$cipher = $cipher;
+        }
     }
 
     /**
@@ -25,10 +48,9 @@ class Crypto
      */
     public static function encrypt($data)
     {
-        $layer = base64_encode(trim($data));
-        $layer = base64_encode(static::$key.$layer);
-
-        return $layer;
+        $iv_size = openssl_cipher_iv_length(static::$cipher);
+        $iv = Str::slice(sha1(static::$key), 0, $iv_size);
+        return openssl_encrypt($data, static::$cipher, static::$key, 0, $iv);
     }
 
     /**
@@ -40,8 +62,8 @@ class Crypto
      */
     public static function decrypt($data)
     {
-        $layer = base64_decode(trim($data));
-        $layer = explode(static::$key, $layer)[0];
-        return base64_decode($layer);
+        $iv_size = openssl_cipher_iv_length(static::$cipher);
+        $iv = Str::slice(sha1(static::$key), 0, $iv_size);
+        return openssl_decrypt($data, static::$cipher, static::$key, 0, $iv);
     }
 }
