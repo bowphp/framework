@@ -1,7 +1,7 @@
 <?php
 
-use Bow\Security\Security;
 use Bow\Security\Hash;
+use Bow\Security\Crypto;
 
 class SecurityTest extends \PHPUnit\Framework\TestCase
 {
@@ -12,8 +12,8 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
 
     public function testEncryptValue()
     {
-        Security::setkey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
-        return  Security::encrypt('bow');
+        Crypto::setKey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
+        return Crypto::encrypt('bow');
     }
 
     /**
@@ -22,8 +22,8 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
      */
     public function testDecrypt($data)
     {
-        Security::setkey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
-        $this->assertEquals(Security::decrypt($data), 'bow');
+        Crypto::setkey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
+        $this->assertEquals(Crypto::decrypt($data), 'bow');
     }
 
     /**
