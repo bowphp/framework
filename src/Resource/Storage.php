@@ -341,7 +341,7 @@ class Storage
         }
 
         if (empty($config)) {
-            $config = static::$config['s3'];
+            $config = isset(static::$config['s3']) ? static::$config['s3'] : [];
         }
 
         static::$s3 = new AwsS3Client($config);
@@ -352,7 +352,7 @@ class Storage
      * @param string $mount
      * @return Storage
      */
-    public static function mount(string $mount)
+    public static function mount($mount)
     {
         static::$config['disk']['mount'] = $mount;
         return new static();
