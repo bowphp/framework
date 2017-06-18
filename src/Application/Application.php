@@ -8,7 +8,10 @@ use Bow\Exception\RouterException;
 use Bow\Exception\ApplicationException;
 use Bow\Firewall\ApplicationCsrfFirewall;
 use Bow\Support\DateAccess;
+use function class_exists;
 use function class_uses;
+use function debug;
+use function is_array;
 
 /**
  * Create and maintener by diagnostic developpers teams:
@@ -120,10 +123,14 @@ class Application
         /**
          * Chargement des services
          */
-        $services = $this->config['app.classes.services'];
+        $services = $this->config['app.classes'];
+
+        if (! isset($services['services'])) {
+            return;
+        }
 
         foreach ($services as $service) {
-            if (! class_uses($service)) {
+            if (! class_exists($service)) {
                 continue;
             }
 
