@@ -2,8 +2,10 @@
 namespace Bow\Session;
 
 use Bow\Security\Security;
+use function dump;
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
+use function response;
 
 /**
  * Class Session
@@ -55,11 +57,21 @@ class Session implements CollectionAccessStatic
 
         $started = @session_start();
 
-        $_SESSION["__bow.csrf"] = new \stdClass();
-        $_SESSION["__bow.session.key.cache"] = [];
-        $_SESSION["__bow.event.listener"] = [];
-        $_SESSION["__bow.flash"] = [];
-        $_SESSION["__bow.old"] = [];
+        if (! isset($_SESSION["__bow.csrf"])) {
+            $_SESSION["__bow.csrf"] = new \stdClass();
+        }
+        if (! isset($_SESSION["__bow.session.key.cache"])) {
+            $_SESSION["__bow.session.key.cache"] = [];
+        }
+        if (! isset($_SESSION["__bow.event.listener"])) {
+            $_SESSION["__bow.event.listener"] = [];
+        }
+        if (! isset($_SESSION["__bow.flash"])) {
+            $_SESSION["__bow.flash"] = [];
+        }
+        if (! isset($_SESSION["__bow.old"])) {
+            $_SESSION["__bow.old"] = [];
+        }
 
         return $started;
     }
@@ -96,7 +108,7 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (! array_key_exists($key, $_SESSION["__bow.session.key.cache"])) {
+        if (! isset($_SESSION["__bow.session.key.cache"][$key])) {
             return isset($_SESSION['__bow.flash'][$key]);
         }
 

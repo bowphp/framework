@@ -925,7 +925,7 @@ if (! function_exists('session')) {
 
         if (is_array($value)) {
             foreach ($value as $key => $item) {
-                Session::add($key, $value);
+                Session::add($key, $item);
             }
         }
 
