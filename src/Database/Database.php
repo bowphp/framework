@@ -3,7 +3,7 @@ namespace Bow\Database;
 
 use PDO;
 use StdClass;
-use Bow\Security\Security;
+use Bow\Security\Sanitize;
 use Bow\Support\Collection;
 use Bow\Exception\DatabaseException;
 use Bow\Exception\ConnectionException;
@@ -164,10 +164,10 @@ class Database
         }
 
         $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
-        static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
+        static::$adapter->bind($pdostatement, Sanitize::make($data, true));
         $pdostatement->execute();
 
-        return new Collection(Security::sanitaze($pdostatement->fetchAll()));
+        return new Collection(Sanitize::make($pdostatement->fetchAll()));
     }
 
     /**
@@ -189,7 +189,7 @@ class Database
         static::$adapter->bind($pdostatement, $data);
         $pdostatement->execute();
 
-        return Security::sanitaze($pdostatement->fetch());
+        return Sanitize::make($pdostatement->fetch());
     }
 
     /**
@@ -357,7 +357,7 @@ class Database
     private static function executePrepareQuery($sqlstatement, array $data = [])
     {
         $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
-        static::$adapter->bind($pdostatement, Security::sanitaze($data, true));
+        static::$adapter->bind($pdostatement, Sanitize::make($data, true));
 
         $pdostatement->execute();
         $r = $pdostatement->rowCount();

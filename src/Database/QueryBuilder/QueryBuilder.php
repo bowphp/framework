@@ -4,7 +4,7 @@ namespace Bow\Database\QueryBuilder;
 use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Database\SqlUnity;
-use Bow\Security\Security;
+use Bow\Security\Sanitize;
 use Bow\Database\Collection;
 use Bow\Database\Util\DBUtility;
 use Bow\Exception\QueryBuilderException;
@@ -694,7 +694,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $this->whereDataBinding = [];
         $stmt->execute();
 
-        $data = Security::sanitaze($stmt->fetchAll());
+        $data = Sanitize::make($stmt->fetchAll());
         $stmt->closeCursor();
 
         if ($this->loadClassName) {
@@ -880,7 +880,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         $stmt = $this->connection->prepare($sql);
-        $data = Security::sanitaze($data, true);
+        $data = Sanitize::make($data, true);
         static::bind($stmt, $data);
 
         // execution de la requête
