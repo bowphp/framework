@@ -1,11 +1,9 @@
 <?php
 namespace Bow\Session;
 
-use Bow\Security\Security;
-use function dump;
+use Bow\Security\Crypto;
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
-use function response;
 
 /**
  * Class Session
@@ -52,7 +50,7 @@ class Session implements CollectionAccessStatic
         session_name("BSESSID");
 
         if (! isset($_COOKIE["BSESSID"])) {
-            session_id(hash("sha256", Security::encrypt(uniqid(microtime(false)))));
+            session_id(hash("sha256", Crypto::encrypt(uniqid(microtime(false)))));
         }
 
         $started = @session_start();
