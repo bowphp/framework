@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Support\Console;
 
+use function dump;
 use Psy\Shell;
 use Psy\Configuration;
 use Bow\Support\Faker;
