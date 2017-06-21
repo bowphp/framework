@@ -3,6 +3,7 @@ namespace Bow\Validation;
 
 use Bow\Support\Str;
 use Bow\Database\Database;
+use function str_replace;
 
 /**
  * Class Validator
@@ -50,6 +51,28 @@ class Validator
         'In',
         'Int',
         'Exists'
+    ];
+
+    /**
+     * @var array
+     */
+    private $lexique = [
+        'email' => "Le champs :attribute doit &ecir;tre un email.",
+        'required' => "Le champs :attribute est requis.",
+        'empty' => "Le champs :attribute n'est pas défini dans les données à valider.",
+        'min' => "Le champs :attribute doit avoir un contenu minimal de :length.",
+        'max' => "Le champs :attribute doit avoir un contenu maximal de :length.",
+        'same' => "Le champs :attribute doit avoir un contenu égal à :value.",
+        'number' => "Le champs :attribute doit avoir un contenu en numérique.",
+        'int' => "Le champs :attribute doit avoir un contenu de type entier.",
+        'float' => "Le champs :attribute doit avoir un contenu de type réel.",
+        'alphanum' => "Le champs :attribute doit avoir un contenu en alphanumérique.",
+        'in' => "Le champs :attribute doit avoir un contenu une valeur dans :value.",
+        'size' => "Le champs :attribute doit avoir un contenu de :length caractère(s).",
+        'lower' => "Le champs :attribute doit avoir un contenu en miniscule.",
+        'upper' => "Le champs :attribute doit avoir un contenu en majiscule.",
+        'alpha' => "Le champs :attribute doit avoir un contenu en alphabetique.",
+        'exists' => "l':attribute n'existe pas.",
     ];
 
     /**
@@ -109,13 +132,13 @@ class Validator
                 // Masque sur la règle required
                 if ($masque == "required") {
                     if (! isset($inputs[$key])) {
-                        $this->lastMessage = $message = "Le champs \"$key\" est requis.";
+                        $this->lastMessage = $message = $this->lexique('required', $key);
                         $this->errors[$key][] = ["masque" => $masque, "message" => $message];
                         $this->fail = true;
                     }
                 } else {
                     if (! isset($inputs[$key])) {
-                        $this->lastMessage = $message = "Le champs \"$key\" n'est pas défini dans les données à valider.";
+                        $this->lastMessage = $message = $this->lexique('empty', $key);
                         $this->errors[$key][] = ["masque" => $masque, "message" => $message];
                         $this->fail = true;
                         continue;
@@ -137,6 +160,26 @@ class Validator
     }
 
     /**
+     * @param string $key
+     * @param string|array $attributes
+     * @return mixed
+     */
+    private function lexique($key, $attributes)
+    {
+        if (is_string($attributes)){
+            $attributes = ['attribute' => $attributes];
+        }
+
+        $lexique = $this->lexique[$key];
+
+        foreach ($attributes as $key => $value) {
+            $lexique = str_replace(':'.$key, $value, $lexique);
+        }
+
+        return $lexique;
+    }
+
+    /**
      * Masque sur la règle min
      *
      * @param string $key
@@ -147,7 +190,10 @@ class Validator
         if (preg_match("/^min:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
             if (Str::len($this->inputs[$key]) < $length) {
-                $this->lastMessage = "Le champs \"$key\" doit avoir un contenu minimal de $length.";
+                $this->lastMessage = $this->lexique('min', [
+                    'attribute' => $key,
+                    'length' => $length
+                ]);
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
@@ -165,8 +211,11 @@ class Validator
         if (preg_match("/^max:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
             if (Str::len($this->inputs[$key]) > $length) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu maximal de $length.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('max', [
+                    'attribute' => $key,
+                    'length' => $length
+                ]);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -183,8 +232,11 @@ class Validator
         if (preg_match("/^same:(.+)$/", $masque, $match)) {
             $value = (string) end($match);
             if ($this->inputs[$key] != $value) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu égal à '$value'.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('same', [
+                    'attribute' => $key,
+                    'value' => $value
+                ]);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -200,8 +252,8 @@ class Validator
     {
         if (preg_match("/^email$/", $masque, $match)) {
             if (!Str::isMail($this->inputs[$key])) {
-                $message = "Le champs $key doit avoir un contenu au format email.";
-                $errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('email', $key);
+                $errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -217,8 +269,8 @@ class Validator
     {
         if (preg_match("/^number$/", $masque, $match)) {
             if (!is_numeric($this->inputs[$key])) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en numérique.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('number', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -234,8 +286,8 @@ class Validator
     {
         if (preg_match("/^int$/", $masque, $match)) {
             if (!is_int($this->inputs[$key])) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu de type entier.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('int', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -251,8 +303,8 @@ class Validator
     {
         if (preg_match("/^float$/", $masque, $match)) {
             if (!is_float($this->inputs[$key])) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu de type réel.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('float', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -268,8 +320,8 @@ class Validator
     {
         if (preg_match("/^alphanum$/", $masque)) {
             if (!Str::isAlphaNum($this->inputs[$key])) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en alphanumérique.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('alphanum', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -291,8 +343,11 @@ class Validator
             }
 
             if (!in_array($this->inputs[$key], $values)) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu une valeur dans " . implode(", ", $values) . ".";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('in', [
+                    'attribute' => $key,
+                    'value' => implode(", ", $values)
+                ]);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -309,8 +364,11 @@ class Validator
         if (preg_match("/^size:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
             if (Str::len($this->inputs[$key]) != $length) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu de $length caractère(s).";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('size', [
+                    'attribute' => $key,
+                    'length' => $length
+                ]);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -326,8 +384,8 @@ class Validator
     {
         if (preg_match("/^lower/", $masque)) {
             if (!Str::isLower($this->inputs[$key])) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en miniscule.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('lower', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -343,8 +401,8 @@ class Validator
     {
         if (preg_match("/^upper/", $masque)) {
             if (!Str::isUpper($this->inputs[$key])) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en majiscule.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('upper', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -360,8 +418,8 @@ class Validator
     {
         if (preg_match("/^alpha$/", $masque)) {
             if (!Str::isAlpha($this->inputs[$key])) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en alphabetique.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('alpha', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
@@ -386,8 +444,8 @@ class Validator
             }
 
             if (! $exists) {
-                $this->lastMessage = $message = "Le champs \"$key\" doit avoir un contenu en alphabetique.";
-                $this->errors[$key][] = ["masque" => $masque, "message" => $message];
+                $this->lastMessage = $this->lexique('exists', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
         }
