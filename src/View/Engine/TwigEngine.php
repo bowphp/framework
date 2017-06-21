@@ -58,13 +58,9 @@ class TwigEngine extends EngineAbstract
             return Sanitize::make($data);
         }));
 
-        $this->template->addFunction(new \Twig_SimpleFunction('csrf_field', function() {
-            return Tokenize::csrf()->field;
-        }));
+        $this->template->addFunction(new \Twig_SimpleFunction('csrf_field', 'csrf_field'));
 
-        $this->template->addFunction(new \Twig_SimpleFunction('csrf_token', function() {
-            return Tokenize::csrf()->token;
-        }));
+        $this->template->addFunction(new \Twig_SimpleFunction('csrf_token', 'csrf_token'));
 
         $this->template->addFunction(new \Twig_SimpleFunction('form', function() {
             return Form::singleton();

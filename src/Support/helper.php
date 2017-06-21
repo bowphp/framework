@@ -394,7 +394,8 @@ if (! function_exists('csrf_token')) {
      * @return string
      */
     function csrf_token() {
-        return create_csrf_token()->token;
+        $csrf = create_csrf_token();
+        return $csrf['token'];
     }
 }
 
@@ -405,7 +406,8 @@ if (! function_exists('csrf_field')) {
      * @return string
      */
     function csrf_field() {
-        return create_csrf_token()->field;
+        $csrf = create_csrf_token();
+        return $csrf['field'];
     }
 }
 
