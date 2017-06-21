@@ -1,10 +1,10 @@
 <?php
 namespace Bow\Validation;
 
-use Bow\Http\Input;
 use Bow\Http\Request;
 use Bow\Http\UploadFile;
 use Bow\Resource\Storage;
+use BadMethodCallException;
 use Psy\Exception\ErrorException;
 
 abstract class RequestValidation extends Validator
@@ -42,16 +42,21 @@ abstract class RequestValidation extends Validator
     private $upload_started = false;
 
     /**
+     * @var Request
+     */
+    private $request;
+
+    /**
      * TodoValidation constructor.
      */
     public function __construct()
     {
-        $input = new Input();
+        $this->request = new Request();
 
         if ((count($this->keys) == 1 && $this->keys[0] === '*') || count($this->keys) == 0) {
-            $this->data = $input->all();
+            $this->data = $this->request->input()->all();
         } else {
-            $this->data = $input->excepts($this->keys);
+            $this->data = $this->request->input()->excepts($this->keys);
         }
 
         $this->validate = Validator::make($this->data, $this->rules);
@@ -157,5 +162,21 @@ abstract class RequestValidation extends Validator
 
         $this->file->move(Storage::resolvePath($dirname), $filename);
         return '/'.ltrim(rtrim($dirname, '/'), '/').'/'.ltrim($filename, '/');
+    }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return Request
+     */
+    public function __call($name, array $arguments)
+    {
+        if (method_exists($this->request, $name)) {
+            return call_user_func_array([$this->request, $name], $arguments);
+        }
+
+        throw new BadMethodCallException('La methode '. $name.' n\'est pas défini.');
     }
 }
