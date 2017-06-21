@@ -1,8 +1,6 @@
 <?php
 namespace Bow\Database\Migration;
 
-use Bow\Support\Collection;
-
 class Statement
 {
     /**
@@ -128,8 +126,12 @@ class Statement
 
                     $this->addIndexOrPrimaryKey($info, $field);
 
-                    if ($info["default"]) {
+                    if (isset($info["default"])) {
                         $this->sql .= " DEFAULT " . $info["default"];
+                    }
+
+                    if (isset($info["unsigned"])) {
+                        $this->sql .= " UNSIGNED";
                     }
                     break;
 
@@ -138,19 +140,33 @@ class Statement
                 case "timestamp" :
                 case "time" :
                 case "year" :
+
                     $this->addFieldType($info, $field, $type);
                     $this->addIndexOrPrimaryKey($info, $field);
+
+                    if (isset($info["default"]) && $info["default"] != null) {
+                        $this->sql .= " DEFAULT " . $info["default"];
+                    }
+
                     break;
                 case "enum" :
                     foreach ($info["value"] as $key => $value) {
                         $info["value"][$key] = "'" . $value . "'";
                     }
-                    $null = $this->getNullType($info["null"]);
+
+                    if (isset($info["null"]) && $info["null"] === true) {
+                        $null = $this->getNullType($info["null"]);
+                    } else {
+                        $null = '';
+                    }
+
                     $enum = implode(", ", $info["value"]);
                     $this->sql .= "`$field` ENUM($enum) $null";
-                    if ($info["default"] !== null) {
+
+                    if (isset($info["default"]) && $info['default'] !== null) {
                         $this->sql .= " DEFAULT '" . $info["default"] . "'";
                     }
+
                     break;
             }
         });

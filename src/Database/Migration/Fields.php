@@ -87,7 +87,6 @@ class Fields
      */
     public function size($size)
     {
-        $this->rangs[$this->lastField->field]['bind']['size'] = $size;
         $this->rangs[$this->lastField->field]['data']['size'] = $size;
     }
 
@@ -96,17 +95,28 @@ class Fields
      */
     public function defautl($default)
     {
-        $this->rangs[$this->lastField->field]['bind']['default'] = $default;
         $this->rangs[$this->lastField->field]['data']['default'] = $default;
     }
 
     /**
-     *
+     * nullable
      */
     public function nullable()
     {
-        $this->rangs[$this->lastField->field]['bind']['null'] = true;
         $this->rangs[$this->lastField->field]['data']['null'] = true;
+    }
+
+    /**
+     * @param $value
+     */
+    public function default($value)
+    {
+        $this->rangs[$this->lastField->field]['data']['default'] = $value;
+    }
+
+    public function unsigned()
+    {
+        $this->rangs[$this->lastField->field]['data']['unsigned'] = true;
     }
 
     /**
@@ -142,39 +152,34 @@ class Fields
      *
      * @param string $field
      * @param int $size
-     * @param bool $null
-     * @param null|string $default
      *
      * @return Fields
      */
-    public function integer($field, $size = 11, $null = false, $default = null)
+    public function integer($field, $size = 11)
     {
-        return $this->loadWhole('int', $field, $size, $null, $default);
+        return $this->loadWhole('int', $field, $size);
     }
 
     /**
      * tinyint
      *
      * @param string $field
-     * @param bool $null
-     * @param bool $size
-     * @param null|string $default
+     * @param integer $size
      *
      * @return Fields
      */
-    public function tinyInteger($field, $size = null, $null = false, $default = null)
+    public function tinyInteger($field, $size = 1)
     {
-        return $this->loadWhole('tinyint', $field, $size, $null, $default);
+        return $this->loadWhole('tinyint', $field, $size);
     }
 
     /**
      * @param $field
-     * @param null $default
      * @return Fields
      */
-    public function boolean($field, $default = null)
+    public function boolean($field)
     {
-        return $this->tinyInteger($field, 1, false, $default);
+        return $this->tinyInteger($field, 1);
     }
 
     /**
@@ -182,15 +187,13 @@ class Fields
      *
      * @param string $field
      * @param bool $size
-     * @param bool $null
-     * @param null|string $default
      *
      * @return Fields
      * @throws \ErrorException
      */
-    public function smallInteger($field, $size = null, $null = false, $default = null)
+    public function smallInteger($field, $size = null)
     {
-        return $this->loadWhole('smallint', $field, $size, $null, $default);
+        return $this->loadWhole('smallint', $field, $size);
     }
 
     /**
@@ -203,7 +206,7 @@ class Fields
      */
     public function mediumInteger($field)
     {
-        return $this->loadWhole('mediumint', $field, null, false, null);
+        return $this->loadWhole('mediumint', $field, null);
     }
 
     /**
@@ -211,33 +214,12 @@ class Fields
      *
      * @param string $field
      * @param int $size
-     * @param bool $null
-     * @param null|string $default
      *
      * @return Fields
      */
-    public function bigInteger($field, $size = 20, $null = false, $default = null)
+    public function bigInteger($field, $size = 20)
     {
-        return $this->loadWhole('bigint', $field, $size, $null, $default);
-    }
-
-    /**
-     * bigint
-     *
-     * @param string $field
-     * @param int $size
-     * @param int $left
-     * @param bool $null
-     * @param null|string $default
-     *
-     * @return Fields
-     */
-    public function double($field, $size = 20, $left = 0, $null = false, $default = null)
-    {
-        if ($left > 0) {
-            $size = '$size, $left';
-        }
-        return $this->loadWhole('double precision', $field, $size, $null, $default);
+        return $this->loadWhole('bigint', $field, $size);
     }
 
     /**
@@ -246,17 +228,32 @@ class Fields
      * @param string $field
      * @param int $size
      * @param int $left
-     * @param bool $null
-     * @param null|string $default
      *
      * @return Fields
      */
-    public function float($field, $size = 20, $left = 0, $null = false, $default = null)
+    public function double($field, $size = 20, $left = 0)
     {
         if ($left > 0) {
             $size = '$size, $left';
         }
-        return $this->loadWhole('float', $field, $size, $null, $default);
+        return $this->loadWhole('double precision', $field, $size);
+    }
+
+    /**
+     * bigint
+     *
+     * @param string $field
+     * @param int $size
+     * @param int $left
+     *
+     * @return Fields
+     */
+    public function float($field, $size = 20, $left = 0)
+    {
+        if ($left > 0) {
+            $size = '$size, $left';
+        }
+        return $this->loadWhole('float', $field, $size);
     }
 
     /**
@@ -264,35 +261,30 @@ class Fields
      *
      * @param string $field
      * @param int $size
-     * @param bool $null
-     * @param null|string $default
      * @throws \Exception
      * @return Fields
      */
-    public function string($field, $size = 255, $null = false, $default = null)
+    public function string($field, $size = 255)
     {
         $type = 'varchar';
         if ($size > 255) {
             $type = 'text';
         }
 
-        return $this->loadWhole($type, $field, $size, $null, $default);
+        return $this->loadWhole($type, $field, $size);
     }
 
     /**
      * varchar
      *
      * @param string $field
-     * @param bool $null
-     * @param null|string $default
      * @throws \Exception
      * @return Fields
      */
-    public function longText($field, $null = false, $default = null)
+    public function longText($field)
     {
         return $this->addField('mediumtext', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -300,16 +292,13 @@ class Fields
      * varchar
      *
      * @param string $field
-     * @param bool $null
-     * @param null|string $default
      * @throws \Exception
      * @return Fields
      */
-    public function mediumText($field, $null = false, $default = null)
+    public function mediumText($field)
     {
         return $this->addField('mediumtext', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -317,16 +306,13 @@ class Fields
      * tinytext
      *
      * @param string $field
-     * @param bool $null
-     * @param null|string $default
      * @throws \Exception
      * @return Fields
      */
-    public function tinyText($field, $null = false, $default = null)
+    public function tinyText($field)
     {
         return $this->addField('tinytext', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -334,16 +320,13 @@ class Fields
      * text
      *
      * @param string $field
-     * @param bool $null
-     * @param null|string $default
      * @throws \Exception
      * @return Fields
      */
-    public function text($field, $null = false, $default = null)
+    public function text($field)
     {
         return $this->addField('text', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -352,16 +335,13 @@ class Fields
      *
      * @param string $field
      * @param int $size
-     * @param bool $null
-     * @param null|string $default
      * @throws \Exception
      * @return Fields
      */
-    public function binary($field, $size = 8, $null = false, $default = null)
+    public function binary($field, $size = 8)
     {
         return $this->addField('binary', $field, [
-            'null' => $null,
-            'default' => $default,
+            'null' => false,
             'size' => $size
         ]);
     }
@@ -370,16 +350,13 @@ class Fields
      * blob
      *
      * @param string $field
-     * @param bool $null
-     * @param mixed $default
      * @throws \Exception
      * @return Fields
      */
-    public function blob($field, $null = false, $default = null)
+    public function blob($field)
     {
         return $this->addField('blob', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -387,16 +364,13 @@ class Fields
      * tiny blob
      *
      * @param string $field
-     * @param bool $null
-     * @param mixed $default
      * @throws \Exception
      * @return Fields
      */
-    public function tinyBlob($field, $null = false, $default = null)
+    public function tinyBlob($field)
     {
         return $this->addField('tinyblob', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -404,16 +378,13 @@ class Fields
      * long blob
      *
      * @param string $field
-     * @param bool $null
-     * @param mixed $default
      * @throws \Exception
      * @return Fields
      */
-    public function longBlob($field, $null = false, $default = null)
+    public function longBlob($field)
     {
         return $this->addField('longblob', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -421,16 +392,13 @@ class Fields
      * medium blob
      *
      * @param string $field
-     * @param bool $null
-     * @param mixed $default
      * @throws \Exception
      * @return Fields
      */
-    public function mediumBlob($field, $null = false, $default = null)
+    public function mediumBlob($field)
     {
         return $this->addField('mediumblob', $field, [
-            'null' => $null,
-            'default' => $default
+            'null' => false
         ]);
     }
 
@@ -438,14 +406,13 @@ class Fields
      * date
      *
      * @param string $field
-     * @param bool $null
      *
      * @return Fields
      */
-    public function date($field, $null = false)
+    public function date($field)
     {
         $this->addField('date', $field, [
-            'null' => $null
+            'null' => false
         ]);
 
         return $this;
@@ -455,14 +422,13 @@ class Fields
      * year
      *
      * @param string $field
-     * @param bool $null
      *
      * @return Fields
      */
-    public function year($field, $null = false)
+    public function year($field)
     {
         $this->addField('year', $field, [
-            'null' => $null
+            'null' => false
         ]);
 
         return $this;
@@ -472,14 +438,13 @@ class Fields
      * time
      *
      * @param string $field
-     * @param bool $null
      *
      * @return Fields
      */
-    public function time($field, $null = false)
+    public function time($field)
     {
         $this->addField('time', $field, [
-            'null' => $null
+            'null' => false
         ]);
 
         return $this;
@@ -489,14 +454,13 @@ class Fields
      * datetime
      *
      * @param string $field
-     * @param string|bool $null
      *
      * @return Fields
      */
-    public function dateTime($field, $null = false)
+    public function dateTime($field)
     {
         $this->addField('datetime', $field, [
-            'null' => $null
+            'null' => false
         ]);
 
         return $this;
@@ -527,45 +491,37 @@ class Fields
      *
      * @param string $field
      * @param int $size
-     * @param bool $null
-     * @param null|string $default
      *
      * @return Fields
      */
-    public function longInteger($field, $size = 20, $null = false, $default = null)
+    public function longInteger($field, $size = 20)
     {
-        return $this->loadWhole('longint', $field, $size, $null, $default);
+        return $this->loadWhole('longint', $field, $size);
     }
 
     /**
      * @param string $field
      * @param int $size
-     * @param bool|false $null
-     * @param string $default
      * @return Fields
      * @throws ModelException
      */
-    public function character($field, $size = 1, $null = false, $default = null)
+    public function character($field, $size = 1)
     {
         if ($size > 4294967295) {
             throw new ModelException('Max size is 4294967295', E_USER_ERROR);
         }
 
-        return $this->loadWhole('char', $field, $size, $null, $default);
+        return $this->loadWhole('char', $field, $size);
     }
 
     /**
      * @param string $field
      * @param array $enums
-     * @param bool $null
-     * @param string $default
      * @return Fields
      */
-    public function enumerate($field, array $enums, $null = false, $default = null)
+    public function enumerate($field, array $enums)
     {
         return $this->addField('enum', $field, [
-            'default' => $default,
-            'null' => $null,
             'value' => $enums
         ]);
     }
@@ -618,9 +574,8 @@ class Fields
             throw new ModelException('Primary key has already defined', E_ERROR);
         }
 
-        if ($field === null) {
-            $field = 'id';
-            $this->addField('int', $field, [
+        if (! is_null($field)) {
+            return $this->addField('int', $field, [
                 'null' => false,
                 'auto' => true
             ]);
@@ -672,11 +627,11 @@ class Fields
      *
      * @param string $method
      * @param string $field
-     * @param string $data
+     * @param array $data
      * @throws ModelException
      * @return Fields
      */
-    private function addField($method, $field, $data)
+    private function addField($method, $field, array $data)
     {
         $method = strtolower($method);
 
@@ -684,28 +639,11 @@ class Fields
             $this->fields->push(new Collection, $method);
         }
 
-        if (! is_array($this->dataBind)) {
-            $this->dataBind = [];
-        }
-
-        $bind = [
-            'field' => $field,
-            'type' => $method,
-            'size' => isset($data['size']) ? $data['size'] : 0,
-            'auto' => false
-        ];
-
         if ($this->getAutoincrement() instanceof \stdClass) {
             if ($this->getAutoincrement()->field == $field) {
-                $bind['auto'] = true;
+                $data['auto'] = true;
             }
         }
-
-        if (isset($data['default']) &&  $data['default'] != null) {
-            $bind['default'] = $data['default'];
-        }
-
-        $this->dataBind[$field] = $bind;
 
         // Verifie l'existance d'un champs
         if ($this->fields->get($method)->has($field)) {
@@ -725,7 +663,7 @@ class Fields
             'field'  => $field
         ];
 
-        $this->rangs[$field] = ['type' => $method, 'data' => $data, 'bind' => $bind];
+        $this->rangs[$field] = ['type' => $method, 'data' => $data];
 
         return $this;
     }
@@ -736,30 +674,14 @@ class Fields
      * @param string      $method
      * @param string      $field
      * @param int         $size
-     * @param bool        $null
-     * @param null|string $default
      *
      * @return Fields
      */
-    private function loadWhole($method, $field, $size = 20, $null = false, $default = null)
+    private function loadWhole($method, $field, $size = 20)
     {
-        if (is_bool($size)) {
-            $default = is_bool($null) ? null : $null;
-            $null = $size;
-            $size = 11;
-        } elseif (is_string($size)) {
-            $default = $size;
-            $size = 11;
-            $null = false;
-        } elseif (is_string($null)) {
-            $default = $null;
-            $null = false;
-        }
-
         $this->addField($method, $field, [
             'size' => $size,
-            'null' => $null,
-            'default' => $default
+            'null' => false,
         ]);
 
         return $this;
@@ -829,14 +751,6 @@ class Fields
     {
         $this->autoincrement = $value;
         return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getBindData()
-    {
-        return $this->dataBind;
     }
 
     /**
