@@ -6,16 +6,6 @@ use Bow\Database\Database;
 class Schema
 {
     /**
-     * @var string
-     */
-    private static $table;
-
-    /**
-     * @var array
-     */
-    private static $data;
-
-    /**
      * Supprimer une table.
      *
      * @param string $table
@@ -25,6 +15,22 @@ class Schema
         $table = Database::getConnectionAdapter()->getTablePrefix().$table;
 
         if ((bool) Database::statement('DROP TABLE ' . $table . ';')) {
+            echo "\033[0;32m$table table droped.\033[00m\n";
+        } else {
+            echo "\033[0;31m$table table not exists.\033[00m\n";
+        }
+    }
+
+    /**
+     * Supprimer une table.
+     *
+     * @param string $table
+     */
+    public static function dropIfExists($table)
+    {
+        $table = Database::getConnectionAdapter()->getTablePrefix().$table;
+
+        if ((bool) Database::statement('DROP TABLE IF EXISTS ' . $table . ';')) {
             echo "\033[0;32m$table table droped.\033[00m\n";
         } else {
             echo "\033[0;31m$table table not exists.\033[00m\n";
