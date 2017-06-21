@@ -13,6 +13,7 @@ use Bow\Event\Event;
 use Bow\Support\Env;
 use Bow\Support\Util;
 use Bow\Support\Faker;
+use Bow\Security\Hash;
 use Bow\Session\Cookie;
 use Bow\Support\Capsule;
 use Bow\Session\Session;
@@ -1130,11 +1131,11 @@ if (! function_exists('bow_hash')) {
      */
     function bow_hash($data, $hash_value = null)
     {
-        if (is_null($hash_value)) {
-            return \Bow\Security\Hash::check($data, $hash_value);
+        if (! is_null($hash_value)) {
+            return Hash::check($data, $hash_value);
         }
 
-        return \Bow\Security\Hash::make($data);
+        return Hash::make($data);
     }
 }
 
