@@ -12,6 +12,7 @@ use Bow\Http\Input;
 use Bow\Event\Event;
 use Bow\Support\Env;
 use Bow\Support\Util;
+use Bow\Support\Faker;
 use Bow\Session\Cookie;
 use Bow\Support\Capsule;
 use Bow\Session\Session;
@@ -1144,12 +1145,16 @@ if (! function_exists('faker')) {
      * @param string $type
      * @return mixed
      */
-    function faker($type)
+    function faker($type = null)
     {
+        if (is_null($type)) {
+            return new Faker();
+        }
+
         $params = array_slice(func_get_args(), 1);
 
-        if (method_exists(\Bow\Support\Faker::class, $type)) {
-            return call_user_func_array([\Bow\Support\Faker::class, $type], $params);
+        if (method_exists(Faker::class, $type)) {
+            return call_user_func_array([Faker::class, $type], $params);
         }
 
         return null;

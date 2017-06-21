@@ -194,6 +194,15 @@ class Faker
     }
 
     /**
+     * Permet de réinitialiser le faker
+     */
+    public static function reinitialize()
+    {
+        static::$autoincrement = 0;
+        static::$selections = [];
+    }
+
+    /**
      * @param int $by
      * @return string
      */
@@ -230,5 +239,21 @@ class Faker
         }
 
         return static::$selections[$key][] = $gen;
+    }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, array $arguments)
+    {
+        if (method_exists(Faker::class, $name)) {
+            return call_user_func_array([Faker::class, $name], $arguments);
+        }
+
+        return null;
     }
 }
