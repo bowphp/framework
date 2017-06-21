@@ -180,6 +180,10 @@ class Faker
      */
     public static function autoincrement($type = 'integer', $start = 0)
     {
+        if (is_int($type)) {
+            $start = $type;
+            $type = 'integer';
+        }
         if ($type != 'integer') {
             return null;
         }
@@ -200,7 +204,7 @@ class Faker
             $tag = static::TAGS[rand(0, $by)];
             if (! in_array($tag, $tags)) {
                 $tags[] = static::TAGS[
-                    rand(0, count(static::TAGS) - 1)
+                rand(0, count(static::TAGS) - 1)
                 ];
             }
         }
