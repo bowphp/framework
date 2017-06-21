@@ -179,4 +179,15 @@ abstract class RequestValidation extends Validator
 
         throw new BadMethodCallException('La methode '. $name.' n\'est pas défini.');
     }
+
+    /**
+     * __get
+     *
+     * @param string $name
+     * @return string
+     */
+    public function __get($name)
+    {
+        return $this->request->$name;
+    }
 }

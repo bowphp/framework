@@ -253,8 +253,12 @@ class Request
      *
      * @return Input
      */
-    public static function input()
+    public static function input($key = null)
     {
+        if (! is_null($key)) {
+            return static::$input->get($key);
+        }
+
         return static::$input;
     }
 
