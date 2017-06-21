@@ -38,29 +38,18 @@ class MustacheEngine extends EngineAbstract
         ]);
 
         $helpers = [
-            'secure' => function ($data) {
-                return Sanitize::make($data, true);
-            },
-            'sanitaze' => function ($data) {
-                return Sanitize::make($data);
-            },
-            'slugify' => function ($data) {
-                return Str::slugify($data);
-            },
-            'csrf_token' => function () {
-                return Tokenize::csrf()->token;
-            },
-            'csrf_field' => function () {
-                return Tokenize::csrf()->field;
-            },
-            'trans' => function ($key, $data = [], $choose = null) {
-                return Translator::make($key, $data, $choose);
-            },
+            'secure' => 'secure',
+            'sanitaze' => 'sanitaze',
+            'slugify' => 'sanitaze',
+            'session' => 'session',
+            'form' => 'form',
+            'csrf_token' => 'csrf_token',
+            'csrf_field' => 'csrf_field',
+            'trans' => 'trans',
             '_public', $config['app.static'],
             '_root', $config['app.root'],
-            'escape' => function($value) {
-                return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
-            }
+            'escape' => 'e',
+            'e' => 'e',
         ];
 
         $this->template = new \Mustache_Engine([

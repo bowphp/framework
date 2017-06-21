@@ -50,43 +50,14 @@ class TwigEngine extends EngineAbstract
          * - Ajout de fonction global
          *  dans le cadre de l'utilisation de Twig
          */
-        $this->template->addFunction(new \Twig_SimpleFunction('secure', function($data) {
-            return Sanitize::make($data, true);
-        }));
-
-        $this->template->addFunction(new \Twig_SimpleFunction('sanitaze', function($data) {
-            return Sanitize::make($data);
-        }));
-
+        $this->template->addFunction(new \Twig_SimpleFunction('secure', 'secure'));
+        $this->template->addFunction(new \Twig_SimpleFunction('sanitaze', 'sanitaze'));
         $this->template->addFunction(new \Twig_SimpleFunction('csrf_field', 'csrf_field'));
-
         $this->template->addFunction(new \Twig_SimpleFunction('csrf_token', 'csrf_token'));
-
-        $this->template->addFunction(new \Twig_SimpleFunction('form', function() {
-            return Form::singleton();
-        }));
-
-        $this->template->addFunction(new \Twig_SimpleFunction('trans', function($key, $data = [], $choose = null) {
-            return Translator::make($key, $data, $choose);
-        }));
-
-        $this->template->addFunction(new \Twig_SimpleFunction('slugify', [Str::class, 'slugify']));
-
-        $this->template->addFunction(new \Twig_SimpleFunction('session', function ($key = null, $value = null){
-            if ($key === null && $value === null) {
-                return new Session();
-            }
-
-            if (Session::has($key)) {
-                return Session::get($key);
-            }
-
-            if ($key !== null && $value !== null) {
-                return Session::add($key, $value);
-            }
-
-            return null;
-        }));
+        $this->template->addFunction(new \Twig_SimpleFunction('form', 'form'));
+        $this->template->addFunction(new \Twig_SimpleFunction('trans', 'trans'));
+        $this->template->addFunction(new \Twig_SimpleFunction('slugify', 'slugify'));
+        $this->template->addFunction(new \Twig_SimpleFunction('session', 'session'));
 
         return $this->template;
     }
