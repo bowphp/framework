@@ -1,7 +1,6 @@
 <?php
 namespace Bow\View\Engine;
 
-
 use Bow\Application\Configuration;
 use Bow\View\EngineAbstract;
 use Pug\Pug;

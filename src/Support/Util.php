@@ -1,8 +1,6 @@
 <?php
 namespace Bow\Support;
 
-use Bow\Exception\UtilException;
-use Bow\Exception\RouterException;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 use Symfony\Component\VarDumper\Dumper\HtmlDumper;

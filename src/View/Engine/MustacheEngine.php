@@ -2,7 +2,8 @@
 namespace Bow\View\Engine;
 
 use Bow\Support\Str;
-use Bow\Security\Security;
+use Bow\Security\Sanitize;
+use Bow\Security\Tokenize;
 use Bow\View\EngineAbstract;
 use Bow\Translate\Translator;
 use Bow\Application\Configuration;
@@ -38,19 +39,19 @@ class MustacheEngine extends EngineAbstract
 
         $helpers = [
             'secure' => function ($data) {
-                return Security::sanitaze($data, true);
+                return Sanitize::make($data, true);
             },
             'sanitaze' => function ($data) {
-                return Security::sanitaze($data);
+                return Sanitize::make($data);
             },
             'slugify' => function ($data) {
                 return Str::slugify($data);
             },
             'csrf_token' => function () {
-                return Security::getCsrfToken()->token;
+                return Tokenize::csrf()->token;
             },
             'csrf_field' => function () {
-                return Security::getCsrfToken()->field;
+                return Tokenize::csrf()->field;
             },
             'trans' => function ($key, $data = [], $choose = null) {
                 return Translator::make($key, $data, $choose);

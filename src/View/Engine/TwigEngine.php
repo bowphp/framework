@@ -2,9 +2,10 @@
 namespace Bow\View\Engine;
 
 use Bow\Http\Form;
-use Bow\Session\Session;
 use Bow\Support\Str;
-use Bow\Security\Security;
+use Bow\Session\Session;
+use Bow\Security\Sanitize;
+use Bow\Security\Tokenize;
 use Bow\View\EngineAbstract;
 use Bow\Translate\Translator;
 use Bow\Application\Configuration;
@@ -50,19 +51,19 @@ class TwigEngine extends EngineAbstract
          *  dans le cadre de l'utilisation de Twig
          */
         $this->template->addFunction(new \Twig_SimpleFunction('secure', function($data) {
-            return Security::sanitaze($data, true);
+            return Sanitize::make($data, true);
         }));
 
         $this->template->addFunction(new \Twig_SimpleFunction('sanitaze', function($data) {
-            return Security::sanitaze($data);
+            return Sanitize::make($data);
         }));
 
         $this->template->addFunction(new \Twig_SimpleFunction('csrf_field', function() {
-            return Security::getCsrfToken()->field;
+            return Tokenize::csrf()->field;
         }));
 
         $this->template->addFunction(new \Twig_SimpleFunction('csrf_token', function() {
-            return Security::getCsrfToken()->token;
+            return Tokenize::csrf()->token;
         }));
 
         $this->template->addFunction(new \Twig_SimpleFunction('form', function() {
