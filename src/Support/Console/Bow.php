@@ -3,6 +3,7 @@ namespace Bow\Support\Console;
 
 use Psy\Shell;
 use Psy\Configuration;
+use Bow\Support\Faker;
 use Bow\Database\Database;
 
 class Bow
@@ -165,6 +166,7 @@ class Bow
 
         foreach ($seeds_filenames as $filename) {
             $seeds = require $filename;
+            Faker::reinitialize();
             $seed_collection = array_merge($seeds, $seed_collection);
         }
 
