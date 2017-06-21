@@ -17,7 +17,7 @@ php:
   - 5.6
   - 7.0
   - nightly
-  - hhvm
+
 env:
   - DB_USER=travis
 
