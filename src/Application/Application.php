@@ -129,7 +129,7 @@ class Application
             return;
         }
 
-        foreach ($services as $service) {
+        foreach ($services['services'] as $service) {
             if (! class_exists($service)) {
                 continue;
             }
