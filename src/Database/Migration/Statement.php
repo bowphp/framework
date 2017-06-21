@@ -161,7 +161,7 @@ class Statement
                     }
 
                     $enum = implode(", ", $info["value"]);
-                    $this->sql .= "`$field` ENUM($enum) $null";
+                    $this->sql .= ", `$field` ENUM($enum) $null";
 
                     if (isset($info["default"]) && $info['default'] !== null) {
                         $this->sql .= " DEFAULT '" . $info["default"] . "'";
