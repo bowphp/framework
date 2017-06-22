@@ -86,7 +86,7 @@ Class Route
      * @param array $with Les informations de restriction.
      * @return bool
      */
-    public function match($uri, $with)
+    public function match($uri, array $with = [])
     {
         $this->with = $with;
 
@@ -109,8 +109,18 @@ Class Route
         // On vérifie la longeur du path définie par le programmeur
         // avec celle de l'url courant dans le navigateur de l'utilisateur.
         // Pour éviter d'aller plus loin.
-        if (count(explode('/', $this->path)) != count(explode('/', $uri))) {
-            return false;
+        $path = implode(
+            '',
+            preg_split(
+                '/(\/:[a-z0-9-_]+\?)/',
+                $this->path
+            )
+        );
+
+        if (count(explode('/', $path)) != count(explode('/', $uri))) {
+            if (count(explode('/', $this->path)) != count(explode('/', $uri))) {
+                return false;
+            }
         }
 
         // Copie de l'url courant pour éviter de la détruie
@@ -120,33 +130,33 @@ Class Route
         // les variables capturées
         if (empty($this->with)) {
             $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
-            preg_match_all('~:([\w]+?)~', $this->path, $this->keys);
-
+            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
             $this->keys = end($this->keys);
-
             return $this->testUri($path, $uri);
         }
 
         // Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
         // capturées
-        if (preg_match_all('~:([\w]+)~', $this->path, $match)) {
-            $tmpPath =  $this->path;
-            $this->keys = end($match);
+        if (! preg_match_all('~:([\w]+)?~', $this->path, $match)) {
+            return $this->testUri($path, $uri);
+        }
 
-            // Assication des critrères personnalisé.
-            foreach ($this->keys as $key => $value) {
-                if (array_key_exists($value, $this->with)) {
-                    $tmpPath = preg_replace('~:' . $value . '~', '(' . $this->with[$value] . ')', $tmpPath);
-                }
+        $tmpPath =  $this->path;
+        $this->keys = end($match);
+
+        // Assication des critrères personnalisé.
+        foreach ($this->keys as $key => $value) {
+            if (array_key_exists($value, $this->with)) {
+                $tmpPath = preg_replace('~:' . $value . '~', '(' . $this->with[$value] . ')', $tmpPath);
             }
+        }
 
-            // Dans le case ou le path différent on récupère, on récupère celle dans $tmpPath
-            if ($tmpPath !== $this->path) {
-                $path = $tmpPath;
-            }
+        // On rend vide le table d'association de critère personnalisé.
+        $this->with = [];
 
-            // On rend vide le table d'association de critère personnalisé.
-            $this->with = [];
+        // Dans le case ou le path différent on récupère, on récupère celle dans $tmpPath
+        if ($tmpPath !== $this->path) {
+            $path = $tmpPath;
         }
 
         // Vérifcation de url et path PARSER
@@ -160,6 +170,10 @@ Class Route
      */
     private function testUri($path, $uri)
     {
+        if (strstr($path, '?') == '?') {
+            $uri = rtrim($uri, '/').'/';
+        }
+
         // Vérifcation de url et path PARSER
         $path = str_replace('~', '\\~', $path);
 
@@ -175,18 +189,20 @@ Class Route
     /**
      * Fonction permettant de lancer les fonctions de rappel.
      *
-     * @param Request 	  $req
-     * @param array 	  $namespaces
-     * @param Application $app
+     * @param Request $req
+     * @param array $namespaces
      *
      * @return mixed
      */
-    public function call(Request $req, $namespaces)
+    public function call(Request $req, array $namespaces)
     {
         $params = [];
 
         // Association des parmatres à la request
         foreach ($this->keys as $key => $value) {
+            if (! isset($this->match[$key])) {
+                continue;
+            }
             if (!is_int($this->match[$key])) {
                 $params[$value] = $this->match[$key];
                 continue;
@@ -197,6 +213,7 @@ Class Route
             $this->match[$key] = $tmp;
         }
 
+        // Ajout des paramètres capturer à la requete
         $req::$params = (object) $params;
 
         return Actionner::call($this->cb, $this->match, $namespaces);
