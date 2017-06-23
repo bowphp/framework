@@ -1221,3 +1221,15 @@ if (! function_exists('app_lang')) {
         return request()->lang();
     }
 }
+
+if (! function_exists('old')) {
+    /**
+     * @param string $key
+     *
+     * @return mixed
+     */
+    function old($key)
+    {
+        return request()->old($key);
+    }
+}
