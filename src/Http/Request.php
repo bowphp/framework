@@ -1,9 +1,9 @@
 <?php
 namespace Bow\Http;
 
-use Bow\Support\Collection;
 use Bow\Support\Str;
 use Bow\Session\Session;
+use Bow\Support\Collection;
 
 /**
  * Class Request
@@ -24,9 +24,9 @@ class Request
      * Variable de paramètre issue de url définie par l'utilisateur
      * e.g /users/:id . alors params serait params->id == une la value suivant /users/1
      *
-     * @var object
+     * @var UrlParameter
      */
-    public static $params;
+    public $param;
 
     /**
      * @var Input
@@ -38,8 +38,8 @@ class Request
      */
     public function __construct()
     {
-        static::$params = new \stdClass();
         static::$input = new Input();
+        $this->param = new UrlParameter([]);
         Session::add('__bow.old', static::$input->all());
     }
 
@@ -251,6 +251,7 @@ class Request
     /**
      * Change le factory RequestData pour tout les entrés PHP (GET, FILES, POST)
      *
+     * @param string $key
      * @return Input
      */
     public static function input($key = null)
@@ -417,7 +418,7 @@ class Request
      */
     public function hasHeader($key)
     {
-        return isset($_SERVER[$key]);
+        return isset($_SERVER[strtoupper($key)]);
     }
 
     /**
@@ -428,7 +429,15 @@ class Request
      */
     public function getParameter($key)
     {
-        return isset(static::$params->$key) ? static::$params->$key : null;
+        return $this->param[$key];
+    }
+
+    /**
+     * @param array $parameter
+     */
+    public function _setUrlParameters(array $parameter)
+    {
+        $this->param = new UrlParameter($parameter);
     }
 
     /**
@@ -438,7 +447,7 @@ class Request
      */
     public function getParameters()
     {
-        return static::$params;
+        return $this->param;
     }
 
     /**

@@ -80,6 +80,28 @@ Class Route
     }
 
     /**
+     * @param array|string $firewall
+     */
+    public function bindFirewall($firewall)
+    {
+        if (! is_array($firewall)) {
+            $firewall = [$firewall];
+        }
+
+        if (is_array($this->cb)) {
+            if (! $this->cb['firewall']) {
+                $this->cb['firewall'] = [];
+            }
+            $this->cb['firewall'] = array_merge($firewall, $this->cb);
+        } else {
+            $this->cb = [
+                'uses' => $this->cb,
+                'firewall' => $firewall
+            ];
+        }
+    }
+
+    /**
      * match, vérifie si le url de la REQUEST est conforme à celle définir par le routeur
      *
      * @param string $uri L'url de la requête
@@ -132,13 +154,13 @@ Class Route
             $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
             preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
             $this->keys = end($this->keys);
-            return $this->testUri($path, $uri);
+            return $this->checkUrl($path, $uri);
         }
 
         // Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
         // capturées
         if (! preg_match_all('~:([\w]+)?~', $this->path, $match)) {
-            return $this->testUri($path, $uri);
+            return $this->checkUrl($path, $uri);
         }
 
         $tmpPath =  $this->path;
@@ -160,7 +182,7 @@ Class Route
         }
 
         // Vérifcation de url et path PARSER
-        return $this->testUri($path, $uri);
+        return $this->checkUrl($path, $uri);
     }
 
     /**
@@ -168,7 +190,7 @@ Class Route
      * @param $uri
      * @return bool
      */
-    private function testUri($path, $uri)
+    private function checkUrl($path, $uri)
     {
         if (strstr($path, '?') == '?') {
             $uri = rtrim($uri, '/').'/';
@@ -189,12 +211,12 @@ Class Route
     /**
      * Fonction permettant de lancer les fonctions de rappel.
      *
-     * @param Request $req
+     * @param Request $request
      * @param array $namespaces
      *
      * @return mixed
      */
-    public function call(Request $req, array $namespaces)
+    public function call(Request $request, array $namespaces)
     {
         $params = [];
 
@@ -214,7 +236,7 @@ Class Route
         }
 
         // Ajout des paramètres capturer à la requete
-        $req::$params = (object) $params;
+        $request->_setUrlParameters($params);
 
         return Actionner::call($this->cb, $this->match, $namespaces);
     }
