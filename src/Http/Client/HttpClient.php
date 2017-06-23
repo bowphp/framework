@@ -1,8 +1,18 @@
 <?php
 namespace Bow\Http\Client;
 
+use function array_merge;
+use function curl_setopt;
+use const CURLOPT_FILE;
+use function ltrim;
+
 class HttpClient
 {
+    /**
+     * @var array
+     */
+    private $attach = [];
+
     /**
      * @var Resource
      */
@@ -56,6 +66,14 @@ class HttpClient
         $this->resetAndAssociateUrl($url);
 
         if (! curl_setopt($this->ch, CURLOPT_POST, true)) {
+            if (! empty($this->attach)) {
+                curl_setopt($this->ch, CURLOPT_SAFE_UPLOAD, true);
+                foreach ($this->attach as $key => $attach) {
+                    $this->attach[$key] = '@'.ltrim('@', $attach);
+                }
+                $data = array_merge($this->attach, $data);
+            }
+
             $this->addFields($data);
         }
 
@@ -86,7 +104,7 @@ class HttpClient
      */
     public function addAttach($attach)
     {
-        return $this;
+        return $this->attach = $attach;
     }
 
     /**

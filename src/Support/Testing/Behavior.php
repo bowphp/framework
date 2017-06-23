@@ -83,14 +83,34 @@ class Behavior
         return $this;
     }
 
-    public function withAttachements($attach)
+    public function assertJson($data, $message = '')
     {
-        $this->parser->addAttach($attach);
+        return $this->mustBeExactJson($data, $message);
+    }
+
+    public function assertStatus($code, $message = '')
+    {
+        Assert::assertTrue($this->parser->getCode() == $code, $message);
         return $this;
     }
 
-    public function assertJson($data)
+    public function assertContentType($type, $message = '')
     {
-        return $this->mustBeExactJson($data);
+        return $this->contentTypeMustBe($type, $message);
+    }
+
+    public function assertKeyExists($key, $message = '')
+    {
+        $data = $this->parser->toArray();
+        Assert::assertTrue(isset($data[$key]), $message);
+        return $this;
+    }
+
+    public function assertKeyMatchValue($key, $value, $message = '')
+    {
+        $data = $this->parser->toArray();
+        Assert::assertTrue(isset($data));
+        Assert::assertEquals($data[$key], $value, $message);
+        return $this;
     }
 }

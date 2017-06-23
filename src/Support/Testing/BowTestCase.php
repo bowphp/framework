@@ -8,6 +8,11 @@ use PHPUnit\Framework\TestCase;
 class BowTestCase extends TestCase
 {
     /**
+     * @var array
+     */
+    private $_attach = [];
+
+    /**
      * @var string
      */
     protected $base_url = '';
@@ -40,7 +45,18 @@ class BowTestCase extends TestCase
     public function post($url, array $param = [])
     {
         $http = new HttpClient($this->formatUrl($url));
+        if (! empty($this->_attach)) {
+            $http->addAttach($this->_attach);
+        }
         return $http->post($url, $param);
+    }
+
+    /**
+     * @param array $attach
+     */
+    public function attach(array $attach)
+    {
+        $this->_attach = $attach;
     }
 
     /**
