@@ -1,9 +1,11 @@
 <?php
 namespace Bow\Session;
 
+use function array_key_exists;
 use Bow\Security\Crypto;
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
+use function session_destroy;
 
 /**
  * Class Session
@@ -16,7 +18,7 @@ class Session implements CollectionAccessStatic
     /**
      * @var array
      */
-    const CORE_KEY = [
+    const SESSION_CORE_KEY = [
         "flash" => "__bow.flash",
         "old" => "__bow.old",
         "listener" => "__bow.event.listener",
@@ -50,20 +52,20 @@ class Session implements CollectionAccessStatic
 
         $started = @session_start();
 
-        if (! isset($_SESSION[static::CORE_KEY['csrf']])) {
-            $_SESSION[static::CORE_KEY['csrf']] = new \stdClass();
+        if (! isset($_SESSION[static::SESSION_CORE_KEY['csrf']])) {
+            $_SESSION[static::SESSION_CORE_KEY['csrf']] = new \stdClass();
         }
-        if (! isset($_SESSION[static::CORE_KEY['cache']])) {
-            $_SESSION[static::CORE_KEY['cache']] = [];
+        if (! isset($_SESSION[static::SESSION_CORE_KEY['cache']])) {
+            $_SESSION[static::SESSION_CORE_KEY['cache']] = [];
         }
-        if (! isset($_SESSION[static::CORE_KEY['listener']])) {
-            $_SESSION[static::CORE_KEY['listener']] = [];
+        if (! isset($_SESSION[static::SESSION_CORE_KEY['listener']])) {
+            $_SESSION[static::SESSION_CORE_KEY['listener']] = [];
         }
-        if (! isset($_SESSION[static::CORE_KEY['flash']])) {
-            $_SESSION[static::CORE_KEY['flash']] = [];
+        if (! isset($_SESSION[static::SESSION_CORE_KEY['flash']])) {
+            $_SESSION[static::SESSION_CORE_KEY['flash']] = [];
         }
-        if (! isset($_SESSION[static::CORE_KEY['old']])) {
-            $_SESSION[static::CORE_KEY['old']] = [];
+        if (! isset($_SESSION[static::SESSION_CORE_KEY['old']])) {
+            $_SESSION[static::SESSION_CORE_KEY['old']] = [];
         }
 
         return $started;
@@ -81,7 +83,7 @@ class Session implements CollectionAccessStatic
         static::start();
 
         foreach($_SESSION as $key => $value) {
-            if (! in_array($key, static::CORE_KEY)) {
+            if (! array_key_exists($key, static::SESSION_CORE_KEY)) {
                 $arr[$key] = $value;
             }
         }
@@ -101,8 +103,8 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (! isset($_SESSION[static::CORE_KEY['cache']][$key])) {
-            return isset($_SESSION[static::CORE_KEY['flash']][$key]);
+        if (! isset($_SESSION[static::SESSION_CORE_KEY['cache']][$key])) {
+            return isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]);
         }
 
         return true;
@@ -130,9 +132,9 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (isset($_SESSION[static::CORE_KEY['flash']][$key])) {
-            $flash = $_SESSION[static::CORE_KEY['flash']][$key];
-            unset($_SESSION[static::CORE_KEY['flash']][$key]);
+        if (isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key])) {
+            $flash = $_SESSION[static::SESSION_CORE_KEY['flash']][$key];
+            unset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]);
             return $flash;
         }
 
@@ -162,11 +164,11 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (! isset($_SESSION[static::CORE_KEY['cache']])) {
-            $_SESSION[static::CORE_KEY['cache']] = [];
+        if (! isset($_SESSION[static::SESSION_CORE_KEY['cache']])) {
+            $_SESSION[static::SESSION_CORE_KEY['cache']] = [];
         }
 
-        $_SESSION[static::CORE_KEY['cache']][$key] = true;
+        $_SESSION[static::SESSION_CORE_KEY['cache']][$key] = true;
 
         if ($next == false) {
             return $_SESSION[$key] = $value;
@@ -229,7 +231,7 @@ class Session implements CollectionAccessStatic
         static::start();
 
         $old = null;
-        $_SESSION[static::CORE_KEY['cache']][$key] = true;
+        $_SESSION[static::SESSION_CORE_KEY['cache']][$key] = true;
 
         if (static::has($key)) {
             $old = $_SESSION[$key];
@@ -253,16 +255,16 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        if (! static::has(static::CORE_KEY['flash'])) {
-            $_SESSION[static::CORE_KEY['flash']] = [];
+        if (! static::has(static::SESSION_CORE_KEY['flash'])) {
+            $_SESSION[static::SESSION_CORE_KEY['flash']] = [];
         }
 
         if ($message !== null) {
-            $_SESSION[static::CORE_KEY['flash']][$key] = $message;
+            $_SESSION[static::SESSION_CORE_KEY['flash']][$key] = $message;
             return true;
         }
 
-        return isset($_SESSION[static::CORE_KEY['flash']][$key]) ? $_SESSION[static::CORE_KEY['flash']][$key] : null;
+        return isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]) ? $_SESSION[static::SESSION_CORE_KEY['flash']][$key] : null;
     }
 
     /**
@@ -281,7 +283,7 @@ class Session implements CollectionAccessStatic
     public static function clearFash()
     {
         static::start();
-        $_SESSION[static::CORE_KEY['flash']] = [];
+        $_SESSION[static::SESSION_CORE_KEY['flash']] = [];
     }
 
     /**
@@ -292,12 +294,20 @@ class Session implements CollectionAccessStatic
         static::start();
 
         foreach(static::filter() as $key => $value){
-            unset($_SESSION[static::CORE_KEY['cache']][$key]);
+            unset($_SESSION[static::SESSION_CORE_KEY['cache']][$key]);
             unset($_SESSION[$key]);
         }
-
-        unset($_SESSION[static::CORE_KEY['csrf']]);
     }
+
+    /**
+     * Permet de vide la session
+     */
+    public static function flush()
+    {
+        session_destroy();
+        static::start();
+    }
+
 
     /**
      * __toString
