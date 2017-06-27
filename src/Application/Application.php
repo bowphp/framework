@@ -179,7 +179,7 @@ class Application
      * @throws ApplicationException
      * @return Application
      */
-    public function group($branch, Callable $cb)
+    public function group($branch, callable $cb)
     {
         $branch = rtrim($branch, '/');
 
@@ -205,25 +205,14 @@ class Application
      * Permet d'associer un firewall sur une url
      *
      * @param array $firewall
+     * @param callable $cb
      * @return Application
      */
-    public function firewall($firewall = [])
+    public function firewall($firewall = [], callable $cb)
     {
-        $this->globale_firewall = is_array($firewall) ? $firewall : [$firewall];
-        return $this;
-    }
-
-    /**
-     * Permet de fermer le firewall
-     *
-     * @return Application
-     * @throws ApplicationException
-     */
-    public function close() {
-        if (empty($this->globale_firewall)) {
-            throw new ApplicationException('Aucune flux firewall ouvert.');
-        }
-
+        $firewall = is_array($firewall) ? $firewall : [$firewall];
+        $this->globale_firewall = $firewall;
+        $cb($this);
         $this->globale_firewall = [];
         return $this;
     }
@@ -409,29 +398,31 @@ class Application
         // construction du path original en fonction de la configuration de l'application
         $path = $this->config['app.root'] . $this->branch . $path;
 
-        // Ajout d'un nouvelle route sur l'en definie.
-        if (! empty($this->globale_firewall)) {
-            if (is_array($cb)) {
-                if (isset($cb['firewall'])) {
-                    if (! is_array($cb['firewall'])) {
-                        $cb['firewall'] = [$cb['firewall']];
-                    }
-
-                    $cb['firewall'] = array_merge($this->globale_firewall, $cb['firewall']);
-                } else {
-                    $cb['firewall'] = $this->globale_firewall;
-                }
-            } else {
-                $cb = ['firewall' => $this->globale_firewall, 'uses' => $cb];
-            }
-        }
-
-        $this->routes[$method][] = new Route($path, $cb);
-
         // route courante
         // methode courante
         $this->current['path'] = $path;
         $this->current['method'] = $method;
+
+        // Ajout d'un nouvelle route sur l'en definie.
+        switch (true) {
+            case ! is_array($cb) && ! empty($this->globale_firewall):
+                $cb = [
+                    'firewall' => $this->globale_firewall,
+                    'uses' => $cb
+                ];
+                break;
+            case isset($cb['firewall']) && ! empty($this->globale_firewall):
+                if (! is_array($cb['firewall'])) {
+                    $cb['firewall'] = [$cb['firewall']];
+                }
+                $cb['firewall'] = array_merge(
+                    $this->globale_firewall, $cb['firewall']
+                );
+                break;
+        }
+
+        // Ajout de nouvelle route
+        $this->routes[$method][] = new Route($path, $cb);
 
         return $this;
     }
@@ -506,7 +497,9 @@ class Application
             if ($this->special_method !== null) {
                 $method = $this->special_method;
             }
+        }
 
+        if ($method == 'PUT' || $method == 'POST') {
             $this->executeNativeFirewall();
         }
 
