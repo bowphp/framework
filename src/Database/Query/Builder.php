@@ -3,11 +3,11 @@ namespace Bow\Database\Query;
 
 use Bow\Support\Str;
 use Bow\Support\Util;
+use Bow\Database\Tool;
 use Bow\Database\SqlUnity;
 use Bow\Security\Sanitize;
 use Bow\Database\Collection;
-use Bow\Database\Util\DBUtility;
-use Bow\Exception\QueryBuilderException;
+use Bow\Database\Exception\QueryBuilderException;
 
 /**
  * Class Builder
@@ -15,7 +15,7 @@ use Bow\Exception\QueryBuilderException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-class Builder extends DBUtility implements \JsonSerializable
+class Builder extends Tool implements \JsonSerializable
 {
     /**
      * @var string
@@ -665,6 +665,7 @@ class Builder extends DBUtility implements \JsonSerializable
         }
 
         $s = $this->connection->prepare($sql);
+        $this->bind($s, $this->whereDataBinding);
         $s->execute();
 
         if ($s->rowCount() > 1) {
@@ -689,7 +690,8 @@ class Builder extends DBUtility implements \JsonSerializable
         $sql = $this->toSql();
 
         $stmt = $this->connection->prepare($sql);
-        static::bind($stmt, $this->whereDataBinding);
+
+        $this->bind($stmt, $this->whereDataBinding);
 
         $this->whereDataBinding = [];
         $stmt->execute();
@@ -833,7 +835,7 @@ class Builder extends DBUtility implements \JsonSerializable
         }
 
         $stmt = $this->connection->prepare($sql);
-        static::bind($stmt, $this->whereDataBinding);
+        $this->bind($stmt, $this->whereDataBinding);
 
         $this->whereDataBinding = [];
         $stmt->execute();
@@ -871,7 +873,7 @@ class Builder extends DBUtility implements \JsonSerializable
 
         $stmt = $this->connection->prepare($sql);
         $data = Sanitize::make($data, true);
-        static::bind($stmt, $data);
+        $this->bind($stmt, $data);
 
         // execution de la requête
         $stmt->execute();
@@ -902,7 +904,7 @@ class Builder extends DBUtility implements \JsonSerializable
 
         $stmt = $this->connection->prepare($sql);
 
-        static::bind($stmt, $this->whereDataBinding);
+        $this->bind($stmt, $this->whereDataBinding);
         $this->whereDataBinding = [];
         $stmt->execute();
 
