@@ -11,16 +11,16 @@ class Statement
     private $sql;
 
     /**
-     * @var Fields
+     * @var TablePrinter
      */
     private $columns;
 
     /**
      * Contructeur.
      *
-     * @param Fields $columns
+     * @param TablePrinter $columns
      */
-    public function __construct(Fields $columns)
+    public function __construct(TablePrinter $columns)
     {
         $this->columns = $columns;
     }

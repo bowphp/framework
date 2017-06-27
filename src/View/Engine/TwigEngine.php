@@ -1,13 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
-use Bow\Http\Form;
-use Bow\Support\Str;
-use Bow\Session\Session;
-use Bow\Security\Sanitize;
-use Bow\Security\Tokenize;
 use Bow\View\EngineAbstract;
-use Bow\Translate\Translator;
 use Bow\Application\Configuration;
 
 class TwigEngine extends EngineAbstract

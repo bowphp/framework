@@ -2,7 +2,7 @@
 
 use \Bow\Database\Database;
 
-class Pets extends \Bow\Database\Model
+class Pets extends \Bow\Database\Barry\Model
 {
     /**
      * @var string

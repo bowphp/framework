@@ -165,7 +165,7 @@ if (! function_exists('table')) {
      * @param string $class.
      * @param string $primary_key
      * @param string $connexion
-     * @return Bow\Database\QueryBuilder\QueryBuilder
+     * @return Bow\Database\QueryBuilder\Builder
      */
     function table($name, $class = null, $primary_key = null, $connexion = null) {
         if (is_string($connexion)) {

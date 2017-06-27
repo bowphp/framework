@@ -1,7 +1,7 @@
 <?php
 namespace Bow\Database\Util;
 
-use Bow\Exception\DatabaseException;
+use Bow\Database\Exception\DatabaseException;
 
 /**
  * Class DatabaseErrorHandler
@@ -9,7 +9,7 @@ use Bow\Exception\DatabaseException;
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-class DBError
+class Error
 {
     /**
      * @var mixed

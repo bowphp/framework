@@ -3,7 +3,7 @@ namespace Bow\Resource;
 
 use Bow\Resource\Ftp\FTP;
 use Bow\Resource\AWS\AwsS3Client;
-use Bow\Exception\ResourceException;
+use Bow\Resource\Exception\ResourceException;
 
 /**
  * Class Storage

@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Database\QueryBuilder;
+namespace Bow\Database\Query;
 
 use Bow\Support\Str;
 use Bow\Support\Util;
@@ -10,12 +10,12 @@ use Bow\Database\Util\DBUtility;
 use Bow\Exception\QueryBuilderException;
 
 /**
- * Class QueryBuilder
+ * Class Builder
  *
  * @author Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-class QueryBuilder extends DBUtility implements \JsonSerializable
+class Builder extends DBUtility implements \JsonSerializable
 {
     /**
      * @var string
@@ -85,7 +85,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     /**
      * @var bool
      */
-    private $getOne = false;
+    private $first = false;
 
     /**
      * Contructeur
@@ -115,7 +115,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param array $select
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function select(array $select = ['*'])
     {
@@ -144,7 +144,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @throws QueryBuilderException
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
@@ -187,7 +187,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @throws QueryBuilderException
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function orWhere($column, $comp = '=', $value = null)
     {
@@ -206,7 +206,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param string $column
      * @param string $boolean='and'
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function whereNull($column, $boolean = 'and')
     {
@@ -227,7 +227,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param $column
      * @param string $boolean='and|or'
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function whereNotNull($column, $boolean = 'and')
     {
@@ -251,7 +251,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @throws QueryBuilderException
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function whereBetween($column, array $range, $boolean = 'and')
     {
@@ -284,7 +284,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param $column
      * @param $range
-     * @return QueryBuilder
+     * @return Builder
      */
     public function whereNotBetween($column, array $range)
     {
@@ -302,7 +302,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @throws QueryBuilderException
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function whereIn($column, array $range, $boolean = 'and')
     {
@@ -343,7 +343,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @throws QueryBuilderException
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function whereNotIn($column, array $range)
     {
@@ -358,7 +358,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param string $table
      * @param callable $callabe
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function join($table, callable $callabe = null)
     {
@@ -382,7 +382,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param callable $callable
      *
      * @throws QueryBuilderException
-     * @return QueryBuilder
+     * @return Builder
      */
     public function leftJoin($table, callable $callable = null)
     {
@@ -412,7 +412,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param callable $callable
      *
      * @throws QueryBuilderException
-     * @return QueryBuilder
+     * @return Builder
      */
     public function rightJoin($table, callable $callable)
     {
@@ -445,7 +445,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @throws QueryBuilderException
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function on($column1, $comp = '=', $column2)
     {
@@ -474,7 +474,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @throws QueryBuilderException
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function orOn($column, $comp = '=', $value)
     {
@@ -499,7 +499,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function group($column)
     {
@@ -537,7 +537,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * @param string $column
      * @param string $type
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function orderBy($column, $type = 'asc')
     {
@@ -558,7 +558,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      * jump = offset
      *
      * @param int $offset
-     * @return QueryBuilder
+     * @return Builder
      */
     public function jump($offset = 0)
     {
@@ -574,7 +574,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param int $limit
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public function take($limit)
     {
@@ -595,7 +595,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return QueryBuilder|number|array
+     * @return Builder|number|array
      */
     public function max($column)
     {
@@ -607,7 +607,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return QueryBuilder|number|array
+     * @return Builder|number|array
      */
     public function min($column)
     {
@@ -619,7 +619,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return QueryBuilder|number|array
+     * @return Builder|number|array
      */
     public function avg($column)
     {
@@ -631,7 +631,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
      *
      * @param string $column
      *
-     * @return QueryBuilder|number|array
+     * @return Builder|number|array
      */
     public function sum($column)
     {
@@ -703,9 +703,9 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
             $loadClassName = static::class;
         }
 
-        if ($this->getOne) {
+        if ($this->first) {
             $current = current($data);
-            $this->getOne = false;
+            $this->first = false;
 
             if ($current == false) {
                 return null;
@@ -716,7 +716,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
                 return $current;
             }
 
-            if ($loadClassName !== QueryBuilder::class) {
+            if ($loadClassName !== Builder::class) {
                 return new $loadClassName((array) $current);
             }
 
@@ -737,7 +737,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         }
 
         foreach ($data as $key => $value) {
-            if ($loadClassName !== QueryBuilder::class) {
+            if ($loadClassName !== Builder::class) {
                 $data[$key] = new $loadClassName((array) $value);
                 continue;
             }
@@ -757,25 +757,15 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * Permet de retourner un élément dans la liste de résultat
-     *
-     * @return SqlUnity|Collection|Collection|null
-     */
-    public function getOne()
-    {
-        $this->getOne = true;
-        $this->limit = 1;
-        return $this->get();
-    }
-
-    /**
      * Alias de getOne
      *
-     * @return SqlUnity|Collection|Collection|null
+     * @return SqlUnity|null
      */
     public function first()
     {
-        return $this->getOne();
+        $this->first = true;
+        $this->limit = 1;
+        return $this->get();
     }
 
     /**
@@ -794,14 +784,14 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
         $this->where = $where;
         $this->whereDataBinding = $whereData;
 
-        return $this->jump($c - 1)->take(1)->getOne();
+        return $this->jump($c - 1)->take(1)->first();
     }
 
     /**
      * Demarrer un transaction dans la base de donnée.
      *
      * @param callable $cb
-     * @return QueryBuilder
+     * @return Builder
      */
     public function transition(callable $cb)
     {
@@ -995,7 +985,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * Action truncate, vide la QueryBuilder
+     * Action truncate, vide la Builder
      *
      * @return bool
      */
@@ -1069,7 +1059,7 @@ class QueryBuilder extends DBUtility implements \JsonSerializable
     }
 
     /**
-     * Action drop, supprime la QueryBuilder
+     * Action drop, supprime la Builder
      *
      * @return mixed
      */

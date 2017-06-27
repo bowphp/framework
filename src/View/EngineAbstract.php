@@ -1,7 +1,7 @@
 <?php
 namespace Bow\View;
 
-use Bow\Exception\ViewException;
+use Bow\View\Exception\ViewException;
 use Bow\Application\Configuration;
 
 abstract class EngineAbstract

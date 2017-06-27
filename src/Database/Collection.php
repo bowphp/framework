@@ -1,6 +1,8 @@
 <?php
 namespace Bow\Database;
 
+use Bow\Database\Barry\Model;
+
 class Collection extends \Bow\Support\Collection
 {
     /**

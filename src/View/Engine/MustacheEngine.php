@@ -1,11 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
-use Bow\Support\Str;
-use Bow\Security\Sanitize;
-use Bow\Security\Tokenize;
 use Bow\View\EngineAbstract;
-use Bow\Translate\Translator;
 use Bow\Application\Configuration;
 
 class MustacheEngine extends EngineAbstract

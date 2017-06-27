@@ -3,15 +3,6 @@
 namespace Bow\Security;
 
 use Bow\Support\Str;
-use function mcrypt_create_iv;
-use function microtime;
-use const null;
-use function openssl_cipher_iv_length;
-use function openssl_decrypt;
-use function openssl_encrypt;
-use function sha1;
-use const true;
-use function var_dump;
 
 class Crypto
 {

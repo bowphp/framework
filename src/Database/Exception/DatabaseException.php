@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Exception;
+namespace Bow\Database\Exception;
 
 use PDOException;
 

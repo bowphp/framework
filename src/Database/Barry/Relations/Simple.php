@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Database\Relations;
+namespace Bow\Database\Barry\Relations;
 
 interface Simple
 {

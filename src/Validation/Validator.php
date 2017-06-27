@@ -50,7 +50,8 @@ class Validator
         'Email',
         'In',
         'Int',
-        'Exists'
+        'Exists',
+        'Unique'
     ];
 
     /**
@@ -444,6 +445,58 @@ class Validator
             }
 
             if (! $exists) {
+                $this->lastMessage = $this->lexique('exists', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alpha
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    protected function compileNotExists($key, $masque)
+    {
+        if (preg_match("/^!exists:(.+)$/", $masque, $match)) {
+            $catch = end($match);
+            $parts = explode(',', $catch);
+
+            if (count($parts) == 1) {
+                $exists = Database::table($parts[0])->where($key, $this->inputs[$key])->exists();
+            } else {
+                $exists = Database::table($parts[0])->where($parts[1], $this->inputs[$key])->exists();
+            }
+
+            if ($exists) {
+                $this->lastMessage = $this->lexique('exists', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alpha
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    protected function compileUnique($key, $masque)
+    {
+        if (preg_match("/^unique:(.+)$/", $masque, $match)) {
+            $catch = end($match);
+            $parts = explode(',', $catch);
+
+            if (count($parts) == 1) {
+                $count = Database::table($parts[0])->where($key, $this->inputs[$key])->count();
+            } else {
+                $count = Database::table($parts[0])->where($parts[1], $this->inputs[$key])->count();
+            }
+
+            if ($count >= 1) {
                 $this->lastMessage = $this->lexique('exists', $key);
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;

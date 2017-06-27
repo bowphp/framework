@@ -4,7 +4,7 @@ namespace Bow\Database\Migration;
 use Bow\Support\Collection;
 use Bow\Exception\ModelException;
 
-class Fields
+class TablePrinter
 {
     /**
      * fields list
@@ -153,7 +153,7 @@ class Fields
      * @param string $field
      * @param int $size
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function integer($field, $size = 11)
     {
@@ -166,7 +166,7 @@ class Fields
      * @param string $field
      * @param integer $size
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function tinyInteger($field, $size = 1)
     {
@@ -175,7 +175,7 @@ class Fields
 
     /**
      * @param $field
-     * @return Fields
+     * @return TablePrinter
      */
     public function boolean($field)
     {
@@ -188,7 +188,7 @@ class Fields
      * @param string $field
      * @param bool $size
      *
-     * @return Fields
+     * @return TablePrinter
      * @throws \ErrorException
      */
     public function smallInteger($field, $size = null)
@@ -201,7 +201,7 @@ class Fields
      *
      * @param string $field
      *
-     * @return Fields
+     * @return TablePrinter
      * @throws \ErrorException
      */
     public function mediumInteger($field)
@@ -215,7 +215,7 @@ class Fields
      * @param string $field
      * @param int $size
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function bigInteger($field, $size = 20)
     {
@@ -229,7 +229,7 @@ class Fields
      * @param int $size
      * @param int $left
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function double($field, $size = 20, $left = 0)
     {
@@ -246,7 +246,7 @@ class Fields
      * @param int $size
      * @param int $left
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function float($field, $size = 20, $left = 0)
     {
@@ -262,7 +262,7 @@ class Fields
      * @param string $field
      * @param int $size
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function string($field, $size = 255)
     {
@@ -279,7 +279,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function longText($field)
     {
@@ -293,7 +293,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function mediumText($field)
     {
@@ -307,7 +307,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function tinyText($field)
     {
@@ -321,7 +321,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function text($field)
     {
@@ -336,7 +336,7 @@ class Fields
      * @param string $field
      * @param int $size
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function binary($field, $size = 8)
     {
@@ -351,7 +351,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function blob($field)
     {
@@ -365,7 +365,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function tinyBlob($field)
     {
@@ -379,7 +379,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function longBlob($field)
     {
@@ -393,7 +393,7 @@ class Fields
      *
      * @param string $field
      * @throws \Exception
-     * @return Fields
+     * @return TablePrinter
      */
     public function mediumBlob($field)
     {
@@ -407,7 +407,7 @@ class Fields
      *
      * @param string $field
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function date($field)
     {
@@ -423,7 +423,7 @@ class Fields
      *
      * @param string $field
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function year($field)
     {
@@ -439,7 +439,7 @@ class Fields
      *
      * @param string $field
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function time($field)
     {
@@ -455,7 +455,7 @@ class Fields
      *
      * @param string $field
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function dateTime($field)
     {
@@ -469,7 +469,7 @@ class Fields
     /**
      * timestamp
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function timestamps()
     {
@@ -492,7 +492,7 @@ class Fields
      * @param string $field
      * @param int $size
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function longInteger($field, $size = 20)
     {
@@ -502,7 +502,7 @@ class Fields
     /**
      * @param string $field
      * @param int $size
-     * @return Fields
+     * @return TablePrinter
      * @throws ModelException
      */
     public function character($field, $size = 1)
@@ -517,7 +517,7 @@ class Fields
     /**
      * @param string $field
      * @param array $enums
-     * @return Fields
+     * @return TablePrinter
      */
     public function enumerate($field, array $enums)
     {
@@ -531,7 +531,7 @@ class Fields
      *
      * @param string $field
      * @throws ModelException
-     * @return Fields
+     * @return TablePrinter
      */
     public function increment($field = null)
     {
@@ -566,7 +566,7 @@ class Fields
      *
      * @param string|array $field
      * @throws ModelException
-     * @return Fields
+     * @return TablePrinter
      */
     public function primary($field = null)
     {
@@ -587,7 +587,7 @@ class Fields
     /**
      * indexe
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function indexe()
     {
@@ -597,7 +597,7 @@ class Fields
     /**
      * unique
      *
-     * @return Fields
+     * @return TablePrinter
      */
     public function unique()
     {
@@ -609,7 +609,7 @@ class Fields
      *
      * @param string $indexType
      * @throws ModelException
-     * @return Fields
+     * @return TablePrinter
      */
     private function addIndexes($indexType)
     {
@@ -629,7 +629,7 @@ class Fields
      * @param string $field
      * @param array $data
      * @throws ModelException
-     * @return Fields
+     * @return TablePrinter
      */
     private function addField($method, $field, array $data)
     {
@@ -675,7 +675,7 @@ class Fields
      * @param string      $field
      * @param int         $size
      *
-     * @return Fields
+     * @return TablePrinter
      */
     private function loadWhole($method, $field, $size = 20)
     {
@@ -745,7 +745,7 @@ class Fields
 
     /**
      * @param bool $value
-     * @return Fields
+     * @return TablePrinter
      */
     public function setAutoincrement($value)
     {

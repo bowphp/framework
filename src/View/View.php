@@ -2,7 +2,7 @@
 namespace Bow\View;
 
 use Bow\Application\Configuration;
-use Bow\Exception\ViewException;
+use Bow\View\Exception\ViewException;
 
 class View
 {

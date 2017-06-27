@@ -16,11 +16,6 @@ class Session implements CollectionAccessStatic
     /**
      * @var array
      */
-    private static $keys = [];
-
-    /**
-     * @var array
-     */
     const CORE_KEY = [
         "flash" => "__bow.flash",
         "old" => "__bow.old",

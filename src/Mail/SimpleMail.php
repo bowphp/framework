@@ -3,7 +3,7 @@ namespace Bow\Mail;
 
 use Bow\Support\Str;
 use InvalidArgumentException;
-use Bow\Exception\MailException;
+use Bow\Mail\Exception\MailException;
 
 /**
  * Systeme d'envoye de mail utilisant le fonction mail de php.

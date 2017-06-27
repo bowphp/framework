@@ -2,7 +2,7 @@
 
 use Bow\Event\Event;
 
-class EventTable extends \Bow\Database\Model
+class EventTable extends \Bow\Database\Barry\Model
 {
     protected $table = 'pets';
 

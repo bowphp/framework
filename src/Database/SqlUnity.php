@@ -2,9 +2,9 @@
 namespace Bow\Database;
 
 use \Carbon\Carbon;
-use Bow\Database\Relations\Simple;
-use Bow\Exception\QueryBuilderException;
-use Bow\Database\QueryBuilder\QueryBuilder;
+use Bow\Database\Query\Builder;
+use Bow\Database\Barry\Relations\Simple;
+use Bow\Database\Exception\QueryBuilderException;
 
 /**
  * Class SQLUnit
@@ -25,7 +25,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     private $id;
 
     /**
-     * @var QueryBuilder
+     * @var Builder
      */
     private $table;
 
@@ -42,14 +42,14 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     /**
      * SqlUnity Contructor
      *
-     * @param QueryBuilder $table
+     * @param Builder $table
      * @param mixed $id
      * @param null|\stdClass $data
      * @throws QueryBuilderException
      */
-    public function __construct(QueryBuilder $table, $id, $data = null) {
+    public function __construct(Builder $table, $id, $data = null) {
         if ($data === null) {
-            $data = $table->getOne();
+            $data = $table->first();
             if ($data instanceof self) {
                 $data = $data->toArray();
             }

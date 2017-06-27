@@ -293,7 +293,7 @@ SEEDER;
         $class_name = ucfirst(Str::camel($model));
         $migrate = <<<doc
 <?php
-use \Bow\Database\Migration\Fields;
+use \Bow\Database\Migration\TablePrinter as Printer;
 use \Bow\Database\Migration\Schema;
 use \Bow\Database\Migration\Migration;
 
@@ -304,7 +304,7 @@ class {$class_name} extends Migration
      */
     public function up()
     {
-        Schema::{$mapMethod[0]}("$table", function(Fields \$table) {
+        Schema::{$mapMethod[0]}("$table", function(Printer \$table) {
             \$table->increment('id');
             \$table->timestamps();
         });
@@ -645,14 +645,14 @@ CM;
         if (is_string($table_name)) {
             $table_name = strtolower($table_name);
         } else {
-            $table_name = strtolower($model_name);
+            $table_name = Str::camel($model_name);
         }
 
         $model = <<<MODEL
 <?php
 namespace App;
 
-use Bow\Database\Model;
+use Bow\Database\Barry\Model;
 
 class ${model_name} extends Model
 {

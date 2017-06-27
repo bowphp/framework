@@ -34,7 +34,7 @@ class AlterTable
      */
     public function add(Callable $cb)
     {
-        $columns = new Fields($this->tableName, $this->displaySql);
+        $columns = new TablePrinter($this->tableName, $this->displaySql);
 
         $cb($columns);
 

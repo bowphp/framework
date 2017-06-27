@@ -1,10 +1,8 @@
 <?php
 namespace Bow\Mail;
 
-use Bow\Exception\MailException;
-use Bow\Http\Response;
 use Bow\View\View;
-use function is_array;
+use Bow\Mail\Exception\MailException;
 
 /**
  * Class Mail
@@ -68,15 +66,7 @@ class Mail
     }
 
     /**
-     * Envoye de mail.
-     *
-     * @param string $view Le nom de la vue
-     * @param array|callable $bind Les données à passer à la vue.
-     * @param \Closure $cb
-     * @return bool
-     *
-     * @throws \Bow\Exception\ResponseException
-     * @throws \Bow\Exception\ViewException
+     * @inheritdoc
      */
     public static function send($view, $bind, \Closure $cb)
     {

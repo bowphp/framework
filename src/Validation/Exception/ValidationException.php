@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Exception;
+namespace Bow\Validation\Exception;
 
 class ValidationException extends \Exception
 {

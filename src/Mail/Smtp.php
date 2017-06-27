@@ -2,8 +2,8 @@
 namespace Bow\Mail;
 
 use ErrorException;
-use Bow\Exception\SmtpException;
-use Bow\Exception\SocketException;
+use Bow\Mail\Exception\SmtpException;
+use Bow\Mail\Exception\SocketException;
 
 /**
  * Class Smtp

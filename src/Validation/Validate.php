@@ -1,7 +1,7 @@
 <?php
 namespace Bow\Validation;
 
-use Bow\Exception\ValidationException;
+use Bow\Validation\Exception\ValidationException;
 /**
  * Class Validate
  *

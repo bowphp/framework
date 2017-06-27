@@ -49,7 +49,7 @@ class Schema
         $adapter = Database::getConnectionAdapter();
         $table = $adapter->getTablePrefix().$table;
 
-        $fields = new Fields($table);
+        $fields = new TablePrinter($table);
         call_user_func_array($cb, [$fields]);
 
         $charset =$adapter->getCharset();

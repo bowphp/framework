@@ -5,9 +5,9 @@ use PDO;
 use StdClass;
 use Bow\Security\Sanitize;
 use Bow\Support\Collection;
-use Bow\Exception\DatabaseException;
-use Bow\Exception\ConnectionException;
-use Bow\Database\QueryBuilder\QueryBuilder;
+use Bow\Database\Query\Builder;
+use Bow\Database\Exception\DatabaseException;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
@@ -232,7 +232,7 @@ class Database
     }
 
     /**
-     * éxécute une requête de type DROP|CREATE TABLE|TRAUNCATE|ALTER QueryBuilder
+     * éxécute une requête de type DROP|CREATE TABLE|TRAUNCATE|ALTER Builder
      *
      * @param $sqlstatement
      * @return bool
@@ -267,19 +267,19 @@ class Database
     }
 
     /**
-     * Charge le factory QueryBuilder
+     * Charge le factory Builder
      *
-     * @param string $table le nom de la QueryBuilder
+     * @param string $table le nom de la Builder
      * @param string $loadClassName
      * @param string $primaryKey
      *
-     * @return QueryBuilder
+     * @return Builder
      */
     public static function table($table, $loadClassName = null, $primaryKey = null)
     {
         static::verifyConnection();
         $table = static::$adapter->getTablePrefix().$table;
-        return new QueryBuilder($table, static::$adapter->getConnection(), $loadClassName, $primaryKey);
+        return new Builder($table, static::$adapter->getConnection(), $loadClassName, $primaryKey);
     }
 
     /**
