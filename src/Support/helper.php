@@ -23,7 +23,7 @@ use Bow\Support\Collection;
 use Bow\Database\Database as DB;
 use Bow\Application\Configuration;
 
-if (! function_exists('app')) {
+if (!function_exists('app')) {
     /**
      * @param null $key
      * @param array $setting
@@ -44,7 +44,7 @@ if (! function_exists('app')) {
     }
 }
 
-if (! function_exists('config')) {
+if (!function_exists('config')) {
     /**
      * Application configuration
      * @param string|array $key
@@ -52,15 +52,15 @@ if (! function_exists('config')) {
      * @return Configuration|mixed
      */
     function config($key = null, $setting = null) {
-        app()->bind('config', function () {
-            return Configuration::singleton();
+        app()->bind('config', function ($c) {
+            return Configuration::configure($c['app.basedir']);
         });
         $config = app('config');
         return $config($key, $setting);
     }
 }
 
-if (! function_exists('response')) {
+if (!function_exists('response')) {
     /**
      * response, manipule une instance de Response::class
      *
@@ -89,7 +89,7 @@ if (! function_exists('response')) {
     }
 }
 
-if (! function_exists('request')) {
+if (!function_exists('request')) {
     /**
      * répresente le classe Request
      *
@@ -104,7 +104,7 @@ if (! function_exists('request')) {
     }
 }
 
-if (! function_exists('db')) {
+if (!function_exists('db')) {
     /**
      * permet de se connecter sur une autre base de donnée
      * et retourne l'instance de la DB
@@ -119,7 +119,7 @@ if (! function_exists('db')) {
             return DB::instance();
         }
 
-        if (! is_string($name)) {
+        if (!is_string($name)) {
             throw new InvalidArgumentException('Erreur sur le parametre 1. Type string attendu.');
         }
 
@@ -137,7 +137,7 @@ if (! function_exists('db')) {
     }
 }
 
-if (! function_exists('view')) {
+if (!function_exists('view')) {
     /**
      * view aliase sur Response::view
      *
@@ -157,7 +157,7 @@ if (! function_exists('view')) {
     }
 }
 
-if (! function_exists('table')) {
+if (!function_exists('table')) {
     /**
      * table aliase DB::table
      *
@@ -175,7 +175,7 @@ if (! function_exists('table')) {
     }
 }
 
-if (! function_exists('query_maker')) {
+if (!function_exists('query_maker')) {
     /**
      * fonction d'astuce
      *
@@ -206,7 +206,7 @@ if (! function_exists('query_maker')) {
     }
 }
 
-if (! function_exists('last_insert_id')) {
+if (!function_exists('last_insert_id')) {
     /**
      * Retourne le dernier ID suite a une requete INSERT sur un table dont ID est
      * auto_increment.
@@ -219,7 +219,7 @@ if (! function_exists('last_insert_id')) {
     }
 }
 
-if (! function_exists('select')) {
+if (!function_exists('select')) {
     /**
      * statement lance des requete SQL de type SELECT
      *
@@ -236,7 +236,7 @@ if (! function_exists('select')) {
     }
 }
 
-if (! function_exists('select_one')) {
+if (!function_exists('select_one')) {
     /**
      * statement lance des requete SQL de type SELECT
      *
@@ -251,7 +251,7 @@ if (! function_exists('select_one')) {
     }
 }
 
-if (! function_exists('insert')) {
+if (!function_exists('insert')) {
     /**
      * statement lance des requete SQL de type INSERT
      *
@@ -266,7 +266,7 @@ if (! function_exists('insert')) {
     }
 }
 
-if (! function_exists('delete')) {
+if (!function_exists('delete')) {
     /**
      * statement lance des requete SQL de type DELETE
      *
@@ -281,7 +281,7 @@ if (! function_exists('delete')) {
     }
 }
 
-if (! function_exists('update')) {
+if (!function_exists('update')) {
     /**
      * update lance des requete SQL de type UPDATE
      *
@@ -296,7 +296,7 @@ if (! function_exists('update')) {
     }
 }
 
-if (! function_exists('statement')) {
+if (!function_exists('statement')) {
     /**
      * statement lance des requete SQL de type CREATE TABLE|ALTER TABLE|RENAME|DROP TABLE
      *
@@ -309,7 +309,7 @@ if (! function_exists('statement')) {
     }
 }
 
-if (! function_exists('slugify')) {
+if (!function_exists('slugify')) {
     /**
      * slugify, transforme un chaine de caractère en slug
      * eg. la chaine '58 comprendre bow framework' -> '58-comprendre-bow-framework'
@@ -322,7 +322,7 @@ if (! function_exists('slugify')) {
     }
 }
 
-if (! function_exists('files')) {
+if (!function_exists('files')) {
     /**
      * files, fonction de type collection
      * manipule la variable global $_FILES
@@ -339,7 +339,7 @@ if (! function_exists('files')) {
     }
 }
 
-if (! function_exists('input')) {
+if (!function_exists('input')) {
     /**
      * input, fonction de type collection
      * manipule la variable global $_GET, $_POST, $_FILES
@@ -362,7 +362,7 @@ if (! function_exists('input')) {
     }
 }
 
-if (! function_exists('debug')) {
+if (!function_exists('debug')) {
     /**
      * debug, fonction de debug de variable
      * elle vous permet d'avoir un coloration
@@ -376,7 +376,7 @@ if (! function_exists('debug')) {
     }
 }
 
-if (! function_exists('create_csrf_token')) {
+if (!function_exists('create_csrf_token')) {
     /**
      * create_csrf, fonction permetant de récupérer le token généré
      *
@@ -389,7 +389,7 @@ if (! function_exists('create_csrf_token')) {
 }
 
 
-if (! function_exists('csrf_token')) {
+if (!function_exists('csrf_token')) {
     /**
      * csrf_token, fonction permetant de récupérer le token généré
      *
@@ -401,7 +401,7 @@ if (! function_exists('csrf_token')) {
     }
 }
 
-if (! function_exists('csrf_field')) {
+if (!function_exists('csrf_field')) {
     /**
      * csrf_field, fonction permetant de récupérer un input généré
      *
@@ -413,7 +413,19 @@ if (! function_exists('csrf_field')) {
     }
 }
 
-if (! function_exists('generate_token_csrf')) {
+if (!function_exists('method_field')) {
+    /**
+     * method_field, fonction permetant de récupérer un input généré
+     *
+     * @param string $method
+     * @return string
+     */
+    function method_field($method) {
+        return '<input type="hidden" name="_method" value="'.$method.'">';
+    }
+}
+
+if (!function_exists('generate_token_csrf')) {
     /**
      * csrf, fonction permetant de générer un token
      *
@@ -424,7 +436,7 @@ if (! function_exists('generate_token_csrf')) {
     }
 }
 
-if (! function_exists('verify_csrf')) {
+if (!function_exists('verify_csrf')) {
     /**
      * verify_token_csrf, fonction permetant de vérifier un token
      *
@@ -437,7 +449,7 @@ if (! function_exists('verify_csrf')) {
     }
 }
 
-if (! function_exists('csrf_time_is_expirate')) {
+if (!function_exists('csrf_time_is_expirate')) {
     /**
      * csrf, fonction permetant de générer un token
      *
@@ -449,7 +461,7 @@ if (! function_exists('csrf_time_is_expirate')) {
     }
 }
 
-if (! function_exists('store')) {
+if (!function_exists('store')) {
     /**
      * store, effecture l'upload d'un fichier vers un repertoire
      * @param array $file, le fichier a uploadé.
@@ -472,7 +484,7 @@ if (! function_exists('store')) {
     }
 }
 
-if (! function_exists('json')) {
+if (!function_exists('json')) {
     /**
      * json, permet de lance des reponses server de type json
      *
@@ -486,7 +498,7 @@ if (! function_exists('json')) {
     }
 }
 
-if (! function_exists('download')) {
+if (!function_exists('download')) {
     /**
      * download, permet de lancer le téléchargement d'un fichier.
      *
@@ -500,7 +512,7 @@ if (! function_exists('download')) {
     }
 }
 
-if (! function_exists('status_code')) {
+if (!function_exists('status_code')) {
     /**
      * statuscode, permet de changer le code de la reponse du server
      *
@@ -512,7 +524,7 @@ if (! function_exists('status_code')) {
     }
 }
 
-if (! function_exists('sanitaze')) {
+if (!function_exists('sanitaze')) {
     /**
      * sanitaze, épure un variable d'information indésiration
      * eg. sanitaze('j\'ai') => j'ai
@@ -529,7 +541,7 @@ if (! function_exists('sanitaze')) {
     }
 }
 
-if (! function_exists('secure')) {
+if (!function_exists('secure')) {
     /**
      * secure, échape les anti-slashes, les balises html
      * eg. secure('j'ai') => j\'ai
@@ -546,7 +558,7 @@ if (! function_exists('secure')) {
     }
 }
 
-if (! function_exists('set_header')) {
+if (!function_exists('set_header')) {
     /**
      * modifie les entêtes HTTP
      *
@@ -558,7 +570,7 @@ if (! function_exists('set_header')) {
     }
 }
 
-if (! function_exists('get_header')) {
+if (!function_exists('get_header')) {
     /**
      * modifie les entêtes HTTP
      *
@@ -570,7 +582,7 @@ if (! function_exists('get_header')) {
     }
 }
 
-if (! function_exists('redirect')) {
+if (!function_exists('redirect')) {
     /**
      * modifie les entêtes HTTP
      *
@@ -588,7 +600,7 @@ if (! function_exists('redirect')) {
     }
 }
 
-if (! function_exists('send')) {
+if (!function_exists('send')) {
     /**
      * alias de echo avec option auto die
      *
@@ -600,7 +612,7 @@ if (! function_exists('send')) {
     }
 }
 
-if (! function_exists('curl')) {
+if (!function_exists('curl')) {
     /**
      * curl lance un requete vers une autre source de resource
      *
@@ -619,7 +631,7 @@ if (! function_exists('curl')) {
         ];
 
         if ($return == true) {
-            if (! curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)) {
+            if (!curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)) {
                 curl_close($ch);
                 return null;
             }
@@ -644,7 +656,7 @@ if (! function_exists('curl')) {
     }
 }
 
-if (! function_exists('url')) {
+if (!function_exists('url')) {
     /**
      * url retourne l'url courant
      *
@@ -674,7 +686,7 @@ if (! function_exists('url')) {
 }
 
 
-if (! function_exists('pdo')) {
+if (!function_exists('pdo')) {
     /**
      * pdo retourne l'instance de la connection PDO
      * @return PDO
@@ -684,7 +696,7 @@ if (! function_exists('pdo')) {
     }
 }
 
-if (! function_exists('set_pdo')) {
+if (!function_exists('set_pdo')) {
     /**
      * modifie l'instance de la connection PDO
      *
@@ -697,7 +709,7 @@ if (! function_exists('set_pdo')) {
     }
 }
 
-if (! function_exists('str')) {
+if (!function_exists('str')) {
     /**
      * @return \Bow\Support\Str;
      */
@@ -707,7 +719,7 @@ if (! function_exists('str')) {
     }
 }
 
-if (! function_exists('collect')) {
+if (!function_exists('collect')) {
 
     /**
      * retourne une instance de collection
@@ -720,7 +732,7 @@ if (! function_exists('collect')) {
     }
 }
 
-if (! function_exists('encrypt')) {
+if (!function_exists('encrypt')) {
     /**
      * Permet de crypt les données passés en paramètre
      *
@@ -732,7 +744,7 @@ if (! function_exists('encrypt')) {
     }
 }
 
-if (! function_exists('decrypt')) {
+if (!function_exists('decrypt')) {
     /**
      * permet de decrypter des données crypté par la function crypt
      *
@@ -744,7 +756,7 @@ if (! function_exists('decrypt')) {
     }
 }
 
-if (! function_exists('start_transaction')) {
+if (!function_exists('start_transaction')) {
     /**
      * Debut un transaction. Désactive l'auto commit
      *
@@ -758,7 +770,7 @@ if (! function_exists('start_transaction')) {
     }
 }
 
-if (! function_exists('transaction_started')) {
+if (!function_exists('transaction_started')) {
     /**
      * Vérifie l'existance d"une transaction en cours
      *
@@ -769,7 +781,7 @@ if (! function_exists('transaction_started')) {
     }
 }
 
-if (! function_exists('rollback')) {
+if (!function_exists('rollback')) {
     /**
      * annuler un rollback
      */
@@ -778,7 +790,7 @@ if (! function_exists('rollback')) {
     }
 }
 
-if (! function_exists('commit')) {
+if (!function_exists('commit')) {
     /**
      * valider une transaction
      */
@@ -787,7 +799,7 @@ if (! function_exists('commit')) {
     }
 }
 
-if (! function_exists('add_event')) {
+if (!function_exists('add_event')) {
     /**
      * Alias de la class Event::on
      *
@@ -797,7 +809,7 @@ if (! function_exists('add_event')) {
      * @throws \Bow\Exception\EventException
      */
     function add_event($event, $fn) {
-        if (! is_string($event)) {
+        if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
 
@@ -805,7 +817,7 @@ if (! function_exists('add_event')) {
     }
 }
 
-if (! function_exists('add_event_once')) {
+if (!function_exists('add_event_once')) {
     /**
      * Alias de la class Event::once
      *
@@ -815,14 +827,14 @@ if (! function_exists('add_event_once')) {
      * @throws \Bow\Exception\EventException
      */
     function add_event_once($event, $fn) {
-        if (! is_string($event)) {
+        if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
         return call_user_func_array([emitter(), 'once'], [$event, $fn]);
     }
 }
 
-if (! function_exists('add_transmisson_event')) {
+if (!function_exists('add_transmisson_event')) {
     /**
      * Alias de la class Event::once
      *
@@ -832,14 +844,14 @@ if (! function_exists('add_transmisson_event')) {
      * @throws \Bow\Exception\EventException
      */
     function add_transmisson_event($event = null, $fn) {
-        if (! is_string($event)) {
+        if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
         return call_user_func_array([emitter(), 'onTransmission'], [$event, $fn]);
     }
 }
 
-if (! function_exists('emitter')) {
+if (!function_exists('emitter')) {
     /**
      * Alias de la class Event::on
      *
@@ -851,7 +863,7 @@ if (! function_exists('emitter')) {
     }
 }
 
-if (! function_exists('emit_event')) {
+if (!function_exists('emit_event')) {
     /**
      * Alias de la class Event::emit
      *
@@ -859,14 +871,14 @@ if (! function_exists('emit_event')) {
      * @throws \Bow\Exception\EventException
      */
     function emit_event($event) {
-        if (! is_string($event)) {
+        if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
         call_user_func_array([emitter(), 'emit'], func_get_args());
     }
 }
 
-if (! function_exists('flash')) {
+if (!function_exists('flash')) {
     /**
      * Permet ajouter un nouveau flash
      * e.g flash('error', 'An error occured');
@@ -881,7 +893,7 @@ if (! function_exists('flash')) {
     }
 }
 
-if (! function_exists('email')) {
+if (!function_exists('email')) {
     /**
      * Alias sur SimpleMail et Smtp
      *
@@ -902,7 +914,7 @@ if (! function_exists('email')) {
     }
 }
 
-if (! function_exists('raw_email')) {
+if (!function_exists('raw_email')) {
     /**
      * Alias sur SimpleMail et Smtp
      *
@@ -917,7 +929,7 @@ if (! function_exists('raw_email')) {
     }
 }
 
-if (! function_exists('session')) {
+if (!function_exists('session')) {
     /**
      * session
      *
@@ -939,7 +951,7 @@ if (! function_exists('session')) {
     }
 }
 
-if (! function_exists('cookie')) {
+if (!function_exists('cookie')) {
     /**
      * aliase sur la classe Cookie.
      *
@@ -969,7 +981,7 @@ if (! function_exists('cookie')) {
     }
 }
 
-if (! function_exists('validator')) {
+if (!function_exists('validator')) {
     /**
      * Elle permet de valider les inforations sur le critère bien définie
      *
@@ -982,7 +994,7 @@ if (! function_exists('validator')) {
     }
 }
 
-if (! function_exists('bow_date')){
+if (!function_exists('bow_date')){
     /**
      * @param null $date
      * @return \Bow\Support\DateAccess
@@ -992,7 +1004,7 @@ if (! function_exists('bow_date')){
     }
 }
 
-if (! function_exists('public_path')) {
+if (!function_exists('public_path')) {
     /**
      * @return string
      */
@@ -1001,7 +1013,7 @@ if (! function_exists('public_path')) {
     }
 }
 
-if (! function_exists('storage_path')) {
+if (!function_exists('storage_path')) {
     /**
      * @return string
      */
@@ -1010,7 +1022,7 @@ if (! function_exists('storage_path')) {
     }
 }
 
-if (! function_exists('str')) {
+if (!function_exists('str')) {
     /**
      * @return \Bow\Support\Str
      */
@@ -1019,7 +1031,7 @@ if (! function_exists('str')) {
     }
 }
 
-if (! function_exists('route')) {
+if (!function_exists('route')) {
     /**
      * Route
      *
@@ -1030,7 +1042,7 @@ if (! function_exists('route')) {
     function route($name, array $data = []) {
         $routes = config('app.routes');
 
-        if (! isset($routes[$name])) {
+        if (!isset($routes[$name])) {
             throw new \InvalidArgumentException($name .'n\'est pas un nom définie.', E_USER_ERROR);
         }
 
@@ -1044,7 +1056,7 @@ if (! function_exists('route')) {
     }
 }
 
-if (! function_exists('e')) {
+if (!function_exists('e')) {
     /**
      * Echape les tags HTML dans la chaine.
      *
@@ -1056,7 +1068,7 @@ if (! function_exists('e')) {
     }
 }
 
-if (! function_exists('form')) {
+if (!function_exists('form')) {
     /**
      * @return \Bow\Http\Form
      */
@@ -1066,7 +1078,7 @@ if (! function_exists('form')) {
     }
 }
 
-if (! function_exists('ftp')) {
+if (!function_exists('ftp')) {
     /**
      * Alias sur le connection FTP.
      *
@@ -1079,7 +1091,7 @@ if (! function_exists('ftp')) {
     }
 }
 
-if (! function_exists('s3')) {
+if (!function_exists('s3')) {
     /**
      * Alias sur le connection S3.
      *
@@ -1092,7 +1104,7 @@ if (! function_exists('s3')) {
     }
 }
 
-if (! function_exists('cache')) {
+if (!function_exists('cache')) {
     /**
      * Alias sur le connection FTP.
      *
@@ -1110,7 +1122,7 @@ if (! function_exists('cache')) {
     }
 }
 
-if (! function_exists('back')) {
+if (!function_exists('back')) {
     /**
      * @param int $status
      * @param array $headers
@@ -1121,7 +1133,7 @@ if (! function_exists('back')) {
     }
 }
 
-if (! function_exists('bow_hash')) {
+if (!function_exists('bow_hash')) {
     /**
      * Alias sur la class Hash.
      *
@@ -1131,7 +1143,7 @@ if (! function_exists('bow_hash')) {
      */
     function bow_hash($data, $hash_value = null)
     {
-        if (! is_null($hash_value)) {
+        if (!is_null($hash_value)) {
             return Hash::check($data, $hash_value);
         }
 
@@ -1139,7 +1151,7 @@ if (! function_exists('bow_hash')) {
     }
 }
 
-if (! function_exists('faker')) {
+if (!function_exists('faker')) {
     /**
      * Alias sur la class Filler.
      *
@@ -1162,7 +1174,7 @@ if (! function_exists('faker')) {
     }
 }
 
-if (! function_exists('trans')) {
+if (!function_exists('trans')) {
     /**
      * @param $key
      * @param $data
@@ -1171,11 +1183,15 @@ if (! function_exists('trans')) {
      */
     function trans($key, $data = [], $choose = null)
     {
+        app()->bind('trans', function($config) {
+            return new \Bow\Translate\Translator($config['app.lang'], $config['app.']);
+        });
+
         return \Bow\Translate\Translator::make($key, $data, $choose);
     }
 }
 
-if (! function_exists('env')) {
+if (!function_exists('env')) {
     /**
      * @param $key
      * @param $default
@@ -1191,18 +1207,33 @@ if (! function_exists('env')) {
     }
 }
 
-if (! function_exists('abort')) {
+if (!function_exists('abort')) {
     /**
      * @param int $code
+     * @param string $message
+     * @param array $headers
+     * @throws \Bow\Http\Exception\HttpException
      */
-    function abort($code)
+    function abort($code, $message = '', array $headers = [])
     {
-        response()->statusCode($code);
-        die();
+        app('app')->abort($code, $message, $headers);
     }
 }
 
-if (! function_exists('app_mode')) {
+if (!function_exists('abort_if')) {
+    /**
+     * @param boolean $boolean
+     * @param int $code
+     */
+    function abort_if($boolean, $code)
+    {
+        if ($boolean) {
+            abort($code);
+        }
+    }
+}
+
+if (!function_exists('app_mode')) {
     /**
      * @return string
      */
@@ -1212,7 +1243,7 @@ if (! function_exists('app_mode')) {
     }
 }
 
-if (! function_exists('app_lang')) {
+if (!function_exists('app_lang')) {
     /**
      * @return string
      */
@@ -1222,7 +1253,7 @@ if (! function_exists('app_lang')) {
     }
 }
 
-if (! function_exists('old')) {
+if (!function_exists('old')) {
     /**
      * @param string $key
      *

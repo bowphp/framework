@@ -45,7 +45,7 @@ class BowTestCase extends TestCase
     public function post($url, array $param = [])
     {
         $http = new HttpClient($this->formatUrl($url));
-        if (! empty($this->_attach)) {
+        if (!empty($this->_attach)) {
             $http->addAttach($this->_attach);
         }
         return $http->post($url, $param);
@@ -106,7 +106,7 @@ class BowTestCase extends TestCase
     {
         $method = strtolower($method);
 
-        if (! method_exists($this, $method)) {
+        if (!method_exists($this, $method)) {
             throw new \BadMethodCallException('La methode ' . $method . ' n\'exist pas');
         }
 

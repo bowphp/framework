@@ -102,7 +102,7 @@ class Tokenize
     public static function verify($token, $strict = false)
     {
 
-        if (! Session::has('__bow.csrf')) {
+        if (!Session::has('__bow.csrf')) {
             return false;
         }
 

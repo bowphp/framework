@@ -437,7 +437,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
         $data = [];
 
         $this->recursive($this->storage, function($value, $key) use (& $data, $ignores) {
-            if (! in_array($key, $ignores)) {
+            if (!in_array($key, $ignores)) {
                 $data[$key] = $value;
             }
         });
@@ -465,11 +465,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      */
     public function update($key, $data, $overide = false)
     {
-        if (! $this->has($key)) {
+        if (!$this->has($key)) {
             return false;
         }
 
-        if (! is_array($this->storage[$key]) || $overide === true) {
+        if (!is_array($this->storage[$key]) || $overide === true) {
             $this->storage[$key] = $data;
             return true;
         }

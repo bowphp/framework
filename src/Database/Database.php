@@ -80,7 +80,7 @@ class Database
             $name = static::$name;
         }
 
-        if (! isset(static::$config[$name])) {
+        if (!isset(static::$config[$name])) {
             throw new ConnectionException('La connection de nom "' . $name . '" n\'est pas définie.');
         }
 
@@ -159,7 +159,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (! preg_match("/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i", $sqlstatement)) {
+        if (!preg_match("/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i", $sqlstatement)) {
             throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
@@ -181,7 +181,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (! preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
+        if (!preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
             throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
@@ -203,7 +203,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (! preg_match("/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i", $sqlstatement)) {
+        if (!preg_match("/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i", $sqlstatement)) {
             throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
@@ -224,7 +224,7 @@ class Database
             $collector[$key] = $value;
         }
 
-        if (! empty($collector)) {
+        if (!empty($collector)) {
             return static::executePrepareQuery($sqlstatement, $collector);
         }
 
@@ -241,7 +241,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (! preg_match("/^((drop|alter|create)\s+table|truncate|call)(\s+)?(.+?);?$/i", $sqlstatement)) {
+        if (!preg_match("/^((drop|alter|create)\s+table|truncate|call)(\s+)?(.+?);?$/i", $sqlstatement)) {
             throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
@@ -259,7 +259,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (! preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i", $sqlstatement)) {
+        if (!preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i", $sqlstatement)) {
             throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
@@ -290,7 +290,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (! static::$adapter->getConnection()->inTransaction()) {
+        if (!static::$adapter->getConnection()->inTransaction()) {
             static::$adapter->getConnection()->beginTransaction();
         }
 

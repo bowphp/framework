@@ -63,7 +63,7 @@ class Smtp implements Send
      */
     public function __construct(array $param)
     {
-        if (! isset($param['secure'])) {
+        if (!isset($param['secure'])) {
             $param['secure'] = false;
 
             if (!isset($param['tls'])) {

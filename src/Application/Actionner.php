@@ -2,7 +2,7 @@
 namespace Bow\Application;
 
 use Bow\Http\Response;
-use Bow\Exception\RouterException;
+use Bow\Application\Exception\RouterException;
 
 class Actionner
 {
@@ -25,13 +25,13 @@ class Actionner
         $param = is_array($param) ? $param : [$param];
         $functions = [];
 
-        if (! isset($names['namespace'])) {
+        if (!isset($names['namespace'])) {
             return static::exec($actions, $param);
         }
 
         static::$names = $names;
 
-        if (! isset($names['namespace'])) {
+        if (!isset($names['namespace'])) {
             throw new RouterException('Le namespace d\'autoload n\'est pas défini dans le fichier de configuration');
         }
 
@@ -46,7 +46,7 @@ class Actionner
             return call_user_func_array($function['controller'], array_merge($function['injections'], $param));
         }
 
-        if (! is_array($actions)) {
+        if (!is_array($actions)) {
             throw new \InvalidArgumentException('Le premier parametre doit etre un tableau, une chaine, une closure', E_USER_ERROR);
         }
 
@@ -95,7 +95,7 @@ class Actionner
         // Status permettant de bloquer la suite du programme.
         $status = true;
 
-        if (! is_array($firewalls)) {
+        if (!is_array($firewalls)) {
             $firewalls = [$firewalls];
         }
 
@@ -103,7 +103,7 @@ class Actionner
         $firewalls_collection = [];
 
         foreach ($firewalls as $firewall) {
-            if (! is_string($firewall)) {
+            if (!is_string($firewall)) {
                 continue;
             }
 
@@ -112,12 +112,12 @@ class Actionner
                 continue;
             }
 
-            if (! array_key_exists($firewall, $names['firewalls'])) {
+            if (!array_key_exists($firewall, $names['firewalls'])) {
                 throw new RouterException($firewall . ' n\'est pas un firewall définir.', E_ERROR);
             }
 
             // On vérifie si le firewall définie est une firewall valide.
-            if (! class_exists($names['firewalls'][$firewall])) {
+            if (!class_exists($names['firewalls'][$firewall])) {
                 throw new RouterException($names['firewalls'][$firewall] . ' n\'est pas un class firewall.');
             }
 
@@ -141,7 +141,7 @@ class Actionner
             }
 
             if (($status instanceof \StdClass) || is_array($status) || (!($status instanceof Response))) {
-                if (! empty($status)) {
+                if (!empty($status)) {
                     die(json_encode($status));
                 }
             }
@@ -151,7 +151,7 @@ class Actionner
 
         // Lancement de l'éxècution de la liste des actions definir
         // Fonction a éxècuté suivant un ordre
-        if (! empty($functions)) {
+        if (!empty($functions)) {
             foreach($functions as $function) {
                 $status = call_user_func_array(
                     $function['controller'],
@@ -211,14 +211,18 @@ class Actionner
         );
 
         foreach ($parts as $value) {
-            if (! preg_match('/^@param\s+(.+)\s+\$/', trim($value), $match)) {
+            if (!preg_match('/^@param\s+(.+)\s+\$/', trim($value), $match)) {
                 continue;
             }
 
             $class = trim($match[1]);
 
             if (class_exists($class, true)) {
-                if (! in_array(strtolower($class), ['string', 'array', 'bool', 'int', 'integer', 'double', 'float', 'callable', 'object', 'stdclass', '\closure', 'closure'])) {
+                if (!in_array(strtolower($class), [
+                    'string', 'array', 'bool', 'int',
+                    'integer', 'double', 'float', 'callable',
+                    'object', 'stdclass', '\closure', 'closure'
+                ])) {
                     $params[] = new $class();
                 }
             }

@@ -47,7 +47,7 @@ class Util
         ]);
 
         $handler = function ($vars) use ($cloner, $dumper) {
-            if (! is_array($vars)) {
+            if (!is_array($vars)) {
                 $vars = [$vars];
             }
             foreach($vars as $var) {

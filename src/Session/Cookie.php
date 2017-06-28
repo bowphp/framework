@@ -120,11 +120,11 @@ class Cookie
     {
         $old = null;
 
-        if (! static::has($key)) {
+        if (!static::has($key)) {
             return $old;
         }
 
-        if (! static::$isDecrypt[$key]) {
+        if (!static::$isDecrypt[$key]) {
             $old = Crypto::decrypt($_COOKIE[$key]);
             unset(static::$isDecrypt[$key]);
         }

@@ -69,7 +69,7 @@ class Str
      */
     public static function snake($value, $delimiter = '_')
     {
-        if (! ctype_lower($value)) {
+        if (!ctype_lower($value)) {
             $value = preg_replace('/\s+/u', '', $value);
             $value = static::lower(preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $value));
         }
@@ -262,7 +262,7 @@ class Str
     {
         $parts = explode('@', $email);
 
-        if (! is_string($email) || count($parts) != 2) {
+        if (!is_string($email) || count($parts) != 2) {
             return false;
         }
 

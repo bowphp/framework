@@ -15,7 +15,7 @@ class ApplicationCsrfFirewall
      */
     public function checker($request, \Closure $next)
     {
-        if (! ($request->isPost() || $request->isPut())) {
+        if (!($request->isPost() || $request->isPut())) {
             return $next();
         }
 

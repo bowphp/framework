@@ -122,7 +122,7 @@ class Input implements CollectionAccess, \ArrayAccess
      */
     public function remove($key)
     {
-        throw new \RuntimeException("Method 'add' not exists");
+        throw new \RuntimeException("Method 'remove' not exists");
     }
 
     /**
@@ -161,7 +161,7 @@ class Input implements CollectionAccess, \ArrayAccess
      */
     public function each(Closure $cb)
     {
-        if (! $this->isEmpty()) {
+        if (!$this->isEmpty()) {
             foreach ($this->input as $key => $value) {
                 call_user_func_array($cb, [$value, $key]);
             }
@@ -270,7 +270,7 @@ class Input implements CollectionAccess, \ArrayAccess
      */
     public static function __callStatic($name, $argmunents)
     {
-        if (! method_exists(static::class, $name)) {
+        if (!method_exists(static::class, $name)) {
             throw new \RuntimeException('Method '. $name . ' not exists');
         }
         return call_user_func_array([static::class, $name], $argmunents);
@@ -320,6 +320,6 @@ class Input implements CollectionAccess, \ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        unset($this->input[$offset]);
+        //
     }
 }

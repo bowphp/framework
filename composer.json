@@ -1,6 +1,6 @@
 {
     "name": "papac/framework",
-    "description": "The bow Framework",
+    "description": "The bow PHP Framework",
     "keywords": ["framework", "bow"],
     "license": "MIT",
     "support": {

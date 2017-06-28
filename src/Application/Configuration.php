@@ -42,7 +42,7 @@ class Configuration implements \ArrayAccess
 
         foreach ($glob as $file) {
             $key = str_replace('.php', '', basename($file));
-            if (in_array($key, ['bootstrap', 'helper', 'classes']) || ! file_exists($file)) {
+            if (in_array($key, ['bootstrap', 'helper', 'classes']) || !file_exists($file)) {
                 continue;
             }
             $config[$key] = require $file;
@@ -64,7 +64,7 @@ class Configuration implements \ArrayAccess
      */
     public static function configure($base_path)
     {
-        if (! self::$instance instanceof Configuration) {
+        if (!self::$instance instanceof Configuration) {
             self::$instance = new self($base_path);
         }
 
@@ -79,7 +79,7 @@ class Configuration implements \ArrayAccess
      */
     public static function singleton()
     {
-        if (! self::$instance instanceof Configuration) {
+        if (!self::$instance instanceof Configuration) {
             throw new ApplicationException('L\'application n\'a pas chargé les confirgurations');
         }
 

@@ -154,7 +154,7 @@ class Command
             }
         }
 
-        if (! is_null($model)) {
+        if (!is_null($model)) {
             $model = strtolower($model);
             $fileParten = $this->dirname.strtolower("/migration/*{$model}*.php");
         } else {
@@ -163,7 +163,7 @@ class Command
 
         $register = ["file" => [], "tables" => []];
 
-        if (! file_exists($this->dirname."/migration/.registers")) {
+        if (!file_exists($this->dirname."/migration/.registers")) {
             echo Color::red('Le fichier de registre de bow est introvable.');
             exit(0);
         }
@@ -182,7 +182,7 @@ class Command
         }
 
         foreach(glob($fileParten) as $file) {
-            if (! file_exists($file)) {
+            if (!file_exists($file)) {
                 echo Color::red("$file n'existe pas.");
                 exit();
             }
@@ -200,7 +200,7 @@ class Command
             // Formatage de la classe et Execution de la methode up ou down
             $class = ucfirst(Str::camel($model));
 
-            if (! class_exists($class)) {
+            if (!class_exists($class)) {
                 echo Color::red("Classe \"{$class}\" introvable. Vérifiez vos fichier de régistre.");
                 exit(1);
             }
@@ -483,7 +483,7 @@ CC;
      */
     public function controller($controller_name)
     {
-        if (! preg_match("/controller$/i", $controller_name)) {
+        if (!preg_match("/controller$/i", $controller_name)) {
             $controller_name = ucfirst($controller_name) . "Controller";
         } else {
             if (preg_match("/^(.+)(controller)$/", $controller_name, $match)) {
@@ -699,11 +699,11 @@ MODEL;
      */
     public function validation($name)
     {
-        if (! is_dir($this->dirname.'/app/Validation')) {
+        if (!is_dir($this->dirname.'/app/Validation')) {
             mkdir($this->dirname.'/app/Validation');
         }
 
-        if (! preg_match('/validator/i', $name)) {
+        if (!preg_match('/validator/i', $name)) {
             $name = ucfirst($name).'Validator';
         }
 
@@ -752,11 +752,11 @@ VALIDATOR;
      */
     public function service($name)
     {
-        if (! is_dir($this->dirname.'/app/Services')) {
+        if (!is_dir($this->dirname.'/app/Services')) {
             mkdir($this->dirname.'/app/Services');
         }
 
-        if (! preg_match('/service/i', $name)) {
+        if (!preg_match('/service/i', $name)) {
             $name = ucfirst($name).'Service';
         }
 

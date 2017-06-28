@@ -28,7 +28,7 @@ class Form
      */
     public static function singleton()
     {
-        if (! static::$instance instanceof Form) {
+        if (!static::$instance instanceof Form) {
             static::$instance = new static();
         }
 

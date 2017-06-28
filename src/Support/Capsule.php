@@ -63,7 +63,7 @@ class Capsule implements \ArrayAccess
             return $this->instances[$key];
         }
 
-        if (! isset($this->registers[$key])) {
+        if (!isset($this->registers[$key])) {
             return $this->resolve($key);
         }
 
@@ -74,7 +74,7 @@ class Capsule implements \ArrayAccess
             );
         }
 
-        if (! is_object($this->registers[$key])) {
+        if (!is_object($this->registers[$key])) {
             return $this->instances[$key] = $this->resolve($key);
         }
 
@@ -85,9 +85,14 @@ class Capsule implements \ArrayAccess
         return null;
     }
 
+    /**
+     * @param $key
+     * @param array $parameters
+     */
     public function makeWith($key, $parameters = [])
     {
-
+        $this->parameters = $parameters;
+        $this->resolve($key);
     }
 
     /**
@@ -110,11 +115,12 @@ class Capsule implements \ArrayAccess
     }
 
     /**
+     * @param string $key
      * @param $instance
      */
-    public function instance($instance)
+    public function instance($key, $instance)
     {
-        $this->factories[] = $instance;
+        $this->instances[$key] = $instance;
     }
 
     /**
@@ -122,16 +128,16 @@ class Capsule implements \ArrayAccess
      * @return mixed
      * @throws \ErrorException
      */
-    public function resolve($key)
+    private function resolve($key)
     {
         $reflection = new \ReflectionClass($key);
 
-        if (! $reflection->isInstantiable()) {
+        if (!$reflection->isInstantiable()) {
             return $key;
         }
 
         $constructor = $reflection->getConstructor();
-        if (! $constructor) {
+        if (!$constructor) {
             return $reflection->newInstance();
         }
 
@@ -146,7 +152,7 @@ class Capsule implements \ArrayAccess
             }
         }
 
-        if (! empty($this->parameters)) {
+        if (!empty($this->parameters)) {
             $parameters_lists = $this->parameters;
         }
 

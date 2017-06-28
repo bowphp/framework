@@ -99,7 +99,7 @@ class Request
      */
     public function origin()
     {
-        if (! isset($_SERVER['REQUEST_SCHEME'])) {
+        if (!isset($_SERVER['REQUEST_SCHEME'])) {
             return 'http://' . $this->hostname();
         }
 
@@ -200,11 +200,11 @@ class Request
      */
     public static function file($key)
     {
-        if (! isset($_FILES[$key])) {
+        if (!isset($_FILES[$key])) {
             return null;
         }
 
-        if (! is_array($_FILES[$key]['name'])) {
+        if (!is_array($_FILES[$key]['name'])) {
             return new UploadFile($_FILES[$key]);
         }
 
@@ -256,7 +256,7 @@ class Request
      */
     public static function input($key = null)
     {
-        if (! is_null($key)) {
+        if (!is_null($key)) {
             return static::$input->get($key);
         }
 
@@ -460,7 +460,7 @@ class Request
      */
     public function __call($name, $arguments)
     {
-        if (! method_exists(static::class, $name)) {
+        if (!method_exists(static::class, $name)) {
             throw new \RuntimeException('Method ' . $name . ' not exists');
         }
 

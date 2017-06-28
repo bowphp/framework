@@ -61,7 +61,7 @@ class Translator
      */
     public static function make($key, array $data = [], $plurial = false)
     {
-        if (! is_string($key)) {
+        if (!is_string($key)) {
             throw new \InvalidArgumentException('La premier parametre doit etre une chaine de carractère.', E_USER_ERROR);
         }
 
@@ -74,7 +74,7 @@ class Translator
         // Formatage du path de fichier de la translation
         $translation_filename = static::$directory.'/'.static::$lang.'/'.current($map).'.php';
 
-        if (! file_exists($translation_filename)) {
+        if (!file_exists($translation_filename)) {
             return $key;
         }
 
@@ -84,7 +84,7 @@ class Translator
         $contents = require $translation_filename;
         $translations = Arraydotify::make($contents);
 
-        if (! isset($translations[$key])) {
+        if (!isset($translations[$key])) {
             return $key;
         }
 

@@ -193,7 +193,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
         });
         $db->rollback();
         $pet = $db->selectOne("SELECT * FROM pets WHERE id = 3");
-        if (! $db->inTransaction()) {
+        if (!$db->inTransaction()) {
             $r = 0;
         }
         $this->assertEquals($r, 0);

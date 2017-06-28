@@ -56,11 +56,11 @@ class Logger extends AbstractLogger
      */
     public function log($level, $message, array $context = []) {
 
-        if (! in_array($this->mode, ['development', 'production'])) {
+        if (!in_array($this->mode, ['development', 'production'])) {
             throw new LoggerException($this->mode . ' n\'est pas définir');
         }
 
-        if (! empty($context)) {
+        if (!empty($context)) {
             $message = '\''. $message.'\'' . ' in ' . $context['file'] . ' at ' . $context['line'];
             if (isset($context['trace'])) {
                 if (is_string($context['trace'])) {

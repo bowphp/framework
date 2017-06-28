@@ -187,7 +187,7 @@ class FTP
      */
     public function __call($method, array $arguments)
     {
-        if (! function_exists('ftp_' . $method)) {
+        if (!function_exists('ftp_' . $method)) {
             throw new \ErrorException('La methode ' . $method . ' est inconnu.', E_USER_ERROR);
         }
 

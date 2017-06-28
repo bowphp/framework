@@ -41,12 +41,12 @@ class Storage
      */
     public static function store($file, $location, $size, array $extension, callable $cb)
     {
-        if (! is_uploaded_file($file['tmp_name'])) {
+        if (!is_uploaded_file($file['tmp_name'])) {
             return call_user_func_array($cb, ['error']);
         }
 
         if (is_string($size)) {
-            if (! preg_match('/^([0-9]+)(k|m)$/', strtolower($size), $match)) {
+            if (!preg_match('/^([0-9]+)(k|m)$/', strtolower($size), $match)) {
                 throw new \InvalidArgumentException('Taille invalide.', E_USER_ERROR);
             }
 
@@ -64,7 +64,7 @@ class Storage
             return call_user_func_array($cb, ['size']);
         }
 
-        if (! in_array(pathinfo($file['name'], PATHINFO_EXTENSION), $extension, true)) {
+        if (!in_array(pathinfo($file['name'], PATHINFO_EXTENSION), $extension, true)) {
             return call_user_func_array($cb, ['extension']);
         }
 
@@ -196,7 +196,7 @@ class Storage
     {
         $filename = static::resolvePath($filename);
 
-        if (! (is_file($filename) && stream_is_local($filename))) {
+        if (!(is_file($filename) && stream_is_local($filename))) {
             return null;
         }
 
@@ -309,7 +309,7 @@ class Storage
             $config = static::$config['ftp'];
         }
 
-        if (! isset($config['tls'])) {
+        if (!isset($config['tls'])) {
             $config['tls'] = false;
         }
 

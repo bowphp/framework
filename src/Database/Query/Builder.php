@@ -148,7 +148,7 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        if (! static::isComporaisonOperator($comp)) {
+        if (!static::isComporaisonOperator($comp)) {
             $value = $comp;
             $comp = '=';
         }
@@ -163,7 +163,7 @@ class Builder extends Tool implements \JsonSerializable
             throw new QueryBuilderException('Valeur de comparaison non définie', E_ERROR);
         }
 
-        if (! in_array(Str::lower($boolean), ['and', 'or'])) {
+        if (!in_array(Str::lower($boolean), ['and', 'or'])) {
             throw new QueryBuilderException('Le booléen '. $boolean . ' non accepté', E_ERROR);
         }
 
@@ -394,7 +394,7 @@ class Builder extends Tool implements \JsonSerializable
             return $this;
         }
 
-        if (! preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
+        if (!preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
             $this->join .= ', `'.$table.'`';
             if (is_callable($callable)) {
                 $callable($this);
@@ -424,7 +424,7 @@ class Builder extends Tool implements \JsonSerializable
             return $this;
         }
 
-        if (! preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
+        if (!preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
             $this->join .= ', `'.$table.'`';
             if (is_callable($callable)) {
                 $callable($this);
@@ -453,7 +453,7 @@ class Builder extends Tool implements \JsonSerializable
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
-        if (! $this->isComporaisonOperator($comp)) {
+        if (!$this->isComporaisonOperator($comp)) {
             $column2 = $comp;
         }
 
@@ -482,7 +482,7 @@ class Builder extends Tool implements \JsonSerializable
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
-        if (! $this->isComporaisonOperator($comp)) {
+        if (!$this->isComporaisonOperator($comp)) {
             $value = $comp;
         }
 
@@ -714,7 +714,7 @@ class Builder extends Tool implements \JsonSerializable
             }
 
             // Permet de retourner les données de façon brute
-            if (! $this->loadDataInClass) {
+            if (!$this->loadDataInClass) {
                 return $current;
             }
 
@@ -734,7 +734,7 @@ class Builder extends Tool implements \JsonSerializable
         }
 
         // Permet de retourner les données de façon brute
-        if (! $this->loadDataInClass) {
+        if (!$this->loadDataInClass) {
             new \Bow\Support\Collection($data);
         }
 
@@ -864,7 +864,7 @@ class Builder extends Tool implements \JsonSerializable
         $sql = 'update `' . $this->table . '` set ';
         $sql .= Util::rangeField(Util::add2points(array_keys($data)));
 
-        if (! is_null($this->where)) {
+        if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
             $this->where = null;
             $data = array_merge($data, $this->whereDataBinding);
@@ -897,7 +897,7 @@ class Builder extends Tool implements \JsonSerializable
     {
         $sql = 'delete from `' . $this->table . '`';
 
-        if (! is_null($this->where)) {
+        if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
             $this->where = null;
         }
@@ -1017,7 +1017,7 @@ class Builder extends Tool implements \JsonSerializable
             unset($values[$key]);
         }
 
-        if (! empty($resets)) {
+        if (!empty($resets)) {
             $nInserted += $this->insertOne($resets);
         }
 
@@ -1202,35 +1202,35 @@ class Builder extends Tool implements \JsonSerializable
         }
 
         // Ajout de la clause join
-        if (! is_null($this->join)) {
+        if (!is_null($this->join)) {
             $sql .= ' join ' . $this->join;
             $this->join = null;
         }
 
         // Ajout de la clause where
-        if (! is_null($this->where)) {
+        if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
             $this->where = null;
         }
 
         // Ajout de la clause order
-        if (! is_null($this->order)) {
+        if (!is_null($this->order)) {
             $sql .= ' ' . $this->order;
             $this->order = null;
         }
 
         // Ajout de la clause limit
-        if (! is_null($this->limit)) {
+        if (!is_null($this->limit)) {
             $sql .= ' limit ' . $this->limit;
             $this->limit = null;
         }
 
         // Ajout de la clause group
-        if (! is_null($this->group)) {
+        if (!is_null($this->group)) {
             $sql .= ' group by ' . $this->group;
             $this->group = null;
 
-            if (! is_null($this->havin)) {
+            if (!is_null($this->havin)) {
                 $sql .= ' having ' . $this->havin;
             }
         }

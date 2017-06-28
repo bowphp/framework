@@ -44,29 +44,9 @@ class TwigEngine extends EngineAbstract
          * - Ajout de fonction global
          *  dans le cadre de l'utilisation de Twig
          */
-        $this->template->addFunction(new \Twig_SimpleFunction('secure', 'secure'));
-        $this->template->addFunction(new \Twig_SimpleFunction('sanitaze', 'sanitaze'));
-        $this->template->addFunction(new \Twig_SimpleFunction('csrf_field', 'csrf_field'));
-        $this->template->addFunction(new \Twig_SimpleFunction('csrf_token', 'csrf_token'));
-        $this->template->addFunction(new \Twig_SimpleFunction('form', 'form'));
-        $this->template->addFunction(new \Twig_SimpleFunction('trans', 'trans'));
-        $this->template->addFunction(new \Twig_SimpleFunction('slugify', 'slugify'));
-        $this->template->addFunction(new \Twig_SimpleFunction('session', 'session'));
-        $this->template->addFunction(new \Twig_SimpleFunction('route', 'route'));
-        $this->template->addFunction(new \Twig_SimpleFunction('bow_hash', 'bow_hash'));
-        $this->template->addFunction(new \Twig_SimpleFunction('config', 'config'));
-        $this->template->addFunction(new \Twig_SimpleFunction('faker', 'faker'));
-        $this->template->addFunction(new \Twig_SimpleFunction('env', 'env'));
-        $this->template->addFunction(new \Twig_SimpleFunction('app_mode', 'app_mode'));
-        $this->template->addFunction(new \Twig_SimpleFunction('app_lang', 'app_lang'));
-        $this->template->addFunction(new \Twig_SimpleFunction('flash', 'flash'));
-        $this->template->addFunction(new \Twig_SimpleFunction('cache', 'cache'));
-        $this->template->addFunction(new \Twig_SimpleFunction('encrypt', 'encrypt'));
-        $this->template->addFunction(new \Twig_SimpleFunction('decrypt', 'decrypt'));
-        $this->template->addFunction(new \Twig_SimpleFunction('collect', 'collect'));
-        $this->template->addFunction(new \Twig_SimpleFunction('url', 'url'));
-        $this->template->addFunction(new \Twig_SimpleFunction('get_header', 'get_header'));
-        $this->template->addFunction(new \Twig_SimpleFunction('input', 'input'));
+        foreach (EngineAbstract::HELPERS as $helper) {
+            $this->template->addFunction(new \Twig_SimpleFunction($helper, $helper));
+        }
 
         return $this->template;
     }

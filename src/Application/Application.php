@@ -5,9 +5,11 @@ use Bow\Event\Event;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Support\DateAccess;
+use Bow\Http\Exception\HttpException;
 use Bow\Firewall\ApplicationCsrfFirewall;
 use Bow\Application\Exception\RouterException;
 use Bow\Application\Exception\ApplicationException;
+use function is_callable;
 
 /**
  * Create and maintener by diagnostic developpers teams:
@@ -121,12 +123,12 @@ class Application
          */
         $services = $this->config['app.classes'];
 
-        if (! isset($services['services'])) {
+        if (!isset($services['services'])) {
             return;
         }
 
         foreach ($services['services'] as $service) {
-            if (! class_exists($service)) {
+            if (!class_exists($service)) {
                 continue;
             }
 
@@ -183,7 +185,7 @@ class Application
     {
         $branch = rtrim($branch, '/');
 
-        if (! preg_match('@^/@', $branch)) {
+        if (!preg_match('@^/@', $branch)) {
             $branch = '/' . $branch;
         }
 
@@ -242,7 +244,7 @@ class Application
     {
         $input = $this->request->input();
 
-        if (! $input->has('_method')) {
+        if (!$input->has('_method')) {
             return $this->routeLoader('POST', $path, $cb);
         }
 
@@ -391,7 +393,7 @@ class Application
     private function routeLoader($method, $path, $cb)
     {
 
-        if (! preg_match('@^/@', $path)) {
+        if (!preg_match('@^/@', $path)) {
             $path = '/' . $path;
         }
 
@@ -405,14 +407,15 @@ class Application
 
         // Ajout d'un nouvelle route sur l'en definie.
         switch (true) {
-            case ! is_array($cb) && ! empty($this->globale_firewall):
+            case !is_array($cb) && !empty($this->globale_firewall):
+                debug($cb);
                 $cb = [
                     'firewall' => $this->globale_firewall,
                     'uses' => $cb
                 ];
                 break;
-            case isset($cb['firewall']) && ! empty($this->globale_firewall):
-                if (! is_array($cb['firewall'])) {
+            case !is_callable($cb) && isset($cb['firewall']) && !empty($this->globale_firewall):
+                if (!is_array($cb['firewall'])) {
                     $cb['firewall'] = [$cb['firewall']];
                 }
                 $cb['firewall'] = array_merge(
@@ -484,7 +487,7 @@ class Application
         }
 
         // Ajout de l'entête X-Powered-By
-        if (! $this->disable_x_powered_by) {
+        if (!$this->disable_x_powered_by) {
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
         }
 
@@ -508,7 +511,7 @@ class Application
 
         // Vérification de l'existance de methode de la requete dans
         // la collection de route
-        if (! isset($this->routes[$method])) {
+        if (!isset($this->routes[$method])) {
             // Vérification et appel de la fonction du branchement 404
             $this->response->statusCode(404);
 
@@ -521,7 +524,7 @@ class Application
 
         foreach ($this->routes[$method] as $key => $route) {
             // route doit être une instance de Route
-            if (! ($route instanceof Route)) {
+            if (!($route instanceof Route)) {
                 continue;
             }
 
@@ -534,7 +537,7 @@ class Application
 
             // Lancement de la recherche de la methode qui arrivée dans la requête
             // ensuite lancement de la vérification de l'url de la requête
-            if (! $route->match($this->request->uri(), $with)) {
+            if (!$route->match($this->request->uri(), $with)) {
                 $error = true;
                 continue;
             }
@@ -555,7 +558,7 @@ class Application
         }
 
         // Gestion de erreur
-        if (! $error) {
+        if (!$error) {
             return true;
         }
 
@@ -607,7 +610,7 @@ class Application
      */
     public function resources($url, $controllerName, array $where = [])
     {
-        if (! is_string($controllerName) && ! is_array($controllerName)) {
+        if (!is_string($controllerName) && !is_array($controllerName)) {
             throw new ApplicationException('Le premier paramètre doit être un array ou une chaine de caractère', 1);
         }
 
@@ -767,7 +770,7 @@ class Application
     {
         $status = Actionner::firewall(ApplicationCsrfFirewall::class);
 
-        if (! $status) {
+        if (!$status) {
             abort(500);
         }
     }
@@ -806,13 +809,31 @@ class Application
     }
 
     /**
+     * @param $code
+     * @param $message
+     * @param array $headers
+     * @throws HttpException
+     */
+    public function abort($code, $message = '', array $headers = [])
+    {
+        response()->statusCode($code);
+        foreach ($headers as $key => $value) {
+            response()->addHeader($key, $value);
+        }
+        if ($message == null) {
+            $message = 'Le procéssus a été suspendu.';
+        }
+        throw new HttpException($message);
+    }
+
+    /**
      * __destruct
      */
     public function __destruct()
     {
         $code = http_response_code();
 
-        if ($code == 404 || ! isset($this->error_code[$code])) {
+        if ($code == 404 || !isset($this->error_code[$code])) {
             return;
         }
 

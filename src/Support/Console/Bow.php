@@ -61,12 +61,12 @@ class Bow
      */
     public function call($command)
     {
-        if (! method_exists($this, $command)) {
+        if (!method_exists($this, $command)) {
             echo Color::red("Bad $command command .\n");
             exit(1);
         }
 
-        if (! $this->_command->getParameter('action')) {
+        if (!$this->_command->getParameter('action')) {
             if ($this->_command->getParameter('target') == 'help') {
                 $this->help($command);
                 exit(0);
@@ -88,7 +88,7 @@ class Bow
     public function migrate()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['up', 'down', null])) {
+        if (!in_array($action, ['up', 'down', null])) {
             throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
         }
 
@@ -116,7 +116,7 @@ class Bow
     public function add()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['firewall', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
+        if (!in_array($action, ['firewall', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
             throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
         }
 
@@ -155,7 +155,7 @@ class Bow
 
         if ($this->_command->getParameter('target') !== null) {
             $table_name = $this->_command->getParameter('target');
-            if (! is_string($table_name) || ! file_exists($this->dirname."/seeders/{$table_name}_seeder.php")) {
+            if (!is_string($table_name) || !file_exists($this->dirname."/seeders/{$table_name}_seeder.php")) {
                 echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
                 exit(1);
             }
@@ -226,7 +226,7 @@ class Bow
             );
         }
 
-        if (! class_exists('\Psy\Shell')) {
+        if (!class_exists('\Psy\Shell')) {
             echo 'SVP installez psy/psysh:@stable avec la commande "composer require --dev psy/psysh @stable"';
             return;
         }
@@ -243,7 +243,7 @@ class Bow
     public function generate()
     {
         $action = $this->_command->getParameter('action');
-        if (! in_array($action, ['key', 'resource'])) {
+        if (!in_array($action, ['key', 'resource'])) {
             echo Color::red("Bad $action command");
             exit(1);
         }

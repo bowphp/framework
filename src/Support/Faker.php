@@ -211,7 +211,7 @@ class Faker
         $tags = [];
         while (count($tags) <= $by) {
             $tag = static::TAGS[rand(0, $by)];
-            if (! in_array($tag, $tags)) {
+            if (!in_array($tag, $tags)) {
                 $tags[] = static::TAGS[
                 rand(0, count(static::TAGS) - 1)
                 ];
@@ -228,7 +228,7 @@ class Faker
      */
     private static function gen($data, $key)
     {
-        if (! isset(static::$selections[$key])) {
+        if (!isset(static::$selections[$key])) {
             static::$selections[$key] = [];
         }
 

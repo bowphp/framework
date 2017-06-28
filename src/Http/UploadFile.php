@@ -83,7 +83,7 @@ class UploadFile
      */
     public function isUploaded()
     {
-        if (! isset($this->file['tmp_name'], $this->file['error'])) {
+        if (!isset($this->file['tmp_name'], $this->file['error'])) {
             return false;
         }
 
@@ -152,7 +152,7 @@ class UploadFile
      */
     public function move($to, $filename = null)
     {
-        if (! isset($this->file['tmp_name'])) {
+        if (!isset($this->file['tmp_name'])) {
             return false;
         }
 
@@ -162,7 +162,7 @@ class UploadFile
             $save_name = $filename;
         }
 
-        if (! is_dir($to)) {
+        if (!is_dir($to)) {
             @mkdir($to, 0777, true);
         }
 

@@ -101,7 +101,7 @@ class AwsS3Client
      */
     public function delete($url)
     {
-        if (! is_array($url)) {
+        if (!is_array($url)) {
             $url = [$url];
         }
 

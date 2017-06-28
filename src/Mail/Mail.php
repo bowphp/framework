@@ -95,7 +95,7 @@ class Mail
      */
     public static function raw($to, $subject, $data, array $headers = [])
     {
-        if (! is_array($to)) {
+        if (!is_array($to)) {
             $to = [$to];
         }
 

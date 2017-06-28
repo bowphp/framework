@@ -3,6 +3,10 @@ namespace Bow\Validation;
 
 use Bow\Support\Str;
 use Bow\Database\Database;
+use const FILTER_FLAG_EMAIL_UNICODE;
+use function filter_var;
+use function preg_match;
+use function preg_quote;
 use function str_replace;
 
 /**
@@ -58,39 +62,44 @@ class Validator
      * @var array
      */
     private $lexique = [
-        'email' => "Le champs :attribute doit &ecir;tre un email.",
-        'required' => "Le champs :attribute est requis.",
-        'empty' => "Le champs :attribute n'est pas défini dans les données à valider.",
-        'min' => "Le champs :attribute doit avoir un contenu minimal de :length.",
-        'max' => "Le champs :attribute doit avoir un contenu maximal de :length.",
-        'same' => "Le champs :attribute doit avoir un contenu égal à :value.",
-        'number' => "Le champs :attribute doit avoir un contenu en numérique.",
-        'int' => "Le champs :attribute doit avoir un contenu de type entier.",
-        'float' => "Le champs :attribute doit avoir un contenu de type réel.",
-        'alphanum' => "Le champs :attribute doit avoir un contenu en alphanumérique.",
-        'in' => "Le champs :attribute doit avoir un contenu une valeur dans :value.",
-        'size' => "Le champs :attribute doit avoir un contenu de :length caractère(s).",
-        'lower' => "Le champs :attribute doit avoir un contenu en miniscule.",
-        'upper' => "Le champs :attribute doit avoir un contenu en majiscule.",
-        'alpha' => "Le champs :attribute doit avoir un contenu en alphabetique.",
-        'exists' => "l':attribute n'existe pas.",
+        'email' => "Le champ :attribute doit &ecir;tre un email.",
+        'required' => "Le champ :attribute est requis.",
+        'empty' => "Le champ :attribute n'est pas défini dans les données à valider.",
+        'min' => "Le champ :attribute doit avoir un contenu minimal de :length.",
+        'max' => "Le champ :attribute doit avoir un contenu maximal de :length.",
+        'same' => "Le champ :attribute doit avoir un contenu égal à :value.",
+        'number' => "Le champ :attribute doit avoir un contenu en numérique.",
+        'int' => "Le champ :attribute doit avoir un contenu de type entier.",
+        'float' => "Le champ :attribute doit avoir un contenu de type réel.",
+        'alphanum' => "Le champ :attribute doit avoir un contenu en alphanumérique.",
+        'in' => "Le champ :attribute doit avoir un contenu une valeur dans :value.",
+        'size' => "Le champ :attribute doit avoir un contenu de :length caractère(s).",
+        'lower' => "Le champ :attribute doit avoir un contenu en miniscule.",
+        'upper' => "Le champ :attribute doit avoir un contenu en majiscule.",
+        'alpha' => "Le champ :attribute doit avoir un contenu en alphabetique.",
+        'exists' => "le champe :attribute n'existe pas.",
+        'not_exists' => "le champ :attribute existe.",
+        'unique' => "le champ :attribute n'est pas unique.",
+        'date' => "Le champ :attribute n'est pas une date au format yyyy-mm-dd",
+        'datetime' => "Le champ :attribute n'est pas une date au format yyyy-mm-dd hh:mm:ss",
+        'regex' => "Le champ :attribute n'est pas valide",
     ];
 
     /**
      * Tout les marqueurs possible.
      *
-     * - required   Vérifie que le champs existe dans les données à valider
-     * - min:value  Vérifie que le contenu du champs est un nombre de caractère minimal suivant la valeur définie
-     * - max:value  Vérifie que le contenu du champs est un nombre de caractère maximal suivant la valeur définie
-     * - size:value Vérifie que le contenu du champs est un nombre de caractère égale à la valeur définie
-     * - eq:value   Vérifie que le contenu du champs soit égale à la valeur définie
-     * - email      Vérifie que le contenu du champs soit une email
-     * - number     Vérifie que le contenu du champs soit un nombre
-     * - alphanum   Vérifie que le contenu du champs soit une chaine alphanumérique
-     * - alpha      Vérifie que le contenu du champs soit une alpha
-     * - upper      Vérifie que le contenu du champs soit une chaine en majiscule
-     * - lower      Vérifie que le contenu du champs soit une chaine en miniscule
-     * - in:(value, ..) Vérifie que le contenu du champs soit une parmis les valeurs définies.
+     * - required   Vérifie que le champ existe dans les données à valider
+     * - min:value  Vérifie que le contenu du champ est un nombre de caractère minimal suivant la valeur définie
+     * - max:value  Vérifie que le contenu du champ est un nombre de caractère maximal suivant la valeur définie
+     * - size:value Vérifie que le contenu du champ est un nombre de caractère égale à la valeur définie
+     * - eq:value   Vérifie que le contenu du champ soit égale à la valeur définie
+     * - email      Vérifie que le contenu du champ soit une email
+     * - number     Vérifie que le contenu du champ soit un nombre
+     * - alphanum   Vérifie que le contenu du champ soit une chaine alphanumérique
+     * - alpha      Vérifie que le contenu du champ soit une alpha
+     * - upper      Vérifie que le contenu du champ soit une chaine en majiscule
+     * - lower      Vérifie que le contenu du champ soit une chaine en miniscule
+     * - in:(value, ..) Vérifie que le contenu du champ soit une parmis les valeurs définies.
      *
      * e.g: required|max:255
      *      required|email|min:49
@@ -132,13 +141,13 @@ class Validator
 
                 // Masque sur la règle required
                 if ($masque == "required") {
-                    if (! isset($inputs[$key])) {
+                    if (!isset($inputs[$key]) || is_null($inputs[$key]) || $inputs[$key] === '') {
                         $this->lastMessage = $message = $this->lexique('required', $key);
                         $this->errors[$key][] = ["masque" => $masque, "message" => $message];
                         $this->fail = true;
                     }
                 } else {
-                    if (! isset($inputs[$key])) {
+                    if (!isset($inputs[$key])) {
                         $this->lastMessage = $message = $this->lexique('empty', $key);
                         $this->errors[$key][] = ["masque" => $masque, "message" => $message];
                         $this->fail = true;
@@ -444,7 +453,7 @@ class Validator
                 $exists = Database::table($parts[0])->where($parts[1], $this->inputs[$key])->exists();
             }
 
-            if (! $exists) {
+            if (!$exists) {
                 $this->lastMessage = $this->lexique('exists', $key);
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
@@ -471,7 +480,7 @@ class Validator
             }
 
             if ($exists) {
-                $this->lastMessage = $this->lexique('exists', $key);
+                $this->lastMessage = $this->lexique('not_exists', $key);
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
@@ -498,6 +507,58 @@ class Validator
 
             if ($count >= 1) {
                 $this->lastMessage = $this->lexique('exists', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alpha
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    protected function compileDate($key, $masque)
+    {
+        if (preg_match("/^date$/", $masque, $match)) {
+            if (preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $this->inputs[$key])) {
+                $this->lastMessage = $this->lexique('date', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alpha
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    protected function compileDateTime($key, $masque)
+    {
+        if (preg_match("/^datetime$/", $masque, $match)) {
+            if (preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/z', $this->inputs[$key])) {
+                $this->lastMessage = $this->lexique('datetime', $key);
+                $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
+                $this->fail = true;
+            }
+        }
+    }
+
+    /**
+     * Masque sur la règle alpha
+     *
+     * @param string $key
+     * @param string $masque
+     */
+    protected function compileRegex($key, $masque)
+    {
+        if (preg_match("/^regex:(.+)+$/", $masque, $match)) {
+            $regex = '/'.preg_quote($match[1]).'/';
+            if (preg_match($regex, $this->inputs[$key])) {
+                $this->lastMessage = $this->lexique('regex', $key);
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }

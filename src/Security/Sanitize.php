@@ -2,6 +2,8 @@
 
 namespace Bow\Security;
 
+use function count;
+
 class Sanitize
 {
     /**
@@ -15,17 +17,22 @@ class Sanitize
     public static function make($data, $secure = false)
     {
         // récupération de la fonction à la lance.
-        $method = $secure === true ? 'data' : 'secure';
+        $method = $secure === true ? 'secure' : 'data';
 
         // strict integer regex
         $rNum = '/^[0-9]+(\.[0-9]+)?$/';
 
         if (is_string($data)) {
-            if (preg_match($rNum, $data)) {
-                $data = (int) $data;
-            } else {
-                $data = self::$method($data);
+            if (! preg_match($rNum, $data, $match)) {
+                return static::$method($data);
             }
+
+            if (count($match) == 2) {
+                $data = (float) $data;
+            } else {
+                $data = (int) $data;
+            }
+
             return $data;
         }
 
@@ -35,14 +42,14 @@ class Sanitize
 
         if (is_array($data)) {
             foreach($data as $key => $value) {
-                $data[$key] = self::make($value, $secure);
+                $data[$key] = static::make($value, $secure);
             }
             return $data;
         }
 
         if (is_object($data)) {
             foreach($data as $key => $value) {
-                $data->$key = self::make($value, $secure);
+                $data->$key = static::make($value, $secure);
             }
             return $data;
         }

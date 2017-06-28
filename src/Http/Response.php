@@ -171,7 +171,7 @@ class Response
 
         echo $data;
 
-        if (! $stop) {
+        if (!$stop) {
             return true;
         }
 

@@ -32,7 +32,13 @@ class PugEngine extends EngineAbstract
             'cache' => $config['view.cache']
         ];
 
-        $this->template = new Pug($pug_config);
+        $this->template = new Pug($pug_config, [
+            'expressionLanguage' => 'php'
+        ]);
+
+        foreach (EngineAbstract::HELPERS as $helper) {
+            $this->template->share($helper, $helper);
+        }
     }
 
     /**

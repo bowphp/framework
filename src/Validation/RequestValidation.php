@@ -127,7 +127,7 @@ abstract class RequestValidation extends Validator
      */
     public function startUploadFor($key)
     {
-        if (! $this->upload_started) {
+        if (!$this->upload_started) {
             $this->upload_started = true;
             $this->file = Request::file($key);
         }
@@ -152,7 +152,7 @@ abstract class RequestValidation extends Validator
      */
     public function makeUpload($dirname, $filename, $overidre_extension = false)
     {
-        if (! $this->upload_started) {
+        if (!$this->upload_started) {
             throw new ErrorException('Lancez la methode "startUploadFile" avant');
         }
 

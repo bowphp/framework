@@ -154,13 +154,13 @@ class Message
         /**
          * Organisation de la liste des senders
          */
-        if (! is_string($name) && preg_match('/^(.+)\s+<(.*)>\z$/', $email, $matches)) {
+        if (!is_string($name) && preg_match('/^(.+)\s+<(.*)>\z$/', $email, $matches)) {
             array_shift($matches);
             $name = $matches[0];
             $email = $matches[1];
         }
 
-        if (! Str::isMail($email)) {
+        if (!Str::isMail($email)) {
             throw new \InvalidArgumentException("$email n'est pas email valide.", E_USER_ERROR);
         }
 
@@ -178,7 +178,7 @@ class Message
      */
     public function addFile($file)
     {
-        if (! is_file($file)) {
+        if (!is_file($file)) {
             throw new MailException("Fichier introuvable.", E_USER_ERROR);
         }
 
@@ -271,7 +271,7 @@ class Message
      */
     private function type($data, $type)
     {
-        if (! $this->message) {
+        if (!$this->message) {
             $this->type = $type;
             $this->message = $data;
         }

@@ -50,7 +50,7 @@ class Parser
      */
     public function raw()
     {
-        if (! $this->retournTransfertToRaw()) {
+        if (!$this->retournTransfertToRaw()) {
             return null;
         }
 
@@ -65,7 +65,7 @@ class Parser
      */
     public function toJson(array $default = null)
     {
-        if (! $this->retournTransfertToPlain()) {
+        if (!$this->retournTransfertToPlain()) {
             if (is_array($default)) {
                 return json_encode($default);
             }
@@ -83,7 +83,7 @@ class Parser
      */
     public function toArray()
     {
-        if (! $this->retournTransfert()) {
+        if (!$this->retournTransfert()) {
             return ["error" => true, "message" => "Connat get information"];
         }
 
@@ -97,7 +97,7 @@ class Parser
      */
     private function retournTransfert()
     {
-        if (! curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true)) {
+        if (!curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true)) {
             $this->close();
             return false;
         }
@@ -113,7 +113,7 @@ class Parser
     private function retournTransfertToRaw()
     {
         if ($this->retournTransfert()) {
-            if (! curl_setopt($this->ch, CURLOPT_BINARYTRANSFER, true)) {
+            if (!curl_setopt($this->ch, CURLOPT_BINARYTRANSFER, true)) {
                 $this->close();
                 return false;
             }
@@ -130,7 +130,7 @@ class Parser
     private function retournTransfertToPlain()
     {
         if ($this->retournTransfert()) {
-            if (! curl_setopt($this->ch, CURLOPT_TRANSFERTEXT, true)) {
+            if (!curl_setopt($this->ch, CURLOPT_TRANSFERTEXT, true)) {
                 $this->close();
                 return false;
             }
@@ -174,7 +174,7 @@ class Parser
      */
     public function getHeaders()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
 
@@ -186,7 +186,7 @@ class Parser
      */
     public function getCode()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['http_code'];
@@ -197,7 +197,7 @@ class Parser
      */
     public function getExecutionTime()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['total_time'];
@@ -208,7 +208,7 @@ class Parser
      */
     public function getConnexionTime()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['connect_time'];
@@ -219,7 +219,7 @@ class Parser
      */
     public function getUploadSize()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['size_upload'];
@@ -230,7 +230,7 @@ class Parser
      */
     public function getUploadSpeed()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['speed_upload'];
@@ -241,7 +241,7 @@ class Parser
      */
     public function getDownloadSize()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['size_download'];
@@ -252,7 +252,7 @@ class Parser
      */
     public function getDownloadSpeed()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['speed_download'];
@@ -263,7 +263,7 @@ class Parser
      */
     public function getErrorMessage()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->error;
@@ -274,7 +274,7 @@ class Parser
      */
     public function getErrorNumber()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->errno;
@@ -285,7 +285,7 @@ class Parser
      */
     public function getContentType()
     {
-        if (! $this->executed) {
+        if (!$this->executed) {
             $this->execute();
         }
         return $this->header['content_type'];

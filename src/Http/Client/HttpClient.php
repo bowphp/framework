@@ -29,7 +29,7 @@ class HttpClient
      */
     public function __construct($url = null)
     {
-        if (! function_exists('curl_init')) {
+        if (!function_exists('curl_init')) {
             throw new \BadFunctionCallException('Installer la librairie cURL de php.');
         }
 
@@ -65,8 +65,8 @@ class HttpClient
     {
         $this->resetAndAssociateUrl($url);
 
-        if (! curl_setopt($this->ch, CURLOPT_POST, true)) {
-            if (! empty($this->attach)) {
+        if (!curl_setopt($this->ch, CURLOPT_POST, true)) {
+            if (!empty($this->attach)) {
                 curl_setopt($this->ch, CURLOPT_SAFE_UPLOAD, true);
                 foreach ($this->attach as $key => $attach) {
                     $this->attach[$key] = '@'.ltrim('@', $attach);
@@ -91,7 +91,7 @@ class HttpClient
     {
         $this->resetAndAssociateUrl($url);
 
-        if (! curl_setopt($this->ch, CURLOPT_PUT, true)) {
+        if (!curl_setopt($this->ch, CURLOPT_PUT, true)) {
             $this->addFields($data);
         }
 
@@ -114,7 +114,7 @@ class HttpClient
      */
     private function resetAndAssociateUrl($url)
     {
-        if (! is_resource($this->ch)) {
+        if (!is_resource($this->ch)) {
             $this->ch = curl_init($url);
         }
     }
@@ -123,7 +123,7 @@ class HttpClient
      * @param array $data
      */
     private function addFields(array $data) {
-        if (! empty($data)) {
+        if (!empty($data)) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
         }
     }

@@ -66,7 +66,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * @var Builder
      */
-    private static $builder;
+    protected static $builder;
 
     /**
      * Model constructor.
@@ -89,13 +89,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function all($columns = [])
     {
-        static::newBuilder();
+        $static = static::newBuilder();
 
         if (count($columns) > 0) {
-            self::$builder->select($columns);
+            $static->select($columns);
         }
 
-        return self::$builder->get();
+        return $static->get();
     }
 
     /**
@@ -103,7 +103,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function first()
     {
-        return self::query()->take(1)->first();
+        return static::query()->take(1)->first();
     }
 
     /**
@@ -119,7 +119,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $one = false;
 
-        if (! is_array($id)) {
+        if (!is_array($id)) {
             $one = true;
             $id = [$id];
         }
@@ -136,7 +136,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function describe()
     {
-        return DB::select('desc '. self::query()->getTable());
+        return DB::select('desc '. static::query()->getTable());
     }
 
     /**
@@ -150,7 +150,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function findAndDelete($id, $select = ['*'])
     {
         $data = static::find($id, $select);
-        self::$builder->delete();
+        static::$builder->delete();
 
         return $data;
     }
@@ -189,7 +189,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             ]);
         }
 
-        if (! array_key_exists($static->primaryKey, $data)) {
+        if (!array_key_exists($static->primaryKey, $data)) {
             if ($static->autoIncrement) {
                 $id_value = [$static->primaryKey => null];
                 $data = array_merge($id_value, $data);
@@ -217,7 +217,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        return self::query()->where($column, $comp, $value, $boolean);
+        return static::query()->where($column, $comp, $value, $boolean);
     }
 
     /**
@@ -230,7 +230,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function paginate($n, $current = 0, $chunk = null)
     {
-        return self::query()->paginate($n, $current, $chunk);
+        return static::query()->paginate($n, $current, $chunk);
     }
 
     /**
@@ -241,7 +241,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function count($column = '*')
     {
-        return self::query()->count($column);
+        return static::query()->count($column);
     }
 
     /**
@@ -251,8 +251,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function query()
     {
-        static::newBuilder();
-        return self::$builder;
+        return static::newBuilder();
     }
 
     /**
@@ -263,7 +262,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function distinct($column)
     {
-        return self::query()->select(['distinct '.$column]);
+        return static::query()->select(['distinct '.$column]);
     }
 
     /**
@@ -272,7 +271,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function select(array $select)
     {
-        return self::query()->select($select);
+        return static::query()->select($select);
     }
 
     /**
@@ -281,7 +280,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function join($table)
     {
-        return self::query()->join($table);
+        return static::query()->join($table);
     }
 
     /**
@@ -290,7 +289,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function increment($column)
     {
-        return self::query()->increment($column);
+        return static::query()->increment($column);
     }
 
     /**
@@ -299,7 +298,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function decrement($column)
     {
-        return self::query()->decrement($column);
+        return static::query()->decrement($column);
     }
 
     /**
@@ -307,7 +306,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function truncate()
     {
-        return self::query()->truncate();
+        return static::query()->truncate();
     }
 
     /**
@@ -346,13 +345,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Permet d'initialiser la connection
      *
-     * @return void
+     * @return Builder
      */
     private static function newBuilder()
     {
-        if (self::$builder instanceof Builder) {
-            if (self::$builder->getLoadClassName() === static::class) {
-                return;
+        if (static::$builder instanceof Builder) {
+            if (static::$builder->getLoadClassName() === static::class) {
+                return self::$builder;
             }
         }
 
@@ -360,7 +359,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $properties = $reflection->getDefaultProperties();
 
         if ($properties['table'] == null) {
-            $table = Str::camel(strtolower(end(explode('\\', static::class))));
+            $parts = explode('\\', static::class);
+            $class_name = end($parts);
+            $table = Str::camel(strtolower($class_name)).'s';
         } else {
             $table = $properties['table'];
         }
@@ -368,7 +369,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $primaryKey = $properties['primaryKey'];
         $table = DB::getConnectionAdapter()->getTablePrefix().$table;
 
-        self::$builder = new Builder($table, DB::getPdo(), static::class, $primaryKey);
+        return static::$builder = new Builder($table, DB::getPdo(), static::class, $primaryKey);
     }
 
     /**
@@ -399,10 +400,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $primary_key_value = $this->getPrimaryKeyValue();
 
         if ($primary_key_value != null) {
-            if (self::$builder->exists($this->primaryKey, $primary_key_value)) {
+            if (static::$builder->exists($this->primaryKey, $primary_key_value)) {
 
                 $this->original[$this->primaryKey] = $primary_key_value;
-                $r = self::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
+                $r = static::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
 
                 $env = str_replace('\\', '.', strtolower(static::class));
 
@@ -417,8 +418,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
 
-        $r = self::$builder->insert($this->attributes);
-        $primary_key_value = self::$builder->getLastInsertId();
+        $r = static::$builder->insert($this->attributes);
+        $primary_key_value = static::$builder->getLastInsertId();
 
         if ($this->primaryKeyType == 'int') {
             $primary_key_value = (int) $primary_key_value;
@@ -453,11 +454,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return 0;
         }
 
-        if (! self::$builder->exists($this->primaryKey, $primary_key_value)) {
+        if (!static::$builder->exists($this->primaryKey, $primary_key_value)) {
             return 0;
         }
 
-        $r = self::$builder->where($this->primaryKey, $primary_key_value)->delete();
+        $r = static::$builder->where($this->primaryKey, $primary_key_value)->delete();
         $env = str_replace('\\', '.', strtolower(static::class));
 
         if ($r == 1 && emitter()->bound($env.'.ondelete')) {
@@ -474,7 +475,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function touch()
     {
-        if (! $this->timestamps) {
+        if (!$this->timestamps) {
             return false;
         }
 
@@ -606,7 +607,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __get($name)
     {
-        if (! isset($this->attributes[$name])) {
+        if (!isset($this->attributes[$name])) {
             return null;
         }
 

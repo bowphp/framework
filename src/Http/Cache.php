@@ -1,6 +1,10 @@
 <?php
 namespace Bow\Http;
+use BadMethodCallException;
 use Bow\Support\Str;
+use function call_user_func_array;
+use function method_exists;
+use function stat;
 
 /**
  * Class Cache
@@ -21,6 +25,15 @@ class Cache
     private static $with_meta = false;
 
     /**
+     * Cache constructor.
+     * @param $base_directory
+     */
+    public function __construct($base_directory)
+    {
+        static::confirgure($base_directory);
+    }
+
+    /**
      * Methode de configuration du cache
      *
      * @param string $base_directory
@@ -30,7 +43,7 @@ class Cache
         if (static::$directory === null || static::$directory !== $base_directory) {
             static::$directory = $base_directory;
         }
-        if (! is_dir($base_directory)) {
+        if (!is_dir($base_directory)) {
             @mkdir($base_directory, 0777);
         }
     }
@@ -114,14 +127,14 @@ class Cache
      */
     public static function get($key, $default = null)
     {
-        if (! static::has($key)) {
+        if (!static::has($key)) {
             static::$with_meta = false;
             return $default;
         }
 
         $cache = unserialize(file_get_contents(static::makeHashFilename($key)));
 
-        if (! static::$with_meta) {
+        if (!static::$with_meta) {
             unset($cache['__bow_meta']);
             $cache = $cache['content'];
         }
@@ -185,7 +198,7 @@ class Cache
     {
         $filename = static::makeHashFilename($key);
 
-        if (! file_exists($filename)) {
+        if (!file_exists($filename)) {
             return false;
         }
 
@@ -244,7 +257,7 @@ class Cache
         $group = Str::slice($hash, 0, 2);
 
         if ($make_group_directory) {
-            if (! is_dir(static::$directory.'/'.$group)) {
+            if (!is_dir(static::$directory.'/'.$group)) {
                 @mkdir(static::$directory.'/'.$group);
             }
         }
@@ -262,5 +275,18 @@ class Cache
         foreach ($glob as $item) {
             @unlink($item);
         }
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists(static::class, $name)) {
+            return call_user_func_array([static::class, $name], $arguments);
+        }
+        throw new BadMethodCallException("La methode $name n'existe pas.");
     }
 }

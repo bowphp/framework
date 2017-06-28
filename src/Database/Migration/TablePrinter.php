@@ -551,7 +551,7 @@ class TablePrinter
             return $this;
         }
 
-        if (! in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
+        if (!in_array($this->lastField->method, ['int', 'longint', 'bigint', 'mediumint', 'smallint', 'tinyint'])) {
             throw new ModelException('Cannot add autoincrement to ' . $this->lastField->method, 1);
         }
 
@@ -574,7 +574,7 @@ class TablePrinter
             throw new ModelException('Primary key has already defined', E_ERROR);
         }
 
-        if (! is_null($field)) {
+        if (!is_null($field)) {
             return $this->addField('int', $field, [
                 'null' => false,
                 'auto' => true
@@ -635,7 +635,7 @@ class TablePrinter
     {
         $method = strtolower($method);
 
-        if (! $this->fields->has($method)) {
+        if (!$this->fields->has($method)) {
             $this->fields->push(new Collection, $method);
         }
 

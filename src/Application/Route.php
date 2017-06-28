@@ -84,12 +84,12 @@ Class Route
      */
     public function bindFirewall($firewall)
     {
-        if (! is_array($firewall)) {
+        if (!is_array($firewall)) {
             $firewall = [$firewall];
         }
 
         if (is_array($this->cb)) {
-            if (! $this->cb['firewall']) {
+            if (!$this->cb['firewall']) {
                 $this->cb['firewall'] = [];
             }
             $this->cb['firewall'] = array_merge($firewall, $this->cb);
@@ -159,7 +159,7 @@ Class Route
 
         // Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
         // capturées
-        if (! preg_match_all('~:([\w]+)?~', $this->path, $match)) {
+        if (!preg_match_all('~:([\w]+)?~', $this->path, $match)) {
             return $this->checkUrl($path, $uri);
         }
 
@@ -222,7 +222,7 @@ Class Route
 
         // Association des parmatres à la request
         foreach ($this->keys as $key => $value) {
-            if (! isset($this->match[$key])) {
+            if (!isset($this->match[$key])) {
                 continue;
             }
             if (!is_int($this->match[$key])) {

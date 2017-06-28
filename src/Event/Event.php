@@ -54,7 +54,7 @@ class Event
      */
     public static function on($event, $fn, $priority = 0)
     {
-        if (! self::bound($event)) {
+        if (!self::bound($event)) {
             self::$events[$event] = [];
         }
 
@@ -73,11 +73,11 @@ class Event
      */
     public static function onTransmission($event, $fn, $priority = 0)
     {
-        if (! self::bound($event)) {
+        if (!self::bound($event)) {
             self::$events['__bow.transmission.event'][$event] = [];
         }
 
-        if (! is_string($fn)) {
+        if (!is_string($fn)) {
             throw new EventException('Transmission event must be string fonction name');
         }
 
@@ -110,7 +110,7 @@ class Event
             return $listener->call($data);
         }
 
-        if (! self::bound($event)) {
+        if (!self::bound($event)) {
             return false;
         }
 

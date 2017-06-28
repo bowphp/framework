@@ -49,7 +49,7 @@ class View
             throw new ViewException('Le moteur de template non défini.', E_USER_ERROR);
         }
 
-        if (! in_array($engine, ['twig', 'mustache', 'pug', 'php'], true)) {
+        if (!in_array($engine, ['twig', 'mustache', 'pug', 'php'], true)) {
             throw new ViewException('Le moteur de template n\'est pas implementé.', E_USER_ERROR);
         }
 
@@ -74,7 +74,7 @@ class View
      */
     public static function singleton()
     {
-        if (! static::$instance instanceof View) {
+        if (!static::$instance instanceof View) {
             static::$instance = new self(self::$config);
         }
 

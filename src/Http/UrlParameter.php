@@ -32,7 +32,7 @@ class UrlParameter implements \ArrayAccess
      */
     public function offsetGet($offset)
     {
-        if (! $this->offsetExists($offset)) {
+        if (!$this->offsetExists($offset)) {
             return null;
         }
 
