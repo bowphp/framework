@@ -1,5 +1,5 @@
-# Bow (Framework)
-> The Bow Framework
+## Bow The PHP Framework
+> __Compile your avanture__
 
 [![docs](https://img.shields.io/packagist/v/papac/bow.svg?style=flat-square)](https://packagist.org/papac/bow)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/papac/framework/blob/master/LICENSE)
