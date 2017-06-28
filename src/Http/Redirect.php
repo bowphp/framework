@@ -91,4 +91,12 @@ class Redirect
         $this->withInput($data);
         $this->to($this->request->referer(), $status);
     }
+
+    /**
+     * @return mixed
+     */
+    public function __invoke()
+    {
+        return call_user_func_array([$this, 'to'], func_get_args());
+    }
 }

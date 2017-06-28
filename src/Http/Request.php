@@ -451,6 +451,43 @@ class Request
     }
 
     /**
+     * @param $property
+     * @return mixed
+     */
+    public static function session($property = null)
+    {
+        if (is_null($property)) {
+            return new Session();
+        }
+
+        return Session::get($property);
+    }
+
+    /**
+     * @param string $url
+     * @return mixed
+     */
+    public static function redirect($url = null)
+    {
+        $redirect = new Redirect();
+
+        if (is_null($url)) {
+            return $redirect;
+        }
+
+        return $redirect($url);
+    }
+
+    /**
+     * @param $property
+     * @return mixed
+     */
+    public function __get($property)
+    {
+        return static::$input->get($property);
+    }
+
+    /**
      * __call
      *
      * @param string $name
@@ -465,27 +502,5 @@ class Request
         }
 
         return call_user_func_array([static::class, $name], $arguments);
-    }
-
-    /**
-     * @param $property
-     * @return mixed
-     */
-    public static function session($property = null)
-    {
-        if (is_null($property)) {
-            return new Session();
-        }
-
-        return Session::get($property);
-    }
-
-    /**
-     * @param $property
-     * @return mixed
-     */
-    public function __get($property)
-    {
-        return static::$input->get($property);
     }
 }
