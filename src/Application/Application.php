@@ -408,7 +408,6 @@ class Application
         // Ajout d'un nouvelle route sur l'en definie.
         switch (true) {
             case !is_array($cb) && !empty($this->globale_firewall):
-                debug($cb);
                 $cb = [
                     'firewall' => $this->globale_firewall,
                     'uses' => $cb

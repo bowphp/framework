@@ -34,12 +34,12 @@ class MustacheEngine extends EngineAbstract
         ]);
 
         $helpers = array_merge(
-            [ '_public', $config['app.static'], '_root', $config['app.root']],
+            ['_public', $config['app.static'], '_root', $config['app.root']],
             EngineAbstract::HELPERS
         );
 
         $this->template = new \Mustache_Engine([
-            'cache' => $config['view.cache'],
+            'cache' => $config['view.cache'].'/view',
             'loader' => $loader,
             'partials_loader' => $partial_loader,
             'helpers' => $helpers
