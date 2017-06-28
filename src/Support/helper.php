@@ -52,8 +52,8 @@ if (!function_exists('config')) {
      * @return Configuration|mixed
      */
     function config($key = null, $setting = null) {
-        app()->bind('config', function ($c) {
-            return Configuration::configure($c['app.basedir']);
+        app()->bind('config', function () {
+            return Configuration::singleton();
         });
         $config = app('config');
         return $config($key, $setting);
