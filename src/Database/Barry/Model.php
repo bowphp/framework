@@ -64,6 +64,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $table;
 
     /**
+     * Le nom de la connexion
+     *
+     * @var string
+     */
+    protected $connexion;
+
+    /**
      * @var Builder
      */
     protected static $builder;
@@ -351,7 +358,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         if (static::$builder instanceof Builder) {
             if (static::$builder->getLoadClassName() === static::class) {
-                return self::$builder;
+                return static::$builder;
             }
         }
 
@@ -360,13 +367,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if ($properties['table'] == null) {
             $parts = explode('\\', static::class);
-            $class_name = end($parts);
-            $table = Str::camel(strtolower($class_name)).'s';
+            $table = end($parts);
+            $table = Str::camel(strtolower($table)).'s';
         } else {
             $table = $properties['table'];
         }
 
         $primaryKey = $properties['primaryKey'];
+
+        if (!is_null($properties['connexion'])) {
+            DB::connection($properties['connexion']);
+        }
+
         $table = DB::getConnectionAdapter()->getTablePrefix().$table;
 
         return static::$builder = new Builder($table, DB::getPdo(), static::class, $primaryKey);
