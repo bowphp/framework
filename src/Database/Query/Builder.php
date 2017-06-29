@@ -962,6 +962,17 @@ class Builder extends Tool implements \JsonSerializable
     }
 
     /**
+     * Permet de faire une réquete avec la close DISTINCT
+     *
+     * @param string $column
+     * @return Builder
+     */
+    public function distinct($column)
+    {
+        return $this->select(['distinct '.$column]);
+    }
+
+    /**
      * method permettant de customiser les methods increment et decrement
      *
      * @param string $column

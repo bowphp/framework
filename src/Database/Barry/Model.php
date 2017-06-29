@@ -214,20 +214,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Model where starter
-     *
-     * @param $column
-     * @param string $comp
-     * @param null $value
-     * @param string $boolean
-     * @return Builder
-     */
-    public static function where($column, $comp = '=', $value = null, $boolean = 'and')
-    {
-        return static::query()->where($column, $comp, $value, $boolean);
-    }
-
-    /**
      * paginate
      *
      * @param integer $n nombre d'element a récupérer
@@ -241,17 +227,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Permet de compter le nombre d'enregistrement
-     *
-     * @param string $column
-     * @return int
-     */
-    public static function count($column = '*')
-    {
-        return static::query()->count($column);
-    }
-
-    /**
      * Permet de rétourne le query builder
      *
      * @return Builder
@@ -259,61 +234,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function query()
     {
         return static::newBuilder();
-    }
-
-    /**
-     * Permet de faire une réquete avec la close DISTINCT
-     *
-     * @param string $column
-     * @return Builder
-     */
-    public static function distinct($column)
-    {
-        return static::query()->select(['distinct '.$column]);
-    }
-
-    /**
-     * @param array $select
-     * @return Builder
-     */
-    public static function select(array $select)
-    {
-        return static::query()->select($select);
-    }
-
-    /**
-     * @param string $table
-     * @return Builder
-     */
-    public static function join($table)
-    {
-        return static::query()->join($table);
-    }
-
-    /**
-     * @param string $column
-     * @return int
-     */
-    public static function increment($column)
-    {
-        return static::query()->increment($column);
-    }
-
-    /**
-     * @param string $column
-     * @return int
-     */
-    public static function decrement($column)
-    {
-        return static::query()->decrement($column);
-    }
-
-    /**
-     * @return bool
-     */
-    public static function truncate()
-    {
-        return static::query()->truncate();
     }
 
     /**
