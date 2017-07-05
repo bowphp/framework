@@ -1,6 +1,7 @@
 <?php
 namespace Bow\Resource;
 
+use BadMethodCallException;
 use Bow\Resource\Ftp\FTP;
 use Bow\Resource\AWS\AwsS3Client;
 use Bow\Resource\Exception\ResourceException;
@@ -340,7 +341,7 @@ class Storage
         }
 
         if (empty($config)) {
-            $config = static::$config['s3'];
+            $config = isset(static::$config['s3']) ? static::$config['s3'] : [];
         }
 
         static::$s3 = new AwsS3Client($config);
@@ -348,12 +349,26 @@ class Storage
     }
 
     /**
+     * @param string $mount
+     * @return Storage
+     */
+    public static function mount($mount)
+    {
+        static::$config['disk']['mount'] = $mount;
+        return new static();
+    }
+
+    /**
+     * Permet de résolver un path.
+     * Donner le chemin absolute d'un path
+     *
      * @param $filename
      * @return string
      */
     public static function resolvePath($filename)
     {
-        $path = realpath(static::$config['storage']);
+        $mount = static::$config['disk']['mount'];
+        $path = realpath(static::$config['path'][$mount]);
 
         if (preg_match('~^'.$path.'~', $filename)) {
             return $filename;
@@ -368,5 +383,21 @@ class Storage
     public static function configure(array $config)
     {
         static::$config = $config;
+    }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, array $arguments)
+    {
+        if (method_exists(static::class, $name)) {
+            return call_user_func_array([static::class, $name], $arguments);
+        }
+
+        throw new BadMethodCallException("unkdown $name method");
     }
 }
