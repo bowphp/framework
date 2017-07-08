@@ -1043,7 +1043,7 @@ if (!function_exists('route')) {
         $routes = config('app.routes');
 
         if (!isset($routes[$name])) {
-            throw new \InvalidArgumentException($name .'n\'est pas un nom définie.', E_USER_ERROR);
+            throw new \InvalidArgumentException($name .' n\'est pas un nom définie.', E_USER_ERROR);
         }
 
         $url = $routes[$name];

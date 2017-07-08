@@ -704,7 +704,7 @@ MODEL;
         }
 
         if (!preg_match('/validator/i', $name)) {
-            $name = ucfirst($name).'Validator';
+            $name = ucfirst($name);
         }
 
         if (file_exists($this->dirname.'/app/Validation/'.$name.'.php')) {
@@ -717,10 +717,20 @@ MODEL;
 
 namespace App\Validation;
 
-use Bow\Validation\RequestValidation as Validator;
+use Bow\Validation\ValidationRequest as Validator;
 
 class {$name} extends Validator
 {
+    /**
+     * Permet de verifier la permission d'un utilisateur 
+     *
+     * @return bool
+     */
+    public function authorized()
+    {
+        return true;
+    }
+    
 	/**
 	 * Règle de validation
 	 * 

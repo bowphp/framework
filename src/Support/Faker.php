@@ -1,6 +1,8 @@
 <?php
 namespace Bow\Support;
 
+use function preg_replace;
+
 class Faker
 {
     /**
@@ -35,7 +37,7 @@ class Faker
         'assurances', 'c#', 'web', 'python', 'c++', 'ruby', 'rails', 'pascal',
         'java', 'javascript', 'closure', 'hackaton', 'street', 'pays', 'la paix',
         'vivre', 'santé', 'virus', 'bot', 'arduino', 'rasberypy', 'bluemix', 'cloud',
-        'djongo', ''
+        'djongo'
     ];
 
     /**
@@ -70,7 +72,7 @@ class Faker
      */
     public static function pseudo(array $additionnal = [])
     {
-        return Str::replace('/\s+/', '', Str::lower(static::name($additionnal)));
+        return preg_replace('/\s+/', '', Str::lower(static::name($additionnal)));
     }
 
     /**

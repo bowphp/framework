@@ -26,6 +26,11 @@ Class Route
     private $path;
 
     /**
+     * @var string
+     */
+    private $name;
+
+    /**
      * key
      *
      * @var array
@@ -239,5 +244,23 @@ Class Route
         $request->_setUrlParameters($params);
 
         return Actionner::call($this->cb, $this->match, $namespaces);
+    }
+
+    /**
+     * Permet de donner un nom à la route
+     *
+     * @param string $name
+     */
+    public function name($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 }

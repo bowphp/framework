@@ -2,12 +2,9 @@
 namespace Bow\Validation;
 
 use Bow\Http\Request;
-use Bow\Http\UploadFile;
-use Bow\Resource\Storage;
 use BadMethodCallException;
-use Psy\Exception\ErrorException;
 
-abstract class RequestValidation extends Validator
+abstract class ValidationRequest
 {
     /**
      * Règle
@@ -32,16 +29,6 @@ abstract class RequestValidation extends Validator
     private $data;
 
     /**
-     * @var UploadFile
-     */
-    private $file;
-
-    /**
-     * @var bool
-     */
-    private $upload_started = false;
-
-    /**
      * @var Request
      */
     private $request;
@@ -51,6 +38,10 @@ abstract class RequestValidation extends Validator
      */
     public function __construct()
     {
+        if (!$this->authorized()) {
+            $this->callAuthorizationFailAction();
+        }
+
         $this->request = new Request();
 
         if ((count($this->keys) == 1 && $this->keys[0] === '*') || count($this->keys) == 0) {
@@ -60,6 +51,19 @@ abstract class RequestValidation extends Validator
         }
 
         $this->validate = Validator::make($this->data, $this->rules);
+    }
+
+    /**
+     * @return bool
+     */
+    public function authorized()
+    {
+        return true;
+    }
+
+    public function callAuthorizationFailAction()
+    {
+        abort(500);
     }
 
     /**
@@ -113,55 +117,11 @@ abstract class RequestValidation extends Validator
     /**
      * Permet de lancer une exception
      *
-     * @throws \Bow\Exception\ValidationException;
+     * @throws \Bow\Validation\Exception\ValidationException;
      */
     public function throwError()
     {
         $this->validate->throwError();
-    }
-
-    /**
-     * Permet de démmarrer le système upload
-     *
-     * @param $key
-     */
-    public function startUploadFor($key)
-    {
-        if (!$this->upload_started) {
-            $this->upload_started = true;
-            $this->file = Request::file($key);
-        }
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasFile()
-    {
-        return is_null($this->file) ? false : $this->file->isUploaded() && $this->file->isValid();
-    }
-
-    /**
-     * Permet de faire upload de fichier
-     *
-     * @param string $dirname
-     * @param string $filename
-     * @param bool $overidre_extension
-     * @throws ErrorException
-     * @return string
-     */
-    public function makeUpload($dirname, $filename, $overidre_extension = false)
-    {
-        if (!$this->upload_started) {
-            throw new ErrorException('Lancez la methode "startUploadFile" avant');
-        }
-
-        if ($overidre_extension) {
-            $filename = $filename.'.'.$this->file->getExtension();
-        }
-
-        $this->file->move(Storage::resolvePath($dirname), $filename);
-        return '/'.ltrim(rtrim($dirname, '/'), '/').'/'.ltrim($filename, '/');
     }
 
     /**

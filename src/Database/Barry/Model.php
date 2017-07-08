@@ -1,12 +1,13 @@
 <?php
 namespace Bow\Database\Barry;
 
-use Bow\Database\Exception\NotFoundException;
-use Bow\Support\Str;
 use Carbon\Carbon;
+use Bow\Support\Str;
 use Bow\Database\Collection;
-use Bow\Database\Database as DB;
 use Bow\Database\Query\Builder;
+use Bow\Database\Database as DB;
+use Bow\Database\Exception\NotFoundException;
+use Bow\Database\Barry\Relations\Relationships;
 
 /**
  * Class Model
@@ -78,12 +79,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Model constructor.
      *
-     * @param array $data
+     * @param array $attributes
      */
-    public function __construct(array $data = [])
+    public function __construct(array $attributes = [])
     {
-        $this->attributes = $data;
-        $this->original = $data;
+        $this->attributes = $attributes;
+        $this->original = $attributes;
 
         static::newBuilder();
     }
