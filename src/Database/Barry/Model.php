@@ -7,7 +7,6 @@ use Bow\Database\Collection;
 use Bow\Database\Query\Builder;
 use Bow\Database\Database as DB;
 use Bow\Database\Exception\NotFoundException;
-use Bow\Database\Barry\Relations\Relationships;
 
 /**
  * Class Model
