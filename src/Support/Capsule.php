@@ -35,7 +35,7 @@ class Capsule implements \ArrayAccess
     private static $instance;
 
     /**
-     * @return mixed
+     * @return Capsule
      */
     public static function getInstance()
     {
