@@ -165,7 +165,7 @@ if (!function_exists('table')) {
      * @param string $class.
      * @param string $primary_key
      * @param string $connexion
-     * @return Bow\Database\QueryBuilder\Builder
+     * @return Bow\Database\Query\Builder
      */
     function table($name, $class = null, $primary_key = null, $connexion = null) {
         if (is_string($connexion)) {
@@ -1212,11 +1212,16 @@ if (!function_exists('abort')) {
      * @param int $code
      * @param string $message
      * @param array $headers
-     * @throws \Bow\Http\Exception\HttpException
      */
     function abort($code, $message = '', array $headers = [])
     {
-        app('app')->abort($code, $message, $headers);
+        response()->statusCode($code);
+
+        foreach ($headers as $key => $value) {
+            response()->addHeader($key, $value);
+        }
+
+        die($message);
     }
 }
 

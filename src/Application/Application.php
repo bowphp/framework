@@ -392,7 +392,6 @@ class Application
      */
     private function routeLoader($method, $path, $cb)
     {
-
         if (!preg_match('@^/@', $path)) {
             $path = '/' . $path;
         }
