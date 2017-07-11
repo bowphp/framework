@@ -85,7 +85,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->attributes = $attributes;
         $this->original = $attributes;
 
-        static::newBuilder();
+        static::query();
     }
 
     /**
@@ -96,7 +96,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function all($columns = [])
     {
-        $static = static::newBuilder();
+        $static = static::query();
 
         if (count($columns) > 0) {
             $static->select($columns);
@@ -110,7 +110,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function first()
     {
-        return static::query()->take(1)->first();
+        return static::query()->first();
     }
 
     /**
@@ -122,12 +122,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function find($id, $select = ['*'])
     {
-        static::newBuilder();
-
-        $one = false;
-
-        if (!is_array($id)) {
-            $one = true;
+        if (! is_array($id)) {
             $id = [$id];
         }
 
@@ -135,7 +130,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $static->select($select);
         $static->whereIn($static->primaryKey, $id);
 
-        return $one ? $static->first() : $static->get();
+        return count($id) == 1 ? $static->first() : $static->get();
     }
 
     /**
@@ -227,16 +222,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Permet de rétourne le query builder
-     *
-     * @return Builder
-     */
-    public static function query()
-    {
-        return static::newBuilder();
-    }
-
-    /**
      * Permet d'associer listerner
      *
      * @param callable $cb
@@ -274,7 +259,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return Builder
      */
-    private static function newBuilder()
+    private static function query()
     {
         if (static::$builder instanceof Builder) {
             if (static::$builder->getLoadClassName() === static::class) {
@@ -462,14 +447,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return array
      */
-    private function mutableAttributes()
+    private function mutableDateAttributes()
     {
         return array_merge(
-            $this->dates,
-            [
-                'created_at', 'updated_at',
-                'expired_at', 'logged_at',
-                'sigined_at'
+            $this->dates, [
+                'created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at'
             ]
         );
     }
@@ -543,7 +525,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return null;
         }
 
-        if (in_array($name, $this->mutableAttributes())) {
+        if (in_array($name, $this->mutableDateAttributes())) {
             return new Carbon($this->attributes[$name]);
         }
 
