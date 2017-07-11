@@ -116,4 +116,22 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(Pets::class, $pet);
     }
+
+    /**
+     * @depends testGetConnection
+     */
+    public function testFind(Bow\Database\Database $db)
+    {
+        $pet = Pets::find(1);
+        $this->assertInstanceOf(Pets::class, $pet);
+    }
+
+    /**
+     * @depends testGetConnection
+     */
+    public function testFindEmoty(Bow\Database\Database $db)
+    {
+        $pet = Pets::find(100);
+        $this->assertNotInstanceOf(Pets::class, $pet);
+    }
 }
