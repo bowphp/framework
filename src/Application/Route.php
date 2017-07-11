@@ -38,6 +38,11 @@ Class Route
     private $keys = [];
 
     /**
+     * @var array
+     */
+    private $params = [];
+
+    /**
      * Liste de paramaters qui on matcher
      *
      * @var array
@@ -87,17 +92,21 @@ Class Route
     /**
      * @param array|string $firewall
      */
-    public function bindFirewall($firewall)
+    public function firewall($firewall)
     {
         if (!is_array($firewall)) {
             $firewall = [$firewall];
         }
 
         if (is_array($this->cb)) {
-            if (!$this->cb['firewall']) {
-                $this->cb['firewall'] = [];
+            if (! isset($this->cb['firewall'])) {
+                $this->cb['firewall'] = $firewall;
+            } else {
+                $this->cb['firewall'] = array_merge(
+                    $firewall,
+                    is_array($this->cb['firewall']) ? $this->cb['firewall'] : [$this->cb['firewall']]
+                );
             }
-            $this->cb['firewall'] = array_merge($firewall, $this->cb);
         } else {
             $this->cb = [
                 'uses' => $this->cb,
@@ -223,25 +232,23 @@ Class Route
      */
     public function call(Request $request, array $namespaces)
     {
-        $params = [];
-
         // Association des parmatres à la request
         foreach ($this->keys as $key => $value) {
             if (!isset($this->match[$key])) {
                 continue;
             }
             if (!is_int($this->match[$key])) {
-                $params[$value] = $this->match[$key];
+                $this->params[$value] = $this->match[$key];
                 continue;
             }
 
             $tmp = (int) $this->match[$key];
-            $params[$value] = $tmp;
+            $this->params[$value] = $tmp;
             $this->match[$key] = $tmp;
         }
 
         // Ajout des paramètres capturer à la requete
-        $request->_setUrlParameters($params);
+        $request->_setUrlParameters($this->params);
 
         return Actionner::call($this->cb, $this->match, $namespaces);
     }
@@ -262,5 +269,22 @@ Class Route
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @return array
+     */
+    public function getParamters()
+    {
+        return $this->params;
+    }
+
+    /**
+     * @param string $key
+     * @return string|null
+     */
+    public function getParamter($key)
+    {
+        return isset($this->params[$key]) ? $this->params[$key] : null;
     }
 }
