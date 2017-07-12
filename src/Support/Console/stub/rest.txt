@@ -1,0 +1,91 @@
+<?php
+namespace App\Controllers;
+{modelNamespace}
+use Bow\Database\Database;
+
+class {controllerName} extends Controller
+{
+    /**
+     * Point d'entré
+     * GET /{path}
+     *
+     * @param mixed $id [optional] L'identifiant de l'element à récupérer
+     * @return mixed
+     */
+    public function index($id = null)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet d'afficher la vue permettant de créer une résource.
+     *
+     * GET /{path}/create
+     */
+    public function create()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet d'ajouter une nouvelle résource dans la base d'information
+     *
+     * POST /{path}
+     */
+    public function store()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet de récupérer un information précise avec un identifiant.
+     *
+     * GET /{path}/:id
+     *
+     * @param mixed $id L'identifiant de l'élément à récupérer
+     * @return mixed
+     */
+    public function show($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Mise à jour d'un résource en utilisant paramètre du GET
+     *
+     * GET /{path}/:id/edit
+     *
+     * @param mixed $id L'identifiant de l'élément à mettre à jour
+     * @return mixed
+     */
+    public function edit($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Mise à jour d'une résource
+     *
+     * PUT /{path}/:id
+     *
+     * @param mixed $id L'identifiant de l'élément à mettre à jour
+     * @return mixed
+     */
+    public function update($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet de supprimer une resource
+     *
+     * DELETE /{path}/:id
+     *
+     * @param mixed $id L'identifiant de l'élément à supprimer
+     * @return mixed
+     */
+    public function destroy($id)
+    {
+        // Codez Ici
+    }
+}

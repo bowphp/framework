@@ -1,0 +1,27 @@
+<?php
+use \Bow\Database\Migration\Schema;
+use \Bow\Database\Migration\Migration;
+use \Bow\Database\Migration\TablePrinter as Printer;
+
+class :className extends Migration
+{
+    /**
+     * create Table
+     */
+    public function up()
+    {
+        Schema::table("{table}", function(Printer $table) {
+            //
+        });
+    }
+
+    /**
+     * Drop Table
+     */
+    public function down()
+    {
+        Schema::table("{table}", function(Printer $table) {
+            //
+        });
+    }
+}
