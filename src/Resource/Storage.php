@@ -350,12 +350,16 @@ class Storage
 
     /**
      * @param string $mount
-     * @return Storage
+     * @return MountFilesystem
+     * @throws ResourceException
      */
     public static function mount($mount)
     {
-        static::$config['disk']['mount'] = $mount;
-        return new static();
+        if (! isset(static::$config['disk']['path'][$mount])) {
+            throw new ResourceException('Le dist '.$mount.' n\'est pas défini.');
+        }
+
+        return new MountFilesystem(static::$config['disk']['path'][$mount]);
     }
 
     /**
@@ -368,7 +372,7 @@ class Storage
     public static function resolvePath($filename)
     {
         $mount = static::$config['disk']['mount'];
-        $path = realpath(static::$config['path'][$mount]);
+        $path = realpath(static::$config['disk']['path'][$mount]);
 
         if (preg_match('~^'.$path.'~', $filename)) {
             return $filename;

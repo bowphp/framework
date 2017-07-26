@@ -9,7 +9,6 @@ use Bow\Http\Exception\HttpException;
 use Bow\Firewall\ApplicationCsrfFirewall;
 use Bow\Application\Exception\RouterException;
 use Bow\Application\Exception\ApplicationException;
-use function is_callable;
 
 /**
  * Create and maintener by diagnostic developpers teams:

@@ -97,7 +97,7 @@ class UploadFile
      */
     public function getBasename()
     {
-        if (isset($this->file['name'])) {
+        if (!isset($this->file['name'])) {
             return null;
         }
 
@@ -111,7 +111,7 @@ class UploadFile
      */
     public function getFilename()
     {
-        if (isset($this->file['name'])) {
+        if (!isset($this->file['name'])) {
             return null;
         }
         return $this->file['name'];
@@ -124,7 +124,7 @@ class UploadFile
      */
     public function getContent()
     {
-        if (isset($this->file['tmp_name'])) {
+        if (!isset($this->file['tmp_name'])) {
             return null;
         }
 

@@ -103,7 +103,17 @@ class Request
             return 'http://' . $this->hostname();
         }
 
-        return strtolower($_SERVER['REQUEST_SCHEME']) . '://' . $this->hostname();
+        return $this->scheme().'://'.$this->hostname();
+    }
+
+    /**
+     * Request scheme
+     *
+     * @return string
+     */
+    public function scheme()
+    {
+        return isset($_SERVER['REQUEST_SCHEME']) ? strtolower($_SERVER['REQUEST_SCHEME']) : 'http';
     }
 
     /**

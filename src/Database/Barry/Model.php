@@ -27,6 +27,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $timestamps = true;
 
     /**
+     * @var string
+     */
+    protected $prefix;
+
+    /**
      * @var bool
      */
     protected $autoIncrement = true;
@@ -267,6 +272,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
         }
 
+        // Reflection action
         $reflection = new \ReflectionClass(static::class);
         $properties = $reflection->getDefaultProperties();
 
@@ -284,7 +290,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             DB::connection($properties['connexion']);
         }
 
-        $table = DB::getConnectionAdapter()->getTablePrefix().$table;
+        if (!is_null($properties['prefix'])) {
+            $prefix = $properties['prefix'];
+        } else {
+            $prefix = DB::getConnectionAdapter()->getTablePrefix();
+        }
+
+        $table = $prefix.$table;
 
         return static::$builder = new Builder($table, DB::getPdo(), static::class, $primaryKey);
     }
@@ -314,13 +326,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function save()
     {
+        $builder = static::query();
         $primary_key_value = $this->getPrimaryKeyValue();
 
         if ($primary_key_value != null) {
-            if (static::$builder->exists($this->primaryKey, $primary_key_value)) {
+            if ($builder->exists($this->primaryKey, $primary_key_value)) {
 
                 $this->original[$this->primaryKey] = $primary_key_value;
-                $r = static::$builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
+                $r = $builder->where($this->primaryKey, $primary_key_value)->update($this->attributes);
 
                 $env = str_replace('\\', '.', strtolower(static::class));
 
@@ -335,8 +348,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
 
-        $r = static::$builder->insert($this->attributes);
-        $primary_key_value = static::$builder->getLastInsertId();
+        $r = $builder->insert($this->attributes);
+        $primary_key_value = $builder->getLastInsertId();
 
         if ($this->primaryKeyType == 'int') {
             $primary_key_value = (int) $primary_key_value;
@@ -366,16 +379,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function delete()
     {
         $primary_key_value = $this->getPrimaryKeyValue();
+        $builder = static::query();
 
         if ($primary_key_value == null) {
             return 0;
         }
 
-        if (!static::$builder->exists($this->primaryKey, $primary_key_value)) {
+        if (!$builder->exists($this->primaryKey, $primary_key_value)) {
             return 0;
         }
 
-        $r = static::$builder->where($this->primaryKey, $primary_key_value)->delete();
+        $r = $builder->where($this->primaryKey, $primary_key_value)->delete();
         $env = str_replace('\\', '.', strtolower(static::class));
 
         if ($r == 1 && emitter()->bound($env.'.ondelete')) {
@@ -562,8 +576,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __call($name, $arguments)
     {
-        if (method_exists(static::query(), $name)) {
-            return call_user_func_array([static::query(), $name], $arguments);
+        $builder = static::query();
+        if (method_exists($builder, $name)) {
+            return call_user_func_array([$builder, $name], $arguments);
         }
 
         throw new \BadMethodCallException('methode ' . $name . ' n\'est définie.', E_ERROR);
@@ -578,8 +593,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function __callStatic($name, $arguments)
     {
-        if (method_exists(static::query(), $name)) {
-            return call_user_func_array([static::query(), $name], $arguments);
+        $builder = static::query();
+        if (method_exists($builder, $name)) {
+            return call_user_func_array([$builder, $name], $arguments);
         }
 
         throw new \BadMethodCallException('methode ' . $name . ' n\'est définie.', E_ERROR);

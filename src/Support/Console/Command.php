@@ -619,7 +619,7 @@ class {$firewall_name}
      * @param \\Closure \$next
      * @return boolean
      */
-    public function checker(\$request, \\Closure \$next)
+    public function checker(\$request, \\Closure \$next, \$guard)
     {
         // Codez Ici
         return \$next();
@@ -645,7 +645,7 @@ CM;
         if (is_string($table_name)) {
             $table_name = strtolower($table_name);
         } else {
-            $table_name = Str::camel($model_name);
+            $table_name = strtolower(Str::camel($model_name)).'s';
         }
 
         $model = <<<MODEL

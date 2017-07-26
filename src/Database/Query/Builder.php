@@ -541,7 +541,7 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function orderBy($column, $type = 'asc')
     {
-        if (is_null($this->order)) {
+        if (! is_null($this->order)) {
             return $this;
         }
 

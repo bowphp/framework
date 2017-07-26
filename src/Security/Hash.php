@@ -8,12 +8,13 @@ class Hash
      * elle rétourne false.
      *
      * @param string $value
+     * @param int $cost
      * @return bool|string
      */
-    public static function make($value)
+    public static function make($value, $cost = 10)
     {
         return password_hash($value, PASSWORD_BCRYPT, [
-            'cast' => 12
+            'cast' => $cost
         ]);
     }
 
@@ -26,6 +27,24 @@ class Hash
      */
     public static function check($value, $hash)
     {
+        if (strlen($hash) === 0) {
+            return false;
+        }
+
         return password_verify($value, $hash);
+    }
+
+    /**
+     * Permet de rehacher une value.
+     *
+     * @param $hash
+     * @param int $cost
+     * @return bool
+     */
+    public function needsRehash($hash, $cost = 10)
+    {
+        return password_needs_rehash($hash, PASSWORD_BCRYPT, [
+            'cost' => $cost,
+        ]);
     }
 }
