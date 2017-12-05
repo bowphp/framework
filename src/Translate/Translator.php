@@ -54,9 +54,9 @@ class Translator
     /**
      * Permet de faire la tranduction
      *
-     * @param string $key
-     * @param array $data
-     * @param bool $plurial
+     * @param  string $key
+     * @param  array  $data
+     * @param  bool   $plurial
      * @return string
      */
     public static function make($key, array $data = [], $plurial = false)
@@ -81,7 +81,7 @@ class Translator
         array_shift($map);
         $key = implode('.', $map);
 
-        $contents = require $translation_filename;
+        $contents = include $translation_filename;
         $translations = Arraydotify::make($contents);
 
         if (!isset($translations[$key])) {
@@ -127,8 +127,8 @@ class Translator
     /**
      * Permet de formater
      *
-     * @param $str
-     * @param array $values
+     * @param  $str
+     * @param  array $values
      * @return string
      */
     private static function format($str, array $values = [])
@@ -143,8 +143,8 @@ class Translator
     /**
      * __call
      *
-     * @param $name
-     * @param $arguments
+     * @param  $name
+     * @param  $arguments
      * @return string
      */
     public function __call($name, $arguments)

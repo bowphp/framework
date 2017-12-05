@@ -3,4 +3,6 @@ namespace Bow\Application\Exception;
 
 use ErrorException;
 
-class ApplicationException extends ErrorException {};
+class ApplicationException extends ErrorException
+{
+};

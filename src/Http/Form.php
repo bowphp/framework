@@ -4,7 +4,7 @@ namespace Bow\Http;
 /**
  * Class Form
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
 class Form
@@ -38,8 +38,8 @@ class Form
     /**
      * Permet de récupérer une valeur dans la tableau $with
      *
-     * @param $key
-     * @param $default
+     * @param  $key
+     * @param  $default
      * @return string
      */
     private static function getAssociateValue($key, $default = '')
@@ -50,7 +50,7 @@ class Form
     /**
      * Permet de récupérer une valeur dans la tableau $with
      *
-     * @param array $attributes
+     * @param  array $attributes
      * @return string
      */
     private static function formatAttributes($attributes)
@@ -69,7 +69,7 @@ class Form
      *
      * @param string $name
      * @param string $value
-     * @param array $attributes
+     * @param array  $attributes
      *
      * @return void
      */
@@ -85,7 +85,7 @@ class Form
      *
      * @param string $name
      * @param string $value=""
-     * @param array $attributes
+     * @param array  $attributes
      *
      * @return void
      */
@@ -102,7 +102,7 @@ class Form
      *
      * @param string $name
      * @param string $value=""
-     * @param array $attributes
+     * @param array  $attributes
      *
      * @return void
      */
@@ -117,7 +117,7 @@ class Form
      * Ajout le tag <input type="file">
      *
      * @param string $name
-     * @param array $attributes
+     * @param array  $attributes
      *
      * @return void
      */
@@ -131,7 +131,7 @@ class Form
      * Ajout le tag <input type="submit">
      *
      * @param string $value
-     * @param array $attributes
+     * @param array  $attributes
      *
      * @return void
      */
@@ -145,7 +145,7 @@ class Form
      * Ajout le tag <input type="submit">
      *
      * @param string $value
-     * @param array $attributes
+     * @param array  $attributes
      *
      * @return void
      */
@@ -160,7 +160,7 @@ class Form
      *
      * @param string $name
      * @param string $value
-     * @param array $attributes
+     * @param array  $attributes
      *
      * @return void
      */
@@ -175,12 +175,12 @@ class Form
      * Ajout le tag <input type="checkbox">
      *
      * @param string $name
-     * @param bool $checked=false
+     * @param bool   $checked=false
      * @param string $value=""
      *
      * @return void
      */
-    public static function checkbox($name, $checked = false,  $value = "")
+    public static function checkbox($name, $checked = false, $value = "")
     {
         $value = static::getAssociateValue($name, $value);
         self::$form .= "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" ". ($checked == true ? 'cheched' : '')."/>";
@@ -190,7 +190,7 @@ class Form
      * Ajout le tag radio.
      *
      * @param string $name
-     * @param bool $checked=false
+     * @param bool   $checked=false
      * @param string $value
      *
      * @return void
@@ -204,10 +204,10 @@ class Form
     /**
      * Ajout le tag radio.
      *
-     * @param string $name
-     * @param array $options
+     * @param string      $name
+     * @param array       $options
      * @param string|null $selected
-     * @param array $attributes
+     * @param array       $attributes
      *
      * @return void
      */
@@ -217,8 +217,7 @@ class Form
         self::$form .= "<select name=\"$name\" ".$attributes.">";
         $oldValue = static::getAssociateValue($name);
 
-        foreach($options as $key => $value) {
-
+        foreach ($options as $key => $value) {
             if ($oldValue !== "") {
                 $key = $oldValue;
             }
@@ -268,7 +267,7 @@ class Form
     /**
      * Ajout le tag <label></label>
      *
-     * @param string $title
+     * @param string      $title
      * @param string|null $for=null
      *
      * @return void
@@ -283,7 +282,7 @@ class Form
      *
      * @param $method
      * @param $action
-     * @param string $id
+     * @param string     $id
      * @param bool|false $enctype
      *
      * @return string
@@ -296,7 +295,7 @@ class Form
     /**
      * Associé un model
      *
-     * @param array $data
+     * @param  array $data
      * @return void
      */
     public static function with($data)
@@ -306,7 +305,7 @@ class Form
 
     /**
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
      * @return mixed|null
      */
     public function __call($name, $arguments)

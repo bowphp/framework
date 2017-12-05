@@ -15,7 +15,7 @@ class Tokenize
     /**
      * Createur de token csrf
      *
-     * @param int $time
+     * @param  int $time
      * @return bool
      */
     public static function makeCsrfToken($time = null)
@@ -30,11 +30,14 @@ class Tokenize
 
         $token = static::make();
 
-        Session::add('__bow.csrf', [
+        Session::add(
+            '__bow.csrf',
+            [
             'token' => $token,
             'expirate' => time() + static::$expirate_at,
             'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
-        ]);
+            ]
+        );
 
         Session::add('_token', $token);
 
@@ -56,7 +59,7 @@ class Tokenize
     /**
      * Retourne un token csrf générer
      *
-     * @param int $time
+     * @param  int $time
      * @return mixed
      */
     public static function csrf($time = null)
@@ -94,8 +97,10 @@ class Tokenize
     /**
      * Vérifie si token csrf est valide
      *
-     * @param string $token le token a vérifié
-     * @param bool $strict le niveau de vérification
+     * @param string $token  le token a
+     *                       vérifié
+     * @param bool   $strict le niveau de
+     *                       vérification
      *
      * @return boolean
      */

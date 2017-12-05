@@ -97,7 +97,7 @@ class Capsule implements \ArrayAccess
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function bind($key, $value)
     {
@@ -115,7 +115,7 @@ class Capsule implements \ArrayAccess
     }
 
     /**
-     * @param string $key
+     * @param string   $key
      * @param $instance
      */
     public function instance($key, $instance)

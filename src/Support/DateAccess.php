@@ -4,7 +4,7 @@ namespace Bow\Support;
 /**
  * Class DateAccess
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
 class DateAccess
@@ -18,7 +18,7 @@ class DateAccess
      * Constructeur d'instance.
      *
      * @param null|int|string $time
-     * @param string $tz
+     * @param string          $tz
      */
     public function __construct($time = null, $tz = null)
     {
@@ -203,7 +203,7 @@ class DateAccess
     /**
      * Permet de formater la date
      *
-     * @param string $format
+     * @param  string $format
      * @return string
      */
     public function format($format)

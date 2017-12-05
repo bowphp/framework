@@ -3,6 +3,7 @@
 namespace Bow\Application;
 
 use Bow\Event\Event;
+use Bow\Config\Config;
 
 abstract class Services
 {
@@ -10,24 +11,32 @@ abstract class Services
 
     /**
      * Services constructor.
+     *
      * @param $app
      */
-    public function __construct($app)
+    public function __construct($app = null)
     {
         $this->app = $app;
     }
 
     /**
-     * @param Application $app
+     * Permet de créer le service
+     *
+     * @param Config $config
+     * @param Config $config
      */
-    abstract public function make($app);
+    abstract public function make(Config $config);
 
     /**
+     * Permet de lancer le service
+     *
      * @return mixed
      */
     abstract public function start();
 
     /**
+     * Start listener
+     *
      * @param callable $cb
      */
     public function stared($cb)
@@ -36,6 +45,8 @@ abstract class Services
     }
 
     /**
+     * Make listener
+     *
      * @param callable $cb
      */
     public function maked($cb)
@@ -44,6 +55,8 @@ abstract class Services
     }
 
     /**
+     * Get la service class name
+     *
      * @return string
      */
     public function getName()

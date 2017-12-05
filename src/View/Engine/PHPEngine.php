@@ -1,7 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
-use Bow\Application\Configuration;
+use Bow\Config\Config;
 use Bow\View\EngineAbstract;
 
 class PHPEngine extends EngineAbstract
@@ -13,9 +13,10 @@ class PHPEngine extends EngineAbstract
 
     /**
      * PHPEngine constructor.
-     * @param Configuration $config
+     *
+     * @param Config $config
      */
-    public function __construct(Configuration $config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
     }
@@ -39,12 +40,12 @@ class PHPEngine extends EngineAbstract
 
         if (file_exists($cache_hash_filename)) {
             if (filemtime($cache_hash_filename) >= fileatime($filename)) {
-                 return require $cache_hash_filename;
+                 return include $cache_hash_filename;
             }
         }
 
         ob_start();
-         require $filename;
+         include $filename;
         $data = ob_get_clean();
 
         $content = file_get_contents($filename);

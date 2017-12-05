@@ -3,4 +3,6 @@ namespace Bow\Exception;
 
 use ErrorException;
 
-class LoggerException extends ErrorException {};
+class LoggerException extends ErrorException
+{
+};

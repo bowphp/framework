@@ -15,8 +15,9 @@ class Listener
 
     /**
      * Listener constructor.
+     *
      * @param callable|string $callable
-     * @param int $priority
+     * @param int             $priority
      */
     public function __construct($callable, $priority)
     {
@@ -27,7 +28,7 @@ class Listener
     /**
      * Permet de lance la fonction du listener
      *
-     * @param array $data
+     * @param  array $data
      * @return mixed
      */
     public function call(array $data)

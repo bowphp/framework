@@ -10,7 +10,7 @@ use function session_destroy;
 /**
  * Class Session
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
 class Session implements CollectionAccessStatic
@@ -82,7 +82,7 @@ class Session implements CollectionAccessStatic
         $arr = [];
         static::start();
 
-        foreach($_SESSION as $key => $value) {
+        foreach ($_SESSION as $key => $value) {
             if (!array_key_exists($key, static::SESSION_CORE_KEY)) {
                 $arr[$key] = $value;
             }
@@ -95,7 +95,7 @@ class Session implements CollectionAccessStatic
      * Permet de vérifier l'existance une clé dans la colléction de session
      *
      * @param string $key
-     * @param bool $strict
+     * @param bool   $strict
      *
      * @return boolean
      */
@@ -113,7 +113,7 @@ class Session implements CollectionAccessStatic
     /**
      * Permet de vérifier si une colléction est vide.
      *
-     *	@return boolean
+     * @return boolean
      */
     public static function isEmpty()
     {
@@ -124,7 +124,7 @@ class Session implements CollectionAccessStatic
      * Permet de récupérer une valeur ou la colléction de valeur.
      *
      * @param string $key=null
-     * @param mixed $default
+     * @param mixed  $default
      *
      * @return mixed
      */
@@ -152,10 +152,12 @@ class Session implements CollectionAccessStatic
     /**
      * Permet d'ajouter une entrée dans la colléction
      *
-     * @param string|int $key La clé de la donnée à ajouter
-     * @param mixed $value La donnée à ajouter
-     * @param boolean $next Elle permet, si elle est a true d'ajouter la donnée si la clé existe
-     *                      Dans un tableau
+     * @param string|int $key   La clé de la donnée à
+     *                          ajouter
+     * @param mixed      $value La donnée à
+     *                          ajouter
+     * @param boolean    $next  Elle permet, si elle est a true d'ajouter la donnée si la
+     *                          clé existe Dans un tableau
      *
      * @throws InvalidArgumentException
      * @return mixed
@@ -222,7 +224,7 @@ class Session implements CollectionAccessStatic
      * set
      *
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      *
      * @return mixed
      */
@@ -247,8 +249,8 @@ class Session implements CollectionAccessStatic
     /**
      * flash
      *
-     * @param mixed $key
-     * @param mixed $message
+     * @param  mixed $key
+     * @param  mixed $message
      * @return mixed
      */
     public static function flash($key, $message = null)
@@ -293,7 +295,7 @@ class Session implements CollectionAccessStatic
     {
         static::start();
 
-        foreach(static::filter() as $key => $value){
+        foreach (static::filter() as $key => $value) {
             unset($_SESSION[static::SESSION_CORE_KEY['cache']][$key]);
             unset($_SESSION[$key]);
         }
@@ -323,8 +325,8 @@ class Session implements CollectionAccessStatic
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      */
     public function __call($name, $arguments)

@@ -14,28 +14,18 @@ class Actionner
     /**
      * Lanceur de callback
      *
-     * @param callable|string|array $actions
-     * @param mixed $param
-     * @param array $names
+     * @param  callable|string|array $actions
+     * @param  mixed                 $param
+     * @param  array                 $names
      * @throws RouterException
      * @return mixed
      */
-    public static function call($actions, $param = null, array $names = [])
+    public static function call($actions, $param = null, array $names = [], array $define_middlewares = [])
     {
         $param = is_array($param) ? $param : [$param];
-        $functions = [];
-
-        if (!isset($names['namespace'])) {
-            return static::exec($actions, $param);
-        }
-
         static::$names = $names;
-
-        if (!isset($names['namespace'])) {
-            throw new RouterException('Le namespace d\'autoload n\'est pas défini dans le fichier de configuration');
-        }
-
-        $firewalls = [];
+        $functions = [];
+        $middlewares = [];
 
         if (is_callable($actions)) {
             return call_user_func_array($actions, $param);
@@ -50,9 +40,9 @@ class Actionner
             throw new \InvalidArgumentException('Le premier parametre doit etre un tableau, une chaine, une closure', E_USER_ERROR);
         }
 
-        if (array_key_exists('firewall', $actions)) {
-            $firewalls = $actions['firewall'];
-            unset($actions['firewall']);
+        if (array_key_exists('middleware', $actions)) {
+            $middlewares = (array) $actions['middleware'];
+            unset($actions['middleware']);
         }
 
         foreach ($actions as $key => $action) {
@@ -76,75 +66,59 @@ class Actionner
                     continue;
                 }
             }
-
-            if (isset($action['with']) && isset($action['call'])) {
-                if (is_string($action['call'])) {
-                    $controller = $action['with'].'@'.$action['call'];
-                    array_push($functions, static::controller($controller));
-                    continue;
-                }
-
-                foreach($action['call'] as $method) {
-                    $controller = $action['with'].'@'.$method;
-                    array_push($functions,  static::controller($controller));
-                }
-                continue;
-            }
         }
 
         // Status permettant de bloquer la suite du programme.
         $status = true;
 
-        if (!is_array($firewalls)) {
-            $firewalls = [$firewalls];
-        }
+        // Collecteur de middleware
+        $middlewares_collection = [];
+        $middlewares_guard = [];
 
-        // Collecteur de firewall
-        $firewalls_collection = [];
-        $firewalls_guard = [];
+        foreach ($middlewares as $middleware_alias) {
 
-        foreach ($firewalls as $firewall) {
-            if (!is_string($firewall)) {
+            if (class_exists($middleware_alias)) {
+                $middlewares_collection[] = $middleware_alias;
                 continue;
             }
 
-            if (class_exists($firewall)) {
-                $firewalls_collection[] = $firewall;
-                continue;
+            if (!array_key_exists($middleware_alias, $define_middlewares)) {
+                throw new RouterException($middleware_alias . ' n\'est pas un middleware définir.', E_ERROR);
             }
 
-            if (!array_key_exists($firewall, $names['firewalls'])) {
-                throw new RouterException($firewall . ' n\'est pas un firewall définir.', E_ERROR);
+            // On vérifie si le middleware définie est une middleware valide.
+            if (!class_exists($define_middlewares[$middleware_alias])) {
+                throw new RouterException($define_middlewares[$middleware_alias] . ' n\'est pas un class middleware.');
             }
 
-            // On vérifie si le firewall définie est une firewall valide.
-            if (!class_exists($names['firewalls'][$firewall])) {
-                throw new RouterException($names['firewalls'][$firewall] . ' n\'est pas un class firewall.');
-            }
-
-            // Make firewalls collection
-            $firewalls_collection[] = $names['firewalls'][$firewall];
-            $parts = explode(':', $firewall, 2);
+            // Make middlewares collection
+            $middlewares_collection[] = $define_middlewares[$middleware_alias];
+            $parts = explode(':', $middleware_alias, 2);
 
             // Make guard collection
             if (count($parts) == 2) {
                 $guard = $parts[1];
-                $firewalls_guard[] = $guard;
+                $middlewares_guard[] = explode(',', $guard);
             } else {
-                $firewalls_guard[] = null;
+                $middlewares_guard[] = null;
             }
         }
 
         $next = false;
-        // Exécution du firewall
-        foreach ($firewalls_collection as $key => $firewall) {
-            $injections = static::injector($firewall, 'checker');
 
-            $firewall_params = array_merge($injections, [function () use (& $next) {
-                return $next = true;
-            }, $firewalls_guard[$key]], $param);
+        // Exécution du middleware
+        foreach ($middlewares_collection as $key => $middleware) {
+            $injections = static::injector($middleware, 'checker');
 
-            $status = call_user_func_array([new $firewall(), 'checker'], $firewall_params);
+            $middleware_params = array_merge(
+                $injections,
+                [function () use (& $next) {
+                    return $next = true;
+                }, $middlewares_guard[$key]],
+                $param
+            );
+
+            $status = call_user_func_array([new $middleware(), 'checker'], $middleware_params);
 
             if ($status === true && $next) {
                 $next = false;
@@ -163,7 +137,7 @@ class Actionner
         // Lancement de l'éxècution de la liste des actions definir
         // Fonction a éxècuté suivant un ordre
         if (!empty($functions)) {
-            foreach($functions as $function) {
+            foreach ($functions as $function) {
                 $status = call_user_func_array(
                     $function['controller'],
                     array_merge($function['injections'], $param)
@@ -175,27 +149,33 @@ class Actionner
     }
 
     /**
-     * Permet de lance un firewall
+     * Permet de lance un middleware
      *
-     * @param string $firewall
-     * @param callable $callback
+     * @param  string   $middleware
+     * @param  callable $callback
      * @return bool
      */
-    public static function firewall($firewall, callable $callback = null)
+    public static function middleware($middleware, callable $callback = null)
     {
         $next = false;
         $injections = [];
 
-        if (is_string($firewall) && class_exists($firewall)) {
-            $instance = [new $firewall(), 'checker'];
-            $injections = static::injector($firewall, 'checker');
+        if (is_string($middleware) && class_exists($middleware)) {
+            $instance = [new $middleware(), 'checker'];
+            $injections = static::injector($middleware, 'checker');
         } else {
-            $instance = $firewall;
+            $instance = $middleware;
         }
 
-        $status = call_user_func_array($instance, array_merge($injections, [function () use (& $next) {
-            return $next = true;
-        }]));
+        $status = call_user_func_array(
+            $instance,
+            array_merge(
+                $injections,
+                [function () use (& $next) {
+                    return $next = true;
+                }]
+            )
+        );
 
         if (is_callable($callback)) {
             $callback();
@@ -207,8 +187,8 @@ class Actionner
     /**
      * Permet de faire un injection
      *
-     * @param string $classname
-     * @param string $method
+     * @param  string $classname
+     * @param  string $method
      * @return array
      */
     public static function injector($classname, $method)
@@ -229,11 +209,11 @@ class Actionner
             $class = trim($match[1]);
 
             if (class_exists($class, true)) {
-                if (!in_array(strtolower($class), [
+                if (!in_array( strtolower($class), [
                     'string', 'array', 'bool', 'int',
                     'integer', 'double', 'float', 'callable',
-                    'object', 'stdclass', '\closure', 'closure'
-                ])) {
+                    'object', 'stdclass', '\closure', 'closure'])
+                ) {
                     $params[] = new $class();
                 }
             }
@@ -245,8 +225,8 @@ class Actionner
     /**
      * Next, lance successivement une liste de fonction.
      *
-     * @param array|callable $arr
-     * @param array|callable $arg
+     * @param  array|callable $arr
+     * @param  array|callable $arg
      * @return mixed
      */
     private static function exec($arr, $arg)
@@ -287,7 +267,7 @@ class Actionner
         }
 
         list($class, $method) = preg_split('/\.|@|::|->/', $controllerName);
-        $class = static::$names['namespace']['controller'] . '\\' . ucfirst($class);
+        $class = static::$names['controller'] . '\\' . ucfirst($class);
 
         $injections = static::injector($class, $method);
 

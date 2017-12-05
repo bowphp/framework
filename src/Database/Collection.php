@@ -40,9 +40,11 @@ class Collection extends \Bow\Support\Collection
      */
     public function dropAll()
     {
-        $this->each(function (Model $model) {
-            $model->delete();
-        });
+        $this->each(
+            function (Model $model) {
+                $model->delete();
+            }
+        );
     }
 
     /**

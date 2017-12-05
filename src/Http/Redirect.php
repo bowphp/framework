@@ -29,21 +29,19 @@ class Redirect
      * redirect, permet de lancer une redirection vers l'url passé en paramêtre
      *
      * @param string|array $path L'url de rédirection
-     * @param $status $path L'url de rédirection
-     *
-     *  Si $path est un tableau :
-     *
-     * 	$url = [
-     * 		'url' => '//'
-     * 		'?' => [
-     * 			'name' => 'dakia',
-     * 			'lastname' => 'franck',
-     * 			'id' => '1',
-     * 		],
-     * 		'#' => 'hello',
-     *      'data' => [] // des données a récupéré dans la page de rédirection
-     * ];
-     *
+     * @param status       $path L'url de rédirection
+     *                           Si $path est un
+     *                           tableau : $url = [
+     *                           'url' => '//' '?' =>
+     *                           [ 'name' => 'dakia',
+     *                           'lastname' =>
+     *                           'franck', 'id' =>
+     *                           '1', ], '#' =>
+     *                           'hello', 'data' => []
+     *                           // des données a
+     *                           récupéré dans la
+     *                           page de rédirection
+     *                           ];
      */
     public function to($path, $status = 302)
     {
@@ -55,7 +53,7 @@ class Redirect
 
         if (isset($path['?'])) {
             $url .= '?';
-            foreach($path['?'] as $key => $value) {
+            foreach ($path['?'] as $key => $value) {
                 if ($key > 0) {
                     $url .= '&';
                 }
@@ -83,7 +81,7 @@ class Redirect
     /**
      * Permet de faire une rédirection sur l'url précédent
      *
-     * @param int $status
+     * @param int   $status
      * @param array $data
      */
     public function back($status = 302, array $data = [])

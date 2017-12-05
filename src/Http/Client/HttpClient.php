@@ -25,6 +25,7 @@ class HttpClient
 
     /**
      * Constructeur d'instance.
+     *
      * @param string $url
      */
     public function __construct($url = null)
@@ -42,8 +43,8 @@ class HttpClient
     /**
      * Make get requete
      *
-     * @param string $url
-     * @param array $data
+     * @param  string $url
+     * @param  array  $data
      * @return Parser
      */
     public function get($url, array $data = [])
@@ -57,8 +58,8 @@ class HttpClient
     /**
      * make post requete
      *
-     * @param string $url
-     * @param array $data
+     * @param  string $url
+     * @param  array  $data
      * @return Parser
      */
     public function post($url, array $data = [])
@@ -83,8 +84,8 @@ class HttpClient
     /**
      * make put requete
      *
-     * @param string $url
-     * @param array $data
+     * @param  string $url
+     * @param  array  $data
      * @return Parser
      */
     public function put($url, array $data = [])
@@ -122,7 +123,8 @@ class HttpClient
     /**
      * @param array $data
      */
-    private function addFields(array $data) {
+    private function addFields(array $data)
+    {
         if (!empty($data)) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
         }

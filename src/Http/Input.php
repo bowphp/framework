@@ -11,7 +11,7 @@ use Bow\Interfaces\CollectionAccess;
 /**
  * Class RequestData
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Http
  */
 class Input implements CollectionAccess, \ArrayAccess
@@ -34,7 +34,7 @@ class Input implements CollectionAccess, \ArrayAccess
      * has, vérifie l'existance d'une clé dans la colléction
      *
      * @param string $key
-     * @param bool $strict
+     * @param bool   $strict
      *
      * @return boolean
      */
@@ -60,8 +60,8 @@ class Input implements CollectionAccess, \ArrayAccess
     /**
      * get, permet de récupérer une valeur ou la colléction de valeur.
      *
-     * @param string $key =null
-     * @param mixed $default =false
+     * @param  string $key     =null
+     * @param  mixed  $default =false
      * @return mixed
      */
     public function get($key, $default = null)
@@ -72,7 +72,7 @@ class Input implements CollectionAccess, \ArrayAccess
     /**
      * get, permet de récupérer une valeur ou la colléction de valeur.
      *
-     * @param array|string|int $expects
+     * @param  array|string|int $expects
      * @return mixed
      */
     public function getWithOut($expects)
@@ -129,8 +129,8 @@ class Input implements CollectionAccess, \ArrayAccess
      * add, ajoute une entrée dans la colléction
      *
      * @param string $key
-     * @param mixed $data
-     * @param bool $next
+     * @param mixed  $data
+     * @param bool   $next
      *
      * @return Input
      */
@@ -143,7 +143,7 @@ class Input implements CollectionAccess, \ArrayAccess
      * set, modifie une entrée dans la colléction
      *
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      *
      * @throws ErrorException
      *
@@ -234,8 +234,8 @@ class Input implements CollectionAccess, \ArrayAccess
     /**
      * Permet de valider les données entrantes
      *
-     * @param array $rule
-     * @return  Validate
+     * @param  array $rule
+     * @return Validate
      */
     public function validate(array $rule)
     {
@@ -264,7 +264,7 @@ class Input implements CollectionAccess, \ArrayAccess
      * __callStatic
      *
      * @param string $name
-     * @param array $argmunents
+     * @param array  $argmunents
      *
      * @return mixed
      */
@@ -279,7 +279,7 @@ class Input implements CollectionAccess, \ArrayAccess
     /**
      * __get
      *
-     * @param string $name Le nom de la variable
+     * @param  string $name Le nom de la variable
      * @return null
      */
     public function __get($name)

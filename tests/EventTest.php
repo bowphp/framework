@@ -9,15 +9,21 @@ class EventTable extends \Bow\Database\Barry\Model
     public function __construct(array $data = [])
     {
         parent::__construct($data);
-        EventTable::created(function() {
-            // fwrite(STDOUT, 'Created');
-        });
-        EventTable::deleted(function() {
-            // fwrite(STDOUT, 'Deleted');
-        });
-        EventTable::updated(function() {
-            // fwrite(STDOUT, 'Updated');
-        });
+        EventTable::created(
+            function () {
+                // fwrite(STDOUT, 'Created');
+            }
+        );
+        EventTable::deleted(
+            function () {
+                // fwrite(STDOUT, 'Deleted');
+            }
+        );
+        EventTable::updated(
+            function () {
+                // fwrite(STDOUT, 'Updated');
+            }
+        );
     }
 }
 
@@ -30,13 +36,17 @@ class EventTest extends \PHPUnit\Framework\TestCase
 
     public function testAddEvent()
     {
-        Event::on('user.destroy', function($name) {
-           $this->assertEquals($name, 'destroy');
-        });
+        Event::on(
+            'user.destroy', function ($name) {
+                $this->assertEquals($name, 'destroy');
+            }
+        );
 
-        Event::on('user.created', function($name) {
-           $this->assertEquals($name, 'created');
-        });
+        Event::on(
+            'user.created', function ($name) {
+                $this->assertEquals($name, 'created');
+            }
+        );
     }
 
     public function testEventEmit1()
@@ -53,10 +63,12 @@ class EventTest extends \PHPUnit\Framework\TestCase
     {
         $pets = new EventTable();
         $this->assertInstanceOf(EventTable::class, $pets);
-        $pets->setAttributes([
+        $pets->setAttributes(
+            [
             'id' => 1,
             'name' => 'Filou'
-        ]);
+            ]
+        );
         $this->assertEquals($pets->save(), 1);
     }
 

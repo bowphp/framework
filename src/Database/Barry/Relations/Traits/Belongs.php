@@ -13,7 +13,6 @@ trait Belongs
      */
     public function BelongsTo($class, $primary_key, $second_key)
     {
-
     }
 
     /**
@@ -25,6 +24,5 @@ trait Belongs
      */
     public function BelongsToMany($class, $primary_key, $second_key)
     {
-
     }
 }

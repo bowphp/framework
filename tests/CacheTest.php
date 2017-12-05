@@ -1,5 +1,7 @@
 <?php
 
+namespace Bow\Test;
+
 use \Bow\Http\Cache;
 
 class CacheTest extends \PHPUnit\Framework\TestCase
@@ -18,13 +20,17 @@ class CacheTest extends \PHPUnit\Framework\TestCase
 
     public function testAddWithCallbackCache()
     {
-        $r = Cache::add('lastname', function () {
-            return 'Franck';
-        });
+        $r = Cache::add(
+            'lastname', function () {
+                return 'Franck';
+            }
+        );
 
-        $r = $r && Cache::add('age', function () {
-            return 25;
-        }, 20000);
+        $r = $r && Cache::add(
+            'age', function () {
+                return 25;
+            }, 20000
+        );
 
         $this->assertEquals($r, true);
     }
@@ -37,11 +43,13 @@ class CacheTest extends \PHPUnit\Framework\TestCase
 
     public function testAddArrayCache()
     {
-        $r = Cache::add('address', [
+        $r = Cache::add(
+            'address', [
             'tel' => "49929598",
             'city' => "Abidjan",
             'country' => "Cote d'ivoire"
-        ]);
+            ]
+        );
 
         $this->assertEquals($r, true);
     }

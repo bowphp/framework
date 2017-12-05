@@ -2,7 +2,7 @@
 
 use \Bow\Support\DateAccess;
 
-class TestDateAccess extends \PHPUnit\Framework\TestCase
+class DateAccessTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetInstance()
     {

@@ -8,7 +8,6 @@
 
 namespace Exception;
 
-
 class ClassLoaderException extends \ErrorException
 {
 

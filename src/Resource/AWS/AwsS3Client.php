@@ -23,6 +23,7 @@ class AwsS3Client
 
     /**
      * AS3Client constructor.
+     *
      * @param array $config
      */
     public function __construct(array $config)
@@ -74,9 +75,11 @@ class AwsS3Client
      */
     public function visibility($url)
     {
-        return $this->s3->getObjectAcl([
+        return $this->s3->getObjectAcl(
+            [
             $url
-        ])->get('acl');
+            ]
+        )->get('acl');
     }
 
     /**

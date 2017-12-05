@@ -9,7 +9,7 @@ use Bow\Resource\Exception\ResourceException;
 /**
  * Class Storage
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
 class Storage
@@ -32,11 +32,11 @@ class Storage
     /**
      * UploadFile, fonction permettant de uploader un fichier
      *
-     * @param array $file information sur le fichier, $_FILES
-     * @param string $location
-     * @param int $size
-     * @param array $extension
-     * @param callable $cb
+     * @param  array    $file      information sur le fichier, $_FILES
+     * @param  string   $location
+     * @param  int      $size
+     * @param  array    $extension
+     * @param  callable $cb
      * @return mixed
      * @throws \InvalidArgumentException
      */
@@ -77,8 +77,8 @@ class Storage
     /**
      * Ecrire à la suite d'un fichier spécifier
      *
-     * @param string $file nom du fichier
-     * @param string $content content a ajouter
+     * @param  string $file    nom du fichier
+     * @param  string $content content a ajouter
      * @return bool
      */
     public static function append($file, $content)
@@ -89,8 +89,8 @@ class Storage
     /**
      * Ecrire au début d'un fichier spécifier
      *
-     * @param string $file
-     * @param string $content
+     * @param  string $file
+     * @param  string $content
      * @return bool
      */
     public static function prepend($file, $content)
@@ -104,8 +104,8 @@ class Storage
     /**
      * Put
      *
-     * @param $file
-     * @param $content
+     * @param  $file
+     * @param  $content
      * @throws ResourceException
      * @return bool
      */
@@ -122,7 +122,7 @@ class Storage
     /**
      * Supprimer un fichier
      *
-     * @param string $file
+     * @param  string $file
      * @return boolean
      */
     public static function delete($file)
@@ -139,7 +139,7 @@ class Storage
     /**
      * Alias sur readInDir
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public static function files($dirname)
@@ -147,34 +147,38 @@ class Storage
         $dirname = static::resolvePath($dirname);
         $directoryContents = glob($dirname."/*");
 
-        return array_filter($directoryContents, function($file)
-        {
-            return filetype($file) == "file";
-        });
+        return array_filter(
+            $directoryContents,
+            function ($file) {
+                return filetype($file) == "file";
+            }
+        );
     }
 
     /**
      * Lire le contenu du dossier
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public static function directories($dirname)
     {
         $directoryContents = glob(static::resolvePath($dirname)."/*");
 
-        return array_filter($directoryContents, function($file)
-        {
-            return filetype($file) == "dir";
-        });
+        return array_filter(
+            $directoryContents,
+            function ($file) {
+                return filetype($file) == "dir";
+            }
+        );
     }
 
     /**
      * Crée un répertoire
      *
-     * @param string $dirname
-     * @param int $mode
-     * @param bool $recursive
+     * @param  string $dirname
+     * @param  int    $mode
+     * @param  bool   $recursive
      * @return boolean
      */
     public static function makeDirectory($dirname, $mode = 0777, $recursive = false)
@@ -190,7 +194,7 @@ class Storage
     /**
      * Récuper le contenu du fichier
      *
-     * @param string $filename
+     * @param  string $filename
      * @return null|string
      */
     public static function get($filename)
@@ -207,8 +211,8 @@ class Storage
     /**
      * Copie le contenu d'un fichier source vers un fichier cible.
      *
-     * @param string $targerFile
-     * @param string $sourceFile
+     * @param  string $targerFile
+     * @param  string $sourceFile
      * @return bool
      */
     public static function copy($targerFile, $sourceFile)
@@ -239,7 +243,7 @@ class Storage
     /**
      * Vérifie l'existance d'un fichier
      *
-     * @param $filename
+     * @param  $filename
      * @return bool
      */
     public static function exists($filename)
@@ -260,7 +264,7 @@ class Storage
     /**
      * L'extension du fichier
      *
-     * @param $filename
+     * @param  $filename
      * @return string
      */
     public static function extension($filename)
@@ -275,7 +279,7 @@ class Storage
     /**
      * isFile aliase sur is_file.
      *
-     * @param $filename
+     * @param  $filename
      * @return bool
      */
     public static function isFile($filename)
@@ -286,7 +290,7 @@ class Storage
     /**
      * isDirectory aliase sur is_dir.
      *
-     * @param $dirname
+     * @param  $dirname
      * @return bool
      */
     public static function isDirectory($dirname)
@@ -297,7 +301,7 @@ class Storage
     /**
      * Lance la connection au ftp.
      *
-     * @param array $config
+     * @param  array $config
      * @return FTP
      */
     public static function ftp($config = null)
@@ -366,7 +370,7 @@ class Storage
      * Permet de résolver un path.
      * Donner le chemin absolute d'un path
      *
-     * @param $filename
+     * @param  $filename
      * @return string
      */
     public static function resolvePath($filename)
@@ -392,8 +396,8 @@ class Storage
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      */
     public function __call($name, array $arguments)

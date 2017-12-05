@@ -6,7 +6,7 @@ use Bow\Security\Crypto;
 /**
  * Class Cookie
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
 class Cookie
@@ -19,13 +19,15 @@ class Cookie
     /**
      * @access private
      */
-    private final function __clone() {}
+    final private function __clone()
+    {
+    }
 
     /**
      * has, vérifie l'existance une clé dans la colléction de session
      *
      * @param string $key
-     * @param bool $strict
+     * @param bool   $strict
      *
      * @return boolean
      */
@@ -56,7 +58,7 @@ class Cookie
      * get, permet de récupérer une valeur ou la colléction de valeur de cookie.
      *
      * @param string $key
-     * @param mixed $default
+     * @param mixed  $default
      *
      * @return mixed
      */
@@ -80,7 +82,7 @@ class Cookie
      */
     public static function all()
     {
-        foreach($_COOKIE as $key => $value) {
+        foreach ($_COOKIE as $key => $value) {
             $_COOKIE[$key] = Crypto::decrypt($value);
         }
 

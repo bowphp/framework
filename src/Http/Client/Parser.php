@@ -60,7 +60,7 @@ class Parser
     /**
      * Retourne la reponse en json
      *
-     * @param array $default
+     * @param  array $default
      * @return string
      */
     public function toJson(array $default = null)

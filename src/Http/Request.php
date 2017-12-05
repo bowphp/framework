@@ -8,7 +8,7 @@ use Bow\Support\Collection;
 /**
  * Class Request
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Http
  */
 class Request
@@ -45,6 +45,7 @@ class Request
 
     /**
      * Singletion loader
+     *
      * @return null|self
      */
     public static function singleton()
@@ -205,7 +206,7 @@ class Request
     /**
      * Charge la factory pour le FILES
      *
-     * @param string $key
+     * @param  string $key
      * @return UploadFile|Collection
      */
     public static function file($key)
@@ -261,7 +262,7 @@ class Request
     /**
      * Change le factory RequestData pour tout les entrés PHP (GET, FILES, POST)
      *
-     * @param string $key
+     * @param  string $key
      * @return Input
      */
     public static function input($key = null)
@@ -276,7 +277,7 @@ class Request
     /**
      * Accès au donnée de la précédente requete
      *
-     * @param mixed $key
+     * @param  mixed $key
      * @return mixed
      */
     public static function old($key)
@@ -305,7 +306,7 @@ class Request
     /**
      * Vérifie si une url match avec le pattern
      *
-     * @param string $match Un regex
+     * @param  string $match Un regex
      * @return int
      */
     public function is($match)
@@ -402,7 +403,7 @@ class Request
     /**
      * Get Request header
      *
-     * @param string $key
+     * @param  string $key
      * @return bool|string
      */
     public function getHeader($key)
@@ -423,7 +424,7 @@ class Request
     /**
      * Verifir si une entête existe.
      *
-     * @param string $key
+     * @param  string $key
      * @return bool
      */
     public function hasHeader($key)
@@ -434,7 +435,7 @@ class Request
     /**
      * Permet de récupérer un paramètre définir dans la route.
      *
-     * @param string $key
+     * @param  string $key
      * @return string
      */
     public function getParameter($key)
@@ -501,7 +502,7 @@ class Request
      * __call
      *
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @return mixed
      */

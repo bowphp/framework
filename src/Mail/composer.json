@@ -1,0 +1,16 @@
+{
+    "name": "papac/bow-mail",
+    "description": "The part of bow framework package",
+    "type": "library",
+    "require": {
+        "swiftmailer/swiftmailer": "^6.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Franck Dakia",
+            "email": "dakiafranck@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}

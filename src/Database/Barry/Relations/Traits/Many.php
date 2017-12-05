@@ -12,6 +12,5 @@ trait Many
      */
     public function hasMamy($classname, $primary_id, $secondary_key)
     {
-
     }
 }

@@ -1,20 +1,18 @@
 <?php
 namespace Bow\Application;
 
-use Bow\Event\Event;
 use Bow\Http\Request;
+use Bow\Config\Config;
 use Bow\Http\Response;
-use Bow\Support\DateAccess;
 use Bow\Http\Exception\HttpException;
-use Bow\Firewall\ApplicationCsrfFirewall;
 use Bow\Application\Exception\RouterException;
 use Bow\Application\Exception\ApplicationException;
 
 /**
  * Create and maintener by diagnostic developpers teams:
  *
- * @author Etchien Boa <geekroot9@gmail.com>
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Etchien Boa <geekroot9@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Core
  */
 class Application
@@ -22,7 +20,12 @@ class Application
     /**
      * @var string
      */
-    private $version = '0.2.1';
+    private $version = '2.5.1';
+
+    /**
+     * @var bool
+     */
+    private $booted = false;
 
     /**
      * @var array
@@ -32,7 +35,7 @@ class Application
     /**
      * @var array
      */
-    private $globale_firewall = [];
+    private $globale_middleware = [];
 
     /**
      * Définition de contrainte sur un route.
@@ -85,7 +88,7 @@ class Application
     private $response;
 
     /**
-     * @var Configuration|null
+     * @var Config|null
      */
     private $config;
 
@@ -102,71 +105,79 @@ class Application
     /**
      * Private construction
      *
-     * @param Configuration $config
-     * @param Request $request
+     * @param Request  $request
      * @param Response $response
      */
-    private function __construct(Configuration $config, Request $request, Response $response)
+    private function __construct(Request $request, Response $response)
     {
-        $this->config = $config;
         $this->request = $request;
         $this->response = $response;
+    }
 
-        /**
-         * Application de la timezone
-         */
-        DateAccess::setTimezone($this->config['app.timezone']);
+    /**
+     * Set Config
+     *
+     * @param Config $config
+     */
+    public function bind(Config $config)
+    {
+        $this->config = $config;
+        $this->boot();
+    }
 
-        /**
-         * Chargement des services
-         */
-        $services = $this->config['app.classes'];
-
-        if (!isset($services['services'])) {
+    /**
+     * Set Config
+     */
+    private function boot()
+    {
+        if ($this->booted) {
             return;
         }
 
-        foreach ($services['services'] as $service) {
-            if (!class_exists($service)) {
-                continue;
+        if (method_exists($this->config, 'services')) {
+            $services = $this->config->services();
+            $service_collection = [];
+
+            foreach ($services as $service) {
+                if (class_exists($service, true)) {
+                    $class = new $service;
+                    $class->make($this->config);
+                    $service_collection[] = $class;
+                }
             }
 
-            $service = new $service($this);
-            $service_called_name = call_user_func([$service, 'getName']);
-            /**
-             * Configuration du service
-             */
-            call_user_func_array([$service, 'make'], [$config]);
-            if (Event::bound($service_called_name.'.services.stared')) {
-                Event::emit($service_called_name.'.services.stared');
-            }
-            /**
-             * Démarrage du service.
-             */
-            call_user_func_array([$service, 'start'], []);
-            if (Event::bound($service_called_name.'.services.maked')) {
-                Event::emit($service_called_name.'.services.maked');
+            dd($service_collection);
+
+            foreach ($service_collection as $service) {
+                $service->start();
             }
         }
+
+        if (method_exists($this->config, 'boot')) {
+            $this->config->boot();
+        }
+
+        $this->booted = true;
     }
 
     /**
      * Private __clone
      */
-    private function __clone(){}
+    private function __clone()
+    {
+    }
 
     /**
      * Pattern Singleton.
      *
-     * @param Configuration $config
-     * @param Request $request
-     * @param Response $response
+     * @param  Request  $request
+     * @param  Response $response
      * @return Application
      */
-    public static function make(Configuration $config, Request $request, Response $response)
+    public static function make(Request $request, Response $response)
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($config, $request, $response);
+            static::$instance = new static($request, $response);
         }
 
         return static::$instance;
@@ -175,8 +186,8 @@ class Application
     /**
      * mount, ajoute un branchement.
      *
-     * @param string $branch
-     * @param callable $cb
+     * @param  string   $branch
+     * @param  callable $cb
      * @throws ApplicationException
      * @return Application
      */
@@ -197,32 +208,34 @@ class Application
         call_user_func_array($cb, [$this]);
 
         $this->branch = '';
-        $this->globale_firewall = [];
+        $this->globale_middleware = [];
 
         return $this;
     }
 
     /**
-     * Permet d'associer un firewall sur une url
+     * Permet d'associer un middleware sur une url
      *
-     * @param array $firewall
-     * @param callable $cb
+     * @param  array    $middleware
+     * @param  callable $cb
      * @return Application
      */
-    public function firewall($firewall = [], callable $cb)
+    public function middleware($middleware = [], callable $cb)
     {
-        $firewall = is_array($firewall) ? $firewall : [$firewall];
-        $this->globale_firewall = $firewall;
+        $middleware = is_array($middleware) ? $middleware : [$middleware];
+        $this->globale_middleware = $middleware;
         $cb($this);
-        $this->globale_firewall = [];
+        $this->globale_middleware = [];
         return $this;
     }
 
     /**
      * get, route de type GET ou bien retourne les variable ajoutés dans Bow
      *
-     * @param string $path La route à mapper
-     * @param callable|array $cb  La fonction à lancer
+     * @param string         $path La route à
+     *                             mapper
+     * @param callable|array $cb   La fonction à
+     *                             lancer
      *
      * @return Application|string
      */
@@ -234,8 +247,10 @@ class Application
     /**
      * post, route de type POST
      *
-     * @param string $path La route à mapper
-     * @param callable $cb La fonction à lancer
+     * @param string   $path La route à
+     *                       mapper
+     * @param callable $cb   La fonction à
+     *                       lancer
      *
      * @return Application
      */
@@ -260,14 +275,16 @@ class Application
     /**
      * any, route de tout type GET|POST|DELETE|PUT|OPTIONS|PATCH
      *
-     * @param string $path La route à mapper
-     * @param Callable $cb La fonction à lancer
+     * @param string   $path La route à
+     *                       mapper
+     * @param Callable $cb   La fonction à
+     *                       lancer
      *
      * @return Application
      */
-    public function any($path, Callable $cb)
+    public function any($path, callable $cb)
     {
-        foreach(['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
+        foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
             $this->$method($path, $cb);
         }
 
@@ -277,8 +294,10 @@ class Application
     /**
      * delete, route de tout type DELETE
      *
-     * @param string $path La route à mapper
-     * @param callable $cb La fonction à lancer
+     * @param string   $path La route à
+     *                       mapper
+     * @param callable $cb   La fonction à
+     *                       lancer
      *
      * @return Application
      */
@@ -290,8 +309,10 @@ class Application
     /**
      * put, route de tout type PUT
      *
-     * @param string $path La route à mapper
-     * @param callable $cb La fonction à lancer
+     * @param string   $path La route à
+     *                       mapper
+     * @param callable $cb   La fonction à
+     *                       lancer
      *
      * @return Application
      */
@@ -303,8 +324,10 @@ class Application
     /**
      * patch, route de tout type PATCH
      *
-     * @param string $path La route à mapper
-     * @param callable $cb La fonction à lancer
+     * @param string   $path La route à
+     *                       mapper
+     * @param callable $cb   La fonction à
+     *                       lancer
      *
      * @return Application
      */
@@ -316,11 +339,13 @@ class Application
     /**
      * patch, route de tout type PATCH
      *
-     * @param string 				$path   La route à mapper
-     * @param callable 				$cb     La fonction à lancer
+     * @param  string   $path La route
+     *                        à mapper
+     * @param  callable $cb   La fonction
+     *                        à lancer
      * @return Application
      */
-    public function options($path, Callable $cb)
+    public function options($path, callable $cb)
     {
         return $this->addHttpVerbe('OPTIONS', $path, $cb);
     }
@@ -328,8 +353,9 @@ class Application
     /**
      * code, Lance une fonction en fonction du code d'erreur HTTP
      *
-     * @param int $code Le code d'erreur
-     * @param callable $cb La fonction à lancer
+     * @param  int      $code Le code d'erreur
+     * @param  callable $cb   La fonction à
+     *                        lancer
      * @return Application
      */
     public function code($code, callable $cb)
@@ -341,16 +367,17 @@ class Application
     /**
      * match, route de tout type de method
      *
-     * @param array $methods
-     * @param string $path
-     * @param callable $cb La fonction à lancer
+     * @param  array    $methods
+     * @param  string   $path
+     * @param  callable $cb      La fonction à
+     *                           lancer
      * @return Application
      */
-    public function match(array $methods, $path, Callable $cb = null)
+    public function match(array $methods, $path, callable $cb = null)
     {
-        foreach($methods as $method) {
+        foreach ($methods as $method) {
             if ($this->request->method() === strtoupper($method)) {
-                $this->routeLoader(strtoupper($method), $path , $cb);
+                $this->routeLoader(strtoupper($method), $path, $cb);
             }
         }
 
@@ -361,9 +388,11 @@ class Application
      * addHttpVerbe, permet d'ajouter les autres verbes http
      * [PUT, DELETE, UPDATE, HEAD, PATCH]
      *
-     * @param string $method La methode HTTP
-     * @param string $path La route à mapper
-     * @param callable|array|string $cb La fonction à lancer
+     * @param string                $method La methode HTTP
+     * @param string                $path   La route
+     *                                      à mapper
+     * @param callable|array|string $cb     La fonction à
+     *                                      lancer
      *
      * @return Application
      */
@@ -383,9 +412,11 @@ class Application
     /**
      * routeLoader, lance le chargement d'une route.
      *
-     * @param string $method La methode HTTP
-     * @param string $path La route à mapper
-     * @param Callable|string|array $cb La fonction à lancer
+     * @param string                $method La methode HTTP
+     * @param string                $path   La route
+     *                                      à mapper
+     * @param Callable|string|array $cb     La fonction à
+     *                                      lancer
      *
      * @return Application
      */
@@ -395,7 +426,7 @@ class Application
             $path = '/' . $path;
         }
 
-        // construction du path original en fonction de la configuration de l'application
+        // construction du path original en fonction de la Config de l'application
         $path = $this->config['app.root'] . $this->branch . $path;
 
         // route courante
@@ -405,18 +436,19 @@ class Application
 
         // Ajout d'un nouvelle route sur l'en definie.
         switch (true) {
-            case !is_array($cb) && !empty($this->globale_firewall):
+            case !is_array($cb) && !empty($this->globale_middleware):
                 $cb = [
-                    'firewall' => $this->globale_firewall,
-                    'uses' => $cb
+                'middleware' => $this->globale_middleware,
+                'uses' => $cb
                 ];
                 break;
-            case !is_callable($cb) && isset($cb['firewall']) && !empty($this->globale_firewall):
-                if (!is_array($cb['firewall'])) {
-                    $cb['firewall'] = [$cb['firewall']];
+            case !is_callable($cb) && isset($cb['middleware']) && !empty($this->globale_middleware):
+                if (!is_array($cb['middleware'])) {
+                    $cb['middleware'] = [$cb['middleware']];
                 }
-                $cb['firewall'] = array_merge(
-                    $this->globale_firewall, $cb['firewall']
+                $cb['middleware'] = array_merge(
+                    $this->globale_middleware,
+                    $cb['middleware']
                 );
                 break;
         }
@@ -431,7 +463,7 @@ class Application
      * Lance une personnalisation de route.
      *
      * @param array|string $var
-     * @param string $regexContrainte
+     * @param string       $regexContrainte
      *
      * @return Application
      */
@@ -472,7 +504,7 @@ class Application
      * @return mixed
      * @throws RouterException
      */
-    public function run()
+    public function send()
     {
         if (php_sapi_name() == 'cli') {
             return true;
@@ -497,10 +529,6 @@ class Application
             if ($this->special_method !== null) {
                 $method = $this->special_method;
             }
-        }
-
-        if ($method == 'PUT' || $method == 'POST') {
-            $this->executeNativeFirewall();
         }
 
         // drapeaux d'erreur.
@@ -542,11 +570,11 @@ class Application
             $this->current['path'] = $route->getPath();
 
             // Appel de l'action associer à la route
-            $response = $route->call($this->request, $this->config['app']['classes']);
+            $response = $route->call($this->request, $this->config->namespaces(), $this->config->middlewares());
 
             if (is_string($response)) {
                 $this->response->send($response);
-            } else if (is_array($response) || is_object($response)) {
+            } elseif (is_array($response) || is_object($response)) {
                 $this->response->json($response);
             }
 
@@ -567,7 +595,7 @@ class Application
             return $this->response->send($r, true);
         }
 
-        if ($this->config['view.404'] != false) {
+        if (is_string($this->config['view.404'])) {
             return $this->response->send(
                 $this->response->view($this->config['view.404'])
             );
@@ -579,10 +607,10 @@ class Application
     /**
      * Permet de donner des noms au url.
      *
-     * @param $name
+     * @param  $name
      * @return Application
      */
-    public function named($name)
+    public function name($name)
     {
         $this->namedRoute($this->current['path'], $name);
         return $this;
@@ -599,9 +627,9 @@ class Application
     /**
      * REST API Maker.
      *
-     * @param string $url
-     * @param string|array $controllerName
-     * @param array $where
+     * @param  string       $url
+     * @param  string|array $controllerName
+     * @param  array        $where
      * @return $this
      * @throws ApplicationException
      */
@@ -653,12 +681,12 @@ class Application
         ];
 
         if (is_array($controllerName)) {
-            if (isset($controllerName['firewall'])) {
-                $internalFirewall = $controllerName['firewall'];
-                unset($controllerName['firewall']);
+            if (isset($controllerName['middleware'])) {
+                $internalMiddleware = $controllerName['middleware'];
+                unset($controllerName['middleware']);
 
                 $next = Actionner::call(
-                    ['firewall' => $internalFirewall],
+                    ['middleware' => $internalMiddleware],
                     [$this->request],
                     $this->config['app.classes']
                 );
@@ -677,7 +705,7 @@ class Application
                 $ignoreMethod = $controllerName['ignores'];
                 unset($controllerName['ignores']);
             }
-        } else  {
+        } else {
             $controller = $controllerName;
         }
 
@@ -752,7 +780,7 @@ class Application
     /**
      * Retourne les définir pour une methode HTTP
      *
-     * @param string $method
+     * @param  string $method
      * @return Route
      */
     public function getMethodRoutes($method)
@@ -761,22 +789,10 @@ class Application
     }
 
     /**
-     * Permet de lancer les middlewares par defaut
-     */
-    private function executeNativeFirewall()
-    {
-        $status = Actionner::firewall(ApplicationCsrfFirewall::class);
-
-        if (!$status) {
-            abort(500);
-        }
-    }
-
-    /**
      * __call fonction magic php
      *
      * @param string $method
-     * @param array $param
+     * @param array  $param
      *
      * @throws ApplicationException
      *
@@ -806,20 +822,25 @@ class Application
     }
 
     /**
-     * @param $code
-     * @param $message
-     * @param array $headers
+     * Abort application
+     *
+     * @param  $code
+     * @param  $message
+     * @param  array   $headers
      * @throws HttpException
      */
-    public function abort($code, $message = '', array $headers = [])
+    public function abort($code = 500, $message = '', array $headers = [])
     {
         response()->statusCode($code);
+        
         foreach ($headers as $key => $value) {
             response()->addHeader($key, $value);
         }
+        
         if ($message == null) {
             $message = 'Le procéssus a été suspendu.';
         }
+
         throw new HttpException($message);
     }
 

@@ -6,7 +6,7 @@ use Bow\Exception\UploadFileException;
 /**
  * Class UploadFile
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Http
  */
 class UploadFile
@@ -134,7 +134,7 @@ class UploadFile
     /**
      * Permet de hash du fichier
      *
-     * @param string $method
+     * @param  string $method
      * @return string
      */
     public function getHashName($method = 'md5')
@@ -145,8 +145,9 @@ class UploadFile
     /**
      * Déplacer le fichier uploader dans un répertoire.
      *
-     * @param string $to Le dossier de récéption
-     * @param string|null $filename Le nom du fichier
+     * @param  string      $to       Le dossier de
+     *                               récéption
+     * @param  string|null $filename Le nom du fichier
      * @return bool
      * @throws UploadFileException
      */

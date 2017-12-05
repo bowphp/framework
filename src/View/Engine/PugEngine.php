@@ -1,7 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
-use Bow\Application\Configuration;
+use Bow\Config\Config;
 use Bow\View\EngineAbstract;
 use Pug\Pug;
 
@@ -19,9 +19,10 @@ class PugEngine extends EngineAbstract
 
     /**
      * PugEngine constructor.
-     * @param Configuration $config
+     *
+     * @param Config $config
      */
-    public function __construct(Configuration $config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
 
@@ -32,9 +33,12 @@ class PugEngine extends EngineAbstract
             'cache' => $config['view.cache']
         ];
 
-        $this->template = new Pug($pug_config, [
+        $this->template = new Pug(
+            $pug_config,
+            [
             'expressionLanguage' => 'php'
-        ]);
+            ]
+        );
 
         foreach (EngineAbstract::HELPERS as $helper) {
             $this->template->share($helper, $helper);

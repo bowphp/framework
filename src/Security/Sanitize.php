@@ -10,7 +10,7 @@ class Sanitize
      * Permet de nettoyer les données
      *
      * @param mixed $data
-     * @param bool $secure
+     * @param bool  $secure
      *
      * @return mixed
      */
@@ -41,14 +41,14 @@ class Sanitize
         }
 
         if (is_array($data)) {
-            foreach($data as $key => $value) {
+            foreach ($data as $key => $value) {
                 $data[$key] = static::make($value, $secure);
             }
             return $data;
         }
 
         if (is_object($data)) {
-            foreach($data as $key => $value) {
+            foreach ($data as $key => $value) {
                 $data->$key = static::make($value, $secure);
             }
             return $data;
@@ -60,7 +60,7 @@ class Sanitize
     /**
      * Permet de nettoyerune chaine de caractère
      *
-     * @param string $data les données a néttoyé
+     * @param  string $data les données a néttoyé
      * @return string
      */
     public static function data($data)
@@ -72,7 +72,7 @@ class Sanitize
      * Permet de nettoye rune chaine de caractère
      * ',<tag>,&nbsp;
      *
-     * @param string $data les données a sécurisé
+     * @param  string $data les données a sécurisé
      * @return string
      */
     public static function secure($data)

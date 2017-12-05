@@ -1,7 +1,8 @@
 <?php
 namespace Bow\View;
 
-use Bow\Application\Configuration;
+use Bow\Config\Config;
+use BadMethodCallException;
 use Bow\View\Exception\ViewException;
 
 class View
@@ -38,10 +39,11 @@ class View
 
     /**
      * View constructor.
-     * @param Configuration $config
+     *
+     * @param  Config $config
      * @throws ViewException
      */
-    public function __construct(Configuration $config)
+    public function __construct(Config $config)
     {
         $engine = $config['view.engine'];
 
@@ -49,7 +51,7 @@ class View
             throw new ViewException('Le moteur de template non défini.', E_USER_ERROR);
         }
 
-        if (!in_array($engine, ['twig', 'mustache', 'pug', 'php'], true)) {
+        if (!array_key_exists($engine, static::$container)) {
             throw new ViewException('Le moteur de template n\'est pas implementé.', E_USER_ERROR);
         }
 
@@ -60,7 +62,7 @@ class View
     /**
      * Permet de configurer la classe
      *
-     * @param array $config
+     * @param Configuration $config
      */
     public static function configure($config)
     {
@@ -75,7 +77,7 @@ class View
     public static function singleton()
     {
         if (!static::$instance instanceof View) {
-            static::$instance = new self(self::$config);
+            static::$instance = new static(static::$config);
         }
 
         return static::$instance;
@@ -84,8 +86,8 @@ class View
     /**
      * Permet de faire le rendu d'une vue
      *
-     * @param string $viewname
-     * @param array $data
+     * @param  string $viewname
+     * @param  array  $data
      * @return string
      * @throws ViewException
      */
@@ -134,5 +136,58 @@ class View
         static::$config['view.extension'] = $extension;
 
         return $this;
+    }
+
+    /**
+     * Ajouter un moteur de template
+     *
+     * @param  $name
+     * @param  $engine
+     * @return bool
+     * @throws ViewException
+     */
+    public static function pushEngine($name, $engine)
+    {
+        if (array_key_exists($name, static::$container)) {
+            return true;
+        }
+
+        if (!class_exists($engine)) {
+            throw new ViewException($engine, ' N\'existe pas.');
+        }
+
+        static::$container[$name] = $engine;
+        return true;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        if (static::$instance instanceof View) {
+            if (method_exists(static::$instance, $name)) {
+                return call_user_func_array([static::$instance, $name], $arguments);
+            }
+        }
+
+        throw new BadMethodCallException($name . ' impossible de lance cette methode');
+    }
+
+    /**
+     * __call
+     *
+     * @param string $method
+     * @param array $arguments
+     */
+    public function __call($method, $arguments)
+    {
+        if (method_exists(static::$instance, $method)) {
+            return call_user_func_array([static::$instance, $method], $arguments);
+        }
+
+        throw new BadMethodCallException("La methode $method n'existe pas");
     }
 }

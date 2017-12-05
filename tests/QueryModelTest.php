@@ -109,10 +109,12 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
      */
     public function testInsert(Bow\Database\Database $db)
     {
-        $pet = Pets::create([
+        $pet = Pets::create(
+            [
             'name' => 'Couli',
             'id' => 1
-        ]);
+            ]
+        );
 
         $this->assertInstanceOf(Pets::class, $pet);
     }

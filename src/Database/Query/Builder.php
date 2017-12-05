@@ -8,11 +8,12 @@ use Bow\Database\SqlUnity;
 use Bow\Security\Sanitize;
 use Bow\Database\Collection;
 use Bow\Database\Exception\QueryBuilderException;
+use function explode;
 
 /**
  * Class Builder
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
 class Builder extends Tool implements \JsonSerializable
@@ -40,12 +41,12 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * @var string
      */
-    private $select = null;
+    private $select;
 
     /**
      * @var string
      */
-    private $where = null;
+    private $where;
 
     /**
      * @var array
@@ -55,27 +56,27 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * @var string
      */
-    private $join = null;
+    private $join;
 
     /**
      * @var string
      */
-    private $limit = null;
+    private $limit;
 
     /**
      * @var string
      */
-    private $group = null;
+    private $group;
 
     /**
      * @var string
      */
-    private $havin = null;
+    private $havin;
 
     /**
      * @var string
      */
-    private $order = null;
+    private $order;
 
     /**
      * @var \PDO
@@ -88,11 +89,16 @@ class Builder extends Tool implements \JsonSerializable
     private $first = false;
 
     /**
+     * @var string
+     */
+    private $prefix = '';
+
+    /**
      * Contructeur
      *
-     * @param string $table
-     * @param string $loadClassName
-     * @param string $primaryKey
+     * @param string     $table
+     * @param string     $loadClassName
+     * @param string     $primaryKey
      * @param $connection
      */
     public function __construct($table, $connection, $loadClassName = null, $primaryKey = 'id')
@@ -139,7 +145,7 @@ class Builder extends Tool implements \JsonSerializable
      *
      * @param $column
      * @param $comp
-     * @param null $value
+     * @param null    $value
      * @param $boolean
      *
      * @throws QueryBuilderException
@@ -183,7 +189,7 @@ class Builder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param string $comp
-     * @param null $value
+     * @param null   $value
      *
      * @throws QueryBuilderException
      *
@@ -246,7 +252,7 @@ class Builder extends Tool implements \JsonSerializable
      * WHERE column BETWEEN '' AND ''
      *
      * @param $column
-     * @param array $range
+     * @param array                   $range
      * @param string boolean='and|or'
      *
      * @throws QueryBuilderException
@@ -282,8 +288,8 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * WHERE column NOT BETWEEN '' AND ''
      *
-     * @param $column
-     * @param $range
+     * @param  $column
+     * @param  $range
      * @return Builder
      */
     public function whereNotBetween($column, array $range)
@@ -297,7 +303,7 @@ class Builder extends Tool implements \JsonSerializable
      * clause where avec comparaison en <<in>>
      *
      * @param string $column
-     * @param array $range
+     * @param array  $range
      * @param string $boolean
      *
      * @throws QueryBuilderException
@@ -310,9 +316,12 @@ class Builder extends Tool implements \JsonSerializable
             throw new QueryBuilderException('Le paramètre 2 ne doit pas être un QueryBuilderau vide.', E_ERROR);
         }
 
-        $map = array_map(function() {
-            return '?';
-        }, $range);
+        $map = array_map(
+            function () {
+                return '?';
+            },
+            $range
+        );
 
         $this->whereDataBinding = array_merge($range, $this->whereDataBinding);
 
@@ -339,7 +348,7 @@ class Builder extends Tool implements \JsonSerializable
      * clause where avec comparaison en <<not in>>
      *
      * @param string $column
-     * @param array $range
+     * @param array  $range
      *
      * @throws QueryBuilderException
      *
@@ -355,13 +364,15 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * clause join
      *
-     * @param string $table
+     * @param string   $table
      * @param callable $callabe
      *
      * @return Builder
      */
     public function join($table, callable $callabe = null)
     {
+        $table = $this->getPrefix().$table;
+
         if (is_null($this->join)) {
             $this->join = 'inner join `'.$table.'`';
         } else {
@@ -378,7 +389,7 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * clause left join
      *
-     * @param string $table
+     * @param string   $table
      * @param callable $callable
      *
      * @throws QueryBuilderException
@@ -386,6 +397,8 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function leftJoin($table, callable $callable = null)
     {
+        $table = $this->getPrefix().$table;
+
         if (is_null($this->join)) {
             $this->join = 'left join `'.$table.'`';
             if (is_callable($callable)) {
@@ -408,7 +421,7 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * clause right join
      *
-     * @param string $table
+     * @param string   $table
      * @param callable $callable
      *
      * @throws QueryBuilderException
@@ -416,6 +429,8 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function rightJoin($table, callable $callable)
     {
+        $table = $this->getPrefix().$table;
+
         if (is_null($this->join)) {
             $this->join = 'right join `'.$table.'`';
             if (is_callable($callable)) {
@@ -439,26 +454,35 @@ class Builder extends Tool implements \JsonSerializable
      * On, Si chainé avec lui même doit ajouter un <<and>> avant, sinon
      * si chainé avec <<orOn>> orOn ajout un <<or>> dévant
      *
-     * @param string $column1
+     * @param string $first
      * @param string $comp
-     * @param string $column2
+     * @param string $second
      *
      * @throws QueryBuilderException
      *
      * @return Builder
      */
-    public function on($column1, $comp = '=', $column2)
+    public function on($first, $comp = '=', $second = null)
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
-            $column2 = $comp;
+            $second = $comp;
+        }
+
+        if (count(explode('.', $first)) == 2) {
+            $first = $this->getPrefix().$first;
+        }
+        if (count(explode('.', $second)) == 2) {
+            $second = $this->getPrefix().$second;
         }
 
         if (!preg_match('/on/i', $this->join)) {
-            $this->join .= ' on `' . $column1 . '` ' . $comp . ' `' . $column2 . '`';
+            $this->join .= ' on `' . $first . '` ' . $comp . ' `' . $second . '`';
+        } else {
+            $this->join .= ' and `' . $first . '` ' . $comp . ' `' . $second . '`';
         }
 
         return $this;
@@ -468,30 +492,39 @@ class Builder extends Tool implements \JsonSerializable
      * clause On, suivie d'une combinaison par un comparateur <<or>>
      * Il faut que l'utilisateur fasse un <<on()>> avant d'utiliser le <<orOn>>
      *
-     * @param string $column
+     * @param string $first
      * @param string $comp
-     * @param string $value
+     * @param string $second
      *
      * @throws QueryBuilderException
      *
      * @return Builder
      */
-    public function orOn($column, $comp = '=', $value)
+    public function orOn($first, $comp = '=', $second)
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);
         }
 
         if (!$this->isComporaisonOperator($comp)) {
-            $value = $comp;
+            $second = $comp;
         }
 
-        if (preg_match('/on/i', $this->join)) {
-            $this->join .= ' or `'.$column.'` '.$comp.' '.$value;
-            return $this;
+        if (!preg_match('/on/i', $this->join)) {
+            throw new QueryBuilderException('La clause <b>on</b> n\'est pas initialisé.', E_ERROR);
         }
 
-        throw new QueryBuilderException('La clause <b>on</b> n\'est pas initialisé.', E_ERROR);
+        if (count(explode('.', $first)) == 2) {
+            $first = $this->getPrefix().$first;
+        }
+
+        if (count(explode('.', $second)) == 2) {
+            $second = $this->getPrefix().$second;
+        }
+
+        $this->join .= ' or `'.$first.'` '.$comp.' '.$second;
+
+        return $this;
     }
 
     /**
@@ -515,7 +548,7 @@ class Builder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param string $comp
-     * @param null $value
+     * @param null   $value
      * @param string $boolean
      */
     public function having($column, $comp = '=', $value = null, $boolean = 'and')
@@ -557,7 +590,7 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * jump = offset
      *
-     * @param int $offset
+     * @param  int $offset
      * @return Builder
      */
     public function jump($offset = 0)
@@ -642,7 +675,7 @@ class Builder extends Tool implements \JsonSerializable
      * Lance en interne les requêtes utilisants les aggregats.
      *
      * @param $aggregat
-     * @param string $column
+     * @param string   $column
      *
      * @return array|int
      */
@@ -659,7 +692,7 @@ class Builder extends Tool implements \JsonSerializable
             $sql .= ' ' . $this->group;
             $this->group = null;
 
-            if (!isNull($this->havin)){
+            if (!isNull($this->havin)) {
                 $sql .= ' having ' . $this->havin;
             }
         }
@@ -669,7 +702,7 @@ class Builder extends Tool implements \JsonSerializable
         $s->execute();
 
         if ($s->rowCount() > 1) {
-            return $s->fetchAll();
+            return Sanitize::make($s->fetchAll());
         }
 
         return (int) $s->fetchColumn();
@@ -677,7 +710,8 @@ class Builder extends Tool implements \JsonSerializable
 
     /**
      * Action get, seulement sur la requete de type select
-     * @param array $columns
+     *
+     * @param  array $columns
      * @return Collection|SqlUnity Si le mode de séléction unitaire n'est pas active
      */
     public function get(array $columns = [])
@@ -792,7 +826,7 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * Demarrer un transaction dans la base de donnée.
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @return Builder
      */
     public function transition(callable $cb)
@@ -809,20 +843,12 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * count
      *
-     * @param string $column          La colonne sur laquelle sera faite le `count`
-     * @param callable $cb [optional] La fonction de rappel. Dans ou elle est définie
-     *                                elle récupère en paramètre une instance de DatabaseErrorHanlder
-     *                                et les données récupérés par la réquête.
+     * @param string $column La colonne sur laquelle sera faite le `count`
      *
      * @return int
      */
-    public function count($column = '*', Callable $cb = null)
+    public function count($column = '*')
     {
-        if (is_callable($column)) {
-            $cb = $column;
-            $column = '*';
-        }
-
         if ($column != '*') {
             $column = '`' . $column . '`';
         }
@@ -841,25 +867,22 @@ class Builder extends Tool implements \JsonSerializable
         $stmt->execute();
 
         $r = $stmt->fetchColumn();
-
-        if (is_callable($cb)) {
-            call_user_func_array($cb, [$r]);
-        }
-
         return (int) $r;
     }
 
     /**
      * Action update
      *
-     * @param array $data  Les données à mettre à jour
-     * @param callable $cb La fonction de rappel. Dans ou elle est définie
-     *                     elle récupère en paramètre une instance de DatabaseErrorHanlder
-     *                     et les données récupérés par la réquête.
+     * @param array    $data Les données à mettre
+     *                       à jour
+     * @param callable $cb   La fonction de rappel. Dans ou elle est
+     *                       définie elle récupère en paramètre une
+     *                       instance de DatabaseErrorHanlder et les
+     *                       données récupérés par la réquête.
      *
      * @return int
      */
-    public function update(array $data = [], Callable $cb = null)
+    public function update(array $data = [], callable $cb = null)
     {
         $sql = 'update `' . $this->table . '` set ';
         $sql .= Util::rangeField(Util::add2points(array_keys($data)));
@@ -893,7 +916,7 @@ class Builder extends Tool implements \JsonSerializable
      *
      * @return int
      */
-    public function delete(Callable $cb = null)
+    public function delete(callable $cb = null)
     {
         $sql = 'delete from `' . $this->table . '`';
 
@@ -921,8 +944,9 @@ class Builder extends Tool implements \JsonSerializable
      * remove alise simplifié de delete.
      *
      * @param string $column Le nom du champs de la conditions
-     * @param string $comp Le type de comparaison
-     * @param string $value [optinal] La valeur a comparé
+     * @param string $comp   Le type de comparaison
+     * @param string $value  [optinal] La valeur a
+     *                       comparé
      *
      * @return int
      *
@@ -938,7 +962,7 @@ class Builder extends Tool implements \JsonSerializable
      * Action increment, ajout 1 par défaut sur le champs spécifié
      *
      * @param string $column La colonne sur laquel est faite incrémentation
-     * @param int $step Le part de l'incrementation
+     * @param int    $step   Le part de l'incrementation
      *
      * @return int
      */
@@ -952,7 +976,7 @@ class Builder extends Tool implements \JsonSerializable
      * Action decrement, soustrait 1 par defaut sur le champs spécifié
      *
      * @param string $column
-     * @param int $step
+     * @param int    $step
      *
      * @return int
      */
@@ -964,19 +988,25 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * Permet de faire une réquete avec la close DISTINCT
      *
-     * @param string $column
+     * @param  string $column
      * @return Builder
      */
     public function distinct($column)
     {
-        return $this->select(['distinct '.$column]);
+        if (!is_null($this->select)) {
+            $this->select .= " distinct `$column`";
+        } else {
+            $this->select = "distinct `$column`";
+        }
+
+        return $this;
     }
 
     /**
      * method permettant de customiser les methods increment et decrement
      *
      * @param string $column
-     * @param int $step
+     * @param int    $step
      * @param string $sign
      *
      * @return int
@@ -1096,9 +1126,11 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * paginate
      *
-     * @param integer $n nombre d'element a récupérer
-     * @param integer $current la page courrant
-     * @param integer $chunk le nombre l'élément par groupe que l'on veux faire.
+     * @param  integer $n       nombre d'element a
+     *                          récupérer
+     * @param  integer $current la page courrant
+     * @param  integer $chunk   le nombre l'élément par groupe que l'on veux
+     *                          faire.
      * @return Collection
      */
     public function paginate($n, $current = 0, $chunk = null)
@@ -1148,8 +1180,8 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * vérifie si un valeur existe déjà dans la DB
      *
-     * @param string $column Le nom de la colonne a vérifié
-     * @param mixed $value Le valeur de la colonne
+     * @param  string $column Le nom de la colonne a vérifié
+     * @param  mixed  $value  Le valeur de la colonne
      * @return bool
      * @throws QueryBuilderException
      */
@@ -1170,7 +1202,7 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * rétourne l'id de la dernière insertion
      *
-     * @param string $name [optional]
+     * @param  string $name [optional]
      * @return string
      */
     public function getLastInsertId($name = null)
@@ -1214,7 +1246,7 @@ class Builder extends Tool implements \JsonSerializable
 
         // Ajout de la clause join
         if (!is_null($this->join)) {
-            $sql .= ' join ' . $this->join;
+            $sql .= ' ' . $this->join;
             $this->join = null;
         }
 
@@ -1270,6 +1302,16 @@ class Builder extends Tool implements \JsonSerializable
     }
 
     /**
+     * Permet de retourner le prefixage.
+     *
+     * @return string
+     */
+    public function getPrefix()
+    {
+        return $this->prefix;
+    }
+
+    /**
      * Permet de récupérer le nom classe à charger
      *
      * @return null|string
@@ -1307,6 +1349,16 @@ class Builder extends Tool implements \JsonSerializable
     public function setTableName($table)
     {
         $this->table = $table;
+    }
+
+    /**
+     * Permet de modifier le prefix
+     *
+     * @param string $prefix
+     */
+    public function setPrefix($prefix)
+    {
+        $this->prefix = $prefix;
     }
 
     /**

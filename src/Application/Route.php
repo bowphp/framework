@@ -6,10 +6,10 @@ use Bow\Http\Request;
 /**
  * Bow Router
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Core
  */
-Class Route
+class Route
 {
     /**
      * Le callaback a lance si le url de la requête à matché.
@@ -59,7 +59,7 @@ Class Route
     /**
      * Contructeur
      *
-     * @param string $path
+     * @param string   $path
      * @param callable $cb
      */
     public function __construct($path, $cb)
@@ -90,36 +90,39 @@ Class Route
     }
 
     /**
-     * @param array|string $firewall
+     * Ajout middleware
+     *
+     * @param  array|string $middleware
+     * @return Route
      */
-    public function firewall($firewall)
+    public function middleware($middleware)
     {
-        if (!is_array($firewall)) {
-            $firewall = [$firewall];
-        }
+        $middleware = (array) $middleware;
 
         if (is_array($this->cb)) {
-            if (! isset($this->cb['firewall'])) {
-                $this->cb['firewall'] = $firewall;
+            if (!isset($this->cb['middleware'])) {
+                $this->cb['middleware'] = $middleware;
             } else {
-                $this->cb['firewall'] = array_merge(
-                    $firewall,
-                    is_array($this->cb['firewall']) ? $this->cb['firewall'] : [$this->cb['firewall']]
-                );
+                $this->cb['middleware'] = array_merge($middleware, is_array($this->cb['middleware']) ? $this->cb['middleware'] : [$this->cb['middleware']]);
             }
-        } else {
-            $this->cb = [
-                'uses' => $this->cb,
-                'firewall' => $firewall
-            ];
+
+            return $this;
         }
+
+
+        $this->cb = [
+            'uses' => $this->cb,
+            'middleware' => $middleware
+        ];
+
+        return $this;
     }
 
     /**
      * match, vérifie si le url de la REQUEST est conforme à celle définir par le routeur
      *
-     * @param string $uri L'url de la requête
-     * @param array $with Les informations de restriction.
+     * @param  string $uri  L'url de la requête
+     * @param  array  $with Les informations de restriction.
      * @return bool
      */
     public function match($uri, array $with = [])
@@ -168,13 +171,13 @@ Class Route
             $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
             preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
             $this->keys = end($this->keys);
-            return $this->checkUrl($path, $uri);
+            return $this->checkRequestUri($path, $uri);
         }
 
         // Dans le cas ou le dévéloppeur a ajouté de contrainte sur les variables
         // capturées
         if (!preg_match_all('~:([\w]+)?~', $this->path, $match)) {
-            return $this->checkUrl($path, $uri);
+            return $this->checkRequestUri($path, $uri);
         }
 
         $tmpPath =  $this->path;
@@ -196,7 +199,7 @@ Class Route
         }
 
         // Vérifcation de url et path PARSER
-        return $this->checkUrl($path, $uri);
+        return $this->checkRequestUri($path, $uri);
     }
 
     /**
@@ -204,7 +207,7 @@ Class Route
      * @param $uri
      * @return bool
      */
-    private function checkUrl($path, $uri)
+    private function checkRequestUri($path, $uri)
     {
         if (strstr($path, '?') == '?') {
             $uri = rtrim($uri, '/').'/';
@@ -226,11 +229,12 @@ Class Route
      * Fonction permettant de lancer les fonctions de rappel.
      *
      * @param Request $request
-     * @param array $namespaces
+     * @param array   $namespaces
+     * @param array   $middlewares
      *
      * @return mixed
      */
-    public function call(Request $request, array $namespaces)
+    public function call(Request $request, array $namespaces, array $middlewares)
     {
         // Association des parmatres à la request
         foreach ($this->keys as $key => $value) {
@@ -250,7 +254,7 @@ Class Route
         // Ajout des paramètres capturer à la requete
         $request->_setUrlParameters($this->params);
 
-        return Actionner::call($this->cb, $this->match, $namespaces);
+        return Actionner::call($this->cb, $this->match, $namespaces, $middlewares);
     }
 
     /**

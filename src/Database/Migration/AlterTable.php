@@ -18,7 +18,7 @@ class AlterTable
     /**
      * Contructeur.
      *
-     * @param string $tableName
+     * @param string     $tableName
      * @param bool|false $displaySql
      */
     public function __construct($tableName, $displaySql = false)
@@ -32,7 +32,7 @@ class AlterTable
      *
      * @param callable $cb
      */
-    public function add(Callable $cb)
+    public function add(callable $cb)
     {
         $columns = new TablePrinter($this->tableName, $this->displaySql);
 
@@ -60,7 +60,7 @@ class AlterTable
     {
         $columns = "";
 
-        foreach($col as $key => $value) {
+        foreach ($col as $key => $value) {
             if ($key > 0) {
                 $columns .= ", ";
             }
@@ -79,7 +79,6 @@ class AlterTable
         if ($this->displaySql) {
             echo $sql . "\n";
         }
-
     }
 
     /**

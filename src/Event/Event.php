@@ -9,12 +9,14 @@ use Bow\Exception\EventException;
 /**
  * Class Event
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
 class Event
 {
-    final private function __clone(){}
+    final private function __clone()
+    {
+    }
 
     /**
      * @var array
@@ -48,9 +50,12 @@ class Event
     /**
      * addEventListener
      *
-     * @param string $event Le nom de l'évènement
-     * @param Callable|array|string $fn  La fonction a lancé quand l'évènement se déclanche
-     * @param int $priority Le namespace de la classe ou fonction à lancer
+     * @param string                $event    Le nom de
+     *                                        l'évènement
+     * @param Callable|array|string $fn       La fonction a lancé quand l'évènement se
+     *                                        déclanche
+     * @param int                   $priority Le namespace de la classe ou fonction à
+     *                                        lancer
      */
     public static function on($event, $fn, $priority = 0)
     {
@@ -60,15 +65,18 @@ class Event
 
         self::$events[$event][] = new Listener($fn, $priority);
 
-        uasort(self::$events[$event], function (Listener $a, Listener $b) {
-            return $a->getPriority() < $b->getPriority();
-        });
+        uasort(
+            self::$events[$event],
+            function (Listener $a, Listener $b) {
+                return $a->getPriority() < $b->getPriority();
+            }
+        );
     }
 
     /**
-     * @param string $event
+     * @param string       $event
      * @param array|string $fn
-     * @param int $priority
+     * @param int          $priority
      * @throws EventException
      */
     public static function onTransmission($event, $fn, $priority = 0)
@@ -86,9 +94,9 @@ class Event
     }
 
     /**
-     * @param string $event
+     * @param string                $event
      * @param callable|array|string $fn
-     * @param int $priority
+     * @param int                   $priority
      */
     public static function once($event, $fn, $priority = 0)
     {
@@ -98,7 +106,7 @@ class Event
     /**
      * emit dispatchEvent
      *
-     * @param string $event Le nom de l'évènement
+     * @param  string $event Le nom de l'évènement
      * @return bool
      */
     public static function emit($event)
@@ -123,18 +131,24 @@ class Event
         $listeners = new Collection($events);
         $data = array_slice(func_get_args(), 1);
 
-        $listeners->each(function(Listener $listener) use ($data) {
+        $listeners->each(
+            function (Listener $listener) use ($data) {
 
-            if ($listener->getActionType() === 'string') {
-                $callable = $listener->getAction();
-            } else {
-                $callable = [$listener, 'call'];
+                if ($listener->getActionType() === 'string') {
+                    $callable = $listener->getAction();
+                } else {
+                    $callable = [$listener, 'call'];
+                }
+
+                return Actionner::call(
+                    $callable,
+                    [$data],
+                    [
+                    'namespace' => [ 'controller' => self::$namespace ]
+                    ]
+                );
             }
-
-            return Actionner::call($callable, [$data], [
-                'namespace' => [ 'controller' => self::$namespace ]
-            ]);
-        });
+        );
 
         return true;
     }
@@ -154,16 +168,18 @@ class Event
     /**
      * Permet de vérifier si un evenement est déja enregistre au moin un fois.
      *
-     * @param string $event
+     * @param  string $event
      * @return bool
      */
     public static function bound($event)
     {
         return array_key_exists($event, self::$events)
-            || array_key_exists($event,
+            || array_key_exists(
+                $event,
                 isset(self::$events['__bow.transmission.event']) ? self::$events['__bow.transmission.event'] : []
             )
-            || array_key_exists($event,
+            || array_key_exists(
+                $event,
                 isset(self::$events['__bow.once.event']) ? self::$events['__bow.once.event'] : []
             );
     }
@@ -171,8 +187,8 @@ class Event
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      */
     public function __call($name, $arguments)

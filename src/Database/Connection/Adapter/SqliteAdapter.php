@@ -13,6 +13,7 @@ class SqliteAdapter extends AbstractConnection
 
     /**
      * SqliteAdapter constructor.
+     *
      * @param $config
      */
     public function __construct($config)

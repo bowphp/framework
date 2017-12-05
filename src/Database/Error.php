@@ -6,7 +6,7 @@ use Bow\Database\Exception\DatabaseException;
 /**
  * Class DatabaseErrorHandler
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
 class Error
@@ -100,7 +100,7 @@ class Error
     /**
      * Lance une exception qui a pour message le message de l'erreur PDO
      *
-     * @param string|null $message
+     * @param  string|null $message
      * @throws DatabaseException
      */
     public function throwError($message = null)

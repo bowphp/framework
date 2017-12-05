@@ -8,7 +8,7 @@ use Bow\Exception\ResponseException;
 /**
  * Class Response
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Http
  */
 class Response
@@ -51,11 +51,11 @@ class Response
         416 => 'Range Not Statisfiable',
         417 => 'Expectation Failed',
         500 => 'Internal Server Error',
-        501	=> 'Not Implemented',
-        502	=> 'Bad Gateway',
+        501    => 'Not Implemented',
+        502    => 'Bad Gateway',
         503 => 'Service Unavailable',
-        504	=> 'Gateway Timeout',
-        505	=> 'HTTP Version Not Supported',
+        504    => 'Gateway Timeout',
+        505    => 'HTTP Version Not Supported',
     ];
 
     /**
@@ -78,8 +78,9 @@ class Response
     /**
      * Modifie les entêtes http
      *
-     * @param string $key 	Le nom de l'entête
-     * @param string $value La nouvelle valeur a assigne à l'entête
+     * @param  string $key   Le nom de
+     *                       l'entête
+     * @param  string $value La nouvelle valeur a assigne à l'entête
      * @return self
      */
     public function addHeader($key, $value)
@@ -92,8 +93,8 @@ class Response
      * Télécharger le fichier donnée en argument
      *
      * @param string $file
-     * @param null $name
-     * @param array $headers
+     * @param null   $name
+     * @param array  $headers
      * @param string $disposition
      */
     public function download($file, $name = null, array $headers = array(), $disposition = 'attachment')
@@ -109,7 +110,7 @@ class Response
         $this->addHeader('Content-Length', filesize($file));
         $this->addHeader('Content-Encoding', 'base64');
 
-        foreach($headers as $key => $value) {
+        foreach ($headers as $key => $value) {
             $this->addHeader($key, $value);
         }
 
@@ -119,8 +120,9 @@ class Response
     /**
      * Modifie les entétes http
      *
-     * @param int  $code 	 Le code de la réponse HTTP
-     * @param bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a 'true'
+     * @param  int  $code     Le code de la réponse
+     *                        HTTP
+     * @param  bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a 'true'
      * @return mixed
      */
     public function statusCode($code, $override = false)
@@ -139,9 +141,11 @@ class Response
     /**
      * Réponse de type JSON
      *
-     * @param mixed $data Les données à transformer en JSON
-     * @param int 	$code Le code de la réponse HTTP
-     * @param array $headers
+     * @param  mixed $data    Les données à transformer en
+     *                        JSON
+     * @param  int   $code    Le code de la
+     *                        réponse HTTP
+     * @param  array $headers
      * @return bool
      */
     public function json($data, $code = 200, array $headers = [])
@@ -159,8 +163,8 @@ class Response
     /**
      * Equivalant à un echo, sauf qu'il termine l'application quand $stop = true
      *
-     * @param string|array|\StdClass $data
-     * @param bool|false $stop
+     * @param  string|array|\StdClass $data
+     * @param  bool|false             $stop
      * @return mixed
      */
     public function send($data, $stop = false)
@@ -181,8 +185,8 @@ class Response
     /**
      * Permet de faire le rendu d'une vue.
      *
-     * @param $template
-     * @param array $data
+     * @param  $template
+     * @param  array    $data
      * @return string
      */
     public function view($template, $data = [])
@@ -207,7 +211,7 @@ class Response
     /**
      * Active Access-control-Allow-Origin
      *
-     * @param array $excepted [optional]
+     * @param  array $excepted [optional]
      * @return Response
      * @throws ResponseException
      */
@@ -223,7 +227,7 @@ class Response
     /**
      * Active Access-control-Allow-Methods
      *
-     * @param array $excepted [optional] $excepted
+     * @param  array $excepted [optional] $excepted
      * @return Response
      * @throws ResponseException
      */
@@ -239,7 +243,7 @@ class Response
     /**
      * Active Access-control-Allow-Headers
      *
-     * @param array $excepted [optional] $excepted
+     * @param  array $excepted [optional] $excepted
      * @return Response
      * @throws ResponseException
      */
@@ -265,7 +269,7 @@ class Response
     /**
      * Active Access-control-Max-Age
      *
-     * @param string $excepted [optional] $excepted
+     * @param  string $excepted [optional] $excepted
      * @return Response
      * @throws ResponseException
      */
@@ -281,7 +285,7 @@ class Response
     /**
      * Active Access-control-Expose-Headers
      *
-     * @param array $excepted [optional] $excepted
+     * @param  array $excepted [optional] $excepted
      * @return Response
      * @throws ResponseException
      */

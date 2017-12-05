@@ -16,6 +16,7 @@ class Arraydotify implements \ArrayAccess
 
     /**
      * DotifyArray constructor.
+     *
      * @param array $array
      */
     public function __construct(array $array = [])
@@ -44,7 +45,7 @@ class Arraydotify implements \ArrayAccess
     }
 
     /**
-     * @param array $array
+     * @param array  $array
      * @param string $prepend
      * @return array
      */
@@ -55,9 +56,13 @@ class Arraydotify implements \ArrayAccess
         foreach ($array as $key => $value) {
             if (is_array($value) || is_object($value)) {
                 $value = (array) $value;
-                $dot = array_merge($dot, $this->dotify(
-                    $value, $prepend.$key.'.'
-                ));
+                $dot = array_merge(
+                    $dot,
+                    $this->dotify(
+                        $value,
+                        $prepend.$key.'.'
+                    )
+                );
                 continue;
             }
 
@@ -68,9 +73,9 @@ class Arraydotify implements \ArrayAccess
     }
 
     /**
-     * @param array $array
+     * @param array  $array
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      * @return mixed
      */
     public function dataSet(&$array, $key, $value)

@@ -34,7 +34,7 @@ class Crypto
     /**
      * crypt
      *
-     * @param string $data les données a encrypté
+     * @param  string $data les données a encrypté
      * @return string
      */
     public static function encrypt($data)

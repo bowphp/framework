@@ -8,13 +8,14 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 /**
  * Class Util
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support
  */
 class Util
 {
     /**
      * définir le type de retoure chariot CRLF ou LF
+     *
      * @var string
      */
     private static $sep;
@@ -31,7 +32,8 @@ class Util
         $cloner = new VarCloner();
         $dumper = 'cli' === PHP_SAPI ? new CliDumper() : new HtmlDumper();
 
-        $dumper->setStyles([
+        $dumper->setStyles(
+            [
             'default' => 'background-color:#fff; color:#FF8400; line-height:1.2em; font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:99999; word-break: normal',
             'num' => 'font-weight:bold; color:#1299DA',
             'const' => 'font-weight:bold',
@@ -44,13 +46,14 @@ class Util
             'meta' => 'color:#B729D9',
             'key' => 'color:#212',
             'index' => 'color:#1200DA',
-        ]);
+            ]
+        );
 
         $handler = function ($vars) use ($cloner, $dumper) {
             if (!is_array($vars)) {
                 $vars = [$vars];
             }
-            foreach($vars as $var) {
+            foreach ($vars as $var) {
                 $dumper->dump($cloner->cloneVar($var));
             }
         };
@@ -61,7 +64,7 @@ class Util
     /**
      * Lance un var_dump sur les variables passées en paramètre.
      *
-     * @param string $var
+     * @param  string $var
      * @return void
      */
     public static function dd($var)
@@ -119,7 +122,7 @@ class Util
      * Formateur de donnée. key => :value
      *
      * @param array $data
-     * @param bool $byKey
+     * @param bool  $byKey
      *
      * @return array $resultat
      */

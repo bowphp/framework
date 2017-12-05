@@ -2,7 +2,8 @@
 
 use Bow\Support\Capsule;
 
-class MyClass {
+class MyClass
+{
     private $collection;
 
     public function __construct(\Bow\Support\Collection $collection)
@@ -31,15 +32,21 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
     public function testAddContainer()
     {
         $this->assertInstanceOf(Capsule::class, self::$capsule);
-        self::$capsule->bind('\stdClass', function () {
-            return new \stdClass();
-        });
-        self::$capsule->bind('MyClass', function ($c) {
-            return new MyClass($c['\Bow\Support\Collection']);
-        });
-        self::$capsule->factory('\Bow\Support\Collection', function () {
-            return new \Bow\Support\Collection();
-        });
+        self::$capsule->bind(
+            '\stdClass', function () {
+                return new \stdClass();
+            }
+        );
+        self::$capsule->bind(
+            'MyClass', function ($c) {
+                return new MyClass($c['\Bow\Support\Collection']);
+            }
+        );
+        self::$capsule->factory(
+            '\Bow\Support\Collection', function () {
+                return new \Bow\Support\Collection();
+            }
+        );
     }
 
     public function testMakeContainer()

@@ -15,7 +15,7 @@ use Bow\Database\Connection\Adapter\SqliteAdapter;
 /**
  * Class Database
  *
- * @author Franck dakia <dakiafranck@gmail.com>
+ * @author  Franck dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
 class Database
@@ -69,7 +69,7 @@ class Database
     /**
      * connection, lance la connection sur la DB
      *
-     * @param null $name
+     * @param  null $name
      * @return null|Database
      *
      * @throws ConnectionException
@@ -133,8 +133,8 @@ class Database
     /**
      * éxécute une requête update
      *
-     * @param string $sqlstatement
-     * @param array $data
+     * @param  string $sqlstatement
+     * @param  array  $data
      * @return bool
      */
     public static function update($sqlstatement, array $data = [])
@@ -151,8 +151,8 @@ class Database
     /**
      * éxécute une requête select
      *
-     * @param $sqlstatement
-     * @param array $data
+     * @param  $sqlstatement
+     * @param  array        $data
      * @return mixed|null
      */
     public static function select($sqlstatement, array $data = [])
@@ -173,8 +173,8 @@ class Database
     /**
      * éxécute une requête select et retourne un seul enregistrement
      *
-     * @param $sqlstatement
-     * @param array $data
+     * @param  $sqlstatement
+     * @param  array        $data
      * @return mixed|null
      */
     public static function selectOne($sqlstatement, array $data = [])
@@ -195,8 +195,8 @@ class Database
     /**
      * éxécute une requête insert
      *
-     * @param $sqlstatement
-     * @param array $data
+     * @param  $sqlstatement
+     * @param  array        $data
      * @return null
      */
     public static function insert($sqlstatement, array $data = [])
@@ -234,7 +234,7 @@ class Database
     /**
      * éxécute une requête de type DROP|CREATE TABLE|TRAUNCATE|ALTER Builder
      *
-     * @param $sqlstatement
+     * @param  $sqlstatement
      * @return bool
      */
     public static function statement($sqlstatement)
@@ -251,8 +251,8 @@ class Database
     /**
      * éxécute une requête delete
      *
-     * @param $sqlstatement
-     * @param array $data
+     * @param  $sqlstatement
+     * @param  array        $data
      * @return bool
      */
     public static function delete($sqlstatement, array $data = [])
@@ -269,7 +269,7 @@ class Database
     /**
      * Charge le factory Builder
      *
-     * @param string $table le nom de la Builder
+     * @param string $table         le nom de la Builder
      * @param string $loadClassName
      * @param string $primaryKey
      *
@@ -284,6 +284,7 @@ class Database
 
     /**
      * Lancement du debut d'un transaction
+     *
      * @param callable $callback
      */
     public static function startTransaction(callable $callback = null)
@@ -338,7 +339,7 @@ class Database
     /**
      * Récupère l'identifiant de la dernière enregistrement.
      *
-     * @param string $name
+     * @param  string $name
      * @return int
      */
     public static function lastInsertId($name = null)
@@ -350,8 +351,8 @@ class Database
     /**
      * Execute Les request de type delete insert update
      *
-     * @param $sqlstatement
-     * @param array $data
+     * @param  $sqlstatement
+     * @param  array        $data
      * @return mixed
      */
     private static function executePrepareQuery($sqlstatement, array $data = [])
@@ -390,7 +391,7 @@ class Database
      * __call
      *
      * @param $method
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @throws DatabaseException
      *

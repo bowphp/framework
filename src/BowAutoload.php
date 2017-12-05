@@ -4,7 +4,7 @@ namespace Bow;
 /**
  * Class BowAutoload, systeme de Chargement automatique des classes.
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow
  */
 class BowAutoload
@@ -12,7 +12,7 @@ class BowAutoload
     /**
      * Charge le fichier original de la classe
      *
-     * @param $class
+     * @param  $class
      * @return void
      */
     private static function load($class)
@@ -22,14 +22,14 @@ class BowAutoload
         $class = dirname(__DIR__). "/" . $class . ".php";
 
         if (is_file($class)) {
-            require $class;
+            include $class;
         }
     }
 
     /**
      * Launce l'autoload
      *
-     * @param bool $helper
+     * @param  bool $helper
      * @return void
      */
     public static function register($helper = true)
@@ -37,7 +37,7 @@ class BowAutoload
         spl_autoload_register([__CLASS__, 'load']);
 
         if ($helper) {
-            require_once __DIR__ . "/Support/helper.php";
+            include_once __DIR__ . "/Support/helper.php";
         }
     }
 }

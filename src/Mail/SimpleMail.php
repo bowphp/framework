@@ -8,7 +8,7 @@ use Bow\Mail\Exception\MailException;
 /**
  * Systeme d'envoye de mail utilisant le fonction mail de php.
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
 class SimpleMail implements Send
@@ -20,7 +20,7 @@ class SimpleMail implements Send
     /**
      * send, Envoie le mail
      *
-     * @param Message $message
+     * @param  Message $message
      * @throws InvalidArgumentException
      * @throws MailException
      * @return bool
@@ -32,7 +32,6 @@ class SimpleMail implements Send
         }
 
         if (isset($this->config['mail'])) {
-
             $section = $this->config['mail']['default'];
 
             if (!$message->fromIsDefined()) {
@@ -49,7 +48,7 @@ class SimpleMail implements Send
         $to = '';
         $message->setDefaultHeader();
 
-        foreach($message->getTo() as $value) {
+        foreach ($message->getTo() as $value) {
             if ($value[0] !== null) {
                 $to .= $value[0] . ' <' . $value[1] . '>';
             } else {
@@ -57,7 +56,12 @@ class SimpleMail implements Send
             }
         }
 
-        $status = @mb_send_mail($to, $message->getSubject(), $message->getMessage(), $message->compileHeaders());
+        $headers .= $message->compileHeaders();
+        $headers .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
+        $headers .= 'Content-Transfer-Encoding: 8bit' . Message::END;
+
+        // Send email use the php native function
+        $status = @mail($to, $message->getSubject(), $message->getMessage(), $headers);
 
         return (bool) $status;
     }
@@ -65,7 +69,9 @@ class SimpleMail implements Send
     /**
      * Mise en privé des fonctions magic __clone
      */
-    private function __clone() { }
+    private function __clone()
+    {
+    }
 
     /**
      * Construction d'une instance de SimpleMail

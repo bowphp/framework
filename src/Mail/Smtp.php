@@ -8,7 +8,7 @@ use Bow\Mail\Exception\SocketException;
 /**
  * Class Smtp
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
 class Smtp implements Send
@@ -80,12 +80,14 @@ class Smtp implements Send
         $this->port = $param['port'];
     }
 
-    private function __clone() {}
+    private function __clone()
+    {
+    }
 
     /**
      * Lance l'envoie de mail
      *
-     * @param Message $message
+     * @param  Message $message
      * @return bool
      */
     public function send(Message $message)
@@ -101,8 +103,7 @@ class Smtp implements Send
             }
         }
 
-        foreach($message->getTo() as $value) {
-
+        foreach ($message->getTo() as $value) {
             if ($value[0] !== null) {
                 $to = $value[0] . '<' . $value[1] . '>';
             } else {
@@ -122,7 +123,7 @@ class Smtp implements Send
 
         try {
             $this->write('.', 250);
-        } catch(SmtpException $e) {
+        } catch (SmtpException $e) {
             echo $e->getMessage();
         }
 
@@ -155,7 +156,7 @@ class Smtp implements Send
             throw new SocketException('Impossible de se connected à ' . $this->url . ':' . $this->port, E_USER_ERROR);
         }
 
-        stream_set_timeout($this->sock, 20, 0);
+        stream_set_timeout($this->sock, $this->timeout, 0);
         $code = $this->read();
 
         $host = isset($_SERVER['HTTP_HOST']) && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
@@ -169,7 +170,7 @@ class Smtp implements Send
 
         if ($this->tls === true) {
             $this->write('STARTTLS', 220);
-            $secured = stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            $secured = @stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
             if (!$secured) {
                 throw new ErrorException('Impossible de sécuriser votre connection avec tls', E_ERROR);
             }
@@ -203,7 +204,7 @@ class Smtp implements Send
     {
         $s = null;
 
-        for (; !feof($this->sock); ) {
+        for (; !feof($this->sock);) {
             if (($line = fgets($this->sock, 1e3)) != null) {
                 $s = explode(' ', $line)[0];
                 if (preg_match('#^[0-9]+$#', $s)) {
@@ -219,8 +220,8 @@ class Smtp implements Send
      * Lance une commande SMPT
      *
      * @param string $command
-     * @param int $code
-     * @param null $message
+     * @param int    $code
+     * @param null   $message
      *
      * @throws SmtpException
      * @return string

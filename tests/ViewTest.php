@@ -6,7 +6,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 {
     public function config()
     {
-        return \Bow\Application\Configuration::configure(__DIR__);
+        return \Bow\Config\Config::configure(__DIR__);
     }
 
     public function testTwigCompilation()

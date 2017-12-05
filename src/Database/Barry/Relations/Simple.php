@@ -9,7 +9,7 @@ interface Simple
     /**
      * Definir la clé étranger
      *
-     * @param string $id
+     * @param  string $id
      * @return self
      */
     public function foreign($id);
@@ -17,8 +17,8 @@ interface Simple
     /**
      * Join avec une autre table
      *
-     * @param string $table
-     * @param mixed $foreign_key
+     * @param  string $table
+     * @param  mixed  $foreign_key
      * @return self
      */
     public function merge($table, $foreign_key = null);

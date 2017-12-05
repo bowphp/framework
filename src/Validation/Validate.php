@@ -2,10 +2,11 @@
 namespace Bow\Validation;
 
 use Bow\Validation\Exception\ValidationException;
+
 /**
  * Class Validate
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support\Validate
  */
 class Validate
@@ -39,9 +40,9 @@ class Validate
     /**
      * Validate constructor.
      *
-     * @param bool $fails
+     * @param bool   $fails
      * @param string $message
-     * @param array $corruptesFields
+     * @param array  $corruptesFields
      */
     public function __construct($fails, $message, array $corruptesFields)
     {
@@ -51,8 +52,8 @@ class Validate
         $this->corruptesRules = [];
         $this->messages = [];
 
-        foreach($corruptesFields as $key => $corruptes) {
-            foreach($corruptes as $fields) {
+        foreach ($corruptesFields as $key => $corruptes) {
+            foreach ($corruptes as $fields) {
                 $this->messages[$key] = $fields["message"];
                 $this->corruptesRules[$key] = $fields["masque"];
             }

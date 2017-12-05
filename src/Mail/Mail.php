@@ -7,7 +7,7 @@ use Bow\Mail\Exception\MailException;
 /**
  * Class Mail
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
 class Mail
@@ -25,7 +25,9 @@ class Mail
     /**
      * Maxi singleton
      */
-    private function __clone() {}
+    private function __clone()
+    {
+    }
 
     /**
      * @param array $config
@@ -38,7 +40,7 @@ class Mail
     /**
      * Configure la classe Mail
      *
-     * @param array $config La configuration
+     * @param  array $config La configuration
      * @throws MailException
      * @return SimpleMail|Smtp
      */
@@ -76,21 +78,22 @@ class Mail
         }
 
         $message = new Message();
+        $data = View::make($view, $bind);
+        $message->setMessage($data);
+
         call_user_func_array($cb, [$message]);
 
-        $data = View::make($view, $bind);
-
-        $message->setMessage($data);
         return self::$instance->send($message);
     }
 
     /**
      * Envoye de mail simulaire a la fonction mail de PHP
      *
-     * @param string|array $to Le destinateur
-     * @param string $subject L'objet du mail
-     * @param string $data Le message du meail
-     * @param array  $headers [optinal] Les entêtes additionnel du mail.
+     * @param  string|array $to      Le destinateur
+     * @param  string       $subject L'objet du mail
+     * @param  string       $data    Le message du meail
+     * @param  array        $headers [optinal] Les entêtes additionnel du
+     *                               mail.
      * @return mixed
      */
     public static function raw($to, $subject, $data, array $headers = [])
@@ -102,16 +105,17 @@ class Mail
         $message = new Message();
         $message->toList($to)->subject($subject)->setMessage($data);
 
-        foreach($headers as $key => $value) {
+        foreach ($headers as $key => $value) {
             $message->addHeader($key, $value);
         }
+        
         return static::$instance->send($message);
     }
 
     /**
      * Modifie le driver smtp|mail
      *
-     * @param $driver
+     * @param  $driver
      * @return SimpleMail|Smtp
      * @throws MailException
      */
@@ -128,8 +132,8 @@ class Mail
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      *
      * @throws \ErrorException

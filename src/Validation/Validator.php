@@ -106,7 +106,7 @@ class Validator
      *      required|confirmed
      *
      * @param array $inputs Les informations a validé
-     * @param array $rules Le critaire de validation
+     * @param array $rules  Le critaire de validation
      *
      * @return Validate
      */
@@ -125,12 +125,12 @@ class Validator
     {
         $this->inputs = $inputs;
 
-        foreach($rules as $key => $rule) {
+        foreach ($rules as $key => $rule) {
             /**
              * Formatage et validation de chaque règle
              * eg. name => "required|max:100|alpha"
              */
-            foreach(explode("|", $rule) as $masque) {
+            foreach (explode("|", $rule) as $masque) {
                 // Dans le case il y a un | superflux.
                 if (is_int($masque) || Str::len($masque) == "") {
                     continue;
@@ -170,13 +170,13 @@ class Validator
     }
 
     /**
-     * @param string $key
+     * @param string       $key
      * @param string|array $attributes
      * @return mixed
      */
     private function lexique($key, $attributes)
     {
-        if (is_string($attributes)){
+        if (is_string($attributes)) {
             $attributes = ['attribute' => $attributes];
         }
 
@@ -200,10 +200,13 @@ class Validator
         if (preg_match("/^min:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
             if (Str::len($this->inputs[$key]) < $length) {
-                $this->lastMessage = $this->lexique('min', [
+                $this->lastMessage = $this->lexique(
+                    'min',
+                    [
                     'attribute' => $key,
                     'length' => $length
-                ]);
+                    ]
+                );
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
@@ -221,10 +224,13 @@ class Validator
         if (preg_match("/^max:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
             if (Str::len($this->inputs[$key]) > $length) {
-                $this->lastMessage = $this->lexique('max', [
+                $this->lastMessage = $this->lexique(
+                    'max',
+                    [
                     'attribute' => $key,
                     'length' => $length
-                ]);
+                    ]
+                );
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
@@ -242,10 +248,13 @@ class Validator
         if (preg_match("/^same:(.+)$/", $masque, $match)) {
             $value = (string) end($match);
             if ($this->inputs[$key] != $value) {
-                $this->lastMessage = $this->lexique('same', [
+                $this->lastMessage = $this->lexique(
+                    'same',
+                    [
                     'attribute' => $key,
                     'value' => $value
-                ]);
+                    ]
+                );
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
@@ -348,15 +357,18 @@ class Validator
         if (preg_match("/^in:(.+)$/", $masque, $match)) {
             $values = explode(",", end($match));
 
-            foreach($values as $index => $value) {
+            foreach ($values as $index => $value) {
                 $values[$index] = trim($value);
             }
 
             if (!in_array($this->inputs[$key], $values)) {
-                $this->lastMessage = $this->lexique('in', [
+                $this->lastMessage = $this->lexique(
+                    'in',
+                    [
                     'attribute' => $key,
                     'value' => implode(", ", $values)
-                ]);
+                    ]
+                );
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }
@@ -374,10 +386,13 @@ class Validator
         if (preg_match("/^size:(\d+)$/", $masque, $match)) {
             $length = (int) end($match);
             if (Str::len($this->inputs[$key]) != $length) {
-                $this->lastMessage = $this->lexique('size', [
+                $this->lastMessage = $this->lexique(
+                    'size',
+                    [
                     'attribute' => $key,
                     'length' => $length
-                ]);
+                    ]
+                );
                 $this->errors[$key][] = ["masque" => $masque, "message" => $this->lastMessage];
                 $this->fail = true;
             }

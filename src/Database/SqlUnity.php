@@ -9,7 +9,7 @@ use Bow\Database\Exception\QueryBuilderException;
 /**
  * Class SQLUnit
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Database
  */
 class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
@@ -42,12 +42,13 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     /**
      * SqlUnity Contructor
      *
-     * @param Builder $table
-     * @param mixed $id
-     * @param null|\stdClass $data
+     * @param  Builder        $table
+     * @param  mixed          $id
+     * @param  null|\stdClass $data
      * @throws QueryBuilderException
      */
-    public function __construct(Builder $table, $id, $data = null) {
+    public function __construct(Builder $table, $id, $data = null)
+    {
         if ($data === null) {
             $data = $table->first();
             if ($data instanceof self) {
@@ -98,7 +99,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     /**
      * Definir la clé étranger
      *
-     * @param string $id
+     * @param  string $id
      * @return self
      */
     public function foreign($id)
@@ -110,8 +111,8 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     /**
      * Join avec une autre table
      *
-     * @param string $table
-     * @param mixed $foreign_key
+     * @param  string $table
+     * @param  mixed  $foreign_key
      * @return self
      */
     public function merge($table, $foreign_key = null)
@@ -143,7 +144,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     /**
      * Récuper une valeur dans l'enrégistrement
      *
-     * @param $property
+     * @param  $property
      * @return mixed
      */
     public function __get($property)
@@ -170,6 +171,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
 
     /**
      * Quand un foreach est lancé sur l'instance de SqlUnit
+     *
      * @return \ArrayIterator
      */
     public function getIterator()
@@ -195,7 +197,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
             $data = $this->data;
         }
 
-        foreach($data as $key => $value) {
+        foreach ($data as $key => $value) {
             if ($value instanceof Carbon) {
                 $data->$key = (string) $value;
             }

@@ -2,7 +2,7 @@
 
 use \Bow\Support\Collection;
 
-class TestCollection extends \PHPUnit\Framework\TestCase
+class CollectionTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetInstance()
     {

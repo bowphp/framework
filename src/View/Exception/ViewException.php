@@ -4,4 +4,6 @@ namespace Bow\View\Exception;
 
 use ErrorException;
 
-class ViewException extends ErrorException {};
+class ViewException extends ErrorException
+{
+};

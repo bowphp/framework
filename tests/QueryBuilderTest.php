@@ -1,4 +1,5 @@
 <?php
+
 use \Bow\Database\Database;
 
 class QueryBuilderTest extends \PHPUnit\Framework\TestCase

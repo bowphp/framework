@@ -4,7 +4,7 @@ namespace Bow\Resource\Ftp;
 /**
  * Class FTP
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support\Resource\Ftp
  */
 class FTP
@@ -33,9 +33,11 @@ class FTP
      * @param string $hostname Le nom de serveur FTP
      * @param string $username Le nom d'utilisateur
      * @param string $password Le mot de passe de l'utilisteur.
-     * @param int $port        Le port de connection
-     * @param bool $tls        Si a true permet d'établir un connection sécuriré.
-     * @param int $timeout     Le temps d'attente avant réponse
+     * @param int    $port     Le port de connection
+     * @param bool   $tls      Si a true permet d'établir un
+     *                         connection sécuriré.
+     * @param int    $timeout  Le temps d'attente avant
+     *                         réponse
      *
      * @throws \ErrorException
      */
@@ -59,7 +61,7 @@ class FTP
     /**
      * Vérifie si le chemin pointe sur le fichier.
      *
-     * @param $filename
+     * @param  $filename
      * @return bool
      */
     public function isFile($filename)
@@ -70,7 +72,7 @@ class FTP
     /**
      * Vérifie si le chemin pointe sur un fichier sur le serveur.
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return bool
      */
     public function isDirectory($dirname)
@@ -89,8 +91,8 @@ class FTP
     /**
      * Récuper le contenu d'un fichier sur le serveur FTP
      *
-     * @param string $filename
-     * @param null|string $to
+     * @param  string      $filename
+     * @param  null|string $to
      * @return bool|null|string
      */
     public function get($filename, $to = null)
@@ -109,7 +111,7 @@ class FTP
     /**
      * Date de dernière modification
      *
-     * @param string $filename
+     * @param  string $filename
      * @return int
      */
     public function lastModifyTime($filename)
@@ -120,7 +122,7 @@ class FTP
     /**
      * Liste le contenu de dossier distant.
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public function listDirectory($dirname)
@@ -131,7 +133,7 @@ class FTP
     /**
      * Liste le contenu de dossier distant de façon brute.
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public function rawListDirectory($dirname)
@@ -141,7 +143,7 @@ class FTP
 
     /**
      * @param string $filename
-     * @param int $mode
+     * @param int    $mode
      * @return bool
      */
     public function changePermission($filename, $mode)
@@ -179,8 +181,8 @@ class FTP
     /**
      * __call
      *
-     * @param $method
-     * @param array $arguments
+     * @param  $method
+     * @param  array  $arguments
      * @throws \ErrorException
      *
      * @return bool

@@ -2,7 +2,7 @@
 namespace Bow\View\Engine;
 
 use Bow\View\EngineAbstract;
-use Bow\Application\Configuration;
+use Bow\Config\Config;
 
 class MustacheEngine extends EngineAbstract
 {
@@ -18,32 +18,41 @@ class MustacheEngine extends EngineAbstract
 
     /**
      * MustacheEngine constructor.
-     * @param Configuration $config
+     *
+     * @param Config $config
      */
-    public function __construct(Configuration $config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
 
         $partial_loader = is_dir($config['view.path'].'/partials') ?
-            new \Mustache_Loader_FilesystemLoader($config['view.path'].'/partials', [
+            new \Mustache_Loader_FilesystemLoader(
+                $config['view.path'].'/partials',
+                [
                 'extension' => $this->config['view.extension']
-            ]) : null;
+                ]
+            ) : null;
 
-        $loader = new \Mustache_Loader_FilesystemLoader($config['view.path'], [
+        $loader = new \Mustache_Loader_FilesystemLoader(
+            $config['view.path'],
+            [
             'extension' => $this->config['view.extension']
-        ]);
+            ]
+        );
 
         $helpers = array_merge(
             ['_public', $config['app.static'], '_root', $config['app.root']],
             EngineAbstract::HELPERS
         );
 
-        $this->template = new \Mustache_Engine([
+        $this->template = new \Mustache_Engine(
+            [
             'cache' => $config['view.cache'].'/view',
             'loader' => $loader,
             'partials_loader' => $partial_loader,
             'helpers' => $helpers
-        ]);
+            ]
+        );
     }
 
     /**

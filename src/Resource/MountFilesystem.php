@@ -14,6 +14,7 @@ class MountFilesystem
 
     /**
      * Filesystem constructor.
+     *
      * @param $basedir
      */
     public function __construct($basedir)
@@ -24,11 +25,11 @@ class MountFilesystem
     /**
      * UploadFile, fonction permettant de uploader un fichier
      *
-     * @param array $file information sur le fichier, $_FILES
-     * @param string $location
-     * @param int $size
-     * @param array $extension
-     * @param callable $cb
+     * @param  array    $file      information sur le fichier, $_FILES
+     * @param  string   $location
+     * @param  int      $size
+     * @param  array    $extension
+     * @param  callable $cb
      * @return mixed
      * @throws \InvalidArgumentException
      */
@@ -69,8 +70,8 @@ class MountFilesystem
     /**
      * Ecrire à la suite d'un fichier spécifier
      *
-     * @param string $file nom du fichier
-     * @param string $content content a ajouter
+     * @param  string $file    nom du fichier
+     * @param  string $content content a ajouter
      * @return bool
      */
     public function append($file, $content)
@@ -81,8 +82,8 @@ class MountFilesystem
     /**
      * Ecrire au début d'un fichier spécifier
      *
-     * @param string $file
-     * @param string $content
+     * @param  string $file
+     * @param  string $content
      * @return bool
      */
     public function prepend($file, $content)
@@ -96,8 +97,8 @@ class MountFilesystem
     /**
      * Put
      *
-     * @param $file
-     * @param $content
+     * @param  $file
+     * @param  $content
      * @throws ResourceException
      * @return bool
      */
@@ -113,7 +114,7 @@ class MountFilesystem
     /**
      * Supprimer un fichier
      *
-     * @param string $file
+     * @param  string $file
      * @return boolean
      */
     public function delete($file)
@@ -130,7 +131,7 @@ class MountFilesystem
     /**
      * Alias sur readInDir
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public function files($dirname)
@@ -138,34 +139,38 @@ class MountFilesystem
         $dirname = $this->resolvePath($dirname);
         $directoryContents = glob($dirname."/*");
 
-        return array_filter($directoryContents, function($file)
-        {
-            return filetype($file) == "file";
-        });
+        return array_filter(
+            $directoryContents,
+            function ($file) {
+                return filetype($file) == "file";
+            }
+        );
     }
 
     /**
      * Lire le contenu du dossier
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public function directories($dirname)
     {
         $directoryContents = glob($this->resolvePath($dirname)."/*");
 
-        return array_filter($directoryContents, function($file)
-        {
-            return filetype($file) == "dir";
-        });
+        return array_filter(
+            $directoryContents,
+            function ($file) {
+                return filetype($file) == "dir";
+            }
+        );
     }
 
     /**
      * Crée un répertoire
      *
-     * @param string $dirname
-     * @param int $mode
-     * @param bool $recursive
+     * @param  string $dirname
+     * @param  int    $mode
+     * @param  bool   $recursive
      * @return boolean
      */
     public function makeDirectory($dirname, $mode = 0777, $recursive = false)
@@ -181,7 +186,7 @@ class MountFilesystem
     /**
      * Récuper le contenu du fichier
      *
-     * @param string $filename
+     * @param  string $filename
      * @return null|string
      */
     public function get($filename)
@@ -198,8 +203,8 @@ class MountFilesystem
     /**
      * Copie le contenu d'un fichier source vers un fichier cible.
      *
-     * @param string $targerFile
-     * @param string $sourceFile
+     * @param  string $targerFile
+     * @param  string $sourceFile
      * @return bool
      */
     public function copy($targerFile, $sourceFile)
@@ -230,7 +235,7 @@ class MountFilesystem
     /**
      * Vérifie l'existance d'un fichier
      *
-     * @param $filename
+     * @param  $filename
      * @return bool
      */
     public function exists($filename)
@@ -251,7 +256,7 @@ class MountFilesystem
     /**
      * L'extension du fichier
      *
-     * @param $filename
+     * @param  $filename
      * @return string
      */
     public function extension($filename)
@@ -266,7 +271,7 @@ class MountFilesystem
     /**
      * isFile aliase sur is_file.
      *
-     * @param $filename
+     * @param  $filename
      * @return bool
      */
     public function isFile($filename)
@@ -277,7 +282,7 @@ class MountFilesystem
     /**
      * isDirectory aliase sur is_dir.
      *
-     * @param $dirname
+     * @param  $dirname
      * @return bool
      */
     public function isDirectory($dirname)
@@ -289,7 +294,7 @@ class MountFilesystem
      * Permet de résolver un path.
      * Donner le chemin absolute d'un path
      *
-     * @param $filename
+     * @param  $filename
      * @return string
      */
     public function resolvePath($filename)

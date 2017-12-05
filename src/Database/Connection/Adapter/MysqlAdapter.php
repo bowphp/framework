@@ -34,7 +34,7 @@ class MysqlAdapter extends AbstractConnection
     public function connection()
     {
         // Construction de la dsn
-        if (isset($this->config['socket']) && $this->config['socket'] != null) {
+        if (isset($this->config['socket']) && !is_null($this->config['socket']) && !empty($this->config['socket'])) {
             $hostname = $this->config['socket'];
         } else {
             $hostname = $this->config['hostname'];
@@ -42,8 +42,8 @@ class MysqlAdapter extends AbstractConnection
 
         $port = '';
 
-        if ($hostname != 'localhost') {
-            if (isset($this->config['port']) && $this->config['port'] !== null) {
+        if ($hostname !== 'localhost' || $hostname == '127.0.0.1') {
+            if (isset($this->config['port']) && !is_null($this->config['port']) && !empty($this->config['port'])) {
                 $port = ':'.$this->config['port'];
             } else {
                 $port = ':'.self::PORT;

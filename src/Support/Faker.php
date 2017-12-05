@@ -47,7 +47,7 @@ class Faker
 
     /**
      * @param array $additionnal_names
-     * @param bool $random
+     * @param bool  $random
      * @return string
      */
     public static function name(array $additionnal_names = [], $random = false)
@@ -80,9 +80,12 @@ class Faker
      */
     public static function password()
     {
-        $passwords = array_map(function($name) {
-            return str_replace(' ', '', strtolower($name));
-        }, self::NAMES);
+        $passwords = array_map(
+            function ($name) {
+                return str_replace(' ', '', strtolower($name));
+            },
+            self::NAMES
+        );
 
         return static::gen($passwords, 'password');
     }
@@ -149,7 +152,7 @@ class Faker
 
     /**
      * @param array $additionnal_emails
-     * @param bool $random
+     * @param bool  $random
      * @return string
      */
     public static function email(array $additionnal_emails = [], $random = false)
@@ -177,7 +180,7 @@ class Faker
 
     /**
      * @param string $type
-     * @param int $start
+     * @param int    $start
      * @return string
      */
     public static function autoincrement($type = 'integer', $start = 0)
@@ -236,7 +239,7 @@ class Faker
 
         $gen = $data[0];
 
-        while (in_array($gen , static::$selections[$key])) {
+        while (in_array($gen, static::$selections[$key])) {
             $gen = $data[rand(0, count($data) - 1)];
         }
 
@@ -246,8 +249,8 @@ class Faker
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      */
     public function __call($name, array $arguments)

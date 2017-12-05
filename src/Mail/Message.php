@@ -7,7 +7,7 @@ use Bow\Mail\Exception\MailException;
 /**
  * Class Message
  *
- * @author Franck Dakia <dakiafranck@gmail.com>
+ * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Mail
  */
 class Message
@@ -16,18 +16,21 @@ class Message
 
     /**
      * Liste des entêtes
+     *
      * @var array
      */
     private $headers = [];
 
     /**
      * définir le destinataire
+     *
      * @var array
      */
     private $to = [];
 
     /**
      * définir l'object du mail
+     *
      * @var string
      */
     private $subject = null;
@@ -44,6 +47,7 @@ class Message
 
     /**
      * Définir le message
+     *
      * @var string
      */
     private $message = null;
@@ -74,6 +78,7 @@ class Message
 
     /**
      * Construction d'une instance de SimpleMail
+     *
      * @param bool $boundary
      */
     public function __construct($boundary = true)
@@ -91,11 +96,7 @@ class Message
     {
         $this->headers[] = "Mime-Version: 1.0";
         $this->headers[] = "Date: " . date("r");
-        $this->headers[] = "X-Mailer: Bow Framework";
-
-        if ($this->fromIsDefined()) {
-            $this->headers[] = "From: " . $this->from;
-        }
+        $this->headers[] = "X-Mailer: PHP/".phpversion();
 
         if ($this->subject) {
             $this->headers[] = "Subject: " . $this->subject;
@@ -134,7 +135,7 @@ class Message
      */
     public function toList(array $list_desc)
     {
-        foreach($list_desc as $name => $to) {
+        foreach ($list_desc as $name => $to) {
             $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
         }
 
@@ -144,8 +145,8 @@ class Message
     /**
      * Formaté l'email récu.
      *
-     * @param  string $email
-     * @param  string $name
+     * @param string $email
+     * @param string $name
      *
      * @return array
      */
@@ -194,7 +195,7 @@ class Message
     {
         if (count($this->attachement) > 0) {
             $this->headers[] = "Content-type: multipart/mixed; boundary=\"{$this->boundary}\"" . self::END;
-            foreach($this->attachement as $file) {
+            foreach ($this->attachement as $file) {
                 $filename = basename($file);
                 $this->headers[] = "--" . $this->boundary;
                 $this->headers[] = "Content-Type: application/octet-stream; name=\"{$filename}\"";
@@ -205,7 +206,7 @@ class Message
             $this->headers[] = "--" . $this->boundary;
         }
 
-        return implode(self::END, $this->headers). self::END;
+        return implode(self::END, $this->headers).self::END;
     }
 
     /**
@@ -231,10 +232,7 @@ class Message
      */
     public function from($from, $name = null)
     {
-        if (!$this->fromDefined) {
-            $this->from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
-            $this->fromDefined = true;
-        }
+        $this->from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
 
         return $this;
     }
@@ -242,7 +240,7 @@ class Message
     /**
      * toHtml, définir le type de contenu en text/html
      *
-     * @param string $html=null
+     * @param  string $html=null
      * @return Message
      */
     public function html($html)
@@ -265,16 +263,14 @@ class Message
     }
 
     /**
-     * @param string $data
+     * @param string $message
      * @param string $type
      * @return Message
      */
-    private function type($data, $type)
+    private function type($message, $type)
     {
-        if (!$this->message) {
-            $this->type = $type;
-            $this->message = $data;
-        }
+        $this->type = $type;
+        $this->message = $message;
 
         return $this;
     }
@@ -356,7 +352,7 @@ class Message
     /**
      * Sets email priority.
      *
-     * @param  int $priority
+     * @param int $priority
      *
      * @return Message
      */
@@ -372,8 +368,9 @@ class Message
      *
      * @param $message
      */
-    public function setMessage($message)
+    public function setMessage($message, $type = 'text/html')
     {
+        $this->type = $type;
         $this->message = $message;
     }
 

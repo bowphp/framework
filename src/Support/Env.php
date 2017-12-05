@@ -26,8 +26,8 @@ class Env
     /**
      * Permet de récuperer le information de l'environement
      *
-     * @param string $key
-     * @param null $default
+     * @param  string $key
+     * @param  null   $default
      * @return mixed
      */
     public static function get($key, $default = null)
@@ -45,7 +45,7 @@ class Env
      * Permet de modifier l'information de l'environement
      *
      * @param string $key
-     * @param null $value
+     * @param null   $value
      */
     public static function set($key, $value)
     {
