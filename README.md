@@ -4,7 +4,7 @@
 [![docs](https://img.shields.io/packagist/v/papac/bow.svg?style=flat-square)](https://packagist.org/papac/bow)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/papac/framework/blob/master/LICENSE)
 [![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square)](https://papac.github.com/bow)
-[![Travis branch](https://img.shields.io/travis/papac/framework/master.svg?style=flat-square)](https://travis-ci.com/papac/framework)
+[![Travis branch](https://img.shields.io/travis/papac/framework/master.svg?style=flat-square)](https://travis-ci.org/papac/framework)
 
 Bow est un micro framework écrire pour les débutants qui veulent travail sur un projet un peut plus
 grand.
