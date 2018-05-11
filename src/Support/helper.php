@@ -1,12 +1,7 @@
 <?php
-/**
- * BOW HELPER
- * ==========
- * Définir des liens symbolique de l'ensemble de
- * fonctions de Bow
- */
 
 use Bow\Mail\Mail;
+use Bow\Auth\Auth;
 use Bow\Http\Cache;
 use Bow\Http\Input;
 use Bow\Event\Event;
@@ -57,15 +52,12 @@ if (!function_exists('config')) {
      */
     function config($key = null, $setting = null)
     {
-        app()->bind(
-            'config',
-            function () {
-                return Config::singleton();
-            }
-        );
+        app('config', function () {
+            return Config::getInstance();
+        });
 
         $config = app('config');
-        
+
         if (is_null($key)) {
             return $config;
         }
@@ -1427,5 +1419,18 @@ if (!function_exists('format_validation_errors')) {
         }
 
         return $validations;
+    }
+}
+
+if (!function_exists('auth')) {
+    /**
+     * Formate validation erreur.
+     *
+     * @param  array $errors
+     * @return array
+     */
+    function auth()
+    {
+        return Auth::getInstance();
     }
 }

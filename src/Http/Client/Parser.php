@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Http\Client;
 
 class Parser
@@ -69,6 +70,7 @@ class Parser
             if (is_array($default)) {
                 return json_encode($default);
             }
+
             return false;
         }
 
@@ -84,6 +86,7 @@ class Parser
     public function toArray()
     {
         if (!$this->retournTransfert()) {
+            $this->close();
             return ["error" => true, "message" => "Connat get information"];
         }
 
@@ -153,7 +156,7 @@ class Parser
         if ($data === false) {
             $this->close();
             ob_end_flush();
-            throw new \Exception('Impossible de passer le resultat.');
+            throw new \Exception('Impossible de passer le résultat.');
         }
 
         $this->error = curl_error($this->ch);

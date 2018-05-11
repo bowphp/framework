@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Session;
 
 use Bow\Security\Crypto;

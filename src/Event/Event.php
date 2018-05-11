@@ -140,13 +140,9 @@ class Event
                     $callable = [$listener, 'call'];
                 }
 
-                return Actionner::call(
-                    $callable,
-                    [$data],
-                    [
+                return Actionner::getInstance()->call($callable, [$data], [
                     'namespace' => [ 'controller' => self::$namespace ]
-                    ]
-                );
+                ]);
             }
         );
 

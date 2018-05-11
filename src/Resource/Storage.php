@@ -386,11 +386,16 @@ class Storage
     }
 
     /**
+     * Configure Storage
+     *
      * @param array $config
+     * @return MountFilesystem
      */
     public static function configure(array $config)
     {
         static::$config = $config;
+
+        return static::mount(static::$config['disk']['mount']);
     }
 
     /**

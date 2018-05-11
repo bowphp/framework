@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Security;
 
 class Hash

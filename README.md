@@ -11,9 +11,9 @@ grand.
 
 > N'ésitez pas commencez maintenant.
 
-# require
+# Require
 
-+ php >= 5.6
++ php >= 7.0
 + mcrypt
 + mb_string
 + PDO
@@ -30,6 +30,6 @@ Pour participer au project il faut:
 + Faire une publication sur votre dépot `git push origin branche-de-vos-traveaux`
 + Enfin faire un `pull-request`
 
-# Author
+# Auteur
 > Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
 > SVP s'il y a un bogue sur le projet veillez me contacté.

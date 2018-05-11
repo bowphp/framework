@@ -1,16 +1,9 @@
 <?php
 namespace Bow\Http;
 
-use Bow\Support\Str;
 use Bow\View\View;
 use Bow\Exception\ResponseException;
 
-/**
- * Class Response
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Http
- */
 class Response
 {
     /**
@@ -51,11 +44,11 @@ class Response
         416 => 'Range Not Statisfiable',
         417 => 'Expectation Failed',
         500 => 'Internal Server Error',
-        501    => 'Not Implemented',
-        502    => 'Bad Gateway',
+        501 => 'Not Implemented',
+        502 => 'Bad Gateway',
         503 => 'Service Unavailable',
-        504    => 'Gateway Timeout',
-        505    => 'HTTP Version Not Supported',
+        504 => 'Gateway Timeout',
+        505 => 'HTTP Version Not Supported',
     ];
 
     /**

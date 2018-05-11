@@ -1,13 +1,26 @@
 <?php
+namespace Bow\Router;
 
-namespace Bow\Router\Route;
+use Bow\Http\Request;
+use Bow\Config\Config;
+use Bow\Application\Actionner;
+use Bow\Application\Application;
 
 class Route
 {
     /**
-     * @var array
+     * Le callaback a lance si le url de la requête à matché.
+     *
+     * @var callable
      */
-    private $where;
+    private $cb;
+
+    /**
+     * Le chemin sur la route définir par l'utilisateur
+     *
+     * @var string
+     */
+    private $path;
 
     /**
      * @var string
@@ -15,258 +28,243 @@ class Route
     private $name;
 
     /**
-     * @var array
-     */
-    private $middleware;
-
-    /**
-     * @var array
-     */
-    private $statusRoutes;
-
-    /**
-     * @var string
-     */
-    private $method;
-
-    /**
-     * @var string
-     */
-    private $action;
-
-    /**
-     * @var string
-     */
-    private $path;
-
-    /**
-     * Permet de donner des noms au url.
+     * key
      *
-     * @param  $name
+     * @var array
+     */
+    private $keys = [];
+
+    /**
+     * @var array
+     */
+    private $params = [];
+
+    /**
+     * Liste de paramaters qui on matcher
+     *
+     * @var array
+     */
+    private $match = [];
+
+    /**
+     * Régle supplementaire de validation d'url
+     *
+     * @var array
+     */
+    private $with = [];
+
+    /**
+     * Application configuration
+     *
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * Contructeur
+     *
+     * @param string   $path
+     * @param callable $cb
+     */
+    public function __construct($path, $cb)
+    {
+        $this->config = config();
+        $this->cb = $cb;
+        $this->path = str_replace('.', '\.', $path);
+        $this->match = [];
+    }
+
+    /**
+     * Récupère le chemin de la route courante
+     *
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * Récupère l'action a executé sur la route courante
+     *
+     * @return mixed
+     */
+    public function getAction()
+    {
+        return $this->cb;
+    }
+
+    /**
+     * Ajout middleware
+     *
+     * @param  array|string $middleware
      * @return Route
      */
-    public function name($name)
+    public function middleware($middleware)
     {
-        $this->name = $name;
+        $middleware = (array) $middleware;
+
+        if (! is_array($this->cb)) {
+            $this->cb = [
+                'uses' => $this->cb,
+                'middleware' => $middleware
+            ];
+
+            return $this;
+        }
+
+
+        if (!isset($this->cb['middleware'])) {
+            $this->cb['middleware'] = $middleware;
+        } else {
+            $this->cb['middleware'] = array_merge($middleware, (array) $this->cb['middleware']);
+        }
+
         return $this;
     }
 
     /**
-     * Permet d'associer un middleware sur une url
+     * Permet de vérifier si l'url de la réquête est
+     * conforme à celle définir par le routeur
      *
-     * @param  array $middleware
-     * @return Route
+     * @param  string $uri
+     * @return bool
      */
-    public function middleware($middleware = [])
+    public function match($uri)
     {
-        $this->middleware = (array) $middleware;
-        return $this;
+        // Normalisation de l'url du nagivateur.
+        if (preg_match('~(.*)/$~', $uri, $match)) {
+            $uri = end($match);
+        }
+
+        // Normalisation du path défini par le programmeur.
+        if (preg_match('~(.*)/$~', $this->path, $match)) {
+            $this->path = end($match);
+        }
+
+        // On retourne directement tout
+        // pour gagner en performance.
+        if ($this->path === $uri) {
+            return true;
+        }
+
+        // On vérifie la longeur du path défini par le programmeur
+        // avec celle de l'url courante dans le navigateur de l'utilisateur.
+        // Pour éviter d'aller plus loin.
+        $path = implode(
+            '',
+            preg_split(
+                '/(\/:[a-z0-9-_]+\?)/',
+                $this->path
+            )
+        );
+
+        if (count(explode('/', $path)) != count(explode('/', $uri))) {
+            if (count(explode('/', $this->path)) != count(explode('/', $uri))) {
+                return false;
+            }
+        }
+
+        // Copie de l'url
+        $path = $uri;
+
+        // Dans le case ou le dévéloppeur n'a pas ajouté
+        // de contrainte sur les variables capturées
+        if (empty($this->with)) {
+            $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
+            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
+            $this->keys = end($this->keys);
+            return $this->checkRequestUri($path, $uri);
+        }
+
+        // Dans le cas ou le dévéloppeur a ajouté des contraintes
+        // sur les variables capturées
+        if (!preg_match_all('~:([\w]+)?~', $this->path, $match)) {
+            return $this->checkRequestUri($path, $uri);
+        }
+
+        $tmp_path = $this->path;
+        $this->keys = end($match);
+
+        // Association des critrères personnalisé.
+        foreach ($this->keys as $key => $value) {
+            if (array_key_exists($value, $this->with)) {
+                $tmp_path = preg_replace('~:' . $value . '~', '(' . $this->with[$value] . ')', $tmp_path);
+            }
+        }
+
+        // On rend vide le table d'association de critère personnalisé.
+        $this->with = [];
+
+        // Dans le case ou le path différent on récupère, on récupère celle dans $tmp_path
+        if ($tmp_path !== $this->path) {
+            $path = $tmp_path;
+        }
+
+        // Vérifcation de url et path PARSER
+        return $this->checkRequestUri($path, $uri);
+    }
+
+    /**
+     * Vérifie url de la réquête
+     *
+     * @param $path
+     * @param $uri
+     * @return bool
+     */
+    private function checkRequestUri($path, $uri)
+    {
+        if (strstr($path, '?') == '?') {
+            $uri = rtrim($uri, '/').'/';
+        }
+
+        // Vérifcation de url et path PARSER
+        $path = str_replace('~', '\\~', $path);
+
+        if (preg_match('~^'. $path . '$~', $uri, $match)) {
+            array_shift($match);
+            $this->match = str_replace('/', '', $match);
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Lance une personnalisation de route.
      *
-     * @param array|string $var
-     * @param string       $regexContrainte
+     * @param array|string $where
+     * @param string       $regex_constraint
      *
-     * @return Route
+     * @return Application
      */
-    public function where($var, $regexContrainte = null)
+    public function where($where, $regex_constraint = null)
     {
-        if (is_array($var)) {
-            $this->where = $var;
+        if (is_array($where)) {
+            $other_rule = $where;
         } else {
-            $this->where = [$var => $regexContrainte];
+            $other_rule = [$where => $regex_constraint];
         }
 
-        return $this;
-    }
-
-    /**
-     * get, route de type GET ou bien retourne les variable ajoutés dans Bow
-     *
-     * @param string         $path
-     * @param callable|array $cb
-     *
-     * @return Route
-     */
-    public function get($path, $cb)
-    {
-        return $this->routeLoader('GET', $path, $cb);
-    }
-
-    /**
-     * post, route de type POST
-     *
-     * @param string   $path
-     * @param callable $cb
-     *
-     * @return Route
-     */
-    public function post($path, $cb)
-    {
-        return $this->routeLoader('POST', $path, $cb);
-    }
-
-    /**
-     * any, route de tout type GET|POST|DELETE|PUT|OPTIONS|PATCH
-     *
-     * @param string   $path
-     * @param Callable $cb
-     *
-     * @return Route
-     */
-    public function any($path, callable $cb)
-    {
-        foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
-            $this->$method($path, $cb);
-        }
+        $this->with = array_merge($this->with, $other_rule);
 
         return $this;
     }
 
     /**
-     * delete, route de tout type DELETE
+     * Permet de donner un nom à la route
      *
-     * @param string   $path
-     * @param callable $cb
-     *
-     * @return Route
+     * @param string $name
      */
-    public function delete($path, $cb)
+    public function name($name)
     {
-        return $this->addHttpVerbe('DELETE', $path, $cb);
+        $this->name = $name;
+        $routes = $this->config['app.routes'];
+        $this->config['app.routes'] = array_merge($routes, [$name => $this->getPath()]);
     }
 
     /**
-     * put, route de tout type PUT
-     *
-     * @param string   $path
-     * @param callable $cb
-     *
-     * @return Route
-     */
-    public function put($path, $cb)
-    {
-        return $this->addHttpVerbe('PUT', $path, $cb);
-    }
-
-    /**
-     * patch, route de tout type PATCH
-     *
-     * @param string   $path
-     * @param callable $cb
-     *
-     * @return Route
-     */
-    public function patch($path, $cb)
-    {
-        return $this->addHttpVerbe('PATCH', $path, $cb);
-    }
-
-    /**
-     * patch, route de tout type PATCH
-     *
-     * @param  string   $path
-     * @param  callable $cb
-     * @return Route
-     */
-    public function options($path, callable $cb)
-    {
-        return $this->addHttpVerbe('OPTIONS', $path, $cb);
-    }
-
-    /**
-     * code, Lance une fonction en fonction du code d'erreur HTTP
-     *
-     * @param  int      $code
-     * @param  callable $cb
-     * @return Route
-     */
-    public function code($code, callable $cb)
-    {
-        $this->statusRoutes[$code] = $cb;
-        return $this;
-    }
-
-    /**
-     * match, route de tout type de method
-     *
-     * @param  array    $methods
-     * @param  string   $path
-     * @param  callable $cb
-     * @return Route
-     */
-    public function match(array $methods, $path, callable $cb = null)
-    {
-        foreach ($methods as $method) {
-            $this->routeLoader(strtoupper($method), $path, $cb);
-        }
-
-        return $this;
-    }
-
-    /**
-     * addHttpVerbe, permet d'ajouter les autres verbes http
-     * [PUT, DELETE, UPDATE, HEAD, PATCH]
-     *
-     * @param string         $method
-     * @param string         $path
-     * @param callable|array $cb
-     *
-     * @return Route
-     */
-    private function addHttpVerbe($method, $path, $cb)
-    {
-        return $this->routeLoader($method, $path, $cb);
-    }
-
-    /**
-     * routeLoader, lance le chargement d'une route.
-     *
-     * @param string         $method La methode HTTP
-     * @param string         $path
-     * @param Callable|array $cb
-     *
-     * @return Route
-     */
-    private function routeLoader($method, $path, $cb)
-    {
-        if (!preg_match('@^/@', $path)) {
-            $path = '/' . $path;
-        }
-
-        $this->method = $method;
-
-        $this->path = $path;
-
-        $this->action = $cb;
-
-        return $this;
-    }
-
-    /**
-     * Get the route action
-     *
-     * @return string
-     */
-    public function getAction()
-    {
-        return $this->action;
-    }
-
-    /**
-     * Get the route action
-     *
-     * @return array
-     */
-    public function getMiddleware()
-    {
-        return $this->middleware;
-    }
-
-    /**
-     * Get the route action
+     * Récupère le nom de la route
      *
      * @return string
      */
@@ -276,12 +274,56 @@ class Route
     }
 
     /**
-     * Get the route action
+     * Récupère les paramètres
      *
-     * @return string
+     * @return array
      */
-    public function call()
+    public function getParamters()
     {
-        return $this->name;
+        return $this->params;
+    }
+
+    /**
+     * Récupère un élément des paramètres
+     *
+     * @param string $key
+     * @return string|null
+     */
+    public function getParamter($key)
+    {
+        return isset($this->params[$key]) ? $this->params[$key] : null;
+    }
+
+    /**
+     * Fonction permettant de lancer les fonctions de rappel.
+     *
+     * @param Request $request
+     * @param array   $namespaces
+     * @param array   $middlewares
+     *
+     * @return mixed
+     */
+    public function call(Request $request)
+    {
+        // Association des parmatres à la request
+        foreach ($this->keys as $key => $value) {
+            if (!isset($this->match[$key])) {
+                continue;
+            }
+
+            if (!is_int($this->match[$key])) {
+                $this->params[$value] = urldecode($this->match[$key]);
+                continue;
+            }
+
+            $tmp = (int) $this->match[$key];
+            $this->params[$value] = $tmp;
+            $this->match[$key] = $tmp;
+        }
+
+        // Ajout des paramètres capturer à la requete
+        $request->_setUrlParameters($this->params);
+
+        return Actionner::getInstance()->call($this->cb, $this->match);
     }
 }

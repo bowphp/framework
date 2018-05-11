@@ -1,4 +1,5 @@
 <?php
-require __DIR__."/../src/BowAutoload.php";
+require __DIR__."/../../vendor/autoload.php";
 
-Bow\BowAutoload::register(true);
+Bow\Config\Config::configure(__DIR__.'/config');
+Bow\Application\Actionner::configure([], []);

@@ -96,8 +96,8 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
     {
         $v = Validator::make(['name' => 'Couli'], ['name' => 'required|exists:pets,name']);
         $v2 = Validator::make(['name' => 'bow'], ['name' => 'required|exists:pets']);
+
         $this->assertFalse($v->fails());
         $this->assertTrue($v2->fails());
     }
-
 }

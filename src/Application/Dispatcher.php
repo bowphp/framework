@@ -1,5 +1,9 @@
 <?php
 
+namespace Bow\Application;
+
+use Bow\Http\Request;
+
 class Dispatcher
 {
     /**
@@ -13,6 +17,8 @@ class Dispatcher
     private $index = 0;
 
     /**
+     * Ajout un middleware à la collection d'execution
+     *
      * @param string $middleware
      * @return $this
      */
@@ -23,10 +29,12 @@ class Dispatcher
     }
 
     /**
-     * @param $request
+     * Lance le procéssus d'execution de middleware
+     *
+     * @param Request $request
      * @return mixed
      */
-    public function process($request)
+    public function process(Request $request)
     {
         if (!isset($this->middlewares[$this->index])) {
             return null;
@@ -35,6 +43,10 @@ class Dispatcher
         $middleware = $this->middlewares[$this->index];
         $this->index++;
 
-        return call_user_func_array([new $middleware, 'checker'], [$request, [$this, 'process']]);
+        if (!is_callable($middleware)) {
+            $middleware = [new $middleware, 'checker'];
+        }
+
+        return call_user_func_array($middleware, [$request, [$this, 'process']]);
     }
 }

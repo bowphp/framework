@@ -28,6 +28,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @param Database $db
      * @depends testGetConnection
      */
     public function testInstanceOfModel(Bow\Database\Database $db)
@@ -40,6 +41,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testInstanceOfModel2(Bow\Database\Database $db)
     {
@@ -50,6 +52,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testInstanceCollectionOf(Bow\Database\Database $db)
     {
@@ -59,6 +62,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testChainSelectOf(Bow\Database\Database $db)
     {
@@ -68,6 +72,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testCountOf(Bow\Database\Database $db)
     {
@@ -77,6 +82,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testCountSelectCountOf(Bow\Database\Database $db)
     {
@@ -97,6 +103,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testSaveOf(Bow\Database\Database $db)
     {
@@ -106,21 +113,21 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testInsert(Bow\Database\Database $db)
     {
-        $pet = Pets::create(
-            [
+        $pet = Pets::create([
             'name' => 'Couli',
             'id' => 1
-            ]
-        );
+        ]);
 
         $this->assertInstanceOf(Pets::class, $pet);
     }
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testFind(Bow\Database\Database $db)
     {
@@ -130,6 +137,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends testGetConnection
+     * @param Database $db
      */
     public function testFindEmoty(Bow\Database\Database $db)
     {

@@ -1,11 +1,23 @@
 <?php
 
+namespace Bow\Jobs;
+
 class Job
 {
-	protected $queue = 'default';
+    /**
+     * @var string
+     */
+    protected $queue = 'default';
 
-	public function handler()
-	{
-		//
-	}
+    /**
+     * The job handle
+     */
+    public function handle()
+    {
+        //
+    }
+    
+    public function dispatch()
+    {
+    }
 }

@@ -1,7 +1,7 @@
 <?php
+
 namespace Bow\Console;
 
-use function dump;
 use Psy\Shell;
 use Psy\Configuration;
 use Bow\Support\Faker;
@@ -10,14 +10,16 @@ use Bow\Database\Database;
 class Bow
 {
     /**
-     * @var array
+     * @var string
      */
     private $serve_filename = './server.php';
 
     /**
      * @var array
      */
-    private $bootstrap = ['public/index.php'];
+    private $bootstrap = [
+        'public/index.php'
+    ];
 
     /**
      * @var string
@@ -34,6 +36,8 @@ class Bow
      *
      * @param  string  $dirname
      * @param  Command $command
+     * @return void
+     *
      * @throws \ErrorException
      */
     public function __construct($dirname, Command $command)
@@ -49,6 +53,8 @@ class Bow
 
     /**
      * Permet de lancer Bow task runner
+     *
+     * @return void
      */
     public function run()
     {
@@ -59,6 +65,7 @@ class Bow
      * Permet d'appeler un commande
      *
      * @param string $command
+     * @return void
      */
     public function call($command)
     {
@@ -84,6 +91,8 @@ class Bow
 
     /**
      * Permet de lancer un migration
+     *
+     * @return void
      *
      * @throws \ErrorException
      */
@@ -113,11 +122,14 @@ class Bow
     /**
      * Permet de créer des fichiers
      *
+     * @return void
+     *
      * @throws \ErrorException
      */
     public function add()
     {
         $action = $this->_command->getParameter('action');
+        
         if (!in_array($action, ['middleware', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
             throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
         }
@@ -131,6 +143,8 @@ class Bow
 
     /**
      * Permet de lancer le seeding
+     *
+     * @return void
      */
     public function seed()
     {
@@ -188,15 +202,19 @@ class Bow
 
     /**
      * Permet de lancer le serveur local
+     *
+     * @return void
      */
     public function serve()
     {
         $port = (int) $this->_command->options('--port', 5000);
         $hostname = $this->_command->options('--host', 'localhost');
-        $settings = $this->_command->getParameter('--php-settings', '');
+        $settings = $this->_command->options('--php-settings', false);
 
-        if ($settings === true || $settings === null) {
+        if (is_bool($settings)) {
             $settings = '';
+        } else {
+            $settings = '-d '.$settings;
         }
 
         // resource.
@@ -216,6 +234,8 @@ class Bow
 
     /**
      * Permet de lancer le repl
+     *
+     * @return void
      */
     public function console()
     {
@@ -229,18 +249,21 @@ class Bow
         }
 
         if (!class_exists('\Psy\Shell')) {
-            echo 'SVP installez psy/psysh:@stable avec la commande "composer require --dev psy/psysh @stable"';
+            echo 'Please, insall psy/psysh:@stable with this command "composer require --dev psy/psysh @stable"';
             return;
         }
 
         $shell = new Shell(new Configuration());
         $shell->setIncludes($this->bootstrap);
         $shell->run();
+
         return;
     }
 
     /**
      * Permet de generate un resource sur un controller
+     *
+     * @return void
      */
     public function generate()
     {
@@ -255,6 +278,8 @@ class Bow
 
     /**
      * Permet de supprimer les caches
+     *
+     * @return void
      *
      * @throws \ErrorException
      */
@@ -281,7 +306,10 @@ class Bow
     }
 
     /**
+     * Supprimession de fichier
+     *
      * @param string $dirname
+     * @return void
      */
     private function unlinks($dirname)
     {
@@ -296,6 +324,7 @@ class Bow
      * Permet de changer les fichiers de demarage
      *
      * @param array $bootstrap
+     * @return void
      */
     public function setBootstrap(array $bootstrap)
     {
@@ -306,6 +335,7 @@ class Bow
      * Permet de changer les fichiers de demarage
      *
      * @param string $serve_filename
+     * @return void
      */
     public function setServerFilename($serve_filename)
     {
@@ -375,14 +405,17 @@ USAGE;
 \n\033[0;32mcreate\033[00m create a user class\n
     [option]
     --with-model[=name]     Create a model associte at controller
-    --no-plain              Create a plain controller
+    --no-plain              Create a plain controller [available in add:controller]
+    -m                      Create a migration [available in add:model]
+    --create                Create a migration for create table [available in add:migration]
+    --table                 Create a migration for alter table [available in add:migration]
 
-    * you can use --no-plain --with-model
+    * you can use --no-plain --with-model in same command
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  For create a new controlleur
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name             For create a new middleware
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           For create a new middleware
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name                For create a new model
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       For create a new model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--n-seed=n]  For create a new table seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new table migration
@@ -393,7 +426,9 @@ U;
                 break;
             case 'generate':
                 echo <<<U
-    \n\033[0;32mgenerate\033[00m create a resource and app keyn
+    \n\033[0;32mgenerate\033[00m create a resource and app key
+    [option]
+    --model   Define the usable model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name             For create a new REST controller
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                       For generate a new APP KEY
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                      For display this
@@ -407,6 +442,7 @@ U;
     --create=table_name   Change name of table
     --table=table_name    Alter migration table
     --all                 Optionnel
+    --display-sql         Display rendered sql code
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:up name [option]       Up the specify migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name [--all]      Down migration

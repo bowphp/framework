@@ -4,15 +4,14 @@ namespace Bow\Auth;
 
 class Guards
 {
-	/**
-	 * Guards contructor
-	 * 
-	 * @param string|null $guard
-	 */
-	public function __construct($guard = null)
-	{
-
-	}
+    /**
+     * Guards contructor
+     *
+     * @param string|null $guard
+     */
+    public function __construct($guard = null)
+    {
+    }
 
     /**
      * Check if user is authenticate

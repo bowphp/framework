@@ -15,7 +15,7 @@ class EnvTest extends \PHPUnit\Framework\TestCase
 
 	public function testIsLoaded()
 	{
-		$this->assertEquals(Env::isLoaded(), null);
+		$this->assertEquals(Env::isLoaded(), true);
 	}
 
 	public function testGet()

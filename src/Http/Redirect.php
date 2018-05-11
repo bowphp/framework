@@ -67,6 +67,7 @@ class Redirect
 
         $this->response->statusCode($status);
         header('Location: ' . $url);
+        
         exit;
     }
 

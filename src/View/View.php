@@ -8,7 +8,7 @@ use Bow\View\Exception\ViewException;
 class View
 {
     /**
-     * @var Configuration
+     * @var Config
      */
     private static $config;
 
@@ -62,7 +62,7 @@ class View
     /**
      * Permet de configurer la classe
      *
-     * @param Configuration $config
+     * @param Config $config
      */
     public static function configure($config)
     {
@@ -74,7 +74,7 @@ class View
      *
      * @return View
      */
-    public static function singleton()
+    public static function getInstance()
     {
         if (!static::$instance instanceof View) {
             static::$instance = new static(static::$config);
@@ -93,7 +93,9 @@ class View
      */
     public static function make($viewname, array $data = [])
     {
-        return static::singleton()->getTemplate()->render($viewname, $data);
+        $data = static::getInstance()->getTemplate()->render($viewname, $data);
+
+        return trim($data);
     }
 
     /**
@@ -181,8 +183,9 @@ class View
      *
      * @param string $method
      * @param array $arguments
+     * @return mixed
      */
-    public function __call($method, $arguments)
+    public function __call(string $method, array $arguments)
     {
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array([static::$instance, $method], $arguments);

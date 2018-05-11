@@ -12,7 +12,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
     public function testTwigCompilation()
     {
         View::configure($this->config());
-        View::singleton()->cachable(false);
+        View::getInstance()->cachable(false);
 
         $resultat = View::make('twig', ['name' => 'bow', 'engine' => 'twig']);
         $this->assertEquals(trim($resultat), '<p>bow see hello world by twig</p>');
@@ -20,7 +20,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 
     public function testMustacheCompilation()
     {
-        View::singleton()->setEngine('mustache')->setExtension('.tpl')->cachable(false);
+        View::getInstance()->setEngine('mustache')->setExtension('.tpl')->cachable(false);
 
         $resultat = View::make('mustache', ['name' => 'bow', 'engine' => 'mustache']);
         $this->assertEquals(trim($resultat), '<p>bow see hello world by mustache</p>');
@@ -28,15 +28,16 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 
     public function testPugCompilation()
     {
-        View::singleton()->setEngine('pug')->setExtension('.pug')->cachable(false);
+        View::getInstance()->setEngine('pug')->setExtension('.pug')->cachable(false);
 
         $resultat = View::make('pug', ['name' => 'bow', 'engine' => 'pug']);
-        $this->assertEquals(trim($resultat), '<p>bow see hello world by pug</p>');
+        $this->assertEquals(trim($resultat), 'bow see hello world by pug');
     }
 
     public function testPHPCompilation()
     {
-        View::singleton()->setEngine('php')->setExtension('.php')->cachable(false);
+        View::getInstance()->setEngine('php')->setExtension('.php')->cachable(false);
+
         $resultat = View::make('php', ['name' => 'bow', 'engine' => 'php']);
         $this->assertEquals(trim($resultat), '<p>bow see hello world by php</p>');
     }

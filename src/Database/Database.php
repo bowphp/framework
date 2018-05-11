@@ -46,6 +46,7 @@ class Database
      * Charger la configuration
      *
      * @param array $config
+     * @return Database
      */
     public static function configure($config)
     {
@@ -54,6 +55,8 @@ class Database
             static::$name = $config['default'];
             static::$config = $config;
         }
+
+        return static::$instance;
     }
 
     /**

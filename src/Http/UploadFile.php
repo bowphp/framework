@@ -3,12 +3,6 @@ namespace Bow\Http;
 
 use Bow\Exception\UploadFileException;
 
-/**
- * Class UploadFile
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Http
- */
 class UploadFile
 {
     /**

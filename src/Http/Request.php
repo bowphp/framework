@@ -1,16 +1,12 @@
 <?php
+
 namespace Bow\Http;
 
 use Bow\Support\Str;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 
-/**
- * Class Request
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Http
- */
+
 class Request
 {
     /**
@@ -40,7 +36,7 @@ class Request
     {
         static::$input = new Input();
         $this->param = new UrlParameter([]);
-        Session::add('__bow.old', static::$input->all());
+        @Session::add('__bow.old', static::$input->all());
     }
 
     /**

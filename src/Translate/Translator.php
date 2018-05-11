@@ -33,20 +33,27 @@ class Translator
     }
 
     /**
+     * Configure translator
+     *
      * @param string $lang
      * @param string $directory
+     * @return Translator
      */
     public static function configure($lang, $directory)
     {
         if (static::$instance === null) {
             static::$instance = new self($lang, $directory);
         }
+
+        return static::$instance;
     }
 
     /**
+     * Get singleton instance
+     *
      * @return Translator
      */
-    public static function singleton()
+    public static function getInstance()
     {
         return static::$instance;
     }
@@ -81,7 +88,7 @@ class Translator
         array_shift($map);
         $key = implode('.', $map);
 
-        $contents = include $translation_filename;
+        $contents = require $translation_filename;
         $translations = Arraydotify::make($contents);
 
         if (!isset($translations[$key])) {
@@ -105,6 +112,8 @@ class Translator
     }
 
     /**
+     *
+     *
      * @param $key
      * @param array $data
      * @return string
@@ -115,6 +124,8 @@ class Translator
     }
 
     /**
+     *
+     *
      * @param $key
      * @param array $data
      * @return string

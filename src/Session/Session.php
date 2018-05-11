@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Session;
 
 use function array_key_exists;

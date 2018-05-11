@@ -4,7 +4,7 @@ namespace Bow\Middleware;
 
 use Bow\Http\Input;
 
-class ApplicationCsrfMiddleware
+class CsrfMiddleware
 {
     /**
      * Fonction de lancement du middleware.
@@ -34,6 +34,6 @@ class ApplicationCsrfMiddleware
             return response('Token Mismatch');
         }
 
-        return $next();
+        return $next($request);
     }
 }

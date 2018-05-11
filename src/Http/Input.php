@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Http;
 
 use Closure;
@@ -8,12 +9,6 @@ use Bow\Validation\Validate;
 use Bow\Validation\Validator;
 use Bow\Interfaces\CollectionAccess;
 
-/**
- * Class RequestData
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Http
- */
 class Input implements CollectionAccess, \ArrayAccess
 {
 

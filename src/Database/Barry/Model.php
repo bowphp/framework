@@ -44,7 +44,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * @var array
      */
-    private $attributes = [];
+    protected $attributes = [];
 
     /**
      * @var array
@@ -348,10 +348,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $update_data = [];
                 
                 foreach ($this->attributes as $key => $value) {
-                    if ($this->original[$key] == $value) {
-                        continue;
+                    if (!isset($this->original[$key]) || $this->original[$key] != $value) {
+                        $update_data[$key] = $value;
                     }
-                    $update_data[$key] = $value;
                 }
 
                 $r = $builder->where($this->primaryKey, $primary_key_value)->update($update_data);

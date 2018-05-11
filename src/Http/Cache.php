@@ -1,18 +1,10 @@
 <?php
+
 namespace Bow\Http;
 
-use BadMethodCallException;
 use Bow\Support\Str;
-use function call_user_func_array;
-use function method_exists;
-use function stat;
+use BadMethodCallException;
 
-/**
- * Class Cache
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Http
- */
 class Cache
 {
     /**
@@ -45,6 +37,7 @@ class Cache
         if (static::$directory === null || static::$directory !== $base_directory) {
             static::$directory = $base_directory;
         }
+
         if (!is_dir($base_directory)) {
             @mkdir($base_directory, 0777);
         }

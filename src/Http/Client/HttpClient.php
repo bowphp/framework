@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Http\Client;
 
 use function array_merge;

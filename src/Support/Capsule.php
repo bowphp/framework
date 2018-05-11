@@ -35,6 +35,8 @@ class Capsule implements \ArrayAccess
     private static $instance;
 
     /**
+     * Get capsule instance
+     *
      * @return Capsule
      */
     public static function getInstance()
@@ -47,6 +49,8 @@ class Capsule implements \ArrayAccess
     }
 
     /**
+     * Make instance
+     *
      * @param string $key
      * @return mixed
      */
@@ -86,6 +90,8 @@ class Capsule implements \ArrayAccess
     }
 
     /**
+     * Make with parameter
+     *
      * @param $key
      * @param array $parameters
      */
@@ -96,6 +102,8 @@ class Capsule implements \ArrayAccess
     }
 
     /**
+     * Bind by key
+     *
      * @param string $key
      * @param mixed  $value
      */
@@ -106,6 +114,8 @@ class Capsule implements \ArrayAccess
     }
 
     /**
+     * Bind factory
+     *
      * @param $key
      * @param \Closure $value
      */
@@ -154,6 +164,7 @@ class Capsule implements \ArrayAccess
 
         if (!empty($this->parameters)) {
             $parameters_lists = $this->parameters;
+            $this->parameters = [];
         }
 
         return $reflection->newInstanceArgs($parameters_lists);

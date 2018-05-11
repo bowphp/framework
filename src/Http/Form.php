@@ -1,12 +1,7 @@
 <?php
+
 namespace Bow\Http;
 
-/**
- * Class Form
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class Form
 {
     private static $form = "";

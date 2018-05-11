@@ -82,12 +82,9 @@ class BowTestCase extends TestCase
      */
     public function delete($url, array $param = [])
     {
-        $param = array_merge(
-            [
+        $param = array_merge([
             '_method' => 'DELETE'
-            ],
-            $param
-        );
+        ], $param);
 
         return $this->put($url, $param);
     }
@@ -99,12 +96,9 @@ class BowTestCase extends TestCase
      */
     public function patch($url, array $param = [])
     {
-        $param = array_merge(
-            [
+        $param = array_merge([
             '_method' => 'PATCH'
-            ],
-            $param
-        );
+        ], $param);
 
         return $this->put($url, $param);
     }

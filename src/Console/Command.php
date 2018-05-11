@@ -10,7 +10,7 @@ class Command
     /**
      * @var string
      */
-    const BAD_COMMAND = "Mauvaise commande.%sS'il vous plait tapez la commande \033[0;32;7m`php bow help` ou `php bow command help` pour plus d'information.";
+    const BAD_COMMAND = "Bad command.%sPlease type this command \033[0;32;7m`php bow help` or `php bow command help` for more information.";
 
     /**
      * @var string
@@ -35,6 +35,8 @@ class Command
 
     /**
      * Permet de formater les options
+     *
+     * @return mixed
      */
     public function formatParameters()
     {
@@ -112,7 +114,7 @@ class Command
 
 
     /**
-     * Permet de monter un migration
+     * Permet de monter une migration
      *
      * @param string $model
      */
@@ -132,7 +134,7 @@ class Command
     }
 
     /**
-     * Permet de rafraichir le fichier de registre
+     * Permet de rafraichir le fichier de régistre
      */
     public function reflesh()
     {
@@ -155,8 +157,11 @@ class Command
     }
 
     /**
+     * Permet de créer une migration dans les deux directions
+     *
      * @param $model
      * @param $type
+     *
      * @throws \ErrorException
      */
     private function makeMigration($model, $type)
@@ -187,14 +192,14 @@ class Command
         $register = ["file" => [], "tables" => []];
 
         if (!file_exists($this->dirname."/db/migration/.registers")) {
-            echo Color::red('Le fichier de registre de bow est introvable.');
+            echo Color::red('Le fichier de régistre de bow est introvable.');
             exit(0);
         }
 
         $registers = file($this->dirname."/db/migration/.registers");
 
         if (count($registers) == 0) {
-            echo Color::red('Le fichier de registre de bow est vide.');
+            echo Color::red('Le fichier de régistre de bow est vide.');
             exit(0);
         }
 
@@ -220,7 +225,7 @@ class Command
 
             include $file;
 
-            // Formatage de la classe et Execution de la methode up ou down
+            // Formatage de la classe et Exécution de la méthode up ou down
             $class = ucfirst(Str::camel($model));
 
             if (!class_exists($class)) {
@@ -237,6 +242,8 @@ class Command
     }
 
     /**
+     * Permet de créer un seeder
+     *
      * @param $name
      */
     public function seeder($name)
@@ -263,7 +270,6 @@ class Command
 foreach (range(1, $num) as \$key) {
     \$seeds[] = [
         'id' => faker('autoincrement'),
-        'name' => faker('name'),
         'created_at' => faker('date'),
         'update_at' => faker('date')
     ];
@@ -272,12 +278,12 @@ foreach (range(1, $num) as \$key) {
 return ['$name' => \$seeds];
 SEEDER;
         file_put_contents($seeder_filename, $content);
-        echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a été bien créer.\033[00m\n";
+        echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a été bien crée.\033[00m\n";
         exit(0);
     }
 
     /**
-     * Permet de create une migration
+     * Permet de crée une migration
      *
      * @param  $model
      * @throws \ErrorException
@@ -316,6 +322,7 @@ SEEDER;
         $class_name = ucfirst(Str::camel($model));
         $migrate = <<<doc
 <?php
+
 use \Bow\Database\Migration\Schema;
 use \Bow\Database\Migration\Migration;
 use \Bow\Database\Migration\TablePrinter as Printer;
@@ -323,7 +330,7 @@ use \Bow\Database\Migration\TablePrinter as Printer;
 class {$class_name} extends Migration
 {
     /**
-     * create Table
+     * Create Table
      */
     public function up()
     {
@@ -346,12 +353,12 @@ doc;
         file_put_contents($this->dirname."/db/migration/${create_at}_${model}.php", $migrate);
         Storage::append($this->dirname."/db/migration/.registers", "${create_at}_${model}|$class_name\n");
 
-        echo "\033[0;32mmLe file de migration \033[00m[$model]\033[0;32m a été bien créer.\033[00m\n";
+        echo "\033[0;32mmLe file de migration \033[00m[$model]\033[0;32m a été bien crée.\033[00m\n";
         return;
     }
 
     /**
-     * Permet de mettre en place le systeme de resource.
+     * Permet de mettre en place le système de réssource.
      *
      * @param string $controller_name
      */
@@ -376,7 +383,6 @@ doc;
             echo "\033[0;33;7m";
             foreach (["create", "edit", "show", "index", "update", "delete"] as $value) {
                 $file = $this->dirname."/components/views/$model/$value.twig";
-                file_put_contents($file, "<!-- Vue '$value' du model '$model' -->");
                 echo "$file\n";
             }
             echo "\033[00m";
@@ -404,6 +410,7 @@ doc;
 
         $controllerRestTemplate =<<<CC
 <?php
+
 namespace App\Controllers;
 $modelNamespace
 use Bow\Database\Database;
@@ -414,10 +421,9 @@ class {$controller_name} extends Controller
      * Point d'entré
      * GET /$path
      *
-     * @param mixed \$id [optional] L'identifiant de l'element à récupérer
-     * @return mixed
+     * @return void
      */
-    public function index(\$id = null)
+    public function index()
     {
         // Codez Ici
     }
@@ -426,6 +432,8 @@ class {$controller_name} extends Controller
      * Permet d'afficher la vue permettant de créer une résource.
      *
      * GET /$path/create
+     * 
+     * @return void
      */
     public function create()
     {
@@ -436,6 +444,8 @@ class {$controller_name} extends Controller
      * Permet d'ajouter une nouvelle résource dans la base d'information
      *
      * POST /$path
+     * 
+     * @return void
      */
     public function store()
     {
@@ -447,8 +457,8 @@ class {$controller_name} extends Controller
      *
      * GET /$path/:id
      *
-     * @param mixed \$id L'identifiant de l'élément à récupérer
-     * @return mixed
+     * @param mixed \$id
+     * @return void
      */
     public function show(\$id)
     {
@@ -456,12 +466,12 @@ class {$controller_name} extends Controller
     }
 
     /**
-     * Mise à jour d'un résource en utilisant paramètre du GET
+     * Mise à jour d'un ressource en utilisant paramètre du GET
      *
      * GET /$path/:id/edit
      *
-     * @param mixed \$id L'identifiant de l'élément à mettre à jour
-     * @return mixed
+     * @param mixed \$id
+     * @return void
      */
     public function edit(\$id)
     {
@@ -473,8 +483,8 @@ class {$controller_name} extends Controller
      *
      * PUT /$path/:id
      *
-     * @param mixed \$id L'identifiant de l'élément à mettre à jour
-     * @return mixed
+     * @param mixed \$id
+     * @return void
      */
     public function update(\$id)
     {
@@ -486,8 +496,8 @@ class {$controller_name} extends Controller
      *
      * DELETE /$path/:id
      *
-     * @param mixed \$id L'identifiant de l'élément à supprimer
-     * @return mixed
+     * @param mixed \$id
+     * @return void
      */
     public function destroy(\$id)
     {
@@ -496,7 +506,7 @@ class {$controller_name} extends Controller
 }
 CC;
         file_put_contents($this->dirname."/app/Controllers/${controller_name}.php", $controllerRestTemplate);
-        echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien créer.\033[00m\n";
+        echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien crée.\033[00m\n";
         exit(0);
     }
 
@@ -529,16 +539,17 @@ CC;
     /**
      * Point d'entré de l'application
      *
-     * @param mixed \$id [optional] L'identifiant de l'élément à récupérer
-     * @return mixed
+     * @return void
      */
-    public function index(\$id = null)
+    public function index()
     {
         // Codez Ici
     }
 
     /**
      * Permet d'afficher la vue permettant de créer une résource.
+     * 
+     * @return void
      */
     public function create()
     {
@@ -547,6 +558,8 @@ CC;
 
     /**
      * Permet d 'ajouter une nouvelle résource dans la base d'information
+     * 
+     * @return void
      */
     public function store()
     {
@@ -557,7 +570,7 @@ CC;
      * Permet de récupérer un information précise avec un identifiant.
      *
      * @param mixed \$id L'identifiant de l'élément à récupérer
-     * @return mixed
+     * @return void
      */
     public function show(\$id)
     {
@@ -565,10 +578,10 @@ CC;
     }
 
     /**
-     * Mise à jour d'un résource en utilisant paramètre du GET
+     * Mise à jour d'un ressource en utilisant paramètre du GET
      *
      * @param mixed \$id L'identifiant de l'élément à mettre à jour
-     * @return mixed
+     * @return void
      */
     public function edit(\$id)
     {
@@ -576,10 +589,10 @@ CC;
     }
 
     /**
-     * Mise à jour d'une résource
+     * Mise à jour d'une ressource
      *
      * @param mixed \$id L'identifiant de l'élément à mettre à jour
-     * @return mixed
+     * @return void
      */
     public function update(\$id)
     {
@@ -587,10 +600,10 @@ CC;
     }
 
     /**
-     * Permet de supprimer une resource
+     * Permet de supprimer une ressource
      *
      * @param mixed \$id L'identifiant de l'élément à supprimer
-     * @return mixed
+     * @return void
      */
     public function destroy(\$id)
     {
@@ -605,6 +618,7 @@ CONTENT;
 
         $controller_template =<<<CC
 <?php
+
 namespace App\Controllers;
 
 class {$controller_name} extends Controller
@@ -613,12 +627,12 @@ class {$controller_name} extends Controller
 }
 CC;
         file_put_contents($this->dirname."/app/Controllers/${controller_name}.php", $controller_template);
-        echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien créer.\033[00m\n";
+        echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien crée.\033[00m\n";
         exit(0);
     }
 
     /**
-     * @param middleware_name
+     * @param $middleware_name
      * @return int
      */
     public function middleware($middleware_name)
@@ -632,6 +646,7 @@ CC;
 
         $middleware_template = <<<CM
 <?php
+
 namespace App\Middleware;
 
 class {$middleware_name}
@@ -652,7 +667,7 @@ class {$middleware_name}
 CM;
         @mkdir($this->dirname."/app/Middleware");
         file_put_contents($this->dirname."/app/Middleware/$middleware_name.php", $middleware_template);
-        echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien créer.\033[00m\n";
+        echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien crée.\033[00m\n";
 
         exit(0);
     }
@@ -684,7 +699,7 @@ MODEL;
         }
 
         file_put_contents($this->dirname."/app/${model_name}.php", $model);
-        echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien créer.\033[00m\n";
+        echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien crée.\033[00m\n";
 
         if ($this->options('-m')) {
             $this->make('create_'.strtolower($model_name).'_table');
@@ -736,7 +751,7 @@ use Bow\Validation\ValidationRequest as Validator;
 class {$name} extends Validator
 {
     /**
-     * Permet de verifier la permission d'un utilisateur 
+     * Permet de vérifier la permission d'un utilisateur 
      *
      * @return bool
      */
@@ -750,7 +765,8 @@ class {$name} extends Validator
 	 * 
 	 * @var array
 	 */
-	protected function rules() {
+    protected function rules()
+    {
 	    return [
             // Vos régles
         ];
@@ -763,13 +779,15 @@ class {$name} extends Validator
 	 */
 	protected function keys()
 	{
-	    return ['*']
+        return [
+            '*'
+        ];
 	}
 }
 VALIDATOR;
 
         file_put_contents($this->dirname.'/app/Validation/'.$name.'.php', $validation);
-        echo "\033[0;32mLe validateur \033[00m[${name}]\033[0;32m a été bien créer.\033[00m\n";
+        echo "\033[0;32mLe validateur \033[00m[${name}]\033[0;32m a été bien crée.\033[00m\n";
         return 0;
     }
 
@@ -781,15 +799,15 @@ VALIDATOR;
      */
     public function service($name)
     {
-        if (!is_dir($this->dirname.'/app/Services')) {
-            mkdir($this->dirname.'/app/Services');
+        if (!is_dir($this->dirname.'/app/Service')) {
+            mkdir($this->dirname.'/app/Service');
         }
 
         if (!preg_match('/service/i', $name)) {
             $name = ucfirst($name).'Service';
         }
 
-        if (file_exists($this->dirname.'/app/Services/'.$name.'.php')) {
+        if (file_exists($this->dirname.'/app/Service/'.$name.'.php')) {
             echo "\033[0;33mLe service \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m existe déja.\033[00m\n";
             return 0;
         }
@@ -799,31 +817,36 @@ VALIDATOR;
 
 namespace App\Services;
 
-use Bow\Application\Configuration;
+use Bow\Config\Config;
 use Bow\Application\Services as BowService;
 
 class {$name} extends BowService
 {
     /**
-     * Démarre le serivce
+     * Permet de lancement de configuration du service
+     * 
+     * @param Config \$config
+     * @return void
      */
-    public function start()
+    public function make(Config \$config)
     {
         //
     }
 
     /**
-     * @param Configuration \$config
+     * Permet de démarrer le serivce
+     * 
+     * @return void
      */
-    public function make(\$config)
+    public function start()
     {
         //
     }
 }
 VALIDATOR;
 
-        file_put_contents($this->dirname.'/app/Services/'.$name.'.php', $validation);
-        echo "\033[0;32mLe service \033[00m[${name}]\033[0;32m a été bien créer.\033[00m\n";
+        file_put_contents($this->dirname.'/app/Service/'.$name.'.php', $validation);
+        echo "\033[0;32mLe service \033[00m[${name}]\033[0;32m a été bien crée.\033[00m\n";
         return 0;
     }
 
@@ -835,21 +858,21 @@ VALIDATOR;
      */
     private function readline($message)
     {
-        echo "\033[0;32m$message y/N\033[00m >>> ";
+        echo Color::green("$message y/N >>> ");
 
         $input = strtolower(trim(readline()));
+        
+        if (is_null($input) || strlen($input) == 0) {
+            $input = 'n';
+        }
 
-        if (in_array($input, ['y', 'n'])) {
-            echo Color::red('Choix invalide');
-            return false;
+        if (!in_array($input, ['y', 'n'])) {
+            echo Color::red('Choix invalide')."\n";
+            return $this->readline($message);
         }
 
         if (strtolower($input) == "y") {
             return true;
-        }
-
-        if (strtolower($input) == 'n' || strlen($input) == 0) {
-            return false;
         }
 
         return false;
