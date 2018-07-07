@@ -1,0 +1,95 @@
+<?php
+
+namespace App\Controllers{namespace};
+
+use App\Controllers\Controller;
+
+class ClassName extends Controller
+{
+    /**
+     * Point d'entré
+     * GET prefix
+     *
+     * @return void
+     */
+    public function index()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet d'afficher la vue permettant de créer une résource.
+     *
+     * GET {prefix}/create
+     *
+     * @return void
+     */
+    public function create()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet d'ajouter une nouvelle résource dans la base d'information
+     *
+     * POST {prefix}
+     *
+     * @return void
+     */
+    public function store()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet de récupérer un information précise avec un identifiant.
+     *
+     * GET {prefix}/:id
+     *
+     * @param mixed $id
+     * @return void
+     */
+    public function show($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Mise à jour d'un ressource en utilisant paramètre du GET
+     *
+     * GET {prefix}/:id/edit
+     *
+     * @param mixed $id
+     * @return void
+     */
+    public function edit($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Mise à jour d'une résource
+     *
+     * PUT {prefix}/:id
+     *
+     * @param mixed $id
+     * @return void
+     */
+    public function update($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet de supprimer une resource
+     *
+     * DELETE {prefix}/:id
+     *
+     * @param mixed $id
+     * @return void
+     */
+    public function destroy($id)
+    {
+        // Codez Ici
+    }
+}

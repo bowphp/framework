@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Validation;
+
+use Bow\Validation\ValidationRequest as Validator;
+
+class {className} extends Validator
+{
+    /**
+     * Permet de vérifier la permission d'un utilisateur
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+	/**
+	 * Règle de validation
+	 *
+	 * @var array
+	 */
+    protected function rules()
+    {
+	    return [
+            // Vos régles
+        ];
+    }
+
+	/**
+	 * Liste des clés à valider
+	 *
+	 * @var array
+	 */
+	protected function keys()
+	{
+        return [
+            '*'
+        ];
+	}
+}

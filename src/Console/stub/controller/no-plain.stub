@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+
+class className extends Controller
+{
+    /**
+     * Point d'entré de l'application
+     *
+     * @return void
+     */
+    public function index()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet d'afficher la vue permettant de créer une résource.
+     *
+     * @return void
+     */
+    public function create()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet d 'ajouter une nouvelle résource dans la base d'information
+     *
+     * @return void
+     */
+    public function store()
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet de récupérer un information précise avec un identifiant.
+     *
+     * @param mixed $id L'identifiant de l'élément à récupérer
+     * @return void
+     */
+    public function show($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Mise à jour d'un ressource en utilisant paramètre du GET
+     *
+     * @param mixed $id L'identifiant de l'élément à mettre à jour
+     * @return void
+     */
+    public function edit($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Mise à jour d'une ressource
+     *
+     * @param mixed $id L'identifiant de l'élément à mettre à jour
+     * @return void
+     */
+    public function update($id)
+    {
+        // Codez Ici
+    }
+
+    /**
+     * Permet de supprimer une ressource
+     *
+     * @param mixed $id L'identifiant de l'élément à supprimer
+     * @return void
+     */
+    public function destroy($id)
+    {
+        // Codez Ici
+    }
+}
