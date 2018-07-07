@@ -111,6 +111,7 @@ class Faker
         }
 
         $str = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
         return Str::slice(Str::repeat($str, $multi), 0, $size);
     }
 
@@ -175,6 +176,7 @@ class Faker
         if ($type == 'string') {
             return Str::lower(uniqid());
         }
+
         return static::autoincrement('integer');
     }
 
@@ -187,14 +189,18 @@ class Faker
     {
         if (is_int($type)) {
             $start = $type;
+
             $type = 'integer';
         }
+
         if ($type != 'integer') {
             return null;
         }
+
         if (static::$autoincrement == 0) {
             static::$autoincrement = $start;
         }
+
         return ++static::$autoincrement;
     }
 
@@ -204,6 +210,7 @@ class Faker
     public static function reinitialize()
     {
         static::$autoincrement = 0;
+
         static::$selections = [];
     }
 
@@ -214,12 +221,12 @@ class Faker
     public static function tags($by = 2)
     {
         $tags = [];
+
         while (count($tags) <= $by) {
             $tag = static::TAGS[rand(0, $by)];
+
             if (!in_array($tag, $tags)) {
-                $tags[] = static::TAGS[
-                rand(0, count(static::TAGS) - 1)
-                ];
+                $tags[] = static::TAGS[rand(0, count(static::TAGS) - 1)];
             }
         }
 

@@ -215,14 +215,14 @@ class DateAccess
      * Permet de modifier la zone horaire.
      *
      * @param string $zone
-     *
-     * @throws \ErrorException
+     * @throws \InvalidArgumentException
      */
     public static function setTimezone($zone)
     {
         if (count(explode('/', $zone)) != 2) {
             throw new \InvalidArgumentException('La définition de la zone est invalide');
         }
+
         date_default_timezone_set($zone);
     }
 }

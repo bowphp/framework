@@ -180,9 +180,11 @@ class Input implements CollectionAccess, \ArrayAccess
         if ($method == "GET") {
             return $_GET;
         }
+
         if ($method == "POST") {
             return $_POST;
         }
+
         return [];
     }
 
@@ -268,6 +270,7 @@ class Input implements CollectionAccess, \ArrayAccess
         if (!method_exists(static::class, $name)) {
             throw new \RuntimeException('Method '. $name . ' not exists');
         }
+
         return call_user_func_array([static::class, $name], $argmunents);
     }
 

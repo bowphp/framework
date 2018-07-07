@@ -36,6 +36,7 @@ class BowTestCase extends TestCase
     public function get($url, array $param = [])
     {
         $http = new HttpClient($this->formatUrl($url));
+
         return $http->get($url, $param);
     }
 

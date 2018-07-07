@@ -48,6 +48,7 @@ class Parser
      * Retourne des données brutes
      *
      * @return mixed|null
+     * @throws
      */
     public function raw()
     {
@@ -59,10 +60,26 @@ class Parser
     }
 
     /**
+     * Retourne des données
+     *
+     * @return mixed|null
+     * @throws
+     */
+    public function getContent()
+    {
+        if (!$this->retournTransfertToPlain()) {
+            return null;
+        }
+
+        return $this->execute();
+    }
+
+    /**
      * Retourne la reponse en json
      *
      * @param  array $default
      * @return string
+     * @throws
      */
     public function toJson(array $default = null)
     {
@@ -74,7 +91,8 @@ class Parser
             return false;
         }
 
-        $data = $this->execute();
+        $data = $this->raw();
+
         return json_encode($data);
     }
 
@@ -82,11 +100,13 @@ class Parser
      * Retourne la reponse sous forme de tableau
      *
      * @return array|mixed
+     * @throws
      */
     public function toArray()
     {
         if (!$this->retournTransfert()) {
             $this->close();
+
             return ["error" => true, "message" => "Connat get information"];
         }
 
@@ -102,6 +122,7 @@ class Parser
     {
         if (!curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true)) {
             $this->close();
+
             return false;
         }
 
@@ -118,6 +139,7 @@ class Parser
         if ($this->retournTransfert()) {
             if (!curl_setopt($this->ch, CURLOPT_BINARYTRANSFER, true)) {
                 $this->close();
+
                 return false;
             }
         }
@@ -135,6 +157,7 @@ class Parser
         if ($this->retournTransfert()) {
             if (!curl_setopt($this->ch, CURLOPT_TRANSFERTEXT, true)) {
                 $this->close();
+
                 return false;
             }
         }
@@ -150,16 +173,16 @@ class Parser
      */
     private function execute()
     {
-        ob_start();
         $data = curl_exec($this->ch);
 
         if ($data === false) {
             $this->close();
-            ob_end_flush();
+
             throw new \Exception('Impossible de passer le résultat.');
         }
 
         $this->error = curl_error($this->ch);
+
         $this->errno = curl_errno($this->ch);
 
         $this->header = curl_getinfo($this->ch);
@@ -167,13 +190,13 @@ class Parser
         $this->executed = true;
 
         $this->close();
-        $data = ob_get_clean();
 
         return $data;
     }
 
     /**
      * @return array
+     * @throws
      */
     public function getHeaders()
     {
@@ -186,111 +209,131 @@ class Parser
 
     /**
      * @return string
+     * @throws
      */
     public function getCode()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['http_code'];
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getExecutionTime()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['total_time'];
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getConnexionTime()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['connect_time'];
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getUploadSize()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['size_upload'];
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getUploadSpeed()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['speed_upload'];
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getDownloadSize()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['size_download'];
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getDownloadSpeed()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['speed_download'];
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getErrorMessage()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->error;
     }
 
     /**
      * @return int
+     * @throws
      */
     public function getErrorNumber()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->errno;
     }
 
     /**
      * @return string
+     * @throws
      */
     public function getContentType()
     {
         if (!$this->executed) {
             $this->execute();
         }
+
         return $this->header['content_type'];
     }
 

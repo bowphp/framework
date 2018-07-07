@@ -42,7 +42,7 @@ class TablePrinter
     /**
      * @var string
      */
-    private $engine = 'MyISAM';
+    private $engine = 'InnoDB';
 
     /**
      * @var string
@@ -81,13 +81,17 @@ class TablePrinter
     public function __construct($table, $charset = null, $collate = null)
     {
         $this->fields = new Collection;
+
         $this->table = $table;
+
         if (!is_null($charset)) {
             $this->charset = $charset;
         }
+
         if (!is_null($collate)) {
             $this->collate = $collate;
         }
+
         return $this;
     }
 
@@ -98,6 +102,7 @@ class TablePrinter
     public function size($size)
     {
         $this->rangs[$this->lastField->field]['data']['size'] = $size;
+
         return $this;
     }
 
@@ -109,6 +114,7 @@ class TablePrinter
     public function nullable()
     {
         $this->rangs[$this->lastField->field]['data']['null'] = true;
+
         return $this;
     }
 
@@ -119,6 +125,7 @@ class TablePrinter
     public function default($value)
     {
         $this->rangs[$this->lastField->field]['data']['default'] = $value;
+
         return $this;
     }
 
@@ -128,40 +135,46 @@ class TablePrinter
     public function unsigned()
     {
         $this->rangs[$this->lastField->field]['data']['unsigned'] = true;
+
         return $this;
     }
 
     /**
      * charset, set the model default character name
      *
-     * @param  $charset
+     * @param string $charset
      * @return TablePrinter
      */
     public function charset($charset)
     {
         $this->charset = $charset;
+
         return $this;
     }
 
     /**
      * setEngine, set the model engine name
      *
-     * @param $collate
+     * @param string $collate
+     * @return TablePrinter
      */
     public function collate($collate)
     {
         $this->collate = $collate;
+
         return $this;
     }
 
     /**
      * setEngine, set the model engine name
      *
-     * @param $engine
+     * @param string $engine
+     * @return TablePrinter
      */
     public function engine($engine)
     {
         $this->engine = $engine;
+
         return $this;
     }
 
@@ -205,9 +218,7 @@ class TablePrinter
      *
      * @param string $field
      * @param bool   $size
-     *
      * @return TablePrinter
-     * @throws \ErrorException
      */
     public function smallInteger($field, $size = null)
     {
@@ -218,9 +229,7 @@ class TablePrinter
      * mediumint
      *
      * @param string $field
-     *
      * @return TablePrinter
-     * @throws \ErrorException
      */
     public function mediumInteger($field)
     {
@@ -232,7 +241,6 @@ class TablePrinter
      *
      * @param string $field
      * @param int    $size
-     *
      * @return TablePrinter
      */
     public function bigInteger($field, $size = 20)
@@ -246,7 +254,6 @@ class TablePrinter
      * @param string $field
      * @param int    $size
      * @param int    $left
-     *
      * @return TablePrinter
      */
     public function double($field, $size = 20, $left = 0)
@@ -254,6 +261,7 @@ class TablePrinter
         if ($left > 0) {
             $size = '$size, $left';
         }
+
         return $this->loadWhole('double precision', $field, $size);
     }
 
@@ -271,6 +279,7 @@ class TablePrinter
         if ($left > 0) {
             $size = '$size, $left';
         }
+
         return $this->loadWhole('float', $field, $size);
     }
 
@@ -302,13 +311,7 @@ class TablePrinter
      */
     public function longText($field)
     {
-        return $this->addField(
-            'mediumtext',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('mediumtext', $field, [ 'null' => false ]);
     }
 
     /**
@@ -320,13 +323,7 @@ class TablePrinter
      */
     public function mediumText($field)
     {
-        return $this->addField(
-            'mediumtext',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('mediumtext', $field, ['null' => false]);
     }
 
     /**
@@ -338,13 +335,7 @@ class TablePrinter
      */
     public function tinyText($field)
     {
-        return $this->addField(
-            'tinytext',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('tinytext', $field, ['null' => false]);
     }
 
     /**
@@ -356,13 +347,7 @@ class TablePrinter
      */
     public function text($field)
     {
-        return $this->addField(
-            'text',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('text', $field, ['null' => false]);
     }
 
     /**
@@ -375,14 +360,10 @@ class TablePrinter
      */
     public function binary($field, $size = 8)
     {
-        return $this->addField(
-            'binary',
-            $field,
-            [
+        return $this->addField('binary', $field, [
             'null' => false,
             'size' => $size
-            ]
-        );
+        ]);
     }
 
     /**
@@ -394,13 +375,7 @@ class TablePrinter
      */
     public function blob($field)
     {
-        return $this->addField(
-            'blob',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('blob', $field, ['null' => false]);
     }
 
     /**
@@ -412,13 +387,7 @@ class TablePrinter
      */
     public function tinyBlob($field)
     {
-        return $this->addField(
-            'tinyblob',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('tinyblob', $field, ['null' => false]);
     }
 
     /**
@@ -430,13 +399,7 @@ class TablePrinter
      */
     public function longBlob($field)
     {
-        return $this->addField(
-            'longblob',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('longblob', $field, ['null' => false]);
     }
 
     /**
@@ -448,31 +411,19 @@ class TablePrinter
      */
     public function mediumBlob($field)
     {
-        return $this->addField(
-            'mediumblob',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        return $this->addField('mediumblob', $field, ['null' => false]);
     }
 
     /**
      * date
      *
      * @param string $field
-     *
      * @return TablePrinter
+     * @throws
      */
     public function date($field)
     {
-        $this->addField(
-            'date',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        $this->addField('date', $field, ['null' => false]);
 
         return $this;
     }
@@ -481,8 +432,8 @@ class TablePrinter
      * year
      *
      * @param string $field
-     *
      * @return TablePrinter
+     * @throws
      */
     public function year($field)
     {
@@ -501,18 +452,12 @@ class TablePrinter
      * time
      *
      * @param string $field
-     *
      * @return TablePrinter
+     * @throws
      */
     public function time($field)
     {
-        $this->addField(
-            'time',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        $this->addField('time', $field, ['null' => false]);
 
         return $this;
     }
@@ -521,18 +466,12 @@ class TablePrinter
      * datetime
      *
      * @param string $field
-     *
      * @return TablePrinter
+     * @throws
      */
     public function dateTime($field)
     {
-        $this->addField(
-            'datetime',
-            $field,
-            [
-            'null' => false
-            ]
-        );
+        $this->addField('datetime', $field, ['null' => false]);
 
         return $this;
     }
@@ -541,17 +480,14 @@ class TablePrinter
      * timestamp
      *
      * @return TablePrinter
+     * @throws
      */
     public function timestamps()
     {
-        $this->addField(
-            'timestamp',
-            'created_at',
-            [
+        $this->addField('timestamp', 'created_at', [
             'null' => true,
             'default' => 'CURRENT_TIMESTAMP'
-            ]
-        );
+        ]);
 
         $this->addField(
             'timestamp',
@@ -597,16 +533,11 @@ class TablePrinter
      * @param string $field
      * @param array  $enums
      * @return TablePrinter
+     * @throws
      */
     public function enumerate($field, array $enums)
     {
-        return $this->addField(
-            'enum',
-            $field,
-            [
-            'value' => $enums
-            ]
-        );
+        return $this->addField('enum', $field, ['value' => $enums]);
     }
 
     /**
@@ -623,6 +554,7 @@ class TablePrinter
                 'method' => 'int',
                 'field' => $field
             ];
+
             return $this->integer($field)->primary();
         }
 
@@ -639,6 +571,7 @@ class TablePrinter
         }
 
         $this->autoincrement = $this->lastField;
+
         $this->dataBind[$this->lastField->field]['auto'] = true;
 
         return $this;
@@ -658,14 +591,10 @@ class TablePrinter
         }
 
         if (!is_null($field)) {
-            return $this->addField(
-                'int',
-                $field,
-                [
+            return $this->addField('int', $field, [
                 'null' => false,
                 'auto' => true
-                ]
-            );
+            ]);
         }
 
         return $this->addIndexes('primary');
@@ -675,6 +604,7 @@ class TablePrinter
      * indexe
      *
      * @return TablePrinter
+     * @throws
      */
     public function indexe()
     {
@@ -685,6 +615,7 @@ class TablePrinter
      * unique
      *
      * @return TablePrinter
+     * @throws
      */
     public function unique()
     {
@@ -705,7 +636,9 @@ class TablePrinter
         }
 
         $last = $this->lastField;
+
         $this->rangs[$last->field]['data'][$indexType] = true;
+
         return $this;
     }
 
@@ -715,7 +648,6 @@ class TablePrinter
      * @param  string $method
      * @param  string $field
      * @param  array  $data
-     * @throws ModelException
      * @return TablePrinter
      */
     private function addField($method, $field, array $data)
@@ -766,14 +698,10 @@ class TablePrinter
      */
     private function loadWhole($method, $field, $size = 20)
     {
-        $this->addField(
-            $method,
-            $field,
-            [
+        $this->addField($method, $field, [
             'size' => $size,
-            'null' => false,
-            ]
-        );
+            'null' => false
+        ]);
 
         return $this;
     }
@@ -849,6 +777,7 @@ class TablePrinter
     public function setAutoincrement($value)
     {
         $this->autoincrement = $value;
+
         return $this;
     }
 

@@ -110,7 +110,9 @@ class Builder extends Tool implements \JsonSerializable
         }
 
         $this->connection = $connection;
+
         $this->primaryKey = $primaryKey;
+
         $this->table = $table;
     }
 
@@ -401,17 +403,21 @@ class Builder extends Tool implements \JsonSerializable
 
         if (is_null($this->join)) {
             $this->join = 'left join `'.$table.'`';
+
             if (is_callable($callable)) {
                 $callable($this);
             }
+
             return $this;
         }
 
         if (!preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
             $this->join .= ', `'.$table.'`';
+
             if (is_callable($callable)) {
                 $callable($this);
             }
+
             return $this;
         }
 
@@ -433,17 +439,21 @@ class Builder extends Tool implements \JsonSerializable
 
         if (is_null($this->join)) {
             $this->join = 'right join `'.$table.'`';
+
             if (is_callable($callable)) {
                 $callable($this);
             }
+
             return $this;
         }
 
         if (!preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
             $this->join .= ', `'.$table.'`';
+
             if (is_callable($callable)) {
                 $callable($this);
             }
+
             return $this;
         }
 
@@ -475,6 +485,7 @@ class Builder extends Tool implements \JsonSerializable
         if (count(explode('.', $first)) == 2) {
             $first = $this->getPrefix().$first;
         }
+
         if (count(explode('.', $second)) == 2) {
             $second = $this->getPrefix().$second;
         }
@@ -550,6 +561,7 @@ class Builder extends Tool implements \JsonSerializable
      * @param string $comp
      * @param null   $value
      * @param string $boolean
+     * @return self
      */
     public function having($column, $comp = '=', $value = null, $boolean = 'and')
     {
@@ -557,11 +569,14 @@ class Builder extends Tool implements \JsonSerializable
             $value = $comp;
             $comp = '=';
         }
+
         if (is_null($this->havin)) {
             $this->havin = '`'.$column.'` '.$comp.' '.$value;
         } else {
             $this->havin .= ' '.$boolean.' `'.$column.'` '.$comp.' '.$value;
         }
+
+        return $this;
     }
 
     /**
@@ -613,6 +628,7 @@ class Builder extends Tool implements \JsonSerializable
     {
         if (is_null($this->limit)) {
             $this->limit = (int) $limit;
+
             return $this;
         }
 
@@ -685,11 +701,13 @@ class Builder extends Tool implements \JsonSerializable
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
+
             $this->where = null;
         }
 
         if (!is_null($this->group)) {
             $sql .= ' ' . $this->group;
+
             $this->group = null;
 
             if (!isNull($this->havin)) {
@@ -698,7 +716,9 @@ class Builder extends Tool implements \JsonSerializable
         }
 
         $s = $this->connection->prepare($sql);
+
         $this->bind($s, $this->whereDataBinding);
+
         $s->execute();
 
         if ($s->rowCount() > 1) {
@@ -710,9 +730,11 @@ class Builder extends Tool implements \JsonSerializable
 
     /**
      * Action get, seulement sur la requete de type select
+     *  Si le mode de séléction unitaire n'est pas active
      *
      * @param  array $columns
-     * @return Collection|SqlUnity Si le mode de séléction unitaire n'est pas active
+     * @return Collection|SqlUnity
+     * @throws
      */
     public function get(array $columns = [])
     {
@@ -775,6 +797,7 @@ class Builder extends Tool implements \JsonSerializable
         foreach ($data as $key => $value) {
             if ($loadClassName !== Builder::class) {
                 $data[$key] = new $loadClassName((array) $value);
+
                 continue;
             }
 
@@ -783,6 +806,7 @@ class Builder extends Tool implements \JsonSerializable
 
             if (isset($value->{$id})) {
                 $id_value = $value->{$id};
+
                 unset($value->{$id});
             }
 
@@ -800,7 +824,9 @@ class Builder extends Tool implements \JsonSerializable
     public function first()
     {
         $this->first = true;
+
         $this->limit = 1;
+
         return $this->get();
     }
 
@@ -812,12 +838,14 @@ class Builder extends Tool implements \JsonSerializable
     public function last()
     {
         $where = $this->where;
+
         $whereData = $this->whereDataBinding;
 
         // On compte le tout.
         $c = $this->count();
 
         $this->where = $where;
+
         $this->whereDataBinding = $whereData;
 
         return $this->jump($c - 1)->take(1)->first();
@@ -832,7 +860,9 @@ class Builder extends Tool implements \JsonSerializable
     public function transition(callable $cb)
     {
         $where = $this->where;
+
         $data = $this->get();
+
         if (call_user_func_array($cb, [$data]) === true) {
             $this->where = $where;
         }
@@ -857,16 +887,20 @@ class Builder extends Tool implements \JsonSerializable
 
         if ($this->where !== null) {
             $sql .= ' where ' . $this->where;
+
             $this->where = null;
         }
 
         $stmt = $this->connection->prepare($sql);
+
         $this->bind($stmt, $this->whereDataBinding);
 
         $this->whereDataBinding = [];
+
         $stmt->execute();
 
         $r = $stmt->fetchColumn();
+
         return (int) $r;
     }
 
@@ -889,17 +923,23 @@ class Builder extends Tool implements \JsonSerializable
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
+
             $this->where = null;
+
             $data = array_merge($data, $this->whereDataBinding);
+
             $this->whereDataBinding = [];
         }
 
         $stmt = $this->connection->prepare($sql);
+
         $data = Sanitize::make($data, true);
+
         $this->bind($stmt, $data);
 
         // execution de la requête
         $stmt->execute();
+
         $r = $stmt->rowCount();
 
         if (is_callable($cb)) {
@@ -922,13 +962,16 @@ class Builder extends Tool implements \JsonSerializable
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
+
             $this->where = null;
         }
 
         $stmt = $this->connection->prepare($sql);
 
         $this->bind($stmt, $this->whereDataBinding);
+
         $this->whereDataBinding = [];
+
         $stmt->execute();
 
         $r = $stmt->rowCount();
@@ -955,6 +998,7 @@ class Builder extends Tool implements \JsonSerializable
     public function remove($column, $comp = '=', $value = null)
     {
         $this->where = null;
+
         return $this->where($column, $comp, $value)->delete();
     }
 
@@ -1017,11 +1061,14 @@ class Builder extends Tool implements \JsonSerializable
 
         if (!is_null($this->where)) {
             $sql .= ' ' . $this->where;
+
             $this->where = null;
         }
 
         $stmt = $this->connection->prepare($sql);
+
         $this->bind($stmt, $this->whereDataBinding);
+
         $stmt->execute();
 
         return (int) $stmt->rowCount();
@@ -1047,6 +1094,7 @@ class Builder extends Tool implements \JsonSerializable
     public function insert(array $values)
     {
         $nInserted = 0;
+
         $resets = [];
 
         foreach ($values as $key => $value) {
@@ -1075,10 +1123,13 @@ class Builder extends Tool implements \JsonSerializable
         $fields = array_keys($value);
 
         $sql = 'insert into `' . $this->table . '` values (';
+
         $sql .= implode(', ', Util::add2points($fields, true));
+
         $sql .= ');';
 
         $stmt = $this->connection->prepare($sql);
+
         $this->bind($stmt, $value);
 
         $stmt->execute();
@@ -1096,6 +1147,7 @@ class Builder extends Tool implements \JsonSerializable
     public function insertAndGetLastId(array $values)
     {
         $this->insert($values);
+
         $n = $this->connection->lastInsertId();
 
         return $n;
@@ -1150,11 +1202,14 @@ class Builder extends Tool implements \JsonSerializable
 
         // sauvegarde des informations sur le where
         $where = $this->where;
+
         $dataBind = $this->whereDataBinding;
+
         $data = $this->jump($jump)->take($n)->get();
 
         // reinitialisation du where
         $this->where = $where;
+
         $this->whereDataBinding = $dataBind;
 
         // On compte le nombre de page qui reste
@@ -1193,6 +1248,7 @@ class Builder extends Tool implements \JsonSerializable
 
         if ($value == null) {
             $value = $column;
+
             $column = $this->primaryKey;
         }
 
@@ -1241,36 +1297,42 @@ class Builder extends Tool implements \JsonSerializable
             $sql .= '* from `' . $this->table .'`';
         } else {
             $sql .= $this->select . ' from `' . $this->table . '`';
+
             $this->select = null;
         }
 
         // Ajout de la clause join
         if (!is_null($this->join)) {
             $sql .= ' ' . $this->join;
+
             $this->join = null;
         }
 
         // Ajout de la clause where
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
+
             $this->where = null;
         }
 
         // Ajout de la clause order
         if (!is_null($this->order)) {
             $sql .= ' ' . $this->order;
+
             $this->order = null;
         }
 
         // Ajout de la clause limit
         if (!is_null($this->limit)) {
             $sql .= ' limit ' . $this->limit;
+
             $this->limit = null;
         }
 
         // Ajout de la clause group
         if (!is_null($this->group)) {
             $sql .= ' group by ' . $this->group;
+
             $this->group = null;
 
             if (!is_null($this->havin)) {

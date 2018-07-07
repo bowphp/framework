@@ -37,6 +37,7 @@ class HttpClient
 
         if (is_string($url)) {
             $this->ch = curl_init($url);
+
             $this->url = $url;
         }
     }
@@ -51,6 +52,7 @@ class HttpClient
     public function get($url, array $data = [])
     {
         $this->resetAndAssociateUrl($url);
+
         $this->addFields($data);
 
         return new Parser($this->ch);
@@ -70,9 +72,11 @@ class HttpClient
         if (!curl_setopt($this->ch, CURLOPT_POST, true)) {
             if (!empty($this->attach)) {
                 curl_setopt($this->ch, CURLOPT_SAFE_UPLOAD, true);
+
                 foreach ($this->attach as $key => $attach) {
                     $this->attach[$key] = '@'.ltrim('@', $attach);
                 }
+
                 $data = array_merge($this->attach, $data);
             }
 

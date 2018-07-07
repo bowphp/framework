@@ -10,6 +10,7 @@ class EnvTest extends \PHPUnit\Framework\TestCase
 		if (! file_exists(__DIR__.'/data/.env.json')) {
 			file_put_contents(__DIR__.'/data/.env.json', json_encode(['NAME' => 'papac']));
 		}
+
 		Env::load(__DIR__.'/data/.env.json');
 	}
 
@@ -21,7 +22,9 @@ class EnvTest extends \PHPUnit\Framework\TestCase
 	public function testGet()
 	{
 		$this->assertEquals(Env::get('NAME'), 'papac');
+
 		$this->assertNull(Env::get('LASTNAME'));
+
 		$this->assertEquals(Env::get('SINCE', date('Y')), date('Y'));
 	}
 
@@ -30,6 +33,7 @@ class EnvTest extends \PHPUnit\Framework\TestCase
 		Env::set('NAME', 'bow framework');
 
 		$this->assertNotEquals(Env::get('NAME'), 'papac');
+
 		$this->assertEquals(Env::get('NAME'), 'bow framework');
 	}
 }

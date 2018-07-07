@@ -13,6 +13,7 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
     public function testEncryptValue()
     {
         Crypto::setKey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
+
         return Crypto::encrypt('bow');
     }
 
@@ -23,6 +24,7 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
     public function testDecrypt($data)
     {
         Crypto::setkey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
+
         $this->assertEquals(Crypto::decrypt($data), 'bow');
     }
 

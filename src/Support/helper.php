@@ -78,14 +78,12 @@ if (!function_exists('response')) {
     function response($template = null, $code = 200, $type = 'text/html')
     {
 
-        app()->bind(
-            'response',
-            function () {
-                return new \Bow\Http\Response();
-            }
-        );
+        app()->bind('response', function () {
+            return new \Bow\Http\Response();
+        });
 
         $response = app('response');
+
         $response->statusCode($code);
 
         if (is_null($template)) {
@@ -93,6 +91,7 @@ if (!function_exists('response')) {
         }
 
         $response->addHeader('Content-Type', $type);
+
         $response->send($template);
 
         return $response;
@@ -420,6 +419,7 @@ if (!function_exists('debug')) {
             },
             secure(func_get_args())
         );
+
         die;
     }
 }
@@ -1197,12 +1197,11 @@ if (!function_exists('ftp')) {
     /**
      * Alias sur le connection FTP.
      *
-     * @param  array $c configuration FTP
      * @return \Bow\Resource\Ftp\FTP
      */
-    function ftp(array $c = [])
+    function ftp()
     {
-        return Storage::ftp($c);
+        return Storage::service('ftp');
     }
 }
 
@@ -1210,12 +1209,25 @@ if (!function_exists('s3')) {
     /**
      * Alias sur le connection S3.
      *
-     * @param  array $c configuration S3
      * @return \Bow\Resource\AWS\AwsS3Client
      */
-    function s3(array $c = [])
+    function s3()
     {
-        return Storage::s3($c);
+        return Storage::service('s3');
+    }
+}
+
+if (!function_exists('mount')) {
+    /**
+     * Alias sur la methode mount
+     *
+     * @param $mount
+     * @return \Bow\Resource\MountFilesystem
+     * @throws \Bow\Resource\Exception\ResourceException
+     */
+    function mount($mount)
+    {
+        return Storage::mount($mount);
     }
 }
 
@@ -1248,7 +1260,7 @@ if (!function_exists('back')) {
     }
 }
 
-if (!function_exists('bow_hash')) {
+if (!function_exists('bhash')) {
     /**
      * Alias sur la class Hash.
      *
@@ -1256,7 +1268,7 @@ if (!function_exists('bow_hash')) {
      * @param  mixed  $hash_value
      * @return mixed
      */
-    function bow_hash($data, $hash_value = null)
+    function bhash($data, $hash_value = null)
     {
         if (!is_null($hash_value)) {
             return Hash::check($data, $hash_value);
@@ -1345,16 +1357,15 @@ if (!function_exists('abort')) {
      * @param int    $code
      * @param string $message
      * @param array  $headers
+     * @return \Bow\Http\Response
      */
     function abort($code = 500, $message = '', array $headers = [])
     {
-        response()->statusCode($code);
-
         foreach ($headers as $key => $value) {
             response()->addHeader($key, $value);
         }
 
-        die($message);
+        return response($message, $code);
     }
 }
 
@@ -1362,11 +1373,12 @@ if (!function_exists('abort_if')) {
     /**
      * @param boolean $boolean
      * @param int     $code
+     * @return \Bow\Http\Response
      */
     function abort_if($boolean, $code)
     {
         if ($boolean) {
-            abort($code);
+            return abort($code);
         }
     }
 }
@@ -1381,11 +1393,11 @@ if (!function_exists('app_mode')) {
     }
 }
 
-if (!function_exists('app_lang')) {
+if (!function_exists('client_lang')) {
     /**
      * @return string
      */
-    function app_lang()
+    function client_lang()
     {
         return request()->lang();
     }
@@ -1424,13 +1436,20 @@ if (!function_exists('format_validation_errors')) {
 
 if (!function_exists('auth')) {
     /**
-     * Formate validation erreur.
+     * Récupération du guard
      *
-     * @param  array $errors
-     * @return array
+     * @param string $guard
+     * @return Bow\Auth\Auth
+     * @throws
      */
-    function auth()
+    function auth($guard = null)
     {
-        return Auth::getInstance();
+        $auth = Auth::getInstance();
+
+        if (is_null($guard)) {
+            return $auth;
+        }
+
+        return $auth->guard($guard);
     }
 }

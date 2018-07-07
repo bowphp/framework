@@ -30,10 +30,10 @@ class Util
         $vars = func_get_args();
 
         $cloner = new VarCloner();
+
         $dumper = 'cli' === PHP_SAPI ? new CliDumper() : new HtmlDumper();
 
-        $dumper->setStyles(
-            [
+        $dumper->setStyles([
             'default' => 'background-color:#fff; color:#FF8400; line-height:1.2em; font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:99999; word-break: normal',
             'num' => 'font-weight:bold; color:#1299DA',
             'const' => 'font-weight:bold',
@@ -46,13 +46,13 @@ class Util
             'meta' => 'color:#B729D9',
             'key' => 'color:#212',
             'index' => 'color:#1200DA',
-            ]
-        );
+        ]);
 
         $handler = function ($vars) use ($cloner, $dumper) {
             if (!is_array($vars)) {
                 $vars = [$vars];
             }
+
             foreach ($vars as $var) {
                 $dumper->dump($cloner->cloneVar($var));
             }
@@ -70,6 +70,7 @@ class Util
     public static function dd($var)
     {
         call_user_func_array([static::class, 'dump'], func_get_args());
+
         die();
     }
 

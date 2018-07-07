@@ -25,6 +25,7 @@ class Dispatcher
     public function pipe($middleware)
     {
         $this->middlewares[] = $middleware;
+
         return $this;
     }
 
@@ -41,6 +42,7 @@ class Dispatcher
         }
 
         $middleware = $this->middlewares[$this->index];
+
         $this->index++;
 
         if (!is_callable($middleware)) {

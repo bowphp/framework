@@ -26,7 +26,9 @@ class MongoAdapter extends AbstractConnection
     public function connection()
     {
         $this->config['hostname'];
+
         $dns = $this->config['hostname'].":".$this->config['port'];
+
         $client = new \MongoClient('mongodb://' . $dns, true, []);
 
         return $client;

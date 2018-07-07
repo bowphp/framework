@@ -7,7 +7,9 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     public function testGetInstance()
     {
         $collection = new Collection(range(1, 10));
+
         $this->assertInstanceOf(Collection::class, $collection);
+
         return $collection;
     }
 
@@ -81,6 +83,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     public function testGenerator(Collection $collection)
     {
         $gen = $collection->yieldify();
+
         $this->assertInstanceOf(Generator::class, $gen);
     }
 
@@ -109,6 +112,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     public function testPush(Collection $collection)
     {
         $collection->push(10);
+
         $this->assertEquals(range(1, 10), $collection->toArray());
     }
 }

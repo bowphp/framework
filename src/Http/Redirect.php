@@ -2,14 +2,17 @@
 
 namespace Bow\Http;
 
-use Bow\Session\Session;
-
 class Redirect
 {
     /**
      * @var Request
      */
     private $request;
+
+    /**
+     * @var string
+     */
+    private $to;
 
     /**
      * @var Response
@@ -22,61 +25,33 @@ class Redirect
     public function __construct()
     {
         $this->request = Request::singleton();
+
         $this->response = Response::singleton();
     }
 
     /**
-     * redirect, permet de lancer une redirection vers l'url passé en paramêtre
-     *
-     * @param string|array $path L'url de rédirection
-     * @param status       $path L'url de rédirection
-     *                           Si $path est un
-     *                           tableau : $url = [
-     *                           'url' => '//' '?' =>
-     *                           [ 'name' => 'dakia',
-     *                           'lastname' =>
-     *                           'franck', 'id' =>
-     *                           '1', ], '#' =>
-     *                           'hello', 'data' => []
-     *                           // des données a
-     *                           récupéré dans la
-     *                           page de rédirection
-     *                           ];
+     * @param $path
+     * @param int $status
+     * @return static
      */
     public function to($path, $status = 302)
     {
-        if (is_string($path)) {
-            $path = ['url' => $path];
-        }
-
-        $url = $path['url'];
-
-        if (isset($path['?'])) {
-            $url .= '?';
-            foreach ($path['?'] as $key => $value) {
-                if ($key > 0) {
-                    $url .= '&';
-                }
-                $url .= $key . '=' . $value;
-            }
-        }
-
-        if (isset($path['#'])) {
-            $url .= '#' . $path['#'];
-        }
+        $this->to = $path;
 
         $this->response->statusCode($status);
-        header('Location: ' . $url);
-        
-        exit;
+
+        return $this;
     }
 
     /**
      * @param array $data
+     * @return static
      */
     public function withInput(array $data)
     {
-        Session::add('__bow.old', $data);
+        $this->request->session()->add('__bow.old', $data);
+
+        return $this;
     }
 
     /**
@@ -88,6 +63,7 @@ class Redirect
     public function back($status = 302, array $data = [])
     {
         $this->withInput($data);
+
         $this->to($this->request->referer(), $status);
     }
 
@@ -97,5 +73,13 @@ class Redirect
     public function __invoke()
     {
         return call_user_func_array([$this, 'to'], func_get_args());
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->to;
     }
 }

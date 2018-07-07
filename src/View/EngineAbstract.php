@@ -1,8 +1,8 @@
 <?php
 namespace Bow\View;
 
+use Bow\Config\Config;
 use Bow\View\Exception\ViewException;
-use Bow\Application\Configuration;
 
 abstract class EngineAbstract
 {
@@ -36,7 +36,6 @@ abstract class EngineAbstract
         'csrf_field' => 'csrf_field',
         'trans' => 'trans',
         'escape' => 'e',
-        'e' => 'e',
         'old' => 'old'
     ];
 
@@ -46,7 +45,7 @@ abstract class EngineAbstract
     protected $name;
 
     /**
-     * @var Configuration
+     * @var Config
      */
     protected $config;
 

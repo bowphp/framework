@@ -62,15 +62,20 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
     public function testGetLocationContaines()
     {
         $this->assertArrayHasKey('city', $this->dot['code.location']);
+
         $this->assertArrayHasKey('tel', $this->dot['code.location']);
+
         $this->assertArrayHasKey('state', $this->dot['code.location']);
+
         $this->assertTrue(is_array($this->dot['code.location.state']));
+
         $this->assertArrayHasKey('code', $this->dot['code.location.state']);
     }
 
     public function testGetUnsetLocation()
     {
         unset($this->dot['code.location']);
+
         $this->assertTrue(isset($this->dot['code.location']));
     }
 }

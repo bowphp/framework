@@ -37,6 +37,7 @@ class StrText extends \PHPUnit\Framework\TestCase
     public function testIsDomain()
     {
         $this->assertTrue(Str::isDomain('https://www.github.com'));
+
         $this->assertFalse(Str::isDomain('httpsgithub.'));
     }
 
@@ -53,6 +54,7 @@ class StrText extends \PHPUnit\Framework\TestCase
     public function testIsEmail()
     {
         $this->assertTrue(Str::isMail('john@doe.com'));
+
         $this->assertFalse(Str::isMail('john@doe'));
     }
 

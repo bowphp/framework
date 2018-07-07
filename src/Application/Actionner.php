@@ -27,11 +27,22 @@ class Actionner
     private static $instance;
 
     /**
+     * Liste de guard
+     *
+     * @var array
+     */
+    private $guards = [];
+
+    /**
      * Actionner constructor
+     *
+     * @param array $namespaces
+     * @param array $middlewares
      */
     public function __construct(array $namespaces, array $middlewares)
     {
         $this->namespaces = $namespaces;
+
         $this->middlewares = $middlewares;
     }
 
@@ -86,6 +97,7 @@ class Actionner
     public function pushNamespace($namespace)
     {
         $namespace = (array) $namespace;
+
         $this->namespaces = array_merge($this->namespaces, $namespace);
     }
 
@@ -93,8 +105,7 @@ class Actionner
      * Lanceur de callback
      *
      * @param  callable|string|array $actions
-     * @param  mixed                 $param
-     * @param  array                 $name
+     * @param  mixed  $param
      * @return mixed
      *
      * @throws RouterException
@@ -102,7 +113,9 @@ class Actionner
     public function call($actions, $param = null)
     {
         $param = (array) $param;
+
         $functions = [];
+
         $middlewares = [];
 
         if (is_callable($actions)) {
@@ -111,6 +124,7 @@ class Actionner
 
         if (is_string($actions)) {
             $function = $this->controller($actions);
+
             return call_user_func_array($function['controller'], array_merge($function['injections'], $param));
         }
 
@@ -120,6 +134,7 @@ class Actionner
 
         if (array_key_exists('middleware', $actions)) {
             $middlewares = (array) $actions['middleware'];
+
             unset($actions['middleware']);
         }
 
@@ -130,11 +145,13 @@ class Actionner
         foreach ($actions as $key => $action) {
             if (is_string($action)) {
                 array_push($functions, $this->controller($action));
+
                 continue;
             }
 
             if (is_callable($action)) {
                 $injections = $this->injectorForClosure($action);
+
                 array_push($functions, ['controller' => $action, 'injections' => $injections]);
             }
         }
@@ -144,16 +161,16 @@ class Actionner
 
         // Collecteur de middleware
         $middlewares_collection = [];
-        $guards = [];
 
         foreach ($middlewares as $middleware) {
             if (class_exists($$middleware)) {
                 $middlewares_collection[] = $middleware;
+
                 continue;
             }
 
             if (!array_key_exists($middleware, $this->middlewares)) {
-                throw new RouterException(sprint('%s n\'est pas un middleware définir.', $middleware), E_ERROR);
+                throw new RouterException(sprintf('%s n\'est pas un middleware définir.', $middleware), E_ERROR);
             }
 
             // On vérifie si le middleware définie est une middleware valide.
@@ -163,14 +180,14 @@ class Actionner
 
             // Make middlewares collection
             $middlewares_collection[] = $this->middlewares[$middleware];
+
             $parts = explode(':', $middleware, 2);
 
             // Make guard collection
             if (count($parts) == 2) {
-                $guard = end($parts);
-                $guards[] = explode(',', $guard);
+                $this->pushGuard(explode(',', end($parts)));
             } else {
-                $guards[] = null;
+                $this->pushGuard(null);
             }
         }
 
@@ -182,9 +199,7 @@ class Actionner
 
             $middleware_params = array_merge(
                 $injections,
-                [function () use (& $next) {
-                    return $next = true;
-                }, $guards[$key]],
+                [$this->next($next), $this->guards[$key]],
                 $param
             );
 
@@ -192,6 +207,7 @@ class Actionner
 
             if ($status === true && $next) {
                 $next = false;
+
                 continue;
             }
 
@@ -228,10 +244,12 @@ class Actionner
     public function middleware($middleware, callable $callback = null)
     {
         $next = false;
+
         $injections = [];
 
         if (is_string($middleware) && class_exists($middleware)) {
             $instance = [new $middleware(), 'checker'];
+
             $injections = $this->injector($middleware, 'checker');
         } else {
             $instance = $middleware;
@@ -255,9 +273,9 @@ class Actionner
      * @param mixed $next
      * @return callable
      */
-    private function next($next)
+    private function next(& $next)
     {
-        return function () use (& $next) {
+        return function ($request = null) use (& $next) {
             return $next = true;
         };
     }
@@ -268,6 +286,7 @@ class Actionner
      * @param string $classname
      * @param string $method
      * @return array
+     * @throws
      */
     public function injector($classname, $method)
     {
@@ -303,6 +322,7 @@ class Actionner
      *
      * @param callable $closure
      * @return array
+     * @throws
      */
     public function injectorForClosure(callable $closure)
     {
@@ -382,7 +402,7 @@ class Actionner
     /**
      * Charge les controleurs definie comme chaine de caractère
      *
-     * @param string $controller_Name
+     * @param string $controller_name
      *
      * @return array
      */
@@ -400,6 +420,7 @@ class Actionner
         }
 
         list($class, $method) = $parts;
+
         $class = sprintf('%s\\%s', $this->namespaces['controller'], ucfirst($class));
 
         $injections = $this->injector($class, $method);
@@ -408,5 +429,15 @@ class Actionner
             'controller' => [new $class(), $method],
             'injections' => $injections
         ];
+    }
+
+    /**
+     * Ajout de guard
+     *
+     * @param $guard
+     */
+    public function pushGuard($guard)
+    {
+        $this->guards[] = $guard;
     }
 }

@@ -60,6 +60,7 @@ class Cache
         }
 
         $meta['__bow_meta'] = ['expire_at' => $time == null ? '+' : $time];
+
         $meta['content'] = $content;
 
         return (bool) file_put_contents(static::makeHashFilename($key, true), serialize($meta));
@@ -81,7 +82,9 @@ class Cache
         }
 
         $meta['__bow_meta'] = ['expire_at' => '+'];
+
         $meta['content'] = $content;
+
         return (bool) file_put_contents(static::makeHashFilename($key, true), serialize($meta));
     }
 
@@ -101,7 +104,9 @@ class Cache
         }
 
         static::$with_meta = true;
+
         $cache = static::get($key);
+
         static::$with_meta = false;
 
         if (is_array($cache['content'])) {
@@ -124,6 +129,7 @@ class Cache
     {
         if (!static::has($key)) {
             static::$with_meta = false;
+
             return $default;
         }
 
@@ -131,6 +137,7 @@ class Cache
 
         if (!static::$with_meta) {
             unset($cache['__bow_meta']);
+
             $cache = $cache['content'];
         }
 
@@ -147,7 +154,9 @@ class Cache
     public static function addTime($key, $time)
     {
         static::$with_meta = true;
+
         $cache = static::get($key);
+
         static::$with_meta = false;
 
         if ($cache == null) {
@@ -173,7 +182,9 @@ class Cache
     public static function timeOf($key)
     {
         static::$with_meta = true;
+
         $cache = static::get($key);
+
         static::$with_meta = false;
 
         if ($cache == null) {
@@ -198,13 +209,17 @@ class Cache
         }
 
         $r = (bool) @unlink($filename);
+
         $parts = explode('/', $filename);
+
         array_pop($parts);
+
         $dirname = implode('/', $parts);
 
         if (is_dir($dirname)) {
             @rmdir($dirname);
         }
+
         return $r;
     }
 
@@ -217,6 +232,7 @@ class Cache
     public static function has($key)
     {
         $filename = static::makeHashFilename($key);
+
         return (bool) @file_exists($filename);
     }
 
@@ -229,6 +245,7 @@ class Cache
     public static function expired($key)
     {
         static::$with_meta = true;
+
         $cache = static::get($key);
 
         if ($cache == null) {
@@ -250,6 +267,7 @@ class Cache
     private static function makeHashFilename($key, $make_group_directory = false)
     {
         $hash = hash('sha256', '/bow_'.$key);
+
         $group = Str::slice($hash, 0, 2);
 
         if ($make_group_directory) {
@@ -283,6 +301,7 @@ class Cache
         if (method_exists(static::class, $name)) {
             return call_user_func_array([static::class, $name], $arguments);
         }
+
         throw new BadMethodCallException("La methode $name n'existe pas.");
     }
 }

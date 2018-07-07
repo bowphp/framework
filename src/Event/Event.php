@@ -90,6 +90,7 @@ class Event
         }
 
         self::$events['__bow.transmission.event'][$event][] = new Listener($fn, $priority);
+
         Session::add("__bow.event.listener", self::$events['__bow.transmission.event']);
     }
 
@@ -113,6 +114,7 @@ class Event
     {
         if (isset(self::$events['__bow.once.event'][$event])) {
             $listener = self::$events['__bow.once.event'][$event];
+
             $data = array_slice(func_get_args(), 1);
 
             return $listener->call($data);
@@ -129,22 +131,21 @@ class Event
         }
 
         $listeners = new Collection($events);
+
         $data = array_slice(func_get_args(), 1);
 
-        $listeners->each(
-            function (Listener $listener) use ($data) {
+        $listeners->each(function (Listener $listener) use ($data) {
 
-                if ($listener->getActionType() === 'string') {
-                    $callable = $listener->getAction();
-                } else {
-                    $callable = [$listener, 'call'];
-                }
-
-                return Actionner::getInstance()->call($callable, [$data], [
-                    'namespace' => [ 'controller' => self::$namespace ]
-                ]);
+            if ($listener->getActionType() === 'string') {
+                $callable = $listener->getAction();
+            } else {
+                $callable = [$listener, 'call'];
             }
-        );
+
+            return Actionner::getInstance()->call($callable, [$data], [
+                'namespace' => [ 'controller' => self::$namespace ]
+            ]);
+        });
 
         return true;
     }
@@ -157,7 +158,11 @@ class Event
     public static function off($event)
     {
         if (self::bound($event)) {
-            unset(self::$events[$event], self::$events['__bow.transmission.event'][$event], self::$events['__bow.once.event'][$event]);
+            unset(
+                self::$events[$event],
+                self::$events['__bow.transmission.event'][$event],
+                self::$events['__bow.once.event'][$event]
+            );
         }
     }
 

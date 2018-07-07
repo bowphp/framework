@@ -6,7 +6,6 @@ use Bow\Support\Str;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 
-
 class Request
 {
     /**
@@ -35,7 +34,9 @@ class Request
     public function __construct()
     {
         static::$input = new Input();
+
         $this->param = new UrlParameter([]);
+
         @Session::add('__bow.old', static::$input->all());
     }
 
@@ -51,6 +52,39 @@ class Request
         }
 
         return static::$instance;
+    }
+
+    /**
+     * Get request value
+     *
+     * @param string $key
+     * @param null $default
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        return static::$input->get($key, $default);
+    }
+
+    /**
+     * Check if key is exists
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function has($key)
+    {
+        return static::$input->has($key);
+    }
+
+    /**
+     * Get all input value
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return static::$input->all();
     }
 
     /**
@@ -216,14 +250,20 @@ class Request
         }
 
         $files = $_FILES[$key];
+
         $collect = [];
 
         foreach ($files['name'] as $key => $name) {
             $file['name'] = $name;
+
             $file['type'] = $files['type'][$key];
+
             $file['size'] = $files['size'][$key];
+
             $file['error'] = $files['error'][$key];
+
             $file['tmp_name'] = $files['tmp_name'][$key];
+
             $collect[] = new UploadFile($file);
         }
 
@@ -279,6 +319,7 @@ class Request
     public static function old($key)
     {
         $old = Session::get('__bow.old', []);
+
         return isset($old[$key]) ? $old[$key] : null;
     }
 
@@ -290,8 +331,9 @@ class Request
     public function isAjax()
     {
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
-            $xhrObj = Str::lower($_SERVER['HTTP_X_REQUESTED_WITH']);
-            if ($xhrObj == 'xmlhttprequest' || $xhrObj == 'activexobject') {
+            $xhr_obj = Str::lower($_SERVER['HTTP_X_REQUESTED_WITH']);
+
+            if ($xhr_obj == 'xmlhttprequest' || $xhr_obj == 'activexobject') {
                 return true;
             }
         }
@@ -365,7 +407,9 @@ class Request
 
         if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
             $tmp = explode(';', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
+
             preg_match('/^([a-z]+(?:-|_)?[a-z]+)/i', $tmp, $match);
+
             $local = end($match);
         }
 
@@ -380,8 +424,11 @@ class Request
     public function lang()
     {
         $accept_language = $this->getHeader('accept_language');
+
         $language = explode(',', explode(';', $accept_language)[0])[0];
+
         preg_match('/([a-z]+)/', $language, $match);
+
         return end($match);
     }
 

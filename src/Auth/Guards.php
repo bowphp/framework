@@ -36,6 +36,7 @@ class Guards
     /**
      * Check if user is authenticate
      *
+     * @param array $credentials
      * @return bool
      */
     public function attempts(array $credentials)

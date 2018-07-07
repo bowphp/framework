@@ -2,7 +2,8 @@
 
 namespace Bow\Router;
 
-use Bow\Router\Route\Collection as RouteCollection;
+use Bow\Config\Config;
+use Bow\Router\Collection as RouteCollection;
 
 class Router
 {
@@ -17,6 +18,16 @@ class Router
     private $collection;
 
     /**
+     * @var array
+     */
+    private $globale_middleware;
+
+    /**
+     * @var string
+     */
+    private $prefix;
+
+    /**
      * @var string
      */
     private $namespace;
@@ -27,10 +38,12 @@ class Router
      * @param $config
      * @param RouteCollection $collection
      */
-    public function __construct($config, RouteCollection $collection)
+    public function __construct(Config $config, RouteCollection $collection)
     {
         $this->config = $config;
+
         $this->namespace = $config->namespaces();
+
         $this->collection = $collection;
     }
 
@@ -74,16 +87,12 @@ class Router
      *
      * @param string   $path
      * @param Callable $cb
-     *
-     * @return Route
      */
     public function any($path, callable $cb)
     {
         foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
             $this->$method($path, $cb);
         }
-
-        return $this;
     }
 
     /**
@@ -138,60 +147,44 @@ class Router
     }
 
     /**
-     * code, Lance une fonction en fonction du code d'erreur HTTP
-     *
-     * @param  int      $code
-     * @param  callable $cb
-     * @return Route
-     */
-    public function code($code, callable $cb)
-    {
-        $this->statusRoutes[$code] = $cb;
-        return $this;
-    }
-
-    /**
      * match, route de tout type de method
      *
      * @param  array    $methods
      * @param  string   $path
      * @param  callable $cb
-     * @return Route
      */
     public function match(array $methods, $path, callable $cb = null)
     {
         foreach ($methods as $method) {
             $this->pushRoute(strtoupper($method), $path, $cb);
         }
-
-        return $this;
     }
 
     /**
      * mount, ajoute un branchement.
      *
-     * @param  string   $branch
+     * @param  string $prefix
      * @param  callable $cb
-     * @throws \Bow\Router\Exception\RouterException
-     * @return Route
+     * @return Router
      */
-    public function group($branch, callable $cb)
+    public function group($prefix, callable $cb)
     {
-        $branch = rtrim($branch, '/');
+        $prefix = rtrim($prefix, '/');
 
-        if (!preg_match('@^/@', $branch)) {
-            $branch = '/' . $branch;
+        if (!preg_match('@^/@', $prefix)) {
+            $prefix = '/' . $prefix;
         }
 
-        if ($this->branch !== null) {
-            $this->branch .= $branch;
+        if ($this->prefix !== null) {
+            $this->prefix .= $prefix;
         } else {
-            $this->branch = $branch;
+            $this->prefix = $prefix;
         }
 
         call_user_func_array($cb, [$this]);
 
-        $this->branch = '';
+        $this->prefix = '';
+
         $this->globale_middleware = [];
 
         return $this;
@@ -199,14 +192,18 @@ class Router
 
     /**
      * Push new route
-     * 
+     *
      * @param string $method
      * @param string $path
      * @param mixed $cb
+     * @return Route;
      */
     private function pushRoute($method, $path, $cb)
     {
         $route = new Route($path, $cb);
-        $this->collection->push($route);
+
+        $this->collection->in($method)->push($route);
+
+        return $route;
     }
 }

@@ -34,6 +34,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testInstanceOfModel(Bow\Database\Database $db)
     {
         $pet = new Pets();
+
         $pet = $pet->first();
 
         $this->assertInstanceOf(Pets::class, $pet);
@@ -46,7 +47,9 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testInstanceOfModel2(Bow\Database\Database $db)
     {
         $pet = new Pets();
+
         $pet = $pet->take(1)->get()->first();
+
         $this->assertInstanceOf(Pets::class, $pet);
     }
 
@@ -57,6 +60,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testInstanceCollectionOf(Bow\Database\Database $db)
     {
         $pets = Pets::all();
+
         $this->assertInstanceOf(Bow\Support\Collection::class, $pets);
     }
 
@@ -67,6 +71,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testChainSelectOf(Bow\Database\Database $db)
     {
         $pets = Pets::where('id', 1)->select(['name'])->get();
+
         $this->assertInstanceOf(Bow\Support\Collection::class, $pets);
     }
 
@@ -77,6 +82,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testCountOf(Bow\Database\Database $db)
     {
         $pets = Pets::count();
+
         $this->assertEquals(is_int($pets), true);
     }
 
@@ -87,7 +93,9 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testCountSelectCountOf(Bow\Database\Database $db)
     {
         $b = Pets::count();
+
         $a = Pets::all()->count();
+
         $this->assertEquals($a, $b);
     }
 
@@ -97,7 +105,9 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testNotCountSelectCountOf(Bow\Database\Database $db)
     {
         $b = Pets::where('id', 1)->count();
+
         $a = Pets::all()->count();
+
         $this->assertNotEquals($a, $b);
     }
 
@@ -108,6 +118,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testSaveOf(Bow\Database\Database $db)
     {
         $pet = Pets::first();
+
         $this->assertInstanceOf(Pets::class, $pet);
     }
 
@@ -132,6 +143,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testFind(Bow\Database\Database $db)
     {
         $pet = Pets::find(1);
+
         $this->assertInstanceOf(Pets::class, $pet);
     }
 
@@ -142,6 +154,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     public function testFindEmoty(Bow\Database\Database $db)
     {
         $pet = Pets::find(100);
+
         $this->assertNotInstanceOf(Pets::class, $pet);
     }
 }

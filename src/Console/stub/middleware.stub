@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Middleware;
+
+class {className}
+{
+    /**
+     * Fonction de lancement du middleware.
+     *
+     * @param Bow\Http\Request $request
+     * @param callable $next
+     * @param array $guard
+     * @return boolean
+     */
+    public function checker($request, callable $next, $guard = [])
+    {
+        // Codez Ici
+        return $next();
+    }
+}

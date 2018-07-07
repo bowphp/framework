@@ -13,6 +13,7 @@ class ViewService extends BowService
      *
      * @param Config $config
      * @return void
+     * @throws
      */
     public function make(Config $config)
     {
@@ -29,6 +30,7 @@ class ViewService extends BowService
      * Démarrage du service
      *
      * @return void
+     * @throws
      */
     public function start()
     {

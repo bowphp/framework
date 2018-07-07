@@ -56,6 +56,7 @@ class View
         }
 
         static::$config = $config;
+
         static::$template = new static::$container[$engine]($config);
     }
 
@@ -73,6 +74,7 @@ class View
      * Permet de créer et retourner une instance de View
      *
      * @return View
+     * @throws
      */
     public static function getInstance()
     {
@@ -89,7 +91,6 @@ class View
      * @param  string $viewname
      * @param  array  $data
      * @return string
-     * @throws ViewException
      */
     public static function make($viewname, array $data = [])
     {
@@ -115,6 +116,7 @@ class View
     public function setEngine($engine)
     {
         static::$instance = null;
+
         static::$config['view.engine'] = $engine;
 
         return $this;
@@ -135,6 +137,7 @@ class View
     public function setExtension($extension)
     {
         static::$instance = null;
+
         static::$config['view.extension'] = $extension;
 
         return $this;
@@ -155,10 +158,11 @@ class View
         }
 
         if (!class_exists($engine)) {
-            throw new ViewException($engine, ' N\'existe pas.');
+            throw new ViewException($engine, ' n\'existe pas.');
         }
 
         static::$container[$name] = $engine;
+
         return true;
     }
 

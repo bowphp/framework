@@ -71,7 +71,9 @@ class Form
     public static function text($name, $value = "", $attributes = [])
     {
         $value = static::getAssociateValue($name, $value);
+
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<input type=\"text\" value=\"{$value}\" name=\"{$name}\" ".$attributes."/>";
     }
 
@@ -87,7 +89,9 @@ class Form
     public static function password($name, $value = "", $attributes = [])
     {
         $value = static::getAssociateValue($name, $value);
+
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<input type=\"password\" name=\"{$name}\" value=\"{$value}\" ".$attributes."/>";
     }
 
@@ -104,7 +108,9 @@ class Form
     public static function hidden($name, $value = "", $attributes = [])
     {
         $value = static::getAssociateValue($name, $value);
+
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<input type=\"hidden\" value=\"{$value}\" name=\"{$name}\" ".$attributes."/>";
     }
 
@@ -119,6 +125,7 @@ class Form
     public static function file($name, array $attributes = [])
     {
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<input type=\"file\" name=\"{$name}\" ".$attributes."/>";
     }
 
@@ -133,6 +140,7 @@ class Form
     public static function submit($value, array $attributes = [])
     {
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<button type=\"submit\" ".$attributes.">{$value}</button>";
     }
 
@@ -147,6 +155,7 @@ class Form
     public static function button($value, array $attributes = [])
     {
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<button ".$attributes.">{$value}</button>";
     }
 
@@ -162,7 +171,9 @@ class Form
     public static function textarea($name, $value = "", array $attributes = [])
     {
         $value = static::getAssociateValue($name, $value);
+
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<textarea name=\"{$name}\" ".$attributes.">" . $value . "</textarea>";
     }
 
@@ -178,6 +189,7 @@ class Form
     public static function checkbox($name, $checked = false, $value = "")
     {
         $value = static::getAssociateValue($name, $value);
+
         self::$form .= "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" ". ($checked == true ? 'cheched' : '')."/>";
     }
 
@@ -193,6 +205,7 @@ class Form
     public static function radio($name, $checked = false, $value = "")
     {
         $value = static::getAssociateValue($name, $value);
+
         self::$form .= "<input type=\"radio\" name=\"{$name}\" value=\"{$value}\" " . ($checked == true ? 'cheched' : '')."/>";
     }
 
@@ -209,7 +222,9 @@ class Form
     public static function select($name, array $options = [], $selected = null, array $attributes = [])
     {
         $attributes = static::formatAttributes($attributes);
+
         self::$form .= "<select name=\"$name\" ".$attributes.">";
+
         $oldValue = static::getAssociateValue($name);
 
         foreach ($options as $key => $value) {

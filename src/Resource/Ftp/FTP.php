@@ -1,13 +1,15 @@
 <?php
 namespace Bow\Resource\Ftp;
 
+use Bow\Resource\FilesystemInterface;
+
 /**
  * Class FTP
  *
  * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Support\Resource\Ftp
  */
-class FTP
+class FTP implements FilesystemInterface
 {
     /**
      * @var resource
@@ -176,6 +178,110 @@ class FTP
     private function readTmp()
     {
         return file_get_contents($this->tmp);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function store($file, $location, $size, array $extension, callable $cb)
+    {
+        // TODO: Implement store() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function append($file, $content)
+    {
+        // TODO: Implement append() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function prepend($file, $content)
+    {
+        // TODO: Implement prepend() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function put($file, $content)
+    {
+        // TODO: Implement put() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function delete($file)
+    {
+        // TODO: Implement delete() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function files($dirname)
+    {
+        // TODO: Implement files() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function directories($dirname)
+    {
+        // TODO: Implement directories() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function makeDirectory($dirname, $mode = 0777, $recursive = false)
+    {
+        // TODO: Implement makeDirectory() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function copy($targerFile, $sourceFile)
+    {
+        // TODO: Implement copy() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function move($targer_file, $source_file)
+    {
+        // TODO: Implement move() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function exists($filename)
+    {
+        // TODO: Implement exists() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function extension($filename)
+    {
+        // TODO: Implement extension() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolvePath($filename)
+    {
+        // TODO: Implement resolvePath() method.
     }
 
     /**

@@ -12,6 +12,7 @@ class DatabaseService extends BowService
      *
      * @param Config $config
      * @return void
+     * @throws
      */
     public function make(Config $config)
     {

@@ -50,9 +50,11 @@ class Database
      */
     public static function configure($config)
     {
-        if (static::$instance === null) {
+        if (is_null(static::$instance)) {
             static::$instance = new self();
+
             static::$name = $config['default'];
+
             static::$config = $config;
         }
 
@@ -67,6 +69,7 @@ class Database
     public static function instance()
     {
         static::verifyConnection();
+
         return static::$instance;
     }
     /**
@@ -79,7 +82,11 @@ class Database
      */
     public static function connection($name = null)
     {
-        if ($name === null) {
+        if (is_null($name) || strlen($name) == 0) {
+            if (is_null(static::$name)) {
+                static::$name = static::$config['default'];
+            }
+
             $name = static::$name;
         }
 
@@ -92,6 +99,7 @@ class Database
         }
 
         $config = static::$config[$name];
+
         static::$name = $name;
 
         if (static::$adapter === null) {
@@ -102,6 +110,7 @@ class Database
             } else {
                 throw new ConnectionException('Ce driver n\'est pas prie en compte.');
             }
+
             static::$adapter->setFetchMode(static::$config['fetch']);
         }
 
@@ -130,6 +139,7 @@ class Database
     public static function getConnectionAdapter()
     {
         static::verifyConnection();
+
         return static::$adapter;
     }
 
@@ -167,7 +177,9 @@ class Database
         }
 
         $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+
         static::$adapter->bind($pdostatement, Sanitize::make($data, true));
+
         $pdostatement->execute();
 
         return new Collection(Sanitize::make($pdostatement->fetchAll()));
@@ -189,7 +201,9 @@ class Database
         }
 
         $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+
         static::$adapter->bind($pdostatement, $data);
+
         $pdostatement->execute();
 
         return Sanitize::make($pdostatement->fetch());
@@ -212,7 +226,9 @@ class Database
 
         if (empty($data)) {
             $pdoStement = static::$adapter->getConnection()->prepare($sqlstatement);
+
             $pdoStement->execute();
+
             return $pdoStement->rowCount();
         }
 
@@ -222,8 +238,10 @@ class Database
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $r += static::executePrepareQuery($sqlstatement, $value);
+
                 continue;
             }
+
             $collector[$key] = $value;
         }
 
@@ -281,7 +299,9 @@ class Database
     public static function table($table, $loadClassName = null, $primaryKey = null)
     {
         static::verifyConnection();
+
         $table = static::$adapter->getTablePrefix().$table;
+
         return new Builder($table, static::$adapter->getConnection(), $loadClassName, $primaryKey);
     }
 
@@ -309,6 +329,7 @@ class Database
     public static function inTransaction()
     {
         static::verifyConnection();
+
         return static::$adapter->getConnection()->inTransaction();
     }
 
@@ -318,6 +339,7 @@ class Database
     public static function commit()
     {
         static::verifyConnection();
+
         static::$adapter->getConnection()->commit();
     }
 
@@ -327,15 +349,17 @@ class Database
     public static function rollback()
     {
         static::verifyConnection();
+
         static::$adapter->getConnection()->rollBack();
     }
 
     /**
      * Lance la verification de l'établissement de connection
+     * @throws
      */
     private static function verifyConnection()
     {
-        if (static::$adapter == null) {
+        if (is_null(static::$adapter)) {
             static::connection(static::$name);
         }
     }
@@ -348,6 +372,7 @@ class Database
     public static function lastInsertId($name = null)
     {
         static::verifyConnection();
+
         return (int) static::$adapter->getConnection()->lastInsertId($name);
     }
 
@@ -361,9 +386,11 @@ class Database
     private static function executePrepareQuery($sqlstatement, array $data = [])
     {
         $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+
         static::$adapter->bind($pdostatement, Sanitize::make($data, true));
 
         $pdostatement->execute();
+
         $r = $pdostatement->rowCount();
 
         return $r;
@@ -377,6 +404,7 @@ class Database
     public static function getPdo()
     {
         static::verifyConnection();
+
         return static::$adapter->getConnection();
     }
 

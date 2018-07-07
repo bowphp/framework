@@ -24,12 +24,13 @@ class TwigEngine extends EngineAbstract
     public function __construct(Config $config)
     {
         $this->config = $config;
+
         $loader = new \Twig_Loader_Filesystem($config['view.path']);
 
         $env = [
             'auto_reload' => $config['view.auto_reload_cache'],
             'debug' => true,
-            'cache' => $config['view.cache'].'/view'
+            'cache' => $config['view.cache']
         ];
 
         $this->template = new \Twig_Environment($loader, $env);
@@ -39,6 +40,7 @@ class TwigEngine extends EngineAbstract
          * dans le cadre de l'utilisation de Twig
          */
         $this->template->addGlobal('_public', $config['app.static']);
+
         $this->template->addGlobal('_root', $config['app.root']);
 
         /**
@@ -54,6 +56,7 @@ class TwigEngine extends EngineAbstract
 
     /**
      * @inheritDoc
+     * @throws
      */
     public function render($filename, array $data = [])
     {

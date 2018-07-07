@@ -32,9 +32,9 @@ class MustacheEngine extends EngineAbstract
 
         if (is_dir($config['view.path'].'/partials')) {
             $this->partails_loader = new \Mustache_Loader_FilesystemLoader(
-                $config['view.path'].'/partials', [
-                'extension' => $this->config['view.extension']
-            ]);
+                $config['view.path'].'/partials',
+                [ 'extension' => $this->config['view.extension'] ]
+            );
         }
 
         $loader = new \Mustache_Loader_FilesystemLoader($config['view.path'], [
@@ -47,7 +47,7 @@ class MustacheEngine extends EngineAbstract
         );
 
         $this->template = new \Mustache_Engine([
-            'cache' => $config['view.cache'].'/view',
+            'cache' => $config['view.cache'],
             'loader' => $loader,
             'partials_loader' => $this->partails_loader,
             'helpers' => $helpers
@@ -56,6 +56,7 @@ class MustacheEngine extends EngineAbstract
 
     /**
      * @inheritDoc
+     * @throws
      */
     public function render($filename, array $data = [])
     {

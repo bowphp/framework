@@ -47,8 +47,11 @@ class Capsule implements \ArrayAccess
     }
 
     /**
+     * Make object
+     *
      * @param string $key
      * @return mixed
+     * @throws
      */
     public function make($key)
     {
@@ -88,6 +91,7 @@ class Capsule implements \ArrayAccess
     /**
      * @param $key
      * @param array $parameters
+     * @throws
      */
     public function makeWith($key, $parameters = [])
     {
@@ -126,7 +130,7 @@ class Capsule implements \ArrayAccess
     /**
      * @param string $key
      * @return mixed
-     * @throws \ErrorException
+     * @throws
      */
     private function resolve($key)
     {

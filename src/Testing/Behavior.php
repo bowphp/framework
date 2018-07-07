@@ -12,6 +12,11 @@ class Behavior
     private $parser;
 
     /**
+     * @var string
+     */
+    private $content;
+
+    /**
      * Behovior constructor.
      *
      * @param Parser $parser
@@ -19,6 +24,8 @@ class Behavior
     public function __construct(Parser $parser)
     {
         $this->parser = $parser;
+
+        $this->content = $parser->getContent();
     }
 
     /**
@@ -27,7 +34,7 @@ class Behavior
      */
     public function mustBeJson($message = '')
     {
-        Assert::assertJson($this->parser->toJson(), $message);
+        Assert::assertJson(json_encode($this->content), $message);
 
         return $this;
     }
@@ -39,8 +46,7 @@ class Behavior
      */
     public function mustBeExactJson($data, $message = '')
     {
-        $json = $this->parser->toJson();
-        Assert::assertArraySubset($data, json_decode($json), $message);
+        Assert::assertArraySubset($data, json_decode($this->content), $message);
 
         return $this;
     }
@@ -52,8 +58,7 @@ class Behavior
      */
     public function mustBeExactText($data, $message = '')
     {
-        $text = $this->parser->raw();
-        Assert::assertEquals($text, $data, $message);
+        Assert::assertEquals($this->content, $data, $message);
         
         return $this;
     }
@@ -100,6 +105,7 @@ class Behavior
     public function contentTypeMustBe($content_type, $message = '')
     {
         $type = $this->parser->getContentType();
+
         Assert::assertEquals($content_type, current(preg_split('/;(\s+)?/', $type)), $message);
 
         return $this;
@@ -146,7 +152,6 @@ class Behavior
     public function assertJson($data, $message = '')
     {
         return $this->mustBeExactJson($data, $message);
-
     }
 
     /**
@@ -179,6 +184,7 @@ class Behavior
     public function assertKeyExists($key, $message = '')
     {
         $data = $this->parser->toArray();
+
         Assert::assertTrue(isset($data[$key]), $message);
 
         return $this;
@@ -192,10 +198,22 @@ class Behavior
      */
     public function assertKeyMatchValue($key, $value, $message = '')
     {
-        $data = $this->parser->toArray();
-        Assert::assertTrue(isset($data));
-        Assert::assertEquals($data[$key], $value, $message);
+        $data = json_encode($this->content);
+
+        if (isset($data[$key])) {
+            Assert::assertFalse(true);
+        } else {
+            Assert::assertEquals($data[$key], $value, $message);
+        }
 
         return $this;
+    }
+
+    /**
+     * @param $text
+     */
+    public function containsText($text)
+    {
+        Assert::assertContains($text, $this->content);
     }
 }

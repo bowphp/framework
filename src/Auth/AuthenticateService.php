@@ -11,8 +11,7 @@ class AuthenticateService extends BowService
     /**
      * Configuration du service
      *
-     * @param Config $config
-     * @return void
+     * @inheritdoc
      */
     public function make(Config $config)
     {
@@ -22,9 +21,7 @@ class AuthenticateService extends BowService
     }
 
     /**
-     * Démarrage du service
-     *
-     * @return void
+     * @inheritdoc
      */
     public function start()
     {

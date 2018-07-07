@@ -7,7 +7,9 @@ class DateAccessTest extends \PHPUnit\Framework\TestCase
     public function testGetInstance()
     {
         $instance = new DateAccess();
+
         $this->assertInstanceOf(DateAccess::class, $instance);
+
         return $instance;
     }
 

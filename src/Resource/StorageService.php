@@ -12,6 +12,7 @@ class StorageService extends BowService
      *
      * @param Config $config
      * @return void
+     * @throws
      */
     public function make(Config $config)
     {
@@ -24,6 +25,7 @@ class StorageService extends BowService
      * Démarrage du service
      *
      * @return void
+     * @throws
      */
     public function start()
     {

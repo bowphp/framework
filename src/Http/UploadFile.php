@@ -44,6 +44,7 @@ class UploadFile
         if (isset($this->file['type'])) {
             return $this->file['type'];
         }
+
         return null;
     }
 
@@ -57,6 +58,7 @@ class UploadFile
         if (isset($this->file['size'])) {
             return $this->file['size'];
         }
+
         return 0;
     }
 
@@ -108,6 +110,7 @@ class UploadFile
         if (!isset($this->file['name'])) {
             return null;
         }
+
         return $this->file['name'];
     }
 
@@ -143,7 +146,7 @@ class UploadFile
      *                               récéption
      * @param  string|null $filename Le nom du fichier
      * @return bool
-     * @throws UploadFileException
+     * @throws
      */
     public function move($to, $filename = null)
     {
@@ -162,6 +165,7 @@ class UploadFile
         }
 
         $resolve = rtrim($to, '/').'/'.$save_name;
+
         return (bool) move_uploaded_file($this->file['tmp_name'], $resolve);
     }
 }

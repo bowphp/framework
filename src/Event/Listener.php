@@ -22,6 +22,7 @@ class Listener
     public function __construct($callable, $priority)
     {
         $this->callable = $callable;
+
         $this->priority = $priority;
     }
 

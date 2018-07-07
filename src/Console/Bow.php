@@ -2,8 +2,6 @@
 
 namespace Bow\Console;
 
-use Psy\Shell;
-use Psy\Configuration;
 use Bow\Support\Faker;
 use Bow\Database\Database;
 
@@ -12,7 +10,7 @@ class Bow
     /**
      * @var string
      */
-    private $serve_filename = './server.php';
+    private $serve_filename;
 
     /**
      * @var array
@@ -29,7 +27,17 @@ class Bow
     /**
      * @var Command
      */
-    private $_command;
+    private $command;
+
+    /**
+     * @var string
+     */
+    private $public_directory;
+
+    /**
+     * @var string
+     */
+    private $storage_directory;
 
     /**
      * Bow constructor.
@@ -37,287 +45,44 @@ class Bow
      * @param  string  $dirname
      * @param  Command $command
      * @return void
-     *
-     * @throws \ErrorException
      */
     public function __construct($dirname, Command $command)
     {
         if ($command->getParameter('trash')) {
             echo Color::red('Bad command. Type "php bow help" for more information"');
+
             exit(1);
         }
 
         $this->dirname = $dirname;
-        $this->_command = $command;
+
+        $this->public_directory = rtrim($dirname, '/').'/public';
+
+        $this->storage_directory = rtrim($dirname, '/').'/storage';
+
+        $this->serve_filename = rtrim($dirname, '/').'/server.php';
+
+        $this->command = $command;
     }
 
     /**
-     * Permet de lancer Bow task runner
-     *
-     * @return void
-     */
-    public function run()
-    {
-        $this->call($this->_command->getParameter('command'));
-    }
-
-    /**
-     * Permet d'appeler un commande
-     *
-     * @param string $command
-     * @return void
-     */
-    public function call($command)
-    {
-        if (!method_exists($this, $command)) {
-            echo Color::red("Bad $command command .\n");
-            exit(1);
-        }
-
-        if (!$this->_command->getParameter('action')) {
-            if ($this->_command->getParameter('target') == 'help') {
-                $this->help($command);
-                exit(0);
-            }
-        }
-
-        try {
-            call_user_func_array([$this, $command], [$this->_command->getParameter('target')]);
-        } catch (\Exception $e) {
-            echo "{$e->getMessage()}";
-            exit(1);
-        }
-    }
-
-    /**
-     * Permet de lancer un migration
-     *
-     * @return void
-     *
-     * @throws \ErrorException
-     */
-    public function migrate()
-    {
-        $action = $this->_command->getParameter('action');
-        if (!in_array($action, ['up', 'down', 'refresh', null])) {
-            throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
-        }
-
-        if ($action == null) {
-            $action = 'up';
-            if ($this->_command->getParameter('target') !== null || $this->_command->getParameter('trash') !== null) {
-                throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
-            }
-        }
-
-        $target = $this->_command->getParameter('target');
-
-        if ($this->_command->getParameter('target') == '--all') {
-            $target = null;
-        }
-
-        $this->_command->$action($target);
-    }
-
-    /**
-     * Permet de créer des fichiers
-     *
-     * @return void
-     *
-     * @throws \ErrorException
-     */
-    public function add()
-    {
-        $action = $this->_command->getParameter('action');
-        
-        if (!in_array($action, ['middleware', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
-            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
-        }
-
-        if ($action == 'migration') {
-            $action = 'make';
-        }
-
-        $this->_command->$action($this->_command->getParameter('target'));
-    }
-
-    /**
-     * Permet de lancer le seeding
-     *
-     * @return void
-     */
-    public function seed()
-    {
-        if ($this->_command->getParameter('action') != null) {
-            echo "\033[0;32mCommand not found\033[00m\033[00m\n";
-            exit(1);
-        }
-
-        $options = $this->_command->options();
-
-        if ($options->has('--all')) {
-            if ($this->_command->getParameter('target') !== null) {
-                echo "\033[0;31mCommand not found\033[00m\033[00m\n";
-                exit(1);
-            }
-        }
-
-        $seeds_filenames = [];
-
-        if ($options->get('--all')) {
-            $seeds_filenames = glob($this->dirname.'/db/seeders/*_seeder.php');
-            goto seed;
-        }
-
-        if ($this->_command->getParameter('target') !== null) {
-            $table_name = $this->_command->getParameter('target');
-            if (!is_string($table_name) || !file_exists($this->dirname."/seeders/{$table_name}_seeder.php")) {
-                echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
-                exit(1);
-            }
-            $seeds_filenames = [$this->dirname."/db/seeders/{$table_name}_seeder.php"];
-        }
-
-        seed:
-        $seed_collection = [];
-
-        foreach ($seeds_filenames as $filename) {
-            $seeds = include $filename;
-            Faker::reinitialize();
-            $seed_collection = array_merge($seeds, $seed_collection);
-        }
-
-        try {
-            foreach ($seed_collection as $table => $seeds) {
-                $n = Database::table($table)->insert($seeds);
-                echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." sur la table '$table'\n\033[00m";
-            }
-        } catch (\Exception $e) {
-            echo Color::red($e->getMessage());
-            exit(1);
-        }
-
-        exit(0);
-    }
-
-    /**
-     * Permet de lancer le serveur local
-     *
-     * @return void
-     */
-    public function serve()
-    {
-        $port = (int) $this->_command->options('--port', 5000);
-        $hostname = $this->_command->options('--host', 'localhost');
-        $settings = $this->_command->options('--php-settings', false);
-
-        if (is_bool($settings)) {
-            $settings = '';
-        } else {
-            $settings = '-d '.$settings;
-        }
-
-        // resource.
-        $r = fopen("php://stdout", "w");
-
-        if ($r) {
-            fwrite($r, sprintf("[%s] web server start at http://localhost:%s \033[0;31;7mctrl-c for shutdown it\033[00m\n", date('F d Y H:i:s a'), $port));
-        }
-
-        fclose($r);
-
-        $doc_root = $this->dirname.'/public';
-
-        // lancement du serveur.
-        return shell_exec("php -S $hostname:$port -t $doc_root ".$this->serve_filename." $settings");
-    }
-
-    /**
-     * Permet de lancer le repl
-     *
-     * @return void
-     */
-    public function console()
-    {
-        if (is_string($this->_command->getParameter('--include'))) {
-            $this->setBootstrap(
-                array_merge(
-                    [$this->bootstrap],
-                    [$this->_command->getParameter('--include')]
-                )
-            );
-        }
-
-        if (!class_exists('\Psy\Shell')) {
-            echo 'Please, insall psy/psysh:@stable with this command "composer require --dev psy/psysh @stable"';
-            return;
-        }
-
-        $shell = new Shell(new Configuration());
-        $shell->setIncludes($this->bootstrap);
-        $shell->run();
-
-        return;
-    }
-
-    /**
-     * Permet de generate un resource sur un controller
-     *
-     * @return void
-     */
-    public function generate()
-    {
-        $action = $this->_command->getParameter('action');
-        if (!in_array($action, ['key', 'resource'])) {
-            echo Color::red("Bad $action command");
-            exit(1);
-        }
-
-        $this->_command->$action($this->_command->getParameter('target'));
-    }
-
-    /**
-     * Permet de supprimer les caches
-     *
-     * @return void
-     *
-     * @throws \ErrorException
-     */
-    public function clear()
-    {
-        if (in_array($this->_command->getParameter('target'), ['view', 'cache', 'all'])) {
-            throw new \ErrorException(sprintf(''));
-        }
-
-        $storage = $this->dirname.'/storage';
-
-        if ($this->_command->getParameter('target') == 'cache') {
-            $this->unlinks($storage.'/cache/bow');
-            return;
-        }
-
-        if ($this->_command->getParameter('target') == 'view') {
-            $this->unlinks($storage.'/cache/view');
-            return;
-        }
-
-        $this->unlinks($storage.'/cache/bow');
-        $this->unlinks($storage.'/cache/view');
-    }
-
-    /**
-     * Supprimession de fichier
+     * Set public directory
      *
      * @param string $dirname
-     * @return void
      */
-    private function unlinks($dirname)
+    public function setPublicDirectory($dirname)
     {
-        $glob = glob($dirname);
+        $this->public_directory = $dirname;
+    }
 
-        foreach ($glob as $item) {
-            @unlink($item);
-        }
+    /**
+     * Set storage directory
+     *
+     * @param string $dirname
+     */
+    public function setStorageDirectory($dirname)
+    {
+        $this->storage_directory = $dirname;
     }
 
     /**
@@ -340,6 +105,319 @@ class Bow
     public function setServerFilename($serve_filename)
     {
         $this->serve_filename = $serve_filename;
+    }
+
+    /**
+     * Permet de lancer Bow task runner
+     *
+     * @return void
+     */
+    public function run()
+    {
+        foreach ($this->bootstrap as $item) {
+            require $item;
+        }
+
+        $this->call($this->command->getParameter('command'));
+    }
+
+    /**
+     * Permet d'appeler un commande
+     *
+     * @param string $command
+     * @return void
+     */
+    public function call($command)
+    {
+        if (!method_exists($this, $command)) {
+            echo Color::red("Bad $command command .\n");
+
+            exit(1);
+        }
+
+        if (!$this->command->getParameter('action')) {
+            if ($this->command->getParameter('target') == 'help') {
+                $this->help($command);
+
+                exit(0);
+            }
+        }
+
+        try {
+            call_user_func_array([$this, $command], [$this->command->getParameter('target')]);
+        } catch (\Exception $e) {
+            echo "{$e->getMessage()}";
+
+            exit(1);
+        }
+    }
+
+    /**
+     * Permet de lancer un migration
+     *
+     * @return void
+     *
+     * @throws \ErrorException
+     */
+    public function migrate()
+    {
+        $action = $this->command->getParameter('action');
+
+        if (!in_array($action, ['up', 'down', 'refresh', null])) {
+            throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
+        }
+
+        if ($action == null) {
+            $action = 'up';
+
+            if ($this->command->getParameter('target') !== null || $this->command->getParameter('trash') !== null) {
+                throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
+            }
+        }
+
+        $target = $this->command->getParameter('target');
+
+        if ($this->command->getParameter('target') == '--all') {
+            $target = null;
+        }
+
+        $this->command->$action($target);
+    }
+
+    /**
+     * Permet de créer des fichiers
+     *
+     * @return void
+     *
+     * @throws \ErrorException
+     */
+    public function add()
+    {
+        $action = $this->command->getParameter('action');
+
+        if (!in_array($action, ['middleware', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
+            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
+        }
+
+        if ($action == 'migration') {
+            $action = 'make';
+        }
+
+        $this->command->$action($this->command->getParameter('target'));
+    }
+
+    /**
+     * Permet de lancer le seeding
+     *
+     * @return void
+     */
+    public function seed()
+    {
+        if ($this->command->getParameter('action') != null) {
+            echo "\033[0;32mCommand not found\033[00m\033[00m\n";
+
+            exit(1);
+        }
+
+        $options = $this->command->options();
+
+        if ($options->has('--all')) {
+            if ($this->command->getParameter('target') !== null) {
+                echo "\033[0;31mCommand not found\033[00m\033[00m\n";
+
+                exit(1);
+            }
+        }
+
+        $seeds_filenames = [];
+
+        if ($options->get('--all')) {
+            $seeds_filenames = glob($this->dirname.'/db/seeders/*_seeder.php');
+
+            goto seed;
+        }
+
+        if ($this->command->getParameter('target') !== null) {
+            $table_name = $this->command->getParameter('target');
+
+            if (!is_string($table_name) || !file_exists($this->dirname."/db/seeders/{$table_name}_seeder.php")) {
+                echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
+
+                exit(1);
+            }
+
+            $seeds_filenames = [$this->dirname."/db/seeders/{$table_name}_seeder.php"];
+        }
+
+        seed:
+        $seed_collection = [];
+
+        foreach ($seeds_filenames as $filename) {
+            $seeds = require $filename;
+
+            Faker::reinitialize();
+
+            $seed_collection = array_merge($seeds, $seed_collection);
+        }
+
+        try {
+            foreach ($seed_collection as $table => $seeds) {
+                $n = Database::table($table)->insert($seeds);
+
+                echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." sur la table '$table'\n\033[00m";
+            }
+        } catch (\Exception $e) {
+            echo Color::red($e->getMessage());
+
+            exit(1);
+        }
+
+        exit(0);
+    }
+
+    /**
+     * Permet de rafraichir le registre
+     *
+     * @throws \ErrorException
+     */
+    public function register()
+    {
+        $action = $this->command->getParameter('action');
+
+        if (!in_array($action, ['refresh'])) {
+            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
+        }
+
+        $this->command->reflesh();
+    }
+
+    /**
+     * Permet de lancer le serveur local
+     *
+     * @return void
+     */
+    public function serve()
+    {
+        $port = (int) $this->command->options('--port', 5000);
+
+        $hostname = $this->command->options('--host', 'localhost');
+
+        $settings = $this->command->options('--php-settings', false);
+
+        if (is_bool($settings)) {
+            $settings = '';
+        } else {
+            $settings = '-d '.$settings;
+        }
+
+        // resource.
+        $r = fopen("php://stdout", "w");
+
+        if ($r) {
+            fwrite($r, sprintf("[%s] web server start at http://localhost:%s \033[0;31;7mctrl-c for shutdown it\033[00m\n", date('F d Y H:i:s a'), $port));
+        }
+
+        fclose($r);
+
+        // lancement du serveur.
+        shell_exec("php -S $hostname:$port -t {$this->public_directory} ".$this->serve_filename." $settings");
+    }
+
+    /**
+     * Permet de lancer le repl
+     *
+     * @return void
+     */
+    public function console()
+    {
+        if (is_string($this->command->getParameter('--include'))) {
+            $this->setBootstrap(
+                array_merge($this->bootstrap, [$this->command->getParameter('--include')])
+            );
+        }
+
+        if (!class_exists('\Psy\Shell')) {
+            echo 'Please, insall psy/psysh:@stable with this command "composer require --dev psy/psysh @stable"';
+
+            return;
+        }
+
+        $config = new \Psy\Configuration();
+
+        $config->setPrompt('bow >> ');
+
+        $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
+
+        $shell = new \Psy\Shell($config);
+
+        $shell->setIncludes($this->bootstrap);
+
+        $shell->run();
+
+        return;
+    }
+
+    /**
+     * Permet de generate un resource sur un controller
+     *
+     * @return void
+     */
+    public function generate()
+    {
+        $action = $this->command->getParameter('action');
+
+        if (!in_array($action, ['key', 'resource'])) {
+            echo Color::red("Bad $action command");
+
+            exit(1);
+        }
+
+        $this->command->$action($this->command->getParameter('target'));
+    }
+
+    /**
+     * Permet de supprimer les caches
+     *
+     * @return void
+     *
+     * @throws \ErrorException
+     */
+    public function clear()
+    {
+        if (in_array($this->command->getParameter('target'), ['view', 'cache', 'all'])) {
+            throw new \ErrorException(sprintf(''));
+        }
+
+        if ($this->command->getParameter('target') == 'cache') {
+            $this->unlinks($this->storage_directory.'/cache/bow');
+
+            return;
+        }
+
+        if ($this->command->getParameter('target') == 'view') {
+            $this->unlinks($this->storage_directory.'/cache/view');
+
+            return;
+        }
+
+        $this->unlinks($this->storage_directory.'/cache/bow');
+
+        $this->unlinks($this->storage_directory.'/cache/view');
+    }
+
+    /**
+     * Supprimession de fichier
+     *
+     * @param string $dirname
+     * @return void
+     */
+    private function unlinks($dirname)
+    {
+        $glob = glob($dirname);
+
+        foreach ($glob as $item) {
+            @unlink($item);
+        }
     }
 
     /**
@@ -378,6 +456,7 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
   option: [table_name|--all]
    \033[0;33mmigrate:down\033[00m       Drop migration
    \033[0;33mmigrate:up\033[00m         Update or create table of the migration
+   \033[0;33mregister:reflesh\033[00m   Update register file
 
  \033[0;32mclear\033[00m for clear cache information [not supported]
 

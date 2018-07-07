@@ -48,12 +48,16 @@ class Str
     public static function camel($str)
     {
         $parts = preg_split('/(_|-|\s)+/', $str);
+
         $camel = "";
+
         foreach ($parts as $key => $value) {
             if ($key == 0) {
                 $camel .= $value;
+
                 continue;
             }
+
             $camel .= ucfirst($value);
         }
 
@@ -144,6 +148,7 @@ class Str
         if ($search === $str) {
             return true;
         }
+
         return static::pos($search, $str);
     }
 
@@ -234,6 +239,7 @@ class Str
     public static function slugify($str)
     {
         $temp = preg_replace('/[^a-z0-9]/', '-', strtolower(trim(strip_tags($str))));
+
         return preg_replace('/-{2,}/', '-', $temp);
     }
 
@@ -255,9 +261,6 @@ class Str
      * eg: dakiafranck@gmail.com => true
      *
      * @param string $email
-     *
-     * @throws \ErrorException
-     *
      * @return bool
      */
     public static function isMail($email)
@@ -278,10 +281,9 @@ class Str
      * eg: http:/exemple.com => false
      *
      * @param string $domain
+     * @return bool
      *
      * @throws \ErrorException
-     *
-     * @return bool
      */
     public static function isDomain($domain)
     {
@@ -295,11 +297,10 @@ class Str
     /**
      * Vérifie si la chaine est en alphanumeric
      *
-     * @param string $str
+     * @param string $str*
+     * @return bool
      *
      * @throws \ErrorException
-     *
-     * @return bool
      */
     public static function isAlphaNum($str)
     {
@@ -314,10 +315,9 @@ class Str
      * Vérifie si la chaine est en numeric
      *
      * @param string $str
+     * @return bool
      *
      * @throws \ErrorException
-     *
-     * @return bool
      */
     public static function isNumeric($str)
     {
@@ -332,10 +332,9 @@ class Str
      * Vérifie si la chaine est en alpha
      *
      * @param string $str
+     * @return bool
      *
      * @throws \ErrorException
-     *
-     * @return bool
      */
     public static function isAlpha($str)
     {
@@ -350,9 +349,7 @@ class Str
      * Vérifie si la chaine est en format slug
      *
      * @param string $str
-     *
      * @throws \ErrorException
-     *
      * @return bool
      */
     public static function isSlug($str)
@@ -410,6 +407,7 @@ class Str
     public static function getWords($words, $len)
     {
         $wordParts = explode(' ', $words);
+
         $sentence = '';
 
         for ($i = 0; $i < $len; $i++) {
@@ -429,11 +427,14 @@ class Str
     public static function shuffleWords($words)
     {
         $wordParts = explode(' ', trim($words));
+
         $wordPartsLen = count($wordParts);
+
         $rand = [];
 
         do {
             $r = rand(0, $wordPartsLen - 1);
+
             if (!in_array($r, $rand)) {
                 $rand[] = $r;
             }
@@ -454,6 +455,7 @@ class Str
     public static function forceInUTF8()
     {
         mb_internal_encoding('UTF-8');
+
         mb_http_output('UTF-8');
     }
 

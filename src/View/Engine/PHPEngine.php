@@ -23,10 +23,12 @@ class PHPEngine extends EngineAbstract
 
     /**
      * @inheritDoc
+     * @throws
      */
     public function render($filename, array $data = [])
     {
         $hash_filename = $filename;
+
         $filename = $this->checkParseFile($filename);
 
         if ($this->config['view.path'] !== null) {
@@ -34,18 +36,21 @@ class PHPEngine extends EngineAbstract
         }
 
         $cache_hash_filename = '_PHP_'.hash('sha1', $hash_filename).'.php';
-        $cache_hash_filename = $this->config['view.cache'].'/view/'.$cache_hash_filename;
+
+        $cache_hash_filename = $this->config['view.cache'].'/'.$cache_hash_filename;
 
         extract($data);
 
         if (file_exists($cache_hash_filename)) {
             if (filemtime($cache_hash_filename) >= fileatime($filename)) {
-                 return include $cache_hash_filename;
+                return include $cache_hash_filename;
             }
         }
 
         ob_start();
-         include $filename;
+
+        include $filename;
+
         $data = ob_get_clean();
 
         $content = file_get_contents($filename);

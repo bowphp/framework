@@ -35,9 +35,7 @@ class PugEngine extends EngineAbstract
 
         $this->template = new Pug(
             $pug_config,
-            [
-            'expressionLanguage' => 'php'
-            ]
+            ['expressionLanguage' => 'php']
         );
 
         foreach (EngineAbstract::HELPERS as $helper) {
@@ -47,6 +45,7 @@ class PugEngine extends EngineAbstract
 
     /**
      * @inheritDoc
+     * @throws
      */
     public function render($filename, array $data = [])
     {

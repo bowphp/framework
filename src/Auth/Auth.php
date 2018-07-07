@@ -40,6 +40,7 @@ class Auth
     public function __construct(array $provider, $credentials = [])
     {
         $this->provider = $provider;
+
         $this->credentials = array_merge($credentials, $this->credentials);
     }
 
@@ -52,6 +53,7 @@ class Auth
     public static function configure(array $config)
     {
         static::$config = $config;
+
         $provider = $config['default'];
 
         return static::$instance = new Auth($config[$provider]);
@@ -81,6 +83,7 @@ class Auth
             if (static::$instance instanceof Auth) {
                 return static::$instance;
             }
+
             return null;
         }
 
@@ -122,6 +125,7 @@ class Auth
     public function attempts(array $credentials)
     {
         $model = $this->provider['model'];
+
         $user  = $model::where('email', $credentials[$this->credentials['email']])->first();
 
         if (is_null($user)) {

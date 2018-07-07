@@ -52,8 +52,11 @@ class MysqlAdapter extends AbstractConnection
 
         // Formatage des paramètres de connection
         $host  = "mysql:host=".$hostname.$port;
+
         $database = "dbname=".$this->config['database'];
+
         $username = $this->config["username"];
+
         $password = $this->config["password"];
 
         // Configuration suppelement coté PDO
