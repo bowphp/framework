@@ -8,7 +8,7 @@
         "source": "https://github.com/papac/bow"
     },
     "require": {
-        "php": ">=5.6",
+        "php": ">=7",
         "twig/twig": "^1.23",
         "psr/log": "1.0.0",
         "nesbot/carbon": "^1.21",
