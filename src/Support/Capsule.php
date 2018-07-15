@@ -15,27 +15,35 @@ class Capsule implements \ArrayAccess
     private $instances = [];
 
     /**
+     *
+     *
      * @var array
      */
     private $factories = [];
 
     /**
+     * Représente un collecteur de cache
+     *
      * @var array
      */
     private $key = [];
 
     /**
+     * Représente les paramètres de compilation
+     *
      * @var array
      */
     private $parameters = [];
 
     /**
+     * Représente l'instance de Capsule
+     *
      * @var Capsule
      */
     private static $instance;
 
     /**
-     * Get capsule instance
+     * Retourne l'instance de Capsule
      *
      * @return Capsule
      */
@@ -49,7 +57,7 @@ class Capsule implements \ArrayAccess
     }
 
     /**
-     * Make instance
+     * Crée un instance de Capsule
      *
      * @param string $key
      * @return mixed
@@ -91,9 +99,9 @@ class Capsule implements \ArrayAccess
     }
 
     /**
-     * Make with parameter
+     * Compilation avec paramètre
      *
-     * @param $key
+     * @param mixed $key
      * @param array $parameters
      * @return mixed
      * @throws
@@ -106,7 +114,7 @@ class Capsule implements \ArrayAccess
     }
 
     /**
-     * Bind by key
+     * Associe une une clé a une classe à compiler
      *
      * @param string $key
      * @param mixed  $value
@@ -119,7 +127,7 @@ class Capsule implements \ArrayAccess
     }
 
     /**
-     * Bind factory
+     * Enregistre l'instance d'une classe
      *
      * @param $key
      * @param \Closure $value
@@ -130,15 +138,23 @@ class Capsule implements \ArrayAccess
     }
 
     /**
+     * Enregistre l'instance d'une classe
+     *
      * @param string   $key
      * @param $instance
      */
     public function instance($key, $instance)
     {
+        if (!is_object($instance)) {
+            throw new \InvalidArgumentException('Le paramètre 2 est invalide');
+        }
+
         $this->instances[$key] = $instance;
     }
 
     /**
+     * Instancie une classe par sa clé
+     *
      * @param string $key
      * @return mixed
      * @throws

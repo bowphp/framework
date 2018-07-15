@@ -1,6 +1,2 @@
-*~
-.idea/
-vendor/
-tests/data/*
-composer.lock
-!tests/data/view
+tests/data/database.sqlite
+tests/data/cache/**
