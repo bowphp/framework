@@ -1,15 +1,15 @@
-## Bow The PHP Framework
-> __Compile your avanture__
-
-[![docs](https://img.shields.io/packagist/v/papac/bow.svg?style=flat-square)](https://packagist.org/papac/bow)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/papac/framework/blob/master/LICENSE)
-[![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square)](https://papac.github.com/bow)
-[![Travis branch](https://img.shields.io/travis/papac/framework/master.svg?style=flat-square)](https://travis-ci.com/papac/framework)
-
-Bow est un micro framework écrire pour les débutants qui veulent travail sur un projet un peut plus
-grand.
-
-> N'ésitez pas commencez maintenant.
+<h1 align="center">
+    <img src="https://github.com/bowphp/framework/raw/master/bow.jpg">
+    <br/>Bow
+</h1>
+<h4 align="center">The BOW PHP framework</h4>
+<br/>
+<p align="center">
+    <a href="https://github.com/bowphp/docs" title="docs"><img src="https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square"/></a>
+    <a href="https://packagist.org/bowphp/framework" title="version"><img src="https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square"/></a>
+    <a href="https://github.com/bowphp/app/blob/master/LICENSE" title="license"><img src="https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square"/></a>
+    <a href="https://travis-ci.org/bowphp/framework" title="Travis branch"><img src="https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square"/></a>
+</p>
 
 # Require
 
@@ -23,12 +23,13 @@ grand.
 
 # Contribution
 
-Pour participer au project il faut:
+Pour participer au projet il faut:
 
-+ Cloner le project `git clone https://github.com/papac/framework`
-+ Créer un branche qui aura le nom résumé de votre modification `git branch branche-de-vos-traveaux`
++ Fork le projet afin qu'il soit parmi les répertoires de votre compte github ex :`https://github.com/votre-compte/app`
++ Cloner le projet depuis votre compte github `git clone https://github.com/votre-crompte/app`
++ Créer un branche qui aura pour nom le résumé de votre modification `git branch branche-de-vos-traveaux`
 + Faire une publication sur votre dépot `git push origin branche-de-vos-traveaux`
-+ Enfin faire un `pull-request`
++ Enfin faire un [pull-request](https://www.thinkful.com/learn/github-pull-request-tutorial/Keep-Tabs-on-the-Project#Time-to-Submit-Your-First-PR)
 
 # Auteur
 > Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
