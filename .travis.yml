@@ -33,4 +33,4 @@ matrix:
   fast_finish: true
 
 script:
-  - ./vendor/bin/phpunit --configuration phpunit.xml
+  - ./vendor/bin/phpunit --configuration phpunit.dist.xml
