@@ -31,7 +31,7 @@ Pour participer au projet il faut:
 + Faire une publication sur votre dépot `git push origin branche-de-vos-traveaux`
 + Enfin faire un [pull-request](https://www.thinkful.com/learn/github-pull-request-tutorial/Keep-Tabs-on-the-Project#Time-to-Submit-Your-First-PR)
 
-Ou bien allez dans la page des [issues](https://github.com/bowphp/framework/issues) et faites vos corrections et suivez [publier](#contribution).
+Ou bien allez dans la page des [issues](https://github.com/bowphp/framework/issues), faites vos corrections et enfin suivez [publier](#contribution).
 
 # Auteur
 > Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
