@@ -4,8 +4,6 @@ namespace Bow\Database\Barry\Relations;
 
 interface Simple
 {
-
-
     /**
      * Definir la clé étranger
      *
