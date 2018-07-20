@@ -25,11 +25,6 @@
             "name": "Franck Dakia",
             "email": "dakiafranck@gmail.com",
             "role": "Lead Developer"
-        },
-        {
-            "name": "Etchien Boa",
-            "email": "geekroot9@gmail.com",
-            "role": "Contributor"
         }
     ],
     "autoload": {
