@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Contracts\Kernel;
+namespace Bow\Contracts\Kernel;
 
 interface Loader
 {
