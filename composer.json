@@ -4,13 +4,13 @@
     "keywords": ["framework", "bow"],
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/papac/bow/issues",
-        "source": "https://github.com/papac/bow"
+        "issues": "https://github.com/bowphp/framework/issues",
+        "source": "https://github.com/bowphp/framework"
     },
     "require": {
         "php": ">=7",
         "twig/twig": "^1.23",
-        "psr/log": "1.0.0",
+        "filp/whoops": "^2.1",
         "nesbot/carbon": "^1.21",
         "psy/psysh": "@stable"
     },
@@ -18,8 +18,7 @@
         "phpunit/phpunit": "^4.8",
         "monolog/monolog": "^1.22",
         "mustache/mustache": "^2.10",
-        "pug-php/pug": "^2.4",
-        "nicolab/php-ftp-client": "^1.2"
+        "pug-php/pug": "^2.4"
     },
     "authors": [
         {
@@ -42,7 +41,8 @@
         }
     },
     "suggest": {
-        "mustache/mustache": "Pour le choix du moteur de template 'mustache'",
-        "pug-php/pug": "Pour le choix du moteur de template 'pug'"
+        "mustache/mustache": "Pour le choix d'utilisation du moteur de template 'mustache'",
+        "pug-php/pug": "Pour le choix d'utilisation du moteur de template 'pug'",
+        "papac/bow-blade": "Pour le choix d'utilisation du moteur de template 'blade'"
     }
 }
