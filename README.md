@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="https://github.com/bowphp/framework/raw/master/bow.jpg">
+    <img src="https://github.com/bowphp/arts/raw/master/bow.jpg">
     <br/>Bow
 </h1>
 <h4 align="center">The BOW PHP framework</h4>
@@ -10,6 +10,8 @@
     <a href="https://github.com/bowphp/app/blob/master/LICENSE" title="license"><img src="https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square"/></a>
     <a href="https://travis-ci.org/bowphp/framework" title="Travis branch"><img src="https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square"/></a>
 </p>
+
+> **BN**: pour utiliser ce package, veuillez créer une application depuis ce package [bowphp/app](https://github.com/bowphp/app)
 
 # Require
 

@@ -106,12 +106,9 @@ if (!function_exists('request')) {
      */
     function request()
     {
-        app()->bind(
-            'request',
-            function () {
-                return \Bow\Http\Request::singleton();
-            }
-        );
+        app()->bind('request', function () {
+            return \Bow\Http\Request::singleton();
+        });
 
         return app('request');
     }
@@ -145,9 +142,9 @@ if (!function_exists('db')) {
 
         if (is_callable($cb)) {
             return $cb();
-        } else {
-            return DB::connection($last_connection);
         }
+        
+        return DB::connection($last_connection);
     }
 }
 
@@ -165,9 +162,12 @@ if (!function_exists('view')) {
     {
         if (is_int($data)) {
             $code = $data;
+
             $data = [];
         }
+
         response()->statusCode($code);
+
         return Bow\View\View::make($template, $data);
     }
 }
@@ -187,6 +187,7 @@ if (!function_exists('table')) {
         if (is_string($connexion)) {
             db($connexion);
         }
+
         return DB::table($name, $class, $primary_key);
     }
 }
@@ -208,6 +209,7 @@ if (!function_exists('query_maker')) {
 
         if (is_callable($data)) {
             $cb = $data;
+
             $data = [];
         }
 
@@ -413,12 +415,9 @@ if (!function_exists('debug')) {
      */
     function debug()
     {
-        array_map(
-            function ($x) {
-                call_user_func_array([Util::class, 'debug'], [$x]);
-            },
-            secure(func_get_args())
-        );
+        array_map(function ($x) {
+            call_user_func_array([Util::class, 'debug'], [$x]);
+        }, secure(func_get_args()));
 
         die;
     }
@@ -447,6 +446,7 @@ if (!function_exists('csrf_token')) {
     function csrf_token()
     {
         $csrf = create_csrf_token();
+
         return $csrf['token'];
     }
 }
@@ -460,6 +460,7 @@ if (!function_exists('csrf_field')) {
     function csrf_field()
     {
         $csrf = create_csrf_token();
+
         return $csrf['field'];
     }
 }
@@ -534,8 +535,11 @@ if (!function_exists('store')) {
 
         if (is_int($location) || preg_match('/^([0-9]+)(m|k)$/', $location)) {
             $cb = $extension;
+
             $extension = $size;
+
             $size = $location;
+
             $location = storage_path();
         }
 
@@ -598,9 +602,9 @@ if (!function_exists('sanitaze')) {
     {
         if (is_numeric($data)) {
             return $data;
-        } else {
-            return \Bow\Security\Sanitize::make($data);
         }
+
+        return \Bow\Security\Sanitize::make($data);
     }
 }
 
@@ -616,9 +620,9 @@ if (!function_exists('secure')) {
     {
         if (is_numeric($data)) {
             return $data;
-        } else {
-            return \Bow\Security\Sanitize::make($data, true);
         }
+        
+        return \Bow\Security\Sanitize::make($data, true);
     }
 }
 
@@ -703,6 +707,7 @@ if (!function_exists('curl')) {
         if ($return == true) {
             if (!curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)) {
                 curl_close($ch);
+
                 return null;
             }
         }
@@ -741,6 +746,7 @@ if (!function_exists('url')) {
 
         if (is_array($url)) {
             $parameters = $url;
+
             $url = '';
         }
 
@@ -779,6 +785,7 @@ if (!function_exists('set_pdo')) {
     function set_pdo(PDO $pdo)
     {
         DB::setPdo($pdo);
+
         return pdo();
     }
 }
@@ -913,6 +920,7 @@ if (!function_exists('add_event_once')) {
         if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
+
         return call_user_func_array([emitter(), 'once'], [$event, $fn]);
     }
 }
@@ -931,6 +939,7 @@ if (!function_exists('add_transmisson_event')) {
         if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
+
         return call_user_func_array([emitter(), 'onTransmission'], [$event, $fn]);
     }
 }
@@ -960,6 +969,7 @@ if (!function_exists('emit_event')) {
         if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
+
         call_user_func_array([emitter(), 'emit'], func_get_args());
     }
 }
@@ -994,7 +1004,9 @@ if (!function_exists('email')) {
     {
         if ($view === null) {
             $email = new Mail(config()->getMailConfig());
+
             $email->configure();
+
             return $email;
         }
 
@@ -1117,7 +1129,7 @@ if (!function_exists('storage_path')) {
      */
     function storage_path($path = '')
     {
-        return trim(rtrim(config('resource.storage'), '/').'/'.ltrim($path, '/'), '/');
+        return trim(rtrim(config('app.storage_path'), '/').'/'.ltrim($path, '/'), '/');
     }
 }
 
@@ -1129,7 +1141,7 @@ if (!function_exists('assets')) {
      */
     function assets($path = '')
     {
-        return trim(rtrim(config('app.assets'), '/').'/'.ltrim($path, '/'), '/');
+        return trim(rtrim(config('app.assets_path'), '/').'/'.ltrim($path, '/'), '/');
     }
 }
 
@@ -1310,13 +1322,6 @@ if (!function_exists('trans')) {
      */
     function trans($key, $data = [], $choose = null)
     {
-        app()->bind(
-            'trans',
-            function ($config) {
-                return new \Bow\Translate\Translator($config['app.lang'], $config['app.']);
-            }
-        );
-
         return \Bow\Translate\Translator::make($key, $data, $choose);
     }
 }
