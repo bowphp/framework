@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Console;
 
 use Bow\Resource\Storage;
@@ -424,7 +425,11 @@ class Command
                 $className .= ucfirst(str_replace('.php', '', $part));
             }
 
-            file_put_contents($register, basename(str_replace('.php', '', $file))."|".$className."\n", FILE_APPEND);
+            file_put_contents(
+                $register, 
+                basename(str_replace('.php', '', $file))."|".$className."\n",
+                FILE_APPEND
+            );
         }
     }
 
@@ -449,7 +454,9 @@ class Command
         if ($type == 'down') {
             if (is_null($model)) {
                 if ($options->get('--all') === null) {
-                    echo Color::danger("cette commande est super dangereuse. Alors veuillez ajout le flag --all pour assurer bow.");
+                    echo Color::danger(
+                        "cette commande est super dangereuse. Alors veuillez ajout le flag --all pour assurer bow."
+                    );
 
                     exit(1);
                 }

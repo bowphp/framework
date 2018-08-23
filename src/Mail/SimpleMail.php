@@ -17,6 +17,7 @@ class SimpleMail implements Send
      * @var array
      */
     private $config;
+
     /**
      * send, Envoie le mail
      *
@@ -28,7 +29,10 @@ class SimpleMail implements Send
     public function send(Message $message)
     {
         if (empty($message->getTo()) || empty($message->getSubject()) || empty($message->getMessage())) {
-            throw new InvalidArgumentException("Une erreur est survenu. L'expediteur ou le message ou l'object omit.", E_USER_ERROR);
+            throw new InvalidArgumentException(
+                "Une erreur est survenu. L'expediteur ou le message ou l'object omit.", 
+                E_USER_ERROR
+            );
         }
 
         if (isset($this->config['mail'])) {
@@ -36,16 +40,19 @@ class SimpleMail implements Send
 
             if (!$message->fromIsDefined()) {
                 $form = $this->config['mail'][$section];
+
                 $message->from($form["address"], $form["username"]);
             } else {
                 if (!Str::isMail($message->getFrom())) {
                     $form = $this->config['mail'][$message->getFrom()];
+                
                     $message->from($form["address"], $form["username"]);
                 }
             }
         }
 
         $to = '';
+
         $message->setDefaultHeader();
 
         foreach ($message->getTo() as $value) {
@@ -57,7 +64,9 @@ class SimpleMail implements Send
         }
 
         $headers .= $message->compileHeaders();
+        
         $headers .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
+        
         $headers .= 'Content-Transfer-Encoding: 8bit' . Message::END;
 
         // Send email use the php native function
@@ -69,9 +78,7 @@ class SimpleMail implements Send
     /**
      * Mise en privé des fonctions magic __clone
      */
-    private function __clone()
-    {
-    }
+    private function __clone() {}
 
     /**
      * Construction d'une instance de SimpleMail

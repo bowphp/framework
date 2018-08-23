@@ -17,7 +17,8 @@ class Job
         //
     }
     
-    public function dispatch()
+    private function dispatch()
     {
+        
     }
 }

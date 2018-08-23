@@ -36,5 +36,6 @@ Pour participer au projet il faut:
 Ou bien allez dans la page des [issues](https://github.com/bowphp/framework/issues), faites vos corrections et enfin suivez [publier](#contribution).
 
 # Auteur
-> Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
-> SVP s'il y a un bogue sur le projet veillez me contacté.
+
+* Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
+* SVP s'il y a un bogue sur le projet veuillez me contacter sur mon [slack](https://papac.slack.com)

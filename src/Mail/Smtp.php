@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Mail;
 
 use ErrorException;
@@ -93,7 +94,9 @@ class Smtp implements Send
     public function send(Message $message)
     {
         $this->connection();
+        
         $error = true;
+
         // SMTP command
         if ($this->username !== null) {
             $this->write('MAIL FROM: <' . $this->username . '>', 250);
@@ -159,7 +162,8 @@ class Smtp implements Send
         stream_set_timeout($this->sock, $this->timeout, 0);
         $code = $this->read();
 
-        $host = isset($_SERVER['HTTP_HOST']) && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        $host = isset($_SERVER['HTTP_HOST']) && 
+            preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
         if ($code == 220) {
             $code = $this->write('EHLO ' . $host, 250, 'HELO');
@@ -170,7 +174,9 @@ class Smtp implements Send
 
         if ($this->tls === true) {
             $this->write('STARTTLS', 220);
+            
             $secured = @stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            
             if (!$secured) {
                 throw new ErrorException('Impossible de sécuriser votre connection avec tls', E_ERROR);
             }
@@ -207,6 +213,7 @@ class Smtp implements Send
         for (; !feof($this->sock);) {
             if (($line = fgets($this->sock, 1e3)) != null) {
                 $s = explode(' ', $line)[0];
+            
                 if (preg_match('#^[0-9]+$#', $s)) {
                     break;
                 }
@@ -240,8 +247,14 @@ class Smtp implements Send
 
         if ($code !== null) {
             $response = $this->read();
+            
             if (!in_array($response, (array) $code)) {
-                throw new SmtpException('Serveur SMTP n\'a pas accepté ' . (isset($message) ? $message : '') . ' avec le code [' . $response . ']', E_ERROR);
+                $message = isset($message) ? $message : '';
+
+                throw new SmtpException(
+                    sprintf('Serveur SMTP n\'a pas accepté %s avec le code [%s]', $message, $response),
+                    E_ERROR
+                );
             }
         }
 
