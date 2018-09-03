@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Database\Barry;
 
 use Carbon\Carbon;

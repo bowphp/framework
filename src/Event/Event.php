@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Event;
 
 use Bow\Session\Session;
@@ -65,12 +66,9 @@ class Event
 
         self::$events[$event][] = new Listener($fn, $priority);
 
-        uasort(
-            self::$events[$event],
-            function (Listener $a, Listener $b) {
-                return $a->getPriority() < $b->getPriority();
-            }
-        );
+        uasort(self::$events[$event], function (Listener $a, Listener $b) {
+            return $a->getPriority() < $b->getPriority();
+        });
     }
 
     /**

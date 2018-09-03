@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Database\Migration;
 
 use Bow\Support\Collection;
@@ -489,14 +490,10 @@ class TablePrinter
             'default' => 'CURRENT_TIMESTAMP'
         ]);
 
-        $this->addField(
-            'timestamp',
-            'updated_at',
-            [
+        $this->addField('timestamp', 'updated_at', [
             'null' => true,
             'default' => 'CURRENT_TIMESTAMP'
-            ]
-        );
+        ]);
 
         return $this;
     }
