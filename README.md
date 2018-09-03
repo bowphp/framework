@@ -13,15 +13,16 @@
 
 > **BN**: pour utiliser ce package, veuillez créer une application depuis ce package [bowphp/app](https://github.com/bowphp/app)
 
-# Require
+# Préréquis
 
-+ php >= 7.0
-+ mcrypt
-+ mb_string
-+ PDO
-+ php-sqlite3
-+ php-openssl
-+ php-curl
+Vous devez vous assurer les différents elements suivants sont installés sur votre machine.
+
+* PHP >= 7
+* OpenSSL PHP Extension
+* PDO PHP Extension
+* Mbstring PHP Extension
+* XML PHP Extension
+* JSON PHP Extension
 
 # Contribution
 
@@ -38,4 +39,4 @@ Ou bien allez dans la page des [issues](https://github.com/bowphp/framework/issu
 # Auteur
 
 * Franck Dakia <dakiafranck@gmail.com> &bull; [@franck_dakia](https://twitter.com/franck_dakia)
-* SVP s'il y a un bogue sur le projet veuillez me contacter sur mon [slack](https://papac.slack.com)
+* SVP s'il y a un bogue sur le projet veuillez me contacter sur mon [slack](https://bowphp.slack.com)

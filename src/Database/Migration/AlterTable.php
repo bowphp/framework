@@ -24,6 +24,7 @@ class AlterTable
     public function __construct($tableName, $displaySql = false)
     {
         $this->tableName  = $tableName;
+
         $this->displaySql = $displaySql;
     }
 
@@ -38,7 +39,8 @@ class AlterTable
 
         $cb($columns);
 
-        $sql = (new Statement($columns))->makeAlterTableStatement();
+        $sql = (new Statement($columns))
+            ->makeAlterTableStatement();
 
         if ($this->displaySql) {
             echo $sql . "\n";

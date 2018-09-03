@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Database;
 
 use Bow\Database\Barry\Model;

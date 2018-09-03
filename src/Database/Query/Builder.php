@@ -8,7 +8,6 @@ use Bow\Database\SqlUnity;
 use Bow\Security\Sanitize;
 use Bow\Database\Collection;
 use Bow\Database\Exception\QueryBuilderException;
-use function explode;
 
 /**
  * Class Builder
@@ -779,10 +778,12 @@ class Builder extends Tool implements \JsonSerializable
             }
 
             $id = $this->primaryKey;
+
             $id_value = null;
 
             if (isset($current->{$id})) {
                 $id_value = $current->{$id};
+
                 unset($current->{$id});
             }
 
@@ -802,6 +803,7 @@ class Builder extends Tool implements \JsonSerializable
             }
 
             $id = $this->primaryKey;
+
             $id_value = null;
 
             if (isset($value->{$id})) {
@@ -848,7 +850,8 @@ class Builder extends Tool implements \JsonSerializable
 
         $this->whereDataBinding = $whereData;
 
-        return $this->jump($c - 1)->take(1)->first();
+        return $this->jump($c - 1)
+            ->take(1)->first();
     }
 
     /**
@@ -1081,7 +1084,8 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function truncate()
     {
-        return (bool) $this->connection->exec('truncate `' . $this->table . '`;');
+        return (bool) $this->connection
+            ->exec('truncate `' . $this->table . '`;');
     }
 
     /**
@@ -1160,7 +1164,8 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function drop()
     {
-        return (bool) $this->connection->exec('drop table ' . $this->table);
+        return (bool) $this->connection
+            ->exec('drop table ' . $this->table);
     }
 
     /**
@@ -1172,7 +1177,11 @@ class Builder extends Tool implements \JsonSerializable
      */
     private static function isComporaisonOperator($comp)
     {
-        return in_array($comp, ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'like'], true);
+        return in_array(
+            $comp, 
+            ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'like'],
+            true
+        );
     }
 
     /**
@@ -1194,9 +1203,11 @@ class Builder extends Tool implements \JsonSerializable
 
         if ($current <= 0) {
             $jump = 0;
+
             $current = 1;
         } else {
             $jump = $n * $current;
+            
             $current++;
         }
 
@@ -1205,7 +1216,8 @@ class Builder extends Tool implements \JsonSerializable
 
         $dataBind = $this->whereDataBinding;
 
-        $data = $this->jump($jump)->take($n)->get();
+        $data = $this->jump($jump)
+            ->take($n)->get();
 
         // reinitialisation du where
         $this->where = $where;
@@ -1220,7 +1232,7 @@ class Builder extends Tool implements \JsonSerializable
             $data = array_chunk($data->toArray(), $chunk);
         }
 
-        // active la pagination automatique.
+        // Active la pagination automatique.
         $data = [
             'next' => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
             'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),

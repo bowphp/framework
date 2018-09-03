@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Event;
 
 class Listener

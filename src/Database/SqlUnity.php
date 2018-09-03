@@ -51,6 +51,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     {
         if ($data === null) {
             $data = $table->first();
+
             if ($data instanceof self) {
                 $data = $data->toArray();
             }
@@ -73,6 +74,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     public function save()
     {
         $data = $this->data;
+        
         if ($this->mergeTableName !== null) {
             unset($data->{$this->mergeTableName});
         }
@@ -105,6 +107,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
     public function foreign($id)
     {
         $this->foreign = $id;
+        
         return $this;
     }
 
@@ -126,6 +129,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
         }
 
         $this->data->$table = Database::table($table)->where($foreign, $this->id)->get();
+        
         $this->mergeTableName = $table;
 
         return $this;
@@ -152,6 +156,7 @@ class SqlUnity implements \IteratorAggregate, \JsonSerializable, Simple
         if (isset($this->data->$property)) {
             return $this->data->$property;
         }
+        
         return null;
     }
 

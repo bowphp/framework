@@ -20,6 +20,7 @@ class Tool
         foreach ($data as $key => $value) {
             if (is_null($value) || strtolower($value) === 'null') {
                 $pdoStatement->bindValue(':' . $key, $value, PDO::PARAM_NULL);
+                
                 unset($data[$key]);
             }
         }
