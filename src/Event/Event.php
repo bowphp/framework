@@ -41,11 +41,11 @@ class Event
      */
     public static function instance()
     {
-        if (self::$instance == null) {
-            self::$instance = new self();
+        if (static::$instance == null) {
+            static::$instance = new static();
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     /**
@@ -60,13 +60,13 @@ class Event
      */
     public static function on($event, $fn, $priority = 0)
     {
-        if (!self::bound($event)) {
-            self::$events[$event] = [];
+        if (!static::bound($event)) {
+            static::$events[$event] = [];
         }
 
-        self::$events[$event][] = new Listener($fn, $priority);
+        static::$events[$event][] = new Listener($fn, $priority);
 
-        uasort(self::$events[$event], function (Listener $a, Listener $b) {
+        uasort(static::$events[$event], function (Listener $a, Listener $b) {
             return $a->getPriority() < $b->getPriority();
         });
     }
@@ -79,17 +79,17 @@ class Event
      */
     public static function onTransmission($event, $fn, $priority = 0)
     {
-        if (!self::bound($event)) {
-            self::$events['__bow.transmission.event'][$event] = [];
+        if (!static::bound($event)) {
+            static::$events['__bow.transmission.event'][$event] = [];
         }
 
         if (!is_string($fn)) {
             throw new EventException('Transmission event must be string fonction name');
         }
 
-        self::$events['__bow.transmission.event'][$event][] = new Listener($fn, $priority);
+        static::$events['__bow.transmission.event'][$event][] = new Listener($fn, $priority);
 
-        Session::add("__bow.event.listener", self::$events['__bow.transmission.event']);
+        Session::add("__bow.event.listener", static::$events['__bow.transmission.event']);
     }
 
     /**
@@ -99,7 +99,7 @@ class Event
      */
     public static function once($event, $fn, $priority = 0)
     {
-        self::$events['__bow.once.event'][$event] = new Listener($fn, $priority);
+        static::$events['__bow.once.event'][$event] = new Listener($fn, $priority);
     }
 
     /**
@@ -110,22 +110,22 @@ class Event
      */
     public static function emit($event)
     {
-        if (isset(self::$events['__bow.once.event'][$event])) {
-            $listener = self::$events['__bow.once.event'][$event];
+        if (isset(static::$events['__bow.once.event'][$event])) {
+            $listener = static::$events['__bow.once.event'][$event];
 
             $data = array_slice(func_get_args(), 1);
 
             return $listener->call($data);
         }
 
-        if (!self::bound($event)) {
+        if (!static::bound($event)) {
             return false;
         }
 
-        if (isset(self::$events[$event])) {
-            $events = self::$events[$event];
+        if (isset(static::$events[$event])) {
+            $events = static::$events[$event];
         } else {
-            $events = self::$events['__bow.transmission.event'][$event];
+            $events = static::$events['__bow.transmission.event'][$event];
         }
 
         $listeners = new Collection($events);
@@ -141,7 +141,7 @@ class Event
             }
 
             return Actionner::getInstance()->call($callable, [$data], [
-                'namespace' => [ 'controller' => self::$namespace ]
+                'namespace' => [ 'controller' => static::$namespace ]
             ]);
         });
 
@@ -155,11 +155,11 @@ class Event
      */
     public static function off($event)
     {
-        if (self::bound($event)) {
+        if (static::bound($event)) {
             unset(
-                self::$events[$event],
-                self::$events['__bow.transmission.event'][$event],
-                self::$events['__bow.once.event'][$event]
+                static::$events[$event],
+                static::$events['__bow.transmission.event'][$event],
+                static::$events['__bow.once.event'][$event]
             );
         }
     }
@@ -172,14 +172,14 @@ class Event
      */
     public static function bound($event)
     {
-        return array_key_exists($event, self::$events)
+        return array_key_exists($event, static::$events)
             || array_key_exists(
                 $event,
-                isset(self::$events['__bow.transmission.event']) ? self::$events['__bow.transmission.event'] : []
+                isset(static::$events['__bow.transmission.event']) ? static::$events['__bow.transmission.event'] : []
             )
             || array_key_exists(
                 $event,
-                isset(self::$events['__bow.once.event']) ? self::$events['__bow.once.event'] : []
+                isset(static::$events['__bow.once.event']) ? static::$events['__bow.once.event'] : []
             );
     }
 
@@ -192,8 +192,8 @@ class Event
      */
     public function __call($name, $arguments)
     {
-        if (method_exists(self::$instance, $name)) {
-            return call_user_func_array([self::$instance, $name], $arguments);
+        if (method_exists(static::$instance, $name)) {
+            return call_user_func_array([static::$instance, $name], $arguments);
         }
 
         throw new \RuntimeException('La methode '.$name.' n\'exists pas.');

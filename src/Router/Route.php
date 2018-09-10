@@ -256,11 +256,10 @@ class Route
     /**
      * Fonction permettant de lancer les fonctions de rappel.
      *
-     * @param Request $request
      * @return mixed
      * @throws
      */
-    public function call(Request $request)
+    public function call()
     {
         // Association des parmatres à la request
         foreach ($this->keys as $key => $value) {
@@ -280,9 +279,6 @@ class Route
 
             $this->match[$key] = $tmp;
         }
-
-        // Ajout des paramètres capturer à la requete
-        $request->_setUrlParameters($this->params);
 
         return Actionner::getInstance()->call($this->cb, $this->match);
     }

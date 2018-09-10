@@ -487,7 +487,9 @@ class Application
             $this->current['path'] = $route->getPath();
 
             // Appel de l'action associer à la route
-            $response = $route->call($this->request);
+            $response = $route->call();
+
+            $this->request->_setUrlParameters($route->getParamters());
 
             break;
         }

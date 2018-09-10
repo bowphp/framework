@@ -1,6 +1,5 @@
 <?php
 
-use Bow\Http\Request;
 use Bow\Router\Route;
 
 class RouteTest extends \PHPUnit\Framework\TestCase
@@ -22,7 +21,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($route->match('/'));
 
-        $this->assertEquals($route->call(new Request()), 'hello');
+        $this->assertEquals($route->call(), 'hello');
     }
 
     public function testUriWithOneParameter()
@@ -33,11 +32,11 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($route->match('/bow'));
 
-        $this->assertTrue($route->call(new Request()));
+        $this->assertTrue($route->call());
 
         $this->assertTrue($route->match('/dakia'));
 
-        $this->assertFalse($route->call(new Request()));
+        $this->assertFalse($route->call());
 
         $this->assertFalse($route->match('/'));
     }
@@ -50,11 +49,11 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($route->match('/bow/1'));
 
-        $this->assertTrue($route->call(new Request()));
+        $this->assertTrue($route->call());
 
         $this->assertTrue($route->match('/dakia/1'));
 
-        $this->assertFalse($route->call(new Request()));
+        $this->assertFalse($route->call());
 
         $this->assertFalse($route->match('/'));
     }
@@ -69,7 +68,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($route->match('/bow/1'));
 
-        $this->assertTrue($route->call(new Request()));
+        $this->assertTrue($route->call());
 
         $route->where(['name' => '[a-z0-9_-]+', 'id' => '\d+']);
 
