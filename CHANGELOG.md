@@ -10,3 +10,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Fix:seeder] mise à jour du template de seeding 
 - [Change] formatage du code
 - [Add] add code of conduct
+- [Fix] fix duplicate code #19 #13 #12 #11 #10 #9 #8 #7 #6 #5
