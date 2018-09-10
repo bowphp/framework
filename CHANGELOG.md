@@ -12,3 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Add] add code of conduct
 - [Fix] fix duplicate code #19 #13 #12 #11 #10 #9 #8 #7 #6 #5
 - [Fix] fix #4 (Variable assignment found within a condition. Did you mean to do a comparison)
+- [Fix] fix #29 ('Duplicate Code' issue in multiple files)
