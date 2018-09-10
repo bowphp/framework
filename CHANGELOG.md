@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Fix] fix #4 (Variable assignment found within a condition. Did you mean to do a comparison)
 - [Fix] fix #29 ('Duplicate Code' issue in multiple files)
 - [Fix] fix #20 'Empty return statement not required here' issue in src\Console\Bow.php
+- [Fix] fix #21 'Duplicate Code' issue in multiple files
