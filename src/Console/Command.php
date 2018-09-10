@@ -564,7 +564,7 @@ foreach (range(1, $num) as \$key) {
     \$seeds[] = [
         'id' => faker('autoincrement'),
         'created_at' => faker('date'),
-        'update_at' => faker('date')
+        'updated_at' => faker('date')
     ];
 }
 
