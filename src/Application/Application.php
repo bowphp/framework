@@ -10,7 +10,7 @@ use Bow\Http\Response;
 use Bow\Support\Capsule;
 use Bow\Http\Exception\HttpException;
 use Bow\Application\Resource\ResourceMethod;
-use Bow\Application\Exception\RouterException;
+use Bow\Router\Exception\RouterException;
 use Bow\Application\Exception\ApplicationException;
 
 class Application
