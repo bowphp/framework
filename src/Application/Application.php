@@ -508,7 +508,9 @@ class Application
             return $this->response->send($r, true);
         }
 
-        if (in_array($code = http_response_code(), array_keys($this->error_code))) {
+        $code = http_response_code();
+
+        if (in_array($code, array_keys($this->error_code))) {
             $this->response->statusCode($code);
 
             $r = call_user_func($this->error_code[$code]);
