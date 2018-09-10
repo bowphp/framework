@@ -54,7 +54,8 @@ class Logger extends AbstractLogger
      *
      * @return mixed
      */
-    public function log($level, $message, array $context = []) {
+    public function log($level, $message, array $context = [])
+    {
 
         if (!in_array($this->mode, ['development', 'production'])) {
             throw new LoggerException($this->mode . ' n\'est pas définir');
@@ -106,9 +107,7 @@ class Logger extends AbstractLogger
         $subErrorMessage = '...';
 
         if (isset($context['trace'])) {
-
             if (is_array($context['trace'])) {
-
                 foreach ($context['trace'] as $key => $errRef) {
                     $func   = '';
                     $line   = '';
@@ -133,10 +132,9 @@ class Logger extends AbstractLogger
 
                     if (isset($errRef['args'])) {
                         if (is_array($errRef['args'])) {
-
                             $len = count($errRef['args']);
 
-                            foreach($errRef['args'] as $k => $args) {
+                            foreach ($errRef['args'] as $k => $args) {
                                 $func .= ucfirst(gettype($args));
                                 if (gettype($args) === 'string') {
                                     $func .= '(\'' . $args . '\')';
@@ -164,7 +162,6 @@ class Logger extends AbstractLogger
             } else {
                 $content = $context['trace'];
             }
-
         } else {
             $content = '<i>Aucun context.</i>';
         }
@@ -240,15 +237,15 @@ class Logger extends AbstractLogger
         ];
 
         // switch sur $errno (le numero de l'erreur)
-        switch($errno) {
+        switch ($errno) {
             case E_ERROR:
             case E_USER_ERROR:
             case E_CORE_ERROR:
-                $this->error($errstr,  $context);
+                $this->error($errstr, $context);
                 break;
             case E_WARNING:
             case E_USER_WARNING:
-                $this->warning($errstr,  $context);
+                $this->warning($errstr, $context);
                 break;
             case E_NOTICE:
             case E_USER_NOTICE:

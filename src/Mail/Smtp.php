@@ -162,7 +162,7 @@ class Smtp implements Send
         stream_set_timeout($this->sock, $this->timeout, 0);
         $code = $this->read();
 
-        $host = isset($_SERVER['HTTP_HOST']) && 
+        $host = isset($_SERVER['HTTP_HOST']) &&
             preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
         if ($code == 220) {

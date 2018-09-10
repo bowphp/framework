@@ -76,7 +76,8 @@ class Bow
         try {
             call_user_func_array([$this, $command], [$this->_command->getParameter('target')]);
         } catch (\Exception $e) {
-            echo "{$e->getMessage()}"; exit(1);
+            echo "{$e->getMessage()}";
+            exit(1);
         }
     }
 
@@ -176,7 +177,7 @@ class Bow
                 $n = Database::table($table)->insert($seeds);
                 echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." sur la table '$table'\n\033[00m";
             }
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             echo Color::red($e->getMessage());
             exit(1);
         }
@@ -281,7 +282,8 @@ class Bow
     /**
      * @param string $dirname
      */
-    private function unlinks($dirname) {
+    private function unlinks($dirname)
+    {
         $glob = glob($dirname);
 
         foreach ($glob as $item) {
@@ -363,7 +365,7 @@ USAGE;
             return 0;
         }
 
-        switch($command) {
+        switch ($command) {
             case 'help':
                 echo "\033[0;33mhelp\033[00m display command helper\n";
                 break;
@@ -389,7 +391,6 @@ U;
 
                 break;
             case 'generate':
-
                 echo <<<U
     \n\033[0;32mgenerate\033[00m create a resource and app keyn
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name             For create a new REST controller

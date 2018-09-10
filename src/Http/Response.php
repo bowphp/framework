@@ -163,23 +163,22 @@ class Response
     /**
      * Equivalant à un echo, sauf qu'il termine l'application quand $stop = true
      *
-     * @param  string|array|\StdClass $data
-     * @param  bool|false             $stop
+     * @param  string|array|\stdClass $data
+     * @param  int  $code
+     * @param  array  $headers
      * @return mixed
      */
-    public function send($data, $stop = false)
+    public function send($data, $code = 200, array $headers = [])
     {
-        if (is_array($data) || ($data instanceof \stdClass)) {
+        if (is_array($data) || $data instanceof \stdClass || is_object($data)) {
             $data = json_encode($data);
         }
 
-        echo $data;
-
-        if (!$stop) {
-            return true;
+        foreach ($headers as $key => $value) {
+            $this->addHeader($key, $value);
         }
 
-        die();
+        return $data;
     }
 
     /**
@@ -221,10 +220,16 @@ class Response
     public function accessControlAllowOrigin(array $excepted)
     {
         if (!is_array($excepted)) {
-            throw new \InvalidArgumentException('Attend un tableau.' . gettype($excepted) . ' donner.', E_USER_ERROR);
+            throw new \InvalidArgumentException(
+                'Attend un tableau.' . gettype($excepted) . ' donner.',
+                E_USER_ERROR
+            );
         }
 
-        return $this->accessControl('Access-Control-Allow-Origin', implode(', ', $excepted));
+        return $this->accessControl(
+            'Access-Control-Allow-Origin',
+            implode(', ', $excepted)
+        );
     }
 
     /**
@@ -279,7 +284,10 @@ class Response
     public function accessControlMaxAge($excepted)
     {
         if (!is_numeric($excepted)) {
-            throw new ResponseException('La paramtere doit être un entier: ' . gettype($excepted) . ' donner.', E_USER_ERROR);
+            throw new ResponseException(
+                'La paramtere doit être un entier: ' . gettype($excepted) . ' donner.',
+                E_USER_ERROR
+            );
         }
 
         return $this->accessControl('Access-Control-Max-Age', $excepted);
@@ -295,7 +303,10 @@ class Response
     public function accessControlExposeHeaders(array $excepted)
     {
         if (count($excepted) == 0) {
-            throw new ResponseException('Le tableau est vide.' . gettype($excepted) . ' donner.', E_USER_ERROR);
+            throw new ResponseException(
+                'Le tableau est vide.' . gettype($excepted) . ' donner.',
+                E_USER_ERROR
+            );
         }
 
         return $this->accessControl('Access-Control-Expose-Headers', implode(', ', $excepted));

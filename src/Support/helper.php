@@ -72,10 +72,10 @@ if (!function_exists('response')) {
      *
      * @param  string $template, le message a envoyer
      * @param  int    $code,     le code d'erreur
-     * @param  string $type,     le type mime du contenu
+     * @param  array $headers,   Le header
      * @return \Bow\Http\Response
      */
-    function response($template = null, $code = 200, $type = 'text/html')
+    function response($template = null, $code = 200, $headers = [])
     {
 
         app()->bind('response', function () {
@@ -90,7 +90,9 @@ if (!function_exists('response')) {
             return $response;
         }
 
-        $response->addHeader('Content-Type', $type);
+        foreach ($headers as $key => $value) {
+            $response->addHeader($key, $value);
+        }
 
         $response->send($template);
 

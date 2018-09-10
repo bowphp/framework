@@ -1178,7 +1178,7 @@ class Builder extends Tool implements \JsonSerializable
     private static function isComporaisonOperator($comp)
     {
         return in_array(
-            $comp, 
+            $comp,
             ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'like'],
             true
         );

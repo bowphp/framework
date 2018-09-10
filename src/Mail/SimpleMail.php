@@ -30,7 +30,7 @@ class SimpleMail implements Send
     {
         if (empty($message->getTo()) || empty($message->getSubject()) || empty($message->getMessage())) {
             throw new InvalidArgumentException(
-                "Une erreur est survenu. L'expediteur ou le message ou l'object omit.", 
+                "Une erreur est survenu. L'expediteur ou le message ou l'object omit.",
                 E_USER_ERROR
             );
         }
@@ -78,7 +78,9 @@ class SimpleMail implements Send
     /**
      * Mise en privé des fonctions magic __clone
      */
-    private function __clone() {}
+    private function __clone()
+    {
+    }
 
     /**
      * Construction d'une instance de SimpleMail

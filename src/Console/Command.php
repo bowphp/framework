@@ -426,7 +426,7 @@ class Command
             }
 
             file_put_contents(
-                $register, 
+                $register,
                 basename(str_replace('.php', '', $file))."|".$className."\n",
                 FILE_APPEND
             );

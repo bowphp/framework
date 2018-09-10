@@ -1,7 +1,6 @@
 <?php
 namespace Bow\Support\Console;
 
-
 use Bow\Resource\Storage;
 use Bow\Support\Collection;
 use Bow\Support\Str;
@@ -175,13 +174,13 @@ class Command
             exit(0);
         }
 
-        foreach(file($this->dirname."/migration/.registers") as $r) {
+        foreach (file($this->dirname."/migration/.registers") as $r) {
             $tmp = explode("|", $r);
             $register["file"][] = $tmp[0];
             $register["tables"][] = $tmp[1];
         }
 
-        foreach(glob($fileParten) as $file) {
+        foreach (glob($fileParten) as $file) {
             if (!file_exists($file)) {
                 echo Color::red("$file n'existe pas.");
                 exit();
@@ -350,7 +349,7 @@ doc;
             @mkdir($this->dirname."/app/views/".$model, 0766);
 
             echo "\033[0;33;7m";
-            foreach(["create", "edit", "show", "index", "update", "delete"] as $value) {
+            foreach (["create", "edit", "show", "index", "update", "delete"] as $value) {
                 $file = $this->dirname."/app/views/$model/$value.twig";
                 file_put_contents($file, "<!-- Vue '$value' du model '$model' -->");
                 echo "$file\n";
