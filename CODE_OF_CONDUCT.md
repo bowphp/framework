@@ -1,4 +1,4 @@
-Le code de conduite de Laravel est dérivé du code de conduite Ruby. Toute violation du code de conduite peut être signalée à Franck Dakia (dakiafranck@gmail.com).
+Le code de conduite de Bow est dérivé du code de conduite Ruby. Toute violation du code de conduite peut être signalée à Franck Dakia (dakiafranck@gmail.com).
 
 - Les participants seront tolérants vis-à-vis des points de vue opposés.
 - Les participants doivent s'assurer que leur langage et leurs actions sont exempts d'attaques personnelles et de remarques personnelles dénigrantes.
