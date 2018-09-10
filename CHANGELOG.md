@@ -16,3 +16,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Fix] fix #20 'Empty return statement not required here' issue in src\Console\Bow.php
 - [Fix] fix #21 'Duplicate Code' issue in multiple files
 - [Fix] fix #15 'Duplicate Code' issue in multiple files
+- [Change] update testing and refonte routing
