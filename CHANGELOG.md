@@ -8,3 +8,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - [Fix:seeder] mise à jour du template de seeding 
+- [Change] formatage du code
