@@ -11,7 +11,7 @@
     <a href="https://travis-ci.org/bowphp/framework" title="Travis branch"><img src="https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square"/></a>
 </p>
 
-> **BN**: pour utiliser ce package, veuillez créer une application depuis ce package [bowphp/app](https://github.com/bowphp/app)
+<p align="center">pour utiliser ce package, veuillez créer une application depuis ce package <a href="https://github.com/bowphp/app">bowphp/app</a></p>
 
 # Préréquis
 
