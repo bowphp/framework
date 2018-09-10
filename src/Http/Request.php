@@ -94,7 +94,9 @@ class Request
      */
     public function uri()
     {
-        if ($pos = strpos($_SERVER['REQUEST_URI'], '?')) {
+        $pos = strpos($_SERVER['REQUEST_URI'], '?');
+
+        if ($pos) {
             $uri = substr($_SERVER['REQUEST_URI'], 0, $pos);
         } else {
             $uri = $_SERVER['REQUEST_URI'];
