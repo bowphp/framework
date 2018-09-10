@@ -660,8 +660,6 @@ doc;
         Storage::append($this->migration_directory."/.registers", "${create_at}_${model}|$class_name\n");
 
         echo "\033[0;32mLe file de migration \033[00m[$model]\033[0;32m a été bien crée.\033[00m\n";
-
-        return;
     }
 
     /**
