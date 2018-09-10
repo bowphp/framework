@@ -325,8 +325,6 @@ class Bow
 
     /**
      * Permet de lancer le repl
-     *
-     * @return void
      */
     public function console()
     {
@@ -353,8 +351,6 @@ class Bow
         $shell->setIncludes($this->bootstrap);
 
         $shell->run();
-
-        return;
     }
 
     /**
