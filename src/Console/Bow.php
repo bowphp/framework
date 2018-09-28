@@ -197,7 +197,7 @@ class Bow
     {
         $action = $this->command->getParameter('action');
 
-        if (!in_array($action, ['middleware', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
+        if (!in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration', 'service'])) {
             echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
 
             throw new \ErrorException('Type "php bow help create" for more information');

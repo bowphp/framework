@@ -796,22 +796,22 @@ class Command
     /**
      * Permet de créer un validator
      *
-     * @param  string $name
+     * @param  string $validator_name
      * @return int
      */
-    public function validation($validator_name)
+    public function validator($validator_name)
     {
         $generator = new GeneratorCommand($this->validation_directory, $validator_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe validateur \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m existe déja.\033[00m\n";
+            echo "\033[0;33mLe validateur \033[0;33m\033[0;31m[${validator_name}]\033[00m\033[0;31m existe déja.\033[00m\n";
 
             return 0;
         }
 
         $generator->write('validator');
 
-        echo "\033[0;32mLe validateur \033[00m[${name}]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe validateur \033[00m[${validator_name}]\033[0;32m a été bien crée.\033[00m\n";
 
         return 0;
     }
@@ -819,22 +819,22 @@ class Command
     /**
      * Permet de créer un validator
      *
-     * @param  string $name
+     * @param  string $service_name
      * @return int
      */
-    public function service($name)
+    public function service($service_name)
     {
-        $generator = new GeneratorCommand($this->validation_directory, $validator_name);
+        $generator = new GeneratorCommand($this->service_directory, $service_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m existe déja.\033[00m\n";
+            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${service_name}]\033[00m\033[0;31m existe déja.\033[00m\n";
 
             return 0;
         }
         
         $generator->write('service');
         
-        echo "\033[0;32mLe service \033[00m[${name}]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe service \033[00m[${service_name}]\033[0;32m a été bien crée.\033[00m\n";
 
         return 0;
     }
