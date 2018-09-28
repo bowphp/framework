@@ -670,6 +670,11 @@ class Command
 
         $options = $this->options();
 
+        $generator->write('controller/rest', [
+            'modelNamespace' => $model_namespace,
+            'prefix' => $prefix
+        ]);
+
         if ($this->readline("Voulez vous que je crée un model?")) {
             if ($options->has('--model')) {
                 if ($options->get('--model') !== true) {
@@ -689,11 +694,6 @@ class Command
                 $this->make($model);
             }
         }
-
-        $generator->write('controller/rest', [
-            'modelNamespace' => $model_namespace,
-            'prefix' => $prefix
-        ]);
 
         echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien crée.\033[00m\n";
 
