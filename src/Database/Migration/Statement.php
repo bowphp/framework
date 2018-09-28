@@ -34,7 +34,13 @@ class Statement
     public function makeSqliteCreateTableStatement()
     {
         if (($statement = $this->makeSqlStatement()) !== null) {
-            return "CREATE TABLE IF NOT EXISTS `" . $this->columns->getTableName() . "` ($statement) DEFAULT CHARSET=" . $this->columns->getCharset() . " COLLATE " . $this->columns->getCollate() . ";";
+            return sprintf(
+                "CREATE TABLE IF NOT EXISTS `%s` (%s) DEFAULT CHARSET=%s COLLATE %s;",
+                $this->columns->getTableName(),
+                $statement,
+                $this->columns->getCharset(),
+                $this->columns->getCollate()
+            );
         }
 
         return null;
@@ -48,7 +54,14 @@ class Statement
     public function makeMysqlCreateTableStatement()
     {
         if (($statement = $this->makeSqlStatement()) !== null) {
-            return "CREATE TABLE IF NOT EXISTS `" . $this->columns->getTableName() . "` ($statement) ENGINE=" . $this->columns->getEngine() . " DEFAULT CHARSET=" . $this->columns->getCharset() . " COLLATE " . $this->columns->getCollate() . ";";
+            return sprintf(
+                "CREATE TABLE IF NOT EXISTS `%s` (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE %s;",
+                $this->columns->getTableName(),
+                $statement,
+                $this->columns->getCharset(),
+                $this->columns->getEngine(),
+                $this->columns->getCollate()
+            );
         }
 
         return null;
@@ -118,9 +131,11 @@ class Statement
                         $this->addFieldType($info, $field, $type);
                         if (in_array($type, ["int", "longint", "bigint", "mediumint", "smallint", "tinyint"], true)) {
                             if ($this->columns->getAutoincrement() instanceof \stdClass) {
-                                if ($this->columns->getAutoincrement()->method == $type && $this->columns->getAutoincrement()->field == $field) {
+                                if ($this->columns->getAutoincrement()->method == $type
+                                    && $this->columns->getAutoincrement()->field == $field) {
                                     $this->sql .= " AUTO_INCREMENT";
                                 }
+
                                 $this->columns->setAutoincrement(false);
                             }
                         }

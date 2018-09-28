@@ -10,7 +10,7 @@ class BowTestCase extends TestCase
     /**
      * @var array
      */
-    private $_attach = [];
+    private $attach = [];
 
     /**
      * @var string
@@ -49,8 +49,8 @@ class BowTestCase extends TestCase
     {
         $http = new HttpClient($this->formatUrl($url));
 
-        if (!empty($this->_attach)) {
-            $http->addAttach($this->_attach);
+        if (!empty($this->attach)) {
+            $http->addAttach($this->attach);
         }
 
         return $http->post($url, $param);
@@ -61,7 +61,7 @@ class BowTestCase extends TestCase
      */
     public function attach(array $attach)
     {
-        $this->_attach = $attach;
+        $this->attach = $attach;
     }
 
     /**

@@ -220,7 +220,11 @@ class Database
     {
         static::verifyConnection();
 
-        if (!preg_match("/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i", $sqlstatement)) {
+        if (!preg_match(
+            "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
+            $sqlstatement
+        )
+        ) {
             throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
         }
 
@@ -233,6 +237,7 @@ class Database
         }
 
         $collector = [];
+        
         $r = 0;
 
         foreach ($data as $key => $value) {

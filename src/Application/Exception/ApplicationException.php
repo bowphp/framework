@@ -5,4 +5,4 @@ use ErrorException;
 
 class ApplicationException extends ErrorException
 {
-};
+}

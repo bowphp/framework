@@ -579,7 +579,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * @inheritDoc
      */
-    function jsonSerialize()
+    public function jsonSerialize()
     {
         return $this->attributes;
     }

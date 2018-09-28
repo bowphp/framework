@@ -2,6 +2,6 @@
 
 namespace Bow\Exception;
 
-class EventException extends \Exception
+class EventException extends \ErrorException
 {
 }

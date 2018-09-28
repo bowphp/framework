@@ -6,4 +6,4 @@ use ErrorException;
 
 class ViewException extends ErrorException
 {
-};
+}

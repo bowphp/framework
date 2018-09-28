@@ -332,12 +332,14 @@ class Request
      */
     public function isAjax()
     {
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
-            $xhr_obj = Str::lower($_SERVER['HTTP_X_REQUESTED_WITH']);
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+            return false;
+        }
 
-            if ($xhr_obj == 'xmlhttprequest' || $xhr_obj == 'activexobject') {
-                return true;
-            }
+        $xhr_obj = Str::lower($_SERVER['HTTP_X_REQUESTED_WITH']);
+
+        if ($xhr_obj == 'xmlhttprequest' || $xhr_obj == 'activexobject') {
+            return true;
         }
 
         return false;
@@ -434,7 +436,6 @@ class Request
         return end($match);
     }
 
-
     /**
      * le protocol de la requête.
      *
@@ -486,14 +487,6 @@ class Request
     public function getParameter($key)
     {
         return $this->param[$key];
-    }
-
-    /**
-     * @param array $parameter
-     */
-    public function _setUrlParameters(array $parameter)
-    {
-        $this->param = new UrlParameter($parameter);
     }
 
     /**

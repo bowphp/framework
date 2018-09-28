@@ -58,7 +58,7 @@ class UrlParameter implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    function __get($name)
+    public function __get($name)
     {
         return $this->offsetExists($name);
     }

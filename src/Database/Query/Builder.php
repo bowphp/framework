@@ -510,7 +510,7 @@ class Builder extends Tool implements \JsonSerializable
      *
      * @return Builder
      */
-    public function orOn($first, $comp = '=', $second)
+    public function orOn($first, $comp = '=', $second = null)
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException('La clause inner join est dèja initialisé.', E_ERROR);

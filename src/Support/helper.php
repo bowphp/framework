@@ -933,10 +933,10 @@ if (!function_exists('add_transmisson_event')) {
      *
      * @param  string                $event
      * @param  callable|array|string $fn
-     * @return Event;
+     * @return Event
      * @throws \Bow\Exception\EventException
      */
-    function add_transmisson_event($event = null, $fn)
+    function add_transmisson_event($event, $fn)
     {
         if (!is_string($event)) {
             throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
@@ -1068,8 +1068,15 @@ if (!function_exists('cookie')) {
      * @param  bool|true  $http
      * @return null|string
      */
-    function cookie($key = null, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
-    {
+    function cookie(
+        $key = null,
+        $data = null,
+        $expirate = 3600,
+        $path = null,
+        $domain = null,
+        $secure = false,
+        $http = true
+    ) {
         if ($key === null) {
             return Cookie::all();
         }

@@ -41,5 +41,9 @@
         "mustache/mustache": "Pour le choix d'utilisation du moteur de template 'Mustache'",
         "pug-php/pug": "Pour le choix d'utilisation du moteur de template 'Pug'",
         "papac/bow-blade": "Pour le choix d'utilisation du moteur de template 'Blade'"
+    },
+    "scripts": {
+        "fix-sniffer": "phpcbf --standard=psr2 --tab-width=4 src tests",
+        "sniffer": "phpcs --standard=psr2 --tab-width=4 src tests"
     }
 }

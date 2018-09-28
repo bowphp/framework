@@ -489,8 +489,6 @@ class Application
             // Appel de l'action associer à la route
             $response = $route->call();
 
-            $this->request->_setUrlParameters($route->getParamters());
-
             break;
         }
 

@@ -8,6 +8,7 @@ abstract class EngineAbstract
 {
     /**
      * Liste des helpers
+     * @var array
      */
     const HELPERS = [
         'secure' => 'secure',
@@ -73,11 +74,22 @@ abstract class EngineAbstract
         // Vérification de l'existance du fichier
         if ($this->config['view.path'] !== null) {
             if (!file_exists($this->config['view.path'].'/'.$tmp_filename)) {
-                throw new ViewException('La vue ['.$tmp_filename.'] n\'existe pas. ' . $this->config['view.path'] . '/' . $filename, E_ERROR);
+                throw new ViewException(
+                    sprintf(
+                        'La vue [%s] n\'existe pas. %s/%s',
+                        $tmp_filename,
+                        $this->config['view.path'],
+                        $filename
+                    ),
+                    E_ERROR
+                );
             }
         } else {
             if (!file_exists($tmp_filename)) {
-                throw new ViewException('La vue ['.$tmp_filename.'] n\'existe pas!.', E_ERROR);
+                throw new ViewException(
+                    sprintf('La vue [%s] n\'existe pas!.', $tmp_filename),
+                    E_ERROR
+                );
             }
         }
 
