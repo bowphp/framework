@@ -650,9 +650,9 @@ class Command
 
         $prefix = preg_replace("/controller/i", "", strtolower($controller_name));
 
+        $model = ucfirst($prefix);
+        
         $prefix = '/'.trim($prefix, '/');
-
-        $model = ucfirst($path);
 
         $model_namespace = '';
 
