@@ -651,7 +651,7 @@ class Command
         $prefix = preg_replace("/controller/i", "", strtolower($controller_name));
 
         $model = ucfirst($prefix);
-        
+
         $prefix = '/'.trim($prefix, '/');
 
         $model_namespace = '';
@@ -664,9 +664,9 @@ class Command
             echo "\033[0;33;7m";
 
             foreach (["create", "edit", "show", "index", "update", "delete"] as $value) {
-                $file = $this->component_directory."/views/$model/$value.".\Bow\Support\Capsule::getInstance()->make('view')->;
+                $file = $this->component_directory."/views/$model/$value.".config('view.extension');
 
-                echo "$file\n";
+                echo "$file added\n";
             }
 
             echo "\033[00m";
