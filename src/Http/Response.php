@@ -174,6 +174,8 @@ class Response
             $data = json_encode($data);
         }
 
+        $this->statusCode($code);
+
         foreach ($headers as $key => $value) {
             $this->addHeader($key, $value);
         }

@@ -22,3 +22,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Change] formating
 - [Change] Refonte console command
 - [Fix] fix [#15](https://github.com/bowphp/framework/issues/15) 'undefined variable'
+- [Fix] fix [#15](https://github.com/bowphp/framework/issues/34) serve resources feature bug

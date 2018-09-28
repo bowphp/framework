@@ -501,27 +501,23 @@ class Application
         $this->response->statusCode(404);
 
         if (in_array(404, array_keys($this->error_code))) {
-            $this->response->statusCode(404);
+            $response = call_user_func($this->error_code[404]);
 
-            $r = call_user_func($this->error_code[404]);
-
-            return $this->response->send($r, true);
+            return $this->sendResponse($this->response->send($response, 404));
         }
 
         $code = http_response_code();
 
         if (in_array($code, array_keys($this->error_code))) {
-            $this->response->statusCode($code);
+            $response = call_user_func($this->error_code[$code]);
 
-            $r = call_user_func($this->error_code[$code]);
-
-            return $this->response->send($r, true);
+            return $this->sendResponse($this->response->send($response, $code));
         }
 
         if (is_string($this->config['view.404'])) {
-            return $this->response->send(
-                $this->response->view($this->config['view.404'])
-            );
+            $response = $this->response->view($this->config['view.404']);
+
+            return $this->sendResponse($response);
         }
 
         throw new RouterException(
@@ -583,10 +579,6 @@ class Application
             );
         }
 
-        $controller = null;
-
-        $internal_middleware = [];
-
         $ignore_method = [];
 
         $controller = $controller_name;
@@ -599,13 +591,6 @@ class Application
                 unset($controller_name['controller']);
             }
 
-            // Get all define middleware
-            if (isset($controller_name['middleware'])) {
-                $internal_middleware = $controller_name['middleware'];
-
-                unset($controller_name['middleware']);
-            }
-
             // Get all ignores methods
             if (isset($controller_name['ignores'])) {
                 $ignore_method = $controller_name['ignores'];
@@ -614,7 +599,7 @@ class Application
             }
         }
 
-        if (is_null($controller)) {
+        if (is_null($controller) || !is_string($controller)) {
             throw new ApplicationException("[REST] Aucun controlleur défini !", E_ERROR);
         }
 
@@ -628,16 +613,18 @@ class Application
                 continue;
             }
 
-            // Formate controlleur
-            $bind_controller = $controller . '@' . $value['call'];
-
             $path = '/'.trim($url.$value['url'], '/');
 
             // Lancement de la methode de mapping de route.
-            $route = $this->{$value['method']}($path, $bind_controller);
+            $route = $this->{$value['method']}(
+                $path,
+                sprintf("%s@%s", $controller, $value['call'])
+            );
 
             // Ajout de nom sur la route
-            $route->name(str_replace('/', '.', $url).'.'.$value['call']);
+            $name = str_replace('/', '.', $url).'.'.$value['call'];
+
+            $route->name($name);
 
             // Association des critères définies
             if (!isset($where["id"])) {
@@ -646,11 +633,9 @@ class Application
                 }
             }
 
-            $data = [];
+            $rule = isset($where['id']) ? $where['id'] : $where[$value['call']];
 
-            $where = isset($where['id']) ? $where['id'] : $where[$value['call']];
-
-            $route->where(['id' => $where]);
+            $route->where(['id' => $rule]);
         }
 
         return $this;

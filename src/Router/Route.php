@@ -188,9 +188,9 @@ class Route
         $this->keys = end($match);
 
         // Association des critrères personnalisé.
-        foreach ($this->keys as $key => $value) {
-            if (array_key_exists($value, $this->with)) {
-                $tmp_path = preg_replace('~:' . $value . '~', '(' . $this->with[$value] . ')', $tmp_path);
+        foreach ($this->keys as $key) {
+            if (array_key_exists($key, $this->with)) {
+                $tmp_path = preg_replace('~:' . $key . '~', '(' . $this->with[$key] . ')', $tmp_path);
             }
         }
 
@@ -198,7 +198,7 @@ class Route
         $this->with = [];
 
         // Dans le case ou le path différent on récupère, on récupère celle dans $tmp_path
-        if ($tmp_path !== $this->path) {
+        if ($tmp_path != $this->path) {
             $path = $tmp_path;
         }
 
