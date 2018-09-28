@@ -574,44 +574,48 @@ class Application
      *
      * @throws ApplicationException
      */
-    public function resources($url, $controller_name, array $where = [])
+    public function rest($url, $controller_name, array $where = [])
     {
         if (!is_string($controller_name) && !is_array($controller_name)) {
-            throw new ApplicationException('Le premier paramètre doit être un array ou une chaine de caractère', 1);
+            throw new ApplicationException(
+                'Le premier paramètre doit être un array ou une chaine de caractère',
+                E_ERROR
+            );
         }
 
-        $controller = '';
+        $controller = null;
 
-        $internal_middleware = null;
+        $internal_middleware = [];
 
         $ignore_method = [];
 
-        $controller_name = (array) $controller_name;
+        $controller = $controller_name;
 
-        if (isset($controller_name['middleware'])) {
-            $internal_middleware = $controller_name['middleware'];
+        if (is_array($controller_name)) {
+            // Get controller
+            if (isset($controller_name['controller'])) {
+                $controller = $controller_name['controller'];
 
-            unset($controller_name['middleware']);
+                unset($controller_name['controller']);
+            }
 
-            $next = $this->capsule(Actionner::class)->call([
-                'middleware' => $internal_middleware
-            ], $this->request);
+            // Get all define middleware
+            if (isset($controller_name['middleware'])) {
+                $internal_middleware = $controller_name['middleware'];
 
-            if ($next === false) {
-                return $this;
+                unset($controller_name['middleware']);
+            }
+
+            // Get all ignores methods
+            if (isset($controller_name['ignores'])) {
+                $ignore_method = $controller_name['ignores'];
+
+                unset($controller_name['ignores']);
             }
         }
 
-        if (isset($controller_name['uses'])) {
-            $controller = $controller_name['uses'];
-
-            unset($controller_name['uses']);
-        }
-
-        if (isset($controller_name['ignores'])) {
-            $ignore_method = $controller_name['ignores'];
-
-            unset($controller_name['ignores']);
+        if (is_null($controller)) {
+            throw new ApplicationException("[REST] Aucun controlleur défini !", E_ERROR);
         }
 
         // normalize url
@@ -627,33 +631,26 @@ class Application
             // Formate controlleur
             $bind_controller = $controller . '@' . $value['call'];
 
-            $path = $url . $value['url'];
+            $path = '/'.trim($url.$value['url'], '/');
 
             // Lancement de la methode de mapping de route.
-            $route = call_user_func_array(
-                [$this, $value['method']],
-                [rtrim($path, '/'), $bind_controller]
-            );
+            $route = $this->{$value['method']}($path, $bind_controller);
 
             // Ajout de nom sur la route
-            $route->name($value['call']);
+            $route->name(str_replace('/', '.', $url).'.'.$value['call']);
 
             // Association des critères définies
-            if (empty($where)) {
-                continue;
+            if (!isset($where["id"])) {
+                if (!isset($where[$value['call']])) {
+                    continue;
+                }
             }
 
             $data = [];
 
-            if (preg_match('/:id/', $path)) {
-                if (isset($where['id'])) {
-                    $data = $where;
-                } else {
-                    $data = ['id' => $where[0]];
-                }
-            }
+            $where = isset($where['id']) ? $where['id'] : $where[$value['call']];
 
-            $route->where(array_merge($data, $where));
+            $route->where(['id' => $where]);
         }
 
         return $this;
