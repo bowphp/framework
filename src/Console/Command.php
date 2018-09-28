@@ -537,11 +537,12 @@ class Command
      */
     public function seeder($name)
     {
-        $this->filenameIsValide($name);
+        $generator = new GeneratorCommand(
+            $this->seeder_directory,
+            "{$name}_seeder"
+        );
 
-        $seeder_filename = $this->seeder_directory."/{$name}_seeder.php";
-
-        if (file_exists($seeder_filename)) {
+        if ($generator->fileExists()) {
             echo "\033[0;31mLe seeder '$name' exists déja.\033[00m";
 
             exit(1);
@@ -555,22 +556,10 @@ class Command
             $num = $options->get('--n-seed', 5);
         }
 
-        $content = <<<SEEDER
-<?php
-
-\$seeds = [];
-
-foreach (range(1, $num) as \$key) {
-    \$seeds[] = [
-        'id' => faker('autoincrement'),
-        'created_at' => faker('date'),
-        'updated_at' => faker('date')
-    ];
-}
-
-return ['$name' => \$seeds];
-SEEDER;
-        file_put_contents($seeder_filename, $content);
+        $generator->write('seed', [
+            'num' => $num,
+            'name' => $name
+        ]);
 
         echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a été bien crée.\033[00m\n";
 
@@ -578,14 +567,19 @@ SEEDER;
     }
 
     /**
-     * Permet de crée une migration
+     * Permet de créer une migration
      *
      * @param  $model
      * @throws \ErrorException
      */
     public function make($model)
     {
-        $this->filenameIsValide($model);
+        $create_at = date("Y_m_d") . "_" . date("His");
+
+        $generator = new GeneratorCommand(
+            $this->migration_directory,
+            "${create_at}_${model}"
+        );
 
         $map_method = ["create", "drop"];
 
@@ -600,6 +594,8 @@ SEEDER;
         if ($options->has('--create') && $options->has('--table')) {
             throw new \ErrorException('Bad command.');
         }
+        
+        $type = "model/standard";
 
         if ($options->has('--table')) {
             if ($options->get('--table') === true) {
@@ -607,55 +603,26 @@ SEEDER;
             }
 
             $table = $options->get('--table');
-
-            $map_method = ["table", "drop"];
-        }
-
-        if ($options->has('--create')) {
+            
+            $type = 'model/table';
+        } elseif ($options->has('--create')) {
             if ($options->get('--create') === true) {
                 throw new \ErrorException(sprintf(self::BAD_COMMAND, ' [--create] '));
             }
 
             $table = $options->get('--create');
 
-            $map_method = ["create", "drop"];
+            $type = 'model/create';
         }
 
         $class_name = ucfirst(Str::camel($model));
-
-        $migrate = <<<doc
-<?php
-
-use \Bow\Database\Migration\Schema;
-use \Bow\Database\Migration\Migration;
-use \Bow\Database\Migration\TablePrinter as Printer;
-
-class {$class_name} extends Migration
-{
-    /**
-     * Create Table
-     */
-    public function up()
-    {
-        Schema::{$map_method[0]}("$table", function(Printer \$table) {
-            \$table->increment('id');
-            \$table->engine('InnoDB');
-            \$table->timestamps();
-        });
-    }
-
-    /**
-     * Drop Table
-     */
-    public function down()
-    {
-        Schema::{$map_method[1]}("$table");
-    }
-}
-doc;
-        $create_at = date("Y_m_d") . "_" . date("His");
-
-        file_put_contents($this->migration_directory."/${create_at}_${model}.php", $migrate);
+        
+        $generator->write($type, [
+            'prefix1' => $map_method[0],
+            'prefix2' => $map_method[1],
+            'table' => $table,
+            'className' => $class_name
+        ]);
 
         Storage::append($this->migration_directory."/.registers", "${create_at}_${model}|$class_name\n");
 
@@ -670,36 +637,24 @@ doc;
      */
     public function resource($controller_name)
     {
-        $this->filenameIsValide($controller_name);
+        $generator = new GeneratorCommand(
+            $this->controller_directory,
+            $controller_name
+        );
 
-        $dirname = dirname($controller_name);
-
-        $path = $this->controller_directory."/$controller_name.php";
-
-        if ($dirname != '.') {
-            @mkdir($this->controller_directory.'/'.trim($dirname, '/'), 0777, true);
-
-            $namespace = '\\'.str_replace('/', '\\', ucfirst(trim($dirname, '/')));
-        } else {
-            $namespace = '';
-        }
-
-        $prefix = preg_replace("/controller/", "", strtolower($controller_name));
-
-        $prefix = '/'.trim($prefix, '/');
-
-        $filename = $this->controller_directory."/${controller_name}.php";
-
-        if (file_exists($filename)) {
+        if ($generator->fileExists()) {
             echo Color::danger('Le controlleur existe déja');
 
             exit(1);
         }
 
+        $prefix = preg_replace("/controller/i", "", strtolower($controller_name));
+
+        $prefix = '/'.trim($prefix, '/');
+
         $model = ucfirst($path);
 
         $model_namespace = '';
-
 
         if (static::readline("Voulez vous que je crée les vues associées?")) {
             $model = strtolower($model);
@@ -739,105 +694,10 @@ doc;
             }
         }
 
-        $controllerRestTemplate =<<<CC
-<?php
-
-namespace App\Controllers{$namespace};
-
-$model_namespace
-use App\Controllers\Controller;
-
-class {$controller_name} extends Controller
-{
-    /**
-     * Point d'entré
-     * GET $prefix
-     *
-     * @return void
-     */
-    public function index()
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet d'afficher la vue permettant de créer une résource.
-     *
-     * GET {$prefix}/create
-     * 
-     * @return void
-     */
-    public function create()
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet d'ajouter une nouvelle résource dans la base d'information
-     *
-     * POST {$prefix}
-     * 
-     * @return void
-     */
-    public function store()
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet de récupérer un information précise avec un identifiant.
-     *
-     * GET {$prefix}/:id
-     *
-     * @param mixed \$id
-     * @return void
-     */
-    public function show(\$id)
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Mise à jour d'un ressource en utilisant paramètre du GET
-     *
-     * GET {$prefix}/:id/edit
-     *
-     * @param mixed \$id
-     * @return void
-     */
-    public function edit(\$id)
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Mise à jour d'une résource
-     *
-     * PUT {$prefix}/:id
-     *
-     * @param mixed \$id
-     * @return void
-     */
-    public function update(\$id)
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet de supprimer une resource
-     *
-     * DELETE {$prefix}/:id
-     *
-     * @param mixed \$id
-     * @return void
-     */
-    public function destroy(\$id)
-    {
-        // Codez Ici
-    }
-}
-CC;
-        file_put_contents($this->controller_directory."/${controller_name}.php", $controllerRestTemplate);
+        $generator->write('controller/rest', [
+            'modelNamespace' => $model_namespace,
+            'prefix' => $prefix
+        ]);
 
         echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien crée.\033[00m\n";
 
@@ -851,124 +711,22 @@ CC;
      */
     public function controller($controller_name)
     {
-        $this->filenameIsValide($controller_name);
+        $generator = new GeneratorCommand(
+            $this->controller_directory,
+            $controller_name
+        );
 
-        $dirname = dirname($controller_name);
-
-        $path = $this->controller_directory."/$controller_name.php";
-
-        $classname = basename($controller_name);
-
-        if ($dirname != '.') {
-            @mkdir($this->controller_directory.'/'.trim($dirname, '/'), 0777, true);
-
-            $namespace = '\\'.str_replace('/', '\\', ucfirst(trim($dirname, '/')));
-        } else {
-            $namespace = '';
-        }
-
-        if (file_exists($path)) {
+        if ($generator->fileExists()) {
             echo "\033[0;31mLe controlleur \033[0;33m\033[0;31m[$controller_name]\033[00m\033[0;31m existe déja.\033[00m\n";
 
             exit(1);
         }
 
         if ($this->options('--no-plain')) {
-            $content = <<<CONTENT
-    
-    /**
-     * Point d'entré de l'application
-     *
-     * @return void
-     */
-    public function index()
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet d'afficher la vue permettant de créer une résource.
-     * 
-     * @return void
-     */
-    public function create()
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet d 'ajouter une nouvelle résource dans la base d'information
-     * 
-     * @return void
-     */
-    public function store()
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet de récupérer un information précise avec un identifiant.
-     *
-     * @param mixed \$id L'identifiant de l'élément à récupérer
-     * @return void
-     */
-    public function show(\$id)
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Mise à jour d'un ressource en utilisant paramètre du GET
-     *
-     * @param mixed \$id L'identifiant de l'élément à mettre à jour
-     * @return void
-     */
-    public function edit(\$id)
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Mise à jour d'une ressource
-     *
-     * @param mixed \$id L'identifiant de l'élément à mettre à jour
-     * @return void
-     */
-    public function update(\$id)
-    {
-        // Codez Ici
-    }
-
-    /**
-     * Permet de supprimer une ressource
-     *
-     * @param mixed \$id L'identifiant de l'élément à supprimer
-     * @return void
-     */
-    public function destroy(\$id)
-    {
-        // Codez Ici
-    }
-CONTENT;
+            $generator->write('controller/no-plain');
         } else {
-            $content = <<<CONTENT
-// Écrivez votre code ici
-CONTENT;
+            $generator->write('controller/controller');
         }
-
-        $controller_template =<<<CC
-<?php
-
-namespace App\Controllers${namespace};
-
-use App\Controllers\Controller;
-
-class {$classname} extends Controller
-{
-    $content
-}
-CC;
-        file_put_contents($path, $controller_template);
 
         echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien crée.\033[00m\n";
 
@@ -982,52 +740,15 @@ CC;
      */
     public function middleware($middleware_name)
     {
-        $this->filenameIsValide($middleware_name);
+        $generator = new GeneratorCommand($this->middleware_directory, $middleware_name);
 
-        $path = $this->middleware_directory."/$middleware_name.php";
-
-        if (file_exists($path)) {
+        if ($generator->fileExists()) {
             echo "\033[0;31mLe middleware \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m existe déja.\033[00m\n";
 
             exit(1);
         }
 
-        $dirname = dirname($middleware_name);
-
-        $classname = ucfirst(basename($middleware_name));
-
-        if ($dirname != '.') {
-            @mkdir($this->middleware_directory.'/'.trim($dirname, '/'), 0777, true);
-
-            $namespace = '\\'.str_replace('/', '\\', trim($dirname, '/'));
-        } else {
-            $namespace = '';
-        }
-
-        $middleware_template = <<<CM
-<?php
-
-namespace App\Middleware{$namespace};
-
-class {$classname}
-{
-    /**
-     * Fonction de lancement du middleware.
-     * 
-     * @param \\Bow\\Http\\Request \$request
-     * @param callable \$next
-     * @return boolean
-     */
-    public function checker(\$request, callable \$next, \$guard)
-    {
-        // Codez Ici
-        return \$next();
-    }
-}
-CM;
-        @mkdir($this->middleware_directory);
-
-        file_put_contents($this->middleware_directory."/$middleware_name.php", $middleware_template);
+        $generator->write('middleware');
 
         echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien crée.\033[00m\n";
 
@@ -1043,43 +764,15 @@ CM;
      */
     public function model($model_name, $table_name = null)
     {
-        $this->filenameIsValide($model_name);
+        $generator = new GeneratorCommand($this->middleware_directory, $model_name);
 
-        $dirname = dirname($model_name);
-
-        if ($dirname != '.') {
-            @mkdir($this->model_directory.'/'.trim($dirname, '/'), 0777, true);
-
-            $namespace = '\\'.str_replace('/', '\\', trim($dirname, '/'));
-        } else {
-            $namespace = '';
-        }
-
-        $classname = ucfirst(
-            Str::camel(
-                basename($model_name)
-            )
-        );
-
-        $model = <<<MODEL
-<?php
-
-namespace App${namespace};
-
-use Bow\Database\Barry\Model;
-
-class $classname extends Model
-{
-    //
-}
-MODEL;
-        if (file_exists($this->model_directory."/${model_name}.php")) {
+        if ($generator->fileExists()) {
             echo "\033[0;33mLe model \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m existe déja.\033[00m\n";
 
             exit(1);
         }
 
-        file_put_contents($this->model_directory."/${model_name}.php", $model);
+        $generator->write('model/model');
 
         echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien crée.\033[00m\n";
 
@@ -1110,78 +803,17 @@ MODEL;
      * @param  string $name
      * @return int
      */
-    public function validation($name)
+    public function validation($validator_name)
     {
-        $this->filenameIsValide($name);
+        $generator = new GeneratorCommand($this->validation_directory, $validator_name);
 
-        if (!is_dir($this->validation_directory)) {
-            @mkdir($this->validation_directory);
-        }
-
-        $classname = ucfirst(basename($name));
-
-        $namespace = dirname($name);
-
-        if ($namespace == '.') {
-            $namespace = '';
-        } else {
-            @mkdir($this->validation_directory.'/'.$namespace, 0777, true);
-
-            $namespace = '\\'.str_replace('/', '\\', $namespace);
-        }
-
-        if (file_exists($this->validation_directory.'/'.$name.'.php')) {
+        if ($generator->fileExists()) {
             echo "\033[0;33mLe validateur \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m existe déja.\033[00m\n";
 
             return 0;
         }
 
-        $validation = <<<VALIDATOR
-<?php
-
-namespace App\Validation{$namespace};
-
-use Bow\Validation\ValidationRequest as Validator;
-
-class {$classname} extends Validator
-{
-    /**
-     * Permet de vérifier la permission d'un utilisateur 
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
-    
-	/**
-	 * Règle de validation
-	 * 
-	 * @var array
-	 */
-    protected function rules()
-    {
-	    return [
-            // Vos régles
-        ];
-    }
-        
-	/**
-	 * Liste des clés à valider
-	 * 
-	 * @var array
-	 */
-	protected function keys()
-	{
-        return [
-            '*'
-        ];
-	}
-}
-VALIDATOR;
-
-        file_put_contents($this->validation_directory.'/'.$name.'.php', $validation);
+        $generator->write('validator');
 
         echo "\033[0;32mLe validateur \033[00m[${name}]\033[0;32m a été bien crée.\033[00m\n";
 
@@ -1196,67 +828,16 @@ VALIDATOR;
      */
     public function service($name)
     {
-        if (!is_dir($this->service_directory)) {
-            @mkdir($this->service_directory);
-        }
+        $generator = new GeneratorCommand($this->validation_directory, $validator_name);
 
-        if (!preg_match('/service/i', $name)) {
-            $name = ucfirst($name).'Service';
-        }
-
-        $classname = basename($name);
-
-        $namespace = dirname($name);
-
-        if ($namespace == '.') {
-            $namespace = '';
-        } else {
-            @mkdir($this->service_directory.'/'.$namespace, 0777, true);
-
-            $namespace = '\\'.str_replace('/', '\\', $namespace);
-        }
-
-        if (file_exists($this->service_directory.'/'.$name.'.php')) {
+        if ($generator->fileExists()) {
             echo "\033[0;33mLe service \033[0;33m\033[0;31m[${name}]\033[00m\033[0;31m existe déja.\033[00m\n";
 
             return 0;
         }
-
-        $validation = <<<VALIDATOR
-<?php
-
-namespace App\Service{$namespace};
-
-use Bow\Config\Config;
-use Bow\Application\Services as BowService;
-
-class {$classname} extends BowService
-{
-    /**
-     * Permet de lancement de configuration du service
-     * 
-     * @param Config \$config
-     * @return void
-     */
-    public function make(Config \$config)
-    {
-        //
-    }
-
-    /**
-     * Permet de démarrer le serivce
-     * 
-     * @return void
-     */
-    public function start()
-    {
-        //
-    }
-}
-VALIDATOR;
-
-        file_put_contents($this->service_directory.'/'.$name.'.php', $validation);
-
+        
+        $generator->write('service');
+        
         echo "\033[0;32mLe service \033[00m[${name}]\033[0;32m a été bien crée.\033[00m\n";
 
         return 0;
@@ -1280,6 +861,7 @@ VALIDATOR;
 
         if (!in_array($input, ['y', 'n'])) {
             echo Color::red('Choix invalide')."\n";
+
             return $this->readline($message);
         }
 
@@ -1288,19 +870,5 @@ VALIDATOR;
         }
 
         return false;
-    }
-
-    /**
-     * Check if filename is valide
-     *
-     * @param $filename
-     */
-    public function filenameIsValide($filename)
-    {
-        if (is_null($filename)) {
-            echo Color::red('Le nom du fichier est invalide.');
-
-            exit(1);
-        }
     }
 }

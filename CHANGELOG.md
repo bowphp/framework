@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2018-09-28 
+
 - [Fix] mise à jour du template de seeding 
 - [Change] formatage du code
 - [Add] add code of conduct
@@ -18,3 +20,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Fix] fix [#15](https://github.com/bowphp/framework/issues/15) 'Duplicate Code' issue in multiple files
 - [Change] update testing and refonte routing
 - [Change] formating
+- [Change] Refonte console command

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers{namespace};
 
 use App\Controllers\Controller;
 
@@ -37,9 +37,9 @@ class {className} extends Controller
     }
 
     /**
-     * Permet de récupérer un information précise avec un identifiant.
+     * Permet de récupérer une information précise avec un identifiant.
      *
-     * @param mixed $id L'identifiant de l'élément à récupérer
+     * @param  mixed $id
      * @return void
      */
     public function show($id)
@@ -50,7 +50,7 @@ class {className} extends Controller
     /**
      * Mise à jour d'un ressource en utilisant paramètre du GET
      *
-     * @param mixed $id L'identifiant de l'élément à mettre à jour
+     * @param  mixed $id
      * @return void
      */
     public function edit($id)
@@ -61,7 +61,7 @@ class {className} extends Controller
     /**
      * Mise à jour d'une ressource
      *
-     * @param mixed $id L'identifiant de l'élément à mettre à jour
+     * @param  mixed $id
      * @return void
      */
     public function update($id)
@@ -72,7 +72,7 @@ class {className} extends Controller
     /**
      * Permet de supprimer une ressource
      *
-     * @param mixed $id L'identifiant de l'élément à supprimer
+     * @param mixed $id
      * @return void
      */
     public function destroy($id)

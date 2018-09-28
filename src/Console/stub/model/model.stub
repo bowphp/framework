@@ -1,0 +1,10 @@
+<?php
+
+namespace App{namespace};
+
+use Bow\Database\Barry\Model;
+
+class {className} extends Model
+{
+    //
+}

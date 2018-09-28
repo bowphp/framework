@@ -1,7 +1,7 @@
 <?php
 $seeds = [];
 
-foreach (range(1, $num) as $key) {
+foreach (range(1, {num}) as $key) {
     $seeds[] = [
         'id' => faker('autoincrement'),
         'name' => faker('name'),

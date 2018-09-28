@@ -2,7 +2,7 @@
 
 namespace App\Controllers{namespace};
 
-use App\Controllers\Controller;
+{modelNamespace}use App\Controllers\Controller;
 
 class {className} extends Controller
 {
