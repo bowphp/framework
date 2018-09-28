@@ -18,7 +18,8 @@
         "phpunit/phpunit": "^4.8",
         "monolog/monolog": "^1.22",
         "mustache/mustache": "^2.10",
-        "pug-php/pug": "^2.4"
+        "pug-php/pug": "^2.4",
+        "squizlabs/php_codesniffer": "3.*"
     },
     "authors": [
         {
@@ -36,8 +37,9 @@
         }
     },
     "suggest": {
-        "mustache/mustache": "Pour le choix d'utilisation du moteur de template 'mustache'",
-        "pug-php/pug": "Pour le choix d'utilisation du moteur de template 'pug'",
-        "papac/bow-blade": "Pour le choix d'utilisation du moteur de template 'blade'"
+        "bowphp/tintin": "Pour le choix d'utilisation du moteur de template 'Tintin'",
+        "mustache/mustache": "Pour le choix d'utilisation du moteur de template 'Mustache'",
+        "pug-php/pug": "Pour le choix d'utilisation du moteur de template 'Pug'",
+        "papac/bow-blade": "Pour le choix d'utilisation du moteur de template 'Blade'"
     }
 }

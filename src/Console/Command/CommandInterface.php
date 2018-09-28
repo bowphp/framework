@@ -4,5 +4,5 @@ namespace Bow\Console\Command;
 
 interface CommandInterface
 {
-	public function makeStub();
+    public function makeStub();
 }

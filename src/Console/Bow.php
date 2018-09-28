@@ -88,7 +88,7 @@ class Bow
     /**
      * Permet de changer les fichiers de demarage
      *
-     * @param array $bootstrap
+     * @param  array $bootstrap
      * @return void
      */
     public function setBootstrap(array $bootstrap)
@@ -99,7 +99,7 @@ class Bow
     /**
      * Permet de changer les fichiers de demarage
      *
-     * @param string $serve_filename
+     * @param  string $serve_filename
      * @return void
      */
     public function setServerFilename($serve_filename)
@@ -115,7 +115,7 @@ class Bow
     public function run()
     {
         foreach ($this->bootstrap as $item) {
-            require $item;
+            include $item;
         }
 
         $this->call($this->command->getParameter('command'));
@@ -124,7 +124,7 @@ class Bow
     /**
      * Permet d'appeler un commande
      *
-     * @param string $command
+     * @param  string $command
      * @return void
      */
     public function call($command)
@@ -253,7 +253,7 @@ class Bow
         $seed_collection = [];
 
         foreach ($seeds_filenames as $filename) {
-            $seeds = require $filename;
+            $seeds = include $filename;
 
             Faker::reinitialize();
 
@@ -404,7 +404,7 @@ class Bow
     /**
      * Supprimession de fichier
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return void
      */
     private function unlinks($dirname)

@@ -384,7 +384,7 @@ class Command
     /**
      * Permet de monter une migration
      *
-     * @param string $model
+     * @param  string $model
      * @throws mixed
      */
     public function up($model)
@@ -395,7 +395,7 @@ class Command
     /**
      * Permet supprimer une migration dans la base de donnée
      *
-     * @param string $model
+     * @param  string $model
      * @throws mixed
      */
     public function down($model)
@@ -665,7 +665,7 @@ doc;
     /**
      * Permet de mettre en place le système de réssource.
      *
-     * @param string $controller_name
+     * @param  string $controller_name
      * @throws
      */
     public function resource($controller_name)
@@ -1055,9 +1055,11 @@ CM;
             $namespace = '';
         }
 
-        $classname = ucfirst(Str::camel(
-            basename($model_name)
-        ));
+        $classname = ucfirst(
+            Str::camel(
+                basename($model_name)
+            )
+        );
 
         $model = <<<MODEL
 <?php

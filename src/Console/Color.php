@@ -4,7 +4,7 @@ namespace Bow\Console;
 class Color
 {
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function red($message)
@@ -13,7 +13,7 @@ class Color
     }
 
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function blue($message)
@@ -22,7 +22,7 @@ class Color
     }
 
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function yellow($message)
@@ -31,7 +31,7 @@ class Color
     }
 
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function green($message)
@@ -40,7 +40,7 @@ class Color
     }
 
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function danger($message)
@@ -49,7 +49,7 @@ class Color
     }
 
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function info($message)
@@ -58,7 +58,7 @@ class Color
     }
 
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function warning($message)
@@ -67,7 +67,7 @@ class Color
     }
 
     /**
-     * @param $message
+     * @param  $message
      * @return string
      */
     public static function success($message)

@@ -4,7 +4,7 @@ namespace App\Controllers{namespace};
 
 use App\Controllers\Controller;
 
-class ClassName extends Controller
+class {className} extends Controller
 {
     /**
      * Point d'entré

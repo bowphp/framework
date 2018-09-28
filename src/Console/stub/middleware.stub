@@ -15,6 +15,6 @@ class {className}
     public function checker($request, callable $next, $guard = [])
     {
         // Codez Ici
-        return $next();
+        return $next($request);
     }
 }
