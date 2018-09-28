@@ -213,15 +213,15 @@ class Bow
      */
     public function seed()
     {
-        if ($this->command->getParameter('action') != null) {
+        $action = $this->command->getParameter('action');
+
+        if (!in_array($action, ['table', 'all'])) {
             echo "\033[0;32mCommand not found\033[00m\033[00m\n";
 
             exit(1);
         }
 
-        $options = $this->command->options();
-
-        if ($options->has('--all')) {
+        if ($action == 'all') {
             if ($this->command->getParameter('target') !== null) {
                 echo "\033[0;31mCommand not found\033[00m\033[00m\n";
 
@@ -231,25 +231,20 @@ class Bow
 
         $seeds_filenames = [];
 
-        if ($options->get('--all')) {
-            $seeds_filenames = glob($this->dirname.'/db/seeders/*_seeder.php');
-
-            goto seed;
-        }
-
-        if ($this->command->getParameter('target') !== null) {
+        if ($action == 'all') {
+            $seeds_filenames = glob($this->command->getSeederDirectory().'/*_seeder.php');
+        } elseif ($action == 'table') {
             $table_name = $this->command->getParameter('target');
 
-            if (!is_string($table_name) || !file_exists($this->dirname."/db/seeders/{$table_name}_seeder.php")) {
+            if (!is_string($table_name) || !file_exists($this->command->getSeederDirectory()."/{$table_name}_seeder.php")) {
                 echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
 
                 exit(1);
             }
 
-            $seeds_filenames = [$this->dirname."/db/seeders/{$table_name}_seeder.php"];
+            $seeds_filenames = [$this->command->getSeederDirectory()."/{$table_name}_seeder.php"];
         }
 
-        seed:
         $seed_collection = [];
 
         foreach ($seeds_filenames as $filename) {
@@ -461,7 +456,8 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mclear:all\033[00m         Clear all cache information
    
  \033[0;32mseed\033[00m Make seeding
-   \033[0;33mseed \033[00m [table_name]    Make seeding for all or one table
+   \033[0;33mseed:table\033[00m [table_name]    Make seeding for one table
+   \033[0;33mseed:all\033[00m                   Make seeding for all
 
  \033[0;32mconsole\033[00m show psysh php REPL for debug you code.
  \033[0;32mserver\033[00m run a local web server.
@@ -514,8 +510,6 @@ U;
                 echo <<<U
 \n\033[0;32mmigrate\033[00m apply a migration in user model\n
     [option]
-    --create=table_name   Change name of table
-    --table=table_name    Alter migration table
     --all                 Optionnel
     --display-sql         Display rendered sql code
 
@@ -539,19 +533,19 @@ U;
             case 'clear':
                 echo <<<U
 \n\033[0;32mclear\033[00m for clear cache information\n
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:view        Clear view cached information
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:cache\033[00m       Clear cache information
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:all\033[00m         Clear all cache information
 
-   \033[0;33mclear:view\033[00m        Clear view cached information
-   \033[0;33mclear:cache\033[00m       Clear cache information
-   \033[0;33mclear:all\033[00m         Clear all cache information
 U;
                 break;
 
             case 'seed':
                 echo <<<U
-\n\033[0;32mseed\033[00m table\n
-   option: [name]
-   
-   \033[0;33mseed\033[00m [option]    Make seeding for all or one table
+\n\033[0;32mMake table seeding\033[00m\n
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:all\033[00m               Make seeding for all
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:table\033[00m table_name  Make seeding for one table
+
 U;
                 break;
         }
