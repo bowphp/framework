@@ -550,11 +550,7 @@ class Command
 
         $options = $this->options();
 
-        $num = 5;
-
-        if ($options->has('--n-seed') && is_int($options->get('--n-seed'))) {
-            $num = $options->get('--n-seed', 5);
-        }
+        $num = (int) $options->get('--n-seed', 5);
 
         $generator->write('seed', [
             'num' => $num,
@@ -583,7 +579,7 @@ class Command
 
         $map_method = ["create", "drop"];
 
-        $table = $model;
+        $table = "table";
 
         $options = $this->options();
 
@@ -764,7 +760,7 @@ class Command
      */
     public function model($model_name, $table_name = null)
     {
-        $generator = new GeneratorCommand($this->middleware_directory, $model_name);
+        $generator = new GeneratorCommand($this->model_directory, $model_name);
 
         if ($generator->fileExists()) {
             echo "\033[0;33mLe model \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m existe déja.\033[00m\n";

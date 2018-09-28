@@ -519,10 +519,10 @@ U;
     --all                 Optionnel
     --display-sql         Display rendered sql code
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:up name [option]       Up the specify migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name [--all]      Down migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate                        Up all defined migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate help                   For display this
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:up name [option]  Up the specify migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name         Down migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate [--all]           Up all defined migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate help              For display this
 
 U;
 
@@ -551,7 +551,7 @@ U;
 \n\033[0;32mseed\033[00m table\n
    option: [name]
    
-   \033[0;33mseed \033[00m [option]    Make seeding for all or one table
+   \033[0;33mseed\033[00m [option]    Make seeding for all or one table
 U;
                 break;
         }
