@@ -31,10 +31,10 @@ class View
      * @var array
      */
     private static $container = [
-        'twig' => Engine\TwigEngine::class,
-        'php' => Engine\PHPEngine::class,
-        'mustache' => Engine\MustacheEngine::class,
-        'pug' => Engine\PugEngine::class
+        'twig' => \Bow\View\Engine\TwigEngine::class,
+        'php' => \Bow\View\Engine\PHPEngine::class,
+        'mustache' => \Bow\View\Engine\MustacheEngine::class,
+        'pug' => \Bow\View\Engine\PugEngine::class
     ];
 
     /**
@@ -110,6 +110,8 @@ class View
     }
 
     /**
+     * Set Engine
+     *
      * @param string $engine
      * @return View
      */
@@ -119,11 +121,13 @@ class View
 
         static::$config['view.engine'] = $engine;
 
-        return $this;
+        return static::getInstance();
     }
 
     /**
-     * @param $cachabled
+     * Set the availability of caching system
+     *
+     * @param bool $cachabled
      */
     public function cachable($cachabled)
     {
@@ -140,7 +144,7 @@ class View
 
         static::$config['view.extension'] = $extension;
 
-        return $this;
+        return static::getInstance();
     }
 
     /**

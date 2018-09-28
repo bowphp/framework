@@ -656,7 +656,7 @@ class Command
 
         $model_namespace = '';
 
-        if (static::readline("Voulez vous que je crée les vues associées?")) {
+        if (static::readline("Voulez vous que je crée les vues associées ? ")) {
             $model = strtolower($model);
 
             @mkdir($this->component_directory."/views/".$model, 0766);
@@ -664,7 +664,7 @@ class Command
             echo "\033[0;33;7m";
 
             foreach (["create", "edit", "show", "index", "update", "delete"] as $value) {
-                $file = $this->component_directory."/views/$model/$value.twig";
+                $file = $this->component_directory."/views/$model/$value.".\Bow\Support\Capsule::getInstance()->make('view')->;
 
                 echo "$file\n";
             }
