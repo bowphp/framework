@@ -24,20 +24,22 @@ class Env
      */
     public static function load($filename)
     {
-        if (static::$env == null) {
-            static::$env = json_decode(trim(file_get_contents($filename)), true);
+        if (static::$env != null) {
+            return;
+        }
 
-            if (json_last_error() == JSON_ERROR_SYNTAX) {
-                throw new \ErrorException('Vérifié la syntax json de fichier d\'environement.');
-            }
+        static::$env = json_decode(trim(file_get_contents($filename)), true);
 
-            if (json_last_error() == JSON_ERROR_INVALID_PROPERTY_NAME) {
-                throw new \ErrorException('Vérifié le nom des propriétés du fichier d\'environement.');
-            }
+        if (json_last_error() == JSON_ERROR_SYNTAX) {
+            throw new \ErrorException('Vérifié la syntax json de fichier d\'environement (.env.json)');
+        }
 
-            if (json_last_error() != JSON_ERROR_NONE) {
-                throw new \ErrorException(json_last_error_msg());
-            }
+        if (json_last_error() == JSON_ERROR_INVALID_PROPERTY_NAME) {
+            throw new \ErrorException('Vérifié le nom des propriétés du fichier d\'environement (.env.json).');
+        }
+
+        if (json_last_error() != JSON_ERROR_NONE) {
+            throw new \ErrorException(json_last_error_msg());
         }
     }
 

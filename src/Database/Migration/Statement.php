@@ -58,8 +58,8 @@ class Statement
                 "CREATE TABLE IF NOT EXISTS `%s` (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE %s;",
                 $this->columns->getTableName(),
                 $statement,
-                $this->columns->getCharset(),
                 $this->columns->getEngine(),
+                $this->columns->getCharset(),
                 $this->columns->getCollate()
             );
         }

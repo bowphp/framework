@@ -2,7 +2,6 @@
 
 namespace Bow\Console;
 
-use Bow\Resource\Storage;
 use Bow\Support\Collection;
 use Bow\Support\Str;
 
@@ -11,7 +10,7 @@ class Command
     /**
      * @var string
      */
-    const BAD_COMMAND = "Bad command.%sPlease type this command \033[0;32;7m`php bow help` or `php bow command help` for more information.";
+    const BAD_COMMAND = "Please type this command \033[0;32;7m`php bow help` or `php bow command help` for more information.";
 
     /**
      * @var string
@@ -482,7 +481,7 @@ class Command
         $registers = file($this->migration_directory."/.registers");
 
         if (count($registers) == 0) {
-            echo Color::red('Le fichier de régistre de bow est vide.');
+            echo Color::red('Le fichier de régistre de bow est vide (db/migration/.registers');
 
             exit(0);
         }
@@ -517,7 +516,7 @@ class Command
             $class = ucfirst(Str::camel($model));
 
             if (!class_exists($class)) {
-                echo Color::red("Classe \"{$class}\" introvable. Vérifiez vos fichier de régistre.");
+                echo Color::red("Classe \"{$class}\" introvable. Vérifiez le fichier de régistre (db/migration/.registers).");
 
                 exit(1);
             }
@@ -577,8 +576,6 @@ class Command
             "${create_at}_${model}"
         );
 
-        $map_method = ["create", "drop"];
-
         $table = "table";
 
         $options = $this->options();
@@ -612,17 +609,21 @@ class Command
         }
 
         $class_name = ucfirst(Str::camel($model));
-        
+
         $generator->write($type, [
-            'prefix1' => $map_method[0],
-            'prefix2' => $map_method[1],
             'table' => $table,
             'className' => $class_name
         ]);
 
-        Storage::append($this->migration_directory."/.registers", "${create_at}_${model}|$class_name\n");
+        file_put_contents(
+            $this->migration_directory."/.registers",
+            "${create_at}_${model}|$class_name\n",
+            FILE_APPEND
+        );
 
-        echo "\033[0;32mLe file de migration \033[00m[$model]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe fichier de migration \033[00m[$model]\033[0;32m a été bien créé.\033[00m\n";
+
+        exit(0);
     }
 
     /**
@@ -675,7 +676,7 @@ class Command
             'prefix' => $prefix
         ]);
 
-        echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien créé.\033[00m\n";
 
         if ($this->readline("Voulez vous que je crée un model?")) {
             if ($options->has('--model')) {
@@ -713,7 +714,7 @@ class Command
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe controlleur \033[0;33m\033[0;31m[$controller_name]\033[00m\033[0;31m existe déja.\033[00m\n";
+            echo "\033[0;31mLe controlleur \033[0;33m\033[0;31m[$controller_name]\033[00m\033[0;31m existe déjà.\033[00m\n";
 
             exit(1);
         }
@@ -724,7 +725,7 @@ class Command
             $generator->write('controller/controller');
         }
 
-        echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien créé.\033[00m\n";
 
         exit(0);
     }
@@ -739,14 +740,14 @@ class Command
         $generator = new GeneratorCommand($this->middleware_directory, $middleware_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe middleware \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m existe déja.\033[00m\n";
+            echo "\033[0;31mLe middleware \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m existe déjà.\033[00m\n";
 
             exit(1);
         }
 
         $generator->write('middleware');
 
-        echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien créé.\033[00m\n";
 
         exit(0);
     }
@@ -763,14 +764,14 @@ class Command
         $generator = new GeneratorCommand($this->model_directory, $model_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe model \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m existe déja.\033[00m\n";
+            echo "\033[0;33mLe model \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
 
             exit(1);
         }
 
         $generator->write('model/model');
 
-        echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien créé.\033[00m\n";
 
         if ($this->options('-m')) {
             $this->make('create_'.strtolower($model_name).'_table');
@@ -804,14 +805,14 @@ class Command
         $generator = new GeneratorCommand($this->validation_directory, $validator_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe validateur \033[0;33m\033[0;31m[${validator_name}]\033[00m\033[0;31m existe déja.\033[00m\n";
+            echo "\033[0;33mLe validateur \033[0;33m\033[0;31m[${validator_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
 
             return 0;
         }
 
         $generator->write('validator');
 
-        echo "\033[0;32mLe validateur \033[00m[${validator_name}]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe validateur \033[00m[${validator_name}]\033[0;32m a été bien créé.\033[00m\n";
 
         return 0;
     }
@@ -827,14 +828,14 @@ class Command
         $generator = new GeneratorCommand($this->service_directory, $service_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${service_name}]\033[00m\033[0;31m existe déja.\033[00m\n";
+            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${service_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
 
             return 0;
         }
         
         $generator->write('service');
         
-        echo "\033[0;32mLe service \033[00m[${service_name}]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe service \033[00m[${service_name}]\033[0;32m a été bien créé.\033[00m\n";
 
         return 0;
     }

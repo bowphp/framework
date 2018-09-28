@@ -31,9 +31,9 @@ class Schema
         $table = Database::getConnectionAdapter()->getTablePrefix().$table;
 
         if ((bool) Database::statement('DROP TABLE IF EXISTS ' . $table . ';')) {
-            echo "\033[0;32m$table table droped.\033[00m\n";
+            echo "\033[0;32m$table table a été supprimée.\033[00m\n";
         } else {
-            echo "\033[0;31m$table table not exists.\033[00m\n";
+            echo "\033[0;31m$table table n'existe pas.\033[00m\n";
         }
     }
 
@@ -68,11 +68,11 @@ class Schema
         }
 
         if ($displaySql) {
-            echo $sql . "\n";
+            echo $sql."\n";
         }
 
         if (Database::statement($sql)) {
-            echo "\033[0;32mLa table $table a été créer.\033[00m\n";
+            echo "\033[0;32mLa table $table a été créée.\033[00m\n";
         }
     }
 
@@ -86,6 +86,7 @@ class Schema
     public static function table($table, callable $cb, $displaySql = false)
     {
         $table = Database::getConnectionAdapter()->getTablePrefix().$table;
+
         call_user_func_array($cb, [new AlterTable($table, $displaySql)]);
     }
 }
