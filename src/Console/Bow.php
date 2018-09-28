@@ -130,9 +130,9 @@ class Bow
     public function call($command)
     {
         if (!method_exists($this, $command)) {
-            echo Color::red("Bad $command command .\n");
+            echo Color::red("Bad command\n");
 
-            exit(1);
+            throw new \ErrorException('Type "php bow help" for more information');
         }
 
         if (!$this->command->getParameter('action')) {
@@ -164,7 +164,9 @@ class Bow
         $action = $this->command->getParameter('action');
 
         if (!in_array($action, ['up', 'down', 'refresh', null])) {
-            throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
+            echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
+
+            throw new \ErrorException('Type "php bow help migrate" for more information');
         }
 
         if ($action == null) {
@@ -196,7 +198,9 @@ class Bow
         $action = $this->command->getParameter('action');
 
         if (!in_array($action, ['middleware', 'controller', 'model', 'validation', 'seeder', 'migration', 'service'])) {
-            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
+            echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
+
+            throw new \ErrorException('Type "php bow help create" for more information');
         }
 
         if ($action == 'migration') {
@@ -216,16 +220,16 @@ class Bow
         $action = $this->command->getParameter('action');
 
         if (!in_array($action, ['table', 'all'])) {
-            echo "\033[0;32mCommand not found\033[00m\033[00m\n";
-
-            exit(1);
+            echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
+            
+            throw new \ErrorException('Type "php bow help seed" for more information');
         }
 
         if ($action == 'all') {
-            if ($this->command->getParameter('target') !== null) {
-                echo "\033[0;31mCommand not found\033[00m\033[00m\n";
+            if ($this->command->getParameter('target') != null) {
+                echo "\033[0;31mBad command\033[00m\033[00m\n";
 
-                exit(1);
+                throw new \ErrorException('Type "php bow help seed" for more information');
             }
         }
 
@@ -234,9 +238,15 @@ class Bow
         if ($action == 'all') {
             $seeds_filenames = glob($this->command->getSeederDirectory().'/*_seeder.php');
         } elseif ($action == 'table') {
-            $table_name = $this->command->getParameter('target');
+            $table_name = trim($this->command->getParameter('target', null));
 
-            if (!is_string($table_name) || !file_exists($this->command->getSeederDirectory()."/{$table_name}_seeder.php")) {
+            if (is_null($table_name)) {
+                echo "\033[0;31mSpecify the seeder table name.\033[00m\033[00m\n";
+                
+                throw new \ErrorException('Type "php bow help seed" for more information');
+            }
+
+            if (!file_exists($this->command->getSeederDirectory()."/{$table_name}_seeder.php")) {
                 echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
 
                 exit(1);
@@ -291,7 +301,7 @@ class Bow
      *
      * @return void
      */
-    public function serve()
+    public function server()
     {
         $port = (int) $this->command->options('--port', 5000);
 
@@ -527,6 +537,14 @@ U;
 \n\033[0;32mconsole\033[00m show psysh php REPL\n
     php bow console
     >>> //test you code here.
+U;
+                break;
+
+            case 'server':
+                echo <<<U
+\n\033[0;32mserver\033[00m start local developpement server\n
+    php bow server
+    [note] Please do use this for make production server.
 U;
                 break;
 

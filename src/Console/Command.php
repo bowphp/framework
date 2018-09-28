@@ -455,7 +455,7 @@ class Command
             if (is_null($model)) {
                 if ($options->get('--all') === null) {
                     echo Color::danger(
-                        "cette commande est super dangereuse. Alors veuillez ajout le flag --all pour assurer bow."
+                        "Cette commande est super dangereuse. Alors veuillez ajout le flag --all pour assurer bow."
                     );
 
                     exit(1);
