@@ -533,17 +533,17 @@ class Application
     /**
      * Envoi la reponse au client
      *
-     * @param $response
+     * @param mixed $response
      * @return null
      */
     public function sendResponse($response)
     {
         if (is_string($response)) {
-            $this->response->send($response);
+            echo $this->response->send($response);
         }
 
         if (is_array($response) || is_object($response)) {
-            $this->response->json($response);
+            echo $this->response->json($response);
         }
 
         if ($response instanceof Redirect) {
