@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Fix] fix [#21](https://github.com/bowphp/framework/issues/21) 'Duplicate Code' issue in multiple files
 - [Fix] fix [#15](https://github.com/bowphp/framework/issues/15) 'Duplicate Code' issue in multiple files
 - [Change] update testing and refonte routing
+- [Change] formating
