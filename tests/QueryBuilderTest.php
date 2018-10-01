@@ -63,7 +63,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pets = $table->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 
     /**
@@ -76,7 +76,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pets = $table->select(['name'])->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 
     /**
@@ -89,7 +89,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pet = $table->select(['name'])->first();
 
-        $this->assertInstanceOf(\Bow\Database\SqlUnity::class, $pet);
+        $this->assertInstanceOf(\StdClass::class, $pet);
     }
 
     /**
@@ -102,7 +102,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pets = $table->whereIn('id', [1, 3])->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 
     /**
@@ -115,7 +115,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pets = $table->whereNull('name')->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 
     /**
@@ -128,7 +128,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pets = $table->whereBetween('id', [1, 3])->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 
     /**
@@ -141,7 +141,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pets = $table->whereNotBetween('id', [1, 3])->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 
     /**
@@ -154,7 +154,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 
         $pets = $table->whereNotIn('id', [1, 3])->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 
     /**
@@ -165,8 +165,11 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     {
         $table = $db->table('pets');
 
-        $pets = $table->where('id', 1)->orWhere('name', 1)->whereNull('name')->whereBetween('id', [1, 3])->whereNotBetween('id', [1, 3])->get();
+        $pets = $table->where('id', 1)->orWhere('name', 1)
+            ->whereNull('name')
+            ->whereBetween('id', [1, 3])
+            ->whereNotBetween('id', [1, 3])->get();
 
-        $this->assertInstanceOf(\Bow\Support\Collection::class, $pets);
+        $this->assertEquals(is_array($pets), true);
     }
 }

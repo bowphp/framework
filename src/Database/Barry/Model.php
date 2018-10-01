@@ -5,7 +5,6 @@ namespace Bow\Database\Barry;
 use Carbon\Carbon;
 use Bow\Support\Str;
 use Bow\Database\Collection;
-use Bow\Database\Query\Builder;
 use Bow\Database\Database as DB;
 use Bow\Database\Exception\NotFoundException;
 
@@ -360,6 +359,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         return null;
+    }
+
+    /**
+     * Permet de récupérer la clé primaire
+     *
+     * @return string
+     */
+    private function getKey()
+    {
+        return $this->primaryKey;
     }
 
     /**

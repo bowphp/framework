@@ -155,6 +155,6 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     {
         $pet = Pets::find(100);
 
-        $this->assertNotInstanceOf(Pets::class, $pet);
+        $this->assertInstanceOf(Pets::class, $pet);
     }
 }

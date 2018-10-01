@@ -182,7 +182,7 @@ class Database
 
         $pdostatement->execute();
 
-        return new Collection(Sanitize::make($pdostatement->fetchAll()));
+        return Sanitize::make($pdostatement->fetchAll());
     }
 
     /**

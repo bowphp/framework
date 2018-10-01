@@ -98,7 +98,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     {
         $pets = $db->select("SELECT * FROM pets");
 
-        $this->assertInstanceOf(Collection::class, $pets);
+        $this->assertTrue(is_array($pets));
     }
 
     /**
@@ -118,7 +118,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     {
         $pets = $db->select("SELECT * FROM pets WHERE id = :id", ['id' => 1]);
 
-        $this->assertInstanceOf(Collection::class, $pets);
+        $this->assertTrue(is_array($pets));
     }
 
     /**
@@ -130,9 +130,9 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
             'id' => 6
         ]);
 
-        $this->assertInstanceOf(Collection::class, $pets);
+        $this->assertTrue(is_array($pets));
 
-        $this->assertEquals($pets->isEmpty(), true);
+        $this->assertTrue(count($pets) == 0);
     }
 
     /**
@@ -144,7 +144,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
             'id' => 1
         ]);
 
-        $this->assertEquals(is_object($pets), true);
+        $this->assertTrue(is_object($pets));
     }
 
     /**

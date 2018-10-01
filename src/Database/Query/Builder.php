@@ -20,77 +20,77 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * @var string
      */
-    private $loadClassName;
+    protected $loadClassName;
 
     /**
      * @var bool
      */
-    private $loadDataInClass = true;
+    protected $loadDataInClass = true;
 
     /**
      * @var string
      */
-    private $primaryKey = 'id';
+    protected $primaryKey = 'id';
 
     /**
      * @var string
      */
-    private $table;
+    protected $table;
 
     /**
      * @var string
      */
-    private $select;
+    protected $select;
 
     /**
      * @var string
      */
-    private $where;
+    protected $where;
 
     /**
      * @var array
      */
-    private $whereDataBinding = [];
+    protected $whereDataBinding = [];
 
     /**
      * @var string
      */
-    private $join;
+    protected $join;
 
     /**
      * @var string
      */
-    private $limit;
+    protected $limit;
 
     /**
      * @var string
      */
-    private $group;
+    protected $group;
 
     /**
      * @var string
      */
-    private $havin;
+    protected $havin;
 
     /**
      * @var string
      */
-    private $order;
+    protected $order;
 
     /**
      * @var \PDO
      */
-    private $connection;
+    protected $connection;
 
     /**
      * @var bool
      */
-    private $first = false;
+    protected $first = false;
 
     /**
      * @var string
      */
-    private $prefix = '';
+    protected $prefix = '';
 
     /**
      * Contructeur
@@ -100,8 +100,12 @@ class Builder extends Tool implements \JsonSerializable
      * @param string     $primaryKey
      * @param $connection
      */
-    public function __construct($table, $connection, $loadClassName = null, $primaryKey = 'id')
-    {
+    public function __construct(
+        $table,
+        $connection,
+        $loadClassName = null,
+        $primaryKey = 'id'
+    ) {
         if ($loadClassName == null) {
             $this->loadClassName = static::class;
         } else {
@@ -752,70 +756,22 @@ class Builder extends Tool implements \JsonSerializable
         $stmt->execute();
 
         $data = Sanitize::make($stmt->fetchAll());
+
         $stmt->closeCursor();
 
-        if ($this->loadClassName) {
-            $loadClassName = $this->loadClassName;
-        } else {
-            $loadClassName = static::class;
+        if (!$this->first) {
+            return $data;
+        }
+   
+        $current = current($data);
+        
+        $this->first = false;
+
+        if ($current == false) {
+            return null;
         }
 
-        if ($this->first) {
-            $current = current($data);
-            $this->first = false;
-
-            if ($current == false) {
-                return null;
-            }
-
-            // Permet de retourner les données de façon brute
-            if (!$this->loadDataInClass) {
-                return $current;
-            }
-
-            if ($loadClassName !== Builder::class) {
-                return new $loadClassName((array) $current);
-            }
-
-            $id = $this->primaryKey;
-
-            $id_value = null;
-
-            if (isset($current->{$id})) {
-                $id_value = $current->{$id};
-
-                unset($current->{$id});
-            }
-
-            return new SqlUnity($this, $id_value, $current);
-        }
-
-        // Permet de retourner les données de façon brute
-        if (!$this->loadDataInClass) {
-            new \Bow\Support\Collection($data);
-        }
-
-        foreach ($data as $key => $value) {
-            if ($loadClassName !== Builder::class) {
-                $data[$key] = new $loadClassName((array) $value);
-
-                continue;
-            }
-
-            $id = $this->primaryKey;
-
-            $id_value = null;
-
-            if (isset($value->{$id})) {
-                $id_value = $value->{$id};
-
-                unset($value->{$id});
-            }
-
-            $data[$key] = new SqlUnity($this, $id_value, $value);
-        }
-
-        return new Collection($data);
+        return $current;
     }
 
     /**
