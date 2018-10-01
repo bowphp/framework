@@ -15,7 +15,7 @@ class Builder extends QueryBuilder
     /**
      * @inherits
      */
-    public function get($columns = [])
+    public function get(array $columns = [])
     {
         $data = parent::get($columns);
 
