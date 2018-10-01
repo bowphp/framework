@@ -16,7 +16,7 @@ class ActionnerService extends BowService
      */
     public function make(Config $config)
     {
-        $this->app->capsule(Actionner::class, function () use ($config) {
+        $this->app->capsule('actionner', function () use ($config) {
             return Actionner::configure($config->namespaces(), $config->middlewares());
         });
     }
@@ -28,6 +28,6 @@ class ActionnerService extends BowService
      */
     public function start()
     {
-        $this->app->capsule(Actionner::class);
+        $this->app->capsule('actionner');
     }
 }

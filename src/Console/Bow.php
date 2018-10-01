@@ -115,10 +115,20 @@ class Bow
     public function run()
     {
         foreach ($this->bootstrap as $item) {
-            include $item;
+            require $item;
+        }
+        
+        $command = $this->command->getParameter('command');
+
+        if ($command == 'launch') {
+            $command = null;
         }
 
-        $this->call($this->command->getParameter('command'));
+        if ($command == 'run') {
+            $command = 'launch';
+        }
+
+        $this->call($command);
     }
 
     /**
@@ -127,10 +137,10 @@ class Bow
      * @param  string $command
      * @return void
      */
-    public function call($command)
+    private function call($command)
     {
         if (!method_exists($this, $command)) {
-            echo Color::red("Bad command\n");
+            echo Color::red("Command not exists !\n");
 
             throw new \ErrorException('Type "php bow help" for more information');
         }
@@ -296,12 +306,23 @@ class Bow
         $this->command->reflesh();
     }
 
+    public function launch()
+    {
+        $action = $this->command->getParameter('action');
+
+        if (!in_array($action, ['server', 'console'])) {
+            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
+        }
+
+        $this->$action();
+    }
+
     /**
      * Permet de lancer le serveur local
      *
      * @return void
      */
-    public function server()
+    private function server()
     {
         $port = (int) $this->command->options('--port', 5000);
 
@@ -331,7 +352,7 @@ class Bow
     /**
      * Permet de lancer le repl
      */
-    public function console()
+    private function console()
     {
         if (is_string($this->command->getParameter('--include'))) {
             $this->setBootstrap(
@@ -347,7 +368,7 @@ class Bow
 
         $config = new \Psy\Configuration();
 
-        $config->setPrompt('bow >> ');
+        $config->setPrompt('(bow) >> ');
 
         $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
 
@@ -432,20 +453,19 @@ class Bow
         if ($command === null) {
             $usage = <<<USAGE
 
-Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|--table|--seed]
+Bow usage: php bow command:action [name]
+    [help|--no-plain|--create|--table|--n-seed|--port|--host|--php-settings|-m|--display-sql|--all|--include|--model]
 
 \033[0;32mcommand\033[00m:
 
  \033[0;33mhelp\033[00m display command helper
 
  \033[0;32mgenerate\033[00m create a new app key and resources
-
    \033[0;33mgenerate:resource\033[00m  Create new REST assicate at a controller
    \033[0;33mgenerate:key\033[00m       Create new app key
 
- \033[0;32madd\033[00m                  Create a user class
-
-   \033[0;33madd:middleware\033[00m      Create new middleware
+ \033[0;32madd\033[00m Create a user class
+   \033[0;33madd:middleware\033[00m    Create new middleware
    \033[0;33madd:service\033[00m       Create new service
    \033[0;33madd:controller\033[00m    Create new controller
    \033[0;33madd:model\033[00m         Create new model
@@ -460,7 +480,6 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
    \033[0;33mregister:reflesh\033[00m   Update register file
 
  \033[0;32mclear\033[00m for clear cache information [not supported]
-
    \033[0;33mclear:view\033[00m        Clear view cached information
    \033[0;33mclear:cache\033[00m       Clear cache information
    \033[0;33mclear:all\033[00m         Clear all cache information
@@ -468,9 +487,10 @@ Bow usage: php bow command:action [name] [help|--with-model|--no-plain|--create|
  \033[0;32mseed\033[00m Make seeding
    \033[0;33mseed:table\033[00m [table_name]    Make seeding for one table
    \033[0;33mseed:all\033[00m                   Make seeding for all
-
- \033[0;32mconsole\033[00m show psysh php REPL for debug you code.
- \033[0;32mserver\033[00m run a local web server.
+ 
+ \033[0;32mrun\033[00m Launch process
+    \033[0;33mrun:console\033[00m show psysh php REPL for debug you code.
+    \033[0;33mrun:server\033[00m run a local web server.
 
 USAGE;
             echo $usage;
@@ -485,7 +505,6 @@ USAGE;
                 echo <<<U
 \n\033[0;32mcreate\033[00m create a user class\n
     [option]
-    --with-model[=name]     Create a model associte at controller
     --no-plain              Create a plain controller [available in add:controller]
     -m                      Create a migration [available in add:model]
     --create                Create a migration for create table [available in add:migration]
@@ -529,22 +548,17 @@ U;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate help              For display this
 
 U;
-
                 break;
 
-            case 'console':
+            case 'run':
                 echo <<<U
-\n\033[0;32mconsole\033[00m show psysh php REPL\n
-    php bow console
-    >>> //test you code here.
-U;
-                break;
+\n\033[0;32mrun\033[00m for launch repl and local server\n
+    Option: run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
+    Option: run:console [--include=filename.php]
 
-            case 'server':
-                echo <<<U
-\n\033[0;32mserver\033[00m start local developpement server\n
-    php bow server
-    [note] Please do use this for make production server.
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m [option] Show psysh php REPL 
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
+
 U;
                 break;
 

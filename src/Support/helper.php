@@ -26,7 +26,7 @@ if (!function_exists('app')) {
      * @param  array $setting
      * @return \Bow\Support\Capsule|mixed
      */
-    function app($key = null, $setting = [])
+    function app($key = null, array $setting = [])
     {
         $capsule = Capsule::getInstance();
 
@@ -34,7 +34,7 @@ if (!function_exists('app')) {
             return $capsule;
         }
 
-        if ($setting == null) {
+        if (coun($setting) == 0) {
             return $capsule->make($key);
         }
 
@@ -52,17 +52,17 @@ if (!function_exists('config')) {
      */
     function config($key = null, $setting = null)
     {
-        app('config', function () {
-            return Config::getInstance();
-        });
-
-        $config = app('config');
+        $config = Config::getInstance();
 
         if (is_null($key)) {
             return $config;
         }
 
-        return $config($key, $setting);
+        if (is_null($setting)) {
+            return $config[$key];
+        }
+
+        return $config[$key] = $setting;
     }
 }
 
@@ -438,7 +438,6 @@ if (!function_exists('create_csrf_token')) {
     }
 }
 
-
 if (!function_exists('csrf_token')) {
     /**
      * csrf_token, fonction permetant de récupérer le token généré
@@ -764,7 +763,6 @@ if (!function_exists('url')) {
     }
 }
 
-
 if (!function_exists('pdo')) {
     /**
      * pdo retourne l'instance de la connection PDO
@@ -779,7 +777,7 @@ if (!function_exists('pdo')) {
 
 if (!function_exists('set_pdo')) {
     /**
-     * modifie l'instance de la connection PDO
+     * Modifie l'instance de la connection PDO
      *
      * @param  PDO $pdo
      * @return PDO
@@ -789,16 +787,6 @@ if (!function_exists('set_pdo')) {
         DB::setPdo($pdo);
 
         return pdo();
-    }
-}
-
-if (!function_exists('str')) {
-    /**
-     * @return \Bow\Support\Str;
-     */
-    function str()
-    {
-        return new \Bow\Support\Str();
     }
 }
 
@@ -853,6 +841,7 @@ if (!function_exists('start_transaction')) {
         if ($cb !== null) {
             call_user_func_array($cb, []);
         }
+
         DB::startTransaction($cb);
     }
 }
@@ -1109,6 +1098,8 @@ if (!function_exists('validator')) {
 
 if (!function_exists('bow_date')) {
     /**
+     * Get \Bow\Support\DateAccess instance
+     *
      * @param null $date
      * @return \Bow\Support\DateAccess
      */
@@ -1120,8 +1111,9 @@ if (!function_exists('bow_date')) {
 
 if (!function_exists('public_path')) {
     /**
-     * Dossier des publics
+     * Get public directory
      *
+     * @param string $path
      * @return string
      */
     function public_path($path = '')
@@ -1132,8 +1124,9 @@ if (!function_exists('public_path')) {
 
 if (!function_exists('storage_path')) {
     /**
-     * Dossier des storages
+     * Get storages directory
      *
+     * @param string $path
      * @return string
      */
     function storage_path($path = '')
@@ -1144,8 +1137,9 @@ if (!function_exists('storage_path')) {
 
 if (!function_exists('assets')) {
     /**
-     * Dossier des assets
+     * Get assets directory
      *
+     * @param string $path
      * @return string
      */
     function assets($path = '')
@@ -1156,6 +1150,8 @@ if (!function_exists('assets')) {
 
 if (!function_exists('str')) {
     /**
+     * Alis for \Bow\Support\Str class
+     *
      * @return \Bow\Support\Str
      */
     function str()
@@ -1166,11 +1162,10 @@ if (!function_exists('str')) {
 
 if (!function_exists('route')) {
     /**
-     * Route
+     * Get Route by name
      *
-     * @param  string $name Le nom de la route nommé
-     * @param  array  $data Les données à
-     *                      assigner
+     * @param  string $name
+     * @param  array  $data
      * @return string
      */
     function route($name, array $data = [])
@@ -1206,6 +1201,10 @@ if (!function_exists('e')) {
 
 if (!function_exists('form')) {
     /**
+     * Form class help
+     *
+     * Build form with helpers
+     *
      * @return \Bow\Http\Form
      */
     function form()
@@ -1272,12 +1271,14 @@ if (!function_exists('cache')) {
 
 if (!function_exists('back')) {
     /**
+     * Make redirection to back
+     *
      * @param int   $status
      * @param array $headers
      */
     function back($status = 302, $headers = [])
     {
-        redirect()->back($status, $headers);
+        return redirect()->back($status, $headers);
     }
 }
 
@@ -1324,6 +1325,8 @@ if (!function_exists('faker')) {
 
 if (!function_exists('trans')) {
     /**
+     * Make translation
+     *
      * @param $key
      * @param $data
      * @param bool $choose
@@ -1352,6 +1355,8 @@ if (!function_exists('__')) {
 
 if (!function_exists('env')) {
     /**
+     * Gets the app environement variable
+     *
      * @param $key
      * @param $default
      * @return string
@@ -1366,8 +1371,28 @@ if (!function_exists('env')) {
     }
 }
 
+if (!function_exists('app_env')) {
+    /**
+     * Gets the app environement variable
+     *
+     * @param $key
+     * @param $default
+     * @return string
+     */
+    function app_env($key, $default = null)
+    {
+        if (Env::isLoaded()) {
+            return Env::get($key, $default);
+        }
+
+        return $default;
+    }
+}
+
 if (!function_exists('abort')) {
     /**
+     * Abort bow execution
+     *
      * @param int    $code
      * @param string $message
      * @param array  $headers
@@ -1385,6 +1410,8 @@ if (!function_exists('abort')) {
 
 if (!function_exists('abort_if')) {
     /**
+     * Abort bow execution if condiction is true
+     *
      * @param boolean $boolean
      * @param int     $code
      * @return \Bow\Http\Response
@@ -1399,16 +1426,20 @@ if (!function_exists('abort_if')) {
 
 if (!function_exists('app_mode')) {
     /**
+     * Get app enviroment mode
+     *
      * @return string
      */
     function app_mode()
     {
-        return env('MODE');
+        return app_env('MODE');
     }
 }
 
 if (!function_exists('client_lang')) {
     /**
+     * Get client request language
+     *
      * @return string
      */
     function client_lang()
@@ -1419,8 +1450,9 @@ if (!function_exists('client_lang')) {
 
 if (!function_exists('old')) {
     /**
-     * @param string $key
+     * Get old request valude
      *
+     * @param string $key
      * @return mixed
      */
     function old($key)

@@ -16,7 +16,7 @@ class StorageService extends BowService
      */
     public function make(Config $config)
     {
-        $this->app->capsule(Storage::class, function () use ($config) {
+        $this->app->capsule('storage', function () use ($config) {
             return Storage::configure($config['resource']);
         });
     }
@@ -29,6 +29,6 @@ class StorageService extends BowService
      */
     public function start()
     {
-        $this->app->capsule(Storage::class);
+        $this->app->capsule('storage');
     }
 }

@@ -16,7 +16,7 @@ class CryptoService extends BowService
      */
     public function make(Config $config)
     {
-        $this->app->capsule(Crypto::class, function () use ($config) {
+        $this->app->capsule('security', function () use ($config) {
             Crypto::setkey(
                 $config['security.key'],
                 $config['security.cipher']
@@ -33,6 +33,6 @@ class CryptoService extends BowService
      */
     public function start()
     {
-        $this->app->capsule(Crypto::class);
+        $this->app->capsule('security');
     }
 }

@@ -18,7 +18,7 @@ class TranslatorService extends BowService
         /**
          * Configuration de translator
          */
-        $this->app->capsule(Translator::class, function () use ($config) {
+        $this->app->capsule('trans', function () use ($config) {
             return Translator::configure(
                 $config['trans.lang'],
                 $config['trans.directory']
@@ -33,6 +33,6 @@ class TranslatorService extends BowService
      */
     public function start()
     {
-        $this->app->capsule(Translator::class);
+        $this->app->capsule('trans');
     }
 }

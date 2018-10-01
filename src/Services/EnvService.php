@@ -14,7 +14,7 @@ class EnvService extends BowService
      */
     public function make(Config $config)
     {
-        $this->app->capsule(Env::class, function () use ($config) {
+        $this->app->capsule('env', function () use ($config) {
             Env::load($config['app.envfile']);
         });
     }
@@ -25,6 +25,6 @@ class EnvService extends BowService
      */
     public function start()
     {
-        $this->app->capsule(Env::class);
+        $this->app->capsule('env');
     }
 }

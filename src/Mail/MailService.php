@@ -15,7 +15,7 @@ class MailService extends BowService
      */
     public function make(Config $config)
     {
-        $this->app->capsule(Mail::class, function () use ($config) {
+        $this->app->capsule('mail', function () use ($config) {
             return Mail::configure($config['mail']);
         });
     }
@@ -27,6 +27,6 @@ class MailService extends BowService
      */
     public function start()
     {
-        $this->app->capsule(Mail::class);
+        $this->app->capsule('mail');
     }
 }
