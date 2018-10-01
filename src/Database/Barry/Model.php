@@ -495,6 +495,21 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Set connexion point
+     *
+     * @param string $connexion
+     * @return Builder
+     */
+    public function setConnexion($connexion)
+    {
+        $this->connexion = $connexion;
+
+        $builder = static::query();
+
+        return $builder;
+    }
+
+    /**
      * Permet de récupérer la liste des attributes.
      *
      * @return array

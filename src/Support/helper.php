@@ -1118,7 +1118,20 @@ if (!function_exists('public_path')) {
      */
     function public_path($path = '')
     {
-        return trim(rtrim(config('app.static'), '/').'/'.ltrim($path, '/'), '/');
+        return '/'.trim(rtrim(config('app.public_path'), '/').'/'.ltrim($path, '/'), '/');
+    }
+}
+
+if (!function_exists('component_path')) {
+    /**
+     * Get component directory
+     *
+     * @param string $path
+     * @return string
+     */
+    function component_path($path = '')
+    {
+        return '/'.trim(rtrim(config('app.component_path'), '/').'/'.ltrim($path, '/'), '/');
     }
 }
 
@@ -1131,20 +1144,7 @@ if (!function_exists('storage_path')) {
      */
     function storage_path($path = '')
     {
-        return trim(rtrim(config('app.storage_path'), '/').'/'.ltrim($path, '/'), '/');
-    }
-}
-
-if (!function_exists('assets')) {
-    /**
-     * Get assets directory
-     *
-     * @param string $path
-     * @return string
-     */
-    function assets($path = '')
-    {
-        return trim(rtrim(config('app.assets_path'), '/').'/'.ltrim($path, '/'), '/');
+        return '/'.trim(rtrim(config('app.storage_path'), '/').'/'.ltrim($path, '/'), '/');
     }
 }
 

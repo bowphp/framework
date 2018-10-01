@@ -6,7 +6,7 @@ foreach (range(1, {num}) as $key) {
         'id' => faker('autoincrement'),
         'name' => faker('name'),
         'created_at' => faker('date'),
-        'update_at' => faker('date')
+        'updated_at' => faker('date')
     ];
 }
 
