@@ -295,19 +295,16 @@ class Database
     /**
      * Charge le factory Builder
      *
-     * @param string $table         le nom de la Builder
-     * @param string $loadClassName
-     * @param string $primaryKey
-     *
+     * @param string $table
      * @return Builder
      */
-    public static function table($table, $loadClassName = null, $primaryKey = null)
+    public static function table($table)
     {
         static::verifyConnection();
 
         $table = static::$adapter->getTablePrefix().$table;
 
-        return new Builder($table, static::$adapter->getConnection(), $loadClassName, $primaryKey);
+        return new Builder($table, static::$adapter->getConnection());
     }
 
     /**

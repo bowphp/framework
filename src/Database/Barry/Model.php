@@ -302,7 +302,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     private static function query()
     {
         if (static::$builder instanceof Builder) {
-            if (static::$builder->getLoadClassName() === static::class) {
+            if (static::$builder->getModel() == static::class) {
                 return static::$builder;
             }
         }
@@ -336,9 +336,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $table = $prefix.$table;
 
-        static::$builder = new Builder($table, DB::getPdo(), static::class, $primaryKey);
+        static::$builder = new Builder($table, DB::getPdo());
 
         static::$builder->setPrefix($prefix);
+
+        static::$builder->setModel(static::class);
 
         return static::$builder;
     }

@@ -20,16 +20,6 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * @var string
      */
-    protected $loadClassName;
-
-    /**
-     * @var bool
-     */
-    protected $loadDataInClass = true;
-
-    /**
-     * @var string
-     */
     protected $primaryKey = 'id';
 
     /**
@@ -95,26 +85,12 @@ class Builder extends Tool implements \JsonSerializable
     /**
      * Contructeur
      *
-     * @param string     $table
-     * @param string     $loadClassName
-     * @param string     $primaryKey
-     * @param $connection
+     * @param string $table
+     * @param PDO $connection
      */
-    public function __construct(
-        $table,
-        $connection,
-        $loadClassName = null,
-        $primaryKey = 'id'
-    ) {
-        if ($loadClassName == null) {
-            $this->loadClassName = static::class;
-        } else {
-            $this->loadClassName = $loadClassName;
-        }
-
+    public function __construct($table, $connection)
+    {
         $this->connection = $connection;
-
-        $this->primaryKey = $primaryKey;
 
         $this->table = $table;
     }
@@ -875,7 +851,7 @@ class Builder extends Tool implements \JsonSerializable
      *
      * @return int
      */
-    public function update(array $data = [], callable $cb = null)
+    public function update(array $data = [])
     {
         $sql = 'update `' . $this->table . '` set ';
         $sql .= Util::rangeField(Util::add2points(array_keys($data)));
@@ -901,21 +877,15 @@ class Builder extends Tool implements \JsonSerializable
 
         $r = $stmt->rowCount();
 
-        if (is_callable($cb)) {
-            return call_user_func_array($cb, [$r]);
-        }
-
         return (int) $r;
     }
 
     /**
      * Action delete
      *
-     * @param callable $cb
-     *
      * @return int
      */
-    public function delete(callable $cb = null)
+    public function delete()
     {
         $sql = 'delete from `' . $this->table . '`';
 
@@ -934,10 +904,6 @@ class Builder extends Tool implements \JsonSerializable
         $stmt->execute();
 
         $r = $stmt->rowCount();
-
-        if (is_callable($cb)) {
-            return call_user_func_array($cb, [$r]);
-        }
 
         return (int) $r;
     }
@@ -1210,17 +1176,11 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function exists($column = null, $value = null)
     {
-        if ($value == null && $value == null) {
-            return $this->count() > 0 ? true : false;
+        if ($column == null && $value == null) {
+            return $this->count() > 0;
         }
 
-        if ($value == null) {
-            $value = $column;
-
-            $column = $this->primaryKey;
-        }
-
-        return $this->where($column, $value)->count() > 0 ? true : false;
+        return $this->where($column, $value)->count() > 0;
     }
 
     /**
@@ -1239,7 +1199,7 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return $this->get()->toJson();
+        return json_encode($this->get());
     }
 
     /**
@@ -1248,7 +1208,7 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function toJson($option = 0)
     {
-        return json_encode($this->get()->toArray(), $option);
+        return json_encode($this->get(), $option);
     }
 
     /**
@@ -1312,16 +1272,6 @@ class Builder extends Tool implements \JsonSerializable
     }
 
     /**
-     * Permet de retourner le nom de la clé primaire
-     *
-     * @return string
-     */
-    public function getPrimaryKey()
-    {
-        return $this->primaryKey;
-    }
-
-    /**
      * Permet de retourner le nom de la table.
      *
      * @return string
@@ -1342,46 +1292,6 @@ class Builder extends Tool implements \JsonSerializable
     }
 
     /**
-     * Permet de récupérer le nom classe à charger
-     *
-     * @return null|string
-     */
-    public function getLoadClassName()
-    {
-        return $this->loadClassName;
-    }
-
-    /**
-     * Permet de modifier le nom de la clé primaire
-     *
-     * @param string $primaryKey
-     */
-    public function setPrimaryKey($primaryKey)
-    {
-        $this->primaryKey = $primaryKey;
-    }
-
-    /**
-     * Permet muter la classe a charge
-     *
-     * @param string $loadClassName
-     */
-    public function setLoadClassName($loadClassName)
-    {
-        $this->loadClassName = $loadClassName;
-    }
-
-    /**
-     * Permet de modifier le mom de la table
-     *
-     * @param string $table
-     */
-    public function setTableName($table)
-    {
-        $this->table = $table;
-    }
-
-    /**
      * Permet de modifier le prefix
      *
      * @param string $prefix
@@ -1392,6 +1302,16 @@ class Builder extends Tool implements \JsonSerializable
     }
 
     /**
+     * Permet de modifier le mom de la table
+     *
+     * @param string $table
+     */
+    public function setTable($table)
+    {
+        $this->table = $table;
+    }
+
+    /**
      * Permet de définir les données à associer
      *
      * @param array $whereDataBinding
@@ -1399,17 +1319,6 @@ class Builder extends Tool implements \JsonSerializable
     public function setWhereDataBinding($whereDataBinding)
     {
         $this->whereDataBinding = $whereDataBinding;
-    }
-
-    /**
-     * Permet d'activer ou désactiver le chargement des données
-     * dans un classe
-     *
-     * @param bool $loadDataInClass
-     */
-    public function setDataLoadingInClass($loadDataInClass)
-    {
-        $this->loadDataInClass = $loadDataInClass;
     }
 
     /**
