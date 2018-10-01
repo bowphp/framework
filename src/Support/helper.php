@@ -34,7 +34,7 @@ if (!function_exists('app')) {
             return $capsule;
         }
 
-        if (coun($setting) == 0) {
+        if (count($setting) == 0) {
             return $capsule->make($key);
         }
 
