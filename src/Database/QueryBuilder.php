@@ -900,11 +900,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
     /**
      * remove alise simplifié de delete.
      *
-     * @param string $column Le nom du champs de la conditions
-     * @param string $comp   Le type de comparaison
-     * @param string $value  [optinal] La valeur a
-     *                       comparé
-     *
+     * @param string $column
+     * @param string $comp
+     * @param string $value
      * @return int
      *
      * @throws QueryBuilderException
@@ -919,8 +917,8 @@ class QueryBuilder extends Tool implements \JsonSerializable
     /**
      * Action increment, ajout 1 par défaut sur le champs spécifié
      *
-     * @param string $column La colonne sur laquel est faite incrémentation
-     * @param int    $step   Le part de l'incrementation
+     * @param string $column
+     * @param int $step
      *
      * @return int
      */
@@ -1018,6 +1016,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             } else {
                 $resets[$key] = $value;
             }
+
             unset($values[$key]);
         }
 
@@ -1029,6 +1028,8 @@ class QueryBuilder extends Tool implements \JsonSerializable
     }
 
     /**
+     * insert one
+     *
      * @see insert
      * @param array $value
      * @return int
@@ -1056,7 +1057,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Action insertAndGetLastId lance les actions insert et lastInsertId
      *
      * @param array $values
-     *
      * @return int
      */
     public function insertAndGetLastId(array $values)
@@ -1082,27 +1082,22 @@ class QueryBuilder extends Tool implements \JsonSerializable
     /**
      * Utilitaire isComporaisonOperator, permet valider un opérateur
      *
-     * @param string $comp Le comparateur logique
+     * @param string $comp
      *
      * @return bool
      */
     private static function isComporaisonOperator($comp)
     {
-        return in_array(
-            $comp,
-            ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'like'],
-            true
-        );
+        return in_array($comp, ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'like'], true);
     }
 
     /**
      * paginate
      *
-     * @param  integer $n       nombre d'element a
-     *                          récupérer
-     * @param  integer $current la page courrant
-     * @param  integer $chunk   le nombre l'élément par groupe que l'on veux
-     *                          faire.
+     * @param  integer $n
+     * @param  integer $current
+     * @param  integer $chunk
+     *
      * @return Collection
      */
     public function paginate($n, $current = 0, $chunk = null)
