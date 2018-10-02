@@ -60,6 +60,17 @@ class Translator
     }
 
     /**
+     * Check the locale
+     *
+     * @param string $locale
+     * @return bool
+     */
+    public static function isLocale($locale)
+    {
+        return static::$lang == $locale;
+    }
+
+    /**
      * Permet de faire la tranduction
      *
      * @param  string $key
