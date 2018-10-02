@@ -1,5 +1,6 @@
 <?php
-namespace Bow\Database\Query;
+
+namespace Bow\Database;
 
 use PDO;
 use Bow\Support\Str;
@@ -15,7 +16,7 @@ use Bow\Database\Exception\QueryBuilderException;
  * @author  Franck Dakia <dakiafranck@gmail.com>
  * @package Bow\Database
  */
-class Builder extends Tool implements \JsonSerializable
+class QueryBuilder extends Tool implements \JsonSerializable
 {
     /**
      * @var string
@@ -707,7 +708,7 @@ class Builder extends Tool implements \JsonSerializable
      *  Si le mode de séléction unitaire n'est pas active
      *
      * @param  array $columns
-     * @return Collection|SqlUnity
+     * @return array
      * @throws
      */
     public function get(array $columns = [])

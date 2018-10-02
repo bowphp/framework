@@ -3,7 +3,7 @@
 namespace Bow\Database\Barry;
 
 use Bow\Database\Collection;
-use Bow\Database\Query\Builder as QueryBuilder;
+use Bow\Database\QueryBuilder;
 
 class Builder extends QueryBuilder
 {
@@ -13,7 +13,10 @@ class Builder extends QueryBuilder
     protected $model;
 
     /**
-     * @inherits
+     * Get informations
+     *
+     * @param array $columns
+     * @return mixed
      */
     public function get(array $columns = [])
     {
@@ -33,7 +36,12 @@ class Builder extends QueryBuilder
     }
 
     /**
-     * @inherits
+     * Check if rows exists
+     *
+     * @param string $column
+     * @param string|int $value
+     * @return bool
+     * @throws
      */
     public function exists($column = null, $value = null)
     {
@@ -44,7 +52,7 @@ class Builder extends QueryBuilder
         if ($value == null) {
             $value = $column;
 
-            $column = (new $model)->getKey();
+            $column = (new $this->model)->getKey();
         }
 
         return $this->where($column, $value)->count() > 0;

@@ -122,15 +122,21 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * @return \Bow\Database\SqlUnity|null
+     * Get first rows
+     *
+     * @return static
      */
     public static function first()
     {
-        return static::query()->first();
+        $query = new static();
+
+        return $query->first();
     }
 
     /**
-     * @return \Bow\Database\SqlUnity|null
+     * Get last
+     *
+     * @return static
      */
     public static function latest()
     {
@@ -163,10 +169,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
     /**
      * Permet de retourner le description de la table
+     *
+     * @reurn mixed
      */
     public static function describe()
     {
-        return DB::select('desc '. static::query()->getTable());
+        return DB::statement('desc '. static::query()->getTable());
     }
 
     /**
