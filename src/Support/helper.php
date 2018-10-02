@@ -1340,6 +1340,12 @@ if (!function_exists('trans')) {
             return Translator::getInstance();
         }
 
+        if (is_bool($data)) {
+            $choose = $data;
+
+            $data = [];
+        }
+
         return Translator::translate($key, $data, $choose);
     }
 }
