@@ -111,10 +111,10 @@ class GeneratorCommand
             \Bow\Support\Str::camel(basename($this->name))
         );
 
-        $template = $this->makeStub($type, array_merge([
+        $template = $this->makeStub($type, array_merge($data, [
             'namespace' => $namespace,
             'className' => $classname
-        ], $data));
+        ]));
 
         return file_put_contents($this->getPath(), $template);
     }

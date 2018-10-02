@@ -75,7 +75,13 @@ class Command
     /**
      * @var array
      */
-    private $namespaces = [];
+    private $namespaces = [
+        'controller' => 'App\\Controllers',
+        'middleware' => 'App\\Middleware',
+        'configuration' => 'App\\Configurations',
+        'validation' => 'App\\Validations',
+        'model' => 'App',
+    ];
 
     /**
      * Command constructor.
@@ -206,7 +212,9 @@ class Command
      */
     public function setNamespaces(array $namespaces)
     {
-        $this->namespaces = array_merge($namespaces, $this->namespaces);
+        foreach ($namespaces as $key => $namespace) {
+            $this->namespaces[$key] = $namespace;
+        }
     }
 
     /**
@@ -733,7 +741,8 @@ class Command
     {
         $generator->write('controller/rest', [
             'modelNamespace' => $model_namespace,
-            'prefix' => $prefix
+            'prefix' => $prefix,
+            'baseNamespace' => $this->namespaces['validation']
         ]);
 
         echo "\033[0;32mLe controlleur rest \033[00m[{$controller_name}]\033[0;32m a été bien créé.\033[00m\n";
@@ -758,9 +767,13 @@ class Command
         }
 
         if ($this->options('--no-plain')) {
-            $generator->write('controller/no-plain');
+            $generator->write('controller/no-plain', [
+                'baseNamespace' => $this->namespaces['controller']
+            ]);
         } else {
-            $generator->write('controller/controller');
+            $generator->write('controller/controller', [
+                'baseNamespace' => $this->namespaces['controller']
+            ]);
         }
 
         echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien créé.\033[00m\n";
@@ -783,7 +796,9 @@ class Command
             exit(1);
         }
 
-        $generator->write('middleware');
+        $generator->write('middleware', [
+            'baseNamespace' => $this->namespaces['middleware']
+        ]);
 
         echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien créé.\033[00m\n";
 
@@ -806,7 +821,9 @@ class Command
             exit(1);
         }
 
-        $generator->write('model/model');
+        $generator->write('model/model', [
+            'baseNamespace' => $this->namespaces['model']
+        ]);
 
         echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien créé.\033[00m\n";
 
@@ -845,7 +862,9 @@ class Command
             return 0;
         }
 
-        $generator->write('validator');
+        $generator->write('validator', [
+            'baseNamespace' => $this->namespaces['validation']
+        ]);
 
         echo "\033[0;32mLe validateur \033[00m[${validator_name}]\033[0;32m a été bien créé.\033[00m\n";
 
@@ -868,7 +887,9 @@ class Command
             return 0;
         }
 
-        $generator->write('configuration');
+        $generator->write('configuration', [
+            'baseNamespace' => $this->namespaces['configuration']
+        ]);
 
         echo "\033[0;32mLe service \033[00m[${configuration_name}]\033[0;32m a été bien créé.\033[00m\n";
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Controllers{namespace};
+namespace {baseNamespace}{namespace};
 
-{modelNamespace}use App\Controllers\Controller;
+{modelNamespace}use {baseNamespace}\Controller;
 
 class {className} extends Controller
 {

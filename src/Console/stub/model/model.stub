@@ -1,6 +1,6 @@
 <?php
 
-namespace App{namespace};
+namespace {baseNamespace}{namespace};
 
 use Bow\Database\Barry\Model;
 
