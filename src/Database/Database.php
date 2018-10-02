@@ -4,7 +4,6 @@ namespace Bow\Database;
 use PDO;
 use StdClass;
 use Bow\Security\Sanitize;
-use Bow\Database\Query\Builder;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\AbstractConnection;
@@ -289,7 +288,7 @@ class Database
      * Charge le factory Builder
      *
      * @param string $table
-     * @return Builder
+     * @return QueryBuilder
      */
     public static function table($table)
     {
@@ -297,7 +296,7 @@ class Database
 
         $table = static::$adapter->getTablePrefix().$table;
 
-        return new Builder($table, static::$adapter->getConnection());
+        return new QueryBuilder($table, static::$adapter->getConnection());
     }
 
     /**
