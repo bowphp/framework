@@ -15,11 +15,6 @@ use Bow\Application\Exception\ApplicationException;
 class Application
 {
     /**
-     * @var string
-     */
-    private $version = '4.0.0';
-
-    /**
      * @var Capsule
      */
     private $capsule;
@@ -168,7 +163,7 @@ class Application
      * @return Application
      * @throws
      */
-    public function group($branch, callable $cb)
+    public function prefix($branch, callable $cb)
     {
         $branch = rtrim($branch, '/');
 
@@ -185,8 +180,6 @@ class Application
         call_user_func_array($cb, [$this]);
 
         $this->branch = '';
-
-        $this->globale_middleware = [];
 
         return $this;
     }

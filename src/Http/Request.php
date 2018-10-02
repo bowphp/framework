@@ -500,16 +500,26 @@ class Request
     }
 
     /**
+     * Get session information
+     *
+     * @param mixed $property
+     * @param mixed $default
+     * @return mixed
+     */
+    public static function session()
+    {
+        return session();
+    }
+
+    /**
+     * Get cookie
+     *
      * @param $property
      * @return mixed
      */
-    public static function session($property = null)
+    public static function cookie($property)
     {
-        if (is_null($property)) {
-            return new Session();
-        }
-
-        return Session::get($property);
+        return cookie($property);
     }
 
     /**

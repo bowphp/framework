@@ -64,7 +64,9 @@ class Loader implements \ArrayAccess
     /**
      * Ferméture de la fonction magic __clone pour optimizer le singleton
      */
-    final private function __clone() { }
+    final private function __clone()
+    {
+    }
 
     /**
      * takeInstance singleton

@@ -2,7 +2,6 @@
 
 namespace Bow\Session;
 
-use function array_key_exists;
 use Bow\Security\Crypto;
 use InvalidArgumentException;
 use Bow\Interfaces\CollectionAccessStatic;
@@ -97,18 +96,44 @@ class Session implements CollectionAccessStatic
      *
      * @param string $key
      * @param bool   $strict
-     *
      * @return boolean
      */
     public static function has($key, $strict = false)
     {
         static::start();
 
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['cache']][$key])) {
-            return isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]);
+        if (!$strict) {
+            if (!isset($_SESSION[static::SESSION_CORE_KEY['cache']][$key])) {
+                return isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]);
+            }
+
+            return true;
         }
 
-        return true;
+        if (!isset($_SESSION[static::SESSION_CORE_KEY['cache']][$key])) {
+            if (isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key])) {
+                $value = $_SESSION[static::SESSION_CORE_KEY['flash']][$key];
+
+                return !is_null($value);
+            }
+
+            return false;
+        }
+
+        $value = $_SESSION[static::SESSION_CORE_KEY['cache']][$key];
+
+        return !is_null($value);
+    }
+
+    /**
+     * Permet de vérifier l'existance une clé dans la colléction de session
+     *
+     * @param string $key
+     * @return boolean
+     */
+    public static function exists($key)
+    {
+        return static::has($key, true);
     }
 
     /**
@@ -286,6 +311,7 @@ class Session implements CollectionAccessStatic
     public static function clearFash()
     {
         static::start();
+
         $_SESSION[static::SESSION_CORE_KEY['flash']] = [];
     }
 
@@ -298,6 +324,7 @@ class Session implements CollectionAccessStatic
 
         foreach (static::filter() as $key => $value) {
             unset($_SESSION[static::SESSION_CORE_KEY['cache']][$key]);
+
             unset($_SESSION[$key]);
         }
     }
@@ -308,6 +335,7 @@ class Session implements CollectionAccessStatic
     public static function flush()
     {
         session_destroy();
+
         static::start();
     }
 
@@ -320,6 +348,7 @@ class Session implements CollectionAccessStatic
     public function __toString()
     {
         static::start();
+
         return json_encode(static::filter());
     }
 

@@ -125,11 +125,12 @@ if (!function_exists('db')) {
      * @param callable $cb   la fonction de rappel
      *
      * @return DB, the DB reference
+     * @throws
      */
     function db($name = null, callable $cb = null)
     {
         if (func_num_args() == 0) {
-            return DB::instance();
+            return DB::getInstance();
         }
 
         if (!is_string($name)) {
@@ -1024,21 +1025,24 @@ if (!function_exists('session')) {
      * session
      *
      * @param  mixed $value
+     * @param  mixed $default
      * @return mixed
      */
-    function session($value = null)
+    function session($value = null, $default = null)
     {
         if ($value === null) {
             return new Session();
         }
 
-        if (is_array($value)) {
-            foreach ($value as $key => $item) {
-                Session::add($key, $item);
-            }
+        if (!is_array($value)) {
+            return Session::get($value, $default);
         }
 
-        return Session::get($value, null);
+        foreach ($value as $key => $item) {
+            Session::add($key, $item);
+        }
+
+        return $value;
     }
 }
 
