@@ -92,7 +92,7 @@ class View
      * @param  array  $data
      * @return string
      */
-    public static function make($viewname, array $data = [])
+    public static function parse($viewname, array $data = [])
     {
         $data = static::getInstance()->getTemplate()->render($viewname, $data);
 

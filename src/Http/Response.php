@@ -193,7 +193,7 @@ class Response
      */
     public function view($template, $data = [])
     {
-        return View::make($template, $data);
+        return View::parse($template, $data);
     }
 
     /**

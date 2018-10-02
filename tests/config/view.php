@@ -12,9 +12,10 @@ return [
     // Le repertoire de cache.
     'cache' => dirname(__DIR__) . '/data/cache',
 
-    // Disponible seulement pour twig
-    'auto_reload_cache' => true,
-
     // Le repertoire des vues.
-    'path' => dirname(__DIR__) . '/data/view'
+    'path' => dirname(__DIR__) . '/data/view',
+
+    'additionnal_options' => [
+        'auto_reload' => true
+    ]
 ];

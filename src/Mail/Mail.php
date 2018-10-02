@@ -78,7 +78,9 @@ class Mail
         }
 
         $message = new Message();
-        $data = View::make($view, $bind);
+
+        $data = View::parse($view, $bind);
+
         $message->setMessage($data);
 
         call_user_func_array($cb, [$message]);

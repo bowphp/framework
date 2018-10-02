@@ -26,17 +26,22 @@ class PugEngine extends EngineAbstract
     {
         $this->config = $config;
 
-        $pug_config = [
+        $option = [
             'basedir' => $config['view.path'],
             'prettyprint' => true,
             'extension' => $config['view.extension'],
             'cache' => $config['view.cache']
         ];
 
-        $this->template = new Pug(
-            $pug_config,
-            ['expressionLanguage' => 'php']
-        );
+        $aditionnals = $config['view.aditionnal_options'];
+
+        if (is_array($aditionnals)) {
+            foreach ($aditionnals as $key => $aditionnal) {
+                $option[$key] = $aditionnal;
+            }
+        }
+
+        $this->template = new Pug($option);
 
         foreach (EngineAbstract::HELPERS as $helper) {
             $this->template->share($helper, $helper);

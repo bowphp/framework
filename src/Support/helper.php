@@ -170,7 +170,7 @@ if (!function_exists('view')) {
 
         response()->statusCode($code);
 
-        return Bow\View\View::make($template, $data);
+        return Bow\View\View::parse($template, $data);
     }
 }
 

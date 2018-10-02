@@ -46,12 +46,22 @@ class MustacheEngine extends EngineAbstract
             EngineAbstract::HELPERS
         );
 
-        $this->template = new \Mustache_Engine([
+        $aditionnals = $config['view.aditionnal_options'];
+
+        $option = [
             'cache' => $config['view.cache'],
             'loader' => $loader,
             'partials_loader' => $this->partails_loader,
             'helpers' => $helpers
-        ]);
+        ];
+
+        if (is_array($aditionnals)) {
+            foreach ($aditionnals as $key => $aditionnal) {
+                $option[$key] = $aditionnal;
+            }
+        }
+
+        $this->template = new \Mustache_Engine($option);
     }
 
     /**

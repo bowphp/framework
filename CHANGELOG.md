@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [Fix] Fix loader call static
+- [Change] Update console stub template
+- [Change] Change configuration concept
+- [Fix] Many bug fix
+- [Change] Refonte of query builder
+
 ## [3.0.1] - 2018-09-28 
 
 - [Fix] mise à jour du template de seeding 

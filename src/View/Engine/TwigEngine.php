@@ -27,11 +27,19 @@ class TwigEngine extends EngineAbstract
 
         $loader = new \Twig_Loader_Filesystem($config['view.path']);
 
+        $aditionnals = $config['view.aditionnal_options'];
+
         $env = [
-            'auto_reload' => $config['view.auto_reload_cache'],
+            'auto_reload' => true,
             'debug' => true,
             'cache' => $config['view.cache']
         ];
+
+        if (is_array($aditionnals)) {
+            foreach ($aditionnals as $key => $aditionnal) {
+                $env[$key] = $aditionnal;
+            }
+        }
 
         $this->template = new \Twig_Environment($loader, $env);
 
