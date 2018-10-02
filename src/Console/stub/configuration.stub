@@ -2,18 +2,18 @@
 
 namespace App\Services{namespace};
 
-use Bow\Config\Config;
-use Bow\Application\Services as BowService;
+use Bow\Configuration\Loader;
+use Bow\Configuration\Configuration;
 
-class {className} extends BowService
+class {className} extends Configuration
 {
     /**
      * Permet de lancement de configuration du service
      *
-     * @param Config $config
+     * @param Loader $config
      * @return void
      */
-    public function make(Config \$config)
+    public function create(Loader \$config)
     {
         //
     }
@@ -23,7 +23,7 @@ class {className} extends BowService
      *
      * @return void
      */
-    public function start()
+    public function run()
     {
         //
     }

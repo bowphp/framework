@@ -5,14 +5,7 @@ namespace Bow\Event;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 use Bow\Application\Actionner;
-use Bow\Exception\EventException;
 
-/**
- * Class Event
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class Event
 {
     final private function __clone()
@@ -23,11 +16,6 @@ class Event
      * @var array
      */
     private static $events = [];
-
-    /**
-     * @var array
-     */
-    private static $namespace = 'App\\Controllers';
 
     /**
      * @var Event
@@ -51,12 +39,9 @@ class Event
     /**
      * addEventListener
      *
-     * @param string                $event    Le nom de
-     *                                        l'évènement
-     * @param Callable|array|string $fn       La fonction a lancé quand l'évènement se
-     *                                        déclanche
-     * @param int                   $priority Le namespace de la classe ou fonction à
-     *                                        lancer
+     * @param string $event
+     * @param Callable|array|string $fn
+     * @param int $priority Le namespace de la classe ou fonction à
      */
     public static function on($event, $fn, $priority = 0)
     {
@@ -72,9 +57,11 @@ class Event
     }
 
     /**
-     * @param string       $event
+     * Envoyer une event de page en page
+     *
+     * @param string $event
      * @param array|string $fn
-     * @param int          $priority
+     * @param int $priority
      * @throws EventException
      */
     public static function onTransmission($event, $fn, $priority = 0)
@@ -93,9 +80,11 @@ class Event
     }
 
     /**
-     * @param string                $event
+     * Associer un seul listener à un event
+     *
+     * @param string $event
      * @param callable|array|string $fn
-     * @param int                   $priority
+     * @param int $priority
      */
     public static function once($event, $fn, $priority = 0)
     {
@@ -140,9 +129,7 @@ class Event
                 $callable = [$listener, 'call'];
             }
 
-            return Actionner::getInstance()->call($callable, [$data], [
-                'namespace' => [ 'controller' => static::$namespace ]
-            ]);
+            return Actionner::getInstance()->call($callable, [$data]);
         });
 
         return true;
@@ -175,7 +162,9 @@ class Event
         return array_key_exists($event, static::$events)
             || array_key_exists(
                 $event,
-                isset(static::$events['__bow.transmission.event']) ? static::$events['__bow.transmission.event'] : []
+                isset(static::$events['__bow.transmission.event'])
+                    ? static::$events['__bow.transmission.event'] :
+                    []
             )
             || array_key_exists(
                 $event,

@@ -9,7 +9,7 @@ use Bow\Support\Env;
 use Bow\Support\Util;
 use Bow\Support\Faker;
 use Bow\Security\Hash;
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\Session\Cookie;
 use Bow\Support\Capsule;
 use Bow\Session\Session;
@@ -179,18 +179,16 @@ if (!function_exists('table')) {
      * table aliase DB::table
      *
      * @param  string $name
-     * @param  string $class.
-     * @param  string $primary_key
      * @param  string $connexion
      * @return Bow\Database\Query\Builder
      */
-    function table($name, $class = null, $primary_key = null, $connexion = null)
+    function table($name, $connexion = null)
     {
         if (is_string($connexion)) {
             db($connexion);
         }
 
-        return DB::table($name, $class, $primary_key);
+        return DB::table($name);
     }
 }
 

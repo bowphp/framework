@@ -1,10 +1,10 @@
 <?php
 namespace Bow\Database\Query;
 
+use PDO;
 use Bow\Support\Str;
 use Bow\Support\Util;
 use Bow\Database\Tool;
-use Bow\Database\SqlUnity;
 use Bow\Security\Sanitize;
 use Bow\Database\Collection;
 use Bow\Database\Exception\QueryBuilderException;
@@ -88,7 +88,7 @@ class Builder extends Tool implements \JsonSerializable
      * @param string $table
      * @param PDO $connection
      */
-    public function __construct($table, $connection)
+    public function __construct($table, PDO $connection)
     {
         $this->connection = $connection;
 
@@ -135,15 +135,10 @@ class Builder extends Tool implements \JsonSerializable
      */
     public function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        if (!static::isComporaisonOperator($comp)) {
+        if (!static::isComporaisonOperator($comp) || is_null($value)) {
             $value = $comp;
-            $comp = '=';
-        }
 
-        // Ajout de matcher sur id.
-        if ($comp == '=' && $value === null) {
-            $value = $column;
-            $column = $this->getPrimaryKey();
+            $comp = '=';
         }
 
         if ($value === null) {

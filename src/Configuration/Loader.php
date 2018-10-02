@@ -1,21 +1,16 @@
 <?php
-namespace Bow\Config;
 
-use Bow\Router\Router;
+namespace Bow\Configuration;
+
+use Bow\Support\Capsule;
 use Bow\Support\Env;
 use Bow\Support\Arraydotify;
 use Bow\Application\Exception\ApplicationException;
 
-/**
- * Class AppConfiguratio
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Core
- */
-class Config implements \ArrayAccess
+class Loader implements \ArrayAccess
 {
     /**
-     * @var Config
+     * @var Loader
      */
     private static $instance;
 
@@ -30,15 +25,15 @@ class Config implements \ArrayAccess
     protected $base_path;
 
     /**
-     * @var string
+     * @var bool
      */
-    protected $routePath;
+    private $booted = false;
 
     /**
      * @param string $base_path
      * @throws
      */
-    public function __construct($base_path)
+    private function __construct($base_path)
     {
         $this->base_path = $base_path;
 
@@ -64,9 +59,6 @@ class Config implements \ArrayAccess
         }
 
         $this->config = Arraydotify::make($config);
-
-        // Load singleton
-        self::$instance = $this;
     }
 
     /**
@@ -80,16 +72,16 @@ class Config implements \ArrayAccess
      * takeInstance singleton
      *
      * @param  string $base_path
-     * @return Config
+     * @return Loader
      * @throws
      */
     public static function configure($base_path)
     {
-        if (!self::$instance instanceof Config) {
-            self::$instance = new self($base_path);
+        if (!static::$instance instanceof Loader) {
+            static::$instance = new static($base_path);
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     /**
@@ -121,7 +113,7 @@ class Config implements \ArrayAccess
      *
      * @return array
      */
-    public function services()
+    public function configurations()
     {
         return [
             //
@@ -129,50 +121,18 @@ class Config implements \ArrayAccess
     }
 
     /**
-     * Load configuration
-     *
-     * @return Config
-     */
-    public function boot()
-    {
-        //
-        return $this;
-    }
-
-    /**
-     * takeInstance singleton
-     *
-     * @return Config
-     * @throws ApplicationException
-     */
-    public static function singleton()
-    {
-        if (!self::$instance instanceof Config) {
-            throw new ApplicationException('L\'application n\'a pas chargé les confirgurations');
-        }
-
-        return self::$instance;
-    }
-
-    /**
-     * Get define route collection
-     *
-     * @return string
-     */
-    public function getRouteCollection()
-    {
-        return $this->routePath;
-    }
-
-    /**
      * Alias de singleton
      *
-     * @return Config
+     * @return Loader
      * @throws
      */
     public static function getInstance()
     {
-        return static::singleton();
+        if (is_null(static::$instance)) {
+            throw new ApplicationException('L\'application n\'a pas chargé les confirgurations');
+        }
+
+        return static::$instance;
     }
 
     /**
@@ -189,6 +149,44 @@ class Config implements \ArrayAccess
         }
 
         return $this->config[$key] = $value;
+    }
+
+    /**
+     * Load configuration
+     *
+     * @return Loader
+     */
+    public function boot()
+    {
+        if ($this->booted) {
+            return $this;
+        }
+
+        $services = $this->configurations();
+
+        $service_collection = [];
+
+        $container = Capsule::getInstance();
+
+        // Configuration des services
+        foreach ($services as $service) {
+            if (class_exists($service, true)) {
+                $class = new $service($container);
+
+                $class->create($this);
+
+                $service_collection[] = $class;
+            }
+        }
+
+        // Démarage des services ou code d'initial
+        foreach ($service_collection as $service) {
+            $service->run();
+        }
+
+        $this->booted = true;
+
+        return $this;
     }
 
     /**

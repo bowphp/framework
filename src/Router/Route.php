@@ -3,7 +3,7 @@
 namespace Bow\Router;
 
 use Bow\Http\Request;
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\Application\Actionner;
 
 class Route
@@ -56,7 +56,7 @@ class Route
     /**
      * Application configuration
      *
-     * @var Config
+     * @var Loader
      */
     private $config;
 
@@ -68,7 +68,7 @@ class Route
      */
     public function __construct($path, $cb)
     {
-        $this->config = Config::getInstance();
+        $this->config = Loader::getInstance();
 
         $this->cb = $cb;
 

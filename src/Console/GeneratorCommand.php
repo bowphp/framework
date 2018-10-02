@@ -122,7 +122,9 @@ class GeneratorCommand
     /**
      * Stub render
      *
-     * @return $content
+     * @param string $type
+     * @param array $data
+     * @return bool|mixed|string
      */
     public function makeStub($type, $data = [])
     {

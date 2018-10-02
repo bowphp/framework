@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Exception;
+namespace Bow\Event;
 
 class EventException extends \ErrorException
 {

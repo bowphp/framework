@@ -1,7 +1,7 @@
 <?php
 namespace Bow\View;
 
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\View\Exception\ViewException;
 
 abstract class EngineAbstract
@@ -46,7 +46,7 @@ abstract class EngineAbstract
     protected $name;
 
     /**
-     * @var Config
+     * @var Loader
      */
     protected $config;
 

@@ -2,7 +2,7 @@
 
 namespace Bow\Router;
 
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\Router\Collection as RouteCollection;
 
 class Router
@@ -38,7 +38,7 @@ class Router
      * @param $config
      * @param RouteCollection $collection
      */
-    public function __construct(Config $config, RouteCollection $collection)
+    public function __construct(Loader $config, RouteCollection $collection)
     {
         $this->config = $config;
 

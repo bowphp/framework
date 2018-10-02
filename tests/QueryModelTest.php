@@ -24,7 +24,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetConnection()
     {
-        return Database::instance();
+        return Database::getInstance();
     }
 
     /**

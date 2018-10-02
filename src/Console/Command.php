@@ -45,7 +45,7 @@ class Command
     /**
      * @var string
      */
-    private $service_directory;
+    private $configuration_directory;
 
     /**
      * @var string
@@ -73,6 +73,11 @@ class Command
     private $config_directory;
 
     /**
+     * @var array
+     */
+    private $namespaces = [];
+
+    /**
      * Command constructor.
      *
      * @param string $dirname
@@ -87,9 +92,9 @@ class Command
 
         $this->controller_directory = $this->dirname.'/app/Controllers';
 
-        $this->middleware_directory = $this->dirname.'/app/Middleware';
+        $this->middleware_directory = $this->dirname.'/app/Middlewares';
 
-        $this->service_directory = $this->dirname.'/app/Services';
+        $this->configuration_directory = $this->dirname.'/app/Configurations';
 
         $this->app_directory = $this->dirname.'/app';
 
@@ -195,6 +200,16 @@ class Command
     }
 
     /**
+     * Set the namespaces
+     *
+     * @param array $namespaces
+     */
+    public function setNamespaces(array $namespaces)
+    {
+        $this->namespaces = array_merge($namespaces, $this->namespaces);
+    }
+
+    /**
      * Get the component directory
      *
      * @return string
@@ -251,7 +266,7 @@ class Command
      */
     public function getServiceDirectory()
     {
-        return $this->service_directory;
+        return $this->configuration_directory;
     }
 
     /**
@@ -261,7 +276,7 @@ class Command
      */
     public function getMiddlewareDirectory()
     {
-        return $this->service_directory;
+        return $this->configuration_directory;
     }
 
     /**
@@ -292,6 +307,16 @@ class Command
     public function getApplicationDirectory()
     {
         return $this->app_directory;
+    }
+
+    /**
+     * Get base directory name
+     *
+     * @return string
+     */
+    public function getBaseDirname()
+    {
+        return $this->dirname;
     }
 
     /**
@@ -419,7 +444,7 @@ class Command
             array_shift($parts);
 
             $className = '';
-            
+
             foreach ($parts as $part) {
                 $className .= ucfirst(str_replace('.php', '', $part));
             }
@@ -510,7 +535,7 @@ class Command
                 $model = rtrim($register["tables"][$num]);
             }
 
-            include $file;
+            @include $file;
 
             // Formatage de la classe et Exécution de la méthode up ou down
             $class = ucfirst(Str::camel($model));
@@ -587,7 +612,7 @@ class Command
         if ($options->has('--create') && $options->has('--table')) {
             throw new \ErrorException('Bad command.');
         }
-        
+
         $type = "model/standard";
 
         if ($options->has('--table')) {
@@ -596,7 +621,7 @@ class Command
             }
 
             $table = $options->get('--table');
-            
+
             $type = 'model/table';
         } elseif ($options->has('--create')) {
             if ($options->get('--create') === true) {
@@ -622,8 +647,6 @@ class Command
         );
 
         echo "\033[0;32mLe fichier de migration \033[00m[$model]\033[0;32m a été bien créé.\033[00m\n";
-
-        exit(0);
     }
 
     /**
@@ -653,7 +676,7 @@ class Command
 
         $model_namespace = '';
 
-        if (static::readline("Voulez vous que je crée les vues associées ? ")) {
+        if ($this->readline("Voulez vous que je crée les vues associées ? ")) {
             $model = strtolower($model);
 
             @mkdir($this->component_directory."/views/".$model, 0766);
@@ -671,34 +694,49 @@ class Command
 
         $options = $this->options();
 
+        if (! $options->has('--model')) {
+            $this->createRestController($generator, $prefix, $controller_name, $model_namespace);
+
+            exit(0);
+        }
+
+        if ($this->readline("Voulez vous que je crée un model?")) {
+            if ($options->get('--model') !== true) {
+                $model = $options->get('--model');
+            } else {
+                echo "\033[0;32;7mLe nom du model non spécifié --model=model_name.\033[00m\n";
+
+                exit(1);
+            }
+        }
+
+        $model_namespace = "\nuse App\\".ucfirst($model).';';
+
+        $this->createRestController($generator, $prefix, $controller_name, $model_namespace);
+
+        $this->model($model);
+
+        if ($this->readline('Voulez vous que je crée une migration pour ce model? ')) {
+            $this->make($model);
+        }
+    }
+
+    /**
+     * Create rest controller
+     *
+     * @param GeneratorCommand $generator
+     * @param $prefix
+     * @param $controller_name
+     * @param string $model_namespace
+     */
+    private function createRestController(GeneratorCommand $generator, $prefix, $controller_name, $model_namespace = '')
+    {
         $generator->write('controller/rest', [
             'modelNamespace' => $model_namespace,
             'prefix' => $prefix
         ]);
 
-        echo "\033[0;32mLe controlleur \033[00m[{$controller_name}]\033[0;32m a été bien créé.\033[00m\n";
-
-        if ($this->readline("Voulez vous que je crée un model?")) {
-            if ($options->has('--model')) {
-                if ($options->get('--model') !== true) {
-                    $model = $options->get('--model');
-                } else {
-                    echo "\033[0;32;7mLe nom du model non spécifié --model=model_name.\033[00m\n";
-
-                    exit(1);
-                }
-            }
-
-            $this->model($model);
-
-            $model_namespace = "\nuse App\\".ucfirst($model).';';
-
-            if ($this->readline('Voulez vous que je crée une migration pour ce model? ')) {
-                $this->make($model);
-            }
-        }
-
-        exit(0);
+        echo "\033[0;32mLe controlleur rest \033[00m[{$controller_name}]\033[0;32m a été bien créé.\033[00m\n";
     }
 
     /**
@@ -755,11 +793,10 @@ class Command
     /**
      * Create new model file
      *
-     * @param  string      $model_name
-     * @param  string|null $table_name
+     * @param  string $model_name
      * @throws
      */
-    public function model($model_name, $table_name = null)
+    public function model($model_name)
     {
         $generator = new GeneratorCommand($this->model_directory, $model_name);
 
@@ -776,8 +813,6 @@ class Command
         if ($this->options('-m')) {
             $this->make('create_'.strtolower($model_name).'_table');
         }
-
-        exit(0);
     }
 
     /**
@@ -820,22 +855,22 @@ class Command
     /**
      * Permet de créer un validator
      *
-     * @param  string $service_name
+     * @param  string $configuration_name
      * @return int
      */
-    public function service($service_name)
+    public function configuration($configuration_name)
     {
-        $generator = new GeneratorCommand($this->service_directory, $service_name);
+        $generator = new GeneratorCommand($this->configuration_directory, $configuration_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${service_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
+            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${configuration_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
 
             return 0;
         }
-        
-        $generator->write('service');
-        
-        echo "\033[0;32mLe service \033[00m[${service_name}]\033[0;32m a été bien créé.\033[00m\n";
+
+        $generator->write('configuration');
+
+        echo "\033[0;32mLe service \033[00m[${configuration_name}]\033[0;32m a été bien créé.\033[00m\n";
 
         return 0;
     }
@@ -851,7 +886,7 @@ class Command
         echo Color::green("$message y/N >>> ");
 
         $input = strtolower(trim(readline()));
-        
+
         if (is_null($input) || strlen($input) == 0) {
             $input = 'n';
         }

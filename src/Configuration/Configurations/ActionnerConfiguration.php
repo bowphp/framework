@@ -1,22 +1,22 @@
 <?php
 
-namespace Bow\Services;
+namespace Bow\Configuration;
 
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\Application\Actionner;
-use Bow\Application\Service as BowService;
+use Bow\Configuration\Configuration;
 
-class ActionnerService extends BowService
+class ActionnerConfiguration extends Configuration
 {
     /**
      * Configuration du service
      *
-     * @param Config $config
+     * @param Loader $config
      * @return void
      */
-    public function make(Config $config)
+    public function make(Loader $config)
     {
-        $this->app->capsule('actionner', function () use ($config) {
+        $this->container->bind('actionner', function () use ($config) {
             return Actionner::configure($config->namespaces(), $config->middlewares());
         });
     }
@@ -28,6 +28,6 @@ class ActionnerService extends BowService
      */
     public function start()
     {
-        $this->app->capsule('actionner');
+        $this->container->make('actionner');
     }
 }

@@ -3,7 +3,7 @@
 namespace Bow\Application;
 
 use Bow\Http\Response;
-use Bow\Application\Exception\RouterException;
+use Bow\Router\Exception\RouterException;
 
 class Actionner
 {

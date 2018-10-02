@@ -1,14 +1,14 @@
 <?php
 namespace Bow\View;
 
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use BadMethodCallException;
 use Bow\View\Exception\ViewException;
 
 class View
 {
     /**
-     * @var Config
+     * @var Loader
      */
     private static $config;
 
@@ -40,10 +40,10 @@ class View
     /**
      * View constructor.
      *
-     * @param  Config $config
+     * @param  Loader $config
      * @throws ViewException
      */
-    public function __construct(Config $config)
+    public function __construct(Loader $config)
     {
         $engine = $config['view.engine'];
 
@@ -63,7 +63,7 @@ class View
     /**
      * Permet de configurer la classe
      *
-     * @param Config $config
+     * @param Loader $config
      */
     public static function configure($config)
     {

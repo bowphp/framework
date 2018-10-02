@@ -2,7 +2,7 @@
 namespace Bow\View\Engine;
 
 use Bow\View\EngineAbstract;
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 
 class MustacheEngine extends EngineAbstract
 {
@@ -24,9 +24,9 @@ class MustacheEngine extends EngineAbstract
     /**
      * MustacheEngine constructor.
      *
-     * @param Config $config
+     * @param Loader $config
      */
-    public function __construct(Config $config)
+    public function __construct(Loader $config)
     {
         $this->config = $config;
 

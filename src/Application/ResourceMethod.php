@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Application\Resource;
+namespace Bow\Application;
 
 class ResourceMethod
 {

@@ -5,11 +5,10 @@ namespace Bow\Application;
 use Bow\Http\Redirect;
 use Bow\Http\Request;
 use Bow\Router\Route;
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\Http\Response;
 use Bow\Support\Capsule;
 use Bow\Http\Exception\HttpException;
-use Bow\Application\Resource\ResourceMethod;
 use Bow\Router\Exception\RouterException;
 use Bow\Application\Exception\ApplicationException;
 
@@ -18,7 +17,7 @@ class Application
     /**
      * @var string
      */
-    private $version = '2.5.1';
+    private $version = '4.0.0';
 
     /**
      * @var Capsule
@@ -84,7 +83,7 @@ class Application
     private $response;
 
     /**
-     * @var Config
+     * @var Loader
      */
     private $config;
 
@@ -117,12 +116,14 @@ class Application
     /**
      * Association de la configuration
      *
-     * @param Config $config
+     * @param Loader $config
      * @return void
      */
-    public function bind(Config $config)
+    public function bind(Loader $config)
     {
         $this->config = $config;
+
+        $this->capsule->instance('config', $config);
 
         $this->boot();
     }
@@ -137,32 +138,8 @@ class Application
         if ($this->booted) {
             return;
         }
-
-        if (method_exists($this->config, 'services')) {
-            $services = $this->config->services();
-
-            $service_collection = [];
-
-            // Configuration des services
-            foreach ($services as $service) {
-                if (class_exists($service, true)) {
-                    $class = new $service($this);
-
-                    $class->make($this->config);
-
-                    $service_collection[] = $class;
-                }
-            }
-
-            // Démarage des services ou code d'initial
-            foreach ($service_collection as $service) {
-                $service->start();
-            }
-        }
-
-        if (method_exists($this->config, 'boot')) {
-            $this->config->boot();
-        }
+        
+        $this->config->boot();
 
         $this->booted = true;
     }
@@ -403,7 +380,7 @@ class Application
      */
     private function routeLoader($method, $path, $cb)
     {
-        // construction du path original en fonction de la Config de l'application
+        // construction du path original en fonction de la Loader de l'application
         $path = $this->config['app.root'].$this->branch.$path;
 
         // route courante
@@ -485,6 +462,8 @@ class Application
             }
 
             $this->current['path'] = $route->getPath();
+            
+            dd($route);
 
             // Appel de l'action associer à la route
             $response = $route->call();

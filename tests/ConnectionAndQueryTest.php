@@ -46,7 +46,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
 
     public function testGetDatabaseConnection()
     {
-        return Database::instance();
+        return Database::getInstance();
     }
 
     /**

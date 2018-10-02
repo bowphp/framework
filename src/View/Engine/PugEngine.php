@@ -1,7 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\View\EngineAbstract;
 use Pug\Pug;
 
@@ -20,9 +20,9 @@ class PugEngine extends EngineAbstract
     /**
      * PugEngine constructor.
      *
-     * @param Config $config
+     * @param Loader $config
      */
-    public function __construct(Config $config)
+    public function __construct(Loader $config)
     {
         $this->config = $config;
 

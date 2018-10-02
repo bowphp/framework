@@ -1,7 +1,7 @@
 <?php
 namespace Bow\View\Engine;
 
-use Bow\Config\Config;
+use Bow\Configuration\Loader;
 use Bow\View\EngineAbstract;
 
 class TwigEngine extends EngineAbstract
@@ -19,9 +19,9 @@ class TwigEngine extends EngineAbstract
     /**
      * TwigEngine constructor.
      *
-     * @param Config $config
+     * @param Loader $config
      */
-    public function __construct(Config $config)
+    public function __construct(Loader $config)
     {
         $this->config = $config;
 

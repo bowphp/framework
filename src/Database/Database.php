@@ -4,7 +4,6 @@ namespace Bow\Database;
 use PDO;
 use StdClass;
 use Bow\Security\Sanitize;
-use Bow\Support\Collection;
 use Bow\Database\Query\Builder;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Exception\ConnectionException;
@@ -12,12 +11,6 @@ use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
 
-/**
- * Class Database
- *
- * @author  Franck dakia <dakiafranck@gmail.com>
- * @package Bow\Database
- */
 class Database
 {
     /**
@@ -66,7 +59,7 @@ class Database
      *
      * @return Database
      */
-    public static function instance()
+    public static function getInstance()
     {
         static::verifyConnection();
 
@@ -115,10 +108,10 @@ class Database
         }
 
         if (static::$adapter->getConnection() instanceof PDO && $name == static::$name) {
-            return static::instance();
+            return static::getInstance();
         }
 
-        return static::instance();
+        return static::getInstance();
     }
 
     /**
@@ -432,8 +425,8 @@ class Database
      */
     public function __call($method, array $arguments)
     {
-        if (method_exists(static::class, $method)) {
-            return call_user_func_array([__CLASS__, $method], $arguments);
+        if (method_exists(static::$instance, $method)) {
+            return call_user_func_array([static::$instance, $method], $arguments);
         }
 
         throw new DatabaseException("$method n'est pas une methode.", E_USER_ERROR);

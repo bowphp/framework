@@ -2,6 +2,7 @@
 
 namespace Bow\Console;
 
+use Bow\Configuration\Loader;
 use Bow\Support\Faker;
 use Bow\Database\Database;
 
@@ -15,9 +16,7 @@ class Bow
     /**
      * @var array
      */
-    private $bootstrap = [
-        'public/index.php'
-    ];
+    private $bootstrap = [];
 
     /**
      * @var string
@@ -40,13 +39,17 @@ class Bow
     private $storage_directory;
 
     /**
+     * @var Loader
+     */
+    private $kernel;
+
+    /**
      * Bow constructor.
      *
-     * @param  string  $dirname
      * @param  Command $command
      * @return void
      */
-    public function __construct($dirname, Command $command)
+    public function __construct(Command $command)
     {
         if ($command->getParameter('trash')) {
             echo Color::red('Bad command. Type "php bow help" for more information"');
@@ -54,13 +57,13 @@ class Bow
             exit(1);
         }
 
-        $this->dirname = $dirname;
+        $this->dirname = $command->getBaseDirname();
 
-        $this->public_directory = rtrim($dirname, '/').'/public';
+        $this->public_directory = rtrim($this->dirname, '/').'/public';
 
-        $this->storage_directory = rtrim($dirname, '/').'/storage';
+        $this->storage_directory = rtrim($this->dirname, '/').'/storage';
 
-        $this->serve_filename = rtrim($dirname, '/').'/server.php';
+        $this->serve_filename = rtrim($this->dirname, '/').'/server.php';
 
         $this->command = $command;
     }
@@ -108,6 +111,16 @@ class Bow
     }
 
     /**
+     * Bind kernel
+     *
+     * @param Loader $kernel
+     */
+    public function bind(Loader $kernel)
+    {
+        $this->kernel = $kernel;
+    }
+
+    /**
      * Permet de lancer Bow task runner
      *
      * @return void
@@ -127,6 +140,8 @@ class Bow
         if ($command == 'run') {
             $command = 'launch';
         }
+
+        $this->kernel->boot();
 
         $this->call($command);
     }
@@ -306,7 +321,12 @@ class Bow
         $this->command->reflesh();
     }
 
-    public function launch()
+    /**
+     * Launch process
+     *
+     * @throws \ErrorException
+     */
+    private function launch()
     {
         $action = $this->command->getParameter('action');
 

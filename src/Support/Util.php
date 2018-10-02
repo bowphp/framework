@@ -5,16 +5,10 @@ use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 
-/**
- * Class Util
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class Util
 {
     /**
-     * définir le type de retoure chariot CRLF ou LF
+     * Définir le type de retoure chariot CRLF ou LF
      *
      * @var string
      */

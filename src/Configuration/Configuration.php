@@ -1,38 +1,41 @@
 <?php
 
-namespace Bow\Application;
+namespace Bow\Configuration;
 
 use Bow\Event\Event;
-use Bow\Config\Config;
+use Bow\Support\Capsule;
 
-abstract class Service
+abstract class Configuration
 {
-    protected $app;
+    /**
+     * @var Capsule
+     */
+    protected $container;
 
     /**
      * Service constructor.
      *
-     * @param $app
+     * @param Capsule $container
      */
-    public function __construct(Application $app)
+    public function __construct(Capsule $container)
     {
-        $this->app = $app;
+        $this->container = $container;
     }
 
     /**
      * Permet de créer le service
      *
-     * @param Config $config
+     * @param Loader $config
      * @return void
      */
-    abstract public function make(Config $config);
+    abstract public function create(Loader $config);
 
     /**
      * Permet de lancer le service
      *
      * @return void
      */
-    abstract public function start();
+    abstract public function run();
 
     /**
      * Start listener
@@ -40,7 +43,7 @@ abstract class Service
      * @param callable $cb
      * @return void
      */
-    public function stared($cb)
+    public function runned($cb)
     {
         Event::once(static::class.'\Service\Started', $cb);
     }
@@ -51,7 +54,7 @@ abstract class Service
      * @param callable $cb
      * @return void
      */
-    public function maked($cb)
+    public function ctreated($cb)
     {
         Event::once(static::class.'\Service\Maked', $cb);
     }

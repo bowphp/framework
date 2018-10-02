@@ -28,7 +28,7 @@ class Listener
     }
 
     /**
-     * Permet de lance la fonction du listener
+     * Permet de lancer la fonction du listener
      *
      * @param  array $data
      * @return mixed
@@ -39,7 +39,7 @@ class Listener
     }
 
     /**
-     * Permet de retourne le type de l'action
+     * Permet de retourner le type de l'action
      *
      * @return string
      */
@@ -49,7 +49,7 @@ class Listener
     }
 
     /**
-     * Permet de retourne l'action à lancer
+     * Permet de retourner l'action à lancer
      *
      * @return mixed
      */
