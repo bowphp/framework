@@ -1,22 +1,22 @@
 <?php
 
-use Bow\Mail\Mail;
 use Bow\Auth\Auth;
+use Bow\Event\Event;
+use Bow\Database\Database as DB;
 use Bow\Http\Cache;
 use Bow\Http\Input;
-use Bow\Event\Event;
-use Bow\Support\Env;
-use Bow\Support\Util;
-use Bow\Support\Faker;
-use Bow\Security\Hash;
-use Bow\Configuration\Loader;
+use Bow\Mail\Mail;
 use Bow\Session\Cookie;
-use Bow\Support\Capsule;
 use Bow\Session\Session;
-use Bow\Resource\Storage;
+use Bow\Security\Hash;
 use Bow\Security\Tokenize;
+use Bow\Support\Env;
+use Bow\Support\Capsule;
 use Bow\Support\Collection;
-use Bow\Database\Database as DB;
+use Bow\Support\Faker;
+use Bow\Support\Util;
+use Bow\Resource\Storage;
+use Bow\Translate\Translator;
 
 if (!function_exists('app')) {
     /**
@@ -1329,14 +1329,18 @@ if (!function_exists('trans')) {
     /**
      * Make translation
      *
-     * @param $key
-     * @param $data
+     * @param string $key
+     * @param array $data
      * @param bool $choose
-     * @return string
+     * @return string | Bow\Translate\Translator
      */
-    function trans($key, $data = [], $choose = null)
+    function trans($key = null, $data = [], $choose = false)
     {
-        return \Bow\Translate\Translator::make($key, $data, $choose);
+        if (is_null($key)) {
+            return Translator::getInstance();
+        }
+
+        return Translator::translate($key, $data, $choose);
     }
 }
 
@@ -1349,7 +1353,7 @@ if (!function_exists('__')) {
      * @param  bool $choose
      * @return string
      */
-    function __($key, $data = [], $choose = null)
+    function __($key, $data = [], $choose = false)
     {
         return trans($key, $data, $choose);
     }
@@ -1438,13 +1442,13 @@ if (!function_exists('app_mode')) {
     }
 }
 
-if (!function_exists('client_lang')) {
+if (!function_exists('client_locale')) {
     /**
      * Get client request language
      *
      * @return string
      */
-    function client_lang()
+    function client_locale()
     {
         return request()->lang();
     }

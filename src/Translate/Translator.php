@@ -29,6 +29,7 @@ class Translator
     public function __construct($lang, $directory)
     {
         static::$lang = $lang;
+
         static::$directory = $directory;
     }
 
@@ -66,7 +67,7 @@ class Translator
      * @param  bool   $plurial
      * @return string
      */
-    public static function make($key, array $data = [], $plurial = false)
+    public static function translate($key, array $data = [], $plurial = false)
     {
         if (!is_string($key)) {
             throw new \InvalidArgumentException('La premier parametre doit etre une chaine de carractère.', E_USER_ERROR);
@@ -86,6 +87,7 @@ class Translator
         }
 
         array_shift($map);
+
         $key = implode('.', $map);
 
         $contents = require $translation_filename;
@@ -99,11 +101,11 @@ class Translator
         $parts = explode('|', $value);
 
         if ($plurial === true) {
-            if (isset($parts[1])) {
-                $value = $parts[1];
-            } else {
+            if (!isset($parts[1])) {
                 return $key;
             }
+
+            $value = $parts[1];
         } else {
             $value = $parts[0];
         }
@@ -120,7 +122,7 @@ class Translator
      */
     public static function single($key, array $data = [])
     {
-        return static::make($key, $data);
+        return static::translate($key, $data);
     }
 
     /**
@@ -132,7 +134,7 @@ class Translator
      */
     public static function pluiral($key, array $data = [])
     {
-        return static::make($key, $data, true);
+        return static::translate($key, $data, true);
     }
 
     /**
@@ -145,10 +147,30 @@ class Translator
     private static function format($str, array $values = [])
     {
         foreach ($values as $key => $value) {
-            $str = preg_replace('/\{\{\s*'.$key.'\s*\}\}/', $value, $str);
+            $str = preg_replace('/{\s*'.$key.'\s*\}/', $value, $str);
         }
 
         return $str;
+    }
+
+    /**
+     * Update locale
+     *
+     * @param $locale
+     */
+    public static function setLocale($locale)
+    {
+        static::$lang = $locale;
+    }
+
+    /**
+     * Get locale
+     *
+     * @return string
+     */
+    public static function getLocale()
+    {
+        return static::$lang;
     }
 
     /**
@@ -160,8 +182,8 @@ class Translator
      */
     public function __call($name, $arguments)
     {
-        if (method_exists(static::class, $name)) {
-            return call_user_func_array([static::class, $name], $arguments);
+        if (method_exists(static::$instance, $name)) {
+            return call_user_func_array([static::$instance, $name], $arguments);
         }
 
         throw new \BadMethodCallException('undefined method '.$name);
