@@ -54,7 +54,7 @@ abstract class Configuration
      * @param callable $cb
      * @return void
      */
-    public function ctreated($cb)
+    public function created($cb)
     {
         Event::once(static::class.'\Service\Maked', $cb);
     }
