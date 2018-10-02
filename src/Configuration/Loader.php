@@ -12,12 +12,12 @@ class Loader implements \ArrayAccess
     /**
      * @var Loader
      */
-    private static $instance;
+    protected static $instance;
 
     /**
      * @var Arraydotify
      */
-    private $config;
+    protected $config;
 
     /**
      * @var string
@@ -27,7 +27,7 @@ class Loader implements \ArrayAccess
     /**
      * @var bool
      */
-    private $booted = false;
+    protected $booted = false;
 
     /**
      * @param string $base_path
@@ -64,9 +64,7 @@ class Loader implements \ArrayAccess
     /**
      * Ferméture de la fonction magic __clone pour optimizer le singleton
      */
-    final private function __clone()
-    {
-    }
+    final private function __clone() { }
 
     /**
      * takeInstance singleton
