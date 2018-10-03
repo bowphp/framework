@@ -718,7 +718,7 @@ class Command
             }
         }
 
-        $model_namespace = "\nuse App\\".ucfirst($model).';';
+        $model_namespace = "\nuse App\\".ucfirst($model).";\n";
 
         $this->createRestController($generator, $prefix, $controller_name, $model_namespace);
 
@@ -742,7 +742,7 @@ class Command
         $generator->write('controller/rest', [
             'modelNamespace' => $model_namespace,
             'prefix' => $prefix,
-            'baseNamespace' => $this->namespaces['validation']
+            'baseNamespace' => $this->namespaces['controller']
         ]);
 
         echo "\033[0;32mLe controlleur rest \033[00m[{$controller_name}]\033[0;32m a été bien créé.\033[00m\n";
