@@ -1,13 +1,13 @@
 <?php
-namespace Bow\Resource\Ftp;
+namespace Bow\Storage\Ftp;
 
-use Bow\Resource\FilesystemInterface;
+use Bow\Storage\FilesystemInterface;
 
 /**
  * Class FTP
  *
  * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support\Resource\Ftp
+ * @package Bow\Support\Storage\Ftp
  */
 class FTP implements FilesystemInterface
 {

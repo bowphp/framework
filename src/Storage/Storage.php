@@ -1,10 +1,11 @@
 <?php
-namespace Bow\Resource;
+
+namespace Bow\Storage;
 
 use BadMethodCallException;
-use Bow\Resource\Ftp\FTP;
-use Bow\Resource\AWS\AwsS3Client;
-use Bow\Resource\Exception\ResourceException;
+use Bow\Storage\Ftp\FTP;
+use Bow\Storage\AWS\AwsS3Client;
+use Bow\Storage\Exception\ResourceException;
 
 /**
  * Class Storage

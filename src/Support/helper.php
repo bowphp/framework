@@ -15,7 +15,7 @@ use Bow\Support\Capsule;
 use Bow\Support\Collection;
 use Bow\Support\Faker;
 use Bow\Support\Util;
-use Bow\Resource\Storage;
+use Bow\Storage\Storage;
 use Bow\Translate\Translator;
 
 if (!function_exists('app')) {
@@ -1219,7 +1219,7 @@ if (!function_exists('ftp')) {
     /**
      * Alias sur le connection FTP.
      *
-     * @return \Bow\Resource\Ftp\FTP
+     * @return \Bow\Storage\Ftp\FTP
      */
     function ftp()
     {
@@ -1231,7 +1231,7 @@ if (!function_exists('s3')) {
     /**
      * Alias sur le connection S3.
      *
-     * @return \Bow\Resource\AWS\AwsS3Client
+     * @return \Bow\Storage\AWS\AwsS3Client
      */
     function s3()
     {
@@ -1244,8 +1244,8 @@ if (!function_exists('mount')) {
      * Alias sur la methode mount
      *
      * @param $mount
-     * @return \Bow\Resource\MountFilesystem
-     * @throws \Bow\Resource\Exception\ResourceException
+     * @return \Bow\Storage\MountFilesystem
+     * @throws \Bow\Storage\Exception\ResourceException
      */
     function mount($mount)
     {

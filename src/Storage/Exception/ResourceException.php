@@ -1,5 +1,5 @@
 <?php
-namespace Bow\Resource\Exception;
+namespace Bow\Storage\Exception;
 
 use ErrorException;
 

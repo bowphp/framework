@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Services;
+namespace Bow\Configuration\Configurations;
 
 use Monolog\Logger;
 use Bow\Configuration\Loader;
@@ -23,21 +23,20 @@ class LoggerConfiguration extends Configuration
 
             $monolog = new Logger('BOW');
 
-            $config = $config;
-
             $whoops->pushHandler(
                 new \Whoops\Handler\PrettyPageHandler
             );
+
             $whoops->register();
-            
+
             $monolog->pushHandler(
-                new StreamHandler($config['resource.log'].'/bow.log', Logger::DEBUG)
+                new StreamHandler($config['resource.log'] . '/bow.log', Logger::DEBUG)
             );
-            
+
             $monolog->pushHandler(
                 new FirePHPHandler()
             );
-        
+
             return $monolog;
         });
     }

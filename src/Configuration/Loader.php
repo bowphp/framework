@@ -136,22 +136,6 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * __invoke
-     *
-     * @param  $key
-     * @param  null $value
-     * @return mixed
-     */
-    public function __invoke($key, $value = null)
-    {
-        if ($value == null) {
-            return $this->config[$key];
-        }
-
-        return $this->config[$key] = $value;
-    }
-
-    /**
      * Load configuration
      *
      * @return Loader
@@ -187,6 +171,22 @@ class Loader implements \ArrayAccess
         $this->booted = true;
 
         return $this;
+    }
+
+    /**
+     * __invoke
+     *
+     * @param  $key
+     * @param  null $value
+     * @return mixed
+     */
+    public function __invoke($key, $value = null)
+    {
+        if ($value == null) {
+            return $this->config[$key];
+        }
+
+        return $this->config[$key] = $value;
     }
 
     /**

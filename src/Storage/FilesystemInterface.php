@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Resource;
+namespace Bow\Storage;
 
 interface FilesystemInterface
 {

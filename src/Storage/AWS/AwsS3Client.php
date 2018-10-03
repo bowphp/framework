@@ -1,9 +1,9 @@
 <?php
-namespace Bow\Resource\AWS;
+namespace Bow\Storage\AWS;
 
 use Aws\Sdk;
 use Aws\S3\S3Client;
-use Bow\Resource\FilesystemInterface;
+use Bow\Storage\FilesystemInterface;
 
 class AwsS3Client implements FilesystemInterface
 {

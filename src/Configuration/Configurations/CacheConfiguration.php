@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Configuration;
+namespace Bow\Configuration\Configurations;
 
 use Bow\Http\Cache;
 use Bow\Configuration\Loader;

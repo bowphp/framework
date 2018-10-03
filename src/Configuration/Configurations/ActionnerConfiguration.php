@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Configuration;
+namespace Bow\Configuration\Configurations;
 
 use Bow\Configuration\Loader;
 use Bow\Application\Actionner;
@@ -14,7 +14,7 @@ class ActionnerConfiguration extends Configuration
      * @param Loader $config
      * @return void
      */
-    public function make(Loader $config)
+    public function create(Loader $config)
     {
         $this->container->bind('actionner', function () use ($config) {
             return Actionner::configure($config->namespaces(), $config->middlewares());
@@ -26,7 +26,7 @@ class ActionnerConfiguration extends Configuration
      *
      * @return void
      */
-    public function start()
+    public function run()
     {
         $this->container->make('actionner');
     }

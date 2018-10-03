@@ -1,5 +1,6 @@
 <?php
-namespace Bow\Resource;
+
+namespace Bow\Storage;
 
 class MountFilesystem implements FilesystemInterface
 {

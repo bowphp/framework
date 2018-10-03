@@ -456,8 +456,6 @@ class Application
 
             $this->current['path'] = $route->getPath();
             
-            dd($route);
-
             // Appel de l'action associer à la route
             $response = $route->call();
 
