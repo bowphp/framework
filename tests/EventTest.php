@@ -10,16 +10,18 @@ class EventTable extends \Bow\Database\Barry\Model
     {
         parent::__construct($data);
 
+        file_put_contents(__DIR__.'/data/cache/event.txt', '');
+
         EventTable::created(function () {
-            // fwrite(STDOUT, 'Created');
+            file_put_contents(__DIR__.'/data/cache/event.txt', 'created', FILE_APPEND);
         });
 
         EventTable::deleted(function () {
-            // fwrite(STDOUT, 'Deleted');
+            file_put_contents(__DIR__.'/data/cache/event.txt', 'deleted', FILE_APPEND);
         });
 
         EventTable::updated(function () {
-            // fwrite(STDOUT, 'Updated');
+            file_put_contents(__DIR__.'/data/cache/event.txt', 'updated', FILE_APPEND);
         });
     }
 }
@@ -45,10 +47,6 @@ class EventTest extends \PHPUnit\Framework\TestCase
     public function testEventEmit1()
     {
         Event::emit('user.created', 'created');
-    }
-
-    public function testEventEmit2()
-    {
         Event::emit('user.destroy', 'destroy');
     }
 
@@ -68,21 +66,21 @@ class EventTest extends \PHPUnit\Framework\TestCase
 
     public function testModelUpdated()
     {
-        $pets = EventTable::find(1);
+        $pet = EventTable::find(1);
 
-        $this->assertInstanceOf(EventTable::class, $pets);
+        $this->assertInstanceOf(EventTable::class, $pet);
 
-        $pets->name = 'Loulou';
+        $pet->name = 'Loulou';
 
-        $this->assertEquals($pets->save(), 1);
+        $this->assertEquals($pet->save(), 1);
     }
 
     public function testModelDeleted()
     {
-        $pets = EventTable::find(1);
+        $pet = EventTable::find(1);
 
-        $this->assertInstanceOf(EventTable::class, $pets);
+        $this->assertInstanceOf(EventTable::class, $pet);
 
-        $this->assertEquals($pets->delete(), 1);
+        $this->assertEquals($pet->delete(), 1);
     }
 }

@@ -181,7 +181,7 @@ if (!function_exists('table')) {
      *
      * @param  string $name
      * @param  string $connexion
-     * @return Bow\Database\Query\Builder
+     * @return Bow\Database\QueryBuilder
      */
     function table($name, $connexion = null)
     {
@@ -903,12 +903,12 @@ if (!function_exists('add_event_once')) {
      * @param  string                $event
      * @param  callable|array|string $fn
      * @return Event;
-     * @throws \Bow\Exception\EventException
+     * @throws \Bow\Event\EventException
      */
     function add_event_once($event, $fn)
     {
         if (!is_string($event)) {
-            throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
+            throw new \Bow\Event\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
 
         return call_user_func_array([emitter(), 'once'], [$event, $fn]);

@@ -6,5 +6,5 @@ return [
         'name' => 'Dakia Franck'
     ],
     'plurial' => 'user|users',
-    'hello' => 'hello {{name}}'
+    'hello' => 'hello {name}'
 ];

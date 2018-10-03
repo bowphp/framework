@@ -11,12 +11,12 @@ class TranslationTest extends \PHPUnit\Framework\TestCase
 
     public function testWelcome()
     {
-        $this->assertEquals(Translator::make('welcome.message'), 'bow framework');
+        $this->assertEquals(Translator::translate('welcome.message'), 'bow framework');
     }
 
     public function testUserName()
     {
-        $this->assertEquals(Translator::make('welcome.user.name'), 'Dakia Franck');
+        $this->assertEquals(Translator::translate('welcome.user.name'), 'Dakia Franck');
     }
 
     public function testPlurial()

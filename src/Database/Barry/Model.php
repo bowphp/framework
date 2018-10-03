@@ -128,9 +128,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function first()
     {
-        $query = new static();
-
-        return $query->first();
+        return static::query()->first();
     }
 
     /**
@@ -235,14 +233,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $data = array_merge($id_value, $data);
             } else {
                 if ($static->primaryKeyType == 'string') {
-                    $data = array_merge([$static->primaryKey => ''], $data);
+                    $data = array_merge([
+                        $static->primaryKey => ''
+                    ], $data);
                 }
             }
         }
 
         $static->setAttributes($data);
 
-        $static->save();
+        $r = $static->save();
+
+        if ($r == 1) {
+            $static->fireEvent('oncreate');
+        }
 
         return $static;
     }
@@ -270,9 +274,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function deleted(callable $cb)
     {
-        $env = str_replace('\\', '.', strtolower(static::class));
+        $env = static::formatEventName('ondelete');
 
-        add_event_once($env.'.ondelete', $cb);
+        add_event_once($env, $cb);
     }
 
     /**
@@ -283,9 +287,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function created(callable $cb)
     {
-        $env = str_replace('\\', '.', strtolower(static::class));
+        $env = static::formatEventName('oncreate');
 
-        add_event_once($env . '.oncreate', $cb);
+        add_event_once($env, $cb);
     }
 
     /**
@@ -296,9 +300,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function updated(callable $cb)
     {
-        $env = str_replace('\\', '.', strtolower(static::class));
+        $env = static::formatEventName('onupdate');
 
-        add_event_once($env.'.onupdate', $cb);
+        add_event_once($env, $cb);
     }
 
     /**
@@ -330,8 +334,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $table = $properties['table'];
         }
 
-        $primaryKey = $properties['primaryKey'];
-
         if (!is_null($properties['connexion'])) {
             DB::connection($properties['connexion']);
         }
@@ -358,7 +360,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return mixed
      */
-    private function getPrimaryKeyValue()
+    public function getKeyValue()
     {
         if (array_key_exists($this->primaryKey, $this->original)) {
             return $this->original[$this->primaryKey];
@@ -376,7 +378,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return string
      */
-    private function getKey()
+    public function getKey()
     {
         return $this->primaryKey;
     }
@@ -391,55 +393,71 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $builder = static::query();
 
-        $primary_key_value = $this->getPrimaryKeyValue();
+        /**
+         * Get the current primary key value
+         */
+        $primaryKeyValue = $this->getKeyValue();
 
-        if ($primary_key_value != null) {
-            if ($builder->exists($this->primaryKey, $primary_key_value)) {
-                $this->original[$this->primaryKey] = $primary_key_value;
+        /**
+         * If primary key value is null, we are going to start the creation of new
+         * row
+         */
+        if ($primaryKeyValue == null) {
+            /**
+             * Insert information in the database
+             */
+            $r = $builder->insert($this->attributes);
 
-                $update_data = [];
+            /**
+             * We get a last insertion id value
+             */
+            $primaryKeyValue = $builder->getLastInsertId();
 
-                foreach ($this->attributes as $key => $value) {
-                    if (!isset($this->original[$key]) || $this->original[$key] != $value) {
-                        $update_data[$key] = $value;
-                    }
-                }
+            /**
+             * Transtype value to the define primary key type
+             */
+            if ($this->primaryKeyType == 'int') {
+                $primaryKeyValue = (int) $primaryKeyValue;
+            } elseif ($this->primaryKeyType == 'float') {
+                $primaryKeyValue = (float) $primaryKeyValue;
+            } elseif ($this->primaryKeyType == 'double') {
+                $primaryKeyValue = (double) $primaryKeyValue;
+            } else {
+                $primaryKeyValue = (string) $primaryKeyValue;
+            }
 
-                $r = $builder->where($this->primaryKey, $primary_key_value)->update($update_data);
+            /**
+             * Set the primary key value
+             */
+            $this->attributes[$this->primaryKey] = $primaryKeyValue;
 
-                $env = str_replace('\\', '.', strtolower(static::class));
+            $this->original = $this->attributes;
 
-                if ($r == 1) {
-                    if (emitter()->bound($env.'.onupdate')) {
-                        emitter()->emit($env.'.onupdate', $this);
-                    }
-                }
+            if ($r == 1) {
+                $this->fireEvent('oncreate');
+            }
 
-                return $r;
+            return $r;
+        }
+
+        if (!$builder->exists($this->primaryKey, $primaryKeyValue)) {
+            return 0;
+        }
+
+        $this->original[$this->primaryKey] = $primaryKeyValue;
+
+        $update_data = [];
+
+        foreach ($this->attributes as $key => $value) {
+            if (!isset($this->original[$key]) || $this->original[$key] != $value) {
+                $update_data[$key] = $value;
             }
         }
 
-
-        $r = $builder->insert($this->attributes);
-
-        $primary_key_value = $builder->getLastInsertId();
-
-        if ($this->primaryKeyType == 'int') {
-            $primary_key_value = (int) $primary_key_value;
-        } elseif ($this->primaryKeyType == 'float') {
-            $primary_key_value = (float) $primary_key_value;
-        } elseif ($this->primaryKeyType == 'double') {
-            $primary_key_value = (double) $primary_key_value;
-        }
-
-        $this->attributes[$this->primaryKey] = $primary_key_value;
-
-        $this->original = $this->attributes;
+        $r = $builder->where($this->primaryKey, $primaryKeyValue)->update($update_data);
 
         if ($r == 1) {
-            if (emitter()->bound(strtolower(static::class).'.oncreate')) {
-                emitter()->emit(strtolower(static::class).'.oncreate');
-            }
+            $this->fireEvent('onupdate');
         }
 
         return $r;
@@ -453,24 +471,22 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function delete()
     {
-        $primary_key_value = $this->getPrimaryKeyValue();
+        $primaryKeyValue = $this->getKeyValue();
 
         $builder = static::query();
 
-        if ($primary_key_value == null) {
+        if ($primaryKeyValue == null) {
             return 0;
         }
 
-        if (!$builder->exists($this->primaryKey, $primary_key_value)) {
+        if (!$builder->exists($this->primaryKey, $primaryKeyValue)) {
             return 0;
         }
 
-        $r = $builder->where($this->primaryKey, $primary_key_value)->delete();
+        $r = $builder->where($this->primaryKey, $primaryKeyValue)->delete();
 
-        $env = str_replace('\\', '.', strtolower(static::class));
-
-        if ($r == 1 && emitter()->bound($env.'.ondelete')) {
-            emitter()->emit($env.'.ondelete', $this);
+        if ($r == 1) {
+            $this->fireEvent('ondelete');
         }
 
         return $r;
@@ -490,6 +506,31 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->setAttribute('updated_at', date('Y-m-d H:i:s'));
 
         return (bool) $this->save();
+    }
+
+    /**
+     * Get event name
+     *
+     * @param string $event
+     * @return mixed
+     */
+    private static function formatEventName($event)
+    {
+        return str_replace('\\', '.', strtolower(static::class)).'.'.$event;
+    }
+
+    /**
+     * Fire event
+     *
+     * @param string $event
+     */
+    private function fireEvent($event)
+    {
+        $env = $this->formatEventName($event);
+
+        if (emitter()->bound($env)) {
+            emitter()->emit($env, $this);
+        }
     }
 
     /**
