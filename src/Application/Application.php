@@ -133,7 +133,7 @@ class Application
         if ($this->booted) {
             return;
         }
-        
+
         $this->config->boot();
 
         $this->booted = true;
@@ -455,7 +455,7 @@ class Application
             }
 
             $this->current['path'] = $route->getPath();
-            
+
             // Appel de l'action associer à la route
             $response = $route->call();
 
@@ -597,15 +597,13 @@ class Application
             $route->name($name);
 
             // Association des critères définies
-            if (!isset($where["id"])) {
-                if (!isset($where[$value['call']])) {
-                    continue;
-                }
+            if (isset($where[$value['call']])) {
+                $route->where((array) $where[$value['call']]);
+
+                continue;
             }
 
-            $rule = isset($where['id']) ? $where['id'] : $where[$value['call']];
-
-            $route->where(['id' => $rule]);
+            $route->where((array) $where);
         }
 
         return $this;

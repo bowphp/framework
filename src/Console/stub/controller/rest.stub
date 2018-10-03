@@ -8,7 +8,8 @@ class {className} extends Controller
 {
     /**
      * Point d'entré
-     * GET prefix
+     *
+     * GET {prefix}
      *
      * @return void
      */
