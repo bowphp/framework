@@ -366,10 +366,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return $this->original[$this->primaryKey];
         }
 
-        if (array_key_exists($this->primaryKey, $this->attributes)) {
-            return $this->attributes[$this->primaryKey];
-        }
-
         return null;
     }
 

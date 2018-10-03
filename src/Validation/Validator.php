@@ -113,6 +113,7 @@ class Validator
     public static function make(array $inputs, array $rules)
     {
         $v = new static();
+
         return $v->validate($inputs, $rules);
     }
 
