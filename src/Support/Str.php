@@ -67,19 +67,32 @@ class Str
     /**
      * Snake case
      *
-     * @param  $value
+     * @param  string $str
      * @param  string $delimiter
      * @return mixed
      */
-    public static function snake($value, $delimiter = '_')
+    public static function snake($str, $delimiter = '_')
     {
-        $value = preg_replace('/\s+/u', $delimiter, $value);
+        $str = preg_replace('/\s+/u', $delimiter, $str);
 
-        $value = static::lower(preg_replace_callback('/([A-Z])/u', function ($math) use ($delimiter) {
+        $str = static::lower(preg_replace_callback('/([A-Z])/u', function ($math) use ($delimiter) {
             return $delimiter.static::lower($math[1]);
-        }, $value));
+        }, $str));
 
-        return preg_replace('/'.$delimiter.'{2,}/', $delimiter, $value);
+        return preg_replace('/'.$delimiter.'{2,}/', $delimiter, $str);
+    }
+
+    /**
+     * Get str plurial
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function plurial($str)
+    {
+        preg_match('/s$/', $str) ?: $str = $str.'s';
+
+        return $str;
     }
 
     /**

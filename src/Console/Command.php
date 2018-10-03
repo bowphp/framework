@@ -724,8 +724,8 @@ class Command
 
         $this->model($model);
 
-        if ($this->readline('Voulez vous que je crée une migration pour ce model? ')) {
-            $this->make($model);
+        if ($this->readline('Voulez vous que je crée une migration pour ce model ? ')) {
+            $this->make('create_'.strtolower(Str::plurial($model)).'_table');
         }
     }
 
