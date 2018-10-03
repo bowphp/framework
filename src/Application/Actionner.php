@@ -138,8 +138,8 @@ class Actionner
             unset($actions['middleware']);
         }
 
-        if (isset($actions['uses'])) {
-            $actions = (array) $actions['uses'];
+        if (isset($actions['controller'])) {
+            $actions = (array) $actions['controller'];
         }
 
         foreach ($actions as $key => $action) {
