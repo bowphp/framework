@@ -1,17 +1,11 @@
-<h1 align="center">
-    <img src="https://github.com/bowphp/arts/raw/master/bow.jpg">
-    <br/>Bow
-</h1>
-<h4 align="center">The BOW PHP framework</h4>
-<br/>
-<p align="center">
-    <a href="https://github.com/bowphp/docs" title="docs"><img src="https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square"/></a>
-    <a href="https://packagist.org/bowphp/framework" title="version"><img src="https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square"/></a>
-    <a href="https://github.com/bowphp/app/blob/master/LICENSE" title="license"><img src="https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square"/></a>
-    <a href="https://travis-ci.org/bowphp/framework" title="Travis branch"><img src="https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square"/></a>
-</p>
+# Bow Framework
 
-<p align="center">pour utiliser ce package, veuillez créer une application depuis ce package <a href="https://github.com/bowphp/app">bowphp/app</a></p>
+<a href="https://github.com/bowphp/docs" title="docs"><img src="https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square"/></a>
+<a href="https://packagist.org/packages/bowphp/framework" title="version"><img src="https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square"/></a>
+<a href="https://github.com/bowphp/app/blob/master/LICENSE" title="license"><img src="https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square"/></a>
+<a href="https://travis-ci.org/bowphp/framework" title="Travis branch"><img src="https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square"/></a>
+
+pour utiliser ce package, veuillez créer une application depuis ce package [bowphp/app](https://github.com/bowphp/app)
 
 # Préréquis
 
