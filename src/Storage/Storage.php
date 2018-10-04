@@ -3,16 +3,10 @@
 namespace Bow\Storage;
 
 use BadMethodCallException;
-use Bow\Storage\Ftp\FTP;
 use Bow\Storage\AWS\AwsS3Client;
 use Bow\Storage\Exception\ResourceException;
+use Bow\Storage\Ftp\FTP;
 
-/**
- * Class Storage
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class Storage
 {
     /**

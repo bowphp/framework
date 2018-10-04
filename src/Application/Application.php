@@ -2,16 +2,15 @@
 
 namespace Bow\Application;
 
-use Bow\Contrats\ResponseInterface;
-use Bow\Http\Redirect;
-use Bow\Http\Request;
-use Bow\Router\Route;
-use Bow\Configuration\Loader;
-use Bow\Http\Response;
-use Bow\Support\Capsule;
-use Bow\Http\Exception\HttpException;
-use Bow\Router\Exception\RouterException;
 use Bow\Application\Exception\ApplicationException;
+use Bow\Configuration\Loader;
+use Bow\Contrats\ResponseInterface;
+use Bow\Http\Exception\HttpException;
+use Bow\Http\Request;
+use Bow\Http\Response;
+use Bow\Router\Exception\RouterException;
+use Bow\Router\Route;
+use Bow\Support\Capsule;
 
 class Application
 {

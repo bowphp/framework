@@ -2,8 +2,8 @@
 
 namespace Bow\View;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class ViewConfiguration extends Configuration
 {

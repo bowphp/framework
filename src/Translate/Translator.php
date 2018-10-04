@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Translate;
 
 use Bow\Support\Arraydotify;

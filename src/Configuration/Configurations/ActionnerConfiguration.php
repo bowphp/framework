@@ -2,9 +2,9 @@
 
 namespace Bow\Configuration\Configurations;
 
-use Bow\Configuration\Loader;
 use Bow\Application\Actionner;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class ActionnerConfiguration extends Configuration
 {

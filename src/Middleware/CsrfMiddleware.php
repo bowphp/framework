@@ -2,35 +2,33 @@
 
 namespace Bow\Middleware;
 
-use Bow\Http\Input;
+use Bow\Http\Request;
 
 class CsrfMiddleware
 {
     /**
      * Fonction de lancement du middleware.
      *
-     * @param  \Bow\Http\Request $request
-     * @param  callable          $next
+     * @param  Request $request
+     * @param  Callable $next
      * @return boolean
      */
-    public function checker($request, callable $next)
+    public function checker(Request $request, Callable $next)
     {
         if (!($request->isPost() || $request->isPut())) {
-            return $next();
+            return $next($request);
         }
 
         if ($request->isAjax()) {
             if ($request->getHeader('x-csrf-token') === session('_token')) {
-                return $next();
+                return $next($request);
             }
 
             response()->statusCode(401);
             return response()->send('unauthorize.');
         }
 
-        $input = new Input();
-
-        if ($input->get('_token', null) !== session('_token')) {
+        if ($request->get('_token', null) !== session('_token')) {
             return response('Token Mismatch');
         }
 

@@ -1,7 +1,6 @@
 <?php
-namespace Bow\Support;
 
-use function preg_replace;
+namespace Bow\Support;
 
 class Faker
 {

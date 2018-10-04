@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Validation;
 
 use Bow\Validation\Exception\ValidationException;

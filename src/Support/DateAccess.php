@@ -1,12 +1,7 @@
 <?php
+
 namespace Bow\Support;
 
-/**
- * Class DateAccess
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class DateAccess
 {
     /**

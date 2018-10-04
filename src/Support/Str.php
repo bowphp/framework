@@ -1,12 +1,7 @@
 <?php
+
 namespace Bow\Support;
 
-/**
- * Class Str
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class Str
 {
     /**
@@ -312,7 +307,6 @@ class Str
      *
      * @param string $str*
      * @return bool
-     *
      * @throws \ErrorException
      */
     public static function isAlphaNum($str)

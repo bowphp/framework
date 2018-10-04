@@ -3,8 +3,8 @@
 namespace Bow\Console;
 
 use Bow\Configuration\Loader;
-use Bow\Support\Faker;
 use Bow\Database\Database;
+use Bow\Support\Faker;
 
 class Bow
 {

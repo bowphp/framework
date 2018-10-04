@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Mail\Exception;
 
 use ErrorException;

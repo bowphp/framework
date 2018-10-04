@@ -2,9 +2,9 @@
 
 namespace Bow\Event;
 
+use Bow\Application\Actionner;
 use Bow\Session\Session;
 use Bow\Support\Collection;
-use Bow\Application\Actionner;
 
 class Event
 {

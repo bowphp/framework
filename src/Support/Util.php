@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Support;
 
 use Symfony\Component\VarDumper\Cloner\VarCloner;

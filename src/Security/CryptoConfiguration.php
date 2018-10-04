@@ -2,8 +2,8 @@
 
 namespace Bow\Security;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class CryptoConfiguration extends Configuration
 {

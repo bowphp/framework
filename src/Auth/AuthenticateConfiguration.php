@@ -2,8 +2,8 @@
 
 namespace Bow\Auth;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class AuthenticateConfiguration extends Configuration
 {

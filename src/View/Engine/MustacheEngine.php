@@ -1,8 +1,9 @@
 <?php
+
 namespace Bow\View\Engine;
 
-use Bow\View\EngineAbstract;
 use Bow\Configuration\Loader;
+use Bow\View\EngineAbstract;
 
 class MustacheEngine extends EngineAbstract
 {

@@ -78,11 +78,6 @@ if (!function_exists('response')) {
      */
     function response($template = null, $code = 200, $headers = [])
     {
-
-        app()->bind('response', function () {
-            return \Bow\Http\Response::getInstance();
-        });
-
         $response = app('response');
 
         $response->statusCode($code);
@@ -109,10 +104,6 @@ if (!function_exists('request')) {
      */
     function request()
     {
-        app()->bind('request', function () {
-            return \Bow\Http\Request::getInstance();
-        });
-
         return app('request');
     }
 }

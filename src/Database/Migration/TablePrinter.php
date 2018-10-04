@@ -2,8 +2,8 @@
 
 namespace Bow\Database\Migration;
 
-use Bow\Support\Collection;
 use Bow\Exception\ModelException;
+use Bow\Support\Collection;
 
 class TablePrinter
 {

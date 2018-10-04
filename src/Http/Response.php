@@ -1,8 +1,8 @@
 <?php
 namespace Bow\Http;
 
-use Bow\View\View;
 use Bow\Exception\ResponseException;
+use Bow\View\View;
 
 class Response
 {
@@ -55,6 +55,17 @@ class Response
      * @var Response
      */
     private static $instance;
+
+    /**
+     * Response constructor.
+     * @param string $data
+     * @param int $code
+     * @param array $headers
+     */
+    public function __construct($data = '', $code = 200, array $headers = [])
+    {
+
+    }
 
     /**
      * @return Response

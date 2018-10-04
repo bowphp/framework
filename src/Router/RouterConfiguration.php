@@ -2,8 +2,8 @@
 
 namespace Bow\Router;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class RouterConfiguration extends Configuration
 {

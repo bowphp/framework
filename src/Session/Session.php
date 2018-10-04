@@ -2,9 +2,9 @@
 
 namespace Bow\Session;
 
+use Bow\Contrats\StaticCollectionInterface;
 use Bow\Security\Crypto;
 use InvalidArgumentException;
-use Bow\Contrats\StaticCollectionInterface;
 
 class Session implements StaticCollectionInterface
 {

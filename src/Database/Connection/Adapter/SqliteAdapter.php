@@ -1,8 +1,9 @@
 <?php
+
 namespace Bow\Database\Connection\Adapter;
 
-use PDO;
 use Bow\Database\Connection\AbstractConnection;
+use PDO;
 
 class SqliteAdapter extends AbstractConnection
 {

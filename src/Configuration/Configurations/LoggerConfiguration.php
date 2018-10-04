@@ -2,11 +2,11 @@
 
 namespace Bow\Configuration\Configurations;
 
-use Monolog\Logger;
-use Bow\Configuration\Loader;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\FirePHPHandler;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
+use Monolog\Handler\FirePHPHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 class LoggerConfiguration extends Configuration
 {

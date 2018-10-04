@@ -2,8 +2,8 @@
 
 namespace Bow\Translate;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class TranslatorConfiguration extends Configuration
 {

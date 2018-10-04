@@ -2,9 +2,8 @@
 
 namespace Bow\Router;
 
-use Bow\Http\Request;
-use Bow\Configuration\Loader;
 use Bow\Application\Actionner;
+use Bow\Configuration\Loader;
 
 class Route
 {

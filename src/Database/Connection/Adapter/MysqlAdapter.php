@@ -1,9 +1,10 @@
 <?php
+
 namespace Bow\Database\Connection\Adapter;
 
-use PDO;
-use Bow\Support\Str;
 use Bow\Database\Connection\AbstractConnection;
+use Bow\Support\Str;
+use PDO;
 
 class MysqlAdapter extends AbstractConnection
 {

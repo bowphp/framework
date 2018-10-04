@@ -2,8 +2,6 @@
 
 namespace Bow\Security;
 
-use function count;
-
 class Sanitize
 {
     /**

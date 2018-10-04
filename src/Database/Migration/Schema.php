@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Database\Migration;
 
 use Bow\Database\Database;

@@ -2,8 +2,8 @@
 
 namespace Bow\Http;
 
-use Bow\Support\Str;
 use BadMethodCallException;
+use Bow\Support\Str;
 
 class Cache
 {

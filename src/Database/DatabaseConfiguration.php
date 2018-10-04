@@ -2,8 +2,8 @@
 
 namespace Bow\Database;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class DatabaseConfiguration extends Configuration
 {

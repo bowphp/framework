@@ -2,11 +2,6 @@
 
 namespace Bow\Http\Client;
 
-use function array_merge;
-use function curl_setopt;
-use const CURLOPT_FILE;
-use function ltrim;
-
 class HttpClient
 {
     /**

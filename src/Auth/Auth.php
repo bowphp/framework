@@ -2,9 +2,9 @@
 
 namespace Bow\Auth;
 
+use Bow\Auth\Exception\AuthenticateException;
 use Bow\Security\Hash;
 use Bow\Session\Session;
-use Bow\Auth\Exception\AuthenticateException;
 
 class Auth
 {
@@ -88,7 +88,7 @@ class Auth
         }
 
         if (! isset(static::$config[$guard])) {
-            throw new AuthenticateException("Aucune configuration trouvé", E_ERROR);
+            throw new AuthenticateException("Aucune configuration trouvée", E_ERROR);
         }
 
         $provider = static::$config[$guard];

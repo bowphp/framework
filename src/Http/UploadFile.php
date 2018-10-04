@@ -1,7 +1,6 @@
 <?php
-namespace Bow\Http;
 
-use Bow\Exception\UploadFileException;
+namespace Bow\Http;
 
 class UploadFile
 {

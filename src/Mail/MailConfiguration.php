@@ -2,8 +2,8 @@
 
 namespace Bow\Mail;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class MailConfiguration extends Configuration
 {

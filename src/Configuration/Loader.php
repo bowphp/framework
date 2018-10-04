@@ -2,10 +2,10 @@
 
 namespace Bow\Configuration;
 
+use Bow\Application\Exception\ApplicationException;
+use Bow\Support\Arraydotify;
 use Bow\Support\Capsule;
 use Bow\Support\Env;
-use Bow\Support\Arraydotify;
-use Bow\Application\Exception\ApplicationException;
 
 class Loader implements \ArrayAccess
 {

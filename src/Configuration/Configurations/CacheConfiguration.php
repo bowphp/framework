@@ -2,9 +2,9 @@
 
 namespace Bow\Configuration\Configurations;
 
-use Bow\Http\Cache;
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
+use Bow\Http\Cache;
 
 class CacheConfiguration extends Configuration
 {

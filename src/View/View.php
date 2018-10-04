@@ -1,8 +1,9 @@
 <?php
+
 namespace Bow\View;
 
-use Bow\Configuration\Loader;
 use BadMethodCallException;
+use Bow\Configuration\Loader;
 use Bow\View\Exception\ViewException;
 
 class View

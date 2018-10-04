@@ -2,12 +2,12 @@
 
 namespace Bow\Http;
 
-use Closure;
-use ErrorException;
+use Bow\Contrats\CollectionInterface;
 use Bow\Support\Collection;
 use Bow\Validation\Validate;
 use Bow\Validation\Validator;
-use Bow\Contrats\CollectionInterface;
+use Closure;
+use ErrorException;
 
 class Input implements CollectionInterface, \ArrayAccess
 {

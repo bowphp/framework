@@ -2,9 +2,9 @@
 
 namespace Bow\Configuration\Configurations;
 
-use Bow\Support\Env;
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
+use Bow\Support\Env;
 
 class EnvConfiguration extends Configuration
 {

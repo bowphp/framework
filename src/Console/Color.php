@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Console;
 
 class Color

@@ -2,9 +2,9 @@
 
 namespace Bow\Validation;
 
-use AuthorizationException;
-use Bow\Http\Request;
 use BadMethodCallException;
+use Bow\Http\Request;
+use Bow\Validation\Exception\AuthorizationException;
 use Bow\Validation\Exception\ValidationException;
 
 abstract class ValidationRequest
@@ -28,6 +28,7 @@ abstract class ValidationRequest
      * TodoValidation constructor.
      *
      * @return mixed
+     * @throws
      */
     public function __construct()
     {
@@ -39,7 +40,8 @@ abstract class ValidationRequest
             die($response);
         }
 
-        $this->request = new Request();
+        $this->request = app('request');
+
         $keys = $this->keys();
 
         if ((count($keys) == 1 && $keys[0] === '*') || count($keys) == 0) {
@@ -89,7 +91,7 @@ abstract class ValidationRequest
      */
     protected function authorizationFailAction()
     {
-        //throw new AuthorizationException('Vous n\'avez l\'authorisation pour faire requête');
+        // throw new AuthorizationException('Vous n\'avez l\'authorisation pour faire requête');
     }
 
     /**
@@ -101,7 +103,7 @@ abstract class ValidationRequest
     }
 
     /**
-     * @throws AuthorizationException
+     * @throws ValidationException
      */
     protected function sendFailValidation()
     {

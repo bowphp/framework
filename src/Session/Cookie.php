@@ -4,12 +4,6 @@ namespace Bow\Session;
 
 use Bow\Security\Crypto;
 
-/**
- * Class Cookie
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class Cookie
 {
     /**

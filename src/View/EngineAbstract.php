@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\View;
 
 use Bow\Configuration\Loader;

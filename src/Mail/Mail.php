@@ -1,8 +1,9 @@
 <?php
+
 namespace Bow\Mail;
 
-use Bow\View\View;
 use Bow\Mail\Exception\MailException;
+use Bow\View\View;
 
 /**
  * Class Mail

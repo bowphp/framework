@@ -1,8 +1,9 @@
 <?php
+
 namespace Bow\Testing;
 
-use Bow\Http\Client\Parser;
 use Bow\Http\Client\HttpClient;
+use Bow\Http\Client\Parser;
 use PHPUnit\Framework\TestCase;
 
 class BowTestCase extends TestCase

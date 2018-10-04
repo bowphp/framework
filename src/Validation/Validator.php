@@ -1,13 +1,9 @@
 <?php
+
 namespace Bow\Validation;
 
-use Bow\Support\Str;
 use Bow\Database\Database;
-use const FILTER_FLAG_EMAIL_UNICODE;
-use function filter_var;
-use function preg_match;
-use function preg_quote;
-use function str_replace;
+use Bow\Support\Str;
 
 /**
  * Class Validator

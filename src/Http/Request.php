@@ -2,9 +2,9 @@
 
 namespace Bow\Http;
 
-use Bow\Support\Str;
 use Bow\Session\Session;
 use Bow\Support\Collection;
+use Bow\Support\Str;
 
 class Request
 {

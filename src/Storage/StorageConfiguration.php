@@ -2,8 +2,8 @@
 
 namespace Bow\Storage;
 
-use Bow\Configuration\Loader;
 use Bow\Configuration\Configuration;
+use Bow\Configuration\Loader;
 
 class StorageConfiguration extends Configuration
 {

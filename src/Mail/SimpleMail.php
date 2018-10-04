@@ -1,9 +1,10 @@
 <?php
+
 namespace Bow\Mail;
 
+use Bow\Mail\Exception\MailException;
 use Bow\Support\Str;
 use InvalidArgumentException;
-use Bow\Mail\Exception\MailException;
 
 /**
  * Systeme d'envoye de mail utilisant le fonction mail de php.

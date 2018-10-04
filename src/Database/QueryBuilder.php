@@ -2,12 +2,12 @@
 
 namespace Bow\Database;
 
-use PDO;
-use stdClass;
+use Bow\Database\Exception\QueryBuilderException;
+use Bow\Security\Sanitize;
 use Bow\Support\Str;
 use Bow\Support\Util;
-use Bow\Security\Sanitize;
-use Bow\Database\Exception\QueryBuilderException;
+use PDO;
+use stdClass;
 
 /**
  * Class Builder

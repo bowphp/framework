@@ -4,5 +4,4 @@ namespace Bow\Jobs;
 
 class Queue
 {
-    
 }
