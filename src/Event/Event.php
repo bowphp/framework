@@ -129,7 +129,7 @@ class Event
                 $callable = [$listener, 'call'];
             }
 
-            return Actionner::getInstance()->call($callable, [$data]);
+            return Actionner::getInstance()->execute($callable, [$data]);
         });
 
         return true;

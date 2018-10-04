@@ -2,6 +2,7 @@
 
 namespace Bow\Application;
 
+use Bow\Contrats\ResponseInterface;
 use Bow\Http\Redirect;
 use Bow\Http\Request;
 use Bow\Router\Route;
@@ -526,8 +527,8 @@ class Application
             echo $this->response->json($response);
         }
 
-        if ($response instanceof Redirect) {
-            return $this->response->addHeader('Location', (string) $response);
+        if ($response instanceof ResponseInterface) {
+            return $response->send();
         }
 
         return;

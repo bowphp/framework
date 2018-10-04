@@ -107,6 +107,16 @@ class Auth
     }
 
     /**
+     * Check if user is guest
+     *
+     * @return bool
+     */
+    public function guest()
+    {
+        return !Session::has('_auth');
+    }
+
+    /**
      * Check if user is authenticate
      *
      * @return bool

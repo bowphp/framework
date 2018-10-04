@@ -2,7 +2,9 @@
 
 namespace Bow\Http;
 
-class Redirect
+use Bow\Contrats\ResponseInterface;
+
+class Redirect implements ResponseInterface
 {
     /**
      * @var Request
@@ -39,7 +41,7 @@ class Redirect
      *
      * @return Redirect
      */
-    public static  function getInstance()
+    public static function getInstance()
     {
         if (!static::$instance) {
             static::$instance = new static();
@@ -108,5 +110,15 @@ class Redirect
     public function __toString()
     {
         return $this->to;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function send()
+    {
+        $this->response->addHeader('Location', $this->to)->statusCode(301);
+
+        die();
     }
 }

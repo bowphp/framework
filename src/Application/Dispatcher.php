@@ -38,9 +38,10 @@ class Dispatcher
      * Lance le procéssus d'execution de middleware
      *
      * @param Request $request
+     * @param array $args
      * @return mixed
      */
-    public function process(Request $request)
+    public function process(Request $request, ...$args)
     {
         if (!isset($this->middlewares[$this->index])) {
             return null;
@@ -50,12 +51,17 @@ class Dispatcher
 
         $this->index++;
 
-        if (!is_callable($middleware)) {
+        $params = $args;
+
+        if (is_array($middleware)) {
+            $params = array_merge($args, $middleware['params']);
+
             $middleware = [new $middleware['class'], 'checker'];
         }
 
-        return  call_user_func_array(
-            $middleware, [$request, [$this, 'process'], $middleware['params']]
+        return call_user_func_array(
+            $middleware,
+            [$request, [$this, 'process'], $params]
         );
     }
 }

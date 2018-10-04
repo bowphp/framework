@@ -10,14 +10,14 @@ class AuthMiddleware
     /**
      * Fonction de lancement du middleware.
      *
-     * @param  \Bow\Http\Request $request
-     * @param  callable          $next
+     * @param  Request $request
+     * @param  Callable  $next
      * @return boolean
      */
-    public function checker(Request $request, callable $next)
+    public function checker(Request $request, Callable $next)
     {
         if (Auth::check()) {
-            return $next();
+            return $next($request);
         }
 
         return redirect($this->redirectTo());

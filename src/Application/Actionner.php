@@ -2,8 +2,11 @@
 
 namespace Bow\Application;
 
+use Bow\Contrats\ResponseInterface;
+use Bow\Database\Barry\Model;
 use Bow\Http\Request;
 use Bow\Router\Exception\RouterException;
+use Bow\Support\Collection;
 
 class Actionner
 {
@@ -121,38 +124,11 @@ class Actionner
     {
         $param = (array) $param;
 
-        $functions = [];
-
-        $middlewares = [];
-
-
-        /**
-         * Execution d'action definir comme une closure
-         */
-        if (is_callable($actions)) {
-
-            if (is_array($actions)) {
-                return call_user_func_array($actions, $param);
-            }
-
-            $function = $this->closure($actions);
-
-            return call_user_func_array(
-                $function['controller'],
-                array_merge($function['injections'], $param)
-            );
-        }
-
         /**
          * Execution d'action definir comme chaine de caractère
          */
-        if (is_string($actions)) {
-            $function = $this->controller($actions);
-
-            return call_user_func_array(
-                $function['controller'],
-                array_merge($function['injections'], $param)
-            );
+        if (is_string($actions) || is_callable($actions)) {
+            $actions = [$actions];
         }
 
         if (!is_array($actions)) {
@@ -162,11 +138,13 @@ class Actionner
             );
         }
 
+        $middlewares = [];
+
         /**
          * Vérification de l'existance de middleware associté à l'action
          * et extraction du middleware
          */
-        if (array_key_exists('middleware', $actions)) {
+        if (isset($actions['middleware'])) {
             $middlewares = (array) $actions['middleware'];
 
             unset($actions['middleware']);
@@ -180,6 +158,8 @@ class Actionner
             $actions = (array) $actions['controller'];
         }
 
+        $functions = [];
+
         /**
          * Normalisation de l'action à executer et creation de
          * l'injection de dépendance
@@ -191,18 +171,24 @@ class Actionner
                 continue;
             }
 
-            if (is_callable($action)) {
-                $injections = $this->injectorForClosure($action);
-
-                array_push($functions, ['controller' => $action, 'injections' => $injections]);
+            if (! is_callable($action)) {
+                continue;
             }
+
+            if (is_array($action) && $action[0] instanceof \Closure) {
+                $injection = $this->injectorForClosure($action[0]);
+            } else {
+                $injection = $this->injectorForClosure($action);
+            }
+
+            array_push($functions, ['action' => $action, 'injection' => $injection]);
         }
 
         /**
          * Chargement des middlewares associés à l'action
          */
         foreach ($middlewares as $middleware) {
-            if (class_exists($$middleware)) {
+            if (class_exists($middleware)) {
                 $this->dispatcher->pipe($middleware);
 
                 continue;
@@ -228,10 +214,16 @@ class Actionner
 
         $response = $this->dispatcher->process(Request::getInstance());
 
-        dd($response, $functions);
-
-        if (! is_null($response)) {
+        if (is_string($response) || is_array($response) || is_object($response)) {
             return $response;
+        }
+
+        if ($response instanceof ResponseInterface) {
+            return $response;
+        }
+
+        if ($response instanceof Model || $response instanceof Collection) {
+            return $response->toArray();
         }
 
         // Lancement de l'éxècution de la liste des actions definir
@@ -240,8 +232,8 @@ class Actionner
 
         foreach ($functions as $function) {
             $response = call_user_func_array(
-                $function['controller'],
-                array_merge($function['injections'], $param)
+                $function['action'],
+                array_merge($function['injection'], $param)
             );
 
             if ($response == false || is_null($response)) {
@@ -320,7 +312,11 @@ class Actionner
             }
 
             if (!in_array(strtolower($class), $this->getInjectorExceptedType())) {
-                $params[] = new $class();
+                if (method_exists($class, 'getInstance')) {
+                    $params[] = $class::getInstance();
+                } else {
+                    $params[] = new $class();
+                }
             }
         }
 
@@ -361,14 +357,14 @@ class Actionner
         // On lance la loader de controller si $cb est un String
         $controller = $this->controller($arr);
 
-        if ($controller['controller'][1] == null) {
-            array_splice($controller['controller'], 1, 1);
+        if ($controller['action'][1] == null) {
+            array_splice($controller['action'], 1, 1);
         }
 
         if (is_array($controller)) {
             return call_user_func_array(
-                $controller['controller'],
-                array_merge($controller['injections'], $arg)
+                $controller['action'],
+                array_merge($controller['injection'], $arg)
             );
         }
 
@@ -397,13 +393,13 @@ class Actionner
 
         list($class, $method) = $parts;
 
-        $class = sprintf('%s\\%s', $this->namespaces['controller'], ucfirst($class));
+        $class = sprintf('%s\\%s', $this->namespaces['action'], ucfirst($class));
 
         $injections = $this->injector($class, $method);
 
         return [
-            'controller' => [new $class(), $method],
-            'injections' => $injections
+            'action' => [new $class(), $method],
+            'injection' => $injections
         ];
     }
 
@@ -424,18 +420,8 @@ class Actionner
         $injections = $this->injectorForClosure($closure);
 
         return [
-            'controller' => $closure,
-            'injections' => $injections
+            'action' => $closure,
+            'injection' => $injections
         ];
-    }
-
-    /**
-     * Ajout de guard
-     *
-     * @param $guard
-     */
-    public function pushGuard($guard)
-    {
-        $this->guards[] = $guard;
     }
 }
