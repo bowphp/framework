@@ -64,7 +64,6 @@ class Response
      */
     public function __construct($data = '', $code = 200, array $headers = [])
     {
-
     }
 
     /**

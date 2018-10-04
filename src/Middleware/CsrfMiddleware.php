@@ -13,7 +13,7 @@ class CsrfMiddleware
      * @param  Callable $next
      * @return boolean
      */
-    public function checker(Request $request, Callable $next)
+    public function checker(Request $request, callable $next)
     {
         if (!($request->isPost() || $request->isPut())) {
             return $next($request);
