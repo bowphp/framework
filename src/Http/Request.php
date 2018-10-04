@@ -37,8 +37,6 @@ class Request
         $this->input = new Input();
 
         $this->param = new UrlParameter([]);
-
-        @Session::add('__bow.old', $this->input->all());
     }
 
     /**

@@ -30,14 +30,11 @@ class Tokenize
 
         $token = static::make();
 
-        Session::add(
-            '__bow.csrf',
-            [
+        Session::add('__bow.csrf', [
             'token' => $token,
             'expirate' => time() + static::$expirate_at,
             'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
-            ]
-        );
+        ]);
 
         Session::add('_token', $token);
 
@@ -52,7 +49,9 @@ class Tokenize
     public static function make()
     {
         $salt = date('Y-m-d H:i:s', time() - 10000) . uniqid(rand(), true);
+
         $token = base64_encode(base64_encode(openssl_random_pseudo_bytes(6)) . $salt);
+
         return Str::slice(hash('sha256', $token), 1, 62);
     }
 
@@ -65,6 +64,7 @@ class Tokenize
     public static function csrf($time = null)
     {
         static::makeCsrfToken($time);
+
         return Session::get('__bow.csrf');
     }
 
@@ -72,7 +72,6 @@ class Tokenize
      * Vérifie si le token en expire
      *
      * @param int $time le temps d'expiration
-     *
      * @return boolean
      */
     public static function csrfExpirated($time = null)
@@ -97,11 +96,8 @@ class Tokenize
     /**
      * Vérifie si token csrf est valide
      *
-     * @param string $token  le token a
-     *                       vérifié
-     * @param bool   $strict le niveau de
-     *                       vérification
-     *
+     * @param string $token
+     * @param bool   $strict
      * @return boolean
      */
     public static function verify($token, $strict = false)
@@ -132,6 +128,7 @@ class Tokenize
     public static function clear()
     {
         Session::remove('__bow.csrf');
+
         Session::remove('_token');
     }
 }

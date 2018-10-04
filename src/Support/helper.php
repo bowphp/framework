@@ -1022,16 +1022,15 @@ if (!function_exists('session')) {
      */
     function session($value = null, $default = null)
     {
-        if ($value === null) {
-            return new Session();
+        if ($value == null) {
+            return Session::getInstance();
         }
 
         if (!is_array($value)) {
-            return Session::get($value, $default);
+            return Session::getInstance()->get($value, $default);
         }
-
         foreach ($value as $key => $item) {
-            Session::add($key, $item);
+            Session::getInstance()->add($key, $item);
         }
 
         return $value;

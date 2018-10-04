@@ -2,16 +2,16 @@
 
 namespace Bow\Session;
 
-use Bow\Contrats\StaticCollectionInterface;
+use Bow\Contrats\CollectionInterface;
 use Bow\Security\Crypto;
 use InvalidArgumentException;
 
-class Session implements StaticCollectionInterface
+class Session implements CollectionInterface
 {
     /**
      * @var array
      */
-    const SESSION_CORE_KEY = [
+    const CORE_KEY = [
         "flash" => "__bow.flash",
         "old" => "__bow.old",
         "listener" => "__bow.event.listener",
@@ -21,47 +21,111 @@ class Session implements StaticCollectionInterface
     ];
 
     /**
-     * Session constructor.
+     * @var Session
      */
-    public function __construct()
+    private static $instance;
+
+    /**
+     * @var array
+     */
+    private $config = [
+        'name' => 'BSESSID'
+    ];
+
+    /**
+     * Session constructor.
+     * @param array $config
+     */
+    public function __construct(array $config)
     {
-        static::start();
+        $this->config = array_merge($this->config, $config);
+
+        $this->start();
+    }
+
+    /**
+     * Configure
+     *
+     * @param array $config
+     * @return mixed
+     */
+    public static function configure($config)
+    {
+        if (static::$instance == null) {
+            static::$instance = new static($config);
+        }
+
+        return static::$instance;
+    }
+
+    /**
+     * Get session singleton
+     *
+     * @return mixed
+     */
+    public static function getInstance()
+    {
+        return static::$instance;
     }
 
     /**
      * Session starteur.
      */
-    public static function start()
+    public function start()
     {
         if (PHP_SESSION_ACTIVE == session_status()) {
             return true;
         }
 
-        session_name("BSESSID");
+        session_name($this->config['name']);
 
         if (!isset($_COOKIE["BSESSID"])) {
-            session_id(hash("sha256", Crypto::encrypt(uniqid(microtime(false)))));
+            session_id(hash("sha256", $this->generateId()));
         }
 
         $started = @session_start();
 
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['csrf']])) {
-            $_SESSION[static::SESSION_CORE_KEY['csrf']] = new \stdClass();
+        if (!isset($_SESSION[static::CORE_KEY['csrf']])) {
+            $_SESSION[static::CORE_KEY['csrf']] = new \stdClass();
         }
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['cache']])) {
-            $_SESSION[static::SESSION_CORE_KEY['cache']] = [];
+
+        if (!isset($_SESSION[static::CORE_KEY['cache']])) {
+            $_SESSION[static::CORE_KEY['cache']] = [];
         }
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['listener']])) {
-            $_SESSION[static::SESSION_CORE_KEY['listener']] = [];
+
+        if (!isset($_SESSION[static::CORE_KEY['listener']])) {
+            $_SESSION[static::CORE_KEY['listener']] = [];
         }
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['flash']])) {
-            $_SESSION[static::SESSION_CORE_KEY['flash']] = [];
+
+        if (!isset($_SESSION[static::CORE_KEY['flash']])) {
+            $_SESSION[static::CORE_KEY['flash']] = [];
         }
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['old']])) {
-            $_SESSION[static::SESSION_CORE_KEY['old']] = [];
+
+        if (!isset($_SESSION[static::CORE_KEY['old']])) {
+            $_SESSION[static::CORE_KEY['old']] = [];
         }
 
         return $started;
+    }
+
+    /**
+     * Generate session ID
+     *
+     * @return string
+     */
+    private function generateId()
+    {
+        return Crypto::encrypt(uniqid(microtime(false)));
+    }
+
+    /**
+     * Generate session
+     */
+    public function regenerate()
+    {
+        $this->flush();
+
+        $this->start();
     }
 
     /**
@@ -70,13 +134,14 @@ class Session implements StaticCollectionInterface
      *
      * @return array
      */
-    private static function filter()
+    private function filter()
     {
         $arr = [];
-        static::start();
+
+        $this->start();
 
         foreach ($_SESSION as $key => $value) {
-            if (!array_key_exists($key, static::SESSION_CORE_KEY)) {
+            if (!array_key_exists($key, static::CORE_KEY)) {
                 $arr[$key] = $value;
             }
         }
@@ -91,21 +156,21 @@ class Session implements StaticCollectionInterface
      * @param bool   $strict
      * @return boolean
      */
-    public static function has($key, $strict = false)
+    public function has($key, $strict = false)
     {
-        static::start();
+        $this->start();
 
         if (!$strict) {
-            if (!isset($_SESSION[static::SESSION_CORE_KEY['cache']][$key])) {
-                return isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]);
+            if (!isset($_SESSION[static::CORE_KEY['cache']][$key])) {
+                return isset($_SESSION[static::CORE_KEY['flash']][$key]);
             }
 
             return true;
         }
 
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['cache']][$key])) {
-            if (isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key])) {
-                $value = $_SESSION[static::SESSION_CORE_KEY['flash']][$key];
+        if (!isset($_SESSION[static::CORE_KEY['cache']][$key])) {
+            if (isset($_SESSION[static::CORE_KEY['flash']][$key])) {
+                $value = $_SESSION[static::CORE_KEY['flash']][$key];
 
                 return !is_null($value);
             }
@@ -113,7 +178,7 @@ class Session implements StaticCollectionInterface
             return false;
         }
 
-        $value = $_SESSION[static::SESSION_CORE_KEY['cache']][$key];
+        $value = $_SESSION[static::CORE_KEY['cache']][$key];
 
         return !is_null($value);
     }
@@ -124,9 +189,9 @@ class Session implements StaticCollectionInterface
      * @param string $key
      * @return boolean
      */
-    public static function exists($key)
+    public function exists($key)
     {
-        return static::has($key, true);
+        return  $this->has($key, true);
     }
 
     /**
@@ -134,9 +199,9 @@ class Session implements StaticCollectionInterface
      *
      * @return boolean
      */
-    public static function isEmpty()
+    public function isEmpty()
     {
-        return empty(self::filter());
+        return empty($this->filter());
     }
 
     /**
@@ -147,17 +212,19 @@ class Session implements StaticCollectionInterface
      *
      * @return mixed
      */
-    public static function get($key, $default = null)
+    public function get($key, $default = null)
     {
-        static::start();
+        $this->start();
 
-        if (isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key])) {
-            $flash = $_SESSION[static::SESSION_CORE_KEY['flash']][$key];
-            unset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]);
+        if (isset($_SESSION[static::CORE_KEY['flash']][$key])) {
+            $flash = $_SESSION[static::CORE_KEY['flash']][$key];
+
+            unset($_SESSION[static::CORE_KEY['flash']][$key]);
+
             return $flash;
         }
 
-        if (static::has($key)) {
+        if ($this->has($key)) {
             return $_SESSION[$key];
         }
 
@@ -171,31 +238,27 @@ class Session implements StaticCollectionInterface
     /**
      * Permet d'ajouter une entrée dans la colléction
      *
-     * @param string|int $key   La clé de la donnée à
-     *                          ajouter
-     * @param mixed      $value La donnée à
-     *                          ajouter
-     * @param boolean    $next  Elle permet, si elle est a true d'ajouter la donnée si la
-     *                          clé existe Dans un tableau
-     *
+     * @param string|int $key
+     * @param mixed $value
+     * @param boolean $next
      * @throws InvalidArgumentException
      * @return mixed
      */
-    public static function add($key, $value, $next = false)
+    public function add($key, $value, $next = false)
     {
-        static::start();
+        $this->start();
 
-        if (!isset($_SESSION[static::SESSION_CORE_KEY['cache']])) {
-            $_SESSION[static::SESSION_CORE_KEY['cache']] = [];
+        if (!isset($_SESSION[static::CORE_KEY['cache']])) {
+            $_SESSION[static::CORE_KEY['cache']] = [];
         }
 
-        $_SESSION[static::SESSION_CORE_KEY['cache']][$key] = true;
+        $_SESSION[static::CORE_KEY['cache']][$key] = true;
 
         if ($next == false) {
             return $_SESSION[$key] = $value;
         }
 
-        if (!static::has($key)) {
+        if (! $this->has($key)) {
             $_SESSION[$key] = [];
         }
 
@@ -213,9 +276,9 @@ class Session implements StaticCollectionInterface
      *
      * @return array
      */
-    public static function all()
+    public function all()
     {
-        return static::filter();
+        return  $this->filter();
     }
 
     /**
@@ -225,17 +288,18 @@ class Session implements StaticCollectionInterface
      *
      * @return mixed
      */
-    public static function remove($key)
+    public function remove($key)
     {
-        self::start();
+        $this->start();
 
         $old = null;
 
-        if (static::has($key)) {
+        if ($this->has($key)) {
             $old = $_SESSION[$key];
         }
 
         unset($_SESSION[$key]);
+
         return $old;
     }
 
@@ -247,16 +311,19 @@ class Session implements StaticCollectionInterface
      *
      * @return mixed
      */
-    public static function set($key, $value)
+    public function set($key, $value)
     {
-        static::start();
+        $this->start();
 
         $old = null;
-        $_SESSION[static::SESSION_CORE_KEY['cache']][$key] = true;
 
-        if (static::has($key)) {
+        $_SESSION[static::CORE_KEY['cache']][$key] = true;
+
+        if ($this->has($key)) {
             $old = $_SESSION[$key];
+
             $_SESSION[$key] = $value;
+
             return $old;
         }
 
@@ -272,20 +339,22 @@ class Session implements StaticCollectionInterface
      * @param  mixed $message
      * @return mixed
      */
-    public static function flash($key, $message = null)
+    public function flash($key, $message = null)
     {
-        static::start();
+        $this->start();
 
-        if (!static::has(static::SESSION_CORE_KEY['flash'])) {
-            $_SESSION[static::SESSION_CORE_KEY['flash']] = [];
+        if (! $this->has(static::CORE_KEY['flash'])) {
+            $_SESSION[static::CORE_KEY['flash']] = [];
         }
 
         if ($message !== null) {
-            $_SESSION[static::SESSION_CORE_KEY['flash']][$key] = $message;
+            $_SESSION[static::CORE_KEY['flash']][$key] = $message;
+
             return true;
         }
 
-        return isset($_SESSION[static::SESSION_CORE_KEY['flash']][$key]) ? $_SESSION[static::SESSION_CORE_KEY['flash']][$key] : null;
+        return isset($_SESSION[static::CORE_KEY['flash']][$key]) ?
+            $_SESSION[static::CORE_KEY['flash']][$key] : null;
     }
 
     /**
@@ -293,7 +362,7 @@ class Session implements StaticCollectionInterface
      *
      * @return array
      */
-    public static function toArray()
+    public function toArray()
     {
         return self::filter();
     }
@@ -301,22 +370,22 @@ class Session implements StaticCollectionInterface
     /**
      * Vide le système de flash.
      */
-    public static function clearFash()
+    public function clearFash()
     {
-        static::start();
+        $this->start();
 
-        $_SESSION[static::SESSION_CORE_KEY['flash']] = [];
+        $_SESSION[static::CORE_KEY['flash']] = [];
     }
 
     /**
      * clear, permet de vider le cache sauf csrf|bow.flash
      */
-    public static function clear()
+    public function clear()
     {
-        static::start();
+        $this->start();
 
-        foreach (static::filter() as $key => $value) {
-            unset($_SESSION[static::SESSION_CORE_KEY['cache']][$key]);
+        foreach ($this->filter() as $key => $value) {
+            unset($_SESSION[static::CORE_KEY['cache']][$key]);
 
             unset($_SESSION[$key]);
         }
@@ -325,11 +394,9 @@ class Session implements StaticCollectionInterface
     /**
      * Permet de vide la session
      */
-    public static function flush()
+    public function flush()
     {
         session_destroy();
-
-        static::start();
     }
 
 
@@ -340,24 +407,32 @@ class Session implements StaticCollectionInterface
      */
     public function __toString()
     {
-        static::start();
+        $this->start();
 
-        return json_encode(static::filter());
+        return json_encode($this->filter());
     }
 
     /**
-     * __call
+     * __callStatic
      *
      * @param  string $name
      * @param  array  $arguments
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public static function __callStatic($name, $arguments)
     {
-        if (method_exists(static::class, $name)) {
-            return call_user_func_array([static::class, $name], $arguments);
+        if (method_exists(static::$instance, $name)) {
+            return call_user_func_array([static::$instance, $name], $arguments);
         }
 
         throw new \BadMethodCallException('La methode ' . $name . ' n\'exist pas.');
+    }
+
+    /**
+     * @return array|void
+     */
+    public function toObject()
+    {
+        //
     }
 }

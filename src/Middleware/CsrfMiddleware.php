@@ -29,7 +29,7 @@ class CsrfMiddleware
             return response()->send('unauthorize.');
         }
 
-        dd($request->get('_token'), $request->session());
+        dd($request->get('_token'), $request->session()->all());
 
         if ($request->get('_token') == $request->session()->get('_token')) {
             return $next($request);
