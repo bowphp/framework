@@ -109,7 +109,7 @@ class Route
 
         if (! is_array($this->cb)) {
             $this->cb = [
-                'uses' => $this->cb,
+                'controller' => $this->cb,
                 'middleware' => $middleware
             ];
 

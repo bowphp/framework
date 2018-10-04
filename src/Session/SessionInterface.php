@@ -4,16 +4,9 @@ namespace Bow\Session;
 
 use Bow\Security\Crypto;
 use InvalidArgumentException;
-use Bow\Interfaces\CollectionAccessStatic;
-use function session_destroy;
+use Bow\Contrats\StaticCollectionInterface;
 
-/**
- * Class Session
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
-class Session implements CollectionAccessStatic
+class Session implements StaticCollectionInterface
 {
     /**
      * @var array

@@ -31,7 +31,7 @@ class Request
     /**
      * Constructeur
      */
-    public function __construct()
+    private function __construct()
     {
         static::$input = new Input();
 
@@ -45,7 +45,7 @@ class Request
      *
      * @return null|self
      */
-    public static function singleton()
+    public static function getInstance()
     {
         if (static::$instance === null) {
             static::$instance = new static();
@@ -502,8 +502,6 @@ class Request
     /**
      * Get session information
      *
-     * @param mixed $property
-     * @param mixed $default
      * @return mixed
      */
     public static function session()
@@ -514,27 +512,12 @@ class Request
     /**
      * Get cookie
      *
-     * @param $property
+     * @param string $property
      * @return mixed
      */
-    public static function cookie($property)
+    public static function cookie($property = null)
     {
         return cookie($property);
-    }
-
-    /**
-     * @param string $url
-     * @return mixed
-     */
-    public static function redirect($url = null)
-    {
-        $redirect = new Redirect();
-
-        if (is_null($url)) {
-            return $redirect;
-        }
-
-        return $redirect($url);
     }
 
     /**

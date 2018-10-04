@@ -48,11 +48,12 @@ if (!function_exists('config')) {
      *
      * @param  string|array $key
      * @param  mixed        $setting
-     * @return Config|mixed
+     * @return \Bow\Configuration\Loader|mixed
+     * @throws
      */
     function config($key = null, $setting = null)
     {
-        $config = Config::getInstance();
+        $config = \Bow\Configuration\Loader::getInstance();
 
         if (is_null($key)) {
             return $config;
@@ -79,7 +80,7 @@ if (!function_exists('response')) {
     {
 
         app()->bind('response', function () {
-            return new \Bow\Http\Response();
+            return \Bow\Http\Response::getInstance();
         });
 
         $response = app('response');
@@ -109,7 +110,7 @@ if (!function_exists('request')) {
     function request()
     {
         app()->bind('request', function () {
-            return \Bow\Http\Request::singleton();
+            return \Bow\Http\Request::getInstance();
         });
 
         return app('request');
@@ -662,7 +663,7 @@ if (!function_exists('redirect')) {
      */
     function redirect($path = null)
     {
-        $redirect = new \Bow\Http\Redirect();
+        $redirect = \Bow\Http\Redirect::getInstance();
 
         if ($path !== null) {
             $redirect->to($path);

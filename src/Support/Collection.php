@@ -1,13 +1,7 @@
 <?php
+
 namespace Bow\Support;
 
-/**
- * Classe de la manipulation de donnés dans un tableau
- *
- * @class   Collection
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Support
- */
 class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \ArrayAccess
 {
     /**

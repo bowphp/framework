@@ -20,13 +20,32 @@ class Redirect
     private $response;
 
     /**
+     * @var Redirect
+     */
+    private static $instance;
+
+    /**
      * Redirect constructor.
      */
-    public function __construct()
+    private function __construct()
     {
-        $this->request = Request::singleton();
+        $this->request = Request::getInstance();
 
-        $this->response = Response::singleton();
+        $this->response = Response::getInstance();
+    }
+
+    /**
+     * Get redirection instance
+     *
+     * @return Redirect
+     */
+    public static  function getInstance()
+    {
+        if (!static::$instance) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
     }
 
     /**
@@ -44,11 +63,19 @@ class Redirect
     }
 
     /**
+     * Ajoute
+     *
      * @param array $data
      * @return static
      */
-    public function withInput(array $data)
+    public function withInput(array $data = [])
     {
+        if (count($data) == 0) {
+            $this->request->session()->add('__bow.old', $this->request->all());
+
+            return $this;
+        }
+
         $this->request->session()->add('__bow.old', $data);
 
         return $this;

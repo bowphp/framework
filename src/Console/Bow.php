@@ -124,6 +124,7 @@ class Bow
      * Permet de lancer Bow task runner
      *
      * @return void
+     * @throws
      */
     public function run()
     {
@@ -151,6 +152,7 @@ class Bow
      *
      * @param  string $command
      * @return void
+     * @throws
      */
     private function call($command)
     {
@@ -239,6 +241,7 @@ class Bow
      * Permet de lancer le seeding
      *
      * @return void
+     * @throws
      */
     public function seed()
     {
@@ -326,7 +329,7 @@ class Bow
      *
      * @throws \ErrorException
      */
-    private function launch()
+    protected function launch()
     {
         $action = $this->command->getParameter('action');
 
@@ -342,7 +345,7 @@ class Bow
      *
      * @return void
      */
-    private function server()
+    protected function server()
     {
         $port = (int) $this->command->options('--port', 5000);
 
@@ -372,7 +375,7 @@ class Bow
     /**
      * Permet de lancer le repl
      */
-    private function console()
+    protected function console()
     {
         if (is_string($this->command->getParameter('--include'))) {
             $this->setBootstrap(
@@ -404,7 +407,7 @@ class Bow
      *
      * @return void
      */
-    public function generate()
+    protected function generate()
     {
         $action = $this->command->getParameter('action');
 
@@ -424,7 +427,7 @@ class Bow
      *
      * @throws \ErrorException
      */
-    public function clear()
+    protected function clear()
     {
         if (in_array($this->command->getParameter('target'), ['view', 'cache', 'all'])) {
             throw new \ErrorException(sprintf(''));

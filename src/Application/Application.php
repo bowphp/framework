@@ -106,6 +106,20 @@ class Application
         $this->response = $response;
 
         $this->capsule = Capsule::getInstance();
+
+        $this->capsule->instance('request', $request);
+
+        $this->capsule->instance('response', $response);
+    }
+
+    /**
+     * Retourne le container
+     *
+     * @return Capsule
+     */
+    public function getContainer()
+    {
+        return $this->capsule;
     }
 
     /**
@@ -610,17 +624,6 @@ class Application
     }
 
     /**
-     * Retourne les définir pour une methode HTTP
-     *
-     * @param string $method
-     * @return array
-     */
-    public function getRouteMethod($method)
-    {
-        return $this->routes[$method];
-    }
-
-    /**
      * __call fonction magic php
      *
      * @param string $method
@@ -640,16 +643,6 @@ class Application
         }
 
         throw new ApplicationException('La methode ' . $method . ' n\'exist pas.', E_ERROR);
-    }
-
-    /**
-     * Permet de récupérer la version de l'application
-     *
-     * @return string
-     */
-    public function version()
-    {
-        return $this->version;
     }
 
     /**
@@ -685,7 +678,7 @@ class Application
      * @return Capsule|mixed
      * @throws ApplicationException
      */
-    public function capsule($name = null, callable $callable = null)
+    public function container($name = null, callable $callable = null)
     {
         if (is_null($name)) {
             return $this->capsule;
@@ -705,6 +698,8 @@ class Application
     /**
      * __invoke
      *
+     * Cette methode point sur le système container
+     *
      * @param array ...$params
      * @return Capsule
      * @throws ApplicationException
@@ -720,9 +715,9 @@ class Application
         }
 
         if (count($params) == 1) {
-            return $this->capsule($params[0]);
+            return $this->capsule->make($params[0]);
         }
 
-        return $this->capsule($params[0], $params[1]);
+        return $this->capsule->bind($params[0], $params[1]);
     }
 }

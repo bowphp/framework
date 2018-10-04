@@ -1,13 +1,8 @@
 <?php
-namespace Bow\Interfaces;
 
-/**
- * Interface CollectionAccessStatic
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Interfaces
- */
-interface CollectionAccessStatic
+namespace Bow\Contrats;
+
+interface StaticCollectionInterface
 {
     /**
      * has, vérifie l'existance une clé dans la colléction de session

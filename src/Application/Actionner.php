@@ -2,7 +2,7 @@
 
 namespace Bow\Application;
 
-use Bow\Http\Response;
+use Bow\Http\Request;
 use Bow\Router\Exception\RouterException;
 
 class Actionner
@@ -34,6 +34,11 @@ class Actionner
     private $guards = [];
 
     /**
+     * @var Dispatcher
+     */
+    private $dispatcher;
+
+    /**
      * Actionner constructor
      *
      * @param array $namespaces
@@ -44,6 +49,8 @@ class Actionner
         $this->namespaces = $namespaces;
 
         $this->middlewares = $middlewares;
+
+        $this->dispatcher = new Dispatcher;
     }
 
     /**
@@ -118,30 +125,65 @@ class Actionner
 
         $middlewares = [];
 
+
+        /**
+         * Execution d'action definir comme une closure
+         */
         if (is_callable($actions)) {
-            return call_user_func_array($actions, $param);
+
+            if (is_array($actions)) {
+                return call_user_func_array($actions, $param);
+            }
+
+            $function = $this->closure($actions);
+
+            return call_user_func_array(
+                $function['controller'],
+                array_merge($function['injections'], $param)
+            );
         }
 
+        /**
+         * Execution d'action definir comme chaine de caractère
+         */
         if (is_string($actions)) {
             $function = $this->controller($actions);
 
-            return call_user_func_array($function['controller'], array_merge($function['injections'], $param));
+            return call_user_func_array(
+                $function['controller'],
+                array_merge($function['injections'], $param)
+            );
         }
 
         if (!is_array($actions)) {
-            throw new \InvalidArgumentException('Le premier paramètre doit être un tableau, une chaine ou une closure', E_USER_ERROR);
+            throw new \InvalidArgumentException(
+                'Le premier paramètre doit être un tableau, une chaine ou une closure',
+                E_USER_ERROR
+            );
         }
 
+        /**
+         * Vérification de l'existance de middleware associté à l'action
+         * et extraction du middleware
+         */
         if (array_key_exists('middleware', $actions)) {
             $middlewares = (array) $actions['middleware'];
 
             unset($actions['middleware']);
         }
 
+        /**
+         * Vérification de l'existance de controlleur associté à l'action
+         * et extraction du controlleur
+         */
         if (isset($actions['controller'])) {
             $actions = (array) $actions['controller'];
         }
 
+        /**
+         * Normalisation de l'action à executer et creation de
+         * l'injection de dépendance
+         */
         foreach ($actions as $key => $action) {
             if (is_string($action)) {
                 array_push($functions, $this->controller($action));
@@ -156,15 +198,12 @@ class Actionner
             }
         }
 
-        // Status permettant de bloquer la suite du programme.
-        $status = true;
-
-        // Collecteur de middleware
-        $middlewares_collection = [];
-
+        /**
+         * Chargement des middlewares associés à l'action
+         */
         foreach ($middlewares as $middleware) {
             if (class_exists($$middleware)) {
-                $middlewares_collection[] = $middleware;
+                $this->dispatcher->pipe($middleware);
 
                 continue;
             }
@@ -178,50 +217,21 @@ class Actionner
                 throw new RouterException(sprintf('%s n\'est pas un class middleware.', $middleware));
             }
 
-            // Make middlewares collection
-            $middlewares_collection[] = $this->middlewares[$middleware];
-
             $parts = explode(':', $middleware, 2);
 
-            // Make guard collection
-            if (count($parts) == 2) {
-                $this->pushGuard(explode(',', end($parts)));
-            } else {
-                $this->pushGuard(null);
-            }
-        }
-
-        $next = false;
-
-        // Exécution du middleware
-        foreach ($middlewares_collection as $key => $middleware) {
-            $injections = $this->injector($middleware, 'checker');
-
-            $middleware_params = array_merge(
-                $injections,
-                [$this->next($next), $this->guards[$key]],
-                $param
+            // Add middleware into dispatch pipeline
+            $this->dispatcher->pipe(
+                $this->middlewares[$middleware],
+                count($parts) != 2 ? [] : explode(',', $parts[0])
             );
-
-            $status = call_user_func_array([new $middleware(), 'checker'], $middleware_params);
-
-            if ($status === true && $next) {
-                $next = false;
-
-                continue;
-            }
-
-            // Envoi de réponse en json
-            if (($status instanceof \StdClass) || is_array($status) || (!($status instanceof Response))) {
-                if (!empty($status)) {
-                    die(json_encode($status));
-                }
-            }
-
-            exit;
         }
 
-        
+        $response = $this->dispatcher->process(Request::getInstance());
+
+        if (! is_null($response)) {
+            return $response;
+        }
+
         // Lancement de l'éxècution de la liste des actions definir
         // Fonction a éxècuté suivant un ordre
         foreach ($functions as $function) {
@@ -229,55 +239,13 @@ class Actionner
                 $function['controller'],
                 array_merge($function['injections'], $param)
             );
+
+            if ($status == false || is_null($status)) {
+                return $status;
+            }
         }
 
-        return $status;
-    }
-
-    /**
-     * Permet de lancer un middleware
-     *
-     * @param string $middleware
-     * @param callable $callback
-     * @return bool
-     */
-    public function middleware($middleware, callable $callback = null)
-    {
-        $next = false;
-
-        $injections = [];
-
-        if (is_string($middleware) && class_exists($middleware)) {
-            $instance = [new $middleware(), 'checker'];
-
-            $injections = $this->injector($middleware, 'checker');
-        } else {
-            $instance = $middleware;
-        }
-
-        $status = call_user_func_array(
-            $instance,
-            array_merge($injections, [$this->next($next)])
-        );
-
-        if (is_callable($callback)) {
-            $callback();
-        }
-
-        return ($next && $status) === true;
-    }
-
-    /**
-     * Lancement de middleware suivant
-     *
-     * @param mixed $next
-     * @return callable
-     */
-    private function next(& $next)
-    {
-        return function ($request = null) use (& $next) {
-            return $next = true;
-        };
+        return null;
     }
 
     /**
@@ -310,7 +278,11 @@ class Actionner
             }
 
             if (!in_array(strtolower($class), $this->getInjectorExceptedType())) {
-                $params[] = new $class();
+                if (method_exists($class, 'getInstance')) {
+                    $params[] = $class::getInstance();
+                } else {
+                    $params[] = new $class();
+                }
             }
         }
 
@@ -332,7 +304,7 @@ class Actionner
 
         foreach ($parameters as $parameter) {
             $type = $parameter->getType();
-            
+
             if (is_null($type)) {
                 continue;
             }
@@ -427,6 +399,28 @@ class Actionner
 
         return [
             'controller' => [new $class(), $method],
+            'injections' => $injections
+        ];
+    }
+
+    /**
+     * Charge les closure definir comme action
+     *
+     * @param \Closure $closure
+     *
+     * @return array
+     */
+    public function closure($closure)
+    {
+        // Récupération de la classe et de la methode à lancer.
+        if (!is_callable($closure)) {
+            return null;
+        }
+
+        $injections = $this->injectorForClosure($closure);
+
+        return [
+            'controller' => $closure,
             'injections' => $injections
         ];
     }

@@ -20,11 +20,16 @@ class Dispatcher
      * Ajout un middleware à la collection d'execution
      *
      * @param string $middleware
+     * @param array $params
      * @return $this
      */
-    public function pipe($middleware)
+    public function pipe($middleware, array $params = [])
     {
-        $this->middlewares[] = $middleware;
+        if (is_callable($middleware)) {
+            $this->middlewares[] = $middleware;
+        } else {
+            $this->middlewares[] = ['class' => $middleware, 'params' => $params];
+        }
 
         return $this;
     }
@@ -46,9 +51,11 @@ class Dispatcher
         $this->index++;
 
         if (!is_callable($middleware)) {
-            $middleware = [new $middleware, 'checker'];
+            $middleware = [new $middleware['class'], 'checker'];
         }
 
-        return call_user_func_array($middleware, [$request, [$this, 'process']]);
+        return  call_user_func_array(
+            $middleware, [$request, [$this, 'process'], $middleware['params']]
+        );
     }
 }

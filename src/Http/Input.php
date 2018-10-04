@@ -7,9 +7,9 @@ use ErrorException;
 use Bow\Support\Collection;
 use Bow\Validation\Validate;
 use Bow\Validation\Validator;
-use Bow\Interfaces\CollectionAccess;
+use Bow\Contrats\CollectionInterface;
 
-class Input implements CollectionAccess, \ArrayAccess
+class Input implements CollectionInterface, \ArrayAccess
 {
 
     /**

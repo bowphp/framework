@@ -136,4 +136,24 @@ class GeneratorCommand
 
         return $content;
     }
+
+    /**
+     * Set writing filename
+     *
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * Get the base directory
+     *
+     * @param string $base_dir
+     */
+    public function setBaseDirectory($base_dir)
+    {
+        $this->base_dir = $base_dir;
+    }
 }
