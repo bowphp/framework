@@ -187,6 +187,14 @@ class Actionner
                 continue;
             }
 
+            if (is_callable($middleware)) {
+                if ($middleware instanceof  \Closure || is_array($middleware)) {
+                    $this->dispatcher->pipe($middleware);
+
+                    continue;
+                }
+            }
+
             if (!array_key_exists($middleware, $this->middlewares)) {
                 throw new RouterException(sprintf('%s n\'est pas un middleware définir.', $middleware), E_ERROR);
             }

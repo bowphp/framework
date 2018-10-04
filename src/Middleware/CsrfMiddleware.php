@@ -29,11 +29,13 @@ class CsrfMiddleware
             return response()->send('unauthorize.');
         }
 
-        if ($request->get('_token', null) !== session('_token')) {
-            return response('Token Mismatch');
+        dd($request->get('_token'), $request->session());
+
+        if ($request->get('_token') == $request->session()->get('_token')) {
+            return $next($request);
         }
 
-        return $next($request);
+        return response('Token Mismatch');
     }
 
     /**

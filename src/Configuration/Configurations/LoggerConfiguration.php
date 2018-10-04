@@ -16,25 +16,14 @@ class LoggerConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('logger', function () use ($config) {
-            $whoops = new \Whoops\Run;
+            if (env('MODE') == 'development') {
+                $this->loadFrontLogger();
+            }
 
-            $monolog = new Logger('BOW');
-
-            $whoops->pushHandler(
-                new \Whoops\Handler\PrettyPageHandler
+            return $this->loadFileLogger(
+                $config['resource.log'],
+                $config['app.name'] ?? 'Bow'
             );
-
-            $whoops->register();
-
-            $monolog->pushHandler(
-                new StreamHandler($config['resource.log'] . '/bow.log', Logger::DEBUG)
-            );
-
-            $monolog->pushHandler(
-                new FirePHPHandler()
-            );
-
-            return $monolog;
         });
     }
 
@@ -44,5 +33,44 @@ class LoggerConfiguration extends Configuration
     public function run()
     {
         $this->container->make('logger');
+    }
+
+    /**
+     * Loader view logger
+     *
+     * @return void
+     */
+    private function loadFrontLogger()
+    {
+        $whoops = new \Whoops\Run;
+
+        $whoops->pushHandler(
+            new \Whoops\Handler\PrettyPageHandler
+        );
+
+        $whoops->register();
+    }
+
+    /**
+     * Loader file logger via Monolog
+     *
+     * @param string $log_dir
+     * @param string $name
+     * @return Logger
+     * @throws \Exception
+     */
+    private function loadFileLogger($log_dir, $name)
+    {
+        $monolog = new Logger($name);
+
+        $monolog->pushHandler(
+            new StreamHandler($log_dir . '/bow.log', Logger::DEBUG)
+        );
+
+        $monolog->pushHandler(
+            new FirePHPHandler()
+        );
+
+        return $monolog;
     }
 }

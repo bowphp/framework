@@ -1503,3 +1503,22 @@ if (!function_exists('auth')) {
         return $auth->guard($guard);
     }
 }
+
+if (!function_exists('log')) {
+    /**
+     * Log error message
+     *
+     * @param string $level
+     * @param string $message
+     * @param array $context
+     * @return bool
+     */
+    function log($level, $message, array $context = [])
+    {
+        if (!in_array($level, ['info', 'warning', 'error', 'critical', 'debug'])) {
+            return false;
+        }
+
+        return app('logger')->${$level}($message, $context);
+    }
+}

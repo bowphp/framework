@@ -2,6 +2,7 @@
 
 namespace Bow\Http;
 
+use Bow\Router\Route;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 use Bow\Support\Str;
@@ -13,7 +14,7 @@ class Request
      *
      * @static self
      */
-    private static $instance = null;
+    private static $instance ;
 
     /**
      * Variable de paramètre issue de url définie par l'utilisateur
@@ -26,18 +27,18 @@ class Request
     /**
      * @var Input
      */
-    public static $input;
+    private $input;
 
     /**
      * Constructeur
      */
     private function __construct()
     {
-        static::$input = new Input();
+        $this->input = new Input();
 
         $this->param = new UrlParameter([]);
 
-        @Session::add('__bow.old', static::$input->all());
+        @Session::add('__bow.old', $this->input->all());
     }
 
     /**
@@ -63,7 +64,7 @@ class Request
      */
     public function get($key, $default = null)
     {
-        return static::$input->get($key, $default);
+        return $this->input->get($key, $default);
     }
 
     /**
@@ -74,7 +75,7 @@ class Request
      */
     public function has($key)
     {
-        return static::$input->has($key);
+        return $this->input->has($key);
     }
 
     /**
@@ -84,7 +85,7 @@ class Request
      */
     public function all()
     {
-        return static::$input->all();
+        return $this->input->all();
     }
 
     /**
@@ -122,7 +123,7 @@ class Request
      */
     public function url()
     {
-        return $this->origin() . $this->uri();
+        return $this->origin().$this->uri();
     }
 
     /**
@@ -214,7 +215,7 @@ class Request
      */
     public function isPut()
     {
-        if ($this->method() == 'PUT' || static::$input->get('_method', null) == 'PUT') {
+        if ($this->method() == 'PUT' || $this->input->get('_method', null) == 'PUT') {
             return true;
         }
 
@@ -228,7 +229,7 @@ class Request
      */
     public function isDelete()
     {
-        if ($this->method() == 'DELETE' || static::$input->get('_method', null) == 'DELETE') {
+        if ($this->method() == 'DELETE' || $this->input->get('_method', null) == 'DELETE') {
             return true;
         }
 
@@ -241,7 +242,7 @@ class Request
      * @param  string $key
      * @return UploadFile|Collection
      */
-    public static function file($key)
+    public function file($key)
     {
         if (!isset($_FILES[$key])) {
             return null;
@@ -277,7 +278,7 @@ class Request
      *
      * @return array
      */
-    public static function files()
+    public function files()
     {
         $files = [];
 
@@ -303,13 +304,13 @@ class Request
      * @param  string $key
      * @return Input
      */
-    public static function input($key = null)
+    public function input($key = null)
     {
         if (!is_null($key)) {
-            return static::$input->get($key);
+            return $this->input->get($key);
         }
 
-        return static::$input;
+        return $this->input;
     }
 
     /**
@@ -502,9 +503,9 @@ class Request
     /**
      * Get session information
      *
-     * @return mixed
+     * @return Session
      */
-    public static function session()
+    public function session()
     {
         return session();
     }
@@ -515,7 +516,7 @@ class Request
      * @param string $property
      * @return mixed
      */
-    public static function cookie($property = null)
+    public function cookie($property = null)
     {
         return cookie($property);
     }
@@ -526,7 +527,7 @@ class Request
      */
     public function __get($property)
     {
-        return static::$input->get($property);
+        return $this->input->get($property);
     }
 
     /**
@@ -537,9 +538,9 @@ class Request
      *
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public static function __callStatic($name, $arguments)
     {
-        if (!method_exists(static::class, $name)) {
+        if (!method_exists(static::$instance, $name)) {
             throw new \RuntimeException('Method ' . $name . ' not exists');
         }
 

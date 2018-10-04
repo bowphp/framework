@@ -59,9 +59,11 @@ class Dispatcher
             $middleware = [new $middleware['class'], 'checker'];
         }
 
+        $params = [$request, [$this, 'process'], $params];
+
         return call_user_func_array(
             $middleware,
-            [$request, [$this, 'process'], $params]
+            $params
         );
     }
 }
