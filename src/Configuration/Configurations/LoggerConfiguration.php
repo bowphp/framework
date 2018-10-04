@@ -11,10 +11,7 @@ use Bow\Configuration\Configuration;
 class LoggerConfiguration extends Configuration
 {
     /**
-     * Permet de créer le service
-     *
-     * @param Loader $config
-     * @return void
+     * @inheritdoc
      */
     public function create(Loader $config)
     {
@@ -42,9 +39,7 @@ class LoggerConfiguration extends Configuration
     }
 
     /**
-     * Permet de lancer le service
-     *
-     * @return void
+     * @inheritdoc
      */
     public function run()
     {

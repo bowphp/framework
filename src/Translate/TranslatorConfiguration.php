@@ -8,10 +8,7 @@ use Bow\Configuration\Configuration;
 class TranslatorConfiguration extends Configuration
 {
     /**
-     * __
-     *
-     * @param Loader $config
-     * @return void
+     * @inheritdoc
      */
     public function create(Loader $config)
     {
@@ -24,9 +21,7 @@ class TranslatorConfiguration extends Configuration
     }
 
     /**
-     * Démarrage du service
-     *
-     * @return void
+     * @inheritdoc
      */
     public function run()
     {

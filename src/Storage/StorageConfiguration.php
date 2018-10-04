@@ -8,11 +8,7 @@ use Bow\Configuration\Configuration;
 class StorageConfiguration extends Configuration
 {
     /**
-     * Configuration du service
-     *
-     * @param Loader $config
-     * @return void
-     * @throws
+     * @inheritdoc
      */
     public function create(Loader $config)
     {
@@ -22,10 +18,7 @@ class StorageConfiguration extends Configuration
     }
 
     /**
-     * Démarrage du service
-     *
-     * @return void
-     * @throws
+     * @inheritdoc
      */
     public function run()
     {

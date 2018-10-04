@@ -228,24 +228,28 @@ class Actionner
 
         $response = $this->dispatcher->process(Request::getInstance());
 
+        dd($response, $functions);
+
         if (! is_null($response)) {
             return $response;
         }
 
         // Lancement de l'éxècution de la liste des actions definir
         // Fonction a éxècuté suivant un ordre
+        $response = null;
+
         foreach ($functions as $function) {
-            $status = call_user_func_array(
+            $response = call_user_func_array(
                 $function['controller'],
                 array_merge($function['injections'], $param)
             );
 
-            if ($status == false || is_null($status)) {
-                return $status;
+            if ($response == false || is_null($response)) {
+                return $response;
             }
         }
 
-        return null;
+        return $response;
     }
 
     /**

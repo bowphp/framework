@@ -8,10 +8,7 @@ use Bow\Configuration\Configuration;
 class CryptoConfiguration extends Configuration
 {
     /**
-     * Configuration du service
-     *
-     * @param Loader $config
-     * @return void
+     * @inheritdoc
      */
     public function create(Loader $config)
     {
@@ -23,9 +20,7 @@ class CryptoConfiguration extends Configuration
     }
 
     /**
-     * Démarrage du service
-     *
-     * @return void
+     * @inheritdoc
      */
     public function run()
     {

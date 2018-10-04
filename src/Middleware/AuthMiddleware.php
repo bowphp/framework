@@ -3,6 +3,7 @@
 namespace Bow\Middleware;
 
 use Bow\Auth\Auth;
+use Bow\Http\Request;
 
 class AuthMiddleware
 {
@@ -13,7 +14,7 @@ class AuthMiddleware
      * @param  callable          $next
      * @return boolean
      */
-    public function checker($request, callable $next)
+    public function checker(Request $request, callable $next)
     {
         if (Auth::check()) {
             return $next();

@@ -31,7 +31,7 @@ abstract class Configuration
     abstract public function create(Loader $config);
 
     /**
-     * Permet de lancer le service
+     * Permet de démarrer le package configuré
      *
      * @return void
      */

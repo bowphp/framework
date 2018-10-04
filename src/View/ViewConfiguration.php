@@ -8,11 +8,7 @@ use Bow\Configuration\Configuration;
 class ViewConfiguration extends Configuration
 {
     /**
-     * Create a Configuration
-     *
-     * @param Loader $config
-     * @return void
-     * @throws
+     * @inheritdoc
      */
     public function create(Loader $config)
     {
@@ -27,10 +23,7 @@ class ViewConfiguration extends Configuration
     }
 
     /**
-     * Run configuration
-     *
-     * @return void
-     * @throws
+     * @inheritdoc
      */
     public function run()
     {

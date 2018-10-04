@@ -8,10 +8,7 @@ use Bow\Configuration\Configuration;
 class MailConfiguration extends Configuration
 {
     /**
-     * Configuration du service
-     *
-     * @param Loader $config
-     * @return void
+     * @inheritdoc
      */
     public function create(Loader $config)
     {
@@ -21,9 +18,7 @@ class MailConfiguration extends Configuration
     }
 
     /**
-     * Démarrage du service
-     *
-     * @return void
+     * @inheritdoc
      */
     public function run()
     {

@@ -2,17 +2,19 @@
 
 namespace {baseNamespace}{namespace};
 
+use Bow\Http\Request;
+
 class {className}
 {
     /**
      * Fonction de lancement du middleware.
      *
-     * @param Bow\Http\Request $request
+     * @param Request $request
      * @param callable $next
      * @param array $guard
-     * @return boolean
+     * @return mixed
      */
-    public function checker($request, callable $next, $guard = [])
+    public function checker(Request $request, callable $next, array $guard = [])
     {
         // Codez Ici
         return $next($request);

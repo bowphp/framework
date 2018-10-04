@@ -10,7 +10,6 @@ class EnvConfiguration extends Configuration
 {
     /**
      * @inheritdoc
-     * @throws
      */
     public function create(Loader $config)
     {
@@ -21,7 +20,6 @@ class EnvConfiguration extends Configuration
 
     /**
      * @inheritdoc
-     * @throws
      */
     public function run()
     {

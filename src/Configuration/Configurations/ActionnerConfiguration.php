@@ -9,10 +9,7 @@ use Bow\Configuration\Configuration;
 class ActionnerConfiguration extends Configuration
 {
     /**
-     * Configuration du service
-     *
-     * @param Loader $config
-     * @return void
+     * @inheritdoc
      */
     public function create(Loader $config)
     {
@@ -22,9 +19,7 @@ class ActionnerConfiguration extends Configuration
     }
 
     /**
-     * Démarrage du service
-     *
-     * @return void
+     * @inheritdoc
      */
     public function run()
     {

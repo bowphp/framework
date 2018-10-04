@@ -3,10 +3,9 @@ namespace Bow\View;
 
 use Bow\Configuration\Loader;
 use BadMethodCallException;
-use Bow\Contrats\ResponseInterface;
 use Bow\View\Exception\ViewException;
 
-class View implements ResponseInterface
+class View
 {
     /**
      * @var Loader
