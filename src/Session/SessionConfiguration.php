@@ -17,7 +17,7 @@ class SessionConfiguration extends Configuration
 
             $session = Session::configure($config['session']);
 
-            Tokenize::makeCsrfToken($config['session.life']);
+            Tokenize::makeCsrfToken($config['session.lifetime']);
 
             return $session;
         });

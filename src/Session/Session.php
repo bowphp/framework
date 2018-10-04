@@ -29,7 +29,12 @@ class Session implements CollectionInterface
      * @var array
      */
     private $config = [
-        'name' => 'BSESSID'
+        'name' => 'Bow',
+        'path' => '/',
+        'domain' => null,
+        'secure' => false,
+        'httponly' => false,
+        'save_path' => null,
     ];
 
     /**
@@ -77,6 +82,27 @@ class Session implements CollectionInterface
             return true;
         }
 
+        /**
+         * Set session cookie params
+         */
+        session_set_cookie_params(
+            $this->config["lifetime"],
+            $this->config["path"],
+            $this->config['domain'],
+            $this->config["secure"],
+            $this->config["httponly"]
+        );
+
+        /**
+         * Update session save path
+         */
+        if (is_string($this->config['save_path'])) {
+            session_save_path($this->config['save_path']);
+        }
+
+        /**
+         * Apply session cookie name
+         */
         session_name($this->config['name']);
 
         if (!isset($_COOKIE[$this->config['name']])) {
