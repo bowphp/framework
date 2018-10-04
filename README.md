@@ -7,7 +7,7 @@
 
 Pour utiliser ce package, veuillez créer une application depuis ce package [bowphp/app](https://github.com/bowphp/app)
 
-# Préréquis
+# Prérequis
 
 Vous devez vous assurer les différents elements suivants sont installés sur votre machine.
 
