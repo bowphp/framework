@@ -64,6 +64,7 @@ class Route
      *
      * @param string   $path
      * @param callable $cb
+     * @throws
      */
     public function __construct($path, $cb)
     {

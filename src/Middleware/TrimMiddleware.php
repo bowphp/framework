@@ -2,16 +2,18 @@
 
 namespace Bow\Middleware;
 
+use Bow\Http\Request;
+
 class TrimMiddleware
 {
     /**
      * Fonction de lancement du middleware.
      *
-     * @param \Bow\Http\Request $request
-     * @param callable $next
+     * @param Request $request
+     * @param Callable $next
      * @return boolean
      */
-    public function checker($request, callable $next)
+    public function checker(Request $request, callable $next)
     {
         $input = array_merge($_GET, $_POST);
 
@@ -19,6 +21,6 @@ class TrimMiddleware
             $input[$key] = trim($value);
         }
 
-        return $next();
+        return $next($request);
     }
 }

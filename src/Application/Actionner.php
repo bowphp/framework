@@ -30,13 +30,6 @@ class Actionner
     private static $instance;
 
     /**
-     * Liste de guard
-     *
-     * @var array
-     */
-    private $guards = [];
-
-    /**
      * @var Dispatcher
      */
     private $dispatcher;

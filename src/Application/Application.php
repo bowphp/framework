@@ -205,7 +205,7 @@ class Application
      * @param callable|string|array $cb
      * @return Application
      */
-    public function middleware($middleware = [], callable $cb = null)
+    public function middleware($middleware, callable $cb = null)
     {
         $middleware = (array) $middleware;
 
@@ -400,6 +400,12 @@ class Application
         $route->middleware($this->globale_middleware);
 
         $this->routes[$method][] = $route;
+
+        $route->middleware('trim');
+
+        if (in_array($method, ['POST', 'DELETE', 'PUT'])) {
+            $route->middleware('csrf');
+        }
 
         return $route;
     }

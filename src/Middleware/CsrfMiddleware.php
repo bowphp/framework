@@ -15,7 +15,7 @@ class CsrfMiddleware
      */
     public function checker(Request $request, callable $next)
     {
-        if (!($request->isPost() || $request->isPut())) {
+        if (in_array($request->uri(), $this->preventOn())) {
             return $next($request);
         }
 
@@ -25,6 +25,7 @@ class CsrfMiddleware
             }
 
             response()->statusCode(401);
+
             return response()->send('unauthorize.');
         }
 
@@ -33,5 +34,17 @@ class CsrfMiddleware
         }
 
         return $next($request);
+    }
+
+    /**
+     * Prevent csrf action on urls
+     *
+     * @return array
+     */
+    public function preventOn()
+    {
+        return [
+
+        ];
     }
 }

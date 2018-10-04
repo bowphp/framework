@@ -98,7 +98,7 @@ class Command
 
         $this->controller_directory = $this->dirname.'/app/Controllers';
 
-        $this->middleware_directory = $this->dirname.'/app/Middlewares';
+        $this->middleware_directory = $this->dirname.'/app/Middleware';
 
         $this->configuration_directory = $this->dirname.'/app/Configurations';
 

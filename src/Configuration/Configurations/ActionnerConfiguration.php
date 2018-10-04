@@ -9,12 +9,21 @@ use Bow\Configuration\Loader;
 class ActionnerConfiguration extends Configuration
 {
     /**
+     * @var array
+     */
+    private $middlewares = [
+        'trim' => \Bow\Middleware\TrimMiddleware::class,
+    ];
+    
+    /**
      * @inheritdoc
      */
     public function create(Loader $config)
     {
         $this->container->bind('actionner', function () use ($config) {
-            return Actionner::configure($config->namespaces(), $config->middlewares());
+            $middlewares = array_merge($config->middlewares(), $this->middlewares);
+
+            return Actionner::configure($config->namespaces(), $middlewares);
         });
     }
 
