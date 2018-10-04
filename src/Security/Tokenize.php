@@ -20,7 +20,7 @@ class Tokenize
      */
     public static function makeCsrfToken($time = null)
     {
-        if (Session::has('__bow.csrf')) {
+        if (Session::getInstance()->has('__bow.csrf')) {
             return true;
         }
 
@@ -30,13 +30,13 @@ class Tokenize
 
         $token = static::make();
 
-        Session::add('__bow.csrf', [
+        Session::getInstance()->add('__bow.csrf', [
             'token' => $token,
             'expirate' => time() + static::$expirate_at,
             'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
         ]);
 
-        Session::add('_token', $token);
+        Session::getInstance()->add('_token', $token);
 
         return true;
     }
@@ -65,7 +65,7 @@ class Tokenize
     {
         static::makeCsrfToken($time);
 
-        return Session::get('__bow.csrf');
+        return Session::getInstance()->get('__bow.csrf');
     }
 
     /**
@@ -76,7 +76,7 @@ class Tokenize
      */
     public static function csrfExpirated($time = null)
     {
-        if (Session::has('__bow.csrf')) {
+        if (Session::getInstance()->has('__bow.csrf')) {
             return false;
         }
 
@@ -84,7 +84,7 @@ class Tokenize
             $time = time();
         }
 
-        $csrf = Session::get('__bow.csrf');
+        $csrf = Session::getInstance()->get('__bow.csrf');
 
         if ($csrf['expirate'] >= (int) $time) {
             return true;
@@ -103,11 +103,11 @@ class Tokenize
     public static function verify($token, $strict = false)
     {
 
-        if (!Session::has('__bow.csrf')) {
+        if (!Session::getInstance()->has('__bow.csrf')) {
             return false;
         }
 
-        $csrf = Session::get('__bow.csrf');
+        $csrf = Session::getInstance()->get('__bow.csrf');
 
         if ($token !== $csrf['token']) {
             return false;
@@ -127,8 +127,8 @@ class Tokenize
      */
     public static function clear()
     {
-        Session::remove('__bow.csrf');
+        Session::getInstance()->remove('__bow.csrf');
 
-        Session::remove('_token');
+        Session::getInstance()->remove('_token');
     }
 }

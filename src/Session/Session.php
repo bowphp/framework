@@ -79,7 +79,7 @@ class Session implements CollectionInterface
 
         session_name($this->config['name']);
 
-        if (!isset($_COOKIE["BSESSID"])) {
+        if (!isset($_COOKIE[$this->config['name']])) {
             session_id(hash("sha256", $this->generateId()));
         }
 
@@ -160,17 +160,21 @@ class Session implements CollectionInterface
     {
         $this->start();
 
+        $cache = $_SESSION[static::CORE_KEY['cache']];
+
+        $flash = $_SESSION[static::CORE_KEY['flash']];
+
         if (!$strict) {
-            if (!isset($_SESSION[static::CORE_KEY['cache']][$key])) {
-                return isset($_SESSION[static::CORE_KEY['flash']][$key]);
+            if (!isset($cache[$key])) {
+                return isset($flash[$key]);
             }
 
             return true;
         }
 
-        if (!isset($_SESSION[static::CORE_KEY['cache']][$key])) {
-            if (isset($_SESSION[static::CORE_KEY['flash']][$key])) {
-                $value = $_SESSION[static::CORE_KEY['flash']][$key];
+        if (!isset($cache[$key])) {
+            if (isset($cache[$key])) {
+                $value = $flash[$key];
 
                 return !is_null($value);
             }
@@ -178,7 +182,7 @@ class Session implements CollectionInterface
             return false;
         }
 
-        $value = $_SESSION[static::CORE_KEY['cache']][$key];
+        $value = $cache[$key];
 
         return !is_null($value);
     }
@@ -216,10 +220,14 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        if (isset($_SESSION[static::CORE_KEY['flash']][$key])) {
-            $flash = $_SESSION[static::CORE_KEY['flash']][$key];
+        $flash = $_SESSION[static::CORE_KEY['flash']];
 
-            unset($_SESSION[static::CORE_KEY['flash']][$key]);
+        if (isset($flash[$key])) {
+            $flash = $flash[$key];
+
+            unset($flash[$key]);
+
+            $_SESSION[static::CORE_KEY['flash']] = $flash;
 
             return $flash;
         }
@@ -247,10 +255,6 @@ class Session implements CollectionInterface
     public function add($key, $value, $next = false)
     {
         $this->start();
-
-        if (!isset($_SESSION[static::CORE_KEY['cache']])) {
-            $_SESSION[static::CORE_KEY['cache']] = [];
-        }
 
         $_SESSION[static::CORE_KEY['cache']][$key] = true;
 
@@ -319,13 +323,13 @@ class Session implements CollectionInterface
 
         $_SESSION[static::CORE_KEY['cache']][$key] = true;
 
-        if ($this->has($key)) {
-            $old = $_SESSION[$key];
-
+        if (!$this->has($key)) {
             $_SESSION[$key] = $value;
 
             return $old;
         }
+
+        $old = $_SESSION[$key];
 
         $_SESSION[$key] = $value;
 
@@ -343,18 +347,15 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        if (! $this->has(static::CORE_KEY['flash'])) {
-            $_SESSION[static::CORE_KEY['flash']] = [];
-        }
-
         if ($message !== null) {
             $_SESSION[static::CORE_KEY['flash']][$key] = $message;
 
             return true;
         }
 
-        return isset($_SESSION[static::CORE_KEY['flash']][$key]) ?
-            $_SESSION[static::CORE_KEY['flash']][$key] : null;
+        $flash = $_SESSION[static::CORE_KEY['flash']];
+
+        return isset($flash[$key]) ? $flash[$key] : null;
     }
 
     /**

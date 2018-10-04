@@ -3,6 +3,7 @@
 namespace Bow\Middleware;
 
 use Bow\Http\Request;
+use Bow\Security\Exception\TokenMismatch;
 
 class CsrfMiddleware
 {
@@ -12,6 +13,7 @@ class CsrfMiddleware
      * @param  Request $request
      * @param  Callable $next
      * @return boolean
+     * @throws
      */
     public function checker(Request $request, callable $next)
     {
@@ -29,13 +31,11 @@ class CsrfMiddleware
             return response()->send('unauthorize.');
         }
 
-        dd($request->get('_token'), $request->session()->all());
-
         if ($request->get('_token') == $request->session()->get('_token')) {
             return $next($request);
         }
 
-        return response('Token Mismatch');
+        throw new TokenMismatch('Token Mismatch');
     }
 
     /**
