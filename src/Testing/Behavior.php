@@ -90,7 +90,7 @@ class Behavior
      * @param $code
      * @return $this
      */
-    public function statusCodeMustBe($code)
+    public function statusMustBe($code)
     {
         Assert::assertEquals($code, $this->parser->getCode());
 
