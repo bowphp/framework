@@ -2,7 +2,7 @@
 
 namespace Bow\Test;
 
-use \Bow\Http\Cache;
+use \Bow\Cache\Cache;
 
 class CacheTest extends \PHPUnit\Framework\TestCase
 {
