@@ -552,7 +552,7 @@ class Request
      */
     public function __get($property)
     {
-        return $this->input->get($property);
+        return $this->get($property);
     }
 
     /**
