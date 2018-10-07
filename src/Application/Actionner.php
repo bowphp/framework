@@ -2,7 +2,7 @@
 
 namespace Bow\Application;
 
-use Bow\Contrats\ResponseInterface;
+use Bow\Contracts\ResponseInterface;
 use Bow\Database\Barry\Model;
 use Bow\Http\Request;
 use Bow\Router\Exception\RouterException;

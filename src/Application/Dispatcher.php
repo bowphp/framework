@@ -56,7 +56,7 @@ class Dispatcher
         if (is_array($middleware)) {
             $params = array_merge($args, $middleware['params']);
 
-            $middleware = [new $middleware['class'], 'checker'];
+            $middleware = [new $middleware['class'], 'process'];
         }
 
         $params = [$request, [$this, 'process'], $params];

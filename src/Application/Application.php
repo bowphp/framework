@@ -4,7 +4,7 @@ namespace Bow\Application;
 
 use Bow\Application\Exception\ApplicationException;
 use Bow\Configuration\Loader;
-use Bow\Contrats\ResponseInterface;
+use Bow\Contracts\ResponseInterface;
 use Bow\Http\Exception\HttpException;
 use Bow\Http\Request;
 use Bow\Http\Response;
@@ -449,7 +449,7 @@ class Application
         // la collection de route
         if (!isset($this->routes[$method])) {
             // Vérification et appel de la fonction du branchement 404
-            $this->response->statusCode(404);
+            $this->response->status(404);
 
             if (empty($this->error_code)) {
                 $this->response->send(
@@ -488,7 +488,7 @@ class Application
         }
 
         // Application du code d'erreur 404
-        $this->response->statusCode(404);
+        $this->response->status(404);
 
         if (in_array(404, array_keys($this->error_code))) {
             $response = call_user_func($this->error_code[404]);
@@ -522,18 +522,24 @@ class Application
      * @param mixed $response
      * @return null
      */
-    public function sendResponse($response)
+    private function sendResponse($response)
     {
         if (is_string($response)) {
             echo $this->response->send($response);
+
+            die;
         }
 
         if (is_array($response) || is_object($response)) {
             echo $this->response->json($response);
+
+            die;
         }
 
         if ($response instanceof ResponseInterface) {
-            return $response->send();
+            echo $response->sendContent();
+
+            die;
         }
 
         return;
@@ -663,7 +669,7 @@ class Application
      */
     public function abort($code = 500, $message = '', array $headers = [])
     {
-        $this->response->statusCode($code);
+        $this->response->status($code);
 
         foreach ($headers as $key => $value) {
             $this->response->addHeader($key, $value);
