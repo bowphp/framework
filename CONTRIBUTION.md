@@ -1,4 +1,3 @@
-
 # Prérequis
 
 Vous devez vous assurer les différents elements suivants sont installés sur votre machine.
