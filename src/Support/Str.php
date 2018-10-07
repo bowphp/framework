@@ -241,21 +241,20 @@ class Str
      * eg: 'je suis un chaine de caractere' => 'je-suis-un-chaine-de-caractere'
      *
      * @param string $str
-     *
+     * @param string $delimiter
      * @return string
      */
-    public static function slugify($str)
+    public static function slugify($str, $delimiter = '-')
     {
-        $temp = preg_replace('/[^a-z0-9]/', '-', strtolower(trim(strip_tags($str))));
+        $temp = preg_replace('/[^a-z0-9]/', $delimiter, strtolower(trim(strip_tags($str))));
 
-        return preg_replace('/-{2,}/', '-', $temp);
+        return preg_replace('/-{2,}/', $delimiter, $temp);
     }
 
     /**
      * unslugify créateur de slug en utilisant un chaine simple.
      *
      * @param string $str
-     *
      * @return string
      */
     public static function unSlugify($str)

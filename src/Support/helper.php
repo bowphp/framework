@@ -1,21 +1,19 @@
 <?php
 
 use Bow\Auth\Auth;
-use Bow\Event\Event;
 use Bow\Database\Database as DB;
-use Bow\Http\Cache;
-use Bow\Http\Input;
+use Bow\Event\Event;
 use Bow\Mail\Mail;
-use Bow\Session\Cookie;
-use Bow\Session\Session;
 use Bow\Security\Hash;
 use Bow\Security\Tokenize;
-use Bow\Support\Env;
+use Bow\Session\Cookie;
+use Bow\Session\Session;
+use Bow\Storage\Storage;
 use Bow\Support\Capsule;
 use Bow\Support\Collection;
+use Bow\Support\Env;
 use Bow\Support\Faker;
 use Bow\Support\Util;
-use Bow\Storage\Storage;
 use Bow\Translate\Translator;
 
 if (!function_exists('app')) {
@@ -80,7 +78,7 @@ if (!function_exists('response')) {
     {
         $response = app('response');
 
-        $response->statusCode($code);
+        $response->status($code);
 
         if (is_null($template)) {
             return $response;
@@ -138,7 +136,7 @@ if (!function_exists('db')) {
         if (is_callable($cb)) {
             return $cb();
         }
-        
+
         return DB::connection($last_connection);
     }
 }
@@ -161,7 +159,7 @@ if (!function_exists('view')) {
             $data = [];
         }
 
-        response()->statusCode($code);
+        response()->status($code);
 
         return Bow\View\View::parse($template, $data);
     }
@@ -376,30 +374,6 @@ if (!function_exists('files')) {
     }
 }
 
-if (!function_exists('input')) {
-    /**
-     * input, fonction de type collection
-     * manipule la variable global $_GET, $_POST, $_FILES
-     *
-     * @param  mixed $key
-     * @return Input
-     */
-    function input($key = null)
-    {
-        $input = request()->input();
-
-        if ($key === null) {
-            return $input;
-        }
-
-        if ($input->has($key)) {
-            return $input->get($key);
-        }
-
-        return null;
-    }
-}
-
 if (!function_exists('debug')) {
     /**
      * debug, fonction de debug de variable
@@ -510,35 +484,6 @@ if (!function_exists('csrf_time_is_expirate')) {
     }
 }
 
-if (!function_exists('store')) {
-    /**
-     * store, effecture l'upload d'un fichier vers un repertoire
-     *
-     * @param  array    $file,     le fichier a
-     *                             uploadé.
-     * @param  $location
-     * @param  $size
-     * @param  array    $extension
-     * @param  callable $cb
-     * @return object
-     */
-    function store(array $file, $location, $size, array $extension, callable $cb = null)
-    {
-
-        if (is_int($location) || preg_match('/^([0-9]+)(m|k)$/', $location)) {
-            $cb = $extension;
-
-            $extension = $size;
-
-            $size = $location;
-
-            $location = storage_path();
-        }
-
-        return Storage::store($file, $location, $size, $extension, $cb);
-    }
-}
-
 if (!function_exists('json')) {
     /**
      * json, permet de lance des reponses server de type json
@@ -562,6 +507,7 @@ if (!function_exists('download')) {
      * @param null|string $name
      * @param array       $headers
      * @param string      $disposition
+     * @return \Bow\Http\Response
      */
     function download($file, $name = null, array $headers = [], $disposition = 'attachment')
     {
@@ -578,7 +524,7 @@ if (!function_exists('status_code')) {
      */
     function status_code($code)
     {
-        return response()->statusCode($code);
+        return response()->status($code);
     }
 }
 
@@ -613,7 +559,7 @@ if (!function_exists('secure')) {
         if (is_numeric($data)) {
             return $data;
         }
-        
+
         return \Bow\Security\Sanitize::make($data, true);
     }
 }
@@ -876,12 +822,12 @@ if (!function_exists('add_event')) {
      * @param  string                $event
      * @param  callable|array|string $fn
      * @return Event;
-     * @throws \Bow\Exception\EventException
+     * @throws \Bow\Event\EventException
      */
     function add_event($event, $fn)
     {
         if (!is_string($event)) {
-            throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
+            throw new \Bow\Event\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
 
         return call_user_func_array([emitter(), 'on'], [$event, $fn]);
@@ -914,12 +860,12 @@ if (!function_exists('add_transmisson_event')) {
      * @param  string                $event
      * @param  callable|array|string $fn
      * @return Event
-     * @throws \Bow\Exception\EventException
+     * @throws \Bow\Event\EventException
      */
     function add_transmisson_event($event, $fn)
     {
         if (!is_string($event)) {
-            throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
+            throw new \Bow\Event\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
 
         return call_user_func_array([emitter(), 'onTransmission'], [$event, $fn]);
@@ -930,8 +876,7 @@ if (!function_exists('emitter')) {
     /**
      * Alias de la class Event::on
      *
-     * @return Event;
-     * @throws \Bow\Exception\EventException
+     * @return Event
      */
     function emitter()
     {
@@ -944,12 +889,12 @@ if (!function_exists('emit_event')) {
      * Alias de la class Event::emit
      *
      * @param  string $event
-     * @throws \Bow\Exception\EventException
+     * @throws \Bow\Event\EventException
      */
     function emit_event($event)
     {
         if (!is_string($event)) {
-            throw new \Bow\Exception\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
+            throw new \Bow\Event\EventException('Le premier paramètre doit être une chaine de caractère.', 1);
         }
 
         call_user_func_array([emitter(), 'emit'], func_get_args());
@@ -968,7 +913,7 @@ if (!function_exists('flash')) {
      */
     function flash($key, $message)
     {
-        return Session::flash($key, $message);
+        return Session::getInstance()->flash($key, $message);
     }
 }
 
@@ -979,8 +924,8 @@ if (!function_exists('email')) {
      * @param null|string $view     la view
      * @param array       $data     la view
      * @param \Closure    $callable
-     *
      * @return Mail|bool
+     * @throws
      */
     function email($view = null, $data = [], \Closure $callable = null)
     {
@@ -1192,20 +1137,6 @@ if (!function_exists('e')) {
     }
 }
 
-if (!function_exists('form')) {
-    /**
-     * Form class help
-     *
-     * Build form with helpers
-     *
-     * @return \Bow\Http\Form
-     */
-    function form()
-    {
-        return \Bow\Http\Form::singleton();
-    }
-}
-
 if (!function_exists('ftp')) {
     /**
      * Alias sur le connection FTP.
@@ -1255,10 +1186,10 @@ if (!function_exists('cache')) {
     function cache($key = null, $value = null)
     {
         if ($key !== null && $value === null) {
-            return Cache::get($key);
+            return \Bow\Cache\Cache::get($key);
         }
 
-        return Cache::add($key, $value);
+        return \Bow\Cache\Cache::add($key, $value);
     }
 }
 
@@ -1268,6 +1199,7 @@ if (!function_exists('back')) {
      *
      * @param int   $status
      * @param array $headers
+     * @return \Bow\Http\Redirect
      */
     function back($status = 302, $headers = [])
     {
@@ -1417,13 +1349,15 @@ if (!function_exists('abort_if')) {
      *
      * @param boolean $boolean
      * @param int     $code
-     * @return \Bow\Http\Response
+     * @return \Bow\Http\Response|null
      */
     function abort_if($boolean, $code)
     {
         if ($boolean) {
             return abort($code);
         }
+
+        return null;
     }
 }
 
