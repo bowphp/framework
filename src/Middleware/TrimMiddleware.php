@@ -13,7 +13,7 @@ class TrimMiddleware
      * @param Callable $next
      * @return boolean
      */
-    public function checker(Request $request, callable $next)
+    public function process(Request $request, callable $next)
     {
         foreach ($_GET as $key => $value) {
             $_GET[$key] = trim($value);

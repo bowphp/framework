@@ -15,7 +15,7 @@ class CsrfMiddleware
      * @return boolean
      * @throws
      */
-    public function checker(Request $request, callable $next)
+    public function process(Request $request, callable $next)
     {
         foreach ($this->preventOn() as $url) {
             if ($request->is($url)) {
@@ -28,7 +28,7 @@ class CsrfMiddleware
                 return $next($request);
             }
 
-            response()->statusCode(401);
+            response()->status(401);
 
             return response()->send('unauthorize.');
         }
