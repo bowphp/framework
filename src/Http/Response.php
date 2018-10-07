@@ -2,10 +2,11 @@
 
 namespace Bow\Http;
 
+use Bow\Contracts\ResponseInterface;
 use Bow\Exception\ResponseException;
 use Bow\View\View;
 
-class Response
+class Response implements ResponseInterface
 {
     /**
      * Liste de code http valide pour l'application
@@ -162,21 +163,6 @@ class Response
     }
 
     /**
-     * Get status code
-     *
-     * @param int $code
-     * @return Response
-     */
-    public function setCode($code)
-    {
-        $this->code = $code;
-
-        $this->override = true;
-
-        return $this;
-    }
-
-    /**
      * Get headers
      *
      * @param array $headers
@@ -210,6 +196,7 @@ class Response
      * @param null   $name
      * @param array  $headers
      * @param string $disposition
+     * @return Response
      */
     public function download($file, $name = null, array $headers = array(), $disposition = 'attachment')
     {
@@ -234,6 +221,8 @@ class Response
         $this->download_filename = $file;
 
         $this->download = true;
+
+        return $this;
     }
 
     /**
@@ -242,17 +231,13 @@ class Response
      * @param  int $code
      * @return mixed
      */
-    public function statusCode($code)
+    public function status($code)
     {
-        $r = true;
-
         if (in_array((int) $code, array_keys(self::$header), true)) {
             header('HTTP/1.1 '. $code .' '. self::$header[$code], $this->override, $code);
-        } else {
-            $r = false;
         }
 
-        return $r;
+        return $this;
     }
 
     /**
@@ -295,7 +280,7 @@ class Response
 
         $this->message = json_encode($data);
 
-        $this->setCode($code);
+        $this->status($code);
 
         return $this->send(json_encode($data), false);
     }
@@ -314,13 +299,13 @@ class Response
             $data = json_encode($data);
         }
 
-        $this->statusCode($code);
+        $this->status($code);
 
         foreach ($headers as $key => $value) {
             $this->addHeader($key, $value);
         }
 
-        return $data;
+        return $this->buildHttpResponse();
     }
 
     /**
@@ -452,5 +437,13 @@ class Response
         }
 
         return $this->accessControl('Access-Control-Expose-Headers', implode(', ', $excepted));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function sendContent()
+    {
+        return $this->buildHttpResponse();
     }
 }

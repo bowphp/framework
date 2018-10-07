@@ -2,10 +2,11 @@
 
 namespace Bow\Http;
 
-use Bow\Router\Route;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 use Bow\Support\Str;
+use Bow\Validation\Validate;
+use Bow\Validation\Validator;
 
 class Request
 {
@@ -14,18 +15,10 @@ class Request
      *
      * @static self
      */
-    private static $instance ;
+    private static $instance;
 
     /**
-     * Variable de paramètre issue de url définie par l'utilisateur
-     * e.g /users/:id . alors params serait params->id == une la value suivant /users/1
-     *
-     * @var UrlParameter
-     */
-    public $param;
-
-    /**
-     * @var Input
+     * @var array
      */
     private $input;
 
@@ -34,9 +27,11 @@ class Request
      */
     private function __construct()
     {
-        $this->input = new Input();
+        $this->input = array_merge($_POST, $_GET);
 
-        $this->param = new UrlParameter([]);
+        foreach ($this->input as $key => $value) {
+            $this->input[$key] = trim($value);
+        }
     }
 
     /**
@@ -54,18 +49,6 @@ class Request
     }
 
     /**
-     * Get request value
-     *
-     * @param string $key
-     * @param null $default
-     * @return mixed
-     */
-    public function get($key, $default = null)
-    {
-        return $this->input->get($key, $default);
-    }
-
-    /**
      * Check if key is exists
      *
      * @param string $key
@@ -73,7 +56,7 @@ class Request
      */
     public function has($key)
     {
-        return $this->input->has($key);
+        return $this->input[$key] ?? null;
     }
 
     /**
@@ -83,7 +66,7 @@ class Request
      */
     public function all()
     {
-        return $this->input->all();
+        return $this->input;
     }
 
     /**
@@ -213,7 +196,7 @@ class Request
      */
     public function isPut()
     {
-        if ($this->method() == 'PUT' || $this->input->get('_method', null) == 'PUT') {
+        if ($this->method() == 'PUT' || $this->get('_method') == 'PUT') {
             return true;
         }
 
@@ -227,7 +210,7 @@ class Request
      */
     public function isDelete()
     {
-        if ($this->method() == 'DELETE' || $this->input->get('_method', null) == 'DELETE') {
+        if ($this->method() == 'DELETE' || $this->get('_method') == 'DELETE') {
             return true;
         }
 
@@ -294,21 +277,6 @@ class Request
     public static function hasFile($key)
     {
         return isset($_FILES[$key]);
-    }
-
-    /**
-     * Change le factory RequestData pour tout les entrés PHP (GET, FILES, POST)
-     *
-     * @param  string $key
-     * @return Input
-     */
-    public function input($key = null)
-    {
-        if (!is_null($key)) {
-            return $this->input->get($key);
-        }
-
-        return $this->input;
     }
 
     /**
@@ -478,27 +446,6 @@ class Request
     }
 
     /**
-     * Permet de récupérer un paramètre définir dans la route.
-     *
-     * @param  string $key
-     * @return string
-     */
-    public function getParameter($key)
-    {
-        return $this->param[$key];
-    }
-
-    /**
-     * Permet de récupérer les paramètres définir dans la route.
-     *
-     * @return object
-     */
-    public function getParameters()
-    {
-        return $this->param;
-    }
-
-    /**
      * Get session information
      *
      * @return Session
@@ -517,6 +464,86 @@ class Request
     public function cookie($property = null)
     {
         return cookie($property);
+    }
+
+    /**
+     * Get, permet de récupérer une valeur ou la colléction de valeur.
+     *
+     * @param  string $key     =null
+     * @param  mixed  $default =false
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        return $this->has($key) ? $this->input[$key] : $default;
+    }
+
+    /**
+     * get, permet de récupérer une valeur ou la colléction de valeur.
+     *
+     * @param  array|string|int $expects
+     * @return mixed
+     */
+    public function withOut($expects)
+    {
+        $data = [];
+
+        if (!is_array($expects)) {
+            $keyWasDefine = $expects;
+        } else {
+            $keyWasDefine = func_get_args();
+        }
+
+        foreach ($this->input as $key => $value) {
+            if (!in_array($key, $keyWasDefine)) {
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function excepts(array $exceptions)
+    {
+        $data = [];
+
+        foreach ($exceptions as $exception) {
+            if (isset($this->input[$exception])) {
+                $data[$exception] = $this->input[$exception];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function ignores(array $ignores)
+    {
+        $data = $this->input;
+
+        foreach ($ignores as $ignore) {
+            if (isset($data[$ignore])) {
+                unset($data[$ignore]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Permet de valider les données entrantes
+     *
+     * @param  array $rule
+     * @return Validate
+     */
+    public function validate(array $rule)
+    {
+        return Validator::make($this->input, $rule);
     }
 
     /**

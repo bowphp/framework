@@ -2,7 +2,7 @@
 
 namespace Bow\Http;
 
-use Bow\Contrats\ResponseInterface;
+use Bow\Contracts\ResponseInterface;
 
 class Redirect implements ResponseInterface
 {
@@ -59,7 +59,7 @@ class Redirect implements ResponseInterface
     {
         $this->to = $path;
 
-        $this->response->statusCode($status);
+        $this->response->status($status);
 
         return $this;
     }
@@ -88,12 +88,24 @@ class Redirect implements ResponseInterface
      *
      * @param int   $status
      * @param array $data
+     * @return Redirect
      */
     public function back($status = 302, array $data = [])
     {
         $this->withInput($data);
 
         $this->to($this->request->referer(), $status);
+
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function sendContent()
+    {
+        return $this->response->addHeader('Location', $this->to)
+            ->status(301);
     }
 
     /**
@@ -110,15 +122,5 @@ class Redirect implements ResponseInterface
     public function __toString()
     {
         return $this->to;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function send()
-    {
-        $this->response->addHeader('Location', $this->to)->statusCode(301);
-
-        die();
     }
 }
