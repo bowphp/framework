@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Http;
+namespace Bow\Cache;
 
 use BadMethodCallException;
 use Bow\Support\Str;
