@@ -14,7 +14,7 @@ class {className}
      * @param array $guard
      * @return mixed
      */
-    public function checker(Request $request, Callable $next, array $guard = [])
+    public function process(Request $request, Callable $next, array $guard = [])
     {
         // Codez Ici
         return $next($request);
