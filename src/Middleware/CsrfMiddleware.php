@@ -17,8 +17,10 @@ class CsrfMiddleware
      */
     public function checker(Request $request, callable $next)
     {
-        if (in_array($request->uri(), $this->preventOn())) {
-            return $next($request);
+        foreach ($this->preventOn() as $url) {
+            if ($request->is($url)) {
+                return $next($request);
+            }
         }
 
         if ($request->isAjax()) {

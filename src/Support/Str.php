@@ -74,7 +74,7 @@ class Str
             return $delimiter.static::lower($math[1]);
         }, $str));
 
-        return preg_replace('/'.$delimiter.'{2,}/', $delimiter, $str);
+        return trim(preg_replace('/'.$delimiter.'{2,}/', $delimiter, $str), $delimiter);
     }
 
     /**

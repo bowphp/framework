@@ -4,9 +4,10 @@ namespace Bow\View;
 
 use BadMethodCallException;
 use Bow\Configuration\Loader;
+use Bow\Contracts\ResponseInterface;
 use Bow\View\Exception\ViewException;
 
-class View
+class View implements ResponseInterface
 {
     /**
      * @var Loader
@@ -22,6 +23,11 @@ class View
      * @var EngineAbstract
      */
     private static $template;
+
+    /**
+     * @var string
+     */
+    private static $data;
 
     /**
      * @var bool
@@ -91,13 +97,13 @@ class View
      *
      * @param  string $viewname
      * @param  array  $data
-     * @return string
+     * @return View
      */
     public static function parse($viewname, array $data = [])
     {
-        $data = static::getInstance()->getTemplate()->render($viewname, $data);
+        static::$data = static::getInstance()->getTemplate()->render($viewname, $data);
 
-        return trim($data);
+        return static::$instance;
     }
 
     /**
@@ -169,6 +175,26 @@ class View
         static::$container[$name] = $engine;
 
         return true;
+    }
+
+    /**
+     * Send Response
+     *
+     * @return mixed
+     */
+    public function sendContent()
+    {
+        return static::$data;
+    }
+
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->sendContent();
     }
 
     /**

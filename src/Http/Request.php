@@ -317,9 +317,9 @@ class Request
      * @param  mixed $key
      * @return mixed
      */
-    public static function old($key)
+    public function old($key)
     {
-        $old = Session::get('__bow.old', []);
+        $old = Session::getInstance()->get('__bow.old', []);
 
         return isset($old[$key]) ? $old[$key] : null;
     }
@@ -352,11 +352,11 @@ class Request
      */
     public function is($match)
     {
-        return preg_match('~' . $match . '~', $this->uri());
+        return preg_match('@'.$match.'@', $this->uri());
     }
 
     /**
-     * clientAddress, L'address ip du client
+     * L'address ip du client
      *
      * @return string
      */
@@ -366,7 +366,7 @@ class Request
     }
 
     /**
-     * clientPort, Retourne de port du client
+     * Retourne de port du client
      *
      * @return string
      */
@@ -408,15 +408,15 @@ class Request
     {
         $local = '';
 
-        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-            $tmp = explode(';', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
-
-            preg_match('/^([a-z]+(?:-|_)?[a-z]+)/i', $tmp, $match);
-
-            $local = end($match);
+        if (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            return $local;
         }
 
-        return $local;
+        $tmp = explode(';', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
+
+        preg_match('/^([a-z]+(?:-|_)?[a-z]+)/i', $tmp, $match);
+
+        return end($match);
     }
 
     /**
@@ -536,10 +536,14 @@ class Request
      *
      * @return mixed
      */
-    public static function __callStatic($name, $arguments)
+    public function __call($name, $arguments)
     {
-        if (!method_exists(static::$instance, $name)) {
-            throw new \RuntimeException('Method ' . $name . ' not exists');
+        if (!method_exists($this, $name)) {
+            if (!method_exists($this->input, $name)) {
+                throw new \RuntimeException('Method ' . $name . ' not exists');
+            }
+
+            return call_user_func_array([$this->input, $name], $arguments);
         }
 
         return call_user_func_array([static::class, $name], $arguments);

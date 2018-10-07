@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Contrats;
+namespace Bow\Contracts;
 
 interface CollectionInterface
 {

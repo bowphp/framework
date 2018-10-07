@@ -684,48 +684,64 @@ class Command
 
         $model_namespace = '';
 
-        if ($this->readline("Voulez vous que je crée les vues associées ? ")) {
+        $options = $this->options();
+
+        if ($options->has('--with-view') && $this->readline("Voulez vous que je crée les vues associées ? ")) {
+            $model = preg_replace("/controller/i", "", strtolower($controller_name));
+
             $model = strtolower($model);
 
-            @mkdir($this->component_directory."/views/".$model, 0766);
+            @mkdir(config('view.path')."/".$model, 0766);
 
-            echo "\033[0;33;7m";
+            foreach (["create", "edit", "show", "index"] as $value) {
+                $filename = "$model/$value".config('view.extension');
 
-            foreach (["create", "edit", "show", "index", "update", "delete"] as $value) {
-                $file = $this->component_directory."/views/$model/$value.".config('view.extension');
+                touch(config('view.path').'/'.$filename);
 
-                echo "$file added\n";
+                echo "$filename added\n";
             }
-
-            echo "\033[00m";
         }
 
         $options = $this->options();
 
         if (! $options->has('--model')) {
-            $this->createRestController($generator, $prefix, $controller_name, $model_namespace);
+            $prefix = Str::plurial(Str::snake($prefix));
+
+            $this->createRestController(
+                $generator,
+                $prefix,
+                $controller_name,
+                $model_namespace
+            );
 
             exit(0);
         }
 
         if ($this->readline("Voulez vous que je crée un model?")) {
-            if ($options->get('--model') !== true) {
-                $model = $options->get('--model');
-            } else {
+            if ($options->get('--model') === true) {
                 echo "\033[0;32;7mLe nom du model non spécifié --model=model_name.\033[00m\n";
 
                 exit(1);
             }
+
+            $model = $options->get('--model');
         }
 
         $model_namespace = "\nuse App\\".ucfirst($model).";\n";
 
-        $this->createRestController($generator, $prefix, $controller_name, $model_namespace);
+        $prefix = '/'.strtolower(trim(Str::plurial(Str::snake($model)), '/'));
+
+        $this->createRestController(
+            $generator,
+            $prefix,
+            $controller_name,
+            $model_namespace
+        );
 
         $this->model($model);
 
         if ($this->readline('Voulez vous que je crée une migration pour ce model ? ')) {
-            $this->make('create_'.strtolower(Str::plurial($model)).'_table');
+            $this->make('create_'.strtolower(Str::plurial(Str::snake($model))).'_table');
         }
     }
 

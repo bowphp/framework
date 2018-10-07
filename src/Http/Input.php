@@ -2,12 +2,11 @@
 
 namespace Bow\Http;
 
-use Bow\Contrats\CollectionInterface;
+use Bow\Contracts\CollectionInterface;
 use Bow\Support\Collection;
 use Bow\Validation\Validate;
 use Bow\Validation\Validator;
 use Closure;
-use ErrorException;
 
 class Input implements CollectionInterface, \ArrayAccess
 {
@@ -23,6 +22,10 @@ class Input implements CollectionInterface, \ArrayAccess
     public function __construct()
     {
         $this->input = array_merge($_POST, $_GET);
+
+        foreach ($this->input as $key => $value) {
+            $this->input[$key] = trim($value);
+        }
     }
 
     /**
@@ -70,7 +73,7 @@ class Input implements CollectionInterface, \ArrayAccess
      * @param  array|string|int $expects
      * @return mixed
      */
-    public function getWithOut($expects)
+    public function withOut($expects)
     {
         $data = [];
 
@@ -112,8 +115,6 @@ class Input implements CollectionInterface, \ArrayAccess
      * remove, supprime une entrée dans la colléction
      *
      * @param string $key
-     *
-     * @return Input
      */
     public function remove($key)
     {
@@ -126,8 +127,6 @@ class Input implements CollectionInterface, \ArrayAccess
      * @param string $key
      * @param mixed  $data
      * @param bool   $next
-     *
-     * @return Input
      */
     public function add($key, $data, $next = false)
     {
@@ -139,10 +138,6 @@ class Input implements CollectionInterface, \ArrayAccess
      *
      * @param string $key
      * @param mixed  $value
-     *
-     * @throws ErrorException
-     *
-     * @return Input
      */
     public function set($key, $value)
     {
@@ -169,23 +164,6 @@ class Input implements CollectionInterface, \ArrayAccess
     public function all()
     {
         return $this->toArray();
-    }
-
-    /**
-     * @param $method
-     * @return array
-     */
-    public function method($method)
-    {
-        if ($method == "GET") {
-            return $_GET;
-        }
-
-        if ($method == "POST") {
-            return $_POST;
-        }
-
-        return [];
     }
 
     /**

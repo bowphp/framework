@@ -1,6 +1,5 @@
 <?php
 
-use Bow\Support\Collection;
 use Bow\Database\Database;
 
 class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
@@ -12,6 +11,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider additionProvider
+     * @param $name
      */
     public function testInstanceOfDatabase($name)
     {
@@ -35,7 +35,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
                 'scheme' => 'sqlite',
                 'sqlite' => [
                     'driver' => 'sqlite',
-                    'database' => __DIR__.'/data/database.sqlite',
+                    'database' => __DIR__ . '/data/database.sqlite',
                     'prefix' => ''
                 ]
             ]

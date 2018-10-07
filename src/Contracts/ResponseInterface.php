@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Contrats;
+namespace Bow\Contracts;
 
 interface ResponseInterface
 {
@@ -9,5 +9,5 @@ interface ResponseInterface
      *
      * @return mixed
      */
-    public function send();
+    public function sendContent();
 }

@@ -15,10 +15,12 @@ class TrimMiddleware
      */
     public function checker(Request $request, callable $next)
     {
-        $input = array_merge($_GET, $_POST);
+        foreach ($_GET as $key => $value) {
+            $_GET[$key] = trim($value);
+        }
 
-        foreach ($input as $key => $value) {
-            $input[$key] = trim($value);
+        foreach ($_POST as $key => $value) {
+            $_GET[$key] = trim($value);
         }
 
         return $next($request);

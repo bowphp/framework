@@ -3,6 +3,7 @@
 namespace {baseNamespace}{namespace};
 
 use App\Controllers\Controller;
+use Bow\Http\Request;
 
 class {className} extends Controller
 {

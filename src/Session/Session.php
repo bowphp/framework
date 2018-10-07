@@ -2,7 +2,7 @@
 
 namespace Bow\Session;
 
-use Bow\Contrats\CollectionInterface;
+use Bow\Contracts\CollectionInterface;
 use Bow\Security\Crypto;
 use InvalidArgumentException;
 

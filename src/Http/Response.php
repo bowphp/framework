@@ -1,4 +1,5 @@
 <?php
+
 namespace Bow\Http;
 
 use Bow\Exception\ResponseException;
@@ -57,16 +58,55 @@ class Response
     private static $instance;
 
     /**
+     * @var string
+     */
+    private $message;
+
+    /**
+     * @var int
+     */
+    private $code;
+
+    /**
+     * @var array
+     */
+    private $headers = [];
+
+    /**
+     * @var bool
+     */
+    private $download = false;
+
+    /**
+     * @var string
+     */
+    private $download_filename;
+
+    /**
+     * @var bool
+     */
+    private $override = false;
+
+    /**
      * Response constructor.
-     * @param string $data
+     * @param string $message
      * @param int $code
      * @param array $headers
      */
-    public function __construct($data = '', $code = 200, array $headers = [])
+    public function __construct($message = '', $code = 200, array $headers = [])
     {
+        $this->message = $message;
+
+        $this->code = $code;
+
+        $this->headers = $headers;
+
+        $this->override = false;
     }
 
     /**
+     * Get response
+     *
      * @return Response
      */
     public static function getInstance()
@@ -79,16 +119,86 @@ class Response
     }
 
     /**
+     * Get response message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
+     * Get status code
+     *
+     * @return int
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
+     * Get headers
+     *
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+
+    /**
+     * Get response message
+     *
+     * @param string $message
+     * @return Response
+     */
+    public function setMessage($message)
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * Get status code
+     *
+     * @param int $code
+     * @return Response
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+
+        $this->override = true;
+
+        return $this;
+    }
+
+    /**
+     * Get headers
+     *
+     * @param array $headers
+     * @return Response
+     */
+    public function setHeaders(array $headers)
+    {
+        $this->headers = $headers;
+
+        return $this;
+    }
+
+    /**
      * Modifie les entêtes http
      *
-     * @param  string $key   Le nom de
-     *                       l'entête
+     * @param  string $key
      * @param  string $value La nouvelle valeur a assigne à l'entête
      * @return self
      */
     public function addHeader($key, $value)
     {
-        header($key.': '.$value);
+        $this->headers[$key] = $value;
 
         return $this;
     }
@@ -121,25 +231,23 @@ class Response
             $this->addHeader($key, $value);
         }
 
-        readfile($file);
+        $this->download_filename = $file;
 
-        die;
+        $this->download = true;
     }
 
     /**
      * Modifie les entétes http
      *
-     * @param  int  $code     Le code de la réponse
-     *                        HTTP
-     * @param  bool $override Permet de remplacer l'entête ecrite précédement quand la valeur est a 'true'
+     * @param  int $code
      * @return mixed
      */
-    public function statusCode($code, $override = false)
+    public function statusCode($code)
     {
         $r = true;
 
         if (in_array((int) $code, array_keys(self::$header), true)) {
-            header('HTTP/1.1 '. $code .' '. self::$header[$code], $override, $code);
+            header('HTTP/1.1 '. $code .' '. self::$header[$code], $this->override, $code);
         } else {
             $r = false;
         }
@@ -148,12 +256,32 @@ class Response
     }
 
     /**
+     * Build HTTP Response
+     *
+     * @return string
+     */
+    private function buildHttpResponse()
+    {
+        header('HTTP/1.1 '. $this->code .' '. static::$header[$this->code], $this->override, $this->code);
+
+        foreach ($this->getHeaders() as $key => $header) {
+            header(sprintf('%s: %s', $key, $header));
+        }
+
+        if ($this->download) {
+            readfile($this->download_filename);
+
+            die;
+        }
+
+        return $this->message;
+    }
+
+    /**
      * Réponse de type JSON
      *
-     * @param  mixed $data    Les données à transformer en
-     *                        JSON
-     * @param  int   $code    Le code de la
-     *                        réponse HTTP
+     * @param  mixed $data
+     * @param  int   $code
      * @param  array $headers
      * @return bool
      */
@@ -165,7 +293,9 @@ class Response
             $this->addHeader($key, $value);
         }
 
-        $this->statusCode($code);
+        $this->message = json_encode($data);
+
+        $this->setCode($code);
 
         return $this->send(json_encode($data), false);
     }
