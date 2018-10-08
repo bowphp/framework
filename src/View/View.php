@@ -27,7 +27,7 @@ class View implements ResponseInterface
     /**
      * @var string
      */
-    private static $data;
+    private static $content;
 
     /**
      * @var bool
@@ -37,7 +37,7 @@ class View implements ResponseInterface
     /**
      * @var array
      */
-    private static $container = [
+    private static $engines = [
         'twig' => \Bow\View\Engine\TwigEngine::class,
         'php' => \Bow\View\Engine\PHPEngine::class,
         'mustache' => \Bow\View\Engine\MustacheEngine::class,
@@ -58,13 +58,13 @@ class View implements ResponseInterface
             throw new ViewException('Le moteur de template non défini.', E_USER_ERROR);
         }
 
-        if (!array_key_exists($engine, static::$container)) {
+        if (!array_key_exists($engine, static::$engines)) {
             throw new ViewException('Le moteur de template n\'est pas implementé.', E_USER_ERROR);
         }
 
         static::$config = $config;
 
-        static::$template = new static::$container[$engine]($config);
+        static::$template = new static::$engines[$engine]($config);
     }
 
     /**
@@ -101,7 +101,7 @@ class View implements ResponseInterface
      */
     public static function parse($viewname, array $data = [])
     {
-        static::$data = static::getInstance()->getTemplate()->render($viewname, $data);
+        static::$content = static::getInstance()->getTemplate()->render($viewname, $data);
 
         return static::$instance;
     }
@@ -164,7 +164,7 @@ class View implements ResponseInterface
      */
     public static function pushEngine($name, $engine)
     {
-        if (array_key_exists($name, static::$container)) {
+        if (array_key_exists($name, static::$engines)) {
             return true;
         }
 
@@ -172,7 +172,7 @@ class View implements ResponseInterface
             throw new ViewException($engine, ' n\'existe pas.');
         }
 
-        static::$container[$name] = $engine;
+        static::$engines[$name] = $engine;
 
         return true;
     }
@@ -184,7 +184,7 @@ class View implements ResponseInterface
      */
     public function sendContent()
     {
-        return static::$data;
+        return static::$content;
     }
 
     /**
