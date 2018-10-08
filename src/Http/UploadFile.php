@@ -81,7 +81,7 @@ class UploadFile
      *
      * @return bool
      */
-    public function isValid()
+    private function isValid()
     {
         return count($this->file) === 5;
     }
@@ -93,6 +93,10 @@ class UploadFile
      */
     public function isUploaded()
     {
+        if (!$this->isValid()) {
+            return false;
+        }
+
         if (!isset($this->file['tmp_name'], $this->file['error'])) {
             return false;
         }
