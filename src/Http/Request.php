@@ -261,22 +261,6 @@ class Request
     }
 
     /**
-     * Charge la factory pour le FILES
-     *
-     * @return array
-     */
-    public function files()
-    {
-        $files = [];
-
-        foreach ($_FILES as $key => $file) {
-            $files[$key] = static::file($key);
-        }
-
-        return $files;
-    }
-
-    /**
      * @param mixed $key
      * @return bool
      */
@@ -295,7 +279,7 @@ class Request
     {
         $old = Session::getInstance()->get('__bow.old', []);
 
-        return isset($old[$key]) ? $old[$key] : null;
+        return $old[$key] ?? null;
     }
 
     /**
@@ -488,7 +472,7 @@ class Request
      */
     public function get($key, $default = null)
     {
-        return $this->has($key) ? $this->input[$key] : $default;
+        return $this->input[$key] ?? $default;
     }
 
     /**
@@ -552,26 +536,5 @@ class Request
     public function __get($property)
     {
         return $this->get($property);
-    }
-
-    /**
-     * __call
-     *
-     * @param string $name
-     * @param array  $arguments
-     *
-     * @return mixed
-     */
-    public function __call($name, $arguments)
-    {
-        if (!method_exists($this, $name)) {
-            if (!method_exists($this->input, $name)) {
-                throw new \RuntimeException('Method ' . $name . ' not exists');
-            }
-
-            return call_user_func_array([$this->input, $name], $arguments);
-        }
-
-        return call_user_func_array([static::class, $name], $arguments);
     }
 }

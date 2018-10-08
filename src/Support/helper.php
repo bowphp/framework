@@ -356,24 +356,6 @@ if (!function_exists('str_slug')) {
     }
 }
 
-if (!function_exists('files')) {
-    /**
-     * files, fonction de type collection
-     * manipule la variable global $_FILES
-     *
-     * @param  string $key
-     * @return array|\Bow\Http\UploadFile
-     */
-    function files($key = null)
-    {
-        if ($key !== null) {
-            return request()->file($key);
-        }
-
-        return request()->files();
-    }
-}
-
 if (!function_exists('debug')) {
     /**
      * debug, fonction de debug de variable
