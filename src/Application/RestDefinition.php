@@ -2,14 +2,14 @@
 
 namespace Bow\Application;
 
-class ResourceMethod
+class RestDefinition
 {
     /**
      * Construire les urls du système REST de Bow
      *
      * @return array
      */
-    public static function take()
+    public static function definitions()
     {
         return [
             [

@@ -241,7 +241,7 @@ class Application
      */
     public function post($path, $cb)
     {
-        $input = $this->request->input();
+        $input = $this->request;
 
         if (!$input->has('_method')) {
             return $this->routeLoader('POST', $path, $cb);
@@ -366,7 +366,7 @@ class Application
      */
     private function pushHttpVerbe($method, $path, $cb)
     {
-        $input = $this->request->input();
+        $input = $this->request;
 
         if ($input->has('_method')) {
             if ($input->get('_method') === $method) {
@@ -453,7 +453,7 @@ class Application
 
             if (empty($this->error_code)) {
                 $this->response->send(
-                    sprintf('Cannot %s %s 404', $method, $this->request->uri())
+                    sprintf('Cannot %s %s 404', $method, $this->request->path())
                 );
             }
 
@@ -470,7 +470,7 @@ class Application
 
             // Lancement de la recherche de la methode qui arrivée dans la requête
             // ensuite lancement de la vérification de l'url de la requête
-            if (!$route->match($this->request->uri())) {
+            if (!$route->match($this->request->path())) {
                 continue;
             }
 
@@ -511,7 +511,7 @@ class Application
         }
 
         throw new RouterException(
-            sprintf('La route "%s" n\'existe pas', $this->request->uri()),
+            sprintf('La route "%s" n\'existe pas', $this->request->path()),
             E_ERROR
         );
     }
@@ -603,7 +603,7 @@ class Application
         $url = preg_replace('/\/+$/', '', $url);
 
         // Association de url prédéfinie
-        foreach (ResourceMethod::take() as $key => $value) {
+        foreach (RestDefinition::definitions() as $key => $value) {
             // on vérifie si la methode de appelé est ignoré
             if (in_array($value['call'], $ignore_method)) {
                 continue;
