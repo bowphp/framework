@@ -74,7 +74,7 @@ if (!function_exists('response')) {
      * @param  array $headers,   Le header
      * @return \Bow\Http\Response
      */
-    function response($content = '', $code = 200, array $headers = [])
+    function response($content = '', $code = 200)
     {
         $response = app('response');
 
@@ -82,10 +82,6 @@ if (!function_exists('response')) {
 
         if (is_null($content)) {
             return $response;
-        }
-
-        foreach ($headers as $key => $value) {
-            $response->addHeader($key, $value);
         }
 
         $response->setContent($content);
@@ -1312,15 +1308,10 @@ if (!function_exists('abort')) {
      *
      * @param int    $code
      * @param string $message
-     * @param array  $headers
      * @return \Bow\Http\Response
      */
-    function abort($code = 500, $message = '', array $headers = [])
+    function abort($code = 500, $message = '')
     {
-        foreach ($headers as $key => $value) {
-            response()->addHeader($key, $value);
-        }
-
         return response($message, $code);
     }
 }
@@ -1331,12 +1322,13 @@ if (!function_exists('abort_if')) {
      *
      * @param boolean $boolean
      * @param int     $code
+     * @param string $message
      * @return \Bow\Http\Response|null
      */
-    function abort_if($boolean, $code)
+    function abort_if($boolean, $code, $message = '')
     {
         if ($boolean) {
-            return abort($code);
+            return abort($code, $message);
         }
 
         return null;
