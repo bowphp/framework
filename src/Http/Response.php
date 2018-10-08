@@ -298,7 +298,7 @@ class Response implements ResponseInterface
     public function send($data, $code = 200, array $headers = [])
     {
         if (is_array($data) || $data instanceof \stdClass || is_object($data)) {
-            $data = json_encode($data);
+            return $this->json($data, $code, $headers);
         }
 
         $this->status($code);
