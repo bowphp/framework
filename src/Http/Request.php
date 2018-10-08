@@ -30,7 +30,11 @@ class Request
         $this->input = array_merge($_POST, $_GET);
 
         foreach ($this->input as $key => $value) {
-            $this->input[$key] = trim($value);
+            if (strlen($value)) {
+                $this->input[$key] = null;
+            } else {
+                $this->input[$key] = trim($value);
+            }
         }
     }
 
@@ -74,7 +78,7 @@ class Request
      *
      * @return string
      */
-    public function uri()
+    public function path()
     {
         $pos = strpos($_SERVER['REQUEST_URI'], '?');
 
@@ -104,7 +108,7 @@ class Request
      */
     public function url()
     {
-        return $this->origin().$this->uri();
+        return $this->origin().$this->path();
     }
 
     /**
@@ -126,7 +130,7 @@ class Request
      *
      * @return string
      */
-    public function scheme()
+    private function scheme()
     {
         return isset($_SERVER['REQUEST_SCHEME']) ? strtolower($_SERVER['REQUEST_SCHEME']) : 'http';
     }
@@ -320,7 +324,7 @@ class Request
      */
     public function is($match)
     {
-        return preg_match('@'.$match.'@', $this->uri());
+        return preg_match('@'.$match.'@', $this->path());
     }
 
     /**
@@ -410,7 +414,28 @@ class Request
      */
     public function protocol()
     {
-        return $_SERVER['SERVER_PROTOCOL'];
+        return $this->scheme();
+    }
+
+    /**
+     * Vérifier le protocol de la requête
+     *
+     * @param string $protocol
+     * @return mixed
+     */
+    public function isProtocol($protocol)
+    {
+        return $this->scheme() == $protocol;
+    }
+
+    /**
+     * Vérifier si le protocol sécurisé
+     *
+     * @return mixed
+     */
+    public function isSecure()
+    {
+        return $this->isProtocol('https');
     }
 
     /**
@@ -479,36 +504,18 @@ class Request
     }
 
     /**
-     * get, permet de récupérer une valeur ou la colléction de valeur.
+     * Permet récupérer les valeurs contenu dans le tableau d'exception
      *
-     * @param  array|string|int $expects
-     * @return mixed
+     * @param array $exceptions
+     * @return array
      */
-    public function withOut($expects)
+    public function only($exceptions)
     {
         $data = [];
 
-        if (!is_array($expects)) {
-            $keyWasDefine = $expects;
-        } else {
-            $keyWasDefine = func_get_args();
+        if (! is_array($exceptions)) {
+            $exceptions = func_get_args();
         }
-
-        foreach ($this->input as $key => $value) {
-            if (!in_array($key, $keyWasDefine)) {
-                $data[$key] = $value;
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function excepts(array $exceptions)
-    {
-        $data = [];
 
         foreach ($exceptions as $exception) {
             if (isset($this->input[$exception])) {
@@ -522,9 +529,13 @@ class Request
     /**
      * @inheritdoc
      */
-    public function ignores(array $ignores)
+    public function ignore($ignores)
     {
         $data = $this->input;
+
+        if (! is_array($ignores)) {
+            $ignores = func_get_args();
+        }
 
         foreach ($ignores as $ignore) {
             if (isset($data[$ignore])) {
