@@ -463,6 +463,8 @@ class Application
 
         $response = null;
 
+        $error = true;
+
         foreach ($this->routes[$method] as $key => $route) {
             // route doit être une instance de Route
             if (!($route instanceof Route)) {
@@ -479,31 +481,18 @@ class Application
 
             // Appel de l'action associer à la route
             $response = $route->call();
+            $error = false;
 
             break;
         }
 
         // Gestion de erreur
-        if (!is_null($response)) {
+        if (!$error) {
             return $this->sendResponse($response);
         }
 
         // Application du code d'erreur 404
         $this->response->status(404);
-
-        if (in_array(404, array_keys($this->error_code))) {
-            $response = call_user_func($this->error_code[404]);
-
-            return $this->sendResponse($response);
-        }
-
-        $code = http_response_code();
-
-        if (in_array($code, array_keys($this->error_code))) {
-            $response = call_user_func($this->error_code[$code]);
-
-            return $this->sendResponse($response);
-        }
 
         if (is_string($this->config['view.404'])) {
             $response = $this->response->render($this->config['view.404']);
