@@ -6,4 +6,4 @@ use ErrorException;
 
 class ResponseException extends ErrorException
 {
-};
+}

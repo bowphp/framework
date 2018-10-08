@@ -30,11 +30,13 @@ class Request
         $this->input = array_merge($_POST, $_GET);
 
         foreach ($this->input as $key => $value) {
-            if (strlen($value)) {
-                $this->input[$key] = null;
-            } else {
-                $this->input[$key] = trim($value);
+            $value = trim($value);
+
+            if (strlen($value) == 0) {
+                $value = null;
             }
+
+            $this->input[$key] = $value;
         }
     }
 
@@ -358,16 +360,6 @@ class Request
     }
 
     /**
-     * retourne la langue de la requête.
-     *
-     * @return string|null
-     */
-    public function language()
-    {
-        return Str::slice($this->locale(), 0, 2);
-    }
-
-    /**
      * retourne la locale de la requête.
      *
      * la locale c'est langue original du client
@@ -378,13 +370,9 @@ class Request
      */
     public function locale()
     {
-        $local = '';
+        $accept_language = $this->getHeader('accept_language');
 
-        if (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-            return $local;
-        }
-
-        $tmp = explode(';', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
+        $tmp = explode(';', $accept_language)[0];
 
         preg_match('/^([a-z]+(?:-|_)?[a-z]+)/i', $tmp, $match);
 

@@ -2,6 +2,8 @@
 
 namespace Bow\Exception;
 
-class UploadFileException extends \Exception
+use ErrorException;
+
+class UploadFileException extends ErrorException
 {
 }

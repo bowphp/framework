@@ -61,7 +61,7 @@ class Response implements ResponseInterface
     /**
      * @var string
      */
-    private $message;
+    private $content;
 
     /**
      * @var int
@@ -90,13 +90,13 @@ class Response implements ResponseInterface
 
     /**
      * Response constructor.
-     * @param string $message
+     * @param string $content
      * @param int $code
      * @param array $headers
      */
-    public function __construct($message = '', $code = 200, array $headers = [])
+    private function __construct($content = '', $code = 200, array $headers = [])
     {
-        $this->message = $message;
+        $this->content = $content;
 
         $this->code = $code;
 
@@ -124,9 +124,9 @@ class Response implements ResponseInterface
      *
      * @return string
      */
-    public function getMessage()
+    public function getContent()
     {
-        return $this->message;
+        return $this->content;
     }
 
     /**
@@ -152,12 +152,12 @@ class Response implements ResponseInterface
     /**
      * Get response message
      *
-     * @param string $message
+     * @param string $content
      * @return Response
      */
-    public function setMessage($message)
+    public function setContent($content)
     {
-        $this->message = $message;
+        $this->content = $content;
 
         return $this;
     }
@@ -196,7 +196,7 @@ class Response implements ResponseInterface
      * @param null   $name
      * @param array  $headers
      * @param string $disposition
-     * @return Response
+     * @return string
      */
     public function download($file, $name = null, array $headers = array(), $disposition = 'attachment')
     {
@@ -222,7 +222,7 @@ class Response implements ResponseInterface
 
         $this->download = true;
 
-        return $this;
+        return $this->buildHttpResponse();
     }
 
     /**
@@ -247,7 +247,9 @@ class Response implements ResponseInterface
      */
     private function buildHttpResponse()
     {
-        header('HTTP/1.1 '. $this->code .' '. static::$header[$this->code], $this->override, $this->code);
+        $status_text = static::$header[$this->code] ?? 'Unkdown';
+
+        header('HTTP/1.1 '. $this->code .' '. $status_text, $this->override, $this->code);
 
         foreach ($this->getHeaders() as $key => $header) {
             header(sprintf('%s: %s', $key, $header));
@@ -259,7 +261,7 @@ class Response implements ResponseInterface
             die;
         }
 
-        return $this->message;
+        return $this->getContent();
     }
 
     /**
@@ -268,7 +270,7 @@ class Response implements ResponseInterface
      * @param  mixed $data
      * @param  int   $code
      * @param  array $headers
-     * @return bool
+     * @return string
      */
     public function json($data, $code = 200, array $headers = [])
     {
@@ -278,11 +280,11 @@ class Response implements ResponseInterface
             $this->addHeader($key, $value);
         }
 
-        $this->message = json_encode($data);
+        $this->content = json_encode($data);
 
         $this->status($code);
 
-        return $this->send(json_encode($data), false);
+        return $this->buildHttpResponse();
     }
 
     /**
@@ -291,7 +293,7 @@ class Response implements ResponseInterface
      * @param  string|array|\stdClass $data
      * @param  int  $code
      * @param  array  $headers
-     * @return mixed
+     * @return string
      */
     public function send($data, $code = 200, array $headers = [])
     {
@@ -305,6 +307,8 @@ class Response implements ResponseInterface
             $this->addHeader($key, $value);
         }
 
+        $this->content = $data;
+
         return $this->buildHttpResponse();
     }
 
@@ -312,131 +316,29 @@ class Response implements ResponseInterface
      * Permet de faire le rendu d'une vue.
      *
      * @param  $template
-     * @param  array    $data
+     * @param  array $data
+     * @param  int $code
+     * @param  array $headers
      * @return string
      * @throws
      */
-    public function view($template, $data = [])
+    public function render($template, $data = [], $code = 200, array $headers = [])
     {
+        $this->status($code);
+
+        $this->setHeaders($headers);
+
         return View::parse($template, $data);
     }
 
     /**
-     * @param $allow
-     * @param $excepted
-     * @return $this
-     */
-    private function accessControl($allow, $excepted)
-    {
-        if ($excepted === null) {
-            $excepted = '*';
-        }
-
-        $this->addHeader($allow, $excepted);
-
-        return $this;
-    }
-
-    /**
-     * Active Access-control-Allow-Origin
+     * Get accessControl instance
      *
-     * @param  array $excepted [optional]
-     * @return Response
-     * @throws
+     * @return AccessControl
      */
-    public function accessControlAllowOrigin(array $excepted)
+    public function accessControl()
     {
-        if (!is_array($excepted)) {
-            throw new \InvalidArgumentException(
-                'Attend un tableau.' . gettype($excepted) . ' donner.',
-                E_USER_ERROR
-            );
-        }
-
-        return $this->accessControl(
-            'Access-Control-Allow-Origin',
-            implode(', ', $excepted)
-        );
-    }
-
-    /**
-     * Active Access-control-Allow-Methods
-     *
-     * @param  array $excepted [optional] $excepted
-     * @return Response
-     * @throws ResponseException
-     */
-    public function accessControlAllowMethods(array $excepted)
-    {
-        if (count($excepted) == 0) {
-            throw new ResponseException('Le tableau est vide.' . gettype($excepted) . ' donner.', E_USER_ERROR);
-        }
-
-        return $this->accessControl('Access-Control-Allow-Methods', implode(', ', $excepted));
-    }
-
-    /**
-     * Active Access-control-Allow-Headers
-     *
-     * @param  array $excepted [optional] $excepted
-     * @return Response
-     * @throws ResponseException
-     */
-    public function accessControlAllowHeaders(array $excepted)
-    {
-        if (count($excepted) == 0) {
-            throw new ResponseException('Le tableau est vide.' . gettype($excepted) . ' donner.', E_USER_ERROR);
-        }
-
-        return $this->accessControl('Access-Control-Allow-Headers', implode(', ', $excepted));
-    }
-
-    /**
-     * Active Access-control-Allow-Credentials
-     *
-     * @return Response
-     */
-    public function accessControlAllowCredentials()
-    {
-        return $this->accessControl('Access-Control-Allow-Credentials', 'true');
-    }
-
-    /**
-     * Active Access-control-Max-Age
-     *
-     * @param  string $excepted [optional] $excepted
-     * @return Response
-     * @throws ResponseException
-     */
-    public function accessControlMaxAge($excepted)
-    {
-        if (!is_numeric($excepted)) {
-            throw new ResponseException(
-                'La paramtere doit être un entier: ' . gettype($excepted) . ' donner.',
-                E_USER_ERROR
-            );
-        }
-
-        return $this->accessControl('Access-Control-Max-Age', $excepted);
-    }
-
-    /**
-     * Active Access-control-Expose-Headers
-     *
-     * @param  array $excepted [optional] $excepted
-     * @return Response
-     * @throws ResponseException
-     */
-    public function accessControlExposeHeaders(array $excepted)
-    {
-        if (count($excepted) == 0) {
-            throw new ResponseException(
-                'Le tableau est vide.' . gettype($excepted) . ' donner.',
-                E_USER_ERROR
-            );
-        }
-
-        return $this->accessControl('Access-Control-Expose-Headers', implode(', ', $excepted));
+        return new AccessControl($this);
     }
 
     /**
