@@ -168,7 +168,7 @@ class Response implements ResponseInterface
      * @param array $headers
      * @return Response
      */
-    public function setHeaders(array $headers)
+    public function withHeaders(array $headers)
     {
         $this->headers = $headers;
 
@@ -326,9 +326,13 @@ class Response implements ResponseInterface
     {
         $this->status($code);
 
-        $this->setHeaders($headers);
+        $this->withHeaders($headers);
 
-        return View::parse($template, $data);
+        $view = View::parse($template, $data);
+
+        $this->content = $view->sendContent();
+
+        return $this->buildHttpResponse();
     }
 
     /**
