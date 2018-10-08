@@ -69,18 +69,18 @@ if (!function_exists('response')) {
     /**
      * response, manipule une instance de Response::class
      *
-     * @param  string $template, le message a envoyer
+     * @param  string $content, le message a envoyer
      * @param  int    $code,     le code d'erreur
      * @param  array $headers,   Le header
      * @return \Bow\Http\Response
      */
-    function response($template = null, $code = 200, $headers = [])
+    function response($content = '', $code = 200, array $headers = [])
     {
         $response = app('response');
 
         $response->status($code);
 
-        if (is_null($template)) {
+        if (is_null($content)) {
             return $response;
         }
 
@@ -88,7 +88,7 @@ if (!function_exists('response')) {
             $response->addHeader($key, $value);
         }
 
-        $response->send($template);
+        $response->setContent($content);
 
         return $response;
     }

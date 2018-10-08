@@ -493,7 +493,7 @@ class Application
         if (in_array(404, array_keys($this->error_code))) {
             $response = call_user_func($this->error_code[404]);
 
-            return $this->sendResponse($this->response->send($response, 404));
+            return $this->sendResponse($response);
         }
 
         $code = http_response_code();
@@ -501,11 +501,11 @@ class Application
         if (in_array($code, array_keys($this->error_code))) {
             $response = call_user_func($this->error_code[$code]);
 
-            return $this->sendResponse($this->response->send($response, $code));
+            return $this->sendResponse($response);
         }
 
         if (is_string($this->config['view.404'])) {
-            $response = $this->response->view($this->config['view.404']);
+            $response = $this->response->render($this->config['view.404']);
 
             return $this->sendResponse($response);
         }
@@ -524,25 +524,13 @@ class Application
      */
     private function sendResponse($response)
     {
-        if (is_string($response)) {
-            echo $this->response->send($response);
-
-            die;
-        }
-
-        if (is_array($response) || is_object($response)) {
-            echo $this->response->json($response);
-
-            die;
-        }
-
         if ($response instanceof ResponseInterface) {
             echo $response->sendContent();
 
             die;
         }
 
-        return;
+        echo $this->response->send($response);
     }
 
     /**
