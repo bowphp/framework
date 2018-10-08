@@ -47,8 +47,8 @@ class Storage
             return static::$ftp;
         }
 
-        if ($config == null) {
-            $config = static::$config['ftp'];
+        if (is_null($config)) {
+            $config = static::$config['services']['ftp'];
         }
 
         if (!isset($config['tls'])) {
@@ -61,7 +61,14 @@ class Storage
 
         static::$ftp = new FTP();
 
-        static::$ftp->connect($config['hostname'], $config['username'], $config['password'], $config['port'], $config['tls'], $config['timeout']);
+        static::$ftp->connect(
+            $config['hostname'],
+            $config['username'],
+            $config['password'],
+            $config['port'],
+            $config['tls'],
+            $config['timeout']
+        );
 
         if (isset($config['root'])) {
             if ($config['root'] !== null) {
@@ -83,7 +90,7 @@ class Storage
         }
 
         if (empty($config)) {
-            $config = isset(static::$config['s3']) ? static::$config['s3'] : [];
+            $config = static::$config['services']['s3']  ?? [];
         }
 
         static::$s3 = new AwsS3Client($config);
@@ -98,13 +105,21 @@ class Storage
      * @return MountFilesystem
      * @throws ResourceException
      */
-    public static function mount($mount)
+    public static function mount($mount = null)
     {
+        if (is_null($mount)) {
+            if (! is_null(static::$mounted)) {
+                return static::$mounted;
+            }
+
+            $mount = static::$config['disk']['mount'];
+        }
+
         if (! isset(static::$config['disk']['path'][$mount])) {
             throw new ResourceException('Le disque '.$mount.' n\'est pas défini.');
         }
 
-        return new MountFilesystem(static::$config['disk']['path'][$mount]);
+        return static::$mounted = new MountFilesystem(static::$config['disk']['path'][$mount]);
     }
 
     /**
@@ -149,7 +164,23 @@ class Storage
      */
     public function __call($name, array $arguments)
     {
-        if (method_exists(static::class, $name)) {
+        if (method_exists(static::$mounted, $name)) {
+            return call_user_func_array([static::$mounted, $name], $arguments);
+        }
+
+        throw new BadMethodCallException("unkdown $name method");
+    }
+
+    /**
+     * __callStatic
+     *
+     * @param  string $name
+     * @param  array  $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, array $arguments)
+    {
+        if (method_exists(static::$mounted, $name)) {
             return call_user_func_array([static::$mounted, $name], $arguments);
         }
 

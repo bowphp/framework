@@ -14,7 +14,7 @@ class UploadFile
      *
      * @param array $file
      */
-    public function __construct(array $file = [])
+    public function __construct(array $file)
     {
         $this->file = $file;
     }
@@ -26,11 +26,26 @@ class UploadFile
      */
     public function getExtension()
     {
-        if (isset($this->file['name'])) {
-            return pathinfo($this->file['name'], PATHINFO_EXTENSION);
+        if (!isset($this->file['name'])) {
+            return null;
         }
 
-        return null;
+        $extension = pathinfo(
+            $this->file['name'],
+            PATHINFO_EXTENSION
+        );
+
+        return strtolower($extension);
+    }
+
+    /**
+     * getExtension alias
+     *
+     * @return string
+     */
+    public function extension()
+    {
+        return $this->getExtension();
     }
 
     /**
@@ -58,7 +73,7 @@ class UploadFile
             return $this->file['size'];
         }
 
-        return 0;
+        return null;
     }
 
     /**
@@ -133,37 +148,34 @@ class UploadFile
      * @param  string $method
      * @return string
      */
-    public function getHashName($method = 'md5')
+    public function getHashName()
     {
-        return hash($method, md5($this->getBasename()));
+        return hash('sha256', $this->getBasename());
     }
 
     /**
      * Déplacer le fichier uploader dans un répertoire.
      *
-     * @param  string      $to       Le dossier de
-     *                               récéption
-     * @param  string|null $filename Le nom du fichier
+     * @param  string $to
+     * @param  string|null $filename
      * @return bool
      * @throws
      */
-    public function move($to, $filename = null)
+    public function moveTo($to, $filename = null)
     {
         if (!isset($this->file['tmp_name'])) {
             return false;
         }
 
-        $save_name = $this->file['name'];
-
-        if (is_string($filename)) {
-            $save_name = $filename;
+        if (!is_null($filename)) {
+            $filename = $this->getHashName();
         }
 
         if (!is_dir($to)) {
             @mkdir($to, 0777, true);
         }
 
-        $resolve = rtrim($to, '/').'/'.$save_name;
+        $resolve = rtrim($to, '/').'/'.$filename;
 
         return (bool) move_uploaded_file($this->file['tmp_name'], $resolve);
     }

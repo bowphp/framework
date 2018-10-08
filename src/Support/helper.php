@@ -1165,7 +1165,7 @@ if (!function_exists('mount')) {
     /**
      * Alias sur la methode mount
      *
-     * @param $mount
+     * @param string $mount
      * @return \Bow\Storage\MountFilesystem
      * @throws \Bow\Storage\Exception\ResourceException
      */
@@ -1197,11 +1197,11 @@ if (!function_exists('back')) {
     /**
      * Make redirection to back
      *
-     * @param int   $status
+     * @param int $status
      * @param array $headers
-     * @return \Bow\Http\Redirect
+     * @return Bow\Http\Redirect
      */
-    function back($status = 302, $headers = [])
+    function back($status = 302, array $headers = [])
     {
         return redirect()->back($status, $headers);
     }
