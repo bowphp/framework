@@ -12,7 +12,7 @@ class Job
     /**
      * The job handle
      */
-    public function handle()
+    public function process()
     {
         //
     }

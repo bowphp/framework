@@ -9,6 +9,7 @@ use Bow\Http\Exception\HttpException;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Router\Exception\RouterException;
+use Bow\Router\Rest;
 use Bow\Router\Route;
 use Bow\Support\Capsule;
 
@@ -591,33 +592,11 @@ class Application
         $url = preg_replace('/\/+$/', '', $url);
 
         // Association de url prédéfinie
-        foreach (RestDefinition::definitions() as $key => $value) {
+        foreach (Rest::routing() as $key => $value) {
             // on vérifie si la methode de appelé est ignoré
-            if (in_array($value['call'], $ignore_method)) {
-                continue;
+            if (!in_array($value['call'], $ignore_method)) {
+                Rest::make($this, $url, $controller, $where);
             }
-
-            $path = '/'.trim($url.$value['url'], '/');
-
-            // Lancement de la methode de mapping de route.
-            $route = $this->{$value['method']}(
-                $path,
-                sprintf("%s@%s", $controller, $value['call'])
-            );
-
-            // Ajout de nom sur la route
-            $name = str_replace('/', '.', $url).'.'.$value['call'];
-
-            $route->name($name);
-
-            // Association des critères définies
-            if (isset($where[$value['call']])) {
-                $route->where((array) $where[$value['call']]);
-
-                continue;
-            }
-
-            $route->where((array) $where);
         }
 
         return $this;
