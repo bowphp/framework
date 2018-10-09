@@ -991,7 +991,7 @@ if (!function_exists('cookie')) {
         }
 
         if ($key !== null && $data !== null) {
-            return Cookie::add($key, $data, $expirate, $path, $domain, $secure, $http);
+            return Cookie::set($key, $data, $expirate, $path, $domain, $secure, $http);
         }
 
         return null;
