@@ -97,11 +97,9 @@ class Cookie
      *
      * @return bool
      */
-    public static function add($key, $data = null, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
+    public static function set($key, $data, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
     {
-        if ($data !== null) {
-            $data = Crypto::encrypt($data);
-        }
+        $data = Crypto::encrypt($data);
 
         return setcookie($key, $data, time() + $expirate, $path, $domain, $secure, $http);
     }
