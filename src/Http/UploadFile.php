@@ -154,7 +154,7 @@ class UploadFile
      */
     public function getHashName()
     {
-        return hash('sha256', $this->getBasename());
+        return strtolower(hash('sha256', $this->getBasename())).'.'.$this->getExtension();
     }
 
     /**
