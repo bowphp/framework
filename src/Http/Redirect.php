@@ -51,9 +51,27 @@ class Redirect implements ResponseInterface
     }
 
     /**
-     * @param $path
+     * Redirection avec les informations de requête
+     *
+     * @param array $data
+     */
+    public function withInput(array $data = [])
+    {
+        if (count($data) == 0) {
+            $this->request->session()->add('__bow.old', $this->request->all());
+        } else {
+            $this->request->session()->add('__bow.old', $data);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Redirection vers une autre URL
+     *
+     * @param string $path
      * @param int $status
-     * @return static
+     * @return Redirect
      */
     public function to($path, $status = 302)
     {
@@ -65,35 +83,14 @@ class Redirect implements ResponseInterface
     }
 
     /**
-     * Ajoute
+     * Rédirection sur l'URL précédent
      *
-     * @param array $data
-     * @return static
-     */
-    public function withInput(array $data = [])
-    {
-        if (count($data) == 0) {
-            $this->request->session()->add('__bow.old', $this->request->all());
-
-            return $this;
-        }
-
-        $this->request->session()->add('__bow.old', $data);
-
-        return $this;
-    }
-
-    /**
-     * Permet de faire une rédirection sur l'url précédent
-     *
-     * @param int   $status
+     * @param int $status
      * @param array $data
      * @return Redirect
      */
-    public function back($status = 302, array $data = [])
+    public function back($status = 302)
     {
-        $this->withInput($data);
-
         $this->to($this->request->referer(), $status);
 
         return $this;
@@ -109,6 +106,8 @@ class Redirect implements ResponseInterface
     }
 
     /**
+     * __invoke
+     *
      * @return mixed
      */
     public function __invoke()
@@ -117,6 +116,8 @@ class Redirect implements ResponseInterface
     }
 
     /**
+     * __toString
+     *
      * @return string
      */
     public function __toString()

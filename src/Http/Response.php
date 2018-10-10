@@ -212,20 +212,20 @@ class Response implements ResponseInterface
      * Télécharger le fichier donnée en argument
      *
      * @param string $file
-     * @param null   $name
+     * @param null   $filename
      * @param array  $headers
      * @param string $disposition
      * @return string
      */
-    public function download($file, $name = null, array $headers = array(), $disposition = 'attachment')
+    public function download($file, $filename = null, array $headers = [], $disposition = 'attachment')
     {
         $type = mime_content_type($file);
 
-        if ($name == null) {
-            $name = basename($file);
+        if ($filename == null) {
+            $filename = basename($file);
         }
 
-        $this->addHeader('Content-Disposition', $disposition.'; filename='.$name);
+        $this->addHeader('Content-Disposition', $disposition.'; filename='.$filename);
 
         $this->addHeader('Content-Type', $type);
 

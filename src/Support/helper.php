@@ -487,9 +487,9 @@ if (!function_exists('download')) {
      * @param string      $disposition
      * @return \Bow\Http\Response
      */
-    function download($file, $name = null, array $headers = [], $disposition = 'attachment')
+    function download($file, $filename = null, array $headers = [], $disposition = 'attachment')
     {
-        return response()->download($file, $name, $headers, $disposition);
+        return response()->download($file, $filename, $headers, $disposition);
     }
 }
 
