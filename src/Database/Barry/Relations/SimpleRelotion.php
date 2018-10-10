@@ -2,15 +2,19 @@
 
 namespace Bow\Database\Barry\Relations;
 
-interface Simple
+trait SimpleRelotion
 {
     /**
      * Definir la clé étranger
-     *
+     * 
+     * @param  string $table
      * @param  string $id
      * @return self
      */
-    public function foreign($id);
+    public function foreign($table, $foreign_key = null)
+    {
+        // TODO: implement foreign method
+    }
 
     /**
      * Join avec une autre table
@@ -19,5 +23,8 @@ interface Simple
      * @param  mixed  $foreign_key
      * @return self
      */
-    public function merge($table, $foreign_key = null);
+    public function merge($table, $foreign_key = null)
+    {
+        // TODO: implement merge method
+    }
 }
