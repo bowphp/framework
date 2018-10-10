@@ -101,8 +101,7 @@ class Redirect implements ResponseInterface
      */
     public function sendContent()
     {
-        return $this->response->addHeader('Location', $this->to)
-            ->status(301);
+        return $this->response->addHeader('Location', $this->to);
     }
 
     /**
