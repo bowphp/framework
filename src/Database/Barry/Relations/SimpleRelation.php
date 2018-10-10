@@ -2,7 +2,7 @@
 
 namespace Bow\Database\Barry\Relations;
 
-trait SimpleRelotion
+trait SimpleRelaion
 {
     /**
      * Definir la clé étranger
