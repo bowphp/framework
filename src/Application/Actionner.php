@@ -386,7 +386,7 @@ class Actionner
             return null;
         }
 
-        $parts = preg_split('/\.|@|::|->/', $controller_name);
+        $parts = preg_split('/::|@/', $controller_name);
 
         if (count($parts) == 1) {
             $parts[1] = null;
@@ -394,7 +394,7 @@ class Actionner
 
         list($class, $method) = $parts;
 
-        $class = sprintf('%s\\%s', $this->namespaces['action'], ucfirst($class));
+        $class = sprintf('%s\\%s', $this->namespaces['controller'], ucfirst($class));
 
         $injections = $this->injector($class, $method);
 
