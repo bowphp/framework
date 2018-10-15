@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.1.0] - 2018-10-03 
+## [3.0.0] - 2018-10-15 
 
 - [Fix] Refonte view system
 - [Fix] Fix loader call static
@@ -17,9 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Change] Refonte of query builder
 - [Change] Refonte unity tests
 - [Fix] Fix many bug in Barry ORM
-
-## [3.0.1] - 2018-09-28 
-
 - [Fix] mise à jour du template de seeding 
 - [Change] formatage du code
 - [Add] add code of conduct
