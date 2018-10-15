@@ -6,7 +6,7 @@ trait SimpleRelation
 {
     /**
      * Definir la clé étranger
-     * 
+     *
      * @param  string $table
      * @param  string $id
      * @return self
