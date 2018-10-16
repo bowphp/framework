@@ -4,6 +4,7 @@ namespace Bow\Cache;
 
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
+use Bow\Cache\Cache;
 
 class CacheConfiguration extends Configuration
 {
@@ -12,7 +13,11 @@ class CacheConfiguration extends Configuration
      */
     public function create(Loader $config)
     {
-        // TODO: Implement create() method.
+        $this->container->bind('cache', function () use ($config) {
+            Cache::confirgure($config['resource.cache']);
+
+            return Cache::class;
+        });
     }
 
     /**
@@ -20,6 +25,6 @@ class CacheConfiguration extends Configuration
      */
     public function run()
     {
-        // TODO: Implement run() method.
+        $this->container->make('cache');
     }
 }
