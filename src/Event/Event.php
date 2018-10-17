@@ -27,7 +27,7 @@ class Event
      *
      * @return Event
      */
-    public static function instance()
+    public static function getInstance()
     {
         if (static::$instance == null) {
             static::$instance = new static();
@@ -76,7 +76,7 @@ class Event
 
         static::$events['__bow.transmission.event'][$event][] = new Listener($fn, $priority);
 
-        Session::add("__bow.event.listener", static::$events['__bow.transmission.event']);
+        Session::getInstance()->add("__bow.event.listener", static::$events['__bow.transmission.event']);
     }
 
     /**

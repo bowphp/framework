@@ -858,7 +858,7 @@ if (!function_exists('emitter')) {
      */
     function emitter()
     {
-        return Event::instance();
+        return Event::getInstance();
     }
 }
 
