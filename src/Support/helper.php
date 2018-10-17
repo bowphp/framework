@@ -71,7 +71,6 @@ if (!function_exists('response')) {
      *
      * @param  string $content, le message a envoyer
      * @param  int    $code,     le code d'erreur
-     * @param  array $headers,   Le header
      * @return \Bow\Http\Response
      */
     function response($content = '', $code = 200)
@@ -482,10 +481,10 @@ if (!function_exists('download')) {
      * download, permet de lancer le téléchargement d'un fichier.
      *
      * @param string      $file
-     * @param null|string $name
+     * @param null|string $filename
      * @param array       $headers
      * @param string      $disposition
-     * @return \Bow\Http\Response
+     * @return string
      */
     function download($file, $filename = null, array $headers = [], $disposition = 'attachment')
     {
@@ -1176,12 +1175,11 @@ if (!function_exists('back')) {
      * Make redirection to back
      *
      * @param int $status
-     * @param array $headers
      * @return Bow\Http\Redirect
      */
-    function back($status = 302, array $headers = [])
+    function back($status = 302)
     {
-        return redirect()->back($status, $headers);
+        return redirect()->back($status);
     }
 }
 
