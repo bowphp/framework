@@ -10,11 +10,11 @@ class {className}
      * Fonction de lancement du middleware.
      *
      * @param Request $request
-     * @param Callable $next
+     * @param callable $next
      * @param array $guard
      * @return mixed
      */
-    public function process(Request $request, Callable $next, array $guard = [])
+    public function process(Request $request, callable $next, array $guard = [])
     {
         // Codez Ici
         return $next($request);
