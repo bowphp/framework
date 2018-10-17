@@ -256,29 +256,29 @@ class Actionner
     public function injector($classname, $method)
     {
         $params = [];
+
         $reflection = new \ReflectionClass($classname);
 
-        $parts = preg_split(
-            '/(\n|\*)+/',
-            $reflection->getMethod($method)->getDocComment()
-        );
+        $parameters = $reflection->getMethod($method)->getParameters();
 
-        foreach ($parts as $value) {
-            if (!preg_match('/^@param\s+(.+)\s+\$/', trim($value), $match)) {
+        foreach ($parameters as $parameter) {
+            $class = $parameter->getClass();
+
+            if (is_null($class)) {
                 continue;
             }
 
-            $class = trim(end($match));
+            $contructor = $class->getName();
 
-            if (! class_exists($class, true)) {
+            if (! class_exists($contructor, true)) {
                 continue;
             }
 
-            if (!in_array(strtolower($class), $this->getInjectorExceptedType())) {
-                if (method_exists($class, 'getInstance')) {
-                    $params[] = $class::getInstance();
+            if (!in_array(strtolower($contructor), $this->getInjectorExceptedType())) {
+                if (method_exists($contructor, 'getInstance')) {
+                    $params[] = $contructor::getInstance();
                 } else {
-                    $params[] = new $class();
+                    $params[] = new $contructor();
                 }
             }
         }
