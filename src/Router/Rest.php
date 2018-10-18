@@ -87,8 +87,9 @@ class Rest
      *
      * @param string $url
      * @param mixed $controller
+     * @param array $definition
      * @param array $where
-     * @param array $ignore_method
+     * @throws
      */
     private static function bind($url, $controller, array $definition, array $where)
     {
