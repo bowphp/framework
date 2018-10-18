@@ -111,6 +111,8 @@ class Application
         $this->capsule->instance('request', $request);
 
         $this->capsule->instance('response', $response);
+
+        $this->capsule->instance('app', $this);
     }
 
     /**
@@ -580,13 +582,7 @@ class Application
         // normalize url
         $url = preg_replace('/\/+$/', '', $url);
 
-        // Association de url prédéfinie
-        foreach (Rest::routing() as $key => $value) {
-            // on vérifie si la methode de appelé est ignoré
-            if (!in_array($value['call'], $ignore_method)) {
-                Rest::make($this, $url, $controller, $where);
-            }
-        }
+        Rest::make($url, $controller, $where, $ignore_method);
 
         return $this;
     }
