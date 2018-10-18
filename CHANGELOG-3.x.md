@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.2] - 2018-10-18
+
 - [Fix] Bug fix #36
 - [Fix] bug fix #35
 - [change] [change] change singleton method name
