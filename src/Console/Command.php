@@ -727,7 +727,7 @@ class Command
             $model = $options->get('--model');
         }
 
-        $model_namespace = "\nuse App\\".ucfirst($model).";\n";
+        $model_namespace = "use App\\".ucfirst($model).";\n";
 
         $prefix = '/'.strtolower(trim(Str::plurial(Str::snake($model)), '/'));
 
