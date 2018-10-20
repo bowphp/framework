@@ -9,36 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.2] - 2018-10-18
 
-- [Fix] Bug fix #36
-- [Fix] bug fix #35
-- [change] [change] change singleton method name
+### Add
+
+- Add `route` method for map the routing
+
+### Fix
+
+- Bug fix #36
+- Bug fix #35
+
+### Change
+
+- Update Action call method for execute `array` action
+- Change singleton method name
+- Refonte `Router` `name` method
 
 ## [3.0.1] - 2018-10-17
 
-- [Fix] refonte injection
-- [Fix] refonte middleware sub
+### Fix
+
+- Refonte injection
+- Refonte middleware sub
 
 ## [3.0.0] - 2018-10-15 
 
-- [Fix] Refonte view system
-- [Fix] Fix loader call static
-- [Change] Update console stub template
-- [Change] Change configuration concept
-- [Fix] Many bug fix
-- [Change] Refonte of query builder
-- [Change] Refonte unity tests
-- [Fix] Fix many bug in Barry ORM
-- [Fix] mise à jour du template de seeding 
-- [Change] formatage du code
-- [Add] add code of conduct
-- [Fix] fix duplicate code [#19](https://github.com/bowphp/framework/issues/19) [#13](https://github.com/bowphp/framework/issues/13) [#12](https://github.com/bowphp/framework/issues/12) [#11](https://github.com/bowphp/framework/issues/12) [#10](https://github.com/bowphp/framework/issues/10) [#9](https://github.com/bowphp/framework/issues/9) [#8](https://github.com/bowphp/framework/issues/8) [#7](https://github.com/bowphp/framework/issues/7) [#6](https://github.com/bowphp/framework/issues/6) [#5](https://github.com/bowphp/framework/issues/5)
-- [Fix] fix [#4](https://github.com/bowphp/framework/issues/4) (Variable assignment found within a condition. Did you mean to do a comparison)
-- [Fix] fix [#29](https://github.com/bowphp/framework/issues/29) ('Duplicate Code' issue in multiple files)
-- [Fix] fix [#20](https://github.com/bowphp/framework/issues/20) 'Empty return statement not required here' issue in src\Console\Bow.php
-- [Fix] fix [#21](https://github.com/bowphp/framework/issues/21) 'Duplicate Code' issue in multiple files
-- [Fix] fix [#15](https://github.com/bowphp/framework/issues/15) 'Duplicate Code' issue in multiple files
-- [Change] update testing and refonte routing
-- [Change] formating
-- [Change] Refonte console command
-- [Fix] fix [#15](https://github.com/bowphp/framework/issues/15) 'undefined variable'
-- [Fix] fix [#15](https://github.com/bowphp/framework/issues/34) serve resources feature bug
+### Fix
+- Refonte view system
+- Fix loader call static
+- Many bug fix
+- Fix many bug in Barry ORM
+- Update seeding template
+- Duplicate code [#19](https://github.com/bowphp/framework/issues/19) [#13](https://github.com/bowphp/framework/issues/13) [#12](https://github.com/bowphp/framework/issues/12) [#11](https://github.com/bowphp/framework/issues/12) [#10](https://github.com/bowphp/framework/issues/10) [#9](https://github.com/bowphp/framework/issues/9) [#8](https://github.com/bowphp/framework/issues/8) [#7](https://github.com/bowphp/framework/issues/7) [#6](https://github.com/bowphp/framework/issues/6) [#5](https://github.com/bowphp/framework/issues/5)
+- Fix [#4](https://github.com/bowphp/framework/issues/4) (Variable assignment found within a condition. Did you mean to do a comparison)
+- Fix [#29](https://github.com/bowphp/framework/issues/29) ('Duplicate Code' issue in multiple files)
+- Fix [#20](https://github.com/bowphp/framework/issues/20) 'Empty return statement not required here' issue in src\Console\Bow.php
+- Fix [#21](https://github.com/bowphp/framework/issues/21) 'Duplicate Code' issue in multiple files
+- Fix [#15](https://github.com/bowphp/framework/issues/15) 'Duplicate Code' issue in multiple files
+- Fix [#15](https://github.com/bowphp/framework/issues/15) 'undefined variable'
+- Fix [#15](https://github.com/bowphp/framework/issues/34) serve resources feature bug
+
+### Change
+
+- Update console stub template
+- Change configuration concept
+- Refonte of query builder
+- Refonte unity tests
+- Formatage du code
+- Update testing and refonte routing
+- Refonte console command
+
+### Add
+- Add code of conduct
