@@ -205,22 +205,60 @@ class Application
      * Permet d'associer un middleware global sur une url
      *
      * @param array $middleware
-     * @param callable|string|array $cb
      * @return Application
      */
-    public function middleware($middleware, callable $cb = null)
+    public function middleware($middleware)
     {
         $middleware = (array) $middleware;
 
         $this->globale_middleware = $middleware;
 
-        if (is_callable($cb)) {
-            $cb($this);
+        return $this;
+    }
 
-            $this->globale_middleware = [];
+    /**
+     * Route mapper
+     *
+     * @param array $definition
+     * @throws RouterException
+     */
+    public function route(array $definition)
+    {
+        if (!isset($definition['path'])) {
+            throw new RouterException('Le chemin non definie');
         }
 
-        return $this;
+        if (!isset($definition['method'])) {
+            throw new RouterException('Méthode non definie');
+        }
+
+        if (!isset($definition['handler'])) {
+            throw new RouterException('Controlleur non definie');
+        }
+
+        $method = $definition['method'];
+
+        $path = $definition['path'];
+
+        $where = $definition['where'] ?? [];
+
+        $cb = (array) $definition['handler'];
+
+        if (isset($cb['middleware'])) {
+            unset($cb['middleware']);
+        }
+
+        if (isset($cb['controller'])) {
+            unset($cb['controller']);
+        }
+
+        $route = $this->pushHttpVerbe($method, $path, $cb);
+
+        if (isset($definition['middleware'])) {
+            $route->middleware($definition['middeware']);
+        }
+
+        $route->where($where);
     }
 
     /**
@@ -352,7 +390,7 @@ class Application
     {
         foreach ($methods as $method) {
             if ($this->request->method() === strtoupper($method)) {
-                $this->routeLoader(strtoupper($method), $path, $cb);
+                $this->pushHttpVerbe(strtoupper($method), $path, $cb);
             }
         }
 
