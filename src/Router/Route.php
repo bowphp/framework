@@ -293,9 +293,11 @@ class Route
     {
         $this->name = $name;
 
-        $routes = $this->config['app.routes'];
+        $routes = (array) $this->config['app.routes'];
 
-        $this->config['app.routes'] = array_merge($routes, [$name => $this->getPath()]);
+        $this->config['app.routes'] = array_merge(
+            $routes, [$name => $this->getPath()]
+        );
     }
 
     /**
