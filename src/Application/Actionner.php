@@ -237,7 +237,11 @@ class Actionner
                 array_merge($function['injection'], $param)
             );
 
-            if ($response == false || is_null($response)) {
+            if ($response === true) {
+                continue;
+            }
+
+            if ($response === false || is_null($response)) {
                 return $response;
             }
         }
