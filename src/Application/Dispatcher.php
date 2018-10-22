@@ -14,6 +14,11 @@ class Dispatcher
     /**
      * @var int
      */
+    const PIPE_EMPTY = 1;
+
+    /**
+     * @var int
+     */
     private $index = 0;
 
     /**
@@ -43,8 +48,8 @@ class Dispatcher
      */
     public function process(Request $request, ...$args)
     {
-        if (!isset($this->middlewares[$this->index])) {
-            return null;
+        if (!isset($this->middlewares[$this->index]) || empty($this->middlewares)) {
+            return Dispatcher::PIPE_EMPTY;
         }
 
         $middleware = $this->middlewares[$this->index];
@@ -54,9 +59,13 @@ class Dispatcher
         $params = $args;
 
         if (is_array($middleware)) {
-            $params = array_merge($args, $middleware['params']);
+            if (isset($middleware['params'])) {
+                $params = array_merge($args, $middleware['params']);
+            }
 
-            $middleware = [new $middleware['class'], 'process'];
+            if (isset($middleware['class'])) {
+                $middleware = [new $middleware['class'], 'process'];
+            }
         }
 
         $params = [$request, [$this, 'process'], $params];

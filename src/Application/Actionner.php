@@ -181,18 +181,18 @@ class Actionner
          * Chargement des middlewares associés à l'action
          */
         foreach ($middlewares as $middleware) {
-            if (class_exists($middleware)) {
-                $this->dispatcher->pipe($middleware);
-
-                continue;
-            }
-
             if (is_callable($middleware)) {
-                if ($middleware instanceof  \Closure || is_array($middleware)) {
+                if ($middleware instanceof \Closure || is_array($middleware)) {
                     $this->dispatcher->pipe($middleware);
 
                     continue;
                 }
+            }
+
+            if (class_exists($middleware)) {
+                $this->dispatcher->pipe($middleware);
+
+                continue;
             }
 
             if (!array_key_exists($middleware, $this->middlewares)) {
@@ -213,24 +213,43 @@ class Actionner
             );
         }
 
-        $response = $this->dispatcher->process(Request::getInstance());
+        // Process middleware dispatcher
+        $response = $this->dispatcher->process(
+            Request::getInstance()
+        );
 
-        if (is_string($response) || is_array($response) || is_object($response)) {
-            return $response;
+        if (Dispatcher::PIPE_EMPTY == $response) {
+            return $this->dispatchControllers($functions, $param);
+        }
+        
+        switch (true) {
+            case is_null($response):
+            case is_string($response):
+            case is_array($response):
+            case is_object($response):
+            case $response instanceof \Iterable:
+            case $response instanceof ResponseInterface:
+                return $response;
+            case $response instanceof Model || $response instanceof Collection:
+                return $response->toArray();
         }
 
-        if ($response instanceof ResponseInterface) {
-            return $response;
-        }
+        return $this->dispatchControllers($functions, $param);
+    }
 
-        if ($response instanceof Model || $response instanceof Collection) {
-            return $response->toArray();
-        }
+    /**
+     * Execution of define controller
+     *
+     * @param array $functions
+     * @param array $param
+     * @return mixed
+     */
+    private function dispatchControllers(array $functions, array $param)
+    {
+        $response = null;
 
         // Lancement de l'éxècution de la liste des actions definir
         // Fonction a éxècuté suivant un ordre
-        $response = null;
-
         foreach ($functions as $function) {
             $response = call_user_func_array(
                 $function['action'],
