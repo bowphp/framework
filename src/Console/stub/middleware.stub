@@ -11,10 +11,10 @@ class {className}
      *
      * @param Request $request
      * @param callable $next
-     * @param array $guard
+     * @param array $args
      * @return mixed
      */
-    public function process(Request $request, callable $next, array $guard = [])
+    public function process(Request $request, callable $next, array $args = [])
     {
         // Codez Ici
         return $next($request);

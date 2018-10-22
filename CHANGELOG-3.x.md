@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `route` method for map the routing
 
+### Change
+
+- Refonte Application middleware method.
+- Refonte dispatcher process method
+- Refonte call actionner
+
 ### Fix
 
 - Bug fix #36
