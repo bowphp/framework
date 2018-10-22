@@ -98,11 +98,16 @@ class Translator
             return $key;
         }
 
-        array_shift($map);
+        $contents = require $translation_filename;
+        
+        if (!is_array($contents)) {
+            return $key;
+        }
 
+        array_shift($map);
+        
         $key = implode('.', $map);
 
-        $contents = require $translation_filename;
         $translations = Arraydotify::make($contents);
 
         if (!isset($translations[$key])) {

@@ -1249,7 +1249,7 @@ if (!function_exists('trans')) {
     }
 }
 
-if (!function_exists('__')) {
+if (!function_exists('_t')) {
     /**
      * Alise de trans
      *
@@ -1258,7 +1258,7 @@ if (!function_exists('__')) {
      * @param  bool $choose
      * @return string
      */
-    function __($key, $data = [], $choose = false)
+    function _t($key, $data = [], $choose = false)
     {
         return trans($key, $data, $choose);
     }
