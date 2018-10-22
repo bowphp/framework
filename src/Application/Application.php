@@ -207,11 +207,21 @@ class Application
      * @param array $middleware
      * @return Application
      */
-    public function middleware($middleware)
+    public function middleware($middlewares)
     {
-        $middleware = (array) $middleware;
+        $middlewares = (array) $middlewares;
 
-        $this->globale_middleware = $middleware;
+        $this->globale_middleware = [];
+
+        foreach ($middlewares as $middleware) {
+            if (is_callable($middleware)) {
+                $this->globale_middleware[] = $middleware;
+            } elseif (class_exists($middleware, true)) {
+                $this->globale_middleware[] = [new $middleware, 'process'];
+            } else {
+                $this->globale_middleware[] = $middleware;
+            }
+        }
 
         return $this;
     }
