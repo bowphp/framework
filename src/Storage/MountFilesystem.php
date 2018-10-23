@@ -22,47 +22,15 @@ class MountFilesystem implements FilesystemInterface
     /**
      * UploadFile, fonction permettant de uploader un fichier
      *
-     * @param  array    $file      information sur le fichier, $_FILES
+     * @param  array    $file
      * @param  string   $location
-     * @param  int      $size
-     * @param  array    $extension
-     * @param  callable $cb
+     * @param  array   $option
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    public function store($file, $location, $size, array $extension, callable $cb)
+    public function store($file, $location, array $option = [])
     {
-        if (!is_uploaded_file($file['tmp_name'])) {
-            return call_user_func_array($cb, ['error']);
-        }
-
-        if (is_string($size)) {
-            if (!preg_match('/^([0-9]+)(k|m)$/', strtolower($size), $match)) {
-                throw new \InvalidArgumentException('Taille invalide.', E_USER_ERROR);
-            }
-
-            $conv = 1;
-
-            array_shift($match);
-
-            if ($match[1] == 'm') {
-                $conv = 1000;
-            }
-
-            $size = $match[0] * $conv;
-        }
-
-        if ($file['size'] > $size) {
-            return call_user_func_array($cb, ['size']);
-        }
-
-        if (!in_array(pathinfo($file['name'], PATHINFO_EXTENSION), $extension, true)) {
-            return call_user_func_array($cb, ['extension']);
-        }
-
-        $r = $this->copy($file['tmp_name'], $location);
-
-        return call_user_func_array($cb, [$r == true ? false : 'uploaded']);
+        // TODO: Implement store method
     }
 
     /**

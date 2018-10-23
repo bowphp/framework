@@ -261,7 +261,7 @@ if (!function_exists('select_one')) {
 
 if (!function_exists('insert')) {
     /**
-     * statement lance des requete SQL de type INSERT
+     * insert lance des requete SQL de type INSERT
      *
      * @param string   $sql
      * @param array    $data
@@ -1249,7 +1249,7 @@ if (!function_exists('trans')) {
     }
 }
 
-if (!function_exists('_t')) {
+if (!function_exists('t')) {
     /**
      * Alise de trans
      *
@@ -1258,7 +1258,7 @@ if (!function_exists('_t')) {
      * @param  bool $choose
      * @return string
      */
-    function _t($key, $data = [], $choose = false)
+    function t($key, $data = [], $choose = false)
     {
         return trans($key, $data, $choose);
     }

@@ -170,7 +170,7 @@ class Faker
      * @param string $type
      * @return string
      */
-    public static function unique($type)
+    public static function unique($type = 'integer')
     {
         if ($type == 'string') {
             return Str::lower(uniqid());

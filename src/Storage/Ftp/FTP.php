@@ -183,7 +183,7 @@ class FTP implements FilesystemInterface
     /**
      * @inheritDoc
      */
-    public function store($file, $location, $size, array $extension, callable $cb)
+    public function store($file, $location, array $option = [])
     {
         // TODO: Implement store() method.
     }

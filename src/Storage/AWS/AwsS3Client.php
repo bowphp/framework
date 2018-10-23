@@ -143,7 +143,7 @@ class AwsS3Client implements FilesystemInterface
     /**
      * @inheritDoc
      */
-    public function store($file, $location, $size, array $extension, callable $cb)
+    public function store($file, $location, array $option = [])
     {
         $this->s3;
     }
@@ -177,7 +177,7 @@ class AwsS3Client implements FilesystemInterface
      */
     public function directories($dirname)
     {
-        //
+        // TODO: Implement directories() method.
     }
 
     /**

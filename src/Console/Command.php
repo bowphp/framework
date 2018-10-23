@@ -589,7 +589,7 @@ class Command
             'name' => $name
         ]);
 
-        echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a été bien crée.\033[00m\n";
+        echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a bien été créé.\033[00m\n";
 
         exit(0);
     }

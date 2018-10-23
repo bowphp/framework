@@ -4,19 +4,16 @@ namespace Bow\Storage;
 
 interface FilesystemInterface
 {
-
     /**
      * UploadFile, fonction permettant de uploader un fichier
      *
-     * @param  array    $file      information sur le fichier, $_FILES
+     * @param  array    $file
      * @param  string   $location
-     * @param  int      $size
-     * @param  array    $extension
-     * @param  callable $cb
+     * @param  array    $option
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    public function store($file, $location, $size, array $extension, callable $cb);
+    public function store($file, $location, array $option = []);
 
     /**
      * Ecrire à la suite d'un fichier spécifier
