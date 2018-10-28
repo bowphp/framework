@@ -254,7 +254,11 @@ class Application
 
         $cb = (array) $definition['handler'];
 
+        $middleware = null;
+
         if (isset($cb['middleware'])) {
+            $middleware = $cb['middleware'];
+
             unset($cb['middleware']);
         }
 
@@ -264,7 +268,7 @@ class Application
 
         $route = $this->pushHttpVerbe($method, $path, $cb);
 
-        if (isset($definition['middleware'])) {
+        if (!is_null($middleware)) {
             $route->middleware($definition['middeware']);
         }
 
