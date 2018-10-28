@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.4] - 2018-10-28
+
+### Fix
+- Bug fix #38 [#39](https://github.com/bowphp/framework/issues/38)
+- Bug fix #39 [#39](https://github.com/bowphp/framework/issues/39)
+
 ## [3.0.3] - 2018-10-22
 
 ### Fix
@@ -27,8 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fix
 
-- Bug fix #36
-- Bug fix #35
+- Bug fix [#36](https://github.com/bowphp/framework/issues/36)
+- Bug fix [#35](https://github.com/bowphp/framework/issues/35)
 - Many bug fix
 
 ### Change
