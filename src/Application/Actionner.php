@@ -194,6 +194,14 @@ class Actionner
 
                 continue;
             }
+            
+            $parts = [];
+
+            if (is_string($middleware)) {
+                $parts = explode(':', $middleware, 2);
+
+                $middleware = $parts[0];
+            }
 
             if (!array_key_exists($middleware, $this->middlewares)) {
                 throw new RouterException(sprintf('%s n\'est pas un middleware définir.', $middleware), E_ERROR);
@@ -204,12 +212,10 @@ class Actionner
                 throw new RouterException(sprintf('%s n\'est pas un class middleware.', $middleware));
             }
 
-            $parts = explode(':', $middleware, 2);
-
             // Add middleware into dispatch pipeline
             $this->dispatcher->pipe(
                 $this->middlewares[$middleware],
-                count($parts) != 2 ? [] : explode(',', $parts[0])
+                count($parts) != 2 ? [] : explode(',', $parts[1])
             );
         }
 
