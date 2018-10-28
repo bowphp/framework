@@ -148,6 +148,8 @@ class Loader implements \ArrayAccess
 
         $services = $this->configurations();
 
+        $services[] = \Bow\Configuration\Configurations\ActionnerConfiguration::class;
+
         $service_collection = [];
 
         $container = Capsule::getInstance();
