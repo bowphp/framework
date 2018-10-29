@@ -115,11 +115,11 @@ class Loader implements \ArrayAccess
     {
         $middlewares = $this->middlewares();
 
-        foreach ($this->middlewares as $key => $middleware) {
-            $middlewares[$key] = $middleware;
+        foreach ($middlewares as $key => $middleware) {
+            $this->middlewares[$key] = $middleware;
         }
 
-        return $middlewares;
+        return $this->middlewares;
     }
 
     /**
