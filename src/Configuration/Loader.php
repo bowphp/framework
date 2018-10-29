@@ -30,6 +30,16 @@ class Loader implements \ArrayAccess
     protected $booted = false;
 
     /**
+     * @var array
+     */
+    private $middlewares = [];
+
+    /**
+     * @var array
+     */
+    private $namespaces = [];
+
+    /**
      * @param string $base_path
      * @throws
      */
@@ -82,6 +92,34 @@ class Loader implements \ArrayAccess
         }
 
         return static::$instance;
+    }
+
+    /**
+     * Push middlewares
+     *
+     * @param array $middlewares
+     */
+    public function pushMiddleware(array $middlewares)
+    {
+        foreach ($middlewares as $key => $middleware) {
+            $this->middlewares[$key] = $middleware;
+        }
+    }
+
+    /**
+     * Middleware collection
+     *
+     * @return array
+     */
+    public function getMiddlewares()
+    {
+        $middlewares = $this->middlewares();
+
+        foreach ($this->middlewares as $key => $middleware) {
+            $middlewares[$key] = $middleware;
+        }
+
+        return $middlewares;
     }
 
     /**

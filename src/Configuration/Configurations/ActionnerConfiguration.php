@@ -21,7 +21,7 @@ class ActionnerConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('actionner', function () use ($config) {
-            $middlewares = array_merge($config->middlewares(), $this->middlewares);
+            $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
 
             return Actionner::configure($config->namespaces(), $middlewares);
         });
