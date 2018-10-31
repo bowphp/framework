@@ -14,7 +14,7 @@ abstract class EngineAbstract
     const HELPERS = [
         'secure' => 'secure',
         'route' => 'route',
-        'bow_hash' => 'bow_hash',
+        'bhash' => 'bhash',
         'config' => 'config',
         'faker' => 'faker',
         'env' => 'env',
@@ -26,19 +26,24 @@ abstract class EngineAbstract
         'decrypt' => 'decrypt',
         'collect' => 'collect',
         'url' => 'url',
-        'get_header' => 'get_header',
         'input' => 'input',
         'response' => 'response',
         'request' => 'request',
         'sanitaze' => 'sanitaze',
         'slugify' => 'slugify',
+        'str_slug' => 'str_slug',
         'session' => 'session',
-        'form' => 'form',
         'csrf_token' => 'csrf_token',
         'csrf_field' => 'csrf_field',
         'trans' => 'trans',
+        't' => 't',
         'escape' => 'e',
-        'old' => 'old'
+        'old' => 'old',
+        "public_path" => "public_path",
+        "component_path" => "component_path",
+        "storage_path" => "storage_path",
+        "client_locale" => "client_locale",
+        "auth" => "auth",
     ];
 
     /**
