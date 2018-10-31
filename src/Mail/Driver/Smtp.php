@@ -1,9 +1,11 @@
 <?php
 
-namespace Bow\Mail;
+namespace Bow\Mail\Driver;
 
 use Bow\Mail\Exception\SmtpException;
 use Bow\Mail\Exception\SocketException;
+use Bow\Mail\Message;
+use Bow\Mail\Send;
 use ErrorException;
 
 /**
@@ -90,11 +92,13 @@ class Smtp implements Send
      *
      * @param  Message $message
      * @return bool
+     * @throws SocketException
+     * @throws ErrorException
      */
     public function send(Message $message)
     {
         $this->connection();
-        
+
         $error = true;
 
         // SMTP command
@@ -163,7 +167,7 @@ class Smtp implements Send
         $code = $this->read();
 
         $host = isset($_SERVER['HTTP_HOST']) &&
-            preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
         if ($code == 220) {
             $code = $this->write('EHLO ' . $host, 250, 'HELO');
@@ -174,9 +178,9 @@ class Smtp implements Send
 
         if ($this->tls === true) {
             $this->write('STARTTLS', 220);
-            
+
             $secured = @stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-            
+
             if (!$secured) {
                 throw new ErrorException('Impossible de sécuriser votre connection avec tls', E_ERROR);
             }
@@ -190,12 +194,17 @@ class Smtp implements Send
     }
 
     /**
-     * déconnection
+     * Déconnection
+     *
+     * @return mixed
+     * @throws ErrorException
      */
     private function disconnect()
     {
         $r = $this->write('QUIT');
+
         fclose($this->sock);
+
         $this->sock = null;
 
         return $r;
@@ -211,12 +220,14 @@ class Smtp implements Send
         $s = null;
 
         for (; !feof($this->sock);) {
-            if (($line = fgets($this->sock, 1e3)) != null) {
-                $s = explode(' ', $line)[0];
-            
-                if (preg_match('#^[0-9]+$#', $s)) {
-                    break;
-                }
+            if (($line = fgets($this->sock, 1e3)) == null) {
+                continue;
+            }
+
+            $s = explode(' ', $line)[0];
+
+            if (preg_match('#^[0-9]+$#', $s)) {
+                break;
             }
         }
 
@@ -240,6 +251,7 @@ class Smtp implements Send
         }
 
         $command = $command . Message::END;
+
         fwrite($this->sock, $command, strlen($command));
 
         $response = null;
@@ -247,7 +259,7 @@ class Smtp implements Send
 
         if ($code !== null) {
             $response = $this->read();
-            
+
             if (!in_array($response, (array) $code)) {
                 $message = isset($message) ? $message : '';
 

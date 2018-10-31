@@ -2,15 +2,11 @@
 
 namespace Bow\Mail;
 
+use Bow\Mail\Driver\SimpleMail;
+use Bow\Mail\Driver\Smtp;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 
-/**
- * Class Mail
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Mail
- */
 class Mail
 {
     /**
@@ -31,7 +27,10 @@ class Mail
     }
 
     /**
+     * Mail constructor
+     *
      * @param array $config
+     * @throws MailException
      */
     public function __construct(array $config = [])
     {
@@ -56,16 +55,26 @@ class Mail
         }
 
         if ($config['driver'] == "mail") {
-            if (!self::$instance instanceof SimpleMail) {
-                self::$instance = new SimpleMail($config['mail']);
+            if (!static::$instance instanceof SimpleMail) {
+                static::$instance = new SimpleMail($config['mail']);
             }
         } else {
-            if (!self::$instance instanceof Smtp) {
-                self::$instance = new Smtp($config['smtp']);
+            if (!static::$instance instanceof Smtp) {
+                static::$instance = new Smtp($config['smtp']);
             }
         }
 
-        return self::$instance;
+        return static::$instance;
+    }
+
+    /**
+     * Get mail instance
+     *
+     * @return Smtp|SimpleMail
+     */
+    public static function getInstance()
+    {
+        return static::$instance;
     }
 
     /**
@@ -86,7 +95,7 @@ class Mail
 
         call_user_func_array($cb, [$message]);
 
-        return self::$instance->send($message);
+        return static::$instance->send($message);
     }
 
     /**
@@ -106,12 +115,13 @@ class Mail
         }
 
         $message = new Message();
+
         $message->toList($to)->subject($subject)->setMessage($data);
 
         foreach ($headers as $key => $value) {
             $message->addHeader($key, $value);
         }
-        
+
         return static::$instance->send($message);
     }
 

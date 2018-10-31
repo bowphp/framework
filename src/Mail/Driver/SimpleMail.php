@@ -1,10 +1,11 @@
 <?php
 
-namespace Bow\Mail;
+namespace Bow\Mail\Driver;
 
-use Bow\Mail\Exception\MailException;
+use Bow\Mail\Send;
 use Bow\Support\Str;
 use InvalidArgumentException;
+use Bow\Mail\Message;
 
 /**
  * Systeme d'envoye de mail utilisant le fonction mail de php.
@@ -20,11 +21,27 @@ class SimpleMail implements Send
     private $config;
 
     /**
+     * Mise en privé des fonctions magic __clone
+     */
+    private function __clone()
+    {
+    }
+
+    /**
+     * SimpleMail Constructor
+     *
+     * @param array $config
+     */
+    public function __construct(array $config = [])
+    {
+        $this->config = $config;
+    }
+
+    /**
      * send, Envoie le mail
      *
      * @param  Message $message
      * @throws InvalidArgumentException
-     * @throws MailException
      * @return bool
      */
     public function send(Message $message)
@@ -46,7 +63,7 @@ class SimpleMail implements Send
             } else {
                 if (!Str::isMail($message->getFrom())) {
                     $form = $this->config['mail'][$message->getFrom()];
-                
+
                     $message->from($form["address"], $form["username"]);
                 }
             }
@@ -64,32 +81,15 @@ class SimpleMail implements Send
             }
         }
 
-        $headers .= $message->compileHeaders();
-        
+        $headers = $message->compileHeaders();
+
         $headers .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
-        
+
         $headers .= 'Content-Transfer-Encoding: 8bit' . Message::END;
 
         // Send email use the php native function
         $status = @mail($to, $message->getSubject(), $message->getMessage(), $headers);
 
         return (bool) $status;
-    }
-
-    /**
-     * Mise en privé des fonctions magic __clone
-     */
-    private function __clone()
-    {
-    }
-
-    /**
-     * Construction d'une instance de SimpleMail
-     *
-     * @param array $config
-     */
-    public function __construct(array $config = [])
-    {
-        $this->config = $config;
     }
 }

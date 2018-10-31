@@ -5,12 +5,6 @@ namespace Bow\Mail;
 use Bow\Mail\Exception\MailException;
 use Bow\Support\Str;
 
-/**
- * Class Message
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Mail
- */
 class Message
 {
     const END = "\r\n";
@@ -368,10 +362,12 @@ class Message
      * Modifir le message du mail
      *
      * @param $message
+     * @param string $type
      */
     public function setMessage($message, $type = 'text/html')
     {
         $this->type = $type;
+
         $this->message = $message;
     }
 
