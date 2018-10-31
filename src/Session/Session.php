@@ -39,9 +39,10 @@ class Session implements CollectionInterface
 
     /**
      * Session constructor.
+     *
      * @param array $config
      */
-    public function __construct(array $config)
+    private function __construct(array $config)
     {
         $this->config = array_merge($this->config, $config);
 
@@ -221,7 +222,7 @@ class Session implements CollectionInterface
      */
     public function exists($key)
     {
-        return  $this->has($key, true);
+        return $this->has($key, true);
     }
 
     /**
@@ -426,6 +427,13 @@ class Session implements CollectionInterface
         session_destroy();
     }
 
+    /**
+     * @return array|void
+     */
+    public function toObject()
+    {
+        throw new \BadMethodCallException("Bad methode called");
+    }
 
     /**
      * __toString
@@ -437,29 +445,5 @@ class Session implements CollectionInterface
         $this->start();
 
         return json_encode($this->filter());
-    }
-
-    /**
-     * __callStatic
-     *
-     * @param  string $name
-     * @param  array  $arguments
-     * @return mixed
-     */
-    public static function __callStatic($name, $arguments)
-    {
-        if (method_exists(static::$instance, $name)) {
-            return call_user_func_array([static::$instance, $name], $arguments);
-        }
-
-        throw new \BadMethodCallException('La methode ' . $name . ' n\'exist pas.');
-    }
-
-    /**
-     * @return array|void
-     */
-    public function toObject()
-    {
-        //
     }
 }

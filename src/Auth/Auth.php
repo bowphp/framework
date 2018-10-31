@@ -9,16 +9,6 @@ use Bow\Session\Session;
 class Auth
 {
     /**
-     * @var Auth
-     */
-    private static $instance;
-
-    /**
-     * @var array
-     */
-    private static $config;
-
-    /**
      * @var array
      */
     private $provider;
@@ -30,6 +20,21 @@ class Auth
         'email' => 'email',
         'password' => 'password'
     ];
+
+    /**
+     * @var Session
+     */
+    private static $session;
+
+    /**
+     * @var Auth
+     */
+    private static $instance;
+
+    /**
+     * @var array
+     */
+    private static $config;
 
     /**
      * Auth constructor.
@@ -52,11 +57,15 @@ class Auth
      */
     public static function configure(array $config)
     {
+        if (!is_null(static::$instance)) {
+            return static::$instance;
+        }
+
         static::$config = $config;
 
-        $provider = $config['default'];
+        static::$session = Session::getInstance();
 
-        return static::$instance = new Auth($config[$provider]);
+        return static::$instance = new Auth($config[$config['default']]);
     }
 
     /**
@@ -80,11 +89,7 @@ class Auth
     public function guard($guard = null)
     {
         if (is_null($guard)) {
-            if (static::$instance instanceof Auth) {
-                return static::$instance;
-            }
-
-            return null;
+            return static::$instance;
         }
 
         if (! isset(static::$config[$guard])) {
@@ -103,7 +108,7 @@ class Auth
      */
     public function check()
     {
-        return Session::has('_auth');
+        return static::$session->has('_auth');
     }
 
     /**
@@ -113,7 +118,7 @@ class Auth
      */
     public function guest()
     {
-        return !Session::has('_auth');
+        return !static::$session->has('_auth');
     }
 
     /**
@@ -123,7 +128,7 @@ class Auth
      */
     public function user()
     {
-        return Session::get('_auth');
+        return static::$session->get('_auth');
     }
 
     /**
@@ -142,13 +147,13 @@ class Auth
             return false;
         }
 
-        if (Hash::check($user->password, $credentials[$this->credentials['password']])) {
-            Session::add('_auth', $user);
-
-            return true;
+        if (!Hash::check($user->password, $credentials[$this->credentials['password']])) {
+            return false;
         }
 
-        return false;
+        static::$session->add('_auth', $user);
+
+        return true;
     }
 
     /**
@@ -159,7 +164,7 @@ class Auth
      */
     public function login(Authentication $user)
     {
-        Session::add('_auth', $user);
+        static::$session->add('_auth', $user);
 
         return true;
     }
@@ -171,7 +176,7 @@ class Auth
      */
     public function id()
     {
-        return Session::get('_auth')->getAuthenticateUserId();
+        return static::$session->get('_auth')->getAuthenticateUserId();
     }
 
     /**
