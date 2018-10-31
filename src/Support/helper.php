@@ -279,7 +279,7 @@ if (!function_exists('statement')) {
      */
     function statement($sql)
     {
-        return DB::statement($sql, $data);
+        return DB::statement($sql);
     }
 }
 
