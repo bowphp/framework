@@ -196,7 +196,7 @@ class View implements ResponseInterface
      */
     public function __toString()
     {
-        return $this->sendContent();
+        return static::$content;
     }
 
     /**
