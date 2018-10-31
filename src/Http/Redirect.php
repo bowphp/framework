@@ -54,6 +54,7 @@ class Redirect implements ResponseInterface
      * Redirection avec les informations de requête
      *
      * @param array $data
+     * @return Redirect
      */
     public function withInput(array $data = [])
     {
@@ -86,7 +87,6 @@ class Redirect implements ResponseInterface
      * Rédirection sur l'URL précédent
      *
      * @param int $status
-     * @param array $data
      * @return Redirect
      */
     public function back($status = 302)
@@ -101,7 +101,9 @@ class Redirect implements ResponseInterface
      */
     public function sendContent()
     {
-        return $this->response->addHeader('Location', $this->to);
+        $this->response->addHeader('Location', $this->to);
+
+        return $this->response->sendContent();
     }
 
     /**

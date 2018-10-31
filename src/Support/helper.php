@@ -178,39 +178,6 @@ if (!function_exists('table')) {
     }
 }
 
-if (!function_exists('query_maker')) {
-    /**
-     * fonction d'astuce
-     *
-     * @param string   $sql
-     * @param array    $data
-     * @param callable $cb
-     * @param $method
-     *
-     * @return mixed
-     */
-    function query_maker($sql, $data, $cb, $method)
-    {
-        $rs = null;
-
-        if (is_callable($data)) {
-            $cb = $data;
-
-            $data = [];
-        }
-
-        if (method_exists(DB::class, $method)) {
-            $rs = DB::$method($sql, $data);
-        }
-
-        if (is_callable($cb)) {
-            return call_user_func_array($cb, [$rs]);
-        }
-
-        return $rs;
-    }
-}
-
 if (!function_exists('last_insert_id')) {
     /**
      * Retourne le dernier ID suite a une requete INSERT sur un table dont ID est
@@ -233,13 +200,12 @@ if (!function_exists('select')) {
      *
      * @param string   $sql
      * @param array    $data
-     * @param callable $cb
      *
      * @return int|array|StdClass
      */
-    function select($sql, $data = [], $cb = null)
+    function select($sql, $data = [])
     {
-        return query_maker($sql, $data, $cb, 'select');
+        return DB::select($sql, $data);
     }
 }
 
@@ -249,13 +215,12 @@ if (!function_exists('select_one')) {
      *
      * @param string   $sql
      * @param array    $data
-     * @param callable $cb
      *
      * @return int|array|StdClass
      */
-    function select_one($sql, $data = [], $cb = null)
+    function select_one($sql, $data = [])
     {
-        return query_maker($sql, $data, $cb, 'selectOne');
+        return DB::selectOne($sql, $data);
     }
 }
 
@@ -265,13 +230,12 @@ if (!function_exists('insert')) {
      *
      * @param string   $sql
      * @param array    $data
-     * @param callable $cb
      *
      * @return int
      */
-    function insert($sql, array $data = [], $cb = null)
+    function insert($sql, array $data = [])
     {
-        return query_maker($sql, $data, $cb, 'insert');
+        return DB::insert($sql, $data);
     }
 }
 
@@ -281,13 +245,12 @@ if (!function_exists('delete')) {
      *
      * @param string   $sql
      * @param array    $data
-     * @param callable $cb
      *
      * @return int
      */
-    function delete($sql, $data = [], $cb = null)
+    function delete($sql, $data = [])
     {
-        return query_maker($sql, $data, $cb, 'delete');
+        return DB::delete($sql, $data);
     }
 }
 
@@ -297,13 +260,12 @@ if (!function_exists('update')) {
      *
      * @param string   $sql
      * @param array    $data
-     * @param callable $cb
      *
      * @return int
      */
-    function update($sql, array $data = [], $cb = null)
+    function update($sql, array $data = [])
     {
-        return query_maker($sql, $data, $cb, 'update');
+        return DB::update($sql, $data);
     }
 }
 
@@ -317,7 +279,7 @@ if (!function_exists('statement')) {
      */
     function statement($sql)
     {
-        return query_maker($sql, [], null, 'statement');
+        return DB::statement($sql, $data);
     }
 }
 
@@ -752,10 +714,6 @@ if (!function_exists('start_transaction')) {
      */
     function start_transaction(callable $cb = null)
     {
-        if ($cb !== null) {
-            call_user_func_array($cb, []);
-        }
-
         DB::startTransaction($cb);
     }
 }
@@ -835,7 +793,7 @@ if (!function_exists('add_transmisson_event')) {
      * Alias de la class Event::once
      *
      * @param  string                $event
-     * @param  callable|array|string $fn
+     * @param  array|string $fn
      * @return Event
      * @throws \Bow\Event\EventException
      */
@@ -900,21 +858,17 @@ if (!function_exists('email')) {
      *
      * @param null|string $view     la view
      * @param array       $data     la view
-     * @param \Closure    $callable
+     * @param callable    $cb
      * @return Mail|bool
      * @throws
      */
-    function email($view = null, $data = [], \Closure $callable = null)
+    function email($view = null, $data = [], callable $cb = null)
     {
         if ($view === null) {
-            $email = new Mail(config()->getMailConfig());
-
-            $email->configure();
-
-            return $email;
+            return Mail::getInstance();
         }
 
-        return Mail::send($view, $data, $callable);
+        return Mail::send($view, $data, $cb);
     }
 }
 

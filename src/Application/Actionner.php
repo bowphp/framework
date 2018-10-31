@@ -224,10 +224,6 @@ class Actionner
             Request::getInstance()
         );
 
-        if (Dispatcher::PIPE_EMPTY == $response) {
-            return $this->dispatchControllers($functions, $param);
-        }
-        
         switch (true) {
             case is_null($response):
             case is_string($response):

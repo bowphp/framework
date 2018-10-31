@@ -184,7 +184,9 @@ class View implements ResponseInterface
      */
     public function sendContent()
     {
-        return static::$content;
+        echo static::$content;
+
+        return;
     }
 
     /**

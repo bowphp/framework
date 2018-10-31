@@ -369,6 +369,8 @@ class Response implements ResponseInterface
      */
     public function sendContent()
     {
-        return $this->buildHttpResponse();
+        echo $this->buildHttpResponse();
+
+        return;
     }
 }

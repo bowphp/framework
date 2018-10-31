@@ -7,7 +7,7 @@ interface ResponseInterface
     /**
      * Send Response to client
      *
-     * @return mixed
+     * @return string
      */
     public function sendContent();
 }

@@ -204,7 +204,7 @@ class Application
     /**
      * Permet d'associer un middleware global sur une url
      *
-     * @param array $middleware
+     * @param array $middlewares
      * @return Application
      */
     public function middleware($middlewares)
@@ -254,11 +254,7 @@ class Application
 
         $cb = (array) $definition['handler'];
 
-        $middleware = null;
-
         if (isset($cb['middleware'])) {
-            $middleware = $cb['middleware'];
-
             unset($cb['middleware']);
         }
 
@@ -268,8 +264,8 @@ class Application
 
         $route = $this->pushHttpVerbe($method, $path, $cb);
 
-        if (!is_null($middleware)) {
-            $route->middleware($definition['middeware']);
+        if (isset($definition['middleware'])) {
+            $route->middleware($definition['middleware']);
         }
 
         $route->where($where);
@@ -569,12 +565,10 @@ class Application
     private function sendResponse($response)
     {
         if ($response instanceof ResponseInterface) {
-            echo $response->sendContent();
-
-            die;
+            $response->sendContent();
+        } else {
+            echo $this->response->send($response);
         }
-
-        echo $this->response->send($response);
     }
 
     /**
