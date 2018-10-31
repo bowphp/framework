@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.3] - 2018-10-31
+
+## Fix
+
+- Update end response system [#1c7b5f0](https://github.com/bowphp/framework/commit/1c7b5f0fbdfb0bca0967c2070c47073c782afecc)
+- Refonte auth sys [#b5858da](https://github.com/bowphp/framework/commit/b5858dad15c6ac47a79d5b0a4cf1dc06a9163b31)
+- Update helper list [#f26cae9](https://github.com/bowphp/framework/commit/f26cae98061726ca28dc3db5ed6e164d8e11069e)
+- Rename readme [#ef2deaa](https://github.com/bowphp/framework/commit/ef2deaa779d439c4a13447a46e9baddede3737bf)
+
+## Change
+
+- Formating [#5fe1af5](https://github.com/bowphp/framework/commit/5fe1af57089f0eabf39613541c2bda6e859b5d38)
+- Update mail config file [#0af43e7](https://github.com/bowphp/framework/commit/0af43e7de0d3398f0c78426e5ea70696600202af)
+- Translate to english [#8ccfc90](https://github.com/bowphp/framework/commit/8ccfc90a12ea079e28e1a366f165429d73a44776)
+
 ## [3.1.1] - 2018-10-29
 
 ### Change
