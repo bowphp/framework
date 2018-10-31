@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fix
 
+- Helper `statement`: undefined `$data` [#d35ef57](https://github.com/bowphp/framework/commit/c92651ae6d7a6133b75866de81fc62d74001438f)
+- View toString [#c92651a](https://github.com/bowphp/framework/commit/d35ef57a64ac7dd25119ce0b02f0315f600705db)
 - Update end response system [#1c7b5f0](https://github.com/bowphp/framework/commit/1c7b5f0fbdfb0bca0967c2070c47073c782afecc)
 - Refonte auth sys [#b5858da](https://github.com/bowphp/framework/commit/b5858dad15c6ac47a79d5b0a4cf1dc06a9163b31)
 - Update helper list [#f26cae9](https://github.com/bowphp/framework/commit/f26cae98061726ca28dc3db5ed6e164d8e11069e)
