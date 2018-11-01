@@ -859,7 +859,7 @@ if (!function_exists('email')) {
      * @param null|string $view     la view
      * @param array       $data     la view
      * @param callable    $cb
-     * @return Mail|bool
+     * @return \Bow\Mail\Driver\SimpleMail|\Bow\Mail\Driver\Smtp|bool
      * @throws
      */
     function email($view = null, $data = [], callable $cb = null)
@@ -975,45 +975,6 @@ if (!function_exists('bow_date')) {
     function bow_date($date = null)
     {
         return new \Bow\Support\DateAccess($date);
-    }
-}
-
-if (!function_exists('public_path')) {
-    /**
-     * Get public directory
-     *
-     * @param string $path
-     * @return string
-     */
-    function public_path($path = '')
-    {
-        return '/'.trim(rtrim(config('app.public_path'), '/').'/'.ltrim($path, '/'), '/');
-    }
-}
-
-if (!function_exists('component_path')) {
-    /**
-     * Get component directory
-     *
-     * @param string $path
-     * @return string
-     */
-    function component_path($path = '')
-    {
-        return '/'.trim(rtrim(config('app.component_path'), '/').'/'.ltrim($path, '/'), '/');
-    }
-}
-
-if (!function_exists('storage_path')) {
-    /**
-     * Get storages directory
-     *
-     * @param string $path
-     * @return string
-     */
-    function storage_path($path = '')
-    {
-        return '/'.trim(rtrim(config('app.storage_path'), '/').'/'.ltrim($path, '/'), '/');
     }
 }
 
