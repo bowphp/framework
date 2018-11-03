@@ -549,7 +549,7 @@ class Command
             $class = ucfirst(Str::camel($model));
 
             if (!class_exists($class)) {
-                echo Color::red("Classe \"{$class}\" introvable. Vérifiez le fichier de régistre (db/migration/.registers).");
+                echo Color::red("Classe \"{$class}\" introuvable. Vérifiez le fichier de régistre (db/migration/.registers).");
 
                 exit(1);
             }
@@ -575,7 +575,7 @@ class Command
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe seeder '$name' exists déja.\033[00m";
+            echo "\033[0;31mLe seeder exists déja.\033[00m";
 
             exit(1);
         }
@@ -589,7 +589,7 @@ class Command
             'name' => $name
         ]);
 
-        echo "\033[0;32mLe seeder \033[00m[$name]\033[0;32m a bien été créé.\033[00m\n";
+        echo "\033[0;32mLe seeder a bien été créé.\033[00m\n";
 
         exit(0);
     }
@@ -654,7 +654,7 @@ class Command
             FILE_APPEND
         );
 
-        echo "\033[0;32mLe fichier de migration \033[00m[$model]\033[0;32m a été bien créé.\033[00m\n";
+        echo "\033[0;32mLe fichier de migration a été bien créé.\033[00m\n";
     }
 
     /**
@@ -761,7 +761,7 @@ class Command
             'baseNamespace' => $this->namespaces['controller']
         ]);
 
-        echo "\033[0;32mLe controlleur rest \033[00m[{$controller_name}]\033[0;32m a été bien créé.\033[00m\n";
+        echo "\033[0;32mLe controlleur Rest a été bien créé.\033[00m\n";
     }
 
     /**
@@ -777,7 +777,7 @@ class Command
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe controlleur \033[0;33m\033[0;31m[$controller_name]\033[00m\033[0;31m existe déjà.\033[00m\n";
+            echo "\033[0;31mLe controlleur existe déjà.\033[00m\n";
 
             exit(1);
         }
@@ -792,7 +792,7 @@ class Command
             ]);
         }
 
-        echo "\033[0;32mLe controlleur \033[00m\033[1;33m[$controller_name]\033[00m\033[0;32m a été bien créé.\033[00m\n";
+        echo "\033[0;32mLe controlleur a été bien créé.\033[00m\n";
 
         exit(0);
     }
@@ -807,7 +807,7 @@ class Command
         $generator = new GeneratorCommand($this->middleware_directory, $middleware_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe middleware \033[0;33m\033[0;31m[$middleware_name]\033[00m\033[0;31m existe déjà.\033[00m\n";
+            echo "\033[0;31mLe middleware existe déjà.\033[00m\n";
 
             exit(1);
         }
@@ -816,7 +816,7 @@ class Command
             'baseNamespace' => $this->namespaces['middleware']
         ]);
 
-        echo "\033[0;32mLe middleware \033[00m[{$middleware_name}]\033[0;32m a été bien créé.\033[00m\n";
+        echo "\033[0;32mLe middleware a été bien créé.\033[00m\n";
 
         exit(0);
     }
@@ -832,7 +832,7 @@ class Command
         $generator = new GeneratorCommand($this->model_directory, $model_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe model \033[0;33m\033[0;31m[${model_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
+            echo "\033[0;33mLe modèle existe déjà.\033[00m\n";
 
             exit(1);
         }
@@ -841,7 +841,7 @@ class Command
             'baseNamespace' => $this->namespaces['model']
         ]);
 
-        echo "\033[0;32mLe model \033[00m[${model_name}]\033[0;32m a été bien créé.\033[00m\n";
+        echo "\033[0;32mLe modèle a été bien créé.\033[00m\n";
 
         if ($this->options('-m')) {
             $this->make('create_'.strtolower($model_name).'_table');
@@ -873,7 +873,7 @@ class Command
         $generator = new GeneratorCommand($this->validation_directory, $validator_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe validateur \033[0;33m\033[0;31m[${validator_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
+            echo "\033[0;33mLe validateur existe déjà.\033[00m\n";
 
             return 0;
         }
@@ -882,7 +882,7 @@ class Command
             'baseNamespace' => $this->namespaces['validation']
         ]);
 
-        echo "\033[0;32mLe validateur \033[00m[${validator_name}]\033[0;32m a été bien créé.\033[00m\n";
+        echo "\033[0;32mLe validateur a été bien créé.\033[00m\n";
 
         return 0;
     }
@@ -898,7 +898,7 @@ class Command
         $generator = new GeneratorCommand($this->configuration_directory, $configuration_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe service \033[0;33m\033[0;31m[${configuration_name}]\033[00m\033[0;31m existe déjà.\033[00m\n";
+            echo "\033[0;33mLa configuration existe déjà.\033[00m\n";
 
             return 0;
         }
@@ -907,7 +907,7 @@ class Command
             'baseNamespace' => $this->namespaces['configuration']
         ]);
 
-        echo "\033[0;32mLe service \033[00m[${configuration_name}]\033[0;32m a été bien créé.\033[00m\n";
+        echo "\033[0;32mLa configuration a été bien créé.\033[00m\n";
 
         return 0;
     }
