@@ -224,7 +224,7 @@ class Bow
     {
         $action = $this->command->getParameter('action');
 
-        if (!in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration', 'service'])) {
+        if (!in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration', 'configuration'])) {
             echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
 
             throw new \ErrorException('Type "php bow help create" for more information');
@@ -489,6 +489,7 @@ Bow usage: php bow command:action [name]
 
  \033[0;32madd\033[00m Create a user class
    \033[0;33madd:middleware\033[00m    Create new middleware
+   \033[0;33madd:configuration\033[00m Create new configuration
    \033[0;33madd:service\033[00m       Create new service
    \033[0;33madd:controller\033[00m    Create new controller
    \033[0;33madd:model\033[00m         Create new model
@@ -537,6 +538,7 @@ USAGE;
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  For create a new controlleur
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           For create a new middleware
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name        For create a new configuration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       For create a new model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validator
