@@ -278,11 +278,14 @@ class Actionner
      * @return array
      * @throws
      */
-    public function injector($classname, $method)
+    public function injector($classname, $method = null)
     {
         $params = [];
-
         $reflection = new \ReflectionClass($classname);
+
+        if (!is_null($method)) {
+            $method = "__invoke";
+        }
 
         $parameters = $reflection->getMethod($method)->getParameters();
 
@@ -414,12 +417,14 @@ class Actionner
         $parts = preg_split('/::|@/', $controller_name);
 
         if (count($parts) == 1) {
-            $parts[1] = null;
+            $parts[1] = '__invoke';
         }
 
         list($class, $method) = $parts;
 
-        $class = sprintf('%s\\%s', $this->namespaces['controller'], ucfirst($class));
+        if (!class_exists($class, true)) {
+            $class = sprintf('%s\\%s', $this->namespaces['controller'], ucfirst($class));
+        }
 
         $injections = $this->injector($class, $method);
 
