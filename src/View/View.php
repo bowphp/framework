@@ -169,7 +169,7 @@ class View implements ResponseInterface
         }
 
         if (!class_exists($engine)) {
-            throw new ViewException($engine, ' n\'existe pas.');
+            throw new ViewException($engine . ' n\'existe pas.');
         }
 
         static::$engines[$name] = $engine;
