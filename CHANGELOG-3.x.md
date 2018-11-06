@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.5] - 2018-10-05
+
+## Fix
+
+- Bug fix [#40](https://github.com/bowphp/framework/issues/40)
+- Add invoke method calling [#57e0e3f](https://github.com/bowphp/framework/commit/57e0e3f11b7d0f7fa3f67818a8cce8fd320f9133)
+
 ## [3.1.3] - 2018-10-31
 
 ## Fix
