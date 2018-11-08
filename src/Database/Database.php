@@ -314,12 +314,20 @@ class Database
         }
 
         if (is_callable($callback)) {
-            call_user_func_array($callback, []);
+            try {
+                call_user_func_array($callback, []);
+
+                static::commit();
+            } catch (DatabaseException $e) {
+                static::rollback();
+            }
         }
     }
 
     /**
-     * Lancement du debut d'un transaction
+     * Vérifie si l'execution de la base de donnée est en transation
+     *
+     * @return bool
      */
     public static function inTransaction()
     {
@@ -358,6 +366,7 @@ class Database
             static::connection(static::$name);
         }
     }
+    
     /**
      * Récupère l'identifiant de la dernière enregistrement.
      *
