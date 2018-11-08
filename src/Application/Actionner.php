@@ -283,7 +283,7 @@ class Actionner
         $params = [];
         $reflection = new \ReflectionClass($classname);
 
-        if (!is_null($method)) {
+        if (is_null($method)) {
             $method = "__invoke";
         }
 

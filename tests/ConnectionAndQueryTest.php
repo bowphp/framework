@@ -181,8 +181,6 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
 
             $this->assertEquals($r, 1);
         });
-
-        $db->commit();
     }
 
     /**
@@ -191,15 +189,16 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     public function testRollbackTable(Database $db)
     {
         $r = 0;
-        $db->startTransaction(function () use ($db, & $r) {
-            $r = $db->delete("DELETE FROM pets WHERE id = :id", [
-                'id' => 3
-            ]);
+        
+        $db->startTransaction();
 
-            $this->assertEquals($db->inTransaction(), true);
+        $r = $db->delete("DELETE FROM pets WHERE id = :id", [
+            'id' => 3
+        ]);
 
-            $this->assertEquals($r, 1);
-        });
+        $this->assertEquals($db->inTransaction(), true);
+
+        $this->assertEquals($r, 1);
 
         $db->rollback();
 
