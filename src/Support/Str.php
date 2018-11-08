@@ -199,7 +199,7 @@ class Str
     }
 
     /**
-     * wordify
+     * Wordify
      *
      * @param $str
      * @param $sep

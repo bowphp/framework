@@ -283,36 +283,6 @@ if (!function_exists('statement')) {
     }
 }
 
-if (!function_exists('slugify')) {
-    /**
-     * slugify, transforme un chaine de caractère en slug
-     * eg. la chaine '58 comprendre bow framework' -> '58-comprendre-bow-framework'
-     *
-     * @param  string $str
-     * @param  string $sperator
-     * @return string
-     */
-    function slugify($str, $sperator = '-')
-    {
-        return \Bow\Support\Str::slugify($str, $sperator);
-    }
-}
-
-if (!function_exists('str_slug')) {
-    /**
-     * slugify, transforme un chaine de caractère en slug
-     * eg. la chaine '58 comprendre bow framework' -> '58-comprendre-bow-framework'
-     *
-     * @param  string $str
-     * @param  string $sperator
-     * @return string
-     */
-    function str_slug($str, $sperator = '-')
-    {
-        return slugify($str, $sperator);
-    }
-}
-
 if (!function_exists('debug')) {
     /**
      * debug, fonction de debug de variable
@@ -978,18 +948,6 @@ if (!function_exists('bow_date')) {
     }
 }
 
-if (!function_exists('str')) {
-    /**
-     * Alis for \Bow\Support\Str class
-     *
-     * @return \Bow\Support\Str
-     */
-    function str()
-    {
-        return new \Bow\Support\Str();
-    }
-}
-
 if (!function_exists('route')) {
     /**
      * Get Route by name
@@ -1340,5 +1298,257 @@ if (!function_exists('log')) {
         }
 
         return app('logger')->${$level}($message, $context);
+    }
+}
+
+if (!function_exists('slugify')) {
+    /**
+     * slugify, transforme un chaine de caractère en slug
+     * eg. la chaine '58 comprendre bow framework' -> '58-comprendre-bow-framework'
+     *
+     * @param  string $str
+     * @param  string $sep
+     * @return string
+     */
+    function slugify($str, $sep = '-')
+    {
+        return str()->slugify($str, $sep);
+    }
+}
+
+if (!function_exists('str_slug')) {
+    /**
+     * slugify, transforme un chaine de caractère en slug
+     * eg. la chaine '58 comprendre bow framework' -> '58-comprendre-bow-framework'
+     *
+     * @param  string $str
+     * @param  string $sep
+     * @return string
+     */
+    function str_slug($str, $sep = '-')
+    {
+        return slugify($str, $sep);
+    }
+}
+
+if (!function_exists('str')) {
+    /**
+     * Alis for \Bow\Support\Str class
+     *
+     * @return \Bow\Support\Str
+     */
+    function str()
+    {
+        return new \Bow\Support\Str();
+    }
+}
+
+if (!function_exists('is_mail')) {
+    /**
+     * Check if the email is valid
+     *
+     * @param string $email
+     * @return bool
+     */
+    function is_mail($email)
+    {
+        return \Bow\Support\Str::isMail($email);
+    }
+}
+
+if (!function_exists('is_domain')) {
+    /**
+     * Check if the string is domain
+     *
+     * @param string $email
+     * @return bool
+     */
+    function is_domain($domain)
+    {
+        return \Bow\Support\Str::isDomain($domain);
+    }
+}
+
+if (!function_exists('is_slug')) {
+    /**
+     * Check if string is slug
+     *
+     * @param string $slug
+     * @return bool
+     */
+    function is_slug($slug)
+    {
+        return \Bow\Support\Str::isSlug($slug);
+    }
+}
+
+if (!function_exists('is_alpha')) {
+    /**
+     * Check if the string is alpha
+     *
+     * @param string $string
+     * @return bool
+     */
+    function is_alpha($string)
+    {
+        return \Bow\Support\Str::isAlpha($string);
+    }
+}
+
+if (!function_exists('is_lower')) {
+    /**
+     * Check if the string is lower
+     *
+     * @param string $string
+     * @return bool
+     */
+    function is_lower($string)
+    {
+        return \Bow\Support\Str::isLower($string);
+    }
+}
+
+if (!function_exists('is_upper')) {
+    /**
+     * Check if the string is upper
+     *
+     * @param string $string
+     * @return bool
+     */
+    function is_upper($string)
+    {
+        return \Bow\Support\Str::isUpper($string);
+    }
+}
+
+if (!function_exists('is_alpha_num')) {
+    /**
+     * Check if string is alpha numeric
+     *
+     * @param string $slug
+     * @return bool
+     */
+    function is_alpha_num($slug)
+    {
+        return \Bow\Support\Str::isAlphaNum($slug);
+    }
+}
+
+if (!function_exists('str_shuffle_words')) {
+    /**
+     * Shuffle words
+     *
+     * @param string $words
+     * @return string
+     */
+    function str_shuffle_words($words)
+    {
+        return \Bow\Support\Str::shuffleWords($words);
+    }
+}
+
+if (!function_exists('str_wordify')) {
+    /**
+     * Check if string is slug
+     *
+     * @param string $words
+     * @param string $sep
+     * @return array
+     */
+    function str_wordify($words, $sep = '')
+    {
+        return \Bow\Support\Str::wordify($slug, $sep);
+    }
+}
+
+if (!function_exists('str_plurial')) {
+    /**
+     * Transform text to plurial
+     *
+     * @param string $slug
+     * @return string
+     */
+    function str_plurial($slug)
+    {
+        return \Bow\Support\Str::plurial($slug);
+    }
+}
+
+if (!function_exists('str_camel')) {
+    /**
+     * Transform text to camel case
+     *
+     * @param string $slug
+     * @return string
+     */
+    function str_camel($slug)
+    {
+        return \Bow\Support\Str::camel($slug);
+    }
+}
+
+if (!function_exists('str_snake')) {
+    /**
+     * Transform text to snake case
+     *
+     * @param string $slug
+     * @return string
+     */
+    function str_snake($slug)
+    {
+        return \Bow\Support\Str::snake($slug);
+    }
+}
+
+if (!function_exists('str_contains')) {
+    /**
+     * Check if string contain an other string
+     *
+     * @param string $search
+     * @param string $string
+     * @return bool
+     */
+    function str_contains($search, $string)
+    {
+        return \Bow\Support\Str::contains($search, $string);
+    }
+}
+
+if (!function_exists('str_capitalize')) {
+    /**
+     * Capitalize
+     *
+     * @param string $slug
+     * @return string
+     */
+    function str_capitalize($slug)
+    {
+        return \Bow\Support\Str::capitalize($slug);
+    }
+}
+
+if (!function_exists('str_random')) {
+    /**
+     * Random string
+     *
+     * @param string $string
+     * @return string
+     */
+    function str_random($string)
+    {
+        return \Bow\Support\Str::randomize($string);
+    }
+}
+
+if (!function_exists('str_force_in_utf8')) {
+    /**
+     * Force output string to utf8
+     *
+     * @param string $string
+     * @return bool
+     */
+    function str_force_in_utf8($string)
+    {
+        return \Bow\Support\Str::forceInUTF8($string);
     }
 }
