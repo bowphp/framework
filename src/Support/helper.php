@@ -676,45 +676,45 @@ if (!function_exists('decrypt')) {
     }
 }
 
-if (!function_exists('start_transaction')) {
+if (!function_exists('db_transaction')) {
     /**
      * Debut un transaction. Désactive l'auto commit
      *
      * @param callable $cb
      */
-    function start_transaction(callable $cb = null)
+    function db_transaction(callable $cb = null)
     {
         DB::startTransaction($cb);
     }
 }
 
-if (!function_exists('transaction_started')) {
+if (!function_exists('db_transaction_started')) {
     /**
      * Vérifie l'existance d"une transaction en cours
      *
      * @return bool
      */
-    function transaction_started()
+    function db_transaction_started()
     {
         return DB::getPdo()->inTransaction();
     }
 }
 
-if (!function_exists('rollback')) {
+if (!function_exists('db_rollback')) {
     /**
      * annuler un rollback
      */
-    function rollback()
+    function db_rollback()
     {
         DB::rollback();
     }
 }
 
-if (!function_exists('commit')) {
+if (!function_exists('db_commit')) {
     /**
      * valider une transaction
      */
-    function commit()
+    function db_commit()
     {
         DB::commit();
     }
@@ -1360,8 +1360,9 @@ if (!function_exists('is_domain')) {
     /**
      * Check if the string is domain
      *
-     * @param string $email
+     * @param string $domain
      * @return bool
+     * @throws
      */
     function is_domain($domain)
     {
@@ -1375,6 +1376,7 @@ if (!function_exists('is_slug')) {
      *
      * @param string $slug
      * @return bool
+     * @throws
      */
     function is_slug($slug)
     {
@@ -1388,6 +1390,7 @@ if (!function_exists('is_alpha')) {
      *
      * @param string $string
      * @return bool
+     * @throws
      */
     function is_alpha($string)
     {
@@ -1427,6 +1430,7 @@ if (!function_exists('is_alpha_num')) {
      *
      * @param string $slug
      * @return bool
+     * @throws
      */
     function is_alpha_num($slug)
     {
@@ -1457,7 +1461,7 @@ if (!function_exists('str_wordify')) {
      */
     function str_wordify($words, $sep = '')
     {
-        return \Bow\Support\Str::wordify($slug, $sep);
+        return \Bow\Support\Str::wordify($words, $sep);
     }
 }
 
@@ -1545,7 +1549,7 @@ if (!function_exists('str_force_in_utf8')) {
      * Force output string to utf8
      *
      * @param string $string
-     * @return bool
+     * @return void
      */
     function str_force_in_utf8($string)
     {

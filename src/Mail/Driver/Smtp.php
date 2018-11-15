@@ -153,6 +153,7 @@ class Smtp implements Send
     private function connection()
     {
         $url = $this->url;
+
         if ($this->secure === true) {
             $url = 'ssl://' . $this->url;
         }

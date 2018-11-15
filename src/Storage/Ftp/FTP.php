@@ -80,6 +80,7 @@ class FTP implements FilesystemInterface
     public function isDirectory($dirname)
     {
         $tmp = ftp_pwd($this->ftp);
+
         $r = false;
 
         if (ftp_chdir($this->ftp, $dirname)) {
@@ -193,7 +194,11 @@ class FTP implements FilesystemInterface
      */
     public function append($file, $content)
     {
-        // TODO: Implement append() method.
+        file_put_contents($this->tmp, $this->get($file));
+
+        file_put_contents($this->tmp, $content, FILE_APPEND);
+
+        $this->put($file, file_get_contents($this->tmp));
     }
 
     /**
@@ -201,7 +206,11 @@ class FTP implements FilesystemInterface
      */
     public function prepend($file, $content)
     {
-        // TODO: Implement prepend() method.
+        file_put_contents($this->tmp, $this->get($file));
+
+        file_put_contents($this->tmp, $content);
+
+        $this->put($file, file_get_contents($this->tmp));
     }
 
     /**
@@ -209,7 +218,9 @@ class FTP implements FilesystemInterface
      */
     public function put($file, $content)
     {
-        // TODO: Implement put() method.
+        file_put_contents($this->tmp, $content);
+
+        ftp_put($this->ftp, $file, $this->tmp, FTP_BINARY);
     }
 
     /**
@@ -217,7 +228,7 @@ class FTP implements FilesystemInterface
      */
     public function delete($file)
     {
-        // TODO: Implement delete() method.
+        ftp_delete($this->ftp, $file);
     }
 
     /**
@@ -225,7 +236,6 @@ class FTP implements FilesystemInterface
      */
     public function files($dirname)
     {
-        // TODO: Implement files() method.
     }
 
     /**
@@ -233,7 +243,7 @@ class FTP implements FilesystemInterface
      */
     public function directories($dirname)
     {
-        // TODO: Implement directories() method.
+        // TODO: Implement directories() method
     }
 
     /**
@@ -281,7 +291,6 @@ class FTP implements FilesystemInterface
      */
     public function resolvePath($filename)
     {
-        // TODO: Implement resolvePath() method.
     }
 
     /**
@@ -300,6 +309,7 @@ class FTP implements FilesystemInterface
         }
 
         array_unshift($arguments, $this->ftp);
+
         return call_user_func_array('ftp_' . $method, $arguments);
     }
 
@@ -309,6 +319,7 @@ class FTP implements FilesystemInterface
     public function __destruct()
     {
         @unlink($this->tmp);
+
         ftp_close($this->ftp);
     }
 }
