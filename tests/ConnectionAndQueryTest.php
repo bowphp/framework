@@ -6,7 +6,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
 {
     public function additionProvider()
     {
-        return [0 => ['first'], 1 => ['seconds']];
+        return [['mysql'], ['sqlite']];
     }
 
     /**
@@ -17,9 +17,8 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     {
         Database::configure([
             'fetch' => \PDO::FETCH_OBJ,
-            'default' => 'first',
-            'first' => [
-                'scheme' => 'mysql',
+            'default' => 'mysql',
+            'connection' => [
                 'mysql' => [
                     'hostname' => getenv('DB_HOSTNAME') ? getenv('DB_HOSTNAME') : 'localhost',
                     'username' => getenv('DB_USERNAME') ? getenv('DB_USERNAME') : 'root',
@@ -29,10 +28,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
                     'collation' => getenv('DB_COLLATE') ? getenv('DB_COLLATE') : 'utf8_unicode_ci',
                     'port' => null,
                     'socket' => null
-                ]
-            ],
-            'seconds' => [
-                'scheme' => 'sqlite',
+                ],
                 'sqlite' => [
                     'driver' => 'sqlite',
                     'database' => __DIR__ . '/data/database.sqlite',

@@ -83,7 +83,7 @@ class Database
             $name = static::$name;
         }
 
-        if (!isset(static::$config[$name])) {
+        if (!isset(static::$config['connection'][$name])) {
             throw new ConnectionException('Le point de connection "' . $name . '" n\'est pas définie.');
         }
 
@@ -91,15 +91,15 @@ class Database
             static::$adapter = null;
         }
 
-        $config = static::$config[$name];
+        $config = static::$config['connection'][$name];
 
         static::$name = $name;
 
         if (static::$adapter === null) {
-            if ($config['scheme'] == 'mysql') {
-                static::$adapter = new MysqlAdapter($config['mysql']);
-            } elseif ($config['scheme'] == 'sqlite') {
-                static::$adapter = new SqliteAdapter($config['sqlite']);
+            if ($name == 'mysql') {
+                static::$adapter = new MysqlAdapter($config);
+            } elseif ($name == 'sqlite') {
+                static::$adapter = new SqliteAdapter($config);
             } else {
                 throw new ConnectionException('Ce driver n\'est pas prie en compte.');
             }
