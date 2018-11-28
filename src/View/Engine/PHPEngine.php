@@ -54,14 +54,15 @@ class PHPEngine extends EngineAbstract
 
         $data = ob_get_clean();
 
-        $content = file_get_contents($filename);
+        $content = trim(file_get_contents($filename));
         // Mise en cache
         file_put_contents(
             $cache_hash_filename,
             <<<PHP
-<?php ob_start(); ?>$content<?php \$__bow_php_rendering_content = ob_get_clean(); ?>
-<?php 
-return \$__bow_php_rendering_content;
+<?php ob_start(); ?>
+$content
+<?php \$__bow_php_rendering_content = ob_get_clean(); ?>
+<?php return \$__bow_php_rendering_content; ?>
 PHP
         );
 
