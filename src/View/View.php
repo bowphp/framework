@@ -40,8 +40,7 @@ class View implements ResponseInterface
     private static $engines = [
         'twig' => \Bow\View\Engine\TwigEngine::class,
         'php' => \Bow\View\Engine\PHPEngine::class,
-        'mustache' => \Bow\View\Engine\MustacheEngine::class,
-        'pug' => \Bow\View\Engine\PugEngine::class
+        'tintin' => \Tintin\Bow\TintinEngine::class
     ];
 
     /**

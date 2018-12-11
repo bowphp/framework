@@ -253,7 +253,9 @@ class Response implements ResponseInterface
     public function status($code)
     {
         if (in_array((int) $code, array_keys(self::$header), true)) {
-            header('HTTP/1.1 '. $code .' '. self::$header[$code], $this->override, $code);
+            $this->code = $code;
+
+            @header('HTTP/1.1 '. $code .' '. self::$header[$code], $this->override, $code);
         }
 
         return $this;
@@ -268,7 +270,7 @@ class Response implements ResponseInterface
     {
         $status_text = static::$header[$this->code] ?? 'Unkdown';
 
-        header('HTTP/1.1 '. $this->code .' '. $status_text, $this->override, $this->code);
+        @header('HTTP/1.1 '. $this->code .' '. $status_text, $this->override, $this->code);
 
         foreach ($this->getHeaders() as $key => $header) {
             header(sprintf('%s: %s', $key, $header));
@@ -301,7 +303,7 @@ class Response implements ResponseInterface
 
         $this->content = json_encode($data);
 
-        $this->status($code);
+        $this->code = $code;
 
         return $this->buildHttpResponse();
     }
@@ -320,7 +322,7 @@ class Response implements ResponseInterface
             return $this->json($data, $code, $headers);
         }
 
-        $this->status($code);
+        $this->code = $code;
 
         foreach ($headers as $key => $value) {
             $this->addHeader($key, $value);
@@ -343,7 +345,7 @@ class Response implements ResponseInterface
      */
     public function render($template, $data = [], $code = 200, array $headers = [])
     {
-        $this->status($code);
+        $this->code = $code;
 
         $this->withHeaders($headers);
 

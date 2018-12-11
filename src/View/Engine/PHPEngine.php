@@ -36,7 +36,7 @@ class PHPEngine extends EngineAbstract
             $filename = $this->config['view.path'] . '/' . $filename;
         }
 
-        $cache_hash_filename = '_PHP_'.hash('sha1', $hash_filename).'.php';
+        $cache_hash_filename = '_PHP_'.md5($hash_filename).'.php';
 
         $cache_hash_filename = $this->config['view.cache'].'/'.$cache_hash_filename;
 
@@ -48,24 +48,17 @@ class PHPEngine extends EngineAbstract
             }
         }
 
-        ob_start();
+        $content[] = '<?php ob_start(); ?>';
+        $content[] = trim(file_get_contents($filename));
+        $content[] = '<?php $__bow_php_rendering_content = ob_get_clean(); ?>';
+        $content[] = '<?php return $__bow_php_rendering_content; ?>';
 
-        include $filename;
-
-        $data = ob_get_clean();
-
-        $content = trim(file_get_contents($filename));
         // Mise en cache
         file_put_contents(
             $cache_hash_filename,
-            <<<PHP
-<?php ob_start(); ?>
-$content
-<?php \$__bow_php_rendering_content = ob_get_clean(); ?>
-<?php return \$__bow_php_rendering_content; ?>
-PHP
+            implode("\n", $content)
         );
 
-        return $data;
+        return include $filename;
     }
 }

@@ -82,7 +82,7 @@ class Translator
     public static function translate($key, array $data = [], $plurial = false)
     {
         if (!is_string($key)) {
-            throw new \InvalidArgumentException('La premier parametre doit etre une chaine de carractère.', E_USER_ERROR);
+            throw new \InvalidArgumentException('Le premier paramêtre doit être une chaine de carractère.', E_USER_ERROR);
         }
 
         $map = explode('.', $key);

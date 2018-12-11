@@ -19,22 +19,13 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(trim($resultat), '<p>bow see hello world by twig</p>');
     }
 
-    public function testMustacheCompilation()
+    public function testTintinCompilation()
     {
-        View::getInstance()->setEngine('mustache')->setExtension('.tpl')->cachable(false);
+        View::getInstance()->setEngine('tintin')->setExtension('.tintin.php')->cachable(false);
 
-        $resultat = View::parse('mustache', ['name' => 'bow', 'engine' => 'mustache']);
+        $resultat = View::parse('tintin', ['name' => 'bow', 'engine' => 'tintin']);
 
-        $this->assertEquals(trim($resultat), '<p>bow see hello world by mustache</p>');
-    }
-
-    public function testPugCompilation()
-    {
-        View::getInstance()->setEngine('pug')->setExtension('.pug')->cachable(false);
-
-        $resultat = View::parse('pug', ['name' => 'bow', 'engine' => 'pug']);
-
-        $this->assertEquals(trim($resultat), 'bow see hello world by pug');
+        $this->assertEquals(trim($resultat), '<p>bow see hello world by tintin</p>');
     }
 
     public function testPHPCompilation()
@@ -53,12 +44,18 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         }
 
         foreach (glob(__DIR__.'/data/cache/*.php') as $value) {
-            @unlink($value);
+            // @unlink($value);
         }
 
         foreach (glob(__DIR__.'/data/cache/view/*/*.php') as $value) {
             @unlink($value);
             @rmdir(dirname($value));
         }
+
+        foreach (glob(__DIR__.'/data/cache/*/*.php') as $value) {
+            @unlink($value);
+            @rmdir(dirname($value));
+        }
+
     }
 }
