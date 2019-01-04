@@ -2,9 +2,13 @@
 
 namespace Bow\Storage;
 
+use Bow\Storage\Contracts\FilesystemInterface;
+
 class MountFilesystem implements FilesystemInterface
 {
     /**
+     * The base work directory
+     * 
      * @var
      */
     private $basedir;

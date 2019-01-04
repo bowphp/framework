@@ -6,97 +6,30 @@ use BadMethodCallException;
 use Bow\Storage\AWS\AwsS3Client;
 use Bow\Storage\Exception\ResourceException;
 use Bow\Storage\Ftp\FTP;
+use Bow\Storage\Exception\ServiceNotFoundException;
 
 class Storage
 {
     /**
+     * The data configuration
+     * 
      * @var array
      */
     private static $config;
 
     /**
-     * @var FTP
-     */
-    private static $ftp;
-
-    /**
-     * @var AwsS3Client
-     */
-    private static $s3;
-
-    /**
+     * The disk mounting 
+     * 
      * @var MountFilesystem
      */
     private static $mounted;
 
     /**
+     * The service lists
+     * 
      * @var array
      */
-    const AVAILABLE_SERIVCES = ['ftp', 's3'];
-
-    /**
-     * Lance la connection au ftp.
-     *
-     * @param  array $config
-     * @return FTP
-     * @throws
-     */
-    private static function ftp($config = null)
-    {
-        if (static::$ftp instanceof FTP) {
-            return static::$ftp;
-        }
-
-        if (is_null($config)) {
-            $config = static::$config['services']['ftp'];
-        }
-
-        if (!isset($config['tls'])) {
-            $config['tls'] = false;
-        }
-
-        if (!isset($config['timeout'])) {
-            $config['timeout'] = 90;
-        }
-
-        static::$ftp = new FTP();
-
-        static::$ftp->connect(
-            $config['hostname'],
-            $config['username'],
-            $config['password'],
-            $config['port'],
-            $config['tls'],
-            $config['timeout']
-        );
-
-        if (isset($config['root'])) {
-            if ($config['root'] !== null) {
-                static::$ftp->chdir($config['root']);
-            }
-        }
-
-        return static::$ftp;
-    }
-
-    /**
-     * @param array $config
-     * @return AwsS3Client
-     */
-    private static function s3(array $config = [])
-    {
-        if (static::$s3 instanceof AwsS3Client) {
-            return static::$s3;
-        }
-
-        if (empty($config)) {
-            $config = static::$config['services']['s3']  ?? [];
-        }
-
-        static::$s3 = new AwsS3Client($config);
-
-        return static::$s3;
-    }
+    private static $available_serivces = [];
 
     /**
      * Mount disk
@@ -130,11 +63,26 @@ class Storage
      */
     public static function service($service)
     {
-        if (! in_array($service, static::AVAILABLE_SERIVCES)) {
-            throw new \InvalidArgumentException(sprintf('Le service "%s" est invalide', $service));
+        if (! in_array($service, static::$available_serivces)) {
+            throw new ServiceNotFoundException(sprintf('This "%s" service is invalid.', $service));
         }
 
-        return static::$service();
+        $service = static::$available_serivces[$service];
+
+        return $service::config(static::$config[$service]);
+    }
+
+    /**
+     * Push a new serive who implement the Bow\Storage\Contracts\ServiceInterface
+     * contracts
+     * 
+     * @param array $services
+     */
+    public static function pushService(array $services)
+    {
+        foreach ($services as $service => $hanlder) {
+            static::$available_serivces[$service] = $hanlder;
+        }
     }
 
     /**
