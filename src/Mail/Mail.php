@@ -2,7 +2,7 @@
 
 namespace Bow\Mail;
 
-use Bow\Mail\Driver\SimpleMail;
+use Bow\Mail\Driver\Native;
 use Bow\Mail\Driver\Smtp;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
@@ -55,8 +55,8 @@ class Mail
         }
 
         if ($config['driver'] == "mail") {
-            if (!static::$instance instanceof SimpleMail) {
-                static::$instance = new SimpleMail($config['mail']);
+            if (!static::$instance instanceof Native) {
+                static::$instance = new Native($config['mail']);
             }
         } else {
             if (!static::$instance instanceof Smtp) {

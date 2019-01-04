@@ -8,17 +8,11 @@ use Bow\Mail\Message;
 use Bow\Mail\Send;
 use ErrorException;
 
-/**
- * Class Smtp
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Mail
- */
 class Smtp implements Send
 {
 
     /**
-     * socket de connection
+     * Socket de connection
      *
      * @var null
      */
