@@ -27,9 +27,17 @@ class Translator
      * @param string $lang
      * @param string $directory
      */
-    public function __construct($lang, $directory)
+    public function __construct($lang, $directory, $auto_detected = false)
     {
         static::$lang = $lang;
+        
+        if ($auto_detected) {
+            static::$lang = strtolower(client_locale());
+
+            if (is_null(static::$lang)) {
+                static::$lang = $lang;
+            }
+        }
 
         static::$directory = $directory;
     }

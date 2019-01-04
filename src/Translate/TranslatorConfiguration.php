@@ -15,7 +15,8 @@ class TranslatorConfiguration extends Configuration
         $this->container->bind('trans', function () use ($config) {
             return Translator::configure(
                 $config['trans.lang'],
-                $config['trans.dictionary']
+                $config['trans.dictionary'],
+                is_null($config['trans.auto_detected']) ? false : $config['trans.auto_detected']
             );
         });
     }
