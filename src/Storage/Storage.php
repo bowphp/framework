@@ -3,7 +3,7 @@
 namespace Bow\Storage;
 
 use BadMethodCallException;
-use Bow\Storage\Exception\ResourceException;
+use Bow\Storage\Exception\MountDiskNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
 
 class Storage
@@ -34,7 +34,7 @@ class Storage
      *
      * @param string $mount
      * @return MountFilesystem
-     * @throws ResourceException
+     * @throws MountDiskNotFoundException
      */
     public static function mount($mount = null)
     {
@@ -47,7 +47,7 @@ class Storage
         }
 
         if (! isset(static::$config['disk']['path'][$mount])) {
-            throw new ResourceException('Le disque '.$mount.' n\'est pas défini.');
+            throw new MountDiskNotFoundException('Le disque '.$mount.' n\'est pas défini.');
         }
 
         return static::$mounted = new MountFilesystem(static::$config['disk']['path'][$mount]);

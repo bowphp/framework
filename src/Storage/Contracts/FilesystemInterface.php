@@ -2,18 +2,21 @@
 
 namespace Bow\Storage\Contracts;
 
+use Bow\Http\UploadFile;
+use InvalidArgumentException;
+
 interface FilesystemInterface
 {
     /**
      * UploadFile, fonction permettant de uploader un fichier
      *
-     * @param  array    $file
-     * @param  string   $location
-     * @param  array    $option
+     * @param  UploadFile $file
+     * @param  string  $location
+     * @param  array $option
      * @return mixed
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    public function store($file, $location, array $option = []);
+    public function store(UploadFile $file, $location = null, array $option = []);
 
     /**
      * Ecrire à la suite d'un fichier spécifier
@@ -35,10 +38,10 @@ interface FilesystemInterface
     public function prepend($file, $content);
 
     /**
-     * Put
+     * Put other file content in given file
      *
-     * @param  $file
-     * @param  $content
+     * @param  string $file
+     * @param  string $content
      * @return bool
      */
     public function put($file, $content);
@@ -88,24 +91,24 @@ interface FilesystemInterface
     /**
      * Copie le contenu d'un fichier source vers un fichier cible.
      *
-     * @param  string $targerFile
-     * @param  string $sourceFile
+     * @param  string $target
+     * @param  string $source
      * @return bool
      */
-    public function copy($targerFile, $sourceFile);
+    public function copy($target, $source);
 
     /**
      * Rénomme ou déplace un fichier source vers un fichier cible.
      *
-     * @param $targer_file
-     * @param $source_file
+     * @param string $target
+     * @param string $source
      */
-    public function move($targer_file, $source_file);
+    public function move($target, $source);
 
     /**
      * Vérifie l'existance d'un fichier
      *
-     * @param  $filename
+     * @param string $filename
      * @return bool
      */
     public function exists($filename);
@@ -113,7 +116,7 @@ interface FilesystemInterface
     /**
      * L'extension du fichier
      *
-     * @param  $filename
+     * @param string $filename
      * @return string
      */
     public function extension($filename);
@@ -121,7 +124,7 @@ interface FilesystemInterface
     /**
      * isFile aliase sur is_file.
      *
-     * @param  $filename
+     * @param string $filename
      * @return bool
      */
     public function isFile($filename);
@@ -129,7 +132,7 @@ interface FilesystemInterface
     /**
      * isDirectory aliase sur is_dir.
      *
-     * @param  $dirname
+     * @param string $dirname
      * @return bool
      */
     public function isDirectory($dirname);
@@ -138,8 +141,8 @@ interface FilesystemInterface
      * Permet de résolver un path.
      * Donner le chemin absolute d'un path
      *
-     * @param  $filename
+     * @param string $filename
      * @return string
      */
-    public function resolvePath($filename);
+    public function path($filename);
 }
