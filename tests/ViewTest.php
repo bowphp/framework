@@ -56,6 +56,5 @@ class ViewTest extends \PHPUnit\Framework\TestCase
             @unlink($value);
             @rmdir(dirname($value));
         }
-
     }
 }
