@@ -4,9 +4,9 @@ namespace Bow\Testing;
 
 use Bow\Http\Client\HttpClient;
 use Bow\Http\Client\Parser;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
-class BowTestCase extends TestCase
+class TestCase extends PHPUnitTestCase
 {
     /**
      * @var array
@@ -16,7 +16,7 @@ class BowTestCase extends TestCase
     /**
      * @var string
      */
-    protected $base_url = '';
+    protected $url = '';
 
     /**
      * Format url
@@ -26,7 +26,7 @@ class BowTestCase extends TestCase
      */
     private function formatUrl($url)
     {
-        return rtrim($this->base_url, '/').$url;
+        return rtrim($this->url, '/').$url;
     }
 
     /**
