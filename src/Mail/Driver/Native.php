@@ -7,13 +7,7 @@ use Bow\Support\Str;
 use InvalidArgumentException;
 use Bow\Mail\Message;
 
-/**
- * Systeme d'envoye de mail utilisant le fonction mail de php.
- *
- * @author  Franck Dakia <dakiafranck@gmail.com>
- * @package Bow\Mail
- */
-class SimpleMail implements Send
+class Native implements Send
 {
     /**
      * @var array
@@ -60,12 +54,10 @@ class SimpleMail implements Send
                 $form = $this->config['mail'][$section];
 
                 $message->from($form["address"], $form["username"]);
-            } else {
-                if (!Str::isMail($message->getFrom())) {
-                    $form = $this->config['mail'][$message->getFrom()];
+            } elseif (!Str::isMail($message->getFrom())) {
+                $form = $this->config['mail'][$message->getFrom()];
 
-                    $message->from($form["address"], $form["username"]);
-                }
+                $message->from($form["address"], $form["username"]);
             }
         }
 

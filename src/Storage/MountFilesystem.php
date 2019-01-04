@@ -2,13 +2,15 @@
 
 namespace Bow\Storage;
 
+use Bow\Http\UploadFile;
 use Bow\Storage\Contracts\FilesystemInterface;
+use InvalidArgumentException;
 
 class MountFilesystem implements FilesystemInterface
 {
     /**
      * The base work directory
-     * 
+     *
      * @var
      */
     private $basedir;
@@ -26,22 +28,39 @@ class MountFilesystem implements FilesystemInterface
     /**
      * UploadFile, fonction permettant de uploader un fichier
      *
-     * @param  array    $file
-     * @param  string   $location
+     * @param  UploadFile  $file
+     * @param  string  $location
      * @param  array   $option
      * @return mixed
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    public function store($file, $location, array $option = [])
+    public function store(UploadFile $file, $location = null, array $option = [])
     {
-        // TODO: Implement store method
+        if (is_array($location)) {
+            $option = $location;
+            $location = null;
+        }
+        
+        if (isset($option['as'])) {
+            $filename = $option['as'];
+        } else {
+            $filename = $file->getHashName();
+        }
+
+        if (is_null($location)) {
+            $location = $filename;
+        } else {
+            $location = trim($location, '/').'/'.$filename;
+        }
+
+        $this->put($location, $file->getContent());
     }
 
     /**
      * Ecrire à la suite d'un fichier spécifier
      *
-     * @param  string $file    nom du fichier
-     * @param  string $content content a ajouter
+     * @param  string $file
+     * @param  string $content
      * @return bool
      */
     public function append($file, $content)
@@ -67,15 +86,15 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Put
+     * Put other file content in given file
      *
-     * @param  $file
-     * @param  $content
+     * @param string $file
+     * @param string $content
      * @return bool
      */
     public function put($file, $content)
     {
-        $file = $this->resolvePath($file);
+        $file = $this->path($file);
 
         $dirname = dirname($file);
 
@@ -92,7 +111,7 @@ class MountFilesystem implements FilesystemInterface
      */
     public function delete($file)
     {
-        $file = $this->resolvePath($file);
+        $file = $this->path($file);
 
         if (is_dir($file)) {
             return @rmdir($file);
@@ -102,33 +121,33 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Alias sur readInDir
+     * Liste les fichiers d'un dossier passé en paramètre
      *
      * @param  string $dirname
      * @return array
      */
     public function files($dirname)
     {
-        $dirname = $this->resolvePath($dirname);
+        $dirname = $this->path($dirname);
 
-        $directoryContents = glob($dirname."/*");
+        $directory_contents = glob($dirname."/*");
 
-        return array_filter($directoryContents, function ($file) {
+        return array_filter($directory_contents, function ($file) {
             return filetype($file) == "file";
         });
     }
 
     /**
-     * Lire le contenu du dossier
+     * Liste les dossier d'un dossier passé en paramètre
      *
      * @param  string $dirname
      * @return array
      */
     public function directories($dirname)
     {
-        $directoryContents = glob($this->resolvePath($dirname)."/*");
+        $directory_contents = glob($this->path($dirname)."/*");
 
-        return array_filter($directoryContents, function ($file) {
+        return array_filter($directory_contents, function ($file) {
             return filetype($file) == "dir";
         });
     }
@@ -149,7 +168,7 @@ class MountFilesystem implements FilesystemInterface
             $mode = 0777;
         }
 
-        $dirname = $this->resolvePath($dirname);
+        $dirname = $this->path($dirname);
 
         if (!is_dir($dirname)) {
             return @mkdir($dirname, $mode, $recursive);
@@ -166,7 +185,7 @@ class MountFilesystem implements FilesystemInterface
      */
     public function get($filename)
     {
-        $filename = $this->resolvePath($filename);
+        $filename = $this->path($filename);
 
         if (!(is_file($filename) && stream_is_local($filename))) {
             return null;
@@ -178,34 +197,34 @@ class MountFilesystem implements FilesystemInterface
     /**
      * Copie le contenu d'un fichier source vers un fichier cible.
      *
-     * @param  string $targerFile
-     * @param  string $sourceFile
+     * @param  string $target
+     * @param  string $source
      * @return bool
      */
-    public function copy($targerFile, $sourceFile)
+    public function copy($target, $source)
     {
-        if (!$this->exists($targerFile)) {
-            throw new \RuntimeException("$targerFile n'exist pas.", E_ERROR);
+        if (!$this->exists($target)) {
+            throw new \RuntimeException("$target n'exist pas.", E_ERROR);
         }
 
-        if (!$this->exists($sourceFile)) {
-            $this->makeDirectory(dirname($sourceFile), true);
+        if (!$this->exists($source)) {
+            $this->makeDirectory(dirname($source), true);
         }
 
-        return file_put_contents($sourceFile, $this->get($targerFile));
+        return file_put_contents($source, $this->get($target));
     }
 
     /**
      * Rénomme ou déplace un fichier source vers un fichier cible.
      *
-     * @param $targerFile
-     * @param $sourceFile
+     * @param $target
+     * @param $source
      */
-    public function move($targerFile, $sourceFile)
+    public function move($target, $source)
     {
-        $this->copy($targerFile, $sourceFile);
+        $this->copy($target, $source);
 
-        $this->delete($targerFile);
+        $this->delete($target);
     }
 
     /**
@@ -216,19 +235,19 @@ class MountFilesystem implements FilesystemInterface
      */
     public function exists($filename)
     {
-        $filename = $this->resolvePath($filename);
+        $filename = $this->path($filename);
 
-        if (is_dir($filename)) {
-            $tmp = getcwd();
-
-            $r = chdir($filename);
-
-            chdir($tmp);
-
-            return $r;
+        if (! $this->isDirectory($filename)) {
+            return file_exists($filename);
         }
+    
+        $tmp = getcwd();
 
-        return file_exists($filename);
+        $r = chdir($filename);
+
+        chdir($tmp);
+
+        return $r;
     }
 
     /**
@@ -240,7 +259,7 @@ class MountFilesystem implements FilesystemInterface
     public function extension($filename)
     {
         if ($this->exists($filename)) {
-            return pathinfo($this->resolvePath($filename), PATHINFO_EXTENSION);
+            return pathinfo($this->path($filename), PATHINFO_EXTENSION);
         }
 
         return null;
@@ -254,7 +273,7 @@ class MountFilesystem implements FilesystemInterface
      */
     public function isFile($filename)
     {
-        return is_file($this->resolvePath($filename));
+        return is_file($this->path($filename));
     }
 
     /**
@@ -265,7 +284,7 @@ class MountFilesystem implements FilesystemInterface
      */
     public function isDirectory($dirname)
     {
-        return is_dir($this->resolvePath($dirname));
+        return is_dir($this->path($dirname));
     }
 
     /**
@@ -275,7 +294,7 @@ class MountFilesystem implements FilesystemInterface
      * @param  $filename
      * @return string
      */
-    public function resolvePath($filename)
+    public function path($filename)
     {
         if (preg_match('~^'.$this->basedir.'~', $filename)) {
             return $filename;

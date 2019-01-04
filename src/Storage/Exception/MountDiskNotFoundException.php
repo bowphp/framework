@@ -4,6 +4,6 @@ namespace Bow\Storage\Exception;
 
 use ErrorException;
 
-class ResourceException extends ErrorException
+class MountDiskNotFoundException extends ErrorException
 {
 }

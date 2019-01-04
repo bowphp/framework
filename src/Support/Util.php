@@ -64,7 +64,7 @@ class Util
      */
     public static function dd($var)
     {
-        call_user_func_array([static::class, 'dump'], func_get_args());
+        call_user_func_array([static::class, 'debug'], func_get_args());
 
         die();
     }

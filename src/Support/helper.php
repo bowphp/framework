@@ -935,19 +935,6 @@ if (!function_exists('validator')) {
     }
 }
 
-if (!function_exists('bow_date')) {
-    /**
-     * Get \Bow\Support\DateAccess instance
-     *
-     * @param null $date
-     * @return \Bow\Support\DateAccess
-     */
-    function bow_date($date = null)
-    {
-        return new \Bow\Support\DateAccess($date);
-    }
-}
-
 if (!function_exists('route')) {
     /**
      * Get Route by name

@@ -96,17 +96,17 @@ class Command
 
         $this->seeder_directory = $this->dirname.'/db/seeders';
 
-        $this->controller_directory = $this->dirname.'/app/Controllers';
+        $this->controller_directory = $this->dirname.'/app/Controller';
 
         $this->middleware_directory = $this->dirname.'/app/Middleware';
 
-        $this->configuration_directory = $this->dirname.'/app/Configurations';
+        $this->configuration_directory = $this->dirname.'/app/Configuration';
 
         $this->app_directory = $this->dirname.'/app';
 
-        $this->model_directory = $this->dirname.'/app';
+        $this->model_directory = $this->dirname.'/app/Model';
 
-        $this->validation_directory = $this->dirname.'/app/Validations';
+        $this->validation_directory = $this->dirname.'/app/Validation';
 
         $this->component_directory = $this->dirname.'/components';
 

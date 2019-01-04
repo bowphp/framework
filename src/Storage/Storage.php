@@ -3,30 +3,28 @@
 namespace Bow\Storage;
 
 use BadMethodCallException;
-use Bow\Storage\AWS\AwsS3Client;
-use Bow\Storage\Exception\ResourceException;
-use Bow\Storage\Ftp\FTP;
+use Bow\Storage\Exception\MountDiskNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
 
 class Storage
 {
     /**
      * The data configuration
-     * 
+     *
      * @var array
      */
     private static $config;
 
     /**
-     * The disk mounting 
-     * 
+     * The disk mounting
+     *
      * @var MountFilesystem
      */
     private static $mounted;
 
     /**
      * The service lists
-     * 
+     *
      * @var array
      */
     private static $available_serivces = [];
@@ -36,7 +34,7 @@ class Storage
      *
      * @param string $mount
      * @return MountFilesystem
-     * @throws ResourceException
+     * @throws MountDiskNotFoundException
      */
     public static function mount($mount = null)
     {
@@ -49,7 +47,7 @@ class Storage
         }
 
         if (! isset(static::$config['disk']['path'][$mount])) {
-            throw new ResourceException('Le disque '.$mount.' n\'est pas défini.');
+            throw new MountDiskNotFoundException('Le disque '.$mount.' n\'est pas défini.');
         }
 
         return static::$mounted = new MountFilesystem(static::$config['disk']['path'][$mount]);
@@ -75,7 +73,7 @@ class Storage
     /**
      * Push a new serive who implement the Bow\Storage\Contracts\ServiceInterface
      * contracts
-     * 
+     *
      * @param array $services
      */
     public static function pushService(array $services)
