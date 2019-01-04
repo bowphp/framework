@@ -2,13 +2,14 @@
 
 namespace Bow\Storage;
 
+use Bow\Http\UploadFile;
 use Bow\Storage\Contracts\FilesystemInterface;
 
 class MountFilesystem implements FilesystemInterface
 {
     /**
      * The base work directory
-     * 
+     *
      * @var
      */
     private $basedir;
@@ -26,15 +27,32 @@ class MountFilesystem implements FilesystemInterface
     /**
      * UploadFile, fonction permettant de uploader un fichier
      *
-     * @param  array    $file
-     * @param  string   $location
+     * @param  UploadFile  $file
+     * @param  string  $location
      * @param  array   $option
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    public function store($file, $location, array $option = [])
+    public function store(UploadFile $file, $location = null, array $option = [])
     {
-        // TODO: Implement store method
+        if (is_array($location)) {
+            $option = $location;
+            $location = null;
+        }
+        
+        if (isset($option['as'])) {
+            $filename = $option['as'];
+        } else {
+            $filename = $file->getHashName();
+        }
+
+        if (is_null($location)) {
+            $location = $filename;
+        } else {
+            $location = trim($location, '/').'/'.$filename;
+        }
+
+        $this->put($location, $file->getContent());
     }
 
     /**
