@@ -3,21 +3,21 @@
 namespace Bow\Configuration;
 
 use Bow\Event\Event;
-use Bow\Support\Capsule;
+use Bow\Support\Capsule as Container;
 
 abstract class Configuration
 {
     /**
-     * @var Capsule
+     * @var Container
      */
     protected $container;
 
     /**
      * Service constructor.
      *
-     * @param Capsule $container
+     * @param Container $container
      */
-    public function __construct(Capsule $container)
+    public function __construct(Container $container)
     {
         $this->container = $container;
     }
