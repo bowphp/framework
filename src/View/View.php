@@ -177,6 +177,16 @@ class View implements ResponseInterface
     }
 
     /**
+     * Get rendering content
+     *
+     * @return string
+     */
+    public function getContent()
+    {
+        return static::$content;
+    }
+
+    /**
      * Send Response
      *
      * @return mixed

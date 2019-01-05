@@ -44,21 +44,26 @@ class PHPEngine extends EngineAbstract
 
         if (file_exists($cache_hash_filename)) {
             if (filemtime($cache_hash_filename) >= fileatime($filename)) {
-                return include $cache_hash_filename;
+                ob_start();
+
+                require $cache_hash_filename;
+
+                return ob_get_clean();
             }
         }
 
-        $content[] = '<?php ob_start(); ?>';
-        $content[] = trim(file_get_contents($filename));
-        $content[] = '<?php $__bow_php_rendering_content = ob_get_clean(); ?>';
-        $content[] = '<?php return $__bow_php_rendering_content; ?>';
+        ob_start();
+
+        $content = file_get_contents($filename);
 
         // Mise en cache
         file_put_contents(
             $cache_hash_filename,
-            implode("\n", $content)
+            $content
         );
 
-        return include $filename;
+        require $cache_hash_filename;
+
+        return ob_get_clean();
     }
 }
