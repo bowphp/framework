@@ -126,6 +126,16 @@ class Command
     }
 
     /**
+     * Set the package configuration directory
+     *
+     * @param string $dirname
+     */
+    public function setConfigurationDirectory($dirname)
+    {
+        $this->configuration_directory = $dirname;
+    }
+
+    /**
      * Set the component directory
      *
      * @param string $dirname
@@ -238,6 +248,16 @@ class Command
     }
 
     /**
+     * Get the package configuration directory
+     *
+     * @return string
+     */
+    public function getConfigurationDirectory()
+    {
+        return $this->configuration_directory;
+    }
+
+    /**
      * Get the migration directory
      *
      * @return string
@@ -284,7 +304,7 @@ class Command
      */
     public function getMiddlewareDirectory()
     {
-        return $this->configuration_directory;
+        return $this->middleware_directory;
     }
 
     /**
