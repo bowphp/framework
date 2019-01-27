@@ -22,7 +22,7 @@ class Dispatcher
     private $index = 0;
 
     /**
-     * Ajout un middleware à la collection d'execution
+     * Add a middleware to the runtime collection
      *
      * @param string $middleware
      * @param array $params
@@ -40,7 +40,7 @@ class Dispatcher
     }
 
     /**
-     * Lance le procéssus d'execution de middleware
+     * Start the middleware running process
      *
      * @param Request $request
      * @param array $args

@@ -11,25 +11,29 @@ use Bow\Support\Collection;
 class Actionner
 {
     /**
-     * La liste des namespaces défini dans l'application
+     * The list of namespaces defined in the application
      *
      * @var array
      */
     private $namespaces;
 
     /**
-     * La liste de middleware charge dans l'application
+     * The list of middleware loads in the application
      *
      * @var array
      */
     private $middlewares;
 
     /**
+     * The Actionner instance
+     *
      * @var Actionner
      */
     private static $instance;
 
     /**
+     * The Dispatcher instance
+     *
      * @var Dispatcher
      */
     private $dispatcher;
@@ -50,10 +54,11 @@ class Actionner
     }
 
     /**
-     * Configuration de l'actionneur
+     * Actionner configuration
      *
      * @param array $namespaces
      * @param array $middlewares
+     *
      * @return static
      */
     public static function configure(array $namespaces, array $middlewares)
@@ -66,7 +71,7 @@ class Actionner
     }
 
     /**
-     * Récupère une instance de l'actonneur
+     * Retrieves Actionner instance
      *
      * @return Actionner
      */
@@ -76,7 +81,7 @@ class Actionner
     }
 
     /**
-     * Ajout un middleware à la liste
+     * Add a middleware to the list
      *
      * @param array|callable $middlewares
      * @param bool $end
@@ -93,7 +98,7 @@ class Actionner
     }
 
     /**
-     * Ajout un namespace à la liste
+     * Adding a namespace to the list
      *
      * @param array|string $namespace
      */
@@ -105,10 +110,11 @@ class Actionner
     }
 
     /**
-     * Lanceur de callback
+     * Callback launcher
      *
      * @param  callable|string|array $actions
      * @param  mixed  $param
+     *
      * @return mixed
      *
      * @throws RouterException
@@ -118,7 +124,7 @@ class Actionner
         $param = (array) $param;
 
         /**
-         * Execution d'action definir comme chaine de caractère
+         * We execute the action define as a string
          */
         if (is_string($actions) || is_callable($actions)) {
             $actions = [$actions];
@@ -134,8 +140,8 @@ class Actionner
         $middlewares = [];
 
         /**
-         * Vérification de l'existance de middleware associté à l'action
-         * et extraction du middleware
+         * We verify the existence of middleware associated with the action
+         * and extracting the middleware
          */
         if (isset($actions['middleware'])) {
             $middlewares = (array) $actions['middleware'];
@@ -144,8 +150,8 @@ class Actionner
         }
 
         /**
-         * Vérification de l'existance de controlleur associté à l'action
-         * et extraction du controlleur
+         * We verify the existence of controller associated
+         * with the action and extracting the controller
          */
         if (isset($actions['controller'])) {
             $actions = (array) $actions['controller'];
@@ -154,8 +160,8 @@ class Actionner
         $functions = [];
 
         /**
-         * Normalisation de l'action à executer et creation de
-         * l'injection de dépendance
+         * We normalize of the action to execute and
+         * creation of the dependency injection
          */
         foreach ($actions as $key => $action) {
             if (is_string($action)) {
@@ -178,7 +184,7 @@ class Actionner
         }
 
         /**
-         * Chargement des middlewares associés à l'action
+         * We load the middleware associated with the action
          */
         foreach ($middlewares as $middleware) {
             if (is_callable($middleware)) {
@@ -207,19 +213,19 @@ class Actionner
                 throw new RouterException(sprintf('%s n\'est pas un middleware définir.', $middleware), E_ERROR);
             }
 
-            // On vérifie si le middleware définie est une middleware valide.
+            // We check if the defined middleware is a valid middleware.
             if (!class_exists($this->middlewares[$middleware])) {
                 throw new RouterException(sprintf('%s n\'est pas un class middleware.', $middleware));
             }
 
-            // Add middleware into dispatch pipeline
+            // We qdd middleware into dispatch pipeline
             $this->dispatcher->pipe(
                 $this->middlewares[$middleware],
                 count($parts) != 2 ? [] : explode(',', $parts[1])
             );
         }
 
-        // Process middleware dispatcher
+        // We process middleware througth the dispatcher
         $response = $this->dispatcher->process(
             Request::getInstance()
         );
@@ -244,14 +250,15 @@ class Actionner
      *
      * @param array $functions
      * @param array $param
+     *
      * @return mixed
      */
     private function dispatchControllers(array $functions, array $param)
     {
         $response = null;
 
-        // Lancement de l'éxècution de la liste des actions definir
-        // Fonction a éxècuté suivant un ordre
+        // We launch of the execution of the list of actions define
+        // Function has been executed according to an order
         foreach ($functions as $function) {
             $response = call_user_func_array(
                 $function['action'],
@@ -271,11 +278,13 @@ class Actionner
     }
 
     /**
-     * Permet de faire un injection
+     * Make any class injection
      *
      * @param string $classname
      * @param string $method
+     *
      * @return array
+     *
      * @throws
      */
     public function injector($classname, $method = null)
@@ -315,10 +324,12 @@ class Actionner
     }
 
     /**
-     * Injection de type pour closure
+     * Injection for closure
      *
      * @param callable $closure
+     *
      * @return array
+     *
      * @throws
      */
     public function injectorForClosure(callable $closure)
@@ -353,7 +364,7 @@ class Actionner
     }
 
     /**
-     * La liste de type non permis
+     * The list of type not allowed to injection
      *
      * @return array
      */
@@ -367,7 +378,7 @@ class Actionner
     }
 
     /**
-     * Next, lance successivement une liste de fonction.
+     * Successively launches a function list.
      *
      * @param array|callable $arr
      * @param array|callable $arg
@@ -383,7 +394,7 @@ class Actionner
             return call_user_func_array($arr, $arg);
         }
 
-        // On lance la loader de controller si $cb est un String
+        // We launch the controller loader if $cb is a String
         $controller = $this->controller($arr);
 
         if ($controller['action'][1] == null) {
@@ -401,7 +412,7 @@ class Actionner
     }
 
     /**
-     * Charge les controleurs definie comme chaine de caractère
+     * Load the controllers defined as string
      *
      * @param string $controller_name
      *
@@ -409,7 +420,7 @@ class Actionner
      */
     public function controller($controller_name)
     {
-        // Récupération de la classe et de la methode à lancer.
+        // Retrieving the class and method to launch.
         if (is_null($controller_name)) {
             return null;
         }
@@ -435,7 +446,7 @@ class Actionner
     }
 
     /**
-     * Charge les closure definir comme action
+     * Load the closure define as action
      *
      * @param \Closure $closure
      *
@@ -443,7 +454,7 @@ class Actionner
      */
     public function closure($closure)
     {
-        // Récupération de la classe et de la methode à lancer.
+        // Retrieving the class and method to launch.
         if (!is_callable($closure)) {
             return null;
         }

@@ -16,31 +16,40 @@ use Bow\Support\Capsule;
 class Application
 {
     /**
+     * The Capsule instance
+     *
      * @var Capsule
      */
     private $capsule;
 
     /**
+     * The booting flag
+     *
      * @var bool
      */
     private $booted = false;
 
     /**
+     * Define the functions related to an http
+     * code executed if this code is up
+     *
      * @var array
      */
     private $error_code = [];
 
     /**
+     * Define the gloal middleware
+     *
      * @var array
      */
-    private $globale_middleware = [];
+    private $middlewares = [];
 
     /**
-     * Branchement global sur un liste de route
+     * The routing prefixer
      *
      * @var string
      */
-    private $branch;
+    private $prefix;
 
     /**
      * @var string
@@ -55,46 +64,49 @@ class Application
     private $current = [];
 
     /**
-     * Patter Singleton
+     * The Application instance
      *
      * @var Application
      */
     private static $instance;
 
     /**
-     * Collecteur de route.
+     * Route collection.
      *
      * @var array
      */
     private $routes = [];
 
     /**
+     * The HTTP Request
+     *
      * @var Request
      */
     private $request;
 
     /**
+     * The HTTP Response
+     *
      * @var Response
      */
     private $response;
 
     /**
+     * The Configuration Loader instance
+     *
      * @var Loader
      */
     private $config;
 
     /**
-     * @var array
-     */
-    private $local = [];
-
-    /**
+     * This define if the X-powered-By header must be put in response
+     *
      * @var bool
      */
     private $disable_x_powered_by = false;
 
     /**
-     * Private construction
+     * Application constructor
      *
      * @param Request $request
      * @param Response $response
@@ -116,7 +128,7 @@ class Application
     }
 
     /**
-     * Retourne le container
+     * Get container
      *
      * @return Capsule
      */
@@ -126,7 +138,7 @@ class Application
     }
 
     /**
-     * Association de la configuration
+     * Configuration Association
      *
      * @param Loader $config
      * @return void
@@ -141,7 +153,7 @@ class Application
     }
 
     /**
-     * Démarrage de l'application
+     * Boot the application
      *
      * @return void
      */
@@ -157,7 +169,7 @@ class Application
     }
 
     /**
-     * Construction de l'application
+     * Build the application
      *
      * @param Request $request
      * @param Response $response
@@ -173,36 +185,38 @@ class Application
     }
 
     /**
-     * Ajout un préfixe sur les routes
+     * Add a prefix on the roads
      *
-     * @param string $branch
-     * @param callable|string|array $cb
+     * @param string $prefix
+     * @param callable $cb
+     *
      * @return Application
+     *
      * @throws
      */
-    public function prefix($branch, callable $cb)
+    public function prefix($prefix, callable $cb)
     {
-        $branch = rtrim($branch, '/');
+        $prefix = rtrim($prefix, '/');
 
-        if (!preg_match('@^/@', $branch)) {
-            $branch = '/' . $branch;
+        if (!preg_match('@^/@', $prefix)) {
+            $prefix = '/' . $prefix;
         }
 
-        if ($this->branch !== null) {
-            $this->branch .= $branch;
+        if ($this->prefix !== null) {
+            $this->prefix .= $prefix;
         } else {
-            $this->branch = $branch;
+            $this->prefix = $prefix;
         }
 
         call_user_func_array($cb, [$this]);
 
-        $this->branch = '';
+        $this->prefix = '';
 
         return $this;
     }
 
     /**
-     * Permet d'associer un middleware global sur une url
+     * Allows to associate a global middleware on an route
      *
      * @param array $middlewares
      * @return Application
@@ -211,15 +225,15 @@ class Application
     {
         $middlewares = (array) $middlewares;
 
-        $this->globale_middleware = [];
+        $this->middlewares = [];
 
         foreach ($middlewares as $middleware) {
             if (is_callable($middleware)) {
-                $this->globale_middleware[] = $middleware;
+                $this->middlewares[] = $middleware;
             } elseif (class_exists($middleware, true)) {
-                $this->globale_middleware[] = [new $middleware, 'process'];
+                $this->middlewares[] = [new $middleware, 'process'];
             } else {
-                $this->globale_middleware[] = $middleware;
+                $this->middlewares[] = $middleware;
             }
         }
 
@@ -235,15 +249,15 @@ class Application
     public function route(array $definition)
     {
         if (!isset($definition['path'])) {
-            throw new RouterException('Le chemin non definie');
+            throw new RouterException('The undefined path');
         }
 
         if (!isset($definition['method'])) {
-            throw new RouterException('Méthode non definie');
+            throw new RouterException('Unspecified method');
         }
 
         if (!isset($definition['handler'])) {
-            throw new RouterException('Controlleur non definie');
+            throw new RouterException('Undefined controller');
         }
 
         $method = $definition['method'];
@@ -272,7 +286,26 @@ class Application
     }
 
     /**
-     * Ajout une route de type GET
+     * Add a route for
+     *
+     * GET, POST, DELETE, PUT, OPTIONS, PATCH
+     *
+     * @param string $path
+     * @param callable|string|array $cb
+     * @return Application
+     * @throws
+     */
+    public function any($path, $cb)
+    {
+        foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
+            $this->$method($path, $cb);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add a GET route
      *
      * @param string $path
      * @param callable|string|array $cb
@@ -284,7 +317,7 @@ class Application
     }
 
     /**
-     * Ajout une route de type POST
+     * Add a POST route
      *
      * @param string $path
      * @param callable|string|array $cb
@@ -308,26 +341,7 @@ class Application
     }
 
     /**
-     * Ajout une route de tout type
-     *
-     * GET, POST, DELETE, PUT, OPTIONS, PATCH
-     *
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Application
-     * @throws
-     */
-    public function any($path, $cb)
-    {
-        foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
-            $this->$method($path, $cb);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Ajout une route de type DELETE
+     * Add a DELETE route
      *
      * @param string $path
      * @param callable|string|array $cb
@@ -339,7 +353,7 @@ class Application
     }
 
     /**
-     * Ajout une route de type PUT
+     * Add a PUT route
      *
      * @param string $path
      * @param callable|string|array $cb
@@ -351,7 +365,7 @@ class Application
     }
 
     /**
-     * Ajout une route de type PATCH
+     * Add a PATCH route
      *
      * @param string $path
      * @param callable|string|array $cb
@@ -363,7 +377,7 @@ class Application
     }
 
     /**
-     * Ajout une route de type PATCH
+     * Add a OPTIONS route
      *
      * @param string $path
      * @param callable $cb
@@ -375,7 +389,8 @@ class Application
     }
 
     /**
-     * Lance une fonction de rappel pour chaque code d'erreur HTTP
+     * Launch a callback function for each HTTP error code.
+     * When the define code match with response code.
      *
      * @param int $code
      * @param callable $cb
@@ -408,7 +423,7 @@ class Application
     }
 
     /**
-     * Permet d'ajouter les autres verbes http [PUT, DELETE, UPDATE, HEAD, PATCH]
+     * Add other HTTP verbs [PUT, DELETE, UPDATE, HEAD, PATCH]
      *
      * @param string $method
      * @param string $path
@@ -429,7 +444,7 @@ class Application
     }
 
     /**
-     * Lance le chargement d'une route.
+     * Start loading a route.
      *
      * @param string $method
      * @param string $path
@@ -438,17 +453,16 @@ class Application
      */
     private function routeLoader($method, $path, $cb)
     {
-        // construction du path original en fonction de la Loader de l'application
-        $path = $this->config['app.root'].$this->branch.$path;
+        // We build the original path based on the application loader
+        $path = $this->config['app.root'].$this->prefix.$path;
 
-        // route courante
-        // methode courante
+        // We define the current route and current method
         $this->current = ['path' => $path, 'method' => $method];
 
-        // Ajout de la nouvelle route
+        // We add the new route
         $route = new Route($path, $cb);
 
-        $route->middleware($this->globale_middleware);
+        $route->middleware($this->middlewares);
 
         $this->routes[$method][] = $route;
 
@@ -462,7 +476,7 @@ class Application
     }
 
     /**
-     * Lanceur de l'application
+     * Launcher of the application
      *
      * @return mixed
      * @throws RouterException
@@ -479,27 +493,26 @@ class Application
             return true;
         }
 
-        // Ajout de l'entête X-Powered-By
+        // We add of the X-Powered-By header when disable_x_powered_by is true
         if (!$this->disable_x_powered_by) {
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
         }
 
-        $this->branch = '';
+        $this->prefix = '';
 
         $method = $this->request->method();
 
-        // vérification de l'existance d'une methode spécial
-        // de type DELETE, PUT
+        // We verify the existence of a special method DELETE, PUT
         if ($method == 'POST') {
             if ($this->special_method !== null) {
                 $method = $this->special_method;
             }
         }
 
-        // Vérification de l'existance de methode de la requete dans
-        // la collection de route
+        // We verify the existence of the method of the request in
+        // the routing collection
         if (!isset($this->routes[$method])) {
-            // Vérification et appel de la fonction du branchement 404
+            // We verify and call function associate by 404 code
             $this->response->status(404);
 
             if (empty($this->error_code)) {
@@ -516,32 +529,32 @@ class Application
         $error = true;
 
         foreach ($this->routes[$method] as $key => $route) {
-            // route doit être une instance de Route
+            // The route must be an instance of Route
             if (!($route instanceof Route)) {
                 continue;
             }
 
-            // Lancement de la recherche de la methode qui arrivée dans la requête
-            // ensuite lancement de la vérification de l'url de la requête
+            // We launch the search of the method that arrived in the query
+             // then start checking the url of the request
             if (!$route->match($this->request->path())) {
                 continue;
             }
 
             $this->current['path'] = $route->getPath();
 
-            // Appel de l'action associer à la route
+            // We call the action associate with the route
             $response = $route->call();
             $error = false;
 
             break;
         }
 
-        // Gestion de erreur
+        // Error management
         if (!$error) {
             return $this->sendResponse($response);
         }
 
-        // Application du code d'erreur 404
+        // We apply the 404 error code
         $this->response->status(404);
 
         if (is_string($this->config['view.404'])) {
@@ -557,7 +570,7 @@ class Application
     }
 
     /**
-     * Envoi la reponse au client
+     * Send the answer to the customer
      *
      * @param mixed $response
      * @return null
@@ -572,8 +585,8 @@ class Application
     }
 
     /**
-     * Permet d'active l'écriture le l'entête X-Powered-By
-     * dans la réponse de la réquête.
+     * Allows you to enable writing the X-Powered-By header
+     * in the answer of the inquiry.
      *
      * @return void
      */
@@ -596,7 +609,7 @@ class Application
     {
         if (!is_string($controller_name) && !is_array($controller_name)) {
             throw new ApplicationException(
-                'Le premier paramètre doit être un array ou une chaine de caractère',
+                'The first parameter must be an array or a string',
                 E_ERROR
             );
         }
@@ -622,37 +635,18 @@ class Application
         }
 
         if (is_null($controller) || !is_string($controller)) {
-            throw new ApplicationException("[REST] Aucun controlleur défini !", E_ERROR);
+            throw new ApplicationException(
+                "[REST] No defined controller!",
+                E_ERROR
+            );
         }
 
-        // normalize url
+        // Normalize url
         $url = preg_replace('/\/+$/', '', $url);
 
         Rest::make($url, $controller, $where, $ignore_method);
 
         return $this;
-    }
-
-    /**
-     * __call fonction magic php
-     *
-     * @param string $method
-     * @param array  $param
-     * @return mixed
-     *
-     * @throws ApplicationException
-     */
-    public function __call($method, array $param)
-    {
-        if (method_exists($this->config, $method)) {
-            return call_user_func_array([$this->config, $method], $param);
-        }
-
-        if (in_array($method, $this->local)) {
-            return call_user_func_array($this->local[$method], $param);
-        }
-
-        throw new ApplicationException('La methode ' . $method . ' n\'exist pas.', E_ERROR);
     }
 
     /**
@@ -674,7 +668,7 @@ class Application
         }
 
         if ($message == null) {
-            $message = 'Le procéssus a été suspendu.';
+            $message = 'The trial was suspended.';
         }
 
         throw new HttpException($message);
@@ -699,7 +693,9 @@ class Application
         }
 
         if (!is_callable($callable)) {
-            throw new ApplicationException('le deuxième paramètre doit être un callable.');
+            throw new ApplicationException(
+                'The second parameter must be a callable.'
+            );
         }
 
         return $this->capsule->bind($name, $callable);
@@ -708,7 +704,7 @@ class Application
     /**
      * __invoke
      *
-     * Cette methode point sur le système container
+     * This point method on the container system
      *
      * @param array ...$params
      * @return Capsule
@@ -721,7 +717,7 @@ class Application
         }
 
         if (count($params) > 2) {
-            throw new ApplicationException('Deuxième paramètre doit être passer.');
+            throw new ApplicationException('Second parameter must be pass.');
         }
 
         if (count($params) == 1) {
