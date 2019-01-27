@@ -5,42 +5,45 @@ namespace Bow\Database\Connection;
 use Bow\Database\Tool;
 use PDO;
 
-/**
- * Interface ConnectionInterface
- *
- * @package Database\Connection
- */
 abstract class AbstractConnection extends Tool
 {
     /**
+     * The connexion name
+     *
      * @var string
      */
     protected $name = null;
 
     /**
+     * The configuration definition
+     *
      * @var array
      */
     protected $config = [];
 
     /**
+     * The PDO fetch mode
+     *
      * @var int
      */
     protected $fetch = \PDO::FETCH_OBJ;
 
     /**
+     * The PDO instance
+     *
      * @var PDO
      */
     protected $pdo;
 
     /**
-     * Permet de creer un instance de l'objet PDO
+     * Create an instance of the PDO
      *
      * @return void
      */
     abstract public function connection();
 
     /**
-     * Permet de recuperer la connection
+     * Retrieves the connection
      *
      * @return PDO
      */
@@ -50,7 +53,7 @@ abstract class AbstractConnection extends Tool
     }
 
     /**
-     * Permet de recuperer la connection
+     * Set the connection
      *
      * @param PDO $pdo
      */
@@ -60,7 +63,7 @@ abstract class AbstractConnection extends Tool
     }
 
     /**
-     * Permet de retourner le nom de la connectoon
+     * Returns the name of the connection
      *
      * @return string
      */
@@ -70,18 +73,22 @@ abstract class AbstractConnection extends Tool
     }
 
     /**
-     * Permet de définir le mode de récuperation des données.
+     * Sets the data recovery mode.
      *
      * @param int $fetch
      */
     public function setFetchMode($fetch)
     {
         $this->fetch = $fetch;
-        $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, $fetch);
+
+        $this->pdo->setAttribute(
+            PDO::ATTR_DEFAULT_FETCH_MODE,
+            $fetch
+        );
     }
 
     /**
-     * Permet de récupérer la configuration
+     * Retrieves the configuration
      *
      * @return array
      */
@@ -91,22 +98,26 @@ abstract class AbstractConnection extends Tool
     }
 
     /**
-     * Permet de récupérer le prefix des tables
+     * Retrieves the table prefix
      *
      * @return mixed|string
      */
     public function getTablePrefix()
     {
-        return isset($this->config['prefix']) ? $this->config['prefix'] : '';
+        return isset($this->config['prefix'])
+            ? $this->config['prefix']
+            : '';
     }
 
     /**
-     * Permet de récupérer le type d'encodage
+     * Retrieves the type of encoding
      *
      * @return mixed|string
      */
     public function getCharset()
     {
-        return isset($this->config['charset']) ? $this->config['charset'] : 'utf8';
+        return isset($this->config['charset'])
+            ? $this->config['charset']
+            : 'utf8';
     }
 }

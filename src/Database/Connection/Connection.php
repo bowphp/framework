@@ -5,6 +5,8 @@ namespace Bow\Database\Connection;
 class Connection
 {
     /**
+     * The adaptor information
+     *
      * @var AbstractConnection
      */
     private $adapter;
@@ -20,7 +22,7 @@ class Connection
     }
 
     /**
-     * Permet de retourner la connection a une base de donnée.
+     * Returns the connection to a database.
      *
      * @return AbstractConnection
      */
@@ -30,7 +32,7 @@ class Connection
     }
 
     /**
-     * Permet de modifier l'adapter
+     * Set the adaptor
      *
      * @param AbstractConnection $adapter
      */

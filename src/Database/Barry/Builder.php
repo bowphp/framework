@@ -8,6 +8,8 @@ use Bow\Database\QueryBuilder;
 class Builder extends QueryBuilder
 {
     /**
+     * The model instance
+     *
      * @var string
      */
     protected $model;

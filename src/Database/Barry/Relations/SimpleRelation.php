@@ -5,7 +5,7 @@ namespace Bow\Database\Barry\Relations;
 trait SimpleRelation
 {
     /**
-     * Definir la clé étranger
+     * Define the foreign key
      *
      * @param  string $table
      * @param  string $id
@@ -17,7 +17,7 @@ trait SimpleRelation
     }
 
     /**
-     * Join avec une autre table
+     * Join with another table
      *
      * @param  string $table
      * @param  mixed  $foreign_key

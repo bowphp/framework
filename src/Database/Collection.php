@@ -37,15 +37,15 @@ class Collection extends \Bow\Support\Collection
     }
 
     /**
-     * Permet de supprimer tout les enrégistrement séléctionnés
+     * Allows you to delete all the selected recordings
+     *
+     * @return void
      */
     public function dropAll()
     {
-        $this->each(
-            function (Model $model) {
-                $model->delete();
-            }
-        );
+        $this->each(function (Model $model) {
+            $model->delete();
+        });
     }
 
     /**

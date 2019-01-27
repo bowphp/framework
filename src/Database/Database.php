@@ -14,31 +14,38 @@ use StdClass;
 class Database
 {
     /**
+     * The adapter instance
+     *
      * @var AbstractConnection;
      */
     private static $adapter;
 
     /**
+     * The singleton Database instance
+     *
      * @var Database
      */
-    private static $instance = null;
+    private static $instance;
+
     /**
      * Configuration
      *
      * @var StdClass
      */
     private static $config;
+
     /**
      * Configuration
      *
      * @var string
      */
-    private static $name = null;
+    private static $name;
 
     /**
-     * Charger la configuration
+     * Load configuration
      *
      * @param array $config
+     *
      * @return Database
      */
     public static function configure($config)
@@ -55,7 +62,7 @@ class Database
     }
 
     /**
-     * Retourne l'instance de Database
+     * Returns the Database instance
      *
      * @return Database
      */
@@ -65,8 +72,9 @@ class Database
 
         return static::$instance;
     }
+
     /**
-     * connection, lance la connection sur la DB
+     * Connection, starts the connection on the DB
      *
      * @param  null $name
      * @return null|Database
@@ -101,7 +109,7 @@ class Database
             } elseif ($name == 'sqlite') {
                 static::$adapter = new SqliteAdapter($config);
             } else {
-                throw new ConnectionException('Ce driver n\'est pas prie en compte.');
+                throw new ConnectionException('This driver is not praised');
             }
 
             static::$adapter->setFetchMode(static::$config['fetch']);
@@ -115,7 +123,7 @@ class Database
     }
 
     /**
-     * currentZone, retourne la zone courante.
+     * Get connexion nane
      *
      * @return string|null
      */
@@ -125,7 +133,7 @@ class Database
     }
 
     /**
-     * Permet de retouner l'instance de l'adapteur
+     * Get adapter connexion instance
      *
      * @return AbstractConnection
      */
@@ -137,7 +145,7 @@ class Database
     }
 
     /**
-     * éxécute une requête update
+     * Execute an UPDATE request
      *
      * @param  string $sqlstatement
      * @param  array  $data
@@ -155,9 +163,9 @@ class Database
     }
 
     /**
-     * éxécute une requête select
+     * Execute a SELECT request
      *
-     * @param  $sqlstatement
+     * @param  string $sqlstatement
      * @param  array        $data
      * @return mixed|null
      */
@@ -165,13 +173,24 @@ class Database
     {
         static::verifyConnection();
 
-        if (!preg_match("/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i", $sqlstatement)) {
-            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
+        if (!preg_match(
+            "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
+            $sqlstatement
+        )) {
+            throw new DatabaseException(
+                'Syntax Error on the Request',
+                E_USER_ERROR
+            );
         }
 
-        $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+        $pdostatement = static::$adapter
+            ->getConnection()
+            ->prepare($sqlstatement);
 
-        static::$adapter->bind($pdostatement, Sanitize::make($data, true));
+        static::$adapter->bind(
+            $pdostatement,
+            Sanitize::make($data, true)
+        );
 
         $pdostatement->execute();
 
@@ -179,10 +198,10 @@ class Database
     }
 
     /**
-     * éxécute une requête select et retourne un seul enregistrement
+     * Executes a select query and returns a single record
      *
-     * @param  $sqlstatement
-     * @param  array        $data
+     * @param  string $sqlstatement
+     * @param  array  $data
      * @return mixed|null
      */
     public static function selectOne($sqlstatement, array $data = [])
@@ -190,20 +209,28 @@ class Database
         static::verifyConnection();
 
         if (!preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
-            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
+            throw new DatabaseException(
+                'Syntax Error on the Request',
+                E_USER_ERROR
+            );
         }
 
-        $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+        // Prepare query
+        $pdostatement = static::$adapter
+            ->getConnection()
+            ->prepare($sqlstatement);
 
+        // Bind data
         static::$adapter->bind($pdostatement, $data);
 
+        // Execute query
         $pdostatement->execute();
 
         return Sanitize::make($pdostatement->fetch());
     }
 
     /**
-     * éxécute une requête insert
+     * Execute an insert query
      *
      * @param  $sqlstatement
      * @param  array        $data
@@ -216,9 +243,11 @@ class Database
         if (!preg_match(
             "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
             $sqlstatement
-        )
-        ) {
-            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
+        )) {
+            throw new DatabaseException(
+                'Syntax Error on the Request',
+                E_USER_ERROR
+            );
         }
 
         if (empty($data)) {
@@ -251,24 +280,32 @@ class Database
     }
 
     /**
-     * éxécute une requête de type DROP|CREATE TABLE|TRAUNCATE|ALTER Builder
+     * Executes a request of type DROP | CREATE TABLE | TRAUNCATE | ALTER Builder
      *
-     * @param  $sqlstatement
+     * @param string $sqlstatement
      * @return bool
      */
     public static function statement($sqlstatement)
     {
         static::verifyConnection();
 
-        if (!preg_match("/^((drop|alter|create)\s+table|truncate|call)(\s+)?(.+?);?$/i", $sqlstatement)) {
-            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
+        if (!preg_match(
+            "/^((drop|alter|create)\s+(?:(?:temp|temporary)\s+)?table|truncate|call)(\s+)?(.+?);?$/i",
+            $sqlstatement
+        )) {
+            throw new DatabaseException(
+                'Syntax Error on the Request',
+                E_USER_ERROR
+            );
         }
 
-        return static::$adapter->getConnection()->exec($sqlstatement) === 0;
+        return static::$adapter
+            ->getConnection()
+            ->exec($sqlstatement) === 0;
     }
 
     /**
-     * éxécute une requête delete
+     * Execute a delete request
      *
      * @param  $sqlstatement
      * @param  array        $data
@@ -278,15 +315,21 @@ class Database
     {
         static::verifyConnection();
 
-        if (!preg_match("/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i", $sqlstatement)) {
-            throw new DatabaseException('Erreur de synthax sur la réquete', E_USER_ERROR);
+        if (!preg_match(
+            "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
+            $sqlstatement
+        )) {
+            throw new DatabaseException(
+                'Syntax Error on the Request',
+                E_USER_ERROR
+            );
         }
 
         return static::executePrepareQuery($sqlstatement, $data);
     }
 
     /**
-     * Charge le factory Builder
+     * Load the query builder factory on table name
      *
      * @param string $table
      * @return QueryBuilder
@@ -297,11 +340,14 @@ class Database
 
         $table = static::$adapter->getTablePrefix().$table;
 
-        return new QueryBuilder($table, static::$adapter->getConnection());
+        return new QueryBuilder(
+            $table,
+            static::$adapter->getConnection()
+        );
     }
 
     /**
-     * Lancement du debut d'un transaction
+     * Starting the start of a transaction
      *
      * @param callable $callback
      */
@@ -325,7 +371,7 @@ class Database
     }
 
     /**
-     * Vérifie si l'execution de la base de donnée est en transation
+     * Check if database execution is in transation
      *
      * @return bool
      */
@@ -337,7 +383,7 @@ class Database
     }
 
     /**
-     * Valider une transaction
+     * Validate a transaction
      */
     public static function commit()
     {
@@ -347,7 +393,7 @@ class Database
     }
 
     /**
-     * Annuler une transaction
+     * Cancel a transaction
      */
     public static function rollback()
     {
@@ -357,7 +403,8 @@ class Database
     }
 
     /**
-     * Lance la verification de l'établissement de connection
+     * Starts the verification of the connection establishment
+     *
      * @throws
      */
     private static function verifyConnection()
@@ -368,7 +415,7 @@ class Database
     }
     
     /**
-     * Récupère l'identifiant de la dernière enregistrement.
+     * Retrieves the identifier of the last record.
      *
      * @param  string $name
      * @return int
@@ -377,21 +424,28 @@ class Database
     {
         static::verifyConnection();
 
-        return (int) static::$adapter->getConnection()->lastInsertId($name);
+        return (int) static::$adapter
+            ->getConnection()
+            ->lastInsertId($name);
     }
 
     /**
-     * Execute Les request de type delete insert update
+     * Execute the request of type delete insert update
      *
-     * @param  $sqlstatement
-     * @param  array        $data
+     * @param string $sqlstatement
+     * @param array $data
      * @return mixed
      */
     private static function executePrepareQuery($sqlstatement, array $data = [])
     {
-        $pdostatement = static::$adapter->getConnection()->prepare($sqlstatement);
+        $pdostatement = static::$adapter
+            ->getConnection()
+            ->prepare($sqlstatement);
 
-        static::$adapter->bind($pdostatement, Sanitize::make($data, true));
+        static::$adapter->bind(
+            $pdostatement,
+            Sanitize::make($data, true)
+        );
 
         $pdostatement->execute();
 
@@ -401,7 +455,7 @@ class Database
     }
 
     /**
-     * pdo, retourne l'instance de la connection.
+     * PDO, returns the instance of the connection.
      *
      * @return PDO
      */
@@ -413,7 +467,7 @@ class Database
     }
 
     /**
-     * modifie l'instance de PDO
+     * Modify the PDO instance
      *
      * @param PDO $pdo
      */
@@ -425,7 +479,7 @@ class Database
     /**
      * __call
      *
-     * @param $method
+     * @param string $method
      * @param array  $arguments
      *
      * @throws DatabaseException
@@ -435,9 +489,15 @@ class Database
     public function __call($method, array $arguments)
     {
         if (method_exists(static::$instance, $method)) {
-            return call_user_func_array([static::$instance, $method], $arguments);
+            return call_user_func_array(
+                [static::$instance, $method],
+                $arguments
+            );
         }
 
-        throw new DatabaseException("$method n'est pas une methode.", E_USER_ERROR);
+        throw new DatabaseException(
+            sprintf("%s is not a method.", $method),
+            E_USER_ERROR
+        );
     }
 }

@@ -5,7 +5,7 @@ namespace Bow\Database\Barry\Relations\Traits;
 trait Belongs
 {
     /**
-     *
+     * Make belongs to one relation
      *
      * @param string $class
      * @param string $primary_key
@@ -16,7 +16,7 @@ trait Belongs
     }
 
     /**
-     *
+     * Make belongs to many relation
      *
      * @param string $class
      * @param string $primary_key

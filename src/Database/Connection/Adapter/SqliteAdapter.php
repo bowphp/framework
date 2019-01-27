@@ -8,6 +8,8 @@ use PDO;
 class SqliteAdapter extends AbstractConnection
 {
     /**
+     * The connexion name
+     *
      * @var string
      */
     protected $name = 'sqlite';
@@ -15,11 +17,12 @@ class SqliteAdapter extends AbstractConnection
     /**
      * SqliteAdapter constructor.
      *
-     * @param $config
+     * @param array $config
      */
-    public function __construct($config)
+    public function __construct(array $config)
     {
         $this->config = $config;
+
         $this->connection();
     }
 

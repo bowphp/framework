@@ -8,18 +8,23 @@ use PDOStatement;
 class Tool
 {
     /**
-     * Éxécute PDOStatement::bindValue sur une instance de PDOStatement passé en paramètre
+     * Executes PDOStatement::bindValue on an instance of
+     * PDOStatement passed as parameter
      *
-     * @param PDOStatement $pdoStatement
-     * @param array        $data
+     * @param PDOStatement $pdo_statement
+     * @param array $data
      *
      * @return PDOStatement
      */
-    public function bind(PDOStatement $pdoStatement, array $data = [])
+    public function bind(PDOStatement $pdo_statement, array $data = [])
     {
         foreach ($data as $key => $value) {
             if (is_null($value) || strtolower($value) === 'null') {
-                $pdoStatement->bindValue(':' . $key, $value, PDO::PARAM_NULL);
+                $pdo_statement->bindValue(
+                    ':' . $key,
+                    $value,
+                    PDO::PARAM_NULL
+                );
                 
                 unset($data[$key]);
             }
@@ -30,14 +35,14 @@ class Tool
 
             if (preg_match('/[a-z0-9A-Z_-]+|éàèëïùöôîüµ$£!?\.\+,;:/', $value) && !is_numeric($value)) {
                 /**
-                 * SÉCURIATION DES DONNÉS
+                 * SECURITY OF DATA
                  * - Injection SQL
                  * - XSS
                  */
                 $param = PDO::PARAM_STR;
             } else {
                 /**
-                 * On force la valeur en entier ou en réél.
+                 * We force the value in whole or in reel.
                  */
                 if (is_int($value)) {
                     $value = (int) $value;
@@ -49,12 +54,12 @@ class Tool
             }
 
             if (is_string($key)) {
-                $pdoStatement->bindValue(':' . $key, $value, $param);
+                $pdo_statement->bindValue(':' . $key, $value, $param);
             } else {
-                $pdoStatement->bindValue($key + 1, $value, $param);
+                $pdo_statement->bindValue($key + 1, $value, $param);
             }
         }
 
-        return $pdoStatement;
+        return $pdo_statement;
     }
 }

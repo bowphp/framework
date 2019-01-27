@@ -5,6 +5,7 @@ namespace Bow\Database\Barry\Relations\Traits;
 trait HasMany
 {
     /**
+     * Make has many relation
      *
      * @param string $class
      * @param string $primary_id
