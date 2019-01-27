@@ -9,11 +9,15 @@ use Bow\Session\Session;
 class Auth
 {
     /**
+     * Defines the auth provider
+     *
      * @var array
      */
     private $provider;
 
     /**
+     * Default credentials fields
+     *
      * @var array
      */
     protected $credentials = [
@@ -22,16 +26,22 @@ class Auth
     ];
 
     /**
+     * The Session instance
+     *
      * @var Session
      */
     private static $session;
 
     /**
+     * The Auth instance
+     *
      * @var Auth
      */
     private static $instance;
 
     /**
+     * The Auth configuration
+     *
      * @var array
      */
     private static $config;
