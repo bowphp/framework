@@ -12,7 +12,8 @@
         "bowphp/tintin": "*",
         "filp/whoops": "^2.1",
         "nesbot/carbon": "^1.21",
-        "psy/psysh": "@stable"
+        "psy/psysh": "@stable",
+        "fzaninotto/faker": "^1.8"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8",
