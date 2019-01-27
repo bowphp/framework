@@ -8,11 +8,15 @@ use Bow\Support\Str;
 class Cache
 {
     /**
+     * The cache directory
+     *
      * @var string
      */
     private static $directory;
 
     /**
+     * The meta data
+     *
      * @var bool
      */
     private static $with_meta = false;
@@ -28,7 +32,7 @@ class Cache
     }
 
     /**
-     * Methode de configuration du cache
+     * Cache configuration method
      *
      * @param string $base_directory
      */
@@ -46,9 +50,10 @@ class Cache
     /**
      * Add new enter in the cache system
      *
-     * @param  string $key  The cache key
-     * @param  mixed  $data
-     * @param  int    $time
+     * @param string $key
+     * @param mixed $data
+     * @param int $time
+     *
      * @return bool
      */
     public static function add($key, $data, $time = null)
@@ -63,11 +68,14 @@ class Cache
 
         $meta['content'] = $content;
 
-        return (bool) file_put_contents(static::makeHashFilename($key, true), serialize($meta));
+        return (bool) file_put_contents(
+            static::makeHashFilename($key, true),
+            serialize($meta)
+        );
     }
 
     /**
-     * Permet d'ajouter un cache qui persistera
+     * Adds a cache that will persist
      *
      * @param  string $key  The cache key
      * @param  mixed  $data
@@ -85,7 +93,10 @@ class Cache
 
         $meta['content'] = $content;
 
-        return (bool) file_put_contents(static::makeHashFilename($key, true), serialize($meta));
+        return (bool) file_put_contents(
+            static::makeHashFilename($key, true),
+            serialize($meta)
+        );
     }
 
     /**
@@ -115,11 +126,14 @@ class Cache
             $cache['content'] .= $content;
         }
 
-        return (bool) file_put_contents(static::makeHashFilename($key), serialize($cache));
+        return (bool) file_put_contents(
+            static::makeHashFilename($key),
+            serialize($cache)
+        );
     }
 
     /**
-     * Récupérer une entrée dans le cache
+     * Retrieve an entry in the cache
      *
      * @param  string $key
      * @param  mixed  $default
@@ -145,7 +159,7 @@ class Cache
     }
 
     /**
-     * Permet d'augmenter le temps d'expiration du cache
+     * Increase the cache expiration time
      *
      * @param  string $key
      * @param  int    $time
@@ -163,18 +177,20 @@ class Cache
             return false;
         }
 
-
         if ($cache['__bow_meta']['expire_at'] == '+') {
             $cache['__bow_meta']['expire_at'] = time();
         }
 
         $cache['__bow_meta']['expire_at'] += $time;
 
-        return (bool) file_put_contents(static::makeHashFilename($key), serialize($cache));
+        return (bool) file_put_contents(
+            static::makeHashFilename($key),
+            serialize($cache)
+        );
     }
 
     /**
-     * Permet de récuperer le temps d'expiration du cache
+     * Retrieves the cache expiration time
      *
      * @param  string $key
      * @return bool|string|int
@@ -195,7 +211,7 @@ class Cache
     }
 
     /**
-     * Permet de supprimer une entrer dans le cache
+     * Delete an entry in the cache
      *
      * @param  string $key
      * @return bool
@@ -224,7 +240,7 @@ class Cache
     }
 
     /**
-     * Vérifier l'existance d'un entrée dans la cache.
+     * Check for an entry in the cache.
      *
      * @param  string $key
      * @return bool
@@ -237,7 +253,7 @@ class Cache
     }
 
     /**
-     * Permet de vérifier si le cache a expiré
+     * Check if the cache has expired
      *
      * @param  string $key
      * @return bool
@@ -254,11 +270,13 @@ class Cache
 
         static::$with_meta = false;
 
-        return $cache['__bow_meta']['expire_at'] == '+' ? false : (time() > $cache['__bow_meta']['expire_at']);
+        return $cache['__bow_meta']['expire_at'] == '+'
+            ? false
+            : (time() > $cache['__bow_meta']['expire_at']);
     }
 
     /**
-     * Permet de formater le fichier
+     * Format the file
      *
      * @param  string $key
      * @param  bool   $make_group_directory
@@ -280,7 +298,7 @@ class Cache
     }
 
     /**
-     * Permet de vide tout le cache
+     * Allows empty all cache
      */
     public static function clear()
     {
@@ -292,6 +310,8 @@ class Cache
     }
 
     /**
+     * __call
+     *
      * @param $name
      * @param $arguments
      * @return mixed
@@ -302,6 +322,6 @@ class Cache
             return call_user_func_array([static::class, $name], $arguments);
         }
 
-        throw new BadMethodCallException("La methode $name n'existe pas.");
+        throw new BadMethodCallException("The $name method does not exist");
     }
 }
