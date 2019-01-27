@@ -5,8 +5,7 @@ namespace Bow\Security;
 class Hash
 {
     /**
-     * Permet de hasher une value et quand le hash a échoué
-     * elle rétourne false.
+     * Allows to have a value and when the hash has failed it returns false.
      *
      * @param  string $value
      * @param  int    $cost
@@ -24,7 +23,7 @@ class Hash
     }
 
     /**
-     * Permet de verifier le hash par apport a une value
+     * Allows you to check the hash by adding a value
      *
      * @param  string $value
      * @param  string $hash
@@ -40,7 +39,7 @@ class Hash
     }
 
     /**
-     * Permet de rehacher une value.
+     * Allows you to rehash a value.
      *
      * @param  $hash
      * @param  int  $cost
@@ -51,9 +50,7 @@ class Hash
         return password_needs_rehash(
             $hash,
             PASSWORD_BCRYPT,
-            [
-            'cost' => $cost,
-            ]
+            ['cost' => $cost]
         );
     }
 }

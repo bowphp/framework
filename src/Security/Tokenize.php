@@ -8,12 +8,14 @@ use Bow\Support\Str;
 class Tokenize
 {
     /**
+     * The token expiration time
+     *
      * @static int
      */
     private static $expirate_at;
 
     /**
-     * Createur de token csrf
+     * Csrf token creator
      *
      * @param  int $time
      * @return bool
@@ -42,7 +44,7 @@ class Tokenize
     }
 
     /**
-     * Générer une clé crypté en md5
+     * GGenerate an encrypted key
      *
      * @return string
      */
@@ -56,7 +58,7 @@ class Tokenize
     }
 
     /**
-     * Retourne un token csrf générer
+     * Get a csrf token generate
      *
      * @param  int $time
      * @return mixed
@@ -69,7 +71,7 @@ class Tokenize
     }
 
     /**
-     * Vérifie si le token en expire
+     * Check if the token expires
      *
      * @param int $time le temps d'expiration
      * @return boolean
@@ -94,7 +96,7 @@ class Tokenize
     }
 
     /**
-     * Vérifie si token csrf est valide
+     * Check if csrf token is valid
      *
      * @param string $token
      * @param bool   $strict
@@ -123,7 +125,9 @@ class Tokenize
     }
 
     /**
-     * Détruie le token
+     * Destroy the token
+     *
+     * @return void
      */
     public static function clear()
     {

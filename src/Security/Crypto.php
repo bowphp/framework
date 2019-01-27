@@ -7,17 +7,21 @@ use Bow\Support\Str;
 class Crypto
 {
     /**
+     * The security key
+     *
      * @var string
      */
     private static $key = '';
 
     /**
+     * The security cipher
+     *
      * @var string
      */
     private static $cipher = 'AES-256-CBC';
 
     /**
-     * Crypto constructor
+     * Set the key
      *
      * @param string $key
      * @param string $cipher
@@ -32,9 +36,10 @@ class Crypto
     }
 
     /**
-     * crypt
+     * Encrypt data
      *
-     * @param  string $data les données a encrypté
+     * @param  string $data
+     *
      * @return string
      */
     public static function encrypt($data)
@@ -47,7 +52,7 @@ class Crypto
     /**
      * decrypt
      *
-     * @param string $data les données a décrypté
+     * @param string $data
      *
      * @return string
      */
