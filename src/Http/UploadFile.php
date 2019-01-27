@@ -20,7 +20,7 @@ class UploadFile
     }
 
     /**
-     * L'extension du fichier
+     * The file extension
      *
      * @return string
      */
@@ -49,7 +49,7 @@ class UploadFile
     }
 
     /**
-     * L'extension du fichier
+     * The file extension
      *
      * @return string
      */
@@ -63,7 +63,7 @@ class UploadFile
     }
 
     /**
-     * La taille du fichier
+     * The size of the file
      *
      * @return mixed
      */
@@ -77,7 +77,7 @@ class UploadFile
     }
 
     /**
-     * Vérifié si le fichier est valide
+     * Checked if the file is valid
      *
      * @return bool
      */
@@ -87,7 +87,7 @@ class UploadFile
     }
 
     /**
-     * Vérifie si le fichier est uploader
+     * Check if the file is uploader
      *
      * @return bool
      */
@@ -105,7 +105,7 @@ class UploadFile
     }
 
     /**
-     * Le nom principal du fichier
+     * Get the main name of the file
      *
      * @return string
      */
@@ -119,7 +119,7 @@ class UploadFile
     }
 
     /**
-     * Le nom du fichier
+     * Get the filename
      *
      * @return mixed
      */
@@ -133,7 +133,7 @@ class UploadFile
     }
 
     /**
-     * Le contenu du fichier.
+     * Get the file content
      *
      * @return string
      */
@@ -147,7 +147,7 @@ class UploadFile
     }
 
     /**
-     * Permet de hash du fichier
+     * Get the file hash name
      *
      * @param  string $method
      * @return string
@@ -158,7 +158,7 @@ class UploadFile
     }
 
     /**
-     * Déplacer le fichier uploader dans un répertoire.
+     * Move the uploader file to a directory.
      *
      * @param  string $to
      * @param  string|null $filename

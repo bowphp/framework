@@ -13,6 +13,7 @@ class AccessControl
     
     /**
      * AccessControl constructor.
+     *
      * @param Response $response
      */
     public function __construct(Response $response)
@@ -21,8 +22,10 @@ class AccessControl
     }
 
     /**
-     * @param $allow
-     * @param $excepted
+     * The access control
+     *
+     * @param string $allow
+     * @param string $excepted
      * @return $this
      */
     private function push($allow, $excepted)
@@ -61,15 +64,17 @@ class AccessControl
     /**
      * Active Access-control-Allow-Methods
      *
-     * @param  array $excepted [optional] $excepted
+     * @param  array $excepted
+     *
      * @return AccessControl
+     *
      * @throws AccessControlException
      */
     public function allowMethods(array $excepted)
     {
         if (count($excepted) == 0) {
             throw new AccessControlException(
-                'Le tableau est vide.' . gettype($excepted) . ' donner.',
+                'Parameter is empty.',
                 E_USER_ERROR
             );
         }
@@ -80,14 +85,14 @@ class AccessControl
     /**
      * Active Access-control-Allow-Headers
      *
-     * @param  array $excepted [optional] $excepted
+     * @param  array $excepted
      * @return AccessControl
      * @throws AccessControlException
      */
     public function allowHeaders(array $excepted)
     {
         if (count($excepted) == 0) {
-            throw new AccessControlException('Le tableau est vide.' . gettype($excepted) . ' donner.', E_USER_ERROR);
+            throw new AccessControlException('Parameter is empty.', E_USER_ERROR);
         }
 
         return $this->push('Access-Control-Allow-Headers', implode(', ', $excepted));
@@ -106,7 +111,7 @@ class AccessControl
     /**
      * Active Access-control-Max-Age
      *
-     * @param  string $excepted [optional] $excepted
+     * @param  string $excepted
      * @return AccessControl
      * @throws AccessControlException
      */
@@ -114,7 +119,7 @@ class AccessControl
     {
         if (!is_numeric($excepted)) {
             throw new AccessControlException(
-                'La paramtere doit être un entier: ' . gettype($excepted) . ' donner.',
+                'Parameter must be an integer',
                 E_USER_ERROR
             );
         }
@@ -125,7 +130,7 @@ class AccessControl
     /**
      * Active Access-control-Expose-Headers
      *
-     * @param  array $excepted [optional] $excepted
+     * @param  array $excepted
      * @return AccessControl
      * @throws AccessControlException
      */

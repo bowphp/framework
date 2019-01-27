@@ -11,13 +11,15 @@ use Bow\Validation\Validator;
 class Request
 {
     /**
-     * Variable d'instance
+     * The Request instance
      *
      * @static self
      */
     private static $instance;
 
     /**
+     * All php instance
+     *
      * @var array
      */
     private $input;
@@ -27,11 +29,14 @@ class Request
      */
     private function __construct()
     {
-        $this->input = array_merge($_POST, $_GET);
+        if ($this->getHeader('content-type') == 'application/json') {
+            $decode = json_decode(file_get_contents("php://input"), true);
+            $this->input = array_merge((array) $decode, $_GET);
+        } else {
+            $this->input = array_merge($_POST, $_GET);
+        }
 
         foreach ($this->input as $key => $value) {
-            $value = trim($value);
-
             if (strlen($value) == 0) {
                 $value = null;
             }
@@ -76,7 +81,7 @@ class Request
     }
 
     /**
-     * retourne uri envoyer par client.
+     * Get uri send by client.
      *
      * @return string
      */
@@ -94,7 +99,7 @@ class Request
     }
 
     /**
-     * retourne le nom host du serveur.
+     * Get the host name of the server.
      *
      * @return string
      */
@@ -104,7 +109,7 @@ class Request
     }
 
     /**
-     * retourne url envoyé par client.
+     * Get url sent by client.
      *
      * @return string
      */
@@ -114,7 +119,7 @@ class Request
     }
 
     /**
-     * origin le nom du serveur + le scheme
+     * Origin the name of the server + the scheme
      *
      * @return string
      */
@@ -128,7 +133,7 @@ class Request
     }
 
     /**
-     * Request scheme
+     * Get request scheme
      *
      * @return string
      */
@@ -138,7 +143,7 @@ class Request
     }
 
     /**
-     * retourne path envoyé par client.
+     * Get path sent by client.
      *
      * @return string
      */
@@ -148,7 +153,7 @@ class Request
     }
 
     /**
-     * Retourne la methode de la requete.
+     * Returns the method of the request.
      *
      * @return string
      */
@@ -156,11 +161,13 @@ class Request
     {
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
 
-        if ($method == 'POST') {
-            if (array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
-                if (in_array($_SERVER['HTTP_X_HTTP_METHOD'], ['PUT', 'DELETE'])) {
-                    $method = $_SERVER['HTTP_X_HTTP_METHOD'];
-                }
+        if ($method !== 'POST') {
+            return $method;
+        }
+
+        if (array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
+            if (in_array($_SERVER['HTTP_X_HTTP_METHOD'], ['PUT', 'DELETE'])) {
+                $method = $_SERVER['HTTP_X_HTTP_METHOD'];
             }
         }
 
@@ -168,7 +175,7 @@ class Request
     }
 
     /**
-     * Si la réquête est de type POST
+     * Check if the query is POST
      *
      * @return bool
      */
@@ -182,7 +189,7 @@ class Request
     }
 
     /**
-     * Si la réquête est de type GET
+     * Check if the query is of type GET
      *
      * @return bool
      */
@@ -196,7 +203,7 @@ class Request
     }
 
     /**
-     * Si la réquête est de type PUT
+     * Check if the query is of type PUT
      *
      * @return bool
      */
@@ -210,7 +217,7 @@ class Request
     }
 
     /**
-     * Si la réquête est de type DELETE
+     * Check if the query is DELETE
      *
      * @return bool
      */
@@ -224,9 +231,9 @@ class Request
     }
 
     /**
-     * Charge la factory pour le FILES
+     * Load the factory for FILES
      *
-     * @param  string $key
+     * @param string $key
      * @return UploadFile|Collection
      */
     public function file($key)
@@ -261,16 +268,18 @@ class Request
     }
 
     /**
-     * @param mixed $key
+     * Check if file exists
+     *
+     * @param mixed $file
      * @return bool
      */
-    public static function hasFile($key)
+    public static function hasFile($file)
     {
-        return isset($_FILES[$key]);
+        return isset($_FILES[$file]);
     }
 
     /**
-     * Accès au donnée de la précédente requete
+     * Get previous request data
      *
      * @param  mixed $key
      * @return mixed
@@ -283,7 +292,7 @@ class Request
     }
 
     /**
-     * Vérifie si on n'est dans le cas d'un requête AJAX.
+     * Check if we are in the case of an AJAX request.
      *
      * @return boolean
      */
@@ -303,7 +312,7 @@ class Request
     }
 
     /**
-     * Vérifie si une url match avec le pattern
+     * Check if a url matches with the pattern
      *
      * @param  string $match Un regex
      * @return int
@@ -314,7 +323,7 @@ class Request
     }
 
     /**
-     * L'address ip du client
+     * Get client address
      *
      * @return string
      */
@@ -324,7 +333,7 @@ class Request
     }
 
     /**
-     * Retourne de port du client
+     * Get client port
      *
      * @return string
      */
@@ -334,7 +343,7 @@ class Request
     }
 
     /**
-     * Retourne la provenance de la requête courante.
+     * Get the source of the current request.
      *
      * @return string
      */
@@ -344,10 +353,10 @@ class Request
     }
 
     /**
-     * retourne la locale de la requête.
+     * Get the request locale.
      *
-     * la locale c'est langue original du client
-     * e.g fr => locale = fr_FR // français de france
+     * The local is the original language of the client
+     * e.g fr => locale = fr_FR
      * e.g en => locale [ en_US, en_EN]
      *
      * @return string|null
@@ -364,9 +373,9 @@ class Request
     }
 
     /**
-     * retourne la lang du naviagateur.
+     * Get request lang.
      *
-     * @return string|null
+     * @return string
      */
     public function lang()
     {
@@ -380,7 +389,7 @@ class Request
     }
 
     /**
-     * le protocol de la requête.
+     * Get request protocol
      *
      * @return mixed
      */
@@ -390,7 +399,7 @@ class Request
     }
 
     /**
-     * Vérifier le protocol de la requête
+     * Check the protocol of the request
      *
      * @param string $protocol
      * @return mixed
@@ -401,7 +410,7 @@ class Request
     }
 
     /**
-     * Vérifier si le protocol sécurisé
+     * Check if the secure protocol
      *
      * @return mixed
      */
@@ -432,7 +441,7 @@ class Request
     }
 
     /**
-     * Verifir si une entête existe.
+     * Check if a header exists.
      *
      * @param  string $key
      * @return bool
@@ -464,7 +473,7 @@ class Request
     }
 
     /**
-     * Get, permet de récupérer une valeur ou la colléction de valeur.
+     * Retrieve a value or a collection of values.
      *
      * @param  string $key     =null
      * @param  mixed  $default =false
@@ -476,7 +485,7 @@ class Request
     }
 
     /**
-     * Permet récupérer les valeurs contenu dans le tableau d'exception
+     * Retrieves the values contained in the exception table
      *
      * @param array $exceptions
      * @return array
@@ -519,7 +528,7 @@ class Request
     }
 
     /**
-     * Permet de valider les données entrantes
+     * Validate incoming data
      *
      * @param  array $rule
      * @return Validate
@@ -530,6 +539,8 @@ class Request
     }
 
     /**
+     * __call
+     *
      * @param $property
      * @return mixed
      */

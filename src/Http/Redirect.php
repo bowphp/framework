@@ -7,21 +7,29 @@ use Bow\Contracts\ResponseInterface;
 class Redirect implements ResponseInterface
 {
     /**
+     * The Request instance
+     *
      * @var Request
      */
     private $request;
 
     /**
+     * The redirect traget
+     *
      * @var string
      */
     private $to;
 
     /**
+     * The Response instance
+     *
      * @var Response
      */
     private $response;
 
     /**
+     * The Redirect instance
+     *
      * @var Redirect
      */
     private static $instance;
@@ -51,7 +59,7 @@ class Redirect implements ResponseInterface
     }
 
     /**
-     * Redirection avec les informations de requête
+     * Redirection with the query information
      *
      * @param array $data
      * @return Redirect
@@ -68,7 +76,7 @@ class Redirect implements ResponseInterface
     }
 
     /**
-     * Redirection vers une autre URL
+     * Redirect to another URL
      *
      * @param string $path
      * @param int $status
@@ -84,7 +92,7 @@ class Redirect implements ResponseInterface
     }
 
     /**
-     * Rédirection sur l'URL précédent
+     * Redirect on the previous URL
      *
      * @param int $status
      * @return Redirect

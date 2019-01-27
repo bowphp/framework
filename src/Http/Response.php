@@ -9,9 +9,9 @@ use Bow\View\View;
 class Response implements ResponseInterface
 {
     /**
-     * Liste de code http valide pour l'application
-     * Sauf que l'utilisateur poura lui même rédéfinir
-     * ces codes s'il utilise la fonction `header` de php
+     * Valid http code list for the app Except that
+     * the user can himself redefine these codes
+     * if it uses the `header` function of php
      */
     private static $header = [
         100 => 'Continue',
@@ -73,42 +73,57 @@ class Response implements ResponseInterface
     ];
 
     /**
+     * The Response instamce
+     *
      * @var Response
      */
     private static $instance;
 
     /**
+     * The Response content
+     *
      * @var string
      */
     private $content;
 
     /**
+     * The Response code
+     *
      * @var int
      */
     private $code;
 
     /**
+     * The added headers
+     *
      * @var array
      */
     private $headers = [];
 
     /**
+     * Downloadable flag
+     *
      * @var bool
      */
     private $download = false;
 
     /**
+     * The downloadable filenme
+     *
      * @var string
      */
     private $download_filename;
 
     /**
+     * The override the respons
+     *
      * @var bool
      */
     private $override = false;
 
     /**
      * Response constructor.
+     *
      * @param string $content
      * @param int $code
      * @param array $headers
@@ -195,10 +210,10 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Modifie les entêtes http
+     * Modify http headers
      *
      * @param  string $key
-     * @param  string $value La nouvelle valeur a assigne à l'entête
+     * @param  string $value
      * @return self
      */
     public function addHeader($key, $value)
@@ -209,7 +224,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Télécharger le fichier donnée en argument
+     * Download the given file as an argument
      *
      * @param string $file
      * @param null   $filename
@@ -245,7 +260,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Modifie les entétes http
+     * Modify http headers
      *
      * @param  int $code
      * @return mixed
@@ -286,7 +301,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Réponse de type JSON
+     * JSON response
      *
      * @param  mixed $data
      * @param  int   $code
@@ -309,7 +324,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Equivalant à un echo, sauf qu'il termine l'application quand $stop = true
+     * Equivalent to an echo, except that it ends the application
      *
      * @param  string|array|\stdClass $data
      * @param  int  $code
@@ -334,7 +349,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Permet de faire le rendu d'une vue.
+     * Make view rendering
      *
      * @param  $template
      * @param  array $data
