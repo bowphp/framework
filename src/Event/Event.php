@@ -13,11 +13,15 @@ class Event
     }
 
     /**
+     * The event collector
+     *
      * @var array
      */
     private static $events = [];
 
     /**
+     * The Event instance
+     *
      * @var Event
      */
     private static $instance;
@@ -40,8 +44,8 @@ class Event
      * addEventListener
      *
      * @param string $event
-     * @param Callable|array|string $fn
-     * @param int $priority Le namespace de la classe ou fonction à
+     * @param callable|array|string $fn
+     * @param int $priority
      */
     public static function on($event, $fn, $priority = 0)
     {
@@ -57,7 +61,7 @@ class Event
     }
 
     /**
-     * Envoyer une event de page en page
+     * Send an event from page to page
      *
      * @param string $event
      * @param array|string $fn
@@ -71,7 +75,7 @@ class Event
         }
 
         if (!is_string($fn)) {
-            throw new EventException('Transmission event must be string fonction name');
+            throw new EventException('The transmission event must be a string function name');
         }
 
         static::$events['__bow.transmission.event'][$event][] = new Listener($fn, $priority);
@@ -80,7 +84,7 @@ class Event
     }
 
     /**
-     * Associer un seul listener à un event
+     * Associate a single listener to an event
      *
      * @param string $event
      * @param callable|array|string $fn
@@ -92,7 +96,7 @@ class Event
     }
 
     /**
-     * emit dispatchEvent
+     * Emit dispatchEvent
      *
      * @param  string $event Le nom de l'évènement
      * @return bool
@@ -136,7 +140,7 @@ class Event
     }
 
     /**
-     * off supprime un event enregistre
+     * off removes an event saves
      *
      * @param string $event
      */
@@ -152,7 +156,7 @@ class Event
     }
 
     /**
-     * Permet de vérifier si un evenement est déja enregistre au moin un fois.
+     * Check whether an event is already recorded at least once.
      *
      * @param  string $event
      * @return bool
@@ -163,8 +167,8 @@ class Event
             || array_key_exists(
                 $event,
                 isset(static::$events['__bow.transmission.event'])
-                    ? static::$events['__bow.transmission.event'] :
-                    []
+                    ? static::$events['__bow.transmission.event']
+                    : []
             )
             || array_key_exists(
                 $event,
@@ -185,6 +189,6 @@ class Event
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \RuntimeException('La methode '.$name.' n\'exists pas.');
+        throw new \RuntimeException('The method '.$name.' There is no');
     }
 }

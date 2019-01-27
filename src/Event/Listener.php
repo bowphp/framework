@@ -5,11 +5,15 @@ namespace Bow\Event;
 class Listener
 {
     /**
-     * @var Callable
+     * The callable
+     *
+     * @var callable
      */
     private $callable;
 
     /**
+     * The priority index
+     *
      * @var int
      */
     private $priority = 0;
@@ -28,7 +32,7 @@ class Listener
     }
 
     /**
-     * Permet de lancer la fonction du listener
+     * Launch the listener function
      *
      * @param  array $data
      * @return mixed
@@ -39,7 +43,7 @@ class Listener
     }
 
     /**
-     * Permet de retourner le type de l'action
+     * Returns the type of action
      *
      * @return string
      */
@@ -49,7 +53,7 @@ class Listener
     }
 
     /**
-     * Permet de retourner l'action à lancer
+     * Returns the action to launch
      *
      * @return mixed
      */
@@ -59,7 +63,7 @@ class Listener
     }
 
     /**
-     * Permet de récuperer la priorité du listerner
+     * Retrieves the priority of the listener
      *
      * @return mixed
      */
