@@ -9,20 +9,22 @@ use Bow\Http\Request;
 class Route
 {
     /**
-     * Le callaback a lance si le url de la requête à matché.
+     * The callaback has launched if the url of the query has matched.
      *
      * @var callable
      */
     private $cb;
 
     /**
-     * Le chemin sur la route définir par l'utilisateur
+     * The road on the road set by the user
      *
      * @var string
      */
     private $path;
 
     /**
+     * The route name
+     *
      * @var string
      */
     private $name;
@@ -35,19 +37,21 @@ class Route
     private $keys = [];
 
     /**
+     * The route parameter
+     *
      * @var array
      */
     private $params = [];
 
     /**
-     * Liste de paramaters qui on matcher
+     * List of paramaters that we match
      *
      * @var array
      */
     private $match = [];
 
     /**
-     * Régle supplementaire de validation d'url
+     * Additional URL validation rule
      *
      * @var array
      */
@@ -61,10 +65,11 @@ class Route
     private $config;
 
     /**
-     * Contructeur
+     * Route Contructeur
      *
-     * @param string   $path
+     * @param string $path
      * @param callable $cb
+     *
      * @throws
      */
     public function __construct($path, $cb)
@@ -79,7 +84,7 @@ class Route
     }
 
     /**
-     * Récupère le chemin de la route courante
+     * Get the path of the current road
      *
      * @return string
      */
@@ -89,7 +94,7 @@ class Route
     }
 
     /**
-     * Récupère l'action a executé sur la route courante
+     * Get the action executed on the current route
      *
      * @return mixed
      */
@@ -99,7 +104,7 @@ class Route
     }
 
     /**
-     * Ajout middleware
+     * Add middleware
      *
      * @param  array|string $middleware
      * @return Route
@@ -128,33 +133,31 @@ class Route
     }
 
     /**
-     * Permet de vérifier si l'url de la réquête est
-     * conforme à celle définir par le routeur
+     * Lets check if the url of the query is
+     * conform to that defined by the router
      *
      * @param  string $uri
      * @return bool
      */
     public function match($uri)
     {
-        // Normalisation de l'url du nagivateur.
+        // Normalization of the url of the nagivator.
         if (preg_match('~(.*)/$~', $uri, $match)) {
             $uri = end($match);
         }
 
-        // Normalisation du path défini par le programmeur.
+        // Normalization of the path defined by the programmer.
         if (preg_match('~(.*)/$~', $this->path, $match)) {
             $this->path = end($match);
         }
 
-        // On retourne directement tout
-        // pour gagner en performance.
+        // We go straight back to gain performance.
         if ($this->path === $uri) {
             return true;
         }
 
-        // On vérifie la longeur du path défini par le programmeur
-        // avec celle de l'url courante dans le navigateur de l'utilisateur.
-        // Pour éviter d'aller plus loin.
+        // We check the length of the path defined by the programmer
+        // with that of the current url in the user's browser.
         $path = implode('', preg_split('/(\/:[a-z0-9-_]+\?)/', $this->path));
 
         if (count(explode('/', $path)) != count(explode('/', $uri))) {
@@ -166,8 +169,7 @@ class Route
         // Copie de l'url
         $path = $uri;
 
-        // Dans le case ou le dévéloppeur n'a pas ajouté
-        // de contrainte sur les variables capturées
+        // In case the developer did not add of constraint on captured variables
         if (empty($this->with)) {
             $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
 
@@ -178,8 +180,8 @@ class Route
             return $this->checkRequestUri($path, $uri);
         }
 
-        // Dans le cas ou le dévéloppeur a ajouté des contraintes
-        // sur les variables capturées
+        // In case the developer has added constraints
+        // on the captured variables
         if (!preg_match_all('~:([\w]+)?~', $this->path, $match)) {
             return $this->checkRequestUri($path, $uri);
         }
@@ -188,30 +190,31 @@ class Route
 
         $this->keys = end($match);
 
-        // Association des critrères personnalisé.
+        // Association of criteria personalized.
         foreach ($this->keys as $key) {
             if (array_key_exists($key, $this->with)) {
                 $tmp_path = preg_replace('~:' . $key . '~', '(' . $this->with[$key] . ')', $tmp_path);
             }
         }
 
-        // On rend vide le table d'association de critère personnalisé.
+        // Clear the custom criteria association table.
         $this->with = [];
 
-        // Dans le case ou le path différent on récupère, on récupère celle dans $tmp_path
+        // In the case where the different path one recovers, one recovers the one in $tmp_path
         if ($tmp_path != $this->path) {
             $path = $tmp_path;
         }
 
-        // Vérifcation de url et path PARSER
+        // Url check and path PARSER
         return $this->checkRequestUri($path, $uri);
     }
 
     /**
-     * Vérifie url de la réquête
+     * Check the url for the search
      *
-     * @param $path
-     * @param $uri
+     * @param string $path
+     * @param string $uri
+     *
      * @return bool
      */
     private function checkRequestUri($path, $uri)
@@ -220,7 +223,7 @@ class Route
             $uri = rtrim($uri, '/').'/';
         }
 
-        // Vérifcation de url et path PARSER
+        // Url check and path PARSER
         $path = str_replace('~', '\\~', $path);
 
         if (preg_match('~^'. $path . '$~', $uri, $match)) {
@@ -235,10 +238,11 @@ class Route
     }
 
     /**
-     * Lance une personnalisation de route.
+     * Add the url rules
      *
      * @param array|string $where
-     * @param string       $regex_constraint
+     * @param string   $regex_constraint
+     *
      * @return Route
      */
     public function where($where, $regex_constraint = null)
@@ -255,14 +259,14 @@ class Route
     }
 
     /**
-     * Fonction permettant de lancer les fonctions de rappel.
+     * Function to launch callback functions where the rule have matching.
      *
      * @return mixed
      * @throws
      */
     public function call()
     {
-        // Association des parmatres à la request
+        // Association of parmatres at the request
         foreach ($this->keys as $key => $value) {
             if (!isset($this->match[$key])) {
                 continue;
@@ -285,7 +289,7 @@ class Route
     }
 
     /**
-     * Permet de donner un nom à la route
+     * To give a name to the road
      *
      * @param string $name
      */
@@ -302,7 +306,7 @@ class Route
     }
 
     /**
-     * Récupère le nom de la route
+     * Get the name of the route
      *
      * @return string
      */
@@ -312,7 +316,7 @@ class Route
     }
 
     /**
-     * Récupère les paramètres
+     * Get the settings
      *
      * @return array
      */
@@ -322,7 +326,7 @@ class Route
     }
 
     /**
-     * Récupère un élément des paramètres
+     * Get a parameter element
      *
      * @param string $key
      * @return string|null

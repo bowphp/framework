@@ -69,13 +69,9 @@ class Rest
     {
         static::$application = Capsule::getInstance()->make('app');
 
-        /**
-         * Association des routes
-         */
+        // Route Association
         foreach (static::$routes as $key => $route) {
-            /**
-             * On vérifie si la methode à appelé est ignoré
-             */
+            // We check if the method to be called is ignored
             if (!in_array($route['call'], $ignore_method)) {
                 static::bind($url, $controller, $route, $where);
             }
@@ -95,18 +91,18 @@ class Rest
     {
         $path = '/'.trim($url.$definition['url'], '/');
 
-        // Lancement de la methode de mapping de route.
+        // Launch of the route mapping method.
         $route = static::$application->{$definition['method']}(
             $path,
             sprintf("%s@%s", $controller, $definition['call'])
         );
 
-        // Ajout de nom sur la route
+        // Add name on the road
         $name = str_replace('/', '.', $url).'.'.$definition['call'];
 
         $route->name($name);
 
-        // Association des critères définies
+        // Association of defined criteria
         if (isset($where[$definition['call']])) {
             $route->where((array) $where[$definition['call']]);
         } else {
