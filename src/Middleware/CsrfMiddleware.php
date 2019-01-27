@@ -8,7 +8,7 @@ use Bow\Security\Exception\TokenMismatch;
 class CsrfMiddleware
 {
     /**
-     * Fonction de lancement du middleware.
+     * Launch function of the middleware.
      *
      * @param  Request $request
      * @param  Callable $next

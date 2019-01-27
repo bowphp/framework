@@ -8,7 +8,7 @@ use Bow\Http\Request;
 class AuthMiddleware
 {
     /**
-     * Fonction de lancement du middleware.
+     * Launch function of the middleware.
      *
      * @param  Request $request
      * @param  Callable  $next
