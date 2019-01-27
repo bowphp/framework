@@ -48,12 +48,15 @@ class Loader implements \ArrayAccess
         $this->base_path = $base_path;
 
         /**
-         * Chargement complet de toute la configuration de Bow
+         * We load all env file
          */
         if (file_exists($base_path . '/../.env.json')) {
             Env::load($base_path . '/../.env.json');
         }
 
+        /**
+         * We load all Bow configuration
+         */
         $glob = glob($base_path . '/**.php');
 
         $config = [];
@@ -61,7 +64,7 @@ class Loader implements \ArrayAccess
         foreach ($glob as $file) {
             $key = str_replace('.php', '', basename($file));
 
-            if (in_array($key, ['bootstrap', 'helper', 'classes']) || !file_exists($file)) {
+            if ($key == 'helper' || !file_exists($file)) {
                 continue;
             }
 
@@ -72,16 +75,16 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * Ferméture de la fonction magic __clone pour optimizer le singleton
+     * Closing the magic __clone function to optimize the singleton
      */
     final private function __clone()
     {
     }
 
     /**
-     * takeInstance singleton
+     * Configuration Loader
      *
-     * @param  string $base_path
+     * @param string $base_path
      * @return Loader
      * @throws
      */
@@ -159,7 +162,7 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * Alias de singleton
+     * Alias of singleton
      *
      * @return Loader
      * @throws
@@ -167,7 +170,7 @@ class Loader implements \ArrayAccess
     public static function getInstance()
     {
         if (is_null(static::$instance)) {
-            throw new ApplicationException('L\'application n\'a pas chargé les confirgurations');
+            throw new ApplicationException('The application did not load configurations.');
         }
 
         return static::$instance;
@@ -192,7 +195,7 @@ class Loader implements \ArrayAccess
 
         $container = Capsule::getInstance();
 
-        // Configuration des services
+        // Configuration of services
         foreach ($services as $service) {
             if (class_exists($service, true)) {
                 $class = new $service($container);
@@ -203,7 +206,7 @@ class Loader implements \ArrayAccess
             }
         }
 
-        // Démarage des services ou code d'initial
+        // Start of services or initial code
         foreach ($service_collection as $service) {
             $service->run();
         }

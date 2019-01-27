@@ -16,12 +16,12 @@ class LoggerConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('logger', function () use ($config) {
-            if (env('MODE') == 'development') {
+            if (env('APP_ENV') == 'development') {
                 $this->loadFrontLogger();
             }
 
             return $this->loadFileLogger(
-                $config['resource.log'],
+                $config['storage.log'],
                 $config['app.name'] ?? 'Bow'
             );
         });

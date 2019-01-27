@@ -23,7 +23,7 @@ abstract class Configuration
     }
 
     /**
-     * Permet de créer le service
+     * Create the service
      *
      * @param Loader $config
      * @return void
@@ -31,7 +31,7 @@ abstract class Configuration
     abstract public function create(Loader $config);
 
     /**
-     * Permet de démarrer le package configuré
+     * Start the configured package
      *
      * @return void
      */
