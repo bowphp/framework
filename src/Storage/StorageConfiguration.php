@@ -13,7 +13,7 @@ class StorageConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('storage', function () use ($config) {
-            return Storage::configure($config['resource']);
+            return Storage::configure($config['storage']);
         });
     }
 
