@@ -10,12 +10,14 @@ use Bow\Mail\Message;
 class Native implements Send
 {
     /**
+     * The configuration
+     *
      * @var array
      */
     private $config;
 
     /**
-     * Mise en privé des fonctions magic __clone
+     * Private setting of the magic functions
      */
     private function __clone()
     {
@@ -32,7 +34,7 @@ class Native implements Send
     }
 
     /**
-     * send, Envoie le mail
+     * Implement send email
      *
      * @param  Message $message
      * @throws InvalidArgumentException
@@ -42,7 +44,7 @@ class Native implements Send
     {
         if (empty($message->getTo()) || empty($message->getSubject()) || empty($message->getMessage())) {
             throw new InvalidArgumentException(
-                "Une erreur est survenu. L'expediteur ou le message ou l'object omit.",
+                "An error has occurred. The sender or the message or object omits.",
                 E_USER_ERROR
             );
         }

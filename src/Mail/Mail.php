@@ -10,11 +10,15 @@ use Bow\View\View;
 class Mail
 {
     /**
+     * The mail driver instance
+     *
      * @var SimpleMail|Smtp
      */
     private static $instance;
 
     /**
+     * The mail configuration
+     *
      * @var array
      */
     private static $config;
@@ -40,7 +44,7 @@ class Mail
     /**
      * Configure la classe Mail
      *
-     * @param  array $config La configuration
+     * @param  array $config
      * @throws MailException
      * @return SimpleMail|Smtp
      */
@@ -51,7 +55,7 @@ class Mail
         }
 
         if (!in_array($config['driver'], ["smtp", "mail"])) {
-            throw new MailException("Le type n'est pas réconnu.", E_USER_ERROR);
+            throw new MailException("The type is not known.", E_USER_ERROR);
         }
 
         if ($config['driver'] == "mail") {
@@ -99,13 +103,12 @@ class Mail
     }
 
     /**
-     * Envoye de mail simulaire a la fonction mail de PHP
+     * Send mail similar to the PHP mail function
      *
-     * @param  string|array $to      Le destinateur
-     * @param  string       $subject L'objet du mail
-     * @param  string       $data    Le message du meail
-     * @param  array        $headers [optinal] Les entêtes additionnel du
-     *                               mail.
+     * @param  string|array $to
+     * @param  string       $subject
+     * @param  string       $data
+     * @param  array        $headers
      * @return mixed
      */
     public static function raw($to, $subject, $data, array $headers = [])
@@ -126,9 +129,9 @@ class Mail
     }
 
     /**
-     * Modifie le driver smtp|mail
+     * Modify the smtp|mail driver
      *
-     * @param  $driver
+     * @param string $driver
      * @return SimpleMail|Smtp
      * @throws MailException
      */
@@ -157,6 +160,6 @@ class Mail
             return call_user_func_array([static::class, $name], $arguments);
         }
 
-        throw new \ErrorException('Cette fonction n\'existe pas. [' . $name . ']', E_ERROR);
+        throw new \ErrorException('This function does not exist. [' . $name . ']', E_ERROR);
     }
 }

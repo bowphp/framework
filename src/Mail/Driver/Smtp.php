@@ -12,49 +12,63 @@ class Smtp implements Send
 {
 
     /**
-     * Socket de connection
+     * Socket connection
      *
-     * @var null
+     * @var resource
      */
     private $sock;
 
     /**
+     * The username
+     *
      * @var string
      */
     private $username;
 
     /**
+     * The password
+     *
      * @var string
      */
     private $password;
 
     /**
+     * The SMPT server
+     *
      * @var string
      */
     private $url;
 
     /**
+     * Define the security
+     *
      * @var bool
      */
     private $secure;
 
     /**
+     * Enable TLS
+     *
      * @var bool
      */
     private $tls = false;
 
     /**
+     * Connexion time out
+     *
      * @var int
      */
     private $timeout;
 
     /**
+     * The SMTP server
+     *
      * @var int
      */
     private $port = 25;
 
     /**
-     * Constructor
+     * Smtp Constructor
      *
      * @param array $param
      */
@@ -77,12 +91,15 @@ class Smtp implements Send
         $this->port = $param['port'];
     }
 
+    /**
+     * Private setting of the magic functions
+     */
     private function __clone()
     {
     }
 
     /**
-     * Lance l'envoie de mail
+     * Start sending mail
      *
      * @param  Message $message
      * @return bool
@@ -139,7 +156,7 @@ class Smtp implements Send
 
 
     /**
-     * permet de se connecté a un serveur smpt
+     * Connect to an SMTP server
      *
      * @throws ErrorException
      * @throws SocketException | SmtpException
@@ -155,7 +172,7 @@ class Smtp implements Send
         $this->sock = fsockopen($url, $this->port, $errno, $errstr, $this->timeout);
 
         if ($this->sock == null) {
-            throw new SocketException('Impossible de se connected à ' . $this->url . ':' . $this->port, E_USER_ERROR);
+            throw new SocketException('Impossible to get connected to ' . $this->url . ':' . $this->port, E_USER_ERROR);
         }
 
         stream_set_timeout($this->sock, $this->timeout, 0);
@@ -177,7 +194,7 @@ class Smtp implements Send
             $secured = @stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
 
             if (!$secured) {
-                throw new ErrorException('Impossible de sécuriser votre connection avec tls', E_ERROR);
+                throw new ErrorException('Can not secure your connection with tls', E_ERROR);
             }
         }
 
@@ -189,7 +206,7 @@ class Smtp implements Send
     }
 
     /**
-     * Déconnection
+     * Disconnection
      *
      * @return mixed
      * @throws ErrorException
@@ -206,7 +223,7 @@ class Smtp implements Send
     }
 
     /**
-     * Lire le flux de connection courrant.
+     * Read the current connection stream.
      *
      * @return string
      */
@@ -230,7 +247,7 @@ class Smtp implements Send
     }
 
     /**
-     * Lance une commande SMPT
+     * Start an SMTP command
      *
      * @param string $command
      * @param int    $code
@@ -259,7 +276,7 @@ class Smtp implements Send
                 $message = isset($message) ? $message : '';
 
                 throw new SmtpException(
-                    sprintf('Serveur SMTP n\'a pas accepté %s avec le code [%s]', $message, $response),
+                    sprintf('SMTP server did not accept %s with code [%s]', $message, $response),
                     E_ERROR
                 );
             }
