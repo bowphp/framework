@@ -5,7 +5,7 @@ namespace Bow\Contracts;
 interface CollectionInterface
 {
     /**
-     * has, vérifie l'existance une clé dans la colléction de session
+     * Check for existence of a key in the session collection
      *
      * @param  string $key
      * @return boolean
@@ -13,14 +13,14 @@ interface CollectionInterface
     public function has($key);
 
     /**
-     * isEmpty, vérifie si une colléction est vide.
+     * Check if a collection is empty.
      *
      * @return boolean
      */
     public function isEmpty();
 
     /**
-     * get, permet de récupérer une valeur ou la colléction de valeur.
+     * Allows to recover a value or value collection.
      *
      * @param  string $key
      * @param  mixed  $default
@@ -29,7 +29,7 @@ interface CollectionInterface
     public function get($key, $default);
 
     /**
-     * add, ajoute une entrée dans la colléction
+     * Add an entry to the collection
      *
      * @param  string $key
      * @param  $data
@@ -40,7 +40,7 @@ interface CollectionInterface
 
 
     /**
-     * remove, supprime une entrée dans la colléction
+     * Delete an entry in the collection
      *
      * @param  string $key
      * @return self
@@ -48,7 +48,7 @@ interface CollectionInterface
     public function remove($key);
 
     /**
-     * set, modifie une entrée dans la colléction
+     * Modify an entry in the collection
      *
      * @param  string $key
      * @param  mixed  $value
@@ -57,14 +57,14 @@ interface CollectionInterface
     public function set($key, $value);
 
     /**
-     * retourne tout les entrées de la colléction
+     * Return all the entries of the collection as an array
      *
      * @return array
      */
     public function toArray();
 
     /**
-     * retourne tout les entrées de la colléction sous forme d'object
+     * Return all entries of the collection as an object
      *
      * @return array
      */
