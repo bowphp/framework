@@ -10,7 +10,8 @@ class Command
     /**
      * @var string
      */
-    const BAD_COMMAND = "Please type this command \033[0;32;7m`php bow help` or `php bow command help` for more information.";
+    const BAD_COMMAND =
+        "Please type this command \033[0;32;7m`php bow help` or `php bow command help` for more information.";
 
     /**
      * @var string
@@ -75,13 +76,7 @@ class Command
     /**
      * @var array
      */
-    private $namespaces = [
-        'controller' => 'App\\Controllers',
-        'middleware' => 'App\\Middleware',
-        'configuration' => 'App\\Configurations',
-        'validation' => 'App\\Validations',
-        'model' => 'App',
-    ];
+    private $namespaces = [];
 
     /**
      * Command constructor.
@@ -91,26 +86,6 @@ class Command
     public function __construct($dirname)
     {
         $this->dirname = rtrim($dirname, '/');
-
-        $this->migration_directory = $this->dirname.'/db/migration';
-
-        $this->seeder_directory = $this->dirname.'/db/seeders';
-
-        $this->controller_directory = $this->dirname.'/app/Controller';
-
-        $this->middleware_directory = $this->dirname.'/app/Middleware';
-
-        $this->configuration_directory = $this->dirname.'/app/Configuration';
-
-        $this->app_directory = $this->dirname.'/app';
-
-        $this->model_directory = $this->dirname.'/app/Model';
-
-        $this->validation_directory = $this->dirname.'/app/Validation';
-
-        $this->component_directory = $this->dirname.'/components';
-
-        $this->config_directory = $this->dirname.'/config';
 
         $this->formatParameters();
     }
@@ -348,7 +323,7 @@ class Command
     }
 
     /**
-     * Permet de formater les options
+     * Format the options
      */
     public function formatParameters()
     {
@@ -358,17 +333,17 @@ class Command
             }
 
             if ($key == 1) {
-                if (preg_match('/^[a-z]+:[a-z]+$/', $param)) {
-                    $part = explode(':', $param);
-
-                    $this->options['command'] = $part[0];
-
-                    $this->options['action'] = $part[1];
+                if (!preg_match('/^[a-z]+:[a-z]+$/', $param)) {
+                    $this->options['command'] = $param;
 
                     continue;
                 }
+                
+                $part = explode(':', $param);
 
-                $this->options['command'] = $param;
+                $this->options['command'] = $part[0];
+
+                $this->options['action'] = $part[1];
 
                 continue;
             }
@@ -403,7 +378,7 @@ class Command
 
 
     /**
-     * Permet de récupérer un parametre
+     * Retrieves a parameter
      *
      * @param  string $key
      * @param  mixed  $default
@@ -415,7 +390,7 @@ class Command
     }
 
     /**
-     * Permet de récupérer les options de la commande
+     * Retrieves the options of the command
      *
      * @param  string $key
      * @param  string $default
@@ -434,7 +409,7 @@ class Command
 
 
     /**
-     * Permet de monter une migration
+     * Make a migration
      *
      * @param  string $model
      * @throws mixed
@@ -445,7 +420,7 @@ class Command
     }
 
     /**
-     * Permet supprimer une migration dans la base de donnée
+     * Rollaback migration
      *
      * @param  string $model
      * @throws mixed
@@ -456,7 +431,7 @@ class Command
     }
 
     /**
-     * Permet de rafraichir le fichier de régistre
+     * Refresh the log file
      */
     public function reflesh()
     {
@@ -486,7 +461,7 @@ class Command
     }
 
     /**
-     * Permet de créer une migration dans les deux directions
+     * Create a migration in both directions
      *
      * @param $model
      * @param $type
@@ -497,93 +472,13 @@ class Command
     {
         $options = $this->options();
 
-        $param = [];
-
-        if ($options->has('--display-sql') && $options->get('--display-sql') === true) {
-            $param = [true];
-        }
-
-        if ($type == 'down') {
-            if (is_null($model)) {
-                if ($options->get('--all') === null) {
-                    echo Color::danger(
-                        "Cette commande est super dangereuse. Alors veuillez ajout le flag --all pour assurer bow."
-                    );
-
-                    exit(1);
-                }
-            }
-        }
-
-        if (!is_null($model)) {
-            $model = strtolower($model);
-
-            $fileParten = $this->migration_directory.strtolower("/*{$model}*.php");
-        } else {
-            $fileParten = $this->migration_directory.strtolower("/*.php");
-        }
-
-        $register = ["file" => [], "tables" => []];
-
-        if (!file_exists($this->migration_directory."/.registers")) {
-            echo Color::red('Le fichier de régistre de bow est introvable.');
-
-            exit(0);
-        }
-
-        $registers = file($this->migration_directory."/.registers");
-
-        if (count($registers) == 0) {
-            echo Color::red('Le fichier de régistre de bow est vide (db/migration/.registers');
-
-            exit(0);
-        }
-
-        foreach (file($this->migration_directory."/.registers") as $r) {
-            $tmp = explode("|", $r);
-
-            $register["file"][] = $tmp[0];
-
-            $register["tables"][] = $tmp[1];
-        }
-
-        foreach (glob($fileParten) as $file) {
-            if (!file_exists($file)) {
-                echo Color::red("$file n'existe pas.");
-
-                exit();
-            }
-
-            // Collection des fichiers de migration.
-            $filename = preg_replace("@^(".$this->migration_directory."/)|(\.php)$@", "", $file);
-
-            if (in_array($filename, $register["file"])) {
-                $num = array_flip($register["file"])[$filename];
-
-                $model = rtrim($register["tables"][$num]);
-            }
-
-            @include $file;
-
-            // Formatage de la classe et Exécution de la méthode up ou down
-            $class = ucfirst(Str::camel($model));
-
-            if (!class_exists($class)) {
-                echo Color::red("Classe \"{$class}\" introuvable. Vérifiez le fichier de régistre (db/migration/.registers).");
-
-                exit(1);
-            }
-
-            $instance = new $class;
-
-            call_user_func_array([$instance, strtolower($type)], $param);
-        }
+        $fileParten = $this->migration_directory.strtolower("/*.php");
 
         exit(0);
     }
 
     /**
-     * Permet de créer un seeder
+     * Create a seeder
      *
      * @param $name
      */
@@ -595,7 +490,7 @@ class Command
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe seeder exists déja.\033[00m";
+            echo "\033[0;31mThe seeder already exists.\033[00m";
 
             exit(1);
         }
@@ -609,27 +504,28 @@ class Command
             'name' => $name
         ]);
 
-        echo "\033[0;32mLe seeder a bien été créé.\033[00m\n";
+        echo "\033[0;32mThe seeder has been created.\033[00m\n";
 
         exit(0);
     }
 
     /**
-     * Permet de créer une migration
+     * Create a migration
      *
      * @param  $model
      * @throws \ErrorException
      */
     public function make($model)
     {
-        $create_at = date("Y_m_d") . "_" . date("His");
+        $create_at = date("YmdHis");
+        $filename = sprintf("%s%s", ucfirst(Str::camel($model)), $create_at);
 
         $generator = new GeneratorCommand(
             $this->migration_directory,
-            "${create_at}_${model}"
+            $filename
         );
 
-        $table = "table";
+        $table = "alter";
 
         $options = $this->options();
 
@@ -665,54 +561,58 @@ class Command
 
         $generator->write($type, [
             'table' => $table,
-            'className' => $class_name
+            'className' => $filename
         ]);
 
-        file_put_contents(
-            $this->migration_directory."/.registers",
-            "${create_at}_${model}|$class_name\n",
-            FILE_APPEND
-        );
+        table('bow_migration_registers')->insert([
+            'migration' => $filename
+        ]);
 
-        echo "\033[0;32mLe fichier de migration a été bien créé.\033[00m\n";
+        echo "\033[0;32mThe migration file has been successfully created.\033[00m\n";
     }
 
     /**
-     * Permet de mettre en place le système de réssource.
+     * Used to set up the resource system.
      *
      * @param  string $controller_name
      * @throws
      */
     public function resource($controller_name)
     {
+        // We create command generator instance
         $generator = new GeneratorCommand(
             $this->controller_directory,
             $controller_name
         );
 
+        // We check if the file already exists
         if ($generator->fileExists()) {
-            echo Color::danger('Le controlleur existe déja');
+            echo Color::danger('The controller already exists');
 
             exit(1);
         }
 
+        // We create the resource url prefix
         $prefix = preg_replace("/controller/i", "", strtolower($controller_name));
-
         $model = ucfirst($prefix);
-
         $prefix = '/'.trim($prefix, '/');
 
         $model_namespace = '';
 
         $options = $this->options();
 
-        if ($options->has('--with-view') && $this->readline("Voulez vous que je crée les vues associées ? ")) {
+        // We check if --with-view exists. If that exists,
+        // we launch the question
+        if ($options->has('--with-view')
+            && $this->readline("Do you want me to create the associated views? ")
+        ) {
             $model = preg_replace("/controller/i", "", strtolower($controller_name));
 
             $model = strtolower($model);
 
             @mkdir(config('view.path')."/".$model, 0766);
 
+            // We create the default CRUD view
             foreach (["create", "edit", "show", "index"] as $value) {
                 $filename = "$model/$value".config('view.extension');
 
@@ -722,8 +622,8 @@ class Command
             }
         }
 
-        $options = $this->options();
-
+        // We check if --model flag exists
+        // When that not exists we make automaticly filename generation
         if (! $options->has('--model')) {
             $prefix = Str::plurial(Str::snake($prefix));
 
@@ -737,9 +637,10 @@ class Command
             exit(0);
         }
 
-        if ($this->readline("Voulez vous que je crée un model?")) {
+        // When --model flag exists
+        if ($this->readline("Do you want me to create a model?")) {
             if ($options->get('--model') === true) {
-                echo "\033[0;32;7mLe nom du model non spécifié --model=model_name.\033[00m\n";
+                echo "\033[0;32;7mThe name of the unspecified model --model=model_name.\033[00m\n";
 
                 exit(1);
             }
@@ -747,7 +648,8 @@ class Command
             $model = $options->get('--model');
         }
 
-        $model_namespace = "use App\\".ucfirst($model).";\n";
+        // We format the model namespace
+        $model_namespace = sprintf("use %s\\$s;\n", $this->namespaces['model'], ucfirst($model));
 
         $prefix = '/'.strtolower(trim(Str::plurial(Str::snake($model)), '/'));
 
@@ -760,7 +662,7 @@ class Command
 
         $this->model($model);
 
-        if ($this->readline('Voulez vous que je crée une migration pour ce model ? ')) {
+        if ($this->readline('Do you want me to create a migration for this model? ')) {
             $this->make('create_'.strtolower(Str::plurial(Str::snake($model))).'_table');
         }
     }
@@ -773,15 +675,19 @@ class Command
      * @param $controller_name
      * @param string $model_namespace
      */
-    private function createRestController(GeneratorCommand $generator, $prefix, $controller_name, $model_namespace = '')
-    {
+    private function createRestController(
+        GeneratorCommand $generator,
+        $prefix,
+        $controller_name,
+        $model_namespace = ''
+    ) {
         $generator->write('controller/rest', [
             'modelNamespace' => $model_namespace,
             'prefix' => $prefix,
             'baseNamespace' => $this->namespaces['controller']
         ]);
 
-        echo "\033[0;32mLe controlleur Rest a été bien créé.\033[00m\n";
+        echo "\033[0;32mThe controller Rest was well created.\033[00m\n";
     }
 
     /**
@@ -797,7 +703,7 @@ class Command
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe controlleur existe déjà.\033[00m\n";
+            echo "\033[0;31mThe controller already exists.\033[00m\n";
 
             exit(1);
         }
@@ -812,7 +718,7 @@ class Command
             ]);
         }
 
-        echo "\033[0;32mLe controlleur a été bien créé.\033[00m\n";
+        echo "\033[0;32mThe controller was well created.\033[00m\n";
 
         exit(0);
     }
@@ -827,7 +733,7 @@ class Command
         $generator = new GeneratorCommand($this->middleware_directory, $middleware_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mLe middleware existe déjà.\033[00m\n";
+            echo "\033[0;31mThe middleware already exists.\033[00m\n";
 
             exit(1);
         }
@@ -836,7 +742,7 @@ class Command
             'baseNamespace' => $this->namespaces['middleware']
         ]);
 
-        echo "\033[0;32mLe middleware a été bien créé.\033[00m\n";
+        echo "\033[0;32mThe middleware has been well created.\033[00m\n";
 
         exit(0);
     }
@@ -852,7 +758,7 @@ class Command
         $generator = new GeneratorCommand($this->model_directory, $model_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe modèle existe déjà.\033[00m\n";
+            echo "\033[0;33mThe model already exists.\033[00m\n";
 
             exit(1);
         }
@@ -861,7 +767,7 @@ class Command
             'baseNamespace' => $this->namespaces['model']
         ]);
 
-        echo "\033[0;32mLe modèle a été bien créé.\033[00m\n";
+        echo "\033[0;32mThe model was well created.\033[00m\n";
 
         if ($this->options('-m')) {
             $this->make('create_'.strtolower($model_name).'_table');
@@ -883,7 +789,7 @@ class Command
     }
 
     /**
-     * Permet de créer un validator
+     * Create a validator
      *
      * @param  string $validator_name
      * @return int
@@ -893,22 +799,22 @@ class Command
         $generator = new GeneratorCommand($this->validation_directory, $validator_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLe validateur existe déjà.\033[00m\n";
+            echo "\033[0;33mThe validator already exists.\033[00m\n";
 
-            return 0;
+            exit(0);
         }
 
         $generator->write('validator', [
             'baseNamespace' => $this->namespaces['validation']
         ]);
 
-        echo "\033[0;32mLe validateur a été bien créé.\033[00m\n";
+        echo "\033[0;32mThe validator was created well.\033[00m\n";
 
-        return 0;
+        exit(0);
     }
 
     /**
-     * Permet de créer un validator
+     * Create a configuration
      *
      * @param  string $configuration_name
      * @return int
@@ -918,7 +824,7 @@ class Command
         $generator = new GeneratorCommand($this->configuration_directory, $configuration_name);
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mLa configuration existe déjà.\033[00m\n";
+            echo "\033[0;33mThe configuration already exists.\033[00m\n";
 
             return 0;
         }
@@ -927,7 +833,7 @@ class Command
             'baseNamespace' => $this->namespaces['configuration']
         ]);
 
-        echo "\033[0;32mLa configuration a été bien créé.\033[00m\n";
+        echo "\033[0;32mThe configuration was well created.\033[00m\n";
 
         return 0;
     }
@@ -949,7 +855,7 @@ class Command
         }
 
         if (!in_array($input, ['y', 'n'])) {
-            echo Color::red('Choix invalide')."\n";
+            echo Color::red('Invalid choice')."\n";
 
             return $this->readline($message);
         }

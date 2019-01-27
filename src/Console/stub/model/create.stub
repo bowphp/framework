@@ -1,27 +1,30 @@
 <?php
 
-use Bow\Database\Migration\Schema;
 use Bow\Database\Migration\Migration;
-use Bow\Database\Migration\TablePrinter as Printer;
+use Bow\Database\Migration\SQLGenerator;
 
 class {className} extends Migration
 {
     /**
-     * create Table
+     * Up Migration
      */
     public function up()
     {
-        Schema::create("{table}", function(Printer $table) {
-            $table->increment('id');
-            $table->timestamps();
+        $this->create("{table}", function (SQLGenerator $table) {
+            $table->addColumn('id', 'int', [
+                'primary' => true,
+                'increment' => true
+            ]);
+
+            $table->addTimestamps();
         });
     }
 
     /**
-     * Drop Table
+     * Rollback migration
      */
-    public function down()
+    public function rollback()
     {
-        Schema::dropIfExists("{table}");
+        $this->dropIfExists("{table}");
     }
 }

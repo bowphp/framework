@@ -7,7 +7,7 @@ use Bow\Http\Request;
 class {className}
 {
     /**
-     * Fonction de lancement du middleware.
+     * Launch function of the middleware.
      *
      * @param Request $request
      * @param callable $next
@@ -16,7 +16,8 @@ class {className}
      */
     public function process(Request $request, callable $next, array $args = [])
     {
-        // Codez Ici
+        // Code Here
+        
         return $next($request);
     }
 }

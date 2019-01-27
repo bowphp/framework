@@ -8,7 +8,7 @@ use Bow\Configuration\Configuration;
 class {className} extends Configuration
 {
     /**
-     * Permet de lancement de configuration
+     * Launch configuration
      *
      * @param Loader $config
      * @return void
@@ -19,7 +19,7 @@ class {className} extends Configuration
     }
 
     /**
-     * Permet de démarrer le package configuré
+     * Start the configured package
      *
      * @return void
      */

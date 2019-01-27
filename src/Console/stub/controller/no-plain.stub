@@ -8,76 +8,76 @@ use Bow\Http\Request;
 class {className} extends Controller
 {
     /**
-     * Point d'entré de l'application
+     * Application entry point
      *
      * @return void
      */
     public function index()
     {
-        // Codez Ici
+        // Code Here
     }
 
     /**
-     * Permet d'afficher la vue permettant de créer une résource.
+     * Displays the view for creating a resource.
      *
      * @return void
      */
     public function create()
     {
-        // Codez Ici
+        // Code Here
     }
 
     /**
-     * Permet d 'ajouter une nouvelle résource dans la base d'information
+     * Add a new resource in the information base
      *
      * @return void
      */
     public function store()
     {
-        // Codez Ici
+        // Code Here
     }
 
     /**
-     * Permet de récupérer une information précise avec un identifiant.
+     * Allows you to retrieve precise information with an identifier.
      *
      * @param  mixed $id
      * @return void
      */
     public function show($id)
     {
-        // Codez Ici
+        // Code Here
     }
 
     /**
-     * Mise à jour d'un ressource en utilisant paramètre du GET
+     * Show updating form using GET
      *
      * @param  mixed $id
      * @return void
      */
     public function edit($id)
     {
-        // Codez Ici
+        // Code Here
     }
 
     /**
-     * Mise à jour d'une ressource
+     * Update a resource
      *
      * @param  mixed $id
      * @return void
      */
     public function update($id)
     {
-        // Codez Ici
+        // Code Here
     }
 
     /**
-     * Permet de supprimer une ressource
+     * Delete a resource
      *
      * @param mixed $id
      * @return void
      */
     public function destroy($id)
     {
-        // Codez Ici
+        // Code Here
     }
 }

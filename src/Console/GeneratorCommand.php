@@ -5,17 +5,21 @@ namespace Bow\Console;
 class GeneratorCommand
 {
     /**
+     * The base directory where that are going to generate
+     *
      * @var string
      */
     private $base_dir;
 
     /**
+     * The generate name
+     *
      * @var string
      */
     private $name;
 
     /**
-     * MiddlewareCommand constructor
+     * GeneratorCommand constructor
      *
      * @param string $base_dir
      * @param string $name
@@ -35,7 +39,7 @@ class GeneratorCommand
     public function filenameIsValide($filename)
     {
         if (is_null($filename)) {
-            echo Color::red('Le nom du fichier est invalide.');
+            echo Color::red('The file name is invalid.');
 
             exit(1);
         }

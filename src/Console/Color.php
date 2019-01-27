@@ -5,7 +5,9 @@ namespace Bow\Console;
 class Color
 {
     /**
-     * @param  $message
+     * Red message
+     *
+     * @param string $message
      * @return string
      */
     public static function red($message)
@@ -14,7 +16,9 @@ class Color
     }
 
     /**
-     * @param  $message
+     * Blue message
+     *
+     * @param string $message
      * @return string
      */
     public static function blue($message)
@@ -23,7 +27,9 @@ class Color
     }
 
     /**
-     * @param  $message
+     * Yellow message
+     *
+     * @param string $message
      * @return string
      */
     public static function yellow($message)
@@ -32,7 +38,9 @@ class Color
     }
 
     /**
-     * @param  $message
+     * Green message
+     *
+     * @param string $message
      * @return string
      */
     public static function green($message)
@@ -41,7 +49,9 @@ class Color
     }
 
     /**
-     * @param  $message
+     * Red message with '[danger]' prefix
+     *
+     * @param string $message
      * @return string
      */
     public static function danger($message)
@@ -50,6 +60,8 @@ class Color
     }
 
     /**
+     * Blue message with '[info]' prefix
+     *
      * @param  $message
      * @return string
      */
@@ -59,7 +71,9 @@ class Color
     }
 
     /**
-     * @param  $message
+     * Yellow message with '[warning]' prefix
+     *
+     * @param string $message
      * @return string
      */
     public static function warning($message)
@@ -68,11 +82,13 @@ class Color
     }
 
     /**
-     * @param  $message
+     * Greean message with '[success]' prefix
+     *
+     * @param string $message
      * @return string
      */
     public static function success($message)
     {
-        return static::danger('[sucess]').' '.$message;
+        return static::green('[success]').' '.$message;
     }
 }

@@ -1,13 +1,19 @@
 <?php
 
+/**
+ * The {name} seeder
+ * 
+ * @see https://github.com/fzaninotto/Faker for all documentation
+ */
+
 $seeds = [];
 
 foreach (range(1, {num}) as $key) {
     $seeds[] = [
-        'id' => faker('autoincrement'),
-        'name' => faker('name'),
-        'created_at' => faker('date'),
-        'updated_at' => faker('date')
+        'id' => 1,
+        'name' => $faker->name,
+        'created_at' => $faker->dateTime(),
+        'updated_at' => $faker->dateTime()
     ];
 }
 

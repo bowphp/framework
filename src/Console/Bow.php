@@ -9,39 +9,77 @@ use Bow\Support\Faker;
 class Bow
 {
     /**
+     * The server file
+     *
      * @var string
      */
     private $serve_filename;
 
     /**
+     * The bootstrap files
+     *
      * @var array
      */
     private $bootstrap = [];
 
     /**
+     * The start directory
+     *
      * @var string
      */
     private $dirname;
 
     /**
+     * The COMMAND instance
+     *
      * @var Command
      */
     private $command;
 
     /**
+     * The the public directory
+     *
      * @var string
      */
     private $public_directory;
 
     /**
+     * The the storage directory
+     *
      * @var string
      */
-    private $storage_directory;
+    private $var_directory;
 
     /**
+     * The Loader instance
+     *
      * @var Loader
      */
     private $kernel;
+
+    /**
+     * The custom command registers
+     *
+     * @var array
+     */
+    private $registers;
+
+    /**
+     * The command list
+     *
+     * @var array
+     */
+    const COMMAND = ['add', 'migrate', 'run', 'generate', 'seed', 'help'];
+
+    /**
+     * The action list
+     *
+     * @var array
+     */
+    const ACTION = [
+        'middleware', 'controller', 'model', 'validator',
+        'seeder', 'migration', 'configuration'
+    ];
 
     /**
      * Bow constructor.
@@ -52,18 +90,10 @@ class Bow
     public function __construct(Command $command)
     {
         if ($command->getParameter('trash')) {
-            echo Color::red('Bad command. Type "php bow help" for more information"');
-
-            exit(1);
+            $this->throwFailsCommand('help');
         }
 
         $this->dirname = $command->getBaseDirname();
-
-        $this->public_directory = rtrim($this->dirname, '/').'/public';
-
-        $this->storage_directory = rtrim($this->dirname, '/').'/storage';
-
-        $this->serve_filename = rtrim($this->dirname, '/').'/server.php';
 
         $this->command = $command;
     }
@@ -79,17 +109,17 @@ class Bow
     }
 
     /**
-     * Set storage directory
+     * Set var directory
      *
      * @param string $dirname
      */
-    public function setStorageDirectory($dirname)
+    public function setVarDirectory($dirname)
     {
-        $this->storage_directory = $dirname;
+        $this->var_directory = $dirname;
     }
 
     /**
-     * Permet de changer les fichiers de demarage
+     * Set the bootstrap files
      *
      * @param  array $bootstrap
      * @return void
@@ -100,9 +130,9 @@ class Bow
     }
 
     /**
-     * Permet de changer les fichiers de demarage
+     * Set the server file
      *
-     * @param  string $serve_filename
+     * @param string $serve_filename
      * @return void
      */
     public function setServerFilename($serve_filename)
@@ -121,7 +151,7 @@ class Bow
     }
 
     /**
-     * Permet de lancer Bow task runner
+     * Launch Bow task runner
      *
      * @return void
      * @throws
@@ -133,6 +163,10 @@ class Bow
         }
         
         $command = $this->command->getParameter('command');
+
+        if (array_key_exists($command, $this->registers)) {
+            return $this->registers[$command]();
+        }
 
         if ($command == 'launch') {
             $command = null;
@@ -148,18 +182,18 @@ class Bow
     }
 
     /**
-     * Permet d'appeler un commande
+     * Calls a command
      *
      * @param  string $command
      * @return void
      * @throws
      */
-    private function call($command)
+    public function call($command)
     {
-        if (!method_exists($this, $command)) {
-            echo Color::red("Command not exists !\n");
+        if (!in_array($command, static::COMMAND)) {
+            echo Color::red("The command '$command' not exists !\n");
 
-            throw new \ErrorException('Type "php bow help" for more information');
+            $this->throwFailsCommand('help');
         }
 
         if (!$this->command->getParameter('action')) {
@@ -171,16 +205,31 @@ class Bow
         }
 
         try {
-            call_user_func_array([$this, $command], [$this->command->getParameter('target')]);
+            call_user_func_array(
+                [$this, $command],
+                [$this->command->getParameter('target')]
+            );
         } catch (\Exception $e) {
-            echo "{$e->getMessage()}";
+            echo $e->getMessage();
 
             exit(1);
         }
     }
 
     /**
-     * Permet de lancer un migration
+     * Add a custom order to the store
+     *
+     * @param string $command
+     * @param callable $cb
+     * @return Bow
+     */
+    public function addCommand($command, $cb)
+    {
+        $this->registers[$command] = $cb;
+    }
+
+    /**
+     * Launch a migration
      *
      * @return void
      *
@@ -191,16 +240,18 @@ class Bow
         $action = $this->command->getParameter('action');
 
         if (!in_array($action, ['up', 'down', 'refresh', null])) {
-            echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
+            echo Color::red("This action is not exists!");
 
-            throw new \ErrorException('Type "php bow help migrate" for more information');
+            $this->throwFailsCommand('help migrate');
         }
 
         if ($action == null) {
             $action = 'up';
 
-            if ($this->command->getParameter('target') !== null || $this->command->getParameter('trash') !== null) {
-                throw new \ErrorException('Bad command. Type "php bow help migrate" for more information"');
+            if ($this->command->getParameter('target') !== null
+                || $this->command->getParameter('trash') !== null
+            ) {
+                $this->throwFailsCommand('help migrate');
             }
         }
 
@@ -214,7 +265,7 @@ class Bow
     }
 
     /**
-     * Permet de créer des fichiers
+     * Create files
      *
      * @return void
      *
@@ -224,21 +275,23 @@ class Bow
     {
         $action = $this->command->getParameter('action');
 
-        if (!in_array($action, ['middleware', 'controller', 'model', 'validator', 'seeder', 'migration', 'configuration'])) {
-            echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
+        if (!in_array($action, static::ACTION)) {
+            echo Color::red("This action is not exists");
 
-            throw new \ErrorException('Type "php bow help create" for more information');
+            $this->throwFailsCommand('help create');
         }
 
         if ($action == 'migration') {
             $action = 'make';
         }
 
-        $this->command->$action($this->command->getParameter('target'));
+        $this->command->$action(
+            $this->command->getParameter('target')
+        );
     }
 
     /**
-     * Permet de lancer le seeding
+     * Launch seeding
      *
      * @return void
      * @throws
@@ -248,16 +301,16 @@ class Bow
         $action = $this->command->getParameter('action');
 
         if (!in_array($action, ['table', 'all'])) {
-            echo "\033[0;32mThis action is not exists\033[00m\033[00m\n";
-            
-            throw new \ErrorException('Type "php bow help seed" for more information');
+            echo Color::red("This action is not exists");
+
+            $this->throwFailsCommand('help seed');
         }
 
         if ($action == 'all') {
             if ($this->command->getParameter('target') != null) {
-                echo "\033[0;31mBad command\033[00m\033[00m\n";
+                echo Color::red("Bad command");
 
-                throw new \ErrorException('Type "php bow help seed" for more information');
+                $this->throwFailsCommand('help seed');
             }
         }
 
@@ -269,27 +322,28 @@ class Bow
             $table_name = trim($this->command->getParameter('target', null));
 
             if (is_null($table_name)) {
-                echo "\033[0;31mSpecify the seeder table name.\033[00m\033[00m\n";
-                
-                throw new \ErrorException('Type "php bow help seed" for more information');
+                echo Color::red('Specify the seeder table name');
+
+                $this->throwFailsCommand('help seed');
             }
 
             if (!file_exists($this->command->getSeederDirectory()."/{$table_name}_seeder.php")) {
-                echo "\033[0;32mLe seeder \033[0;33m$table_name\033[00m\033[0;32m n'existe pas.\n";
+                echo Color::red("Seeder $table_name not exists.");
 
                 exit(1);
             }
 
-            $seeds_filenames = [$this->command->getSeederDirectory()."/{$table_name}_seeder.php"];
+            $seeds_filenames = [
+                $this->command->getSeederDirectory()."/{$table_name}_seeder.php"
+            ];
         }
 
         $seed_collection = [];
 
+        $faker = \Faker\Factory::create();
+
         foreach ($seeds_filenames as $filename) {
             $seeds = include $filename;
-
-            Faker::reinitialize();
-
             $seed_collection = array_merge($seeds, $seed_collection);
         }
 
@@ -297,7 +351,7 @@ class Bow
             foreach ($seed_collection as $table => $seeds) {
                 $n = Database::table($table)->insert($seeds);
 
-                echo "\033[0;33m'$n' seed".($n > 1 ? 's' : '')." sur la table '$table'\n\033[00m";
+                echo Color::red("$n seed".($n > 1 ? 's' : '')." on $table table\n");
             }
         } catch (\Exception $e) {
             echo Color::red($e->getMessage());
@@ -306,22 +360,6 @@ class Bow
         }
 
         exit(0);
-    }
-
-    /**
-     * Permet de rafraichir le registre
-     *
-     * @throws \ErrorException
-     */
-    public function register()
-    {
-        $action = $this->command->getParameter('action');
-
-        if (!in_array($action, ['refresh'])) {
-            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
-        }
-
-        $this->command->reflesh();
     }
 
     /**
@@ -334,14 +372,14 @@ class Bow
         $action = $this->command->getParameter('action');
 
         if (!in_array($action, ['server', 'console'])) {
-            throw new \ErrorException('Bad command. Type "php bow help create" for more information"');
+            $this->throwFailsCommand('help run');
         }
 
         $this->$action();
     }
 
     /**
-     * Permet de lancer le serveur local
+     * Launch the local server
      *
      * @return void
      */
@@ -369,11 +407,13 @@ class Bow
         fclose($r);
 
         // lancement du serveur.
-        shell_exec("php -S $hostname:$port -t {$this->public_directory} ".$this->serve_filename." $settings");
+        shell_exec(
+            "php -S $hostname:$port -t {$this->public_directory} ".$this->serve_filename." $settings"
+        );
     }
 
     /**
-     * Permet de lancer le repl
+     * Launch the REPL
      */
     protected function console()
     {
@@ -403,7 +443,7 @@ class Bow
     }
 
     /**
-     * Permet de generate un resource sur un controller
+     * Allows generate a resource on a controller
      *
      * @return void
      */
@@ -417,11 +457,13 @@ class Bow
             exit(1);
         }
 
-        $this->command->$action($this->command->getParameter('target'));
+        $this->command->$action(
+            $this->command->getParameter('target')
+        );
     }
 
     /**
-     * Permet de supprimer les caches
+     * Remove the caches
      *
      * @return void
      *
@@ -434,24 +476,24 @@ class Bow
         }
 
         if ($this->command->getParameter('target') == 'cache') {
-            $this->unlinks($this->storage_directory.'/cache/bow');
+            $this->unlinks($this->var_directory.'/cache/bow');
 
             return;
         }
 
         if ($this->command->getParameter('target') == 'view') {
-            $this->unlinks($this->storage_directory.'/cache/view');
+            $this->unlinks($this->var_directory.'/cache/view');
 
             return;
         }
 
-        $this->unlinks($this->storage_directory.'/cache/bow');
+        $this->unlinks($this->var_directory.'/cache/bow');
 
-        $this->unlinks($this->storage_directory.'/cache/view');
+        $this->unlinks($this->var_directory.'/cache/view');
     }
 
     /**
-     * Supprimession de fichier
+     * Delete file
      *
      * @param  string $dirname
      * @return void
@@ -463,6 +505,20 @@ class Bow
         foreach ($glob as $item) {
             @unlink($item);
         }
+    }
+
+    /**
+     * Throw fails command
+     *
+     * @param string $command
+     *
+     * @throws \ErrorException
+     */
+    private function throwFailsCommand($command)
+    {
+        echo Color::green(sprintf('Type "php bow %s" for more information', $command));
+
+        exit(1);
     }
 
     /**
@@ -498,10 +554,9 @@ Bow usage: php bow command:action [name]
    \033[0;33madd:migration\033[00m     Create a new migration
 
  \033[0;32mmigrate\033[00m apply a migration in user model
-  option: [table_name|--all]
-   \033[0;33mmigrate:down\033[00m       Drop migration
-   \033[0;33mmigrate:up\033[00m         Update or create table of the migration
-   \033[0;33mregister:reflesh\033[00m   Update register file
+   \033[0;33mmigrate\033[00m            Make migration
+   \033[0;33mmigrate:reset\033[00m      Reset all migration
+   \033[0;33mmigrate:rollback\033[00m   Rollback to previous migration
 
  \033[0;32mclear\033[00m for clear cache information [not supported]
    \033[0;33mclear:view\033[00m        Clear view cached information
@@ -529,10 +584,10 @@ USAGE;
                 echo <<<U
 \n\033[0;32mcreate\033[00m create a user class\n
     [option]
-    --no-plain              Create a plain controller [available in add:controller]
-    -m                      Create a migration [available in add:model]
-    --create                Create a migration for create table [available in add:migration]
-    --table                 Create a migration for alter table [available in add:migration]
+    --no-plain  Create a plain controller [available in add:controller]
+    -m          Create a migration [available in add:model]
+    --create    Create a migration for create table [available in add:migration]
+    --table     Create a migration for alter table [available in add:migration]
 
     * you can use --no-plain --with-model in same command
 
@@ -542,8 +597,8 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       For create a new model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validator
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--n-seed=n]  For create a new table seeder
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new table migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--n-seed=n]  For create a new seeder
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
 
 U;
@@ -553,24 +608,22 @@ U;
                 echo <<<U
     \n\033[0;32mgenerate\033[00m create a resource and app key
     [option]
-    --model   Define the usable model
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name             For create a new REST controller
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                       For generate a new APP KEY
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                      For display this
+    --model=[model_name] Define the usable model
+
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   For create a new REST controller
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      For generate a new APP KEY
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     For display this
 
 U;
                 break;
             case 'migrate':
                 echo <<<U
 \n\033[0;32mmigrate\033[00m apply a migration in user model\n
-    [option]
-    --all                 Optionnel
-    --display-sql         Display rendered sql code
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:up name [option]  Up the specify migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:down name         Down migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate [--all]           Up all defined migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate help              For display this
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate           Make migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:reset     Reset all migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate:rollback  Rollback to previous migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate help      For display this
 
 U;
                 break;
@@ -578,10 +631,11 @@ U;
             case 'run':
                 echo <<<U
 \n\033[0;32mrun\033[00m for launch repl and local server\n
-    Option: run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
-    Option: run:console [--include=filename.php]
+    [option]
+    run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
+    run:console [--include=filename.php]
 
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m [option] Show psysh php REPL 
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
 
 U;
@@ -590,9 +644,10 @@ U;
             case 'clear':
                 echo <<<U
 \n\033[0;32mclear\033[00m for clear cache information\n
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:view        Clear view cached information
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:cache\033[00m       Clear cache information
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:all\033[00m         Clear all cache information
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:view             Clear view cached information
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:cache\033[00m    Clear cache information
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:all\033[00m      Clear all cache information
 
 U;
                 break;
@@ -600,6 +655,7 @@ U;
             case 'seed':
                 echo <<<U
 \n\033[0;32mMake table seeding\033[00m\n
+
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:all\033[00m               Make seeding for all
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:table\033[00m table_name  Make seeding for one table
 
