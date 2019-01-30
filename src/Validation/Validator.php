@@ -41,6 +41,7 @@ class Validator
      * @var array
      */
     protected $compiles = [
+        'Required',
         'Max',
         'Min',
         'Lower',
@@ -53,8 +54,13 @@ class Validator
         'Email',
         'In',
         'Int',
+        'Float',
         'Exists',
-        'Unique'
+        'NotExists',
+        'Unique',
+        'Date',
+        'DateTime',
+        'Regex'
     ];
 
     /**
@@ -601,7 +607,7 @@ class Validator
     /**
      * Compile Exists Rule
      *
-     * [exists:column,table] Check that the contents of a table field exist
+     * [exists:table,column] Check that the contents of a table field exist
      *
      * @param string $key
      * @param string $masque
@@ -638,7 +644,7 @@ class Validator
     /**
      * Compile Not Exists Rule
      *
-     * [!exists:column,table] Checks that the contents of the field of a table do not exist
+     * [!exists:table,column] Checks that the contents of the field of a table do not exist
      *
      * @param string $key
      * @param string $masque
@@ -675,7 +681,7 @@ class Validator
     /**
      * Compile Unique Rule
      *
-     * [unique:column,table] Check that the contents of the field of a table is a single value
+     * [unique:table,column] Check that the contents of the field of a table is a single value
      *
      * @param string $key
      * @param string $masque
