@@ -21,6 +21,7 @@ env:
   - DB_USER=travis
 
 before_script:
+  - ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src tests
   - if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
   - mysql -u root -e 'CREATE DATABASE IF NOT EXISTS test;'
 
