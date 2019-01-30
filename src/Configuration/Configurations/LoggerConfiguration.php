@@ -16,7 +16,7 @@ class LoggerConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('logger', function () use ($config) {
-            if (env('APP_ENV') == 'development') {
+            if (app_env('APP_ENV') == 'development') {
                 $this->loadFrontLogger();
             }
 
