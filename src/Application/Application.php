@@ -487,12 +487,6 @@ class Application
             return true;
         }
 
-        if (env('MODE') == 'down') {
-            abort(503);
-
-            return true;
-        }
-
         // We add of the X-Powered-By header when disable_x_powered_by is true
         if (!$this->disable_x_powered_by) {
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
