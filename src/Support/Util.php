@@ -9,14 +9,14 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 class Util
 {
     /**
-     * Définir le type de retoure chariot CRLF ou LF
+     * Define the CRLF or LF carriage return type
      *
      * @var string
      */
     private static $sep;
 
     /**
-     * Lance un var_dump sur les variables passées en paramètre.
+     * Run a var_dump on the variables passed in parameter.
      *
      * @return void
      */
@@ -57,7 +57,7 @@ class Util
     }
 
     /**
-     * Lance un var_dump sur les variables passées en paramètre.
+     * Run a var_dump on the variables passed in parameter.
      *
      * @param  string $var
      * @return void
@@ -70,7 +70,7 @@ class Util
     }
 
     /**
-     * sep, séparateur \r\n or \n
+     * sep, separator \r\n or \n
      *
      * @return string
      */
@@ -91,7 +91,7 @@ class Util
 
 
     /**
-     * rangeField, fonction permettant de sécuriser les données.
+     * Function to secure the data.
      *
      * @param array $data, les données à sécuriser
      *
@@ -99,15 +99,12 @@ class Util
      */
     public static function rangeField($data)
     {
-        /**
-         * Construction d'une chaine de format:
-         * key1 = value1, key2 = value2[, keyN = valueN]
-         * Utile pour binder une réquête INSERT|UPDATE|SELECT|DELETE en mode préparer:
-         */
         $field = '';
         $i = 0;
+
         foreach ($data as $key => $value) {
             $field .= ($i > 0 ? ', ' : '') . '`'.$key . '` = ' . $value;
+
             $i++;
         }
 
@@ -115,7 +112,7 @@ class Util
     }
 
     /**
-     * Formateur de donnée. key => :value
+     * Data trainer. key => :value
      *
      * @param array $data
      * @param bool  $byKey
@@ -125,6 +122,7 @@ class Util
     public static function add2points(array $data, $byKey = false)
     {
         $resultat = [];
+
         if ($byKey == true) {
             foreach ($data as $key => $value) {
                 if (is_string($value)) {
@@ -138,6 +136,7 @@ class Util
                 $resultat[$value] = ':' . $value;
             }
         }
+        
         return $resultat;
     }
 }

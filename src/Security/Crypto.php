@@ -11,7 +11,7 @@ class Crypto
      *
      * @var string
      */
-    private static $key = '';
+    private static $key;
 
     /**
      * The security cipher
@@ -30,7 +30,7 @@ class Crypto
     {
         static::$key = $key;
 
-        if ($cipher) {
+        if (!is_null($cipher)) {
             static::$cipher = $cipher;
         }
     }
@@ -45,7 +45,9 @@ class Crypto
     public static function encrypt($data)
     {
         $iv_size = openssl_cipher_iv_length(static::$cipher);
+
         $iv = Str::slice(sha1(static::$key), 0, $iv_size);
+
         return openssl_encrypt($data, static::$cipher, static::$key, 0, $iv);
     }
 
@@ -59,7 +61,9 @@ class Crypto
     public static function decrypt($data)
     {
         $iv_size = openssl_cipher_iv_length(static::$cipher);
+        
         $iv = Str::slice(sha1(static::$key), 0, $iv_size);
+
         return openssl_decrypt($data, static::$cipher, static::$key, 0, $iv);
     }
 }

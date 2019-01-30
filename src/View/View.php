@@ -54,11 +54,17 @@ class View implements ResponseInterface
         $engine = $config['view.engine'];
 
         if (is_null($engine)) {
-            throw new ViewException('Le moteur de template non défini.', E_USER_ERROR);
+            throw new ViewException(
+                'Le moteur de template non défini.',
+                E_USER_ERROR
+            );
         }
 
         if (!array_key_exists($engine, static::$engines)) {
-            throw new ViewException('Le moteur de template n\'est pas implementé.', E_USER_ERROR);
+            throw new ViewException(
+                'Le moteur de template n\'est pas implementé.',
+                E_USER_ERROR
+            );
         }
 
         static::$config = $config;
@@ -100,7 +106,9 @@ class View implements ResponseInterface
      */
     public static function parse($viewname, array $data = [])
     {
-        static::$content = static::getInstance()->getTemplate()->render($viewname, $data);
+        static::$content = static::getInstance()
+            ->getTemplate()
+            ->render($viewname, $data);
 
         return static::$instance;
     }

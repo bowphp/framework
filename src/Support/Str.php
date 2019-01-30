@@ -187,7 +187,7 @@ class Str
     }
 
     /**
-     * len, retourne la taille d'une chaine.
+     * Len
      *
      * @param $str
      *
@@ -212,7 +212,7 @@ class Str
     }
 
     /**
-     * repeat, réperte la chaine de caractère dans une nombre déterminé
+     * Lists the string of characters in a specified number
      *
      * @param $str
      * @param $number
@@ -225,7 +225,7 @@ class Str
     }
 
     /**
-     * randomize
+     * Randomize
      *
      * @param int $size
      *
@@ -237,8 +237,8 @@ class Str
     }
 
     /**
-     * slugify créateur de slug en utilisant un chaine simple.
-     * eg: 'je suis un chaine de caractere' => 'je-suis-un-chaine-de-caractere'
+     * slugify slug creator using a simple chain.
+     * eg: 'I am a string of character' => 'i-am-a-chain-of-character'
      *
      * @param string $str
      * @param string $delimiter
@@ -246,13 +246,17 @@ class Str
      */
     public static function slugify($str, $delimiter = '-')
     {
-        $temp = preg_replace('/[^a-z0-9]/', $delimiter, strtolower(trim(strip_tags($str))));
+        $temp = preg_replace(
+            '/[^a-z0-9]/',
+            $delimiter,
+            strtolower(trim(strip_tags($str)))
+        );
 
         return preg_replace('/-{2,}/', $delimiter, $temp);
     }
 
     /**
-     * unslugify créateur de slug en utilisant un chaine simple.
+     * unslugify, Lets you undo a slug
      *
      * @param string $str
      * @return string
@@ -263,7 +267,7 @@ class Str
     }
 
     /**
-     * Vérifier si le mail est un mail valide.
+     * Check if the email is a valid email.
      *
      * eg: dakiafranck@gmail.com => true
      *
@@ -282,7 +286,7 @@ class Str
     }
 
     /**
-     * Vérifie si la chaine est un domaine
+     * Check if the string is a domain
      *
      * eg: http://exemple.com => true
      * eg: http:/exemple.com => false
@@ -298,13 +302,16 @@ class Str
             throw new \ErrorException('Accept string ' . gettype($domain) . ' given');
         }
 
-        return  (bool) preg_match('/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/', $domain);
+        return  (bool) preg_match(
+            '/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/',
+            $domain
+        );
     }
 
     /**
-     * Vérifie si la chaine est en alphanumeric
+     * Check if the string is in alphanumeric
      *
-     * @param string $str*
+     * @param string $str
      * @return bool
      * @throws \ErrorException
      */
@@ -318,7 +325,7 @@ class Str
     }
 
     /**
-     * Vérifie si la chaine est en numeric
+     * Check if the string is in numeric
      *
      * @param string $str
      * @return bool
@@ -335,7 +342,7 @@ class Str
     }
 
     /**
-     * Vérifie si la chaine est en alpha
+     * Check if the string is in alpha
      *
      * @param string $str
      * @return bool
@@ -352,7 +359,7 @@ class Str
     }
 
     /**
-     * Vérifie si la chaine est en format slug
+     * Check if the string is in slug format
      *
      * @param string $str
      * @throws \ErrorException
@@ -368,7 +375,7 @@ class Str
     }
 
     /**
-     * Vérifie si la chaine est en majiscule
+     * Check if the string is in uppercase
      *
      * @param  string $str
      * @return bool
@@ -379,7 +386,7 @@ class Str
     }
 
     /**
-     * Vérifie si la chaine est en miniscule
+     * Check if the string is lowercase
      *
      * @param  string $str
      * @return bool
@@ -390,7 +397,7 @@ class Str
     }
 
     /**
-     * Retourne le nombre caractère dans une chaine.
+     * Returns the number of characters in a string.
      *
      * @param string $pattern
      * @param string $str
@@ -403,7 +410,7 @@ class Str
     }
 
     /**
-     * Retourne un nombre détermine de mots dans une chaine de caractère.
+     * Returns a determined number of words in a string.
      *
      * @param string $words
      * @param int    $len
@@ -424,7 +431,7 @@ class Str
     }
 
     /**
-     * Retourne une chaine de caractère dont les mots sont mélangés.
+     * Returns a string of words whose words are mixed.
      *
      * @param string $words
      *
@@ -456,7 +463,7 @@ class Str
     }
 
     /**
-     * Permet de forcer l'encodage en utf-8
+     * Enables to force the encoding in utf-8
      */
     public static function forceInUTF8()
     {

@@ -7,11 +7,15 @@ use Bow\Security\Crypto;
 class Cookie
 {
     /**
+     * The decrypted data collection
+     *
      * @var array
      */
     private static $isDecrypt = [];
 
     /**
+     * __clone
+     *
      * @access private
      */
     final private function __clone()
@@ -19,7 +23,7 @@ class Cookie
     }
 
     /**
-     * has, vérifie l'existance une clé dans la colléction de session
+     * Check for existence of a key in the session collection
      *
      * @param string $key
      * @param bool   $strict
@@ -40,7 +44,7 @@ class Cookie
     }
 
     /**
-     * isEmpty, vérifie si une colléction est vide.
+     * Check if a collection is empty.
      *
      * @return boolean
      */
@@ -50,7 +54,7 @@ class Cookie
     }
 
     /**
-     * get, permet de récupérer une valeur ou la colléction de valeur de cookie.
+     * Allows you to retrieve a value or collection of cookie value.
      *
      * @param string $key
      * @param mixed  $default
@@ -71,7 +75,7 @@ class Cookie
     }
 
     /**
-     * Retourne tout les valeurs COOKIE
+     * Return all values of COOKIE
      *
      * @return mixed
      */
@@ -85,27 +89,42 @@ class Cookie
     }
 
     /**
-     * add, permet d'ajouter une value dans le tableau de cookie.
+     * Add a value to the cookie table.
      *
-     * @param string|int $key,     La clé du cookie
-     * @param mixed      $data     La donnée a associée
-     * @param int        $expirate Le temps de vie du cookie
-     * @param string     $path     Le path de reconnaissance
-     * @param string     $domain   Le domaine sur lequel sera envoyé le cookie
-     * @param bool       $secure   Définie la sécurité
-     * @param bool       $http     Définie si c'est seulement le protocole http
+     * @param string|int $key
+     * @param mixed      $data
+     * @param int        $expirate
+     * @param string     $path
+     * @param string     $domain
+     * @param bool       $secure
+     * @param bool       $http
      *
      * @return bool
      */
-    public static function set($key, $data, $expirate = 3600, $path = null, $domain = null, $secure = false, $http = true)
-    {
+    public static function set(
+        $key,
+        $data,
+        $expirate = 3600,
+        $path = null,
+        $domain = null,
+        $secure = false,
+        $http = true
+    ) {
         $data = Crypto::encrypt($data);
 
-        return setcookie($key, $data, time() + $expirate, $path, $domain, $secure, $http);
+        return setcookie(
+            $key,
+            $data,
+            time() + $expirate,
+            $path,
+            $domain,
+            $secure,
+            $http
+        );
     }
 
     /**
-     * remove, supprime une entrée dans la table
+     * Delete an entry in the table
      *
      * @param string $key
      *
@@ -121,6 +140,7 @@ class Cookie
 
         if (!static::$isDecrypt[$key]) {
             $old = Crypto::decrypt($_COOKIE[$key]);
+
             unset(static::$isDecrypt[$key]);
         }
 

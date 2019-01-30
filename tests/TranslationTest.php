@@ -21,7 +21,7 @@ class TranslationTest extends \PHPUnit\Framework\TestCase
 
     public function testPlurial()
     {
-        $this->assertEquals(Translator::pluiral('welcome.plurial'), 'users');
+        $this->assertEquals(Translator::plurial('welcome.plurial'), 'users');
     }
 
     public function testSingle()

@@ -8,6 +8,9 @@ use Bow\Support\Collection;
 
 class Event
 {
+    /**
+     * __clone
+     */
     final private function __clone()
     {
     }

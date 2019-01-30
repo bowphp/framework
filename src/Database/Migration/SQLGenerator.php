@@ -10,6 +10,8 @@ class SQLGenerator
 {
     /**
      * The managed table name
+     *
+     * @var string
      */
     private $table;
 
@@ -40,6 +42,7 @@ class SQLGenerator
      * SQLGenerator constructor
      *
      * @param string $table
+     * @param string $adapter
      * @param string $scope
      */
     public function __construct($table, $adapter = 'mysql', $scope = 'create')

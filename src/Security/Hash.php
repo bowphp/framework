@@ -13,13 +13,7 @@ class Hash
      */
     public static function make($value, $cost = 10)
     {
-        return password_hash(
-            $value,
-            PASSWORD_BCRYPT,
-            [
-            'cast' => $cost
-            ]
-        );
+        return password_hash($value, PASSWORD_BCRYPT, ['cast' => $cost]);
     }
 
     /**
@@ -47,10 +41,6 @@ class Hash
      */
     public function needsRehash($hash, $cost = 10)
     {
-        return password_needs_rehash(
-            $hash,
-            PASSWORD_BCRYPT,
-            ['cost' => $cost]
-        );
+        return password_needs_rehash($hash, PASSWORD_BCRYPT, ['cost' => $cost]);
     }
 }

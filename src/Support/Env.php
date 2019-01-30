@@ -5,11 +5,15 @@ namespace Bow\Support;
 class Env
 {
     /**
+     * The env collection
+     *
      * @var object
      */
     private static $env;
 
     /**
+     * Check if env is load
+     *
      * @return bool
      */
     public static function isLoaded()
@@ -32,11 +36,11 @@ class Env
         static::$env = json_decode(trim(file_get_contents($filename)), true);
 
         if (json_last_error() == JSON_ERROR_SYNTAX) {
-            throw new \ErrorException('Vérifié la syntax json de fichier d\'environement (.env.json)');
+            throw new \ErrorException('');
         }
 
         if (json_last_error() == JSON_ERROR_INVALID_PROPERTY_NAME) {
-            throw new \ErrorException('Vérifié le nom des propriétés du fichier d\'environement (.env.json).');
+            throw new \ErrorException('Check environment file json syntax (.env.json)');
         }
 
         if (json_last_error() != JSON_ERROR_NONE) {
@@ -45,7 +49,7 @@ class Env
     }
 
     /**
-     * Permet de récuperer le information de l'environement
+     * Retrieve information from the environment
      *
      * @param  string $key
      * @param  null   $default
@@ -63,7 +67,7 @@ class Env
     }
 
     /**
-     * Permet de modifier l'information de l'environement
+     * Allows you to modify the information of the environment
      *
      * @param string $key
      * @param null   $value

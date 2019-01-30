@@ -9,6 +9,8 @@ use InvalidArgumentException;
 class Session implements CollectionInterface
 {
     /**
+     * The internal session variable
+     *
      * @var array
      */
     const CORE_KEY = [
@@ -21,11 +23,15 @@ class Session implements CollectionInterface
     ];
 
     /**
+     * The instance of Session
+     *
      * @var Session
      */
     private static $instance;
 
     /**
+     * The session configuration
+     *
      * @var array
      */
     private $config = [
@@ -50,7 +56,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Configure
+     * Configure session instance
      *
      * @param array $config
      * @return mixed
@@ -76,6 +82,8 @@ class Session implements CollectionInterface
 
     /**
      * Session starteur.
+     *
+     * @return boolean
      */
     public function start()
     {
@@ -156,8 +164,8 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Permet de filter les variables définie par l'utilisateur
-     * et celles utilisé par le framework.
+     * Allows to filter user defined variables
+     * and those used by the framework.
      *
      * @return array
      */
@@ -177,7 +185,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Permet de vérifier l'existance une clé dans la colléction de session
+     * Allows checking for the existence of a key in the session collection
      *
      * @param string $key
      * @param bool   $strict
@@ -215,7 +223,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Permet de vérifier l'existance une clé dans la colléction de session
+     * Allows checking for the existence of a key in the session collection
      *
      * @param string $key
      * @return boolean
@@ -226,7 +234,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Permet de vérifier si une colléction est vide.
+     * Check whether a collection is empty.
      *
      * @return boolean
      */
@@ -236,9 +244,9 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Permet de récupérer une valeur ou la colléction de valeur.
+     * Retrieves a value or value collection.
      *
-     * @param string $key=null
+     * @param string $key
      * @param mixed  $default
      *
      * @return mixed
@@ -271,7 +279,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Permet d'ajouter une entrée dans la colléction
+     * Add an entry to the collection
      *
      * @param string|int $key
      * @param mixed $value
@@ -303,7 +311,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Retourne la liste des variables de session
+     * Returns the list of session variables
      *
      * @return array
      */
@@ -313,9 +321,9 @@ class Session implements CollectionInterface
     }
 
     /**
-     * remove, supprime une entrée dans la colléction
+     * Delete an entry in the collection
      *
-     * @param string $key La clé de l'élément a supprimé
+     * @param string $key
      *
      * @return mixed
      */
@@ -364,7 +372,8 @@ class Session implements CollectionInterface
     }
 
     /**
-     * flash
+     * Add flash data
+     * After the data recovery is automatic deleted
      *
      * @param  mixed $key
      * @param  mixed $message
@@ -386,7 +395,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Retourne la liste des données de la session sous forme de tableau.
+     * Returns the list of session data as a array.
      *
      * @return array
      */
@@ -396,7 +405,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Vide le système de flash.
+     * Empty the flash system.
      */
     public function clearFash()
     {
@@ -406,7 +415,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * clear, permet de vider le cache sauf csrf|bow.flash
+     * Allows to clear the cache except csrf and __bow.flash
      */
     public function clear()
     {
@@ -420,7 +429,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Permet de vide la session
+     * Allows you to empty the session
      */
     public function flush()
     {
@@ -428,6 +437,8 @@ class Session implements CollectionInterface
     }
 
     /**
+     * Returns the list of session data as a toObject.
+     *
      * @return array|void
      */
     public function toObject()

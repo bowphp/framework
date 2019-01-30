@@ -8,7 +8,7 @@ use InvalidArgumentException;
 interface FilesystemInterface
 {
     /**
-     * UploadFile, fonction permettant de uploader un fichier
+     * Store directly the upload file
      *
      * @param  UploadFile $file
      * @param  string  $location
@@ -19,16 +19,16 @@ interface FilesystemInterface
     public function store(UploadFile $file, $location = null, array $option = []);
 
     /**
-     * Ecrire à la suite d'un fichier spécifier
+     * Write following a file specify
      *
-     * @param  string $file    nom du fichier
-     * @param  string $content content a ajouter
+     * @param  string $file
+     * @param  string $content
      * @return bool
      */
     public function append($file, $content);
 
     /**
-     * Ecrire au début d'un fichier spécifier
+     * Write to the beginning of a file specify
      *
      * @param  string $file
      * @param  string $content
@@ -47,7 +47,7 @@ interface FilesystemInterface
     public function put($file, $content);
 
     /**
-     * Supprimer un fichier
+     * Delete file
      *
      * @param  string $file
      * @return boolean
@@ -63,7 +63,7 @@ interface FilesystemInterface
     public function files($dirname);
 
     /**
-     * Lire le contenu du dossier
+     * Read the contents of the file
      *
      * @param  string $dirname
      * @return array
@@ -71,7 +71,7 @@ interface FilesystemInterface
     public function directories($dirname);
 
     /**
-     * Crée un répertoire
+     * Create a directory
      *
      * @param  string $dirname
      * @param  int    $mode
@@ -81,7 +81,7 @@ interface FilesystemInterface
     public function makeDirectory($dirname, $mode = 0777, $recursive = false);
 
     /**
-     * Récuper le contenu du fichier
+     * Get file content
      *
      * @param  string $filename
      * @return null|string
@@ -89,7 +89,7 @@ interface FilesystemInterface
     public function get($filename);
 
     /**
-     * Copie le contenu d'un fichier source vers un fichier cible.
+     * Copy the contents of a source file to a target file.
      *
      * @param  string $target
      * @param  string $source
@@ -98,7 +98,7 @@ interface FilesystemInterface
     public function copy($target, $source);
 
     /**
-     * Rénomme ou déplace un fichier source vers un fichier cible.
+     * Rénme or move a source file to a target file.
      *
      * @param string $target
      * @param string $source
@@ -106,7 +106,7 @@ interface FilesystemInterface
     public function move($target, $source);
 
     /**
-     * Vérifie l'existance d'un fichier
+     * Check the existence of a file
      *
      * @param string $filename
      * @return bool
@@ -114,7 +114,7 @@ interface FilesystemInterface
     public function exists($filename);
 
     /**
-     * L'extension du fichier
+     * The file extension
      *
      * @param string $filename
      * @return string
@@ -122,7 +122,7 @@ interface FilesystemInterface
     public function extension($filename);
 
     /**
-     * isFile aliase sur is_file.
+     * isFile alias of is_file.
      *
      * @param string $filename
      * @return bool
@@ -130,7 +130,7 @@ interface FilesystemInterface
     public function isFile($filename);
 
     /**
-     * isDirectory aliase sur is_dir.
+     * isDirectory alias of is_dir.
      *
      * @param string $dirname
      * @return bool
@@ -138,8 +138,8 @@ interface FilesystemInterface
     public function isDirectory($dirname);
 
     /**
-     * Permet de résolver un path.
-     * Donner le chemin absolute d'un path
+     * Resolves a path.
+     * Give the absolute path of a path
      *
      * @param string $filename
      * @return string

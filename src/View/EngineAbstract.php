@@ -9,6 +9,7 @@ abstract class EngineAbstract
 {
     /**
      * Liste des helpers
+     *
      * @var array
      */
     const HELPERS = [
@@ -47,11 +48,15 @@ abstract class EngineAbstract
     ];
 
     /**
+     * The template engine name
+     *
      * @var string
      */
     protected $name;
 
     /**
+     * The configuration loader
+     *
      * @var Loader
      */
     protected $config;

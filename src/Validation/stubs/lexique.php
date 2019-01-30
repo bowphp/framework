@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'email' => "Le champ :attribute doit &ecir;tre un email.",
+    'required' => "Le champ :attribute est requis.",
+    'empty' => "Le champ :attribute n'est pas défini dans les données à valider.",
+    'min' => "Le champ :attribute doit avoir un contenu minimal de :length.",
+    'max' => "Le champ :attribute doit avoir un contenu maximal de :length.",
+    'same' => "Le champ :attribute doit avoir un contenu égal à :value.",
+    'number' => "Le champ :attribute doit avoir un contenu en numérique.",
+    'int' => "Le champ :attribute doit avoir un contenu de type entier.",
+    'float' => "Le champ :attribute doit avoir un contenu de type réel.",
+    'alphanum' => "Le champ :attribute doit avoir un contenu en alphanumérique.",
+    'in' => "Le champ :attribute doit avoir un contenu une valeur dans :value.",
+    'size' => "Le champ :attribute doit avoir un contenu de :length caractère(s).",
+    'lower' => "Le champ :attribute doit avoir un contenu en miniscule.",
+    'upper' => "Le champ :attribute doit avoir un contenu en majiscule.",
+    'alpha' => "Le champ :attribute doit avoir un contenu en alphabetique.",
+    'exists' => "le champe :attribute n'existe pas.",
+    'not_exists' => "le champ :attribute existe.",
+    'unique' => "le champ :attribute n'est pas unique.",
+    'date' => "Le champ :attribute n'est pas une date au format yyyy-mm-dd",
+    'datetime' => "Le champ :attribute n'est pas une date au format yyyy-mm-dd hh:mm:ss",
+    'regex' => "Le champ :attribute n'est pas valide",
+];

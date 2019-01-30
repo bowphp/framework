@@ -10,16 +10,22 @@ use Bow\Validation\Exception\ValidationException;
 abstract class ValidationRequest
 {
     /**
+     * The Validate instance
+     *
      * @var Validate
      */
     private $validate;
 
     /**
+     * The request data
+     *
      * @var array
      */
     private $data;
 
     /**
+     * The Request instance
+     *
      * @var Request
      */
     private $request;
@@ -34,9 +40,11 @@ abstract class ValidationRequest
     {
         if (!$this->authorize()) {
             $response = $this->authorizationFailAction();
+
             if (is_array($response) || is_object($response)) {
                 $response = json_encode($response);
             }
+
             die($response);
         }
 
@@ -58,16 +66,20 @@ abstract class ValidationRequest
     }
 
     /**
+     * The rules list
+     *
      * @return array
      */
     protected function rules()
     {
         return [
-            // Vos régles
+            // Your rules
         ];
     }
 
     /**
+     * The allowed validation key
+     *
      * @return array
      */
     protected function keys()
@@ -78,6 +90,8 @@ abstract class ValidationRequest
     }
 
     /**
+     * The define the user authorisation
+     *
      * @return bool
      */
     protected function authorize()
@@ -86,33 +100,45 @@ abstract class ValidationRequest
     }
 
     /**
-     * Quand l'utilisateur n'a pas l'authorization de lance cette requête
-     * C'est la methode qui est lancer pour bloquer l'utilisateur
+     * When the user does not have the authorization to launch this request
+     * This is the method that is launched to block the user
+     *
+     * @throws AuthorizationException
      */
     protected function authorizationFailAction()
     {
-        // throw new AuthorizationException('Vous n\'avez l\'authorisation pour faire requête');
+        throw new AuthorizationException(
+            'You do not have permission to make a request'
+        );
     }
 
     /**
+     * Send fails authorization
+     *
      * @throws AuthorizationException
      */
     protected function sendFailAuthorization()
     {
-        throw new AuthorizationException('Vous n\'avez l\'authorisation pour faire requête');
+        throw new AuthorizationException(
+            'You do not have permission to make a request'
+        );
     }
 
     /**
+     * Throw validation error
+     *
      * @throws ValidationException
      */
     protected function sendFailValidation()
     {
-        throw new ValidationException('Erreur de validation');
+        throw new ValidationException('Validation error');
     }
 
     /**
      * Quand l'utilisateur n'a pas l'authorization de lance cette requête
      * C'est la methode qui est lancer pour bloquer l'utilisateur
+     *
+     * @throws AuthorizationException
      */
     protected function validationFailAction()
     {
@@ -120,7 +146,9 @@ abstract class ValidationRequest
     }
 
     /**
-     * Permet de verifier si la réquete
+     * Check if the query
+     *
+     * @return boolean
      */
     protected function fails()
     {
@@ -128,7 +156,7 @@ abstract class ValidationRequest
     }
 
     /**
-     * Permet de récupérer le validateur
+     * Get the validator instance
      *
      * @return Validate
      */
@@ -138,7 +166,7 @@ abstract class ValidationRequest
     }
 
     /**
-     * Permet de récupérer le message du de la dernier erreur
+     * Get the message of the last error
      *
      * @return string
      */
@@ -148,7 +176,7 @@ abstract class ValidationRequest
     }
 
     /**
-     * Permet de récupérer tout les messages d'erreur
+     * Get all errors messages
      *
      * @return array
      */
@@ -158,7 +186,7 @@ abstract class ValidationRequest
     }
 
     /**
-     * Permet de récupérer les données de la validation
+     * Get validation data
      *
      * @return array
      */
@@ -168,9 +196,9 @@ abstract class ValidationRequest
     }
 
     /**
-     * Permet de lancer une exception
+     * Throws an exception
      *
-     * @throws \Bow\Validation\Exception\ValidationException;
+     * @throws ValidationException;
      */
     protected function throwError()
     {
@@ -190,7 +218,7 @@ abstract class ValidationRequest
             return call_user_func_array([$this->request, $name], $arguments);
         }
 
-        throw new BadMethodCallException('La methode '. $name.' n\'est pas défini.');
+        throw new BadMethodCallException('The method '. $name.' does not define.');
     }
 
     /**

@@ -7,16 +7,22 @@ use Bow\Support\Arraydotify;
 class Translator
 {
     /**
+     * The define langue
+     *
      * @var string
      */
     private static $lang;
 
     /**
+     * The lang directory
+     *
      * @var string
      */
     private static $directory;
 
     /**
+     * The Translator instance
+     *
      * @var Translator
      */
     private static $instance;
@@ -47,6 +53,7 @@ class Translator
      *
      * @param string $lang
      * @param string $directory
+     *
      * @return Translator
      */
     public static function configure($lang, $directory)
@@ -72,6 +79,7 @@ class Translator
      * Check the locale
      *
      * @param string $locale
+     *
      * @return bool
      */
     public static function isLocale($locale)
@@ -80,17 +88,21 @@ class Translator
     }
 
     /**
-     * Permet de faire la tranduction
+     * Allows translation
      *
      * @param  string $key
      * @param  array  $data
      * @param  bool   $plurial
+     *
      * @return string
      */
     public static function translate($key, array $data = [], $plurial = false)
     {
         if (!is_string($key)) {
-            throw new \InvalidArgumentException('Le premier paramêtre doit être une chaine de carractère.', E_USER_ERROR);
+            throw new \InvalidArgumentException(
+                'The first parameter must be a string.',
+                E_USER_ERROR
+            );
         }
 
         $map = explode('.', $key);
@@ -139,10 +151,11 @@ class Translator
     }
 
     /**
+     * Make singleton translation
      *
-     *
-     * @param $key
+     * @param string $key
      * @param array $data
+     *
      * @return string
      */
     public static function single($key, array $data = [])
@@ -151,13 +164,13 @@ class Translator
     }
 
     /**
-     *
+     * Make plurial translation
      *
      * @param $key
      * @param array $data
      * @return string
      */
-    public static function pluiral($key, array $data = [])
+    public static function plurial($key, array $data = [])
     {
         return static::translate($key, $data, true);
     }
@@ -211,6 +224,6 @@ class Translator
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \BadMethodCallException('undefined method '.$name);
+        throw new \BadMethodCallException('Undefined method '.$name);
     }
 }

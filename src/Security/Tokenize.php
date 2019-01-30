@@ -61,6 +61,7 @@ class Tokenize
      * Get a csrf token generate
      *
      * @param  int $time
+     *
      * @return mixed
      */
     public static function csrf($time = null)
@@ -73,7 +74,8 @@ class Tokenize
     /**
      * Check if the token expires
      *
-     * @param int $time le temps d'expiration
+     * @param int $time
+     *
      * @return boolean
      */
     public static function csrfExpirated($time = null)
@@ -100,6 +102,7 @@ class Tokenize
      *
      * @param string $token
      * @param bool   $strict
+     *
      * @return boolean
      */
     public static function verify($token, $strict = false)

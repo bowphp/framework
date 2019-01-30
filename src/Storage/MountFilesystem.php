@@ -11,14 +11,14 @@ class MountFilesystem implements FilesystemInterface
     /**
      * The base work directory
      *
-     * @var
+     * @var string
      */
     private $basedir;
 
     /**
-     * Filesystem constructor.
+     * MountFilesystem constructor.
      *
-     * @param $basedir
+     * @param string $basedir
      */
     public function __construct($basedir)
     {
@@ -26,7 +26,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * UploadFile, fonction permettant de uploader un fichier
+     * Function to upload a file
      *
      * @param  UploadFile  $file
      * @param  string  $location
@@ -57,7 +57,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Ecrire à la suite d'un fichier spécifier
+     * Add content after the contents of the file
      *
      * @param  string $file
      * @param  string $content
@@ -69,7 +69,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Ecrire au début d'un fichier spécifier
+     * Add content before the contents of the file
      *
      * @param  string $file
      * @param  string $content
@@ -104,7 +104,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Supprimer un fichier
+     * Delete file or directory
      *
      * @param  string $file
      * @return boolean
@@ -121,7 +121,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Liste les fichiers d'un dossier passé en paramètre
+     * List the files of a folder passed as a parameter
      *
      * @param  string $dirname
      * @return array
@@ -138,7 +138,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Liste les dossier d'un dossier passé en paramètre
+     * List the folder of a folder passed as a parameter
      *
      * @param  string $dirname
      * @return array
@@ -153,7 +153,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Crée un répertoire
+     * Create a directory
      *
      * @param  string $dirname
      * @param  int    $mode
@@ -178,7 +178,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Récuper le contenu du fichier
+     * Recover the contents of the file
      *
      * @param  string $filename
      * @return null|string
@@ -195,7 +195,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Copie le contenu d'un fichier source vers un fichier cible.
+     * Copy the contents of a source file to a target file.
      *
      * @param  string $target
      * @param  string $source
@@ -204,7 +204,7 @@ class MountFilesystem implements FilesystemInterface
     public function copy($target, $source)
     {
         if (!$this->exists($target)) {
-            throw new \RuntimeException("$target n'exist pas.", E_ERROR);
+            throw new \RuntimeException("$target does not exist.", E_ERROR);
         }
 
         if (!$this->exists($source)) {
@@ -215,7 +215,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Rénomme ou déplace un fichier source vers un fichier cible.
+     * Renames or moves a source file to a target file.
      *
      * @param $target
      * @param $source
@@ -228,7 +228,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Vérifie l'existance d'un fichier
+     * Check the existence of a file
      *
      * @param  $filename
      * @return bool
@@ -251,7 +251,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * L'extension du fichier
+     * The file extension
      *
      * @param  $filename
      * @return string
@@ -266,7 +266,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * isFile aliase sur is_file.
+     * isFile alias of is_file.
      *
      * @param  $filename
      * @return bool
@@ -277,7 +277,7 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * isDirectory aliase sur is_dir.
+     * isDirectory alias of is_dir.
      *
      * @param  $dirname
      * @return bool
@@ -288,8 +288,8 @@ class MountFilesystem implements FilesystemInterface
     }
 
     /**
-     * Permet de résolver un path.
-     * Donner le chemin absolute d'un path
+     * Resolves file path.
+     * Give the absolute path of a path
      *
      * @param  $filename
      * @return string

@@ -7,11 +7,15 @@ use Bow\Http\Client\Parser;
 class Behavior
 {
     /**
+     * The http parser
+     *
      * @var Parser
      */
     private $parser;
 
     /**
+     * The parser content
+     *
      * @var string
      */
     private $content;
@@ -29,8 +33,11 @@ class Behavior
     }
 
     /**
+     * Check if the content is json format
+     *
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function mustBeJson($message = '')
     {
@@ -40,9 +47,13 @@ class Behavior
     }
 
     /**
+     * Check if the content is json format and the parsed data is
+     * some to the content
+     *
      * @param $data
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function mustBeExactJson($data, $message = '')
     {
@@ -52,9 +63,12 @@ class Behavior
     }
 
     /**
-     * @param $data
+     * Check if the content is some of parse data
+     *
+     * @param string $data
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function mustBeExactText($data, $message = '')
     {
@@ -64,9 +78,12 @@ class Behavior
     }
 
     /**
-     * @param $header
+     * Check if the header exists
+     *
+     * @param string $header
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function headerExists($header, $message = '')
     {
@@ -76,8 +93,11 @@ class Behavior
     }
 
     /**
+     * Check if the content is array format
+     *
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function mustBeArray($message = '')
     {
@@ -87,8 +107,11 @@ class Behavior
     }
 
     /**
-     * @param $code
-     * @return $this
+     * Check the status code
+     *
+     * @param int $code
+     *
+     * @return Behavior
      */
     public function statusMustBe($code)
     {
@@ -98,22 +121,32 @@ class Behavior
     }
 
     /**
+     * Check the content type
+     *
      * @param $content_type
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function contentTypeMustBe($content_type, $message = '')
     {
         $type = $this->parser->getContentType();
 
-        Assert::assertEquals($content_type, current(preg_split('/;(\s+)?/', $type)), $message);
+        Assert::assertEquals(
+            $content_type,
+            current(preg_split('/;(\s+)?/', $type)),
+            $message
+        );
 
         return $this;
     }
 
     /**
+     * Check if the content type is application/json
+     *
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function contentTypeMustBeJson($message = '')
     {
@@ -123,8 +156,11 @@ class Behavior
     }
 
     /**
+     * Check if the content type is text/plain
+     *
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function contentTypeMustBeText($message = '')
     {
@@ -134,8 +170,11 @@ class Behavior
     }
 
     /**
+     * Check if the content type is text/html
+     *
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function contentTypeMustBeHtml($message = '')
     {
@@ -145,8 +184,25 @@ class Behavior
     }
 
     /**
-     * @param $data
+     * Check if the content type is text/xml
+     *
      * @param string $message
+     *
+     * @return Behavior
+     */
+    public function contentTypeMustBeXml($message = '')
+    {
+        $this->contentTypeMustBe('text/xml', $message);
+
+        return $this;
+    }
+
+    /**
+     * Alias of mustBeExactJson
+     *
+     * @param array $data
+     * @param string $message
+     *
      * @return Behavior
      */
     public function assertJson($data, $message = '')
@@ -157,7 +213,8 @@ class Behavior
     /**
      * @param $code
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function assertStatus($code, $message = '')
     {
@@ -169,6 +226,7 @@ class Behavior
     /**
      * @param $type
      * @param string $message
+     *
      * @return Behavior
      */
     public function assertContentType($type, $message = '')
@@ -179,7 +237,8 @@ class Behavior
     /**
      * @param $key
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function assertKeyExists($key, $message = '')
     {
@@ -194,7 +253,8 @@ class Behavior
      * @param $key
      * @param $value
      * @param string $message
-     * @return $this
+     *
+     * @return Behavior
      */
     public function assertKeyMatchValue($key, $value, $message = '')
     {
@@ -210,10 +270,16 @@ class Behavior
     }
 
     /**
-     * @param $text
+     * Check if the content contains the parsed text
+     *
+     * @param string $text
+     *
+     * @return Behavior
      */
     public function containsText($text)
     {
         Assert::assertContains($text, $this->content);
+
+        return $this;
     }
 }

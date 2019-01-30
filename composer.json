@@ -19,7 +19,8 @@
         "phpunit/phpunit": "^4.8",
         "monolog/monolog": "^1.22",
         "twig/twig": "^2.5",
-        "squizlabs/php_codesniffer": "3.*"
+        "squizlabs/php_codesniffer": "3.*",
+        "aws/aws-sdk-php": "^3.87"
     },
     "authors": [
         {

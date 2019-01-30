@@ -5,7 +5,7 @@ namespace Bow\Storage\Contracts;
 interface ServiceInterface implements FilesystemInterface
 {
     /**
-     * Configure serivice
+     * Configure service
      *
      * @param array $config
      */

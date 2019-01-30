@@ -47,22 +47,28 @@ class Storage
         }
 
         if (! isset(static::$config['disk']['path'][$mount])) {
-            throw new MountDiskNotFoundException('Le disque '.$mount.' n\'est pas défini.');
+            throw new MountDiskNotFoundException('The '.$mount.' disk is not define.');
         }
 
-        return static::$mounted = new MountFilesystem(static::$config['disk']['path'][$mount]);
+        $config = static::$config['disk']['path'][$mount];
+
+        return static::$mounted = new MountFilesystem($config);
     }
 
     /**
      * Mount service
      *
      * @param string $service
+     *
      * @return mixed
      */
     public static function service($service)
     {
         if (! in_array($service, static::$available_serivces)) {
-            throw new ServiceNotFoundException(sprintf('This "%s" service is invalid.', $service));
+            throw new ServiceNotFoundException(sprintf(
+                'This "%s" service is invalid.',
+                $service
+            ));
         }
 
         $service = static::$available_serivces[$service];
@@ -71,8 +77,8 @@ class Storage
     }
 
     /**
-     * Push a new serive who implement the Bow\Storage\Contracts\ServiceInterface
-     * contracts
+     * Push a new service who implement
+     * the Bow\Storage\Contracts\ServiceInterface
      *
      * @param array $services
      */

@@ -30,8 +30,11 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * @param $url
-     * @param $param
+     * Get request
+     *
+     * @param string $url
+     * @param array $param
+     *
      * @return Parser
      */
     public function get($url, array $param = [])
@@ -42,8 +45,11 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * @param $url
-     * @param $param
+     * Post Request
+     *
+     * @param string $url
+     * @param array $param
+     *
      * @return Parser
      */
     public function post($url, array $param = [])
@@ -58,16 +64,25 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
+     * Add attachment
+     *
      * @param array $attach
+     *
+     * @return Parser
      */
     public function attach(array $attach)
     {
         $this->attach = $attach;
+
+        return $this;
     }
 
     /**
-     * @param $url
-     * @param $param
+     * Put Request
+     *
+     * @param string $url
+     * @param array $param
+     *
      * @return Parser
      */
     public function put($url, array $param = [])
@@ -78,8 +93,11 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * @param $url
+     * Delete Request
+     *
+     * @param string $url
      * @param array $param
+     *
      * @return Parser
      */
     public function delete($url, array $param = [])
@@ -92,8 +110,11 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * @param $url
-     * @param $param
+     * Patch Request
+     *
+     * @param string $url
+     * @param array $param
+     *
      * @return Parser
      */
     public function patch($url, array $param = [])
@@ -106,9 +127,12 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * @param $method
-     * @param $url
+     * Initilalize Behavior action
+     *
+     * @param string $method
+     * @param string $url
      * @param array  $params
+     *
      * @return Behavior
      */
     public function visit($method, $url, array $params = [])
@@ -116,7 +140,9 @@ class TestCase extends PHPUnitTestCase
         $method = strtolower($method);
 
         if (!method_exists($this, $method)) {
-            throw new \BadMethodCallException('La methode ' . $method . ' n\'exist pas');
+            throw new \BadMethodCallException(
+                'The ' . $method . ' method does not exists.'
+            );
         }
 
         return new Behavior($this->$method($url, $params));

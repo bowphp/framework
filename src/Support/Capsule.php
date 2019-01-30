@@ -5,59 +5,63 @@ namespace Bow\Support;
 class Capsule implements \ArrayAccess
 {
     /**
+     * The container register for bind by alias
+     *
      * @var array
      */
     private $registers = [];
 
     /**
+     * The constainer register for instance
+     *
      * @var array
      */
     private $instances = [];
 
     /**
-     *
+     * The container factory maker
      *
      * @var array
      */
     private $factories = [];
 
     /**
-     * Représente un collecteur de cache
+     * Represents a cache collector
      *
      * @var array
      */
     private $key = [];
 
     /**
-     * Représente les paramètres de compilation
+     * Represents the compilation parameters
      *
      * @var array
      */
     private $parameters = [];
 
     /**
-     * Représente l'instance de Capsule
+     * Represents the instance of Capsule
      *
      * @var Capsule
      */
     private static $instance;
 
     /**
-     * Retourne l'instance de Capsule
+     * Get instance of Capsule
      *
      * @return Capsule
      */
     public static function getInstance()
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static();
+            static::$instance = new static;
         }
 
         return static::$instance;
     }
 
     /**
-     * Crée un instance de Capsule
+     * Make the
      *
      * @param string $key
      * @return mixed
@@ -92,14 +96,14 @@ class Capsule implements \ArrayAccess
         }
 
         if (method_exists($this->registers[$key], '__invoke')) {
-            return  $this->instances[$key] = $this->registers[$key]($this);
+            return  $this->instances[$key] = $this->registers[$key]();
         }
 
         return null;
     }
 
     /**
-     * Compilation avec paramètre
+     * Compilation with parameter
      *
      * @param mixed $key
      * @param array $parameters
@@ -110,11 +114,15 @@ class Capsule implements \ArrayAccess
     {
         $this->parameters = $parameters;
 
-        return $this->resolve($key);
+        $this->resolve($key);
+
+        $this->parameters = [];
+
+        return $invalide;
     }
 
     /**
-     * Associe une une clé a une classe à compiler
+     * Add to register
      *
      * @param string $key
      * @param mixed  $value
@@ -138,7 +146,7 @@ class Capsule implements \ArrayAccess
     }
 
     /**
-     * Enregistre l'instance d'une classe
+     * Saves the instance of a class
      *
      * @param string   $key
      * @param $instance
@@ -153,7 +161,7 @@ class Capsule implements \ArrayAccess
     }
 
     /**
-     * Instancie une classe par sa clé
+     * Instantiate a class by its key
      *
      * @param string $key
      * @return mixed
