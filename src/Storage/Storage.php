@@ -3,6 +3,7 @@
 namespace Bow\Storage;
 
 use BadMethodCallException;
+use Bow\Storage\Contracts\ServiceInterface;
 use Bow\Storage\Exception\MountDiskNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
 
@@ -27,7 +28,7 @@ class Storage
      *
      * @var array
      */
-    private static $available_serivces = [];
+    private static $available_services = [];
 
     /**
      * Mount disk
@@ -38,6 +39,7 @@ class Storage
      */
     public static function mount($mount = null)
     {
+        // Use the default disk as fallback
         if (is_null($mount)) {
             if (! is_null(static::$mounted)) {
                 return static::$mounted;
@@ -61,19 +63,21 @@ class Storage
      * @param string $service
      *
      * @return mixed
+     * @throws ServiceNotFoundException
      */
-    public static function service($service)
+    public static function service(string $service)
     {
-        if (! in_array($service, static::$available_serivces)) {
+        if (!in_array($service, static::$available_services, true)) {
             throw new ServiceNotFoundException(sprintf(
                 'This "%s" service is invalid.',
                 $service
             ));
         }
 
-        $service = static::$available_serivces[$service];
+        /** @var ServiceInterface $service */
+        $service = static::$available_services[$service];
 
-        return $service::config(static::$config[$service]);
+        return $service::configure(static::$config[$service]);
     }
 
     /**
@@ -85,7 +89,7 @@ class Storage
     public static function pushService(array $services)
     {
         foreach ($services as $service => $hanlder) {
-            static::$available_serivces[$service] = $hanlder;
+            static::$available_services[$service] = $hanlder;
         }
     }
 
