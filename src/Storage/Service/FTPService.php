@@ -2,7 +2,6 @@
 
 namespace Bow\Storage\Service;
 
-
 use Bow\Http\UploadFile;
 use Bow\Storage\Contracts\ServiceInterface;
 use InvalidArgumentException;
@@ -21,6 +20,13 @@ class FTPService implements ServiceInterface
      *
      */
     protected static $connection;
+
+    /**
+     * Root folder absolute path.
+     *
+     * @var string
+     */
+    protected static $root;
 
     public function __construct()
     {
@@ -57,6 +63,18 @@ class FTPService implements ServiceInterface
         }
 
         $this->login();
+        $this->setConnectionRoot();
+    }
+
+    /**
+     * Disconnect from the FTP server.
+     */
+    public function disconnect()
+    {
+        if (is_resource($this->connection)) {
+            ftp_close($this->connection);
+        }
+        $this->connection = null;
     }
 
     /**
@@ -68,7 +86,8 @@ class FTPService implements ServiceInterface
     {
         ['username' => $username, 'password' => $password] = self::$config;
         // Disable error handling to avoid credentials leak
-        set_error_handler(function () {});
+        set_error_handler(function () {
+        });
         $isLoggedIn = ftp_login(self::$connection, $username, $password);
         restore_error_handler();
 
@@ -83,6 +102,24 @@ class FTPService implements ServiceInterface
     }
 
     /**
+     * Set the connection root.
+     */
+    protected function setConnectionRoot()
+    {
+        ['root' => $root] = self::$config;
+
+        if ($root && (!ftp_chdir(self::$connection, $root))) {
+            throw new RuntimeException('Root is invalid or does not exist: ' . $root);
+        }
+
+        // Store absolute path for further reference.
+        // This is needed when creating directories and
+        // initial root was a relative path, else the root
+        // would be relative to the chdir'd path.
+        self::$root = ftp_pwd(self::$connection);
+    }
+
+    /**
      * @return mixed
      */
     public static function getConnection()
@@ -91,14 +128,13 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Disconnect from the FTP server.
+     * Return the current working directory.
+     *
+     * @return mixed
      */
-    public function disconnect()
+    public function getCurrentDir()
     {
-        if (is_resource($this->connection)) {
-            ftp_close($this->connection);
-        }
-        $this->connection = null;
+        return pathinfo(ftp_pwd(self::$connection), PATHINFO_BASENAME);
     }
 
     /**
