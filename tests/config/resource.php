@@ -32,7 +32,7 @@ return [
         'password' => 'demo-user',
         'username' => 'demo-user',
         'port'     => 21,
-        'root' => '', // Le dossier de base du serveur
+        'root' => 'upload', // Le dossier de base du serveur
         'tls' => false, // A `true` pour activer une connection sécurisé.
         'timeout' => 90 // Temps d'attente de connection
     ],
