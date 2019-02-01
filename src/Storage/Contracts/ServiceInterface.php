@@ -2,7 +2,7 @@
 
 namespace Bow\Storage\Contracts;
 
-interface ServiceInterface implements FilesystemInterface
+interface ServiceInterface extends FilesystemInterface
 {
     /**
      * Configure service
