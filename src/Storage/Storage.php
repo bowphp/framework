@@ -14,7 +14,7 @@ class Storage
      *
      * @var array
      */
-    private static $config;
+    private static $config = [];
 
     /**
      * The disk mounting
@@ -67,17 +67,17 @@ class Storage
      */
     public static function service(string $service)
     {
-        if (!in_array($service, static::$available_services, true)) {
+        if (!array_key_exists($service, self::$available_services)) {
             throw new ServiceNotFoundException(sprintf(
-                'This "%s" service is invalid.',
+                '"%s" is not registered as a service.',
                 $service
             ));
         }
 
         /** @var ServiceInterface $service */
-        $service = static::$available_services[$service];
+        $service_class = static::$available_services[$service];
 
-        return $service::configure(static::$config[$service]);
+        return $service_class::configure(static::$config[$service]);
     }
 
     /**
