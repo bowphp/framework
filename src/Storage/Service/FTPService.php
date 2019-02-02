@@ -4,6 +4,7 @@ namespace Bow\Storage\Service;
 
 use Bow\Http\UploadFile;
 use Bow\Storage\Contracts\ServiceInterface;
+use Bow\Storage\Exception\ResourceException;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -256,7 +257,13 @@ class FTPService implements ServiceInterface
      */
     public function get($filename)
     {
-        // TODO: Implement get() method.
+        if (!$stream = $this->readStream($filename)) {
+            return false;
+        }
+
+        $contents = stream_get_contents($stream);
+        fclose($stream);
+        return $contents;
     }
 
     /**
@@ -353,14 +360,35 @@ class FTPService implements ServiceInterface
     /**
      * @inheritdoc
      */
-    public function writeStream($path, $resource)
+    protected function writeStream($path, $resource)
     {
-        if (! ftp_fput(self::getConnection(), $path, $resource, $this->transferMode)) {
+        if (!ftp_fput(self::getConnection(), $path, $resource, $this->transferMode)) {
             return false;
         }
 
         $type = 'file';
         return compact('type', 'path');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function readStream($path)
+    {
+        try {
+            $stream = fopen('php://temp', 'w+b');
+            $result = ftp_fget($this->getConnection(), $stream, $path, $this->transferMode);
+            rewind($stream);
+
+            if (!$result) {
+                fclose($stream);
+                return false;
+            }
+
+            return $stream;
+        } catch (\Exception $exception) {
+            throw new ResourceException(sprintf('"%s" not found.', $path));
+        }
     }
 
     /**
@@ -370,7 +398,7 @@ class FTPService implements ServiceInterface
      */
     protected function setConnectionPassiveMode()
     {
-        if (! ftp_pasv(self::$connection, $this->usePassiveMode)) {
+        if (!ftp_pasv(self::$connection, $this->usePassiveMode)) {
             throw new RuntimeException(
                 'Could not set passive mode for connection: '
                 . self::$config['hostname'] . '::' . self::$config['port']
