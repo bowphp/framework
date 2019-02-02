@@ -41,9 +41,9 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function testGetInexistentFile()
     {
-       $ftpService = Storage::service('ftp');
-       $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
-       $ftpService->get('dummy.txt');
+        $ftpService = Storage::service('ftp');
+        $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
+        $ftpService->get('dummy.txt');
     }
 
     public function testGet()
