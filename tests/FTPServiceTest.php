@@ -1,6 +1,7 @@
 <?php
 
 
+use Bow\Storage\Service\FTPService;
 use Bow\Storage\Storage;
 
 class FTPServiceTest extends \PHPUnit\Framework\TestCase
@@ -8,14 +9,14 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         Storage::configure(require 'config/resource.php');
-        Storage::pushService(['ftp' => \Bow\Storage\Service\FTPService::class]);
+        Storage::pushService(['ftp' => FTPService::class]);
     }
 
     public function testUnsecureConnection()
     {
-        /** @var \Bow\Storage\Service\FTPService $ftp_service_instance */
+        /** @var FTPService $ftp_service_instance */
         $ftp_service_instance = Storage::service('ftp');
-        $this->assertInstanceOf(\Bow\Storage\Service\FTPService::class, $ftp_service_instance);
+        $this->assertInstanceOf(FTPService::class, $ftp_service_instance);
         $this->assertNotFalse($ftp_service_instance::getConnection());
     }
 
@@ -28,16 +29,14 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function testStore()
     {
-        /** @var \Bow\Storage\Service\FTPService $ftp_service */
-        $ftp_service = Storage::service('ftp');
+        /** @var FTPService $ftpService */
+        $ftpService = Storage::service('ftp');
         $file_content = 'Something very interesting';
         $file_name = 'test.txt';
-        $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
-        $uploadedFile->method('getContent')->willReturn($file_content);
-        $uploadedFile->method('getFilename')->willReturn($file_name);
-        $result = $ftp_service->store($uploadedFile, $uploadedFile->getFilename());
+        $result = $this->createFile($ftpService, $file_name, $file_content);
         $this->assertInternalType('array', $result);
         $this->assertEquals($result['content'], $file_content);
+        $this->assertEquals($result['path'], $file_name);
     }
 
     public function testGetInexistentFile()
@@ -49,11 +48,28 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function testGet()
     {
-        /** @var \Bow\Storage\Service\FTPService $ftpService */
+        /** @var FTPService $ftpService */
         $ftpService = Storage::service('ftp');
-        $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
-        $uploadedFile->method('getContent')->willReturn('bow');
-        $ftpService->store($uploadedFile, 'bow.txt');
+        $this->createFile($ftpService, 'bow.txt', 'bow');
         $this->assertEquals($ftpService->get('bow.txt'), 'bow');
+    }
+
+    public function testDelete()
+    {
+        $ftpService = Storage::service('ftp');
+        $filename = 'delete.txt';
+        $this->createFile($ftpService, $filename);
+        $result = $ftpService->delete($filename);
+        $this->assertTrue($result);
+        $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
+        $ftpService->get($filename);
+    }
+
+    private function createFile(FTPService $ftpServiceInstance, $filename, $content = '')
+    {
+        $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
+        $uploadedFile->method('getContent')->willReturn($content);
+        $uploadedFile->method('getFilename')->willReturn($filename);
+        return $ftpServiceInstance->store($uploadedFile, $filename);
     }
 }
