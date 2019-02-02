@@ -3,8 +3,8 @@
 namespace Bow\Storage;
 
 use BadMethodCallException;
-use Bow\Storage\Contracts\ServiceInterface;
 use Bow\Storage\Exception\MountDiskNotFoundException;
+use Bow\Storage\Exception\ServiceConfigurationNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
 
 class Storage
@@ -68,16 +68,24 @@ class Storage
     public static function service(string $service)
     {
         if (!array_key_exists($service, self::$available_services)) {
-            throw new ServiceNotFoundException(sprintf(
+            throw (new ServiceNotFoundException(sprintf(
                 '"%s" is not registered as a service.',
                 $service
-            ));
+            )))->setServiceName($service);
         }
 
-        /** @var ServiceInterface $service */
         $service_class = static::$available_services[$service];
 
-        return $service_class::configure(static::$config[$service]);
+        $config = static::$config['services'][$service] ?? null;
+
+        if (is_null($config)) {
+            throw (new ServiceConfigurationNotFoundException(sprintf(
+                '"%s" configuration not found.',
+                $service
+            )))->setServiceName($service);
+        }
+
+        return $service_class::configure($config);
     }
 
     /**

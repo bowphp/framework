@@ -24,29 +24,31 @@ return [
      */
     'cache' => __DIR__.'/../data/cache',
 
-    /**
-     * FTP configuration
-     */
-    'ftp' => [
-        'hostname' => '127.0.0.1',
-        'password' => 'password',
-        'username' => 'demo',
-        'port'     => 21,
-        'root' => '', // Le dossier de base du serveur
-        'tls' => false, // A `true` pour activer une connection sécurisé.
-        'timeout' => 90 // Temps d'attente de connection
-    ],
-
-    /**
-     * S3 configuration
-     */
-    's3' => [
-        'credentials' => [
-            'key'    => '',
-            'secret' => '',
+    'services' => [
+        /**
+         * FTP configuration
+         */
+        'ftp' => [
+            'hostname' => 'test.rebex.net',
+            'password' => 'password',
+            'username' => 'demo',
+            'port'     => 21,
+            'root' => '', // Start directory
+            'tls' => false, // `true` enable the secure connexion.
+            'timeout' => 90 // Temps d'attente de connection
         ],
-        'bucket' => '',
-        'region' => '',
-        'version' => 'latest'
+
+        /**
+         * S3 configuration
+         */
+        's3' => [
+            'credentials' => [
+                'key'    => '',
+                'secret' => '',
+            ],
+            'bucket' => '',
+            'region' => '',
+            'version' => 'latest'
+        ]
     ]
 ];
