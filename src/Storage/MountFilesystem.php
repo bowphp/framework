@@ -31,6 +31,7 @@ class MountFilesystem implements FilesystemInterface
      * @param  UploadFile  $file
      * @param  string  $location
      * @param  array   $option
+     *
      * @return mixed
      * @throws InvalidArgumentException
      */
@@ -61,6 +62,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @param  string $file
      * @param  string $content
+     *
      * @return bool
      */
     public function append($file, $content)
@@ -73,6 +75,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @param  string $file
      * @param  string $content
+     *
      * @return bool
      * @throws
      */
@@ -90,6 +93,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @param string $file
      * @param string $content
+     *
      * @return bool
      */
     public function put($file, $content)
@@ -107,6 +111,7 @@ class MountFilesystem implements FilesystemInterface
      * Delete file or directory
      *
      * @param  string $file
+     *
      * @return boolean
      */
     public function delete($file)
@@ -124,6 +129,7 @@ class MountFilesystem implements FilesystemInterface
      * List the files of a folder passed as a parameter
      *
      * @param  string $dirname
+     *
      * @return array
      */
     public function files($dirname)
@@ -141,6 +147,7 @@ class MountFilesystem implements FilesystemInterface
      * List the folder of a folder passed as a parameter
      *
      * @param  string $dirname
+     *
      * @return array
      */
     public function directories($dirname)
@@ -158,6 +165,7 @@ class MountFilesystem implements FilesystemInterface
      * @param  string $dirname
      * @param  int    $mode
      * @param  bool   $recursive
+     *
      * @return boolean
      */
     public function makeDirectory($dirname, $mode = 0777, $recursive = false)
@@ -181,6 +189,7 @@ class MountFilesystem implements FilesystemInterface
      * Recover the contents of the file
      *
      * @param  string $filename
+     *
      * @return null|string
      */
     public function get($filename)
@@ -199,6 +208,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @param  string $target
      * @param  string $source
+     *
      * @return bool
      */
     public function copy($target, $source)
@@ -217,8 +227,8 @@ class MountFilesystem implements FilesystemInterface
     /**
      * Renames or moves a source file to a target file.
      *
-     * @param $target
-     * @param $source
+     * @param string $target
+     * @param string $source
      */
     public function move($target, $source)
     {
@@ -230,7 +240,8 @@ class MountFilesystem implements FilesystemInterface
     /**
      * Check the existence of a file
      *
-     * @param  $filename
+     * @param string $filename
+     *
      * @return bool
      */
     public function exists($filename)
@@ -253,7 +264,8 @@ class MountFilesystem implements FilesystemInterface
     /**
      * The file extension
      *
-     * @param  $filename
+     * @param string $filename
+     *
      * @return string
      */
     public function extension($filename)
@@ -268,7 +280,8 @@ class MountFilesystem implements FilesystemInterface
     /**
      * isFile alias of is_file.
      *
-     * @param  $filename
+     * @param string $filename
+     *
      * @return bool
      */
     public function isFile($filename)
@@ -279,7 +292,8 @@ class MountFilesystem implements FilesystemInterface
     /**
      * isDirectory alias of is_dir.
      *
-     * @param  $dirname
+     * @param string $dirname
+     *
      * @return bool
      */
     public function isDirectory($dirname)
@@ -291,7 +305,8 @@ class MountFilesystem implements FilesystemInterface
      * Resolves file path.
      * Give the absolute path of a path
      *
-     * @param  $filename
+     * @param string $filename
+     *
      * @return string
      */
     public function path($filename)

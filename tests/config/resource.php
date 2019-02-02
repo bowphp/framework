@@ -28,13 +28,13 @@ return [
      * FTP configuration
      */
     'ftp' => [
-        'hostname' => '',
-        'password' => '',
-        'username' => '',
-        'port'     => '',
+        'hostname' => '127.0.0.1',
+        'password' => 'password',
+        'username' => 'demo',
+        'port'     => 21,
         'root' => '', // Le dossier de base du serveur
-        'tls' => '', // A `true` pour activer une connection sécurisé.
-        'timeout' => '' // Temps d'attente de connection
+        'tls' => false, // A `true` pour activer une connection sécurisé.
+        'timeout' => 90 // Temps d'attente de connection
     ],
 
     /**
