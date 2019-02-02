@@ -29,7 +29,9 @@ class Util
         $dumper = 'cli' === PHP_SAPI ? new CliDumper() : new HtmlDumper();
 
         $dumper->setStyles([
-            'default' => 'background-color:#fff; color:#FF8400; line-height:1.2em; font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:99999; word-break: normal',
+            'default' => 'background-color:#fff; color:#FF8400; line-height:1.2em; 
+                font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; 
+                white-space: pre-wrap; position:relative; z-index:99999; word-break: normal',
             'num' => 'font-weight:bold; color:#1299DA',
             'const' => 'font-weight:bold',
             'str' => 'color:#111111',
@@ -60,6 +62,7 @@ class Util
      * Run a var_dump on the variables passed in parameter.
      *
      * @param  string $var
+     *
      * @return void
      */
     public static function dd($var)

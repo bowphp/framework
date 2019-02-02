@@ -190,6 +190,7 @@ if (!function_exists('last_insert_id')) {
      * on a table whose ID is auto_increment.
      *
      * @param  string $name
+     *
      * @return int
      */
     function last_insert_id($name = null)
@@ -294,6 +295,8 @@ if (!function_exists('debug')) {
      * debug, variable debug function
      * it allows you to have a color
      * Synthaxic data types.
+     *
+     * @return void
      */
     function debug()
     {
@@ -310,7 +313,8 @@ if (!function_exists('create_csrf_token')) {
      * Create a new token
      *
      * @param  int $time [optional]
-     * @return \StdClass
+     *
+     * @return \stdClass
      */
     function create_csrf_token($time = null)
     {
@@ -408,6 +412,7 @@ if (!function_exists('json')) {
      * @param  mixed $data
      * @param  int   $code
      * @param  array $headers
+     *
      * @return mixed
      */
     function json($data, $code = 200, array $headers = [])
@@ -424,6 +429,7 @@ if (!function_exists('download')) {
      * @param null|string $filename
      * @param array       $headers
      * @param string      $disposition
+     *
      * @return string
      */
     function download($file, $filename = null, array $headers = [], $disposition = 'attachment')
@@ -436,7 +442,8 @@ if (!function_exists('status_code')) {
     /**
      * Set status code
      *
-     * @param  int $code=200
+     * @param  int $code
+     *
      * @return mixed
      */
     function status_code($code)
@@ -450,6 +457,7 @@ if (!function_exists('sanitaze')) {
      * Sanitaze data
      *
      * @param  mixed $data
+     *
      * @return mixed
      */
     function sanitaze($data)
@@ -467,6 +475,7 @@ if (!function_exists('secure')) {
      * Secure data with sanitaze it
      *
      * @param  mixed $data
+     *
      * @return mixed
      */
     function secure($data)
@@ -485,6 +494,8 @@ if (!function_exists('set_header')) {
      *
      * @param string $key
      * @param string $value
+     *
+     * @return void
      */
     function set_header($key, $value)
     {
@@ -533,6 +544,7 @@ if (!function_exists('send')) {
      * Send simple message to client
      *
      * @param  string $data
+     *
      * @return mixed
      */
     function send($data)
@@ -550,6 +562,7 @@ if (!function_exists('curl')) {
      * @param  array  $params
      * @param  bool   $return
      * @param  string $header
+     *
      * @return array|null
      */
     function curl($method, $url, array $params = [], $return = false, & $header = null)
@@ -583,6 +596,7 @@ if (!function_exists('curl')) {
         }
 
         curl_close($ch);
+
         return $data;
     }
 }
@@ -635,6 +649,7 @@ if (!function_exists('set_pdo')) {
      * Set PDO instance
      *
      * @param  PDO $pdo
+     *
      * @return PDO
      */
     function set_pdo(PDO $pdo)
@@ -665,6 +680,7 @@ if (!function_exists('encrypt')) {
      * Encrypt data
      *
      * @param  string $data
+     *
      * @return string
      */
     function encrypt($data)
@@ -678,6 +694,7 @@ if (!function_exists('decrypt')) {
      * Decrypt data
      *
      * @param  string $data
+     *
      * @return string
      */
     function decrypt($data)
@@ -761,7 +778,8 @@ if (!function_exists('add_event_once')) {
      *
      * @param  string                $event
      * @param  callable|array|string $fn
-     * @return Event;
+     *
+     * @return Event
      * @throws \Bow\Event\EventException
      */
     function add_event_once($event, $fn)
@@ -821,6 +839,8 @@ if (!function_exists('emit_event')) {
      * Fire event
      *
      * @param  string $event
+     *
+     * @return void
      * @throws \Bow\Event\EventException
      */
     function emit_event($event)
@@ -861,6 +881,7 @@ if (!function_exists('email')) {
      * @param null|string $view
      * @param array       $data
      * @param callable    $cb
+     *
      * @return \Bow\Mail\Driver\SimpleMail|\Bow\Mail\Driver\Smtp|bool
      * @throws
      */
@@ -882,6 +903,7 @@ if (!function_exists('raw_email')) {
      * @param  string       $subject
      * @param  string       $message
      * @param  array        $headers
+     *
      * @return Mail|mixed
      */
     function raw_email($to, $subject, $message, array $headers = [])
@@ -896,6 +918,7 @@ if (!function_exists('session')) {
      *
      * @param  mixed $value
      * @param  mixed $default
+     *
      * @return mixed
      */
     function session($value = null, $default = null)
@@ -975,6 +998,7 @@ if (!function_exists('route')) {
      *
      * @param  string $name
      * @param  array  $data
+     *
      * @return string
      */
     function route($name, array $data = [])
@@ -1003,6 +1027,7 @@ if (!function_exists('e')) {
      * Escape the HTML tags in the chain.
      *
      * @param  string $value
+     *
      * @return string
      */
     function e($value)
@@ -1057,6 +1082,7 @@ if (!function_exists('cache')) {
      *
      * @param  string $key
      * @param  mixed  $value
+     *
      * @return mixed
      */
     function cache($key = null, $value = null)
@@ -1074,6 +1100,7 @@ if (!function_exists('back')) {
      * Make redirection to back
      *
      * @param int $status
+     *
      * @return Bow\Http\Redirect
      */
     function back($status = 302)
@@ -1088,6 +1115,7 @@ if (!function_exists('bhash')) {
      *
      * @param  string $data
      * @param  mixed  $hash_value
+     *
      * @return mixed
      */
     function bhash($data, $hash_value = null)
@@ -1133,6 +1161,7 @@ if (!function_exists('t')) {
      * @param  $key
      * @param  $data
      * @param  bool $choose
+     *
      * @return string
      */
     function t($key, $data = [], $choose = false)
@@ -1147,6 +1176,7 @@ if (!function_exists('app_env')) {
      *
      * @param $key
      * @param $default
+     *
      * @return string
      */
     function app_env($key, $default = null)
@@ -1165,6 +1195,7 @@ if (!function_exists('abort')) {
      *
      * @param int    $code
      * @param string $message
+     *
      * @return \Bow\Http\Response
      */
     function abort($code = 500, $message = '')
@@ -1180,6 +1211,7 @@ if (!function_exists('abort_if')) {
      * @param boolean $boolean
      * @param int     $code
      * @param string $message
+     *
      * @return \Bow\Http\Response|null
      */
     function abort_if($boolean, $code, $message = '')
@@ -1221,6 +1253,7 @@ if (!function_exists('old')) {
      * Get old request valude
      *
      * @param string $key
+     *
      * @return mixed
      */
     function old($key)
@@ -1257,6 +1290,7 @@ if (!function_exists('log')) {
      * @param string $level
      * @param string $message
      * @param array $context
+     *
      * @return bool
      */
     function log($level, $message, array $context = [])
@@ -1275,6 +1309,7 @@ if (!function_exists('str_slug')) {
      *
      * @param  string $str
      * @param  string $sep
+     *
      * @return string
      */
     function str_slug($str, $sep = '-')
@@ -1288,6 +1323,7 @@ if (!function_exists('str_is_mail')) {
      * Check if the email is valid
      *
      * @param string $email
+     *
      * @return bool
      */
     function str_is_mail($email)
@@ -1301,6 +1337,7 @@ if (!function_exists('str_is_domain')) {
      * Check if the string is domain
      *
      * @param string $domain
+     *
      * @return bool
      * @throws
      */
@@ -1315,6 +1352,7 @@ if (!function_exists('str_is_slug')) {
      * Check if string is slug
      *
      * @param string $slug
+     *
      * @return bool
      * @throws
      */
@@ -1329,6 +1367,7 @@ if (!function_exists('str_is_alpha')) {
      * Check if the string is alpha
      *
      * @param string $string
+     *
      * @return bool
      * @throws
      */
@@ -1343,6 +1382,7 @@ if (!function_exists('str_is_lower')) {
      * Check if the string is lower
      *
      * @param string $string
+     *
      * @return bool
      */
     function str_is_lower($string)
@@ -1356,6 +1396,7 @@ if (!function_exists('str_is_upper')) {
      * Check if the string is upper
      *
      * @param string $string
+     *
      * @return bool
      */
     function str_is_upper($string)
@@ -1369,6 +1410,7 @@ if (!function_exists('str_is_alpha_num')) {
      * Check if string is alpha numeric
      *
      * @param string $slug
+     *
      * @return bool
      * @throws
      */
@@ -1383,6 +1425,7 @@ if (!function_exists('str_shuffle_words')) {
      * Shuffle words
      *
      * @param string $words
+     *
      * @return string
      */
     function str_shuffle_words($words)
@@ -1397,6 +1440,7 @@ if (!function_exists('str_wordify')) {
      *
      * @param string $words
      * @param string $sep
+     *
      * @return array
      */
     function str_wordify($words, $sep = '')
@@ -1410,6 +1454,7 @@ if (!function_exists('str_plurial')) {
      * Transform text to plurial
      *
      * @param string $slug
+     *
      * @return string
      */
     function str_plurial($slug)
@@ -1423,6 +1468,7 @@ if (!function_exists('str_camel')) {
      * Transform text to camel case
      *
      * @param string $slug
+     *
      * @return string
      */
     function str_camel($slug)
@@ -1436,6 +1482,7 @@ if (!function_exists('str_snake')) {
      * Transform text to snake case
      *
      * @param string $slug
+     *
      * @return string
      */
     function str_snake($slug)
@@ -1450,6 +1497,7 @@ if (!function_exists('str_contains')) {
      *
      * @param string $search
      * @param string $string
+     *
      * @return bool
      */
     function str_contains($search, $string)
@@ -1463,6 +1511,7 @@ if (!function_exists('str_capitalize')) {
      * Capitalize
      *
      * @param string $slug
+     *
      * @return string
      */
     function str_capitalize($slug)
@@ -1476,6 +1525,7 @@ if (!function_exists('str_random')) {
      * Random string
      *
      * @param string $string
+     *
      * @return string
      */
     function str_random($string)
@@ -1489,6 +1539,7 @@ if (!function_exists('str_force_in_utf8')) {
      * Force output string to utf8
      *
      * @param string $string
+     *
      * @return void
      */
     function str_force_in_utf8($string)
