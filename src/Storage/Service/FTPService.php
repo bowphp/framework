@@ -2,9 +2,9 @@
 
 namespace Bow\Storage\Service;
 
-
 use Bow\Http\UploadFile;
 use Bow\Storage\Contracts\ServiceInterface;
+use Bow\Storage\Exception\ResourceException;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -21,6 +21,25 @@ class FTPService implements ServiceInterface
      *
      */
     protected static $connection;
+
+    /**
+     * Transfer mode
+     */
+    protected $transferMode = FTP_BINARY;
+
+    /**
+     * Whether to use the passive mode.
+     *
+     * @var bool
+     */
+    protected $usePassiveMode = true;
+
+    /**
+     * Root folder absolute path.
+     *
+     * @var string
+     */
+    protected static $root;
 
     public function __construct()
     {
@@ -57,6 +76,19 @@ class FTPService implements ServiceInterface
         }
 
         $this->login();
+        $this->setConnectionRoot();
+        $this->setConnectionPassiveMode();
+    }
+
+    /**
+     * Disconnect from the FTP server.
+     */
+    public function disconnect()
+    {
+        if (is_resource(self::$connection)) {
+            ftp_close(self::$connection);
+        }
+        self::$connection = null;
     }
 
     /**
@@ -68,7 +100,8 @@ class FTPService implements ServiceInterface
     {
         ['username' => $username, 'password' => $password] = self::$config;
         // Disable error handling to avoid credentials leak
-        set_error_handler(function () {});
+        set_error_handler(function () {
+        });
         $isLoggedIn = ftp_login(self::$connection, $username, $password);
         restore_error_handler();
 
@@ -83,6 +116,24 @@ class FTPService implements ServiceInterface
     }
 
     /**
+     * Set the connection root.
+     */
+    protected function setConnectionRoot()
+    {
+        ['root' => $root] = self::$config;
+
+        if ($root && (!ftp_chdir(self::$connection, $root))) {
+            throw new RuntimeException('Root is invalid or does not exist: ' . $root);
+        }
+
+        // Store absolute path for further reference.
+        // This is needed when creating directories and
+        // initial root was a relative path, else the root
+        // would be relative to the chdir'd path.
+        self::$root = ftp_pwd(self::$connection);
+    }
+
+    /**
      * @return mixed
      */
     public static function getConnection()
@@ -91,14 +142,13 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Disconnect from the FTP server.
+     * Return the current working directory.
+     *
+     * @return mixed
      */
-    public function disconnect()
+    public function getCurrentDir()
     {
-        if (is_resource($this->connection)) {
-            ftp_close($this->connection);
-        }
-        $this->connection = null;
+        return pathinfo(ftp_pwd(self::$connection), PATHINFO_BASENAME);
     }
 
     /**
@@ -112,7 +162,19 @@ class FTPService implements ServiceInterface
      */
     public function store(UploadFile $file, $location = null, array $option = [])
     {
-        // TODO: Implement store() method.
+        $content = $file->getContent();
+        $stream = fopen('php://temp', 'w+b');
+        fwrite($stream, $content);
+        rewind($stream);
+        $result = $this->writeStream($location, $stream, $option);
+        fclose($stream);
+
+        if ($result === false) {
+            return false;
+        }
+
+        $result['content'] = $content;
+        return $result;
     }
 
     /**
@@ -195,7 +257,13 @@ class FTPService implements ServiceInterface
      */
     public function get($filename)
     {
-        // TODO: Implement get() method.
+        if (!$stream = $this->readStream($filename)) {
+            return false;
+        }
+
+        $contents = stream_get_contents($stream);
+        fclose($stream);
+        return $contents;
     }
 
     /**
@@ -215,10 +283,11 @@ class FTPService implements ServiceInterface
      *
      * @param string $target
      * @param string $source
+     * @return bool
      */
     public function move($target, $source)
     {
-        // TODO: Implement move() method.
+        return ftp_rename(self::getConnection(), $target, $source);
     }
 
     /**
@@ -282,10 +351,59 @@ class FTPService implements ServiceInterface
      * Delete file
      *
      * @param  string $file
-     * @return boolean
+     * @return bool
      */
-    public function delete($file)
+    public function delete($file): bool
     {
-        // TODO: Implement delete() method.
+        return ftp_delete(self::getConnection(), $file);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function writeStream($path, $resource)
+    {
+        if (!ftp_fput(self::getConnection(), $path, $resource, $this->transferMode)) {
+            return false;
+        }
+
+        $type = 'file';
+        return compact('type', 'path');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function readStream($path)
+    {
+        try {
+            $stream = fopen('php://temp', 'w+b');
+            $result = ftp_fget(self::getConnection(), $stream, $path, $this->transferMode);
+            rewind($stream);
+
+            if (!$result) {
+                fclose($stream);
+                return false;
+            }
+
+            return $stream;
+        } catch (\Exception $exception) {
+            throw new ResourceException(sprintf('"%s" not found.', $path));
+        }
+    }
+
+    /**
+     * Set the connections to passive mode.
+     *
+     * @throws RuntimeException
+     */
+    protected function setConnectionPassiveMode()
+    {
+        if (!ftp_pasv(self::$connection, $this->usePassiveMode)) {
+            throw new RuntimeException(
+                'Could not set passive mode for connection: '
+                . self::$config['hostname'] . '::' . self::$config['port']
+            );
+        }
     }
 }

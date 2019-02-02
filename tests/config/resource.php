@@ -28,9 +28,9 @@ return [
      * FTP configuration
      */
     'ftp' => [
-        'hostname' => 'demo.wftpserver.com',
-        'password' => 'demo-user',
-        'username' => 'demo-user',
+        'hostname' => '127.0.0.1',
+        'password' => 'password',
+        'username' => 'demo',
         'port'     => 21,
         'root' => '', // Le dossier de base du serveur
         'tls' => false, // A `true` pour activer une connection sécurisé.
