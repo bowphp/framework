@@ -350,11 +350,11 @@ class FTPService implements ServiceInterface
      * Delete file
      *
      * @param  string $file
-     * @return boolean
+     * @return bool
      */
-    public function delete($file)
+    public function delete($file): bool
     {
-        // TODO: Implement delete() method.
+        return ftp_delete($this->getConnection(), $file);
     }
 
     /**
