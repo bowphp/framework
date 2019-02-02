@@ -283,10 +283,11 @@ class FTPService implements ServiceInterface
      *
      * @param string $target
      * @param string $source
+     * @return bool
      */
     public function move($target, $source)
     {
-        // TODO: Implement move() method.
+        return ftp_rename(self::getConnection(), $target, $source);
     }
 
     /**
@@ -354,7 +355,7 @@ class FTPService implements ServiceInterface
      */
     public function delete($file): bool
     {
-        return ftp_delete($this->getConnection(), $file);
+        return ftp_delete(self::getConnection(), $file);
     }
 
     /**
@@ -377,7 +378,7 @@ class FTPService implements ServiceInterface
     {
         try {
             $stream = fopen('php://temp', 'w+b');
-            $result = ftp_fget($this->getConnection(), $stream, $path, $this->transferMode);
+            $result = ftp_fget(self::getConnection(), $stream, $path, $this->transferMode);
             rewind($stream);
 
             if (!$result) {
