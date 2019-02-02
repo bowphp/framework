@@ -22,6 +22,18 @@ class FTPService implements ServiceInterface
     protected static $connection;
 
     /**
+     * Transfer mode
+     */
+    protected $transferMode = FTP_BINARY;
+
+    /**
+     * Whether to use the passive mode.
+     *
+     * @var bool
+     */
+    protected $usePassiveMode = true;
+
+    /**
      * Root folder absolute path.
      *
      * @var string
@@ -64,6 +76,7 @@ class FTPService implements ServiceInterface
 
         $this->login();
         $this->setConnectionRoot();
+        $this->setConnectionPassiveMode();
     }
 
     /**
@@ -71,10 +84,10 @@ class FTPService implements ServiceInterface
      */
     public function disconnect()
     {
-        if (is_resource($this->connection)) {
-            ftp_close($this->connection);
+        if (is_resource(self::$connection)) {
+            ftp_close(self::$connection);
         }
-        $this->connection = null;
+        self::$connection = null;
     }
 
     /**
@@ -148,7 +161,19 @@ class FTPService implements ServiceInterface
      */
     public function store(UploadFile $file, $location = null, array $option = [])
     {
-        // TODO: Implement store() method.
+        $content = $file->getContent();
+        $stream = fopen('php://temp', 'w+b');
+        fwrite($stream, $content);
+        rewind($stream);
+        $result = $this->writeStream($location, $stream, $option);
+        fclose($stream);
+
+        if ($result === false) {
+            return false;
+        }
+
+        $result['content'] = $content;
+        return $result;
     }
 
     /**
@@ -323,5 +348,33 @@ class FTPService implements ServiceInterface
     public function delete($file)
     {
         // TODO: Implement delete() method.
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function writeStream($path, $resource)
+    {
+        if (! ftp_fput(self::getConnection(), $path, $resource, $this->transferMode)) {
+            return false;
+        }
+
+        $type = 'file';
+        return compact('type', 'path');
+    }
+
+    /**
+     * Set the connections to passive mode.
+     *
+     * @throws RuntimeException
+     */
+    protected function setConnectionPassiveMode()
+    {
+        if (! ftp_pasv(self::$connection, $this->usePassiveMode)) {
+            throw new RuntimeException(
+                'Could not set passive mode for connection: '
+                . self::$config['hostname'] . '::' . self::$config['port']
+            );
+        }
     }
 }
