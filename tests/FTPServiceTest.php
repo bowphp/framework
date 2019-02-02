@@ -39,4 +39,21 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertInternalType('array', $result);
         $this->assertEquals($result['content'], $file_content);
     }
+
+    public function testGetInexistentFile()
+    {
+       $ftpService = Storage::service('ftp');
+       $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
+       $ftpService->get('dummy.txt');
+    }
+
+    public function testGet()
+    {
+        /** @var \Bow\Storage\Service\FTPService $ftpService */
+        $ftpService = Storage::service('ftp');
+        $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
+        $uploadedFile->method('getContent')->willReturn('bow');
+        $ftpService->store($uploadedFile, 'bow.txt');
+        $this->assertEquals($ftpService->get('bow.txt'), 'bow');
+    }
 }
