@@ -25,4 +25,18 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $ftp_service_instance = Storage::service('ftp');
         $this->assertEquals($ftp_service_instance->getCurrentDir(), $config['ftp']['root']);
     }
+
+    public function testStore()
+    {
+        /** @var \Bow\Storage\Service\FTPService $ftp_service */
+        $ftp_service = Storage::service('ftp');
+        $file_content = 'Something very interesting';
+        $file_name = 'test.txt';
+        $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
+        $uploadedFile->method('getContent')->willReturn($file_content);
+        $uploadedFile->method('getFilename')->willReturn($file_name);
+        $result = $ftp_service->store($uploadedFile, $uploadedFile->getFilename());
+        $this->assertInternalType('array', $result);
+        $this->assertEquals($result['content'], $file_content);
+    }
 }
