@@ -65,6 +65,15 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $ftpService->get($filename);
     }
 
+    public function testRename()
+    {
+        $ftpService = Storage::service('ftp');
+        $this->createFile($ftpService, 'file1.txt', 'from file 1');
+        $result = $ftpService->move('file1.txt', 'file2.txt');
+        $this->assertTrue($result);
+        $this->assertEquals($ftpService->get('file2.txt'), 'from file 1');
+    }
+
     private function createFile(FTPService $ftpServiceInstance, $filename, $content = '')
     {
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
