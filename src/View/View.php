@@ -10,31 +10,43 @@ use Bow\View\Exception\ViewException;
 class View implements ResponseInterface
 {
     /**
+     * The application loader
+     *
      * @var Loader
      */
     private static $config;
 
     /**
+     * The View singleton instance
+     *
      * @var View
      */
     private static $instance;
 
     /**
+     * The template Engine extension
+     *
      * @var EngineAbstract
      */
     private static $template;
 
     /**
+     * The view rendering content
+     *
      * @var string
      */
     private static $content;
 
     /**
+     * The enable view caching
+     *
      * @var bool
      */
     private $cachabled = true;
 
     /**
+     * The build-in template engine
+     *
      * @var array
      */
     private static $engines = [
@@ -47,6 +59,8 @@ class View implements ResponseInterface
      * View constructor.
      *
      * @param  Loader $config
+     *
+     * @return  void
      * @throws ViewException
      */
     public function __construct(Loader $config)
@@ -55,14 +69,14 @@ class View implements ResponseInterface
 
         if (is_null($engine)) {
             throw new ViewException(
-                'Le moteur de template non défini.',
+                'The view engine is not define.',
                 E_USER_ERROR
             );
         }
 
         if (!array_key_exists($engine, static::$engines)) {
             throw new ViewException(
-                'Le moteur de template n\'est pas implementé.',
+                'The view engine is not implemented.',
                 E_USER_ERROR
             );
         }
@@ -73,9 +87,11 @@ class View implements ResponseInterface
     }
 
     /**
-     * Permet de configurer la classe
+     * Load view configuration
      *
      * @param Loader $config
+     *
+     * @return void
      */
     public static function configure($config)
     {
@@ -83,7 +99,7 @@ class View implements ResponseInterface
     }
 
     /**
-     * Permet de créer et retourner une instance de View
+     * Get the view singleton instance
      *
      * @return View
      * @throws
@@ -98,10 +114,11 @@ class View implements ResponseInterface
     }
 
     /**
-     * Permet de faire le rendu d'une vue
+     * Parse the view
      *
      * @param  string $viewname
      * @param  array  $data
+     *
      * @return View
      */
     public static function parse($viewname, array $data = [])
@@ -114,7 +131,7 @@ class View implements ResponseInterface
     }
 
     /**
-     * Permet de récuperer l'instance du template
+     * Get the template engine instance
      *
      * @return EngineAbstract
      */
@@ -127,6 +144,7 @@ class View implements ResponseInterface
      * Set Engine
      *
      * @param string $engine
+     *
      * @return View
      */
     public function setEngine($engine)
@@ -142,6 +160,8 @@ class View implements ResponseInterface
      * Set the availability of caching system
      *
      * @param bool $cachabled
+     *
+     * @return void
      */
     public function cachable($cachabled)
     {
@@ -166,6 +186,7 @@ class View implements ResponseInterface
      *
      * @param  $name
      * @param  $engine
+     *
      * @return bool
      * @throws ViewException
      */
@@ -176,7 +197,7 @@ class View implements ResponseInterface
         }
 
         if (!class_exists($engine)) {
-            throw new ViewException($engine . ' n\'existe pas.');
+            throw new ViewException($engine . ' does not exists.');
         }
 
         static::$engines[$name] = $engine;
@@ -217,8 +238,11 @@ class View implements ResponseInterface
     }
 
     /**
-     * @param $name
-     * @param $arguments
+     * __callStatic
+     *
+     * @param string $name
+     * @param array $arguments
+     *
      * @return mixed
      */
     public static function __callStatic($name, $arguments)
@@ -229,7 +253,7 @@ class View implements ResponseInterface
             }
         }
 
-        throw new BadMethodCallException($name . ' impossible de lance cette methode');
+        throw new BadMethodCallException($name . ' method does not exists.');
     }
 
     /**
@@ -237,6 +261,7 @@ class View implements ResponseInterface
      *
      * @param string $method
      * @param array $arguments
+     *
      * @return mixed
      */
     public function __call(string $method, array $arguments)
@@ -245,6 +270,6 @@ class View implements ResponseInterface
             return call_user_func_array([static::$instance, $method], $arguments);
         }
 
-        throw new BadMethodCallException("La methode $method n'existe pas");
+        throw new BadMethodCallException("The method $method does not exists");
     }
 }

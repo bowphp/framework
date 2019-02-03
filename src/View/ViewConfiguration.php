@@ -13,7 +13,7 @@ class ViewConfiguration extends Configuration
     public function create(Loader $config)
     {
         /**
-         * Configuration de translator
+         * Configuration of view
          */
         $this->container->bind('view', function () use ($config) {
             View::configure($config);

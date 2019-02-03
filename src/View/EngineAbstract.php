@@ -8,7 +8,7 @@ use Bow\View\Exception\ViewException;
 abstract class EngineAbstract
 {
     /**
-     * Liste des helpers
+     * The helper lists
      *
      * @var array
      */
@@ -62,19 +62,21 @@ abstract class EngineAbstract
     protected $config;
 
     /**
-     * Permet de transforme le code du temple en code html
+     * Make template rendering
      *
      * @param  string $filename
      * @param  array  $data
+     *
      * @return mixed
      */
     abstract public function render($filename, array $data = []);
 
     /**
-     * Permet de verifier le fichier à parser
+     * Check the parsed file
      *
      * @param  string $filename
      * @param  bool   $extended
+     *
      * @return string
      * @throws ViewException
      */
@@ -87,7 +89,7 @@ abstract class EngineAbstract
             if (!file_exists($this->config['view.path'].'/'.$tmp_filename)) {
                 throw new ViewException(
                     sprintf(
-                        'La vue [%s] n\'existe pas. %s/%s',
+                        'The view [%s] does not exists. %s/%s',
                         $tmp_filename,
                         $this->config['view.path'],
                         $filename
@@ -98,7 +100,7 @@ abstract class EngineAbstract
         } else {
             if (!file_exists($tmp_filename)) {
                 throw new ViewException(
-                    sprintf('La vue [%s] n\'existe pas!.', $tmp_filename),
+                    sprintf('The view [%s] does not exists.', $tmp_filename),
                     E_ERROR
                 );
             }
@@ -112,7 +114,7 @@ abstract class EngineAbstract
     }
 
     /**
-     * Permet de retourne le nom de template charge
+     * Get the engine name
      *
      * @return mixed
      */

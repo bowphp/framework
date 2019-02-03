@@ -8,11 +8,15 @@ use Bow\View\EngineAbstract;
 class TwigEngine extends EngineAbstract
 {
     /**
+     * The template engine instance
+     *
      * @var \Twig_Loader_Filesystem
      */
     private $template;
 
     /**
+     * The engine name
+     *
      * @var string
      */
     protected $name = 'twig';
@@ -21,6 +25,8 @@ class TwigEngine extends EngineAbstract
      * TwigEngine constructor.
      *
      * @param Loader $config
+     *
+     * @return void
      */
     public function __construct(Loader $config)
     {
@@ -44,28 +50,23 @@ class TwigEngine extends EngineAbstract
 
         $this->template = new \Twig_Environment($loader, $env);
 
-        /**
-         * - Ajout de variable globale
-         * dans le cadre de l'utilisation de Twig
-         */
+        // Add variable in global scope in the Twig use case
         $this->template->addGlobal('_public', $config['app.static']);
 
         $this->template->addGlobal('_root', $config['app.root']);
 
-        /**
-         * - Ajout de fonction global
-         *  dans le cadre de l'utilisation de Twig
-         */
+        // Add function in global scope in Twig use case
         foreach (EngineAbstract::HELPERS as $helper) {
-            $this->template->addFunction(new \Twig_SimpleFunction($helper, $helper));
+            $this->template->addFunction(
+                new \Twig_SimpleFunction($helper, $helper)
+            );
         }
 
         return $this->template;
     }
 
     /**
-     * @inheritDoc
-     * @throws
+     * {@inheritdoc}
      */
     public function render($filename, array $data = [])
     {
@@ -75,6 +76,8 @@ class TwigEngine extends EngineAbstract
     }
 
     /**
+     * The get engine instance
+     *
      * @return \Twig_Environment|\Twig_Loader_Filesystem
      */
     public function getTemplate()
