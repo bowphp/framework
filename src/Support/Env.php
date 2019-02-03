@@ -25,6 +25,8 @@ class Env
      * Load env file
      *
      * @param string $filename
+     *
+     * @return void
      * @throws
      */
     public static function load($filename)
@@ -53,6 +55,7 @@ class Env
      *
      * @param  string $key
      * @param  null   $default
+     *
      * @return mixed
      */
     public static function get($key, $default = null)
@@ -71,6 +74,7 @@ class Env
      *
      * @param string $key
      * @param null   $value
+     *
      * @return mixed
      */
     public static function set($key, $value)

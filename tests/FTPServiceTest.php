@@ -9,6 +9,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         Storage::configure(require 'config/resource.php');
+
         Storage::pushService(['ftp' => FTPService::class]);
     }
 
@@ -16,15 +17,17 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     {
         /** @var FTPService $ftp_service_instance */
         $ftp_service_instance = Storage::service('ftp');
+
         $this->assertInstanceOf(FTPService::class, $ftp_service_instance);
-        $this->assertNotFalse($ftp_service_instance::getConnection());
+        $this->assertNotFalse($ftp_service_instance->getConnection());
     }
 
     public function testHasCorrectRootFolder()
     {
         $config = require 'config/resource.php';
         $ftp_service_instance = Storage::service('ftp');
-        $this->assertEquals($ftp_service_instance->getCurrentDir(), $config['ftp']['root']);
+
+        $this->assertEquals($ftp_service_instance->getCurrentDirectory(), $config['services']['ftp']['root']);
     }
 
     public function testStore()
@@ -34,6 +37,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $file_content = 'Something very interesting';
         $file_name = 'test.txt';
         $result = $this->createFile($ftpService, $file_name, $file_content);
+
         $this->assertInternalType('array', $result);
         $this->assertEquals($result['content'], $file_content);
         $this->assertEquals($result['path'], $file_name);
@@ -51,6 +55,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         /** @var FTPService $ftpService */
         $ftpService = Storage::service('ftp');
         $this->createFile($ftpService, 'bow.txt', 'bow');
+
         $this->assertEquals($ftpService->get('bow.txt'), 'bow');
     }
 
@@ -70,6 +75,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $ftpService = Storage::service('ftp');
         $this->createFile($ftpService, 'file1.txt', 'from file 1');
         $result = $ftpService->move('file1.txt', 'file2.txt');
+
         $this->assertTrue($result);
         $this->assertEquals($ftpService->get('file2.txt'), 'from file 1');
     }
@@ -79,6 +85,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
         $uploadedFile->method('getContent')->willReturn($content);
         $uploadedFile->method('getFilename')->willReturn($filename);
+        
         return $ftpServiceInstance->store($uploadedFile, $filename);
     }
 }

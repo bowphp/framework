@@ -64,6 +64,7 @@ class Capsule implements \ArrayAccess
      * Make the
      *
      * @param string $key
+     *
      * @return mixed
      * @throws
      */
@@ -107,6 +108,7 @@ class Capsule implements \ArrayAccess
      *
      * @param mixed $key
      * @param array $parameters
+     *
      * @return mixed
      * @throws
      */
@@ -125,6 +127,7 @@ class Capsule implements \ArrayAccess
      * Add to register
      *
      * @param string $key
+     *
      * @param mixed  $value
      */
     public function bind($key, $value)
@@ -139,6 +142,8 @@ class Capsule implements \ArrayAccess
      *
      * @param $key
      * @param \Closure $value
+     *
+     * @return void
      */
     public function factory($key, \Closure $value)
     {
@@ -149,7 +154,9 @@ class Capsule implements \ArrayAccess
      * Saves the instance of a class
      *
      * @param string   $key
-     * @param $instance
+     * @param mixed $instance
+     *
+     * @return void
      */
     public function instance($key, $instance)
     {
@@ -164,6 +171,7 @@ class Capsule implements \ArrayAccess
      * Instantiate a class by its key
      *
      * @param string $key
+     *
      * @return mixed
      * @throws
      */

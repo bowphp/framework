@@ -8,6 +8,8 @@ use Bow\View\EngineAbstract;
 class PHPEngine extends EngineAbstract
 {
     /**
+     * The engine name
+     *
      * @var string
      */
     protected $name = 'php';
@@ -16,6 +18,8 @@ class PHPEngine extends EngineAbstract
      * PHPEngine constructor.
      *
      * @param Loader $config
+     *
+     * @return void
      */
     public function __construct(Loader $config)
     {
@@ -23,8 +27,7 @@ class PHPEngine extends EngineAbstract
     }
 
     /**
-     * @inheritDoc
-     * @throws
+     * {@inheritdoc}
      */
     public function render($filename, array $data = [])
     {
@@ -56,7 +59,7 @@ class PHPEngine extends EngineAbstract
 
         $content = file_get_contents($filename);
 
-        // Mise en cache
+        // Save to cache
         file_put_contents(
             $cache_hash_filename,
             $content

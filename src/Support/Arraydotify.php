@@ -91,6 +91,7 @@ class Arraydotify implements \ArrayAccess
      * @param array  $array
      * @param string $key
      * @param mixed  $value
+     *
      * @return mixed
      */
     private function dataSet(&$array, $key, $value)
@@ -110,34 +111,6 @@ class Arraydotify implements \ArrayAccess
         $array[array_shift($keys)] = $value;
 
         return $array;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function offsetExists($offset)
-    {
-        if (isset($this->array[$offset])) {
-            return true;
-        }
-
-        $array = $this->find($this->origin, $offset);
-
-        return (is_array($array) && !empty($array));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function offsetGet($offset)
-    {
-        if (!$this->offsetExists($offset)) {
-            return null;
-        }
-
-        return isset($this->array[$offset])
-            ? $this->array[$offset]
-            : $this->find($this->origin, $offset);
     }
 
     /**
@@ -177,6 +150,34 @@ class Arraydotify implements \ArrayAccess
         return $array;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function offsetExists($offset)
+    {
+        if (isset($this->array[$offset])) {
+            return true;
+        }
+
+        $array = $this->find($this->origin, $offset);
+
+        return (is_array($array) && !empty($array));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetGet($offset)
+    {
+        if (!$this->offsetExists($offset)) {
+            return null;
+        }
+
+        return isset($this->array[$offset])
+            ? $this->array[$offset]
+            : $this->find($this->origin, $offset);
+    }
+    
     /**
      * @inheritDoc
      */

@@ -8,6 +8,7 @@ class Str
      * upper case
      *
      * @param  string $str
+     *
      * @return array|string
      */
     public static function upper($str)
@@ -23,6 +24,7 @@ class Str
      * lower case
      *
      * @param  string $str
+     *
      * @return array|string
      */
     public static function lower($str)
@@ -38,6 +40,7 @@ class Str
      * camel
      *
      * @param  string $str
+     *
      * @return string
      */
     public static function camel($str)
@@ -64,6 +67,7 @@ class Str
      *
      * @param  string $str
      * @param  string $delimiter
+     *
      * @return mixed
      */
     public static function snake($str, $delimiter = '_')
@@ -81,6 +85,7 @@ class Str
      * Get str plurial
      *
      * @param string $str
+     *
      * @return string
      */
     public static function plurial($str)
@@ -96,6 +101,7 @@ class Str
      * @param  string $str
      * @param  $start
      * @param  null   $end
+     *
      * @return string
      */
     public static function slice($str, $start, $end = null)
@@ -163,9 +169,9 @@ class Str
     /**
      * replace
      *
-     * @param $pattern
-     * @param $replaceBy
-     * @param $str
+     * @param string $pattern
+     * @param string $replaceBy
+     * @param string $str
      *
      * @return string
      */
@@ -177,7 +183,7 @@ class Str
     /**
      * capitalize
      *
-     * @param $str
+     * @param string $str
      *
      * @return string
      */
@@ -189,7 +195,7 @@ class Str
     /**
      * Len
      *
-     * @param $str
+     * @param string $str
      *
      * @return int
      */
@@ -201,8 +207,8 @@ class Str
     /**
      * Wordify
      *
-     * @param $str
-     * @param $sep
+     * @param string $str
+     * @param string $sep
      *
      * @return array
      */
@@ -214,8 +220,8 @@ class Str
     /**
      * Lists the string of characters in a specified number
      *
-     * @param $str
-     * @param $number
+     * @param string $str
+     * @param string $number
      *
      * @return string
      */
@@ -242,6 +248,7 @@ class Str
      *
      * @param string $str
      * @param string $delimiter
+     *
      * @return string
      */
     public static function slugify($str, $delimiter = '-')
@@ -259,6 +266,7 @@ class Str
      * unslugify, Lets you undo a slug
      *
      * @param string $str
+     *
      * @return string
      */
     public static function unSlugify($str)
@@ -272,6 +280,7 @@ class Str
      * eg: dakiafranck@gmail.com => true
      *
      * @param string $email
+     *
      * @return bool
      */
     public static function isMail($email)
@@ -292,8 +301,8 @@ class Str
      * eg: http:/exemple.com => false
      *
      * @param string $domain
-     * @return bool
      *
+     * @return bool
      * @throws \ErrorException
      */
     public static function isDomain($domain)
@@ -312,6 +321,7 @@ class Str
      * Check if the string is in alphanumeric
      *
      * @param string $str
+     *
      * @return bool
      * @throws \ErrorException
      */
@@ -362,8 +372,9 @@ class Str
      * Check if the string is in slug format
      *
      * @param string $str
-     * @throws \ErrorException
+     *
      * @return bool
+     * @throws \ErrorException
      */
     public static function isSlug($str)
     {
@@ -378,6 +389,7 @@ class Str
      * Check if the string is in uppercase
      *
      * @param  string $str
+     *
      * @return bool
      */
     public static function isUpper($str)
@@ -389,6 +401,7 @@ class Str
      * Check if the string is lowercase
      *
      * @param  string $str
+     *
      * @return bool
      */
     public static function isLower($str)
@@ -464,6 +477,8 @@ class Str
 
     /**
      * Enables to force the encoding in utf-8
+     *
+     * @return void
      */
     public static function forceInUTF8()
     {
@@ -477,6 +492,7 @@ class Str
      *
      * @param  string $method
      * @param  array  $arguments
+     *
      * @return mixed
      */
     public function __call($method, $arguments)

@@ -10,39 +10,58 @@ use RuntimeException;
 
 class FTPService implements ServiceInterface
 {
-
     /**
+     * The Service configuration
+     *
      * @var array
      */
-    protected static $config = [];
+    private $config = [];
 
     /**
      * Ftp connection
      *
+     * @var resource
      */
-    protected static $connection;
+    private $connection;
 
     /**
      * Transfer mode
+     *
+     * @var int
      */
-    protected $transferMode = FTP_BINARY;
+    private $transfer_mode = FTP_BINARY;
 
     /**
      * Whether to use the passive mode.
      *
      * @var bool
      */
-    protected $usePassiveMode = true;
+    private $use_passive_mode = true;
 
     /**
      * Root folder absolute path.
      *
      * @var string
      */
-    protected static $root;
+    private $root;
 
-    public function __construct()
+    /**
+     * The FTPService Instance
+     *
+     * @var FTPService
+     */
+    private static $instance;
+
+    /**
+     * FTPService constructor
+     *
+     * @param array $config
+     * @return void
+     */
+    private function __construct(array $config)
     {
+        $this->config = $config;
+
         $this->connect();
     }
 
@@ -50,29 +69,35 @@ class FTPService implements ServiceInterface
      * Configure service
      *
      * @param array $config
+     *
      * @return FTPService
      */
     public static function configure(array $config)
     {
-        static::$config = $config;
-        return new static();
+        if (is_null(static::$instance)) {
+            static::$instance = new static($config);
+        }
+
+        return static::$instance;
     }
 
     /**
      * Connect to the FTP server.
+     *
+     * @return void
      */
     public function connect()
     {
-        ['hostname' => $host, 'port' => $port, 'timeout' => $timeout] = self::$config;
+        ['hostname' => $host, 'port' => $port, 'timeout' => $timeout] = $this->config;
 
-        if (self::$config['tls']) {
-            self::$connection = ftp_ssl_connect($host, $port, $timeout);
+        if ($this->config['tls']) {
+            $this->connection = ftp_ssl_connect($host, $port, $timeout);
         } else {
-            self::$connection = ftp_connect($host, $port, $timeout);
+            $this->connection = ftp_connect($host, $port, $timeout);
         }
 
-        if (!self::$connection) {
-            throw new RuntimeException('Could not connect to host: ' . $host . ', port:' . $port);
+        if (!$this->connection) {
+            throw new RuntimeException(sprintf('Could not connect to %s:%s', $host, $port));
         }
 
         $this->login();
@@ -82,47 +107,58 @@ class FTPService implements ServiceInterface
 
     /**
      * Disconnect from the FTP server.
+     *
+     * @return void
      */
     public function disconnect()
     {
-        if (is_resource(self::$connection)) {
-            ftp_close(self::$connection);
+        if (is_resource($this->connection)) {
+            ftp_close($this->connection);
         }
-        self::$connection = null;
+
+        $this->connection = null;
     }
 
     /**
-     * Login.
+     * Make FTP Login.
      *
+     * @return void
      * @throws RuntimeException
      */
-    protected function login()
+    private function login()
     {
-        ['username' => $username, 'password' => $password] = self::$config;
+        ['username' => $username, 'password' => $password] = $this->config;
+
         // Disable error handling to avoid credentials leak
         set_error_handler(function () {
         });
-        $isLoggedIn = ftp_login(self::$connection, $username, $password);
+        $is_logged_in = ftp_login($this->connection, $username, $password);
         restore_error_handler();
 
-        if (!$isLoggedIn) {
+        if (!$is_logged_in) {
             $this->disconnect();
+            
             throw new RuntimeException(
-                'Could not login with connection: '
-                . self::$config['hostname'] . '::' . self::$config['port']
-                . ', username: ' . $username
+                sprintf(
+                    'Could not login with connection: (s)ftp://%s@%s:%s',
+                    $username,
+                    $this->config['hostname'],
+                    $this->config['port']
+                )
             );
         }
     }
 
     /**
      * Set the connection root.
+     *
+     * @return void
      */
-    protected function setConnectionRoot()
+    private function setConnectionRoot()
     {
-        ['root' => $root] = self::$config;
+        ['root' => $root] = $this->config;
 
-        if ($root && (!ftp_chdir(self::$connection, $root))) {
+        if ($root && (!ftp_chdir($this->connection, $root))) {
             throw new RuntimeException('Root is invalid or does not exist: ' . $root);
         }
 
@@ -130,15 +166,17 @@ class FTPService implements ServiceInterface
         // This is needed when creating directories and
         // initial root was a relative path, else the root
         // would be relative to the chdir'd path.
-        self::$root = ftp_pwd(self::$connection);
+        $this->root = ftp_pwd($this->connection);
     }
 
     /**
+     * Get ftp connextion
+     *
      * @return mixed
      */
-    public static function getConnection()
+    public function getConnection()
     {
-        return self::$connection;
+        return $this->connection;
     }
 
     /**
@@ -146,9 +184,9 @@ class FTPService implements ServiceInterface
      *
      * @return mixed
      */
-    public function getCurrentDir()
+    public function getCurrentDirectory()
     {
-        return pathinfo(ftp_pwd(self::$connection), PATHINFO_BASENAME);
+        return pathinfo(ftp_pwd($this->connection), PATHINFO_BASENAME);
     }
 
     /**
@@ -164,8 +202,10 @@ class FTPService implements ServiceInterface
     {
         $content = $file->getContent();
         $stream = fopen('php://temp', 'w+b');
+
         fwrite($stream, $content);
         rewind($stream);
+
         $result = $this->writeStream($location, $stream, $option);
         fclose($stream);
 
@@ -174,6 +214,7 @@ class FTPService implements ServiceInterface
         }
 
         $result['content'] = $content;
+
         return $result;
     }
 
@@ -263,6 +304,7 @@ class FTPService implements ServiceInterface
 
         $contents = stream_get_contents($stream);
         fclose($stream);
+
         return $contents;
     }
 
@@ -279,7 +321,7 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Rénme or move a source file to a target file.
+     * Rename or move a source file to a target file.
      *
      * @param string $target
      * @param string $source
@@ -287,7 +329,7 @@ class FTPService implements ServiceInterface
      */
     public function move($target, $source)
     {
-        return ftp_rename(self::getConnection(), $target, $source);
+        return ftp_rename($this->getConnection(), $target, $source);
     }
 
     /**
@@ -353,40 +395,51 @@ class FTPService implements ServiceInterface
      * @param  string $file
      * @return bool
      */
-    public function delete($file): bool
+    public function delete($file)
     {
-        return ftp_delete(self::getConnection(), $file);
+        return ftp_delete($this->getConnection(), $file);
     }
 
     /**
-     * @inheritdoc
+     * Write stream
+     *
+     * @param string $path
+     * @param resouce $resource
+     *
+     * @return array|boolean
      */
-    protected function writeStream($path, $resource)
+    private function writeStream($path, $resource)
     {
-        if (!ftp_fput(self::getConnection(), $path, $resource, $this->transferMode)) {
+        if (!ftp_fput($this->getConnection(), $path, $resource, $this->transfer_mode)) {
             return false;
         }
 
         $type = 'file';
+
         return compact('type', 'path');
     }
 
     /**
-     * @inheritdoc
+     * Read stream
+     *
+     * @param string $path
+     *
+     * @return mixed
      */
-    protected function readStream($path)
+    private function readStream($path)
     {
         try {
             $stream = fopen('php://temp', 'w+b');
-            $result = ftp_fget(self::getConnection(), $stream, $path, $this->transferMode);
+            $result = ftp_fget($this->getConnection(), $stream, $path, $this->transfer_mode);
             rewind($stream);
 
-            if (!$result) {
-                fclose($stream);
-                return false;
+            if ($result) {
+                return $stream;
             }
 
-            return $stream;
+            fclose($stream);
+            
+            return false;
         } catch (\Exception $exception) {
             throw new ResourceException(sprintf('"%s" not found.', $path));
         }
@@ -397,12 +450,12 @@ class FTPService implements ServiceInterface
      *
      * @throws RuntimeException
      */
-    protected function setConnectionPassiveMode()
+    private function setConnectionPassiveMode()
     {
-        if (!ftp_pasv(self::$connection, $this->usePassiveMode)) {
+        if (!ftp_pasv($this->connection, $this->use_passive_mode)) {
             throw new RuntimeException(
                 'Could not set passive mode for connection: '
-                . self::$config['hostname'] . '::' . self::$config['port']
+                . $this->config['hostname'] . '::' . $this->config['port']
             );
         }
     }
