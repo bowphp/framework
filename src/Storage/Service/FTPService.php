@@ -317,7 +317,12 @@ class FTPService implements ServiceInterface
      */
     public function copy($target, $source)
     {
-        // TODO: Implement copy() method.
+        $source_stream = $this->readStream($source);
+        $result = $this->writeStream($target, $source_stream);
+
+        fclose($source_stream);
+
+        return $result;
     }
 
     /**
