@@ -153,7 +153,7 @@ class Validator
         }
 
         // Get lexique provider by application part
-        $lexique = trans($key, $attributes);
+        $lexique = trans('lexique.'.$key, $attributes);
 
         if (is_null($lexique)) {
             $lexique = $this->lexique[$key];
