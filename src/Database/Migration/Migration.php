@@ -22,6 +22,8 @@ abstract class Migration
     public function __construct()
     {
         $this->adapter = Database::getConnectionAdapter();
+
+        $this->createRepository();
     }
 
     /**
@@ -86,7 +88,13 @@ abstract class Migration
 
         call_user_func_array($cb, [$generator]);
 
-        $sql = sprintf("CREATE TABLE `%s` (%s);", $table, $generator->make());
+        if ($this->adapter->getName() == 'mysql') {
+            $engine = sprintf('ENGINE=%s', strtoupper($generator->getEngine()));
+        } else {
+            $engine = null;
+        }
+
+        $sql = sprintf("CREATE TABLE `%s` (%s)%s;", $table, $generator->make(), $engine);
 
         return $this->executeSqlQuery($sql);
     }

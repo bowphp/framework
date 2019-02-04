@@ -39,6 +39,13 @@ class SQLGenerator
     private $adapter;
 
     /**
+     * Defines the mysql ENGINE
+     *
+     * @var string
+     */
+    private $engine;
+
+    /**
      * SQLGenerator constructor
      *
      * @param string $table
@@ -52,6 +59,8 @@ class SQLGenerator
         $this->scope = $scope;
 
         $this->adapter = $adapter;
+
+        $this->engine = 'InnoDB';
     }
 
     /**
@@ -181,11 +190,23 @@ class SQLGenerator
     /**
      * Set the engine
      *
+     * @param string $engine
+     *
      * @return void
      */
-    public function engine($engine)
+    public function withEngine($engine)
     {
         $this->engine = $engine;
+    }
+
+    /**
+     * Get the engine
+     *
+     * @return string
+     */
+    public function getEngine()
+    {
+        return $this->engine;
     }
 
     /**
