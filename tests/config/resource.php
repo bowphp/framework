@@ -29,13 +29,13 @@ return [
          * FTP configuration
          */
         'ftp' => [
-            'hostname' => 'test.rebex.net',
-            'password' => 'password',
-            'username' => 'demo',
-            'port'     => 21,
-            'root' => '', // Start directory
-            'tls' => false, // `true` enable the secure connexion.
-            'timeout' => 90 // Temps d'attente de connection
+            'hostname' => app_env('FTP_HOST'),
+            'password' => app_env('FTP_PASSWORD'),
+            'username' => app_env('FTP_USERNAME'),
+            'port'     => app_env('FTP_PORT', 21),
+            'root' => app_env('FTP_ROOT', ''), // Start directory
+            'tls' => app_env('FTP_SSL', false), // `true` enable the secure connexion.
+            'timeout' => app_env('FTP_TIMEOUT', 90) // Temps d'attente de connection
         ],
 
         /**
