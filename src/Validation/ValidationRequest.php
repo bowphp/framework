@@ -135,8 +135,8 @@ abstract class ValidationRequest
     }
 
     /**
-     * Quand l'utilisateur n'a pas l'authorization de lance cette requête
-     * C'est la methode qui est lancer pour bloquer l'utilisateur
+     * When user have not authorize to launch a request
+     * This method permet to custom fail exception
      *
      * @throws AuthorizationException
      */
@@ -210,6 +210,7 @@ abstract class ValidationRequest
      *
      * @param  string $name
      * @param  array  $arguments
+     *
      * @return Request
      */
     public function __call($name, array $arguments)
@@ -225,6 +226,7 @@ abstract class ValidationRequest
      * __get
      *
      * @param  string $name
+     *
      * @return string
      */
     public function __get($name)

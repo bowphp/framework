@@ -72,6 +72,8 @@ class Validator
 
     /**
      * Validator constructor
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -171,6 +173,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileRequired($key, $masque)
     {
@@ -194,6 +198,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileEmpty($key, $masque)
     {
@@ -217,6 +223,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileMin($key, $masque)
     {
@@ -251,6 +259,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileMax($key, $masque)
     {
@@ -284,6 +294,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileSame($key, $masque)
     {
@@ -316,6 +328,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileEmail($key, $masque)
     {
@@ -344,6 +358,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileNumber($key, $masque)
     {
@@ -372,6 +388,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileInt($key, $masque)
     {
@@ -400,6 +418,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileFloat($key, $masque)
     {
@@ -428,6 +448,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileAlphaNum($key, $masque)
     {
@@ -454,8 +476,10 @@ class Validator
      *
      * [in:(value, ...)] Check that the contents of the field are equal to the defined value
      *
-     * @param $key
-     * @param $masque
+     * @param string $key
+     * @param string $masque
+     *
+     * @return void
      */
     protected function compileIn($key, $masque)
     {
@@ -494,6 +518,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileSize($key, $masque)
     {
@@ -527,6 +553,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileLower($key, $masque)
     {
@@ -555,6 +583,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileUpper($key, $masque)
     {
@@ -583,6 +613,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileAlpha($key, $masque)
     {
@@ -611,6 +643,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileExists($key, $masque)
     {
@@ -648,6 +682,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileNotExists($key, $masque)
     {
@@ -685,6 +721,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileUnique($key, $masque)
     {
@@ -722,6 +760,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileDate($key, $masque)
     {
@@ -750,6 +790,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileDateTime($key, $masque)
     {
@@ -781,6 +823,8 @@ class Validator
      *
      * @param string $key
      * @param string $masque
+     *
+     * @return void
      */
     protected function compileRegex($key, $masque)
     {

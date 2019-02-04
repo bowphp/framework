@@ -48,6 +48,8 @@ class Validate
      * @param bool   $fails
      * @param string $message
      * @param array  $corruptes_fields
+     *
+     * @return void
      */
     public function __construct($fails, $message, array $corruptes_fields)
     {
