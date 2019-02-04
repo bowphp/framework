@@ -21,28 +21,28 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function testUnsecureConnection()
     {
-        /** @var FTPService $ftp_service_instance */
-        $ftp_service_instance = Storage::service('ftp');
+        /** @var FTPService $ftp_service */
+        $ftp_service = Storage::service('ftp');
 
-        $this->assertInstanceOf(FTPService::class, $ftp_service_instance);
-        $this->assertNotFalse($ftp_service_instance->getConnection());
+        $this->assertInstanceOf(FTPService::class, $ftp_service);
+        $this->assertNotFalse($ftp_service->getConnection());
     }
 
     public function testHasCorrectRootFolder()
     {
         $config = require 'config/resource.php';
-        $ftp_service_instance = Storage::service('ftp');
+        $ftp_service = Storage::service('ftp');
 
-        $this->assertEquals($ftp_service_instance->getCurrentDirectory(), $config['services']['ftp']['root']);
+        $this->assertEquals($ftp_service->getCurrentDirectory(), $config['services']['ftp']['root']);
     }
 
     public function testStore()
     {
-        /** @var FTPService $ftpService */
-        $ftpService = Storage::service('ftp');
+        /** @var FTPService $ftp_service */
+        $ftp_service = Storage::service('ftp');
         $file_content = 'Something very interesting';
         $file_name = 'test.txt';
-        $result = $this->createFile($ftpService, $file_name, $file_content);
+        $result = $this->createFile($ftp_service, $file_name, $file_content);
 
         $this->assertInternalType('array', $result);
         $this->assertEquals($result['content'], $file_content);
@@ -51,39 +51,41 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function testGetInexistentFile()
     {
-        $ftpService = Storage::service('ftp');
+        $ftp_service = Storage::service('ftp');
+
         $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
-        $ftpService->get('dummy.txt');
+        $ftp_service->get('dummy.txt');
     }
 
     public function testGet()
     {
-        /** @var FTPService $ftpService */
-        $ftpService = Storage::service('ftp');
-        $this->createFile($ftpService, 'bow.txt', 'bow');
+        /** @var FTPService $ftp_service */
+        $ftp_service = Storage::service('ftp');
+        $this->createFile($ftp_service, 'bow.txt', 'bow');
 
-        $this->assertEquals($ftpService->get('bow.txt'), 'bow');
+        $this->assertEquals($ftp_service->get('bow.txt'), 'bow');
     }
 
     public function testDelete()
     {
-        $ftpService = Storage::service('ftp');
-        $filename = 'delete.txt';
-        $this->createFile($ftpService, $filename);
-        $result = $ftpService->delete($filename);
+        $ftp_service = Storage::service('ftp');
+        $file_name = 'delete.txt';
+        $this->createFile($ftp_service, $file_name);
+        $result = $ftp_service->delete($file_name);
+
         $this->assertTrue($result);
         $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
-        $ftpService->get($filename);
+        $ftp_service->get($file_name);
     }
 
     public function testRename()
     {
-        $ftpService = Storage::service('ftp');
-        $this->createFile($ftpService, 'file1.txt', 'from file 1');
-        $result = $ftpService->move('file1.txt', 'file2.txt');
+        $ftp_service = Storage::service('ftp');
+        $this->createFile($ftp_service, 'file1.txt', 'from file 1');
+        $result = $ftp_service->move('file1.txt', 'file2.txt');
 
         $this->assertTrue($result);
-        $this->assertEquals($ftpService->get('file2.txt'), 'from file 1');
+        $this->assertEquals($ftp_service->get('file2.txt'), 'from file 1');
     }
 
     public function testCopy()
