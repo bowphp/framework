@@ -195,6 +195,7 @@ class FTPService implements ServiceInterface
      * @param  UploadFile $file
      * @param  string $location
      * @param  array $option
+     *
      * @return mixed
      * @throws InvalidArgumentException
      */
