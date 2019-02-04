@@ -25,7 +25,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $ftp_service = Storage::service('ftp');
 
         $this->assertInstanceOf(FTPService::class, $ftp_service);
-        $this->assertNotFalse($ftp_service->getConnection());
+        $this->assertInternalType('resource', $ftp_service->getConnection());
     }
 
     public function testHasCorrectRootFolder()
