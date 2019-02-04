@@ -2,6 +2,8 @@
 
 namespace Bow\Storage;
 
+use Bow\Storage\Exception\ResourceException;
+
 class Temporary
 {
     /**
@@ -12,12 +14,23 @@ class Temporary
     private $stream;
 
     /**
+     * The Lock filename
+     *
+     * @var string
+     */
+    private $lock_filename;
+
+    /**
      * Temporary Constructor
+     *
+     * @param string $lock_filename
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($lock_filename = 'php://temp')
     {
+        $this->lock_filename = $lock_filename;
+
         $this->open();
     }
 
@@ -38,7 +51,27 @@ class Temporary
      */
     public function open()
     {
-        $this->stream = fopen('php://temp', 'w+b');
+        if (is_resource($this->stream)) {
+            throw new ResourceException(
+                'The temporary file is already open.'
+            );
+        }
+
+        $this->stream = fopen($this->lock_filename, 'w+b');
+    }
+
+    /**
+     * Set the Lock file name
+     *
+     * @param string $lock_filename
+     *
+     * @return void
+     */
+    public function lockFile($lock_filename)
+    {
+        $this->close();
+
+        $this->lock_filename = $lock_filename;
     }
 
     /**
@@ -62,9 +95,11 @@ class Temporary
      */
     public function write($content)
     {
-        if ($this->isOpen()) {
-            return fwrite($this->stream, $content);
+        if (!$this->isOpen()) {
+            $this->open();
         }
+
+        return fwrite($this->stream, $content);
     }
 
     /**
@@ -75,10 +110,14 @@ class Temporary
     public function read()
     {
         if (!$this->isOpen()) {
-            return null;
+            $this->open();
         }
 
-        $content = fread($this->stream, 100000);
+        $this->stream = fopen($this->lock_filename, 'r');
+
+        $content = stream_get_contents($this->stream);
+
+        $this->close();
 
         return $content;
     }
