@@ -6,8 +6,14 @@ use Bow\Storage\Storage;
 
 class FTPServiceTest extends \PHPUnit\Framework\TestCase
 {
-    protected function setUp()
+    public static function setUpBeforeClass()
     {
+        $env_file = dirname(__DIR__) . '/.env.json';
+
+        if (file_exists($env_file) && !\Bow\Support\Env::isLoaded()) {
+            \Bow\Support\Env::load($env_file);
+        }
+
         Storage::configure(require 'config/resource.php');
 
         Storage::pushService(['ftp' => FTPService::class]);
@@ -78,6 +84,16 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($result);
         $this->assertEquals($ftpService->get('file2.txt'), 'from file 1');
+    }
+
+    public function testCopy()
+    {
+        /** @var FTPService $ftp_service */
+        $ftp_service = Storage::service('ftp');
+        $result = $ftp_service->copy('file-copy.txt', 'test.txt');
+
+        $this->assertInternalType('array', $result);
+        $this->assertEquals($ftp_service->get('test.txt'), $ftp_service->get('file-copy.txt'));
     }
 
     private function createFile(FTPService $ftpServiceInstance, $filename, $content = '')
