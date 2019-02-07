@@ -16,6 +16,13 @@ class MountFilesystem implements FilesystemInterface
     private $basedir;
 
     /**
+     * The current working directory
+     *
+     * @var string
+     */
+    private $currentWorkingDir;
+
+    /**
      * MountFilesystem constructor.
      *
      * @param string $basedir
@@ -23,14 +30,18 @@ class MountFilesystem implements FilesystemInterface
     public function __construct($basedir)
     {
         $this->basedir = realpath($basedir);
+        $this->currentWorkingDir = $this->basedir;
+
+        // Set the root folder
+        chdir($this->basedir);
     }
 
     /**
      * Function to upload a file
      *
-     * @param  UploadFile  $file
-     * @param  string  $location
-     * @param  array   $option
+     * @param  UploadFile $file
+     * @param  string $location
+     * @param  array $option
      *
      * @return mixed
      * @throws InvalidArgumentException
@@ -41,7 +52,7 @@ class MountFilesystem implements FilesystemInterface
             $option = $location;
             $location = null;
         }
-        
+
         if (isset($option['as'])) {
             $filename = $option['as'];
         } else {
@@ -51,7 +62,7 @@ class MountFilesystem implements FilesystemInterface
         if (is_null($location)) {
             $location = $filename;
         } else {
-            $location = trim($location, '/').'/'.$filename;
+            $location = trim($location, '/') . '/' . $filename;
         }
 
         $this->put($location, $file->getContent());
@@ -136,7 +147,7 @@ class MountFilesystem implements FilesystemInterface
     {
         $dirname = $this->path($dirname);
 
-        $directory_contents = glob($dirname."/*");
+        $directory_contents = glob($dirname . "/*");
 
         return array_filter($directory_contents, function ($file) {
             return filetype($file) == "file";
@@ -152,7 +163,7 @@ class MountFilesystem implements FilesystemInterface
      */
     public function directories($dirname)
     {
-        $directory_contents = glob($this->path($dirname)."/*");
+        $directory_contents = glob($this->path($dirname) . "/*");
 
         return array_filter($directory_contents, function ($file) {
             return filetype($file) == "dir";
@@ -163,26 +174,49 @@ class MountFilesystem implements FilesystemInterface
      * Create a directory
      *
      * @param  string $dirname
-     * @param  int    $mode
-     * @param  bool   $recursive
+     * @param  int $mode
      *
      * @return boolean
      */
-    public function makeDirectory($dirname, $mode = 0777, $recursive = false)
+    public function makeDirectory($dirname, $mode = 0777)
     {
-        if (is_bool($mode)) {
-            $recursive = $mode;
+        $directories = explode('/', $dirname);
 
-            $mode = 0777;
+        foreach ($directories as $directory) {
+            if (false === $this->makeActualDirectory($directory, $mode)) {
+                chdir($this->basedir);
+                return false;
+            }
+            chdir($directory);
+            $this->currentWorkingDir = getcwd();
         }
 
-        $dirname = $this->path($dirname);
+        chdir($this->basedir);
 
-        if (!is_dir($dirname)) {
-            return @mkdir($dirname, $mode, $recursive);
+        return true;
+    }
+
+    /**
+     * Create a directory.
+     *
+     * @param $dirname
+     * @param $mode
+     * @return bool
+     */
+    private function makeActualDirectory($dirname, $mode)
+    {
+        $listing = glob($this->currentWorkingDir . '/*', GLOB_ONLYDIR) ?: [];
+
+        $directories = array_map(function ($value) {
+            return pathinfo($value, PATHINFO_BASENAME);
+        }, $listing);
+
+        // Skip directory creation if it already exists
+        if (in_array($dirname, $directories, true)) {
+            return true;
         }
 
-        return false;
+        return @mkdir($dirname, $mode);
     }
 
     /**
@@ -248,10 +282,10 @@ class MountFilesystem implements FilesystemInterface
     {
         $filename = $this->path($filename);
 
-        if (! $this->isDirectory($filename)) {
+        if (!$this->isDirectory($filename)) {
             return file_exists($filename);
         }
-    
+
         $tmp = getcwd();
 
         $r = chdir($filename);
@@ -311,10 +345,10 @@ class MountFilesystem implements FilesystemInterface
      */
     public function path($filename)
     {
-        if (preg_match('~^'.$this->basedir.'~', $filename)) {
+        if (preg_match('~^' . $this->basedir . '~', $filename)) {
             return $filename;
         }
 
-        return rtrim($this->basedir, '/').'/'.ltrim($filename, '/');
+        return rtrim($this->basedir, '/') . '/' . ltrim($filename, '/');
     }
 }
