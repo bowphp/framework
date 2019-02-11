@@ -98,6 +98,16 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($ftp_service->get('test.txt'), $ftp_service->get('file-copy.txt'));
     }
 
+    public function testMakeDirectory()
+    {
+        $ftp_service = Storage::service('ftp');
+        $result = $ftp_service->makeDirectory('super/nested/dir');
+        $result_1 = $ftp_service->makeDirectory('simple_dir');
+
+        $this->assertTrue($result);
+        $this->assertTrue($result_1);
+    }
+
     private function createFile(FTPService $ftpServiceInstance, $filename, $content = '')
     {
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);

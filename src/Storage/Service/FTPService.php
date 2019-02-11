@@ -15,7 +15,7 @@ class FTPService implements ServiceInterface
      *
      * @var array
      */
-    private $config = [];
+    private $config;
 
     /**
      * Ftp connection
@@ -282,12 +282,53 @@ class FTPService implements ServiceInterface
      *
      * @param  string $dirname
      * @param  int $mode
-     * @param  bool $recursive
+     *
      * @return boolean
      */
-    public function makeDirectory($dirname, $mode = 0777, $recursive = false)
+    public function makeDirectory($dirname, $mode = 0777)
     {
-        // TODO: Implement makeDirectory() method.
+        $connection = $this->getConnection();
+
+        $directories = explode('/', $dirname);
+
+        foreach ($directories as $directory) {
+            if (false === $this->makeActualDirectory($directory, $mode)) {
+                $this->setConnectionRoot();
+                return false;
+            }
+            ftp_chdir($connection, $directory);
+        }
+
+        $this->setConnectionRoot();
+
+        return true;
+    }
+
+    /**
+     * Create a directory.
+     *
+     * @param string   $directory
+     *
+     * @return bool
+     */
+    protected function makeActualDirectory($directory, $mode)
+    {
+        $connection = $this->getConnection();
+
+        $directories = ftp_nlist($connection, '.') ?: [];
+
+        // Remove unix characters from directory name
+        array_walk($directories, function ($dir_name, $key) {
+            return preg_match('~^\./.*~', $dir_name) ? substr($dir_name, 2) : $dir_name;
+        });
+
+
+        // Skip directory creation if it already exists
+        if (in_array($directory, $directories, true)) {
+            return true;
+        }
+
+        return ftp_mkdir($connection, $directory);
     }
 
     /**
