@@ -2,64 +2,57 @@
 
 - [Introduction](#introduction)
 - [Découpage du projet](#découpage-du-projet)
-- [Comment faire les commits](#comment-faire-les-commits)
+- [How to make the commits](#comment-faire-les-commits)
 
 ## Introduction
 
-Pour participer au projet il faut:
+To participate in the project you must:
 
-- Fork le projet afin qu'il soit parmi les répertoires de votre compte github ex :`https://github.com/votre-compte/app`
-- Cloner le projet depuis votre compte github `git clone https://github.com/votre-crompte/app`
-- Créer un branche qui aura pour nom le résumé de votre modification `git branch branche-de-vos-traveaux`
-- Faire une publication sur votre dépot `git push origin branche-de-vos-traveaux`
-- Enfin faire un [pull-request](https://www.thinkful.com/learn/github-pull-request-tutorial/Keep-Tabs-on-the-Project#Time-to-Submit-Your-First-PR)
+- Fork the project so that it is among the directories of your github ex account: `https://github.com/your-account/app`
+- Clone the project from your github `git clone account https://github.com/your-account/app`
+- Create a branch whose name will be the summary of your change `git branch branch-of-your-works`
+- Make a publication on your depot `git push origin branch-of-your-works`
+- Finally make a [pull-request](https://www.thinkful.com/learn/github-pull-request-tutorial/Keep-Tabs-on-the-Project#Time-to-Submit-Your-First-PR)
 
 
-## Découpage du projet
+## Cutting the project
 
-Le projet Bow framework est découper en sous projet. Alors chaque participant poura participer sur la section dans laquelle il se sens le mieux.
+The Bow framework project is split into a subproject. Then each participant will be able to participate on the section in which he feels the best.
 
-Imaginons que vous etes plus confortable avec la construction des Routing. Il suffit de vous concentrer sur `src/Routing`. Notez que les sections ont faire pour être indépendant et donc possède le propre configuration.
+Imagine that you are more comfortable with the construction of Routing. Just focus on `src/Routing`. Note that the sections have to be independent and therefore have the own configuration.
 
-## Comment faire les commits
+## How to make the commits
 
-Les commits permettent de valider votre modification. Mais dans le projet Bow, il y a une façon d'écrire le message de commit. Prenons un exemple, vous avez travailler sur la section `Session` et vous voulez valider vos modification.
+Commits validate your change. But in the Bow project, there is a way to write the commit message. For example, you have worked on the `Session` section and you want to validate your changes.
 
-Pour le faire regardez un peu la nomenclature d'un message de commit:
+To do it look a bit the nomenclature of a commit message:
 
 ```sh
 git commit
 ```
 
-Dans votre éditeur:
+In your editor:
 
 ```
-[nom-de-la-section] message de commit
+[nom-de-la-section] message
 
 Description
 ```
 
-Dans notre exemple précédant nous allons donc faire:
+In our previous example we will do:
 
 ```
-git commit -m "[session] message de modification"
+git commit -m "[session] change message"
 ```
 
-La modification peut aussi affecture un element dans un section:
+The modification can also read an element in a section:
 
 ```
 git commit -m "[http:request] bug fix #40"
 ```
 
-Dans le cas ou votre modification affect plusieur section ? Vous donnez un message et un description des modifications sous forme de liste à puce.
-
-## Auteurs
-
-Liste des contributeurs:
-
-- Franck Dakia <dakiafranck@gmail.com> [@franck_dakia](https://twitter.com/franck_dakia)
-- Ayiyikoh <fablab@ayiyikoh.org> [@ayiyikoh](https://twitter.com/ayiyikoh) hashtag: __#GoAyiyikoh__
+In case your modification affect more section? You give a message and a description of the changes as a smart list.
 
 ## Contact
 
-SVP s'il y a un bogue sur le projet veuillez me contacter par email ou laissez moi un message sur le [slack](https://bowphp.slack.com).
+Please, if there is a bug on the project please contact me by email or leave me a message on the [slack](https://bowphp.slack.com).

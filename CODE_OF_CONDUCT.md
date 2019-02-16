@@ -1,6 +1,6 @@
-Le code de conduite de Bow est dérivé du code de conduite Ruby. Toute violation du code de conduite peut être signalée à Franck Dakia (dakiafranck@gmail.com).
+Bow's code of conduct is derived from the Ruby Code of Conduct. Any breach of the code of conduct may be reported to Franck DAKIA (dakiafranck@gmail.com).
 
-- Les participants seront tolérants vis-à-vis des points de vue opposés.
-- Les participants doivent s'assurer que leur langage et leurs actions sont exempts d'attaques personnelles et de remarques personnelles dénigrantes.
-- En interprétant les mots et les actions des autres, les participants doivent toujours assumer de bonnes intentions.
-- Un comportement qui peut raisonnablement être considéré comme du harcèlement ne sera pas toléré.
+- Participants will be tolerant of opposing points of view.
+- Participants must ensure that their language and actions are free from personal attacks and derogatory personal remarks.
+- By interpreting the words and actions of others, participants must always assume good intentions.
+- Behavior that can reasonably be considered harassment will not be tolerated.
