@@ -5,29 +5,37 @@ namespace Bow\Http\Client;
 class HttpClient
 {
     /**
+     * The attach file collection
+     *
      * @var array
      */
     private $attach = [];
 
     /**
+     * The curl instance
+     *
      * @var Resource
      */
     private $ch;
 
     /**
+     * The base url
+     *
      * @var string
      */
     private $url;
 
     /**
-     * Constructeur d'instance.
+     * HttpClient Constructor.
      *
      * @param string $url
+     *
+     * @return void
      */
     public function __construct($url = null)
     {
         if (!function_exists('curl_init')) {
-            throw new \BadFunctionCallException('Installer la librairie cURL de php.');
+            throw new \BadFunctionCallException('cURL php is require.');
         }
 
         if (is_string($url)) {
@@ -42,6 +50,7 @@ class HttpClient
      *
      * @param  string $url
      * @param  array  $data
+     *
      * @return Parser
      */
     public function get($url, array $data = [])
@@ -82,10 +91,11 @@ class HttpClient
     }
 
     /**
-     * make put requete
+     * Make put requete
      *
      * @param  string $url
      * @param  array  $data
+     *
      * @return Parser
      */
     public function put($url, array $data = [])
@@ -100,8 +110,11 @@ class HttpClient
     }
 
     /**
-     * @param $attach
-     * @return $this
+     * Attach new file
+     *
+     * @param string $attach
+     *
+     * @return mixed
      */
     public function addAttach($attach)
     {
@@ -112,6 +125,8 @@ class HttpClient
      * Reset alway connection
      *
      * @param string $url
+     *
+     * @return void
      */
     private function resetAndAssociateUrl($url)
     {
@@ -121,7 +136,11 @@ class HttpClient
     }
 
     /**
+     * Add field
+     *
      * @param array $data
+     *
+     * @return void
      */
     private function addFields(array $data)
     {
