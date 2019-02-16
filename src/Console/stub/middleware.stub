@@ -12,6 +12,7 @@ class {className}
      * @param Request $request
      * @param callable $next
      * @param array $args
+     * 
      * @return mixed
      */
     public function process(Request $request, callable $next, array $args = [])

@@ -8,7 +8,7 @@ use Bow\Http\Request;
 class {className} extends Controller
 {
     /**
-     * Point d'entré
+     * Start point
      *
      * GET {prefix}
      *

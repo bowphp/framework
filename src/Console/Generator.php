@@ -2,8 +2,10 @@
 
 namespace Bow\Console;
 
-class GeneratorCommand
+class Generator
 {
+    use ConsoleInformation;
+    
     /**
      * The base directory where that are going to generate
      *
