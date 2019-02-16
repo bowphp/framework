@@ -72,6 +72,8 @@ class Temporary
         $this->close();
 
         $this->lock_filename = $lock_filename;
+
+        $this->open();
     }
 
     /**

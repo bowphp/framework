@@ -18,6 +18,7 @@ class S3Service implements ServiceInterface
      * S3Service constructor
      *
      * @param array $config
+     * @return void
      */
     private function __consturct(array $config)
     {
@@ -30,8 +31,10 @@ class S3Service implements ServiceInterface
      * S3Service Configuration
      *
      * @param array $config
+     *
+     * @return S3Service
      */
-    public static function config(array $config)
+    public static function configure(array $config)
     {
         if (is_null(static::$instance)) {
             static::$instance = new static($config);
@@ -50,13 +53,13 @@ class S3Service implements ServiceInterface
         return static::$instance;
     }
 
-
     /**
      * Function to upload a file
      *
      * @param  UploadFile  $file
      * @param  string  $location
      * @param  array   $option
+     *
      * @return mixed
      * @throws InvalidArgumentException
      */

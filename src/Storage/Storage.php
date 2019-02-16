@@ -34,6 +34,7 @@ class Storage
      * Mount disk
      *
      * @param string $mount
+     *
      * @return MountFilesystem
      * @throws MountDiskNotFoundException
      */

@@ -263,6 +263,8 @@ class MountFilesystem implements FilesystemInterface
      *
      * @param string $target
      * @param string $source
+     *
+     * @return void
      */
     public function move($target, $source)
     {
