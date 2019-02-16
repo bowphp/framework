@@ -9,11 +9,15 @@ use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 class TestCase extends PHPUnitTestCase
 {
     /**
+     * The request attachment collection
+     *
      * @var array
      */
     private $attach = [];
 
     /**
+     * The base url
+     *
      * @var string
      */
     protected $url = '';
