@@ -5,7 +5,7 @@ namespace Bow\Router;
 use Bow\Application\Application;
 use Bow\Support\Capsule;
 
-class Rest
+class Resource
 {
     /**
      * Application instance

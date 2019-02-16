@@ -305,17 +305,17 @@ class Actionner
                 continue;
             }
 
-            $contructor = $class->getName();
+            $constructor = $class->getName();
 
-            if (! class_exists($contructor, true)) {
+            if (! class_exists($constructor, true)) {
                 continue;
             }
 
-            if (!in_array(strtolower($contructor), $this->getInjectorExceptedType())) {
-                if (method_exists($contructor, 'getInstance')) {
-                    $params[] = $contructor::getInstance();
+            if (!in_array(strtolower($constructor), $this->getInjectorExceptedType())) {
+                if (method_exists($constructor, 'getInstance')) {
+                    $params[] = $constructor::getInstance();
                 } else {
-                    $params[] = new $contructor();
+                    $params[] = new $constructor();
                 }
             }
         }

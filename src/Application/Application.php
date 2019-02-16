@@ -9,7 +9,7 @@ use Bow\Http\Exception\HttpException;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Router\Exception\RouterException;
-use Bow\Router\Rest;
+use Bow\Router\Resource;
 use Bow\Router\Route;
 use Bow\Support\Capsule;
 
@@ -638,7 +638,7 @@ class Application
         // Normalize url
         $url = preg_replace('/\/+$/', '', $url);
 
-        Rest::make($url, $controller, $where, $ignore_method);
+        Resource::make($url, $controller, $where, $ignore_method);
 
         return $this;
     }
