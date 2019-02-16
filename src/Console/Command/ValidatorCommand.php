@@ -2,7 +2,8 @@
 
 namespace Bow\Console\Command;
 
-use Bow\Console\GeneratorCommand;
+use Bow\Console\Color;
+use Bow\Console\Generator;
 
 class ValidatorCommand extends AbstractCommand
 {
@@ -15,22 +16,22 @@ class ValidatorCommand extends AbstractCommand
      */
     public function generate($validator)
     {
-        $generator = new GeneratorCommand(
-            $this->getValidationDirectory(),
+        $generator = new Generator(
+            $this->setting->getValidationDirectory(),
             $validator
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mThe validator already exists.\033[00m\n";
+            echo Color::red('The validator already exists.');
 
             exit(0);
         }
 
         $generator->write('validator', [
-            'baseNamespace' => $this->namespaces['validator']
+            'baseNamespace' => $this->namespaces['validation']
         ]);
 
-        echo "\033[0;32mThe validator was created well.\033[00m\n";
+        echo Color::green('The validator was created well.');
 
         exit(0);
     }

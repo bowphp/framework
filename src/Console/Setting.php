@@ -409,7 +409,7 @@ class Setting
      */
     public function getValidationDirectory()
     {
-        return $this->migration_directory;
+        return $this->validation_directory;
     }
 
     /**

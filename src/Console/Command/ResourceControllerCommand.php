@@ -85,7 +85,7 @@ class ResourceControllerCommand extends AbstractCommand
             'baseNamespace' => $this->namespaces['controller']
         ]);
 
-        echo "\033[0;32mThe controller Rest was well created.\033[00m\n";
+        echo Color::green('The controller Rest was well created.');
     }
 
     /**

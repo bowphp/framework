@@ -2,6 +2,7 @@
 
 namespace Bow\Console\Command;
 
+use Bow\Console\Color;
 use Bow\Console\Generator;
 
 class ModelCommand extends AbstractCommand

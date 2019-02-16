@@ -2,6 +2,7 @@
 
 namespace Bow\Console\Command;
 
+use Bow\Console\Color;
 use Bow\Console\Generator;
 
 class ConfigurationCommand extends AbstractCommand
@@ -21,17 +22,17 @@ class ConfigurationCommand extends AbstractCommand
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mThe configuration already exists.\033[00m\n";
+            echo Color::red('The configuration already exists.');
 
-            exit 0;
+            exit(0);
         }
 
         $generator->write('configuration', [
             'baseNamespace' => $this->namespaces['configuration']
         ]);
 
-        echo "\033[0;32mThe configuration was well created.\033[00m\n";
+        echo Color::green('The configuration was well created.');
 
-        exit 0;
+        exit(0);
     }
 }
