@@ -51,36 +51,7 @@ class ResourceControllerCommand extends AbstractCommand
             $this->createDefaultView($model, $filename);
         }
 
-        // We check if --model flag exists
-        // When that not exists we make automaticly filename generation
-        if (! $options->has('--model')) {
-            $prefix = Str::plurial(Str::snake($prefix));
-
-            $this->createResourceController(
-                $generator,
-                $prefix,
-                $controller,
-                $model_namespace
-            );
-
-            exit(0);
-        }
-
-        // When --model flag exists
-        if ($this->arg->readline("Do you want me to create a model?")) {
-            if ($options->get('--model') === true) {
-                echo "\033[0;32;7mThe name of the unspecified model --model=model_name.\033[00m\n";
-
-                exit(1);
-            }
-
-            $model = $options->get('--model');
-        }
-
-        // We format the model namespace
-        $model_namespace = sprintf("use %s\\$s;\n", $this->namespaces['model'], ucfirst($model));
-
-        $prefix = '/'.strtolower(trim(Str::plurial(Str::snake($model)), '/'));
+        $prefix = Str::plurial(Str::snake($prefix));
 
         $this->createResourceController(
             $generator,
@@ -89,11 +60,7 @@ class ResourceControllerCommand extends AbstractCommand
             $model_namespace
         );
 
-        $this->model($model);
-
-        if ($this->readline('Do you want me to create a migration for this model? ')) {
-            $this->make('create_'.strtolower(Str::plurial(Str::snake($model))).'_table');
-        }
+        exit(0);
     }
 
     /**

@@ -57,7 +57,7 @@ class Console
      *
      * @var array
      */
-    const COMMAND = ['add', 'migration', 'run', 'generate', 'seed', 'help', 'launch'];
+    const COMMAND = ['add', 'migration', 'run', 'generate', 'seed', 'help', 'launch', 'clear'];
 
     /**
      * The action list
@@ -149,9 +149,7 @@ class Console
     private function call($command)
     {
         if (!in_array($command, static::COMMAND)) {
-            echo Color::red("The command '$command' not exists !\n");
-
-            $this->throwFailsCommand('help');
+            $this->throwFailsCommand("The command '$command' not exists.", 'help');
         }
 
         if (!$this->arg->getParameter('action')) {
@@ -237,6 +235,21 @@ class Console
      */
     private function seed()
     {
+        $action = $this->arg->getParameter('action');
+
+        if (!in_array($action, ['all', 'table'])) {
+            echo Color::red("This action is not exists");
+
+            $this->throwFailsCommand('help seed');
+        }
+
+        if ($action == 'all') {
+            if ($this->arg->getParameter('target') != null) {
+                $this->throwFailsAction('Bad command', 'help seed');
+            }
+        }
+
+        $this->command->call($action, 'seeder', $this->arg->getParameter('target'));
     }
 
     /**
@@ -282,25 +295,7 @@ class Console
      */
     private function clear()
     {
-        $this->command->call('clear', $this->arg->getParameter('action'));
-    }
-
-    /**
-     * Delete file
-     *
-     * @param  string $dirname
-     *
-     * @return void
-     */
-    private function unlinks($dirname)
-    {
-        $glob = glob($dirname);
-
-        foreach ($glob as $item) {
-            if (!preg_match('/.gitkeep/', $item)) {
-                @unlink($item);
-            }
-        }
+        $this->command->call('make', 'clear', $this->arg->getParameter('action'));
     }
 
     /**

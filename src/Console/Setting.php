@@ -347,7 +347,7 @@ class Setting
      *
      * @return string
      */
-    public function getVarDirectory($dirname)
+    public function getVarDirectory()
     {
         return $this->var_directory;
     }

@@ -16,7 +16,7 @@ class ValidatorCommand extends AbstractCommand
     public function generate($validator)
     {
         $generator = new GeneratorCommand(
-            $this->dirname,
+            $this->getValidationDirectory(),
             $validator
         );
 
@@ -27,7 +27,7 @@ class ValidatorCommand extends AbstractCommand
         }
 
         $generator->write('validator', [
-            'baseNamespace' => $this->command->getNamespace('validator')
+            'baseNamespace' => $this->namespaces['validator']
         ]);
 
         echo "\033[0;32mThe validator was created well.\033[00m\n";

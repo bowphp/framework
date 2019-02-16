@@ -37,56 +37,59 @@ class SeederCommand extends AbstractCommand
     }
 
     /**
-     * Make Seeder
+     * Launch all seeding
      *
      * @return void
      */
-    public function make()
+    public function all()
     {
-        $action = $this->arg->getParameter('action');
+        $seeds_filenames = glob($this->setting->getSeederDirectory().'/*_seeder.php');
 
-        if (!in_array($action, ['table', 'all'])) {
-            $this->throwFailsAction('This action is not exists', 'help seed');
+        $this->make($seeds_filenames);
+    }
+
+    /**
+     * Launch targeted seeding
+     *
+     * @param string $table_name
+     *
+     * @return void
+     */
+    public function table($table_name)
+    {
+        $table_name = trim($table_name);
+
+        if (is_null($table_name)) {
+            echo Color::red('Specify the seeder table name');
 
             $this->throwFailsCommand('help seed');
         }
 
-        if ($action == 'all') {
-            if ($this->arg->getParameter('target') != null) {
-                $this->throwFailsAction('Bad command', 'help seed');
-            }
+        if (!file_exists($this->setting->getSeederDirectory()."/{$table_name}_seeder.php")) {
+            echo Color::red("Seeder $table_name not exists.");
+
+            exit(1);
         }
 
-        $seeds_filenames = [];
+        $this->make([
+            $this->setting->getSeederDirectory()."/{$table_name}_seeder.php"
+        ]);
+    }
 
-        if ($action == 'all') {
-            $seeds_filenames = glob($this->setting->getSeederDirectory().'/*_seeder.php');
-        } elseif ($action == 'table') {
-            $table_name = trim($this->arg->getParameter('target', null));
-
-            if (is_null($table_name)) {
-                echo Color::red('Specify the seeder table name');
-
-                $this->throwFailsCommand('help seed');
-            }
-
-            if (!file_exists($this->setting->getSeederDirectory()."/{$table_name}_seeder.php")) {
-                echo Color::red("Seeder $table_name not exists.");
-
-                exit(1);
-            }
-
-            $seeds_filenames = [
-                $this->setting->getSeederDirectory()."/{$table_name}_seeder.php"
-            ];
-        }
-
+    /**
+     * Make Seeder
+     *
+     * @return void
+     */
+    private function make($seeds_filenames)
+    {
         $seed_collection = [];
 
         $faker = \Faker\Factory::create();
 
         foreach ($seeds_filenames as $filename) {
             $seeds = include $filename;
+
             $seed_collection = array_merge($seeds, $seed_collection);
         }
 

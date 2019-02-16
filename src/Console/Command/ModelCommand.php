@@ -21,7 +21,7 @@ class ModelCommand extends AbstractCommand
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;33mThe model already exists.\033[00m\n";
+            echo Color::red('The model already exists.');
 
             exit(1);
         }
@@ -30,12 +30,6 @@ class ModelCommand extends AbstractCommand
             'baseNamespace' => $this->namespaces['model']
         ]);
 
-        echo "\033[0;32mThe model was well created.\033[00m\n";
-
-        if ($this->arg->options('-m')) {
-            $this->migration->add('create_'.strtolower($model).'_table');
-        }
-
-        exit 0;
+        echo Color::green("The model was well created.");
     }
 }

@@ -2,52 +2,97 @@
 
 namespace Bow\Console\Command;
 
+use Bow\Console\Color;
+use Bow\Console\ConsoleInformation;
+
 class ClearCommand extends AbstractCommand
 {
+    use ConsoleInformation;
+    
     /**
      * Clear cache
      *
-     * @param string $target
+     * @param string $action
      *
      * @return void
      */
-    public function clear($target)
+    public function make($action)
     {
-        if (in_array($target, ['view', 'cache', 'session', 'log', 'all'])) {
-            $this->throwFailsCommand('', 'clear help');
+        if (!in_array($action, ['view', 'cache', 'session', 'log', 'all'])) {
+            $this->throwFailsCommand('Clear target not valid', 'clear help');
         }
 
-        if ($target == 'all') {
-            $this->unlinks($this->setting->getVarDirectory().'/cache/bow');
-            $this->unlinks($this->setting->getVarDirectory().'/cache/view');
-            $this->unlinks($this->setting->getVarDirectory().'/cache/session');
-            $this->unlinks($this->setting->getVarDirectory().'/cache/logs');
+        $this->clear($action);
+
+        echo Color::green("$action cache clear.");
+    }
+
+    /**
+     * Clear action
+     *
+     * @param string $action
+     *
+     * @return void
+     */
+    private function clear($action)
+    {
+        if ($action == 'all') {
+            $this->unlinks($this->setting->getVarDirectory().'/view/*/*');
+            foreach (glob($this->setting->getVarDirectory().'/view/*') as $dirname) {
+                @rmdir($dirname);
+            }
+
+            $this->unlinks($this->setting->getVarDirectory().'/cache/*');
+            $this->unlinks($this->setting->getVarDirectory().'/session/*');
+            $this->unlinks($this->setting->getVarDirectory().'/logs/*');
 
             return;
         }
 
-        if ($target == 'view') {
-            $this->unlinks($this->setting->getVarDirectory().'/cache/view');
+        if ($action == 'view') {
+            $this->unlinks($this->setting->getVarDirectory().'/view/*/*');
+
+            foreach (glob($this->setting->getVarDirectory().'/view/*') as $dirname) {
+                @rmdir($dirname);
+            }
 
             return;
         }
 
-        if ($target == 'cache') {
-            $this->unlinks($this->setting->getVarDirectory().'/cache/cache');
+        if ($action == 'cache') {
+            $this->unlinks($this->setting->getVarDirectory().'/cache/*');
 
             return;
         }
 
-        if ($target == 'session') {
-            $this->unlinks($this->setting->getVarDirectory().'/cache/session');
+        if ($action == 'session') {
+            $this->unlinks($this->setting->getVarDirectory().'/session/*');
 
             return;
         }
 
-        if ($target == 'log') {
-            $this->unlinks($this->setting->getVarDirectory().'/cache/logs');
+        if ($action == 'log') {
+            $this->unlinks($this->setting->getVarDirectory().'/logs/*');
 
             return;
+        }
+    }
+
+    /**
+     * Delete file
+     *
+     * @param  string $dirname
+     *
+     * @return void
+     */
+    private function unlinks($dirname)
+    {
+        $glob = glob($dirname);
+
+        foreach ($glob as $item) {
+            if (!preg_match('/.gitkeep/', $item)) {
+                @unlink($item);
+            }
         }
     }
 }
