@@ -63,7 +63,6 @@ class Storage
      * @param string $service
      *
      * @return mixed
-     * @throws ServiceNotFoundException
      */
     public static function service(string $service)
     {

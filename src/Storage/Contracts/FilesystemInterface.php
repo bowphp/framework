@@ -75,10 +75,9 @@ interface FilesystemInterface
      *
      * @param  string $dirname
      * @param  int    $mode
-     * @param  bool   $recursive
      * @return boolean
      */
-    public function makeDirectory($dirname, $mode = 0777, $recursive = false);
+    public function makeDirectory($dirname, $mode = 0777);
 
     /**
      * Get file content
