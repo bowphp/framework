@@ -175,15 +175,15 @@ abstract class Migration
      */
     private function executeSqlQuery($sql)
     {
-        echo "\033[0;32m▶ \033[00m";
-
-        $result = (bool) Database::statement($sql);
-
-        if ($result) {
-            echo "\033[0;31m▶ \033[00m";
+        try {
+            $result = (bool) Database::statement($sql);
+        } catch (\Exception $e) {
+            echo "\n\033[0;31m▶\033[00m $sql\n";
+            
+            throw $e;
         }
 
-        echo "$sql\n";
+        echo "\033[0;32m▶\033[00m $sql\n";
 
         return $this;
     }
