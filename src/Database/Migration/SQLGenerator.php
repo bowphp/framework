@@ -181,8 +181,8 @@ class SQLGenerator
      */
     public function addTimestamps()
     {
-        $this->addColumn('created_at', 'datetime');
-        $this->addColumn('updated_at', 'datetime');
+        $this->addColumn('created_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
+        $this->addColumn('updated_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
 
         return $this;
     }
