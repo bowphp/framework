@@ -1283,7 +1283,7 @@ if (!function_exists('auth')) {
     }
 }
 
-if (!function_exists('log')) {
+if (!function_exists('logger')) {
     /**
      * Log error message
      *
@@ -1293,13 +1293,13 @@ if (!function_exists('log')) {
      *
      * @return bool
      */
-    function log($level, $message, array $context = [])
+    function logger($level, $message, array $context = [])
     {
         if (!in_array($level, ['info', 'warning', 'error', 'critical', 'debug'])) {
             return false;
         }
 
-        return app('logger')->${$level}($message, $context);
+        return app('logger')->$level($message, $context);
     }
 }
 
