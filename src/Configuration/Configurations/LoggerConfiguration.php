@@ -16,14 +16,14 @@ class LoggerConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('logger', function () use ($config) {
-            if (app_env('APP_ENV') == 'development') {
-                $this->loadFrontLogger();
-            }
-
-            return $this->loadFileLogger(
-                $config['storage.log'],
+            $monolog = $this->loadFileLogger(
+                realpath($config['storage.log']),
                 $config['app.name'] ?? 'Bow'
             );
+
+            $this->loadFrontLogger($monolog);
+
+            return $monolog;
         });
     }
 
@@ -38,15 +38,33 @@ class LoggerConfiguration extends Configuration
     /**
      * Loader view logger
      *
+     * @param Logger $monolog
      * @return void
      */
-    private function loadFrontLogger()
+    private function loadFrontLogger(Logger $monolog)
     {
         $whoops = new \Whoops\Run;
 
-        $whoops->pushHandler(
-            new \Whoops\Handler\PrettyPageHandler
-        );
+        if (app_env('APP_ENV') == 'development') {
+            $whoops->pushHandler(
+                new \Whoops\Handler\PrettyPageHandler
+            );
+        }
+
+        if (class_exists(\App\ErrorHandle::class)) {
+            $handler = new \Whoops\Handler\CallbackHandler(
+                function ($exception, $inspector, $run) use ($monolog) {
+                    $monolog->error($exception->getMessage(), $exception->getTrace());
+
+                    return call_user_func_array(
+                        [new \App\ErrorHandle, 'handle'],
+                        [$exception]
+                    );
+                }
+            );
+
+            $whoops->pushHandler($handler);
+        }
 
         $whoops->register();
     }
