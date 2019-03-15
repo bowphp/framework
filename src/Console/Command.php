@@ -24,6 +24,7 @@ class Command extends AbstractCommand
         'validator' => \Bow\Console\Command\ValidatorCommand::class,
         'key' => \Bow\Console\Command\GenerateKeyCommand::class,
         'clear' => \Bow\Console\Command\ClearCommand::class,
+        'service' => \Bow\Console\Command\ServiceCommand::class
     ];
 
     /**

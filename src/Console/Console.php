@@ -81,7 +81,7 @@ class Console
         $this->arg = new ArgOption;
 
         if ($this->arg->getParameter('trash')) {
-            $this->throwFailsCommand('help');
+            $this->throwFailsCommand('Bad command usage', 'help');
         }
 
         $this->setting = $setting;
@@ -219,11 +219,9 @@ class Console
         $action = $this->arg->getParameter('action');
 
         if (!in_array($action, static::ACTION)) {
-            echo Color::red("This action is not exists");
-
-            $this->throwFailsCommand('help create');
+            $this->throwFailsCommand('This action is not exists', 'help add');
         }
-
+        
         $this->command->call('generate', $action, $this->arg->getParameter('target'));
     }
 
@@ -238,14 +236,12 @@ class Console
         $action = $this->arg->getParameter('action');
 
         if (!in_array($action, ['all', 'table'])) {
-            echo Color::red("This action is not exists");
-
-            $this->throwFailsCommand('help seed');
+            $this->throwFailsCommand('This action is not exists', 'help seed');
         }
 
         if ($action == 'all') {
             if ($this->arg->getParameter('target') != null) {
-                $this->throwFailsAction('Bad command', 'help seed');
+                $this->throwFailsAction('Bad command usage', 'help seed');
             }
         }
 
@@ -295,7 +291,11 @@ class Console
      */
     private function clear()
     {
-        $this->command->call('make', 'clear', $this->arg->getParameter('action'));
+        $this->command->call(
+            'make',
+            'clear',
+            $this->arg->getParameter('action')
+        );
     }
 
     /**
@@ -308,7 +308,7 @@ class Console
     {
         if ($command === null) {
             $usage = <<<USAGE
-Bow usage: php bow command:action [name]
+Bow tqsk runner usage: php bow command:action [name] --option
 
 \033[0;32mCOMMAND\033[00m:
 

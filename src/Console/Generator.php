@@ -56,11 +56,7 @@ class Generator
     {
         $this->filenameIsValide($this->name);
 
-        if (file_exists($this->getPath())) {
-            return true;
-        }
-
-        return false;
+        return file_exists($this->getPath()) || is_dir($this->base_dir."/".$this->name);
     }
 
     /**
