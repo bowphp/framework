@@ -132,7 +132,6 @@ class Setting
      * Command constructor.
      *
      * @param string $dirname
-     *
      * @return void
      */
     public function __construct($dirname)
@@ -142,7 +141,6 @@ class Setting
 
     /**
      * The arg option
-     *
      * @return ArgOption
      */
     public function getArgOption()
@@ -154,7 +152,6 @@ class Setting
      * Set the bootstrap files
      *
      * @param  array $bootstrap
-     *
      * @return void
      */
     public function setBootstrap(array $bootstrap)
@@ -166,7 +163,6 @@ class Setting
      * Set the server file
      *
      * @param string $serve_filename
-     *
      * @return void
      */
     public function setServerFilename($serve_filename)
@@ -178,7 +174,6 @@ class Setting
      * Set the public directory
      *
      * @param string $public_directory
-     *
      * @return void
      */
     public function setPublicDirectory($public_directory)
@@ -189,140 +184,128 @@ class Setting
     /**
      * Set the config directory
      *
-     * @param string $dirname
-     *
+     * @param string $config_directory
      * @return void
      */
-    public function setConfigDirectory($dirname)
+    public function setConfigDirectory($config_directory)
     {
-        $this->config_directory = $dirname;
+        $this->config_directory = $config_directory;
     }
 
     /**
      * Set the package configuration directory
      *
-     * @param string $dirname
-     *
+     * @param string $configuration_directory
      * @return void
      */
-    public function setPackageDirectory($dirname)
+    public function setPackageDirectory($configuration_directory)
     {
-        $this->configuration_directory = $dirname;
+        $this->configuration_directory = $configuration_directory;
     }
 
     /**
      * Set the component directory
      *
-     * @param string $dirname
-     *
+     * @param string $component_directory
      * @return void
      */
-    public function setComponentDirectory($dirname)
+    public function setComponentDirectory($component_directory)
     {
-        $this->component_directory = $dirname;
+        $this->component_directory = $component_directory;
     }
 
     /**
      * Set the migration directory
      *
-     * @param string $dirname
-     *
+     * @param string $migration_directory
      * @return void
      */
-    public function setMigrationDirectory($dirname)
+    public function setMigrationDirectory($migration_directory)
     {
-        $this->migration_directory = $dirname;
+        $this->migration_directory = $migration_directory;
     }
 
     /**
      * Set the seeder directory
      *
-     * @param string $dirname
-     *
+     * @param string $seeder_directory
      * @return void
      */
-    public function setSeederDirectory($dirname)
+    public function setSeederDirectory($seeder_directory)
     {
-        $this->seeder_directory = $dirname;
+        $this->seeder_directory = $seeder_directory;
     }
 
     /**
      * Set the controller directory
      *
-     * @param string $dirname
-     *
+     * @param string $controller_directory
      * @return void
      */
-    public function setControllerDirectory($dirname)
+    public function setControllerDirectory($controller_directory)
     {
-        $this->controller_directory = $dirname;
+        $this->controller_directory = $controller_directory;
     }
 
     /**
      * Set the validation directory
      *
-     * @param string $dirname
-     *
+     * @param string $validation_directory
      * @return void
      */
-    public function setValidationDirectory($dirname)
+    public function setValidationDirectory($validation_directory)
     {
-        $this->validation_directory = $dirname;
+        $this->validation_directory = $validation_directory;
     }
 
     /**
      * Set the middleware directory
      *
-     * @param string $dirname
-     *
+     * @param string $middleware_directory
      * @return void
      */
-    public function setMiddlewareDirectory($dirname)
+    public function setMiddlewareDirectory($middleware_directory)
     {
-        $this->middleware_directory = $dirname;
+        $this->middleware_directory = $middleware_directory;
     }
 
     /**
      * Set the application directory
      *
-     * @param string $dirname
-     *
+     * @param string $app_directory
      * @return void
      */
-    public function setApplicationDirectory($dirname)
+    public function setApplicationDirectory($app_directory)
     {
-        $this->app_directory = $dirname;
+        $this->app_directory = $app_directory;
     }
 
     /**
      * Set the model directory
      *
-     * @param string $dirname
-     *
+     * @param string $model_directory
      * @return void
      */
-    public function setModelDirectory($dirname)
+    public function setModelDirectory($model_directory)
     {
-        $this->model_directory = $dirname;
+        $this->model_directory = $model_directory;
     }
 
     /**
      * Set the var directory
      *
-     * @param string $dirname
-     *
+     * @param string $var_directory
      * @return void
      */
-    public function setVarDirectory($dirname)
+    public function setVarDirectory($var_directory)
     {
-        $this->var_directory = $dirname;
+        $this->var_directory = $var_directory;
     }
 
     /**
      * Set the namespaces
      *
      * @param array $namespaces
-     *
      * @return void
      */
     public function setNamespaces(array $namespaces)
@@ -334,7 +317,7 @@ class Setting
 
     /**
      * Get the namespaces
-     *
+     * 
      * @return array
      */
     public function getNamespaces()
@@ -344,7 +327,7 @@ class Setting
 
     /**
      * Get the var directory
-     *
+     * 
      * @return string
      */
     public function getVarDirectory()
@@ -354,7 +337,7 @@ class Setting
 
     /**
      * Get the component directory
-     *
+     * 
      * @return string
      */
     public function getComponentDirectory()
@@ -364,7 +347,7 @@ class Setting
 
     /**
      * Get the config directory
-     *
+     * 
      * @return string
      */
     public function getConfigDirectory()
@@ -374,7 +357,7 @@ class Setting
 
     /**
      * Get the package configuration directory
-     *
+     * 
      * @return string
      */
     public function getPackageDirectory()
@@ -384,7 +367,7 @@ class Setting
 
     /**
      * Get the migration directory
-     *
+     * 
      * @return string
      */
     public function getMigrationDirectory()
@@ -394,7 +377,7 @@ class Setting
 
     /**
      * Get the seeder directory
-     *
+     * 
      * @return string
      */
     public function getSeederDirectory()
@@ -404,7 +387,7 @@ class Setting
 
     /**
      * Get the validation directory
-     *
+     * 
      * @return string
      */
     public function getValidationDirectory()
@@ -414,17 +397,17 @@ class Setting
 
     /**
      * Get the service directory
-     *
+     * 
      * @return string
      */
     public function getServiceDirectory()
     {
-        return $this->configuration_directory;
+        return $this->service_directory;
     }
 
     /**
      * Get the service directory
-     *
+     * 
      * @return string
      */
     public function getMiddlewareDirectory()
@@ -434,7 +417,7 @@ class Setting
 
     /**
      * Get the model directory
-     *
+     * 
      * @return string
      */
     public function getModelDirectory()
@@ -444,7 +427,7 @@ class Setting
 
     /**
      * Get the controller directory
-     *
+     * 
      * @return string
      */
     public function getControllerDirectory()
@@ -454,7 +437,7 @@ class Setting
 
     /**
      * Get the app directory
-     *
+     * 
      * @return string
      */
     public function getApplicationDirectory()
@@ -464,7 +447,7 @@ class Setting
 
     /**
      * Get base directory name
-     *
+     * 
      * @return string
      */
     public function getBaseDirectory()
@@ -474,7 +457,7 @@ class Setting
 
     /**
      * Get the bootstrap files
-     *
+     * 
      * @return array
      */
     public function getBootstrap()
@@ -484,7 +467,7 @@ class Setting
 
     /**
      * Get the local server file
-     *
+     * 
      * @return void
      */
     public function getServerFilename()
@@ -494,7 +477,7 @@ class Setting
 
     /**
      * Get the public base directory
-     *
+     * 
      * @return void
      */
     public function getPublicDirectory()
