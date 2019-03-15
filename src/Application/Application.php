@@ -551,6 +551,12 @@ class Application
         // We apply the 404 error code
         $this->response->status(404);
 
+        if (array_key_exists(404, $this->error_code)) {
+            $response = Actionner::execute($this->error_code[404], []);
+
+            return $this->sendResponse($response);
+        }
+
         if (is_string($this->config['view.404'])) {
             $response = $this->response->render($this->config['view.404']);
 
