@@ -22,8 +22,6 @@ abstract class Migration
     public function __construct()
     {
         $this->adapter = Database::getConnectionAdapter();
-
-        $this->createRepository();
     }
 
     /**
@@ -44,7 +42,6 @@ abstract class Migration
      * Drop table action
      *
      * @param string $table
-     *
      * @return Migration
      */
     final public function drop($table)
@@ -60,7 +57,6 @@ abstract class Migration
      * Drop table if he exists action
      *
      * @param string $table
-     *
      * @return Migration
      */
     final public function dropIfExists($table)
@@ -77,7 +73,6 @@ abstract class Migration
      *
      * @param string  $table
      * @param callable $cb
-     *
      * @return Migration
      */
     final public function create($table, callable $cb)
@@ -94,7 +89,7 @@ abstract class Migration
             $engine = null;
         }
 
-        $sql = sprintf("CREATE TABLE `%s` (%s)%s;", $table, $generator->make(), $engine);
+        $sql = sprintf("CREATE TABLE `%s` (%s) %s;", $table, $generator->make(), $engine);
 
         return $this->executeSqlQuery($sql);
     }
@@ -104,7 +99,6 @@ abstract class Migration
      *
      * @param string $table
      * @param callable $cb
-     *
      * @return Migration
      */
     final public function alter($table, callable $cb)
@@ -124,7 +118,6 @@ abstract class Migration
      * Add SQL query
      *
      * @param string $sql
-     *
      * @return Migration
      */
     final public function addSql($sql)
@@ -136,7 +129,6 @@ abstract class Migration
      * Add SQL query
      *
      * @param string $sql
-     *
      * @return Migration
      */
     final public function renameTable($table, $to)
@@ -156,7 +148,6 @@ abstract class Migration
      * Get prefixed table name
      *
      * @param string $table
-     *
      * @return string
      */
     final public function getTablePrefixed($table)
@@ -170,46 +161,19 @@ abstract class Migration
      * Execute direct sql query
      *
      * @param string $sql
-     *
      * @return Migration
      */
     private function executeSqlQuery($sql)
     {
         try {
             $result = (bool) Database::statement($sql);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             echo "\n\033[0;31m▶\033[00m $sql\n";
-            
-            throw $e;
+            throw $exception;
         }
 
         echo "\033[0;32m▶\033[00m $sql\n";
 
         return $this;
-    }
-
-    /**
-     * Create the migration repository data store.
-     *
-     * @return void
-     */
-    private function createRepository()
-    {
-        // The migrations table is responsible for keeping track of which of the
-        // migrations have actually run for the application. We'll create the
-        // table to hold the migration file's path as well as the batch ID.
-        $generator = new SQLGenerator(null);
-
-        $generator->addColumn('id', 'integer', ['primary' => true]);
-        $generator->addColumn('migration', 'string', ['unique' => true]);
-        $generator->addColumn('batch', 'integer', ['size' => 11, 'default' => 0]);
-
-        $sql = sprintf(
-            'CREATE TABLE IF NOT EXISTS %s (%s)',
-            'bow_migration_registers',
-            $generator->make()
-        );
-
-        Database::statement($sql);
     }
 }

@@ -217,22 +217,69 @@ class SQLGenerator
      *
      * @return SQLGenerator
      */
-    public function addForeign($name, array $attributes)
+    public function addForeign($name, array $attributes = [])
+    {
+        if ($this->scope == 'alter') {
+            $command = 'ADD ';
+        } else {
+            $command = '';
+        }
+
+        $on = '';
+        $references = '';
+
+        if (isset($attributes['on'])) {
+            $on = strtoupper('ON ' .$attributes['on']);
+        }
+
+        if (isset($attributes['references'])) {
+            $references = strtoupper(
+                sprintf(
+                    'REFERENCES %s(%s)',
+                    $attributes['table'],
+                    $attributes['references']
+                )
+            );
+        }
+
+        $sql = sprintf(
+            '%sFOREIGN KEY (`%s`)%s%s',
+            $command,
+            $name,
+            $references,
+            $on
+        );
+
+        $this->sqls[] = $sql;
+
+        return $this;
+    }
+
+
+    /**
+     * Add constraintes
+     *
+     * @param string $name
+     * @param array $attributes
+     *
+     * @return SQLGenerator
+     */
+    public function addConstraint($name, array $attributes = [])
     {
         if ($this->scope == 'alter') {
             $command = 'ADD CONSTRAINT';
         } else {
-            $command = 'CONSTRAINTES';
+            $command = 'CONSTRAINT';
         }
 
         $sql = sprintf(
-            '%s %s FOREIGN KEY (%s) REFERENCES %s(%s) %s',
+            '%s (%s) FOREIGN KEY (`%s`) REFERENCES %s(%s) ON %s',
             $command,
             $name,
             $attributes['target'],
-            $attributes['on'],
+            $attributes['table'],
             $attributes['references'],
-            $attributes['delete'] ?? $attributes['update'] ?? ''
+            strtoupper($attributes['on'])
         );
 
         $this->sqls[] = $sql;
@@ -252,7 +299,7 @@ class SQLGenerator
         $names = (array) $name;
 
         foreach ($names as $name) {
-            $this->sqls[] = sprintf('DROP FOREIGN KEY %s', $name);
+            $this->sqls[] = sprintf('DROP FOREIGN KEY `%s`', $name);
         }
 
         return $this;
@@ -273,7 +320,7 @@ class SQLGenerator
             $command = 'INDEX';
         }
 
-        $this->sqls[] = sprintf('%s %s', $command, $name);
+        $this->sqls[] = sprintf('%s `%s`', $command, $name);
 
         return $this;
     }
@@ -290,7 +337,7 @@ class SQLGenerator
         $names = (array) $name;
 
         foreach ($names as $name) {
-            $this->sqls[] = sprintf('DROP INDEX %s', $name);
+            $this->sqls[] = sprintf('DROP INDEX `%s`', $name);
         }
 
         return $this;
@@ -330,6 +377,7 @@ class SQLGenerator
         $increment = $attributes['increment'] ?? false;
         $nullable = $attributes['nullable'] ?? false;
         $unique = $attributes['unique'] ?? false;
+        $check = $attributes['check'] ?? false;
 
         // String to VARCHAR
         if ($type == 'STRING') {
@@ -372,6 +420,10 @@ class SQLGenerator
             $type = sprintf('%s DEFAULT %s', $type, $default);
         }
 
+        if ($check) {
+            $type = sprintf('%s CHECK (%s)', $type, $check);
+        }
+
         return trim(
             sprintf('%s `%s` %s', $description['command'], $name, $type)
         );
@@ -381,7 +433,6 @@ class SQLGenerator
      * Set the scope
      *
      * @param string $scope
-     *
      * @return SQLGenerator
      */
     public function setScope($scope)

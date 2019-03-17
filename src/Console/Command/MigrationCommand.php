@@ -79,8 +79,8 @@ class MigrationCommand extends AbstractCommand
             $action = 'make'.strtoupper($type);
 
             return $this->$action($current_migrations, $migrations);
-        } catch (\Exception $e) {
-            $this->printExceptionMessage($e);
+        } catch (\Exception $exception) {
+            $this->printExceptionMessage($exception);
         }
     }
 
@@ -101,19 +101,29 @@ class MigrationCommand extends AbstractCommand
         }
 
         foreach ($migrations as $file => $migration) {
-            if (! $this->checkMigrationExistance($migration)) {
-                require $file;
+            if ($this->checkMigrationExistance($migration)) {
+                continue;
+            }
 
+            // Include the migration file
+            require $file;
+
+            try {
                 // Up migration
                 (new $migration)->up();
-
-                // Create new migration status
-                $this->createMigrationStatus($migration);
+            } catch (\Exception $exception) {
+                $this->throwMigrationException($exception, $migration);
             }
+
+            // Create new migration status
+            $this->createMigrationStatus($migration);
         }
 
         foreach ($current_migrations as $migration) {
-            $this->updateMigrationStatus($migration->migration, $migration->batch + 1);
+            $this->updateMigrationStatus(
+                $migration->migration,
+                $migration->batch + 1
+            );
         }
     }
 
@@ -133,16 +143,28 @@ class MigrationCommand extends AbstractCommand
             return;
         }
 
-        foreach ($migrations as $file => $migration) {
-            foreach ($current_migrations as $value) {
-                if (!($value->batch == 1 && $migration == $value->migration)) {
+        // We sort current migration by created date value
+        usort($current_migrations, function ($first, $second) {
+            return strtotime($first->created_at) < strtotime($second->created_at);
+        });
+
+        foreach ($current_migrations as $value) {
+            foreach ($migrations as $file => $migration) {
+                if (!($value->batch == 1
+                    && $migration == $value->migration)
+                ) {
                     continue;
                 }
 
+                // Include the migration file
                 require $file;
 
                 // Rollabck migration
-                (new $migration)->rollback();
+                try {
+                    (new $migration)->rollback();
+                } catch (\Exception $exception) {
+                    $this->throwMigrationException($exception, $migration);
+                }
 
                 break;
             }
@@ -153,10 +175,14 @@ class MigrationCommand extends AbstractCommand
 
         foreach ($current_migrations as $value) {
             if ($value->batch != 1) {
-                $this->updateMigrationStatus($value->migration, $value->batch - 1);
+                $this->updateMigrationStatus(
+                    $value->migration,
+                    $value->batch - 1
+                );
             }
         }
 
+        // Print console information
         echo Color::green('Migration rollback.');
     }
 
@@ -165,7 +191,6 @@ class MigrationCommand extends AbstractCommand
      *
      * @param array $current_migration
      * @param array $migrations
-     *
      * @return void
      */
     private function makeReset($current_migrations, $migrations)
@@ -176,39 +201,66 @@ class MigrationCommand extends AbstractCommand
             return;
         }
 
-        // We sort current migration by batch value
+        // We sort current migration by batch or created date value
         usort($current_migrations, function ($first, $second) {
+            if ($first->batch == $second->batch) {
+                return strtotime($first->created_at) < strtotime($second->created_at);
+            }
+
             return $first->batch > $second->batch;
         });
 
         foreach ($current_migrations as $value) {
             foreach ($migrations as $file => $migration) {
-                if ($value->migration == $migration) {
-                    require $file;
-
-                    (new $migration)->rollback();
-
-                    $this->getMigrationTable()->where('migration', $migration)->delete();
+                if ($value->migration != $migration) {
+                    continue;
                 }
+                
+                // Include the migration file
+                require $file;
+
+                // Rollabck migration
+                try {
+                    (new $migration)->rollback();
+                } catch (\Exception $exception) {
+                    $this->throwMigrationException($exception, $migration);
+                }
+
+                $this->getMigrationTable()->where('migration', $migration)->delete();
             }
         }
 
+        // Print console information
         echo Color::green('Migration reset.');
     }
 
     /**
      * Print the error message
      *
-     * @param \Exception $e
-     *
+     * @param string $message
+     * @param string $migration
      * @return void
      */
-    private function printExceptionMessage(\Exception $e)
+    private function printExceptionMessage($message, $migration)
     {
-        $message = Color::red($e->getMessage());
+        $message = Color::red($message);
         $migration = Color::yellow($migration);
 
         exit(sprintf("\nOn %s\n\n%s\n\n", $migration, $message));
+    }
+
+    /**
+     * Throw migration exception
+     *
+     * @param \Exception $exception
+     * @param string $migration
+     */
+    private function throwMigrationException(\Exception $exception, $migration)
+    {
+        $this->printExceptionMessage(
+            $exception->getMessage(),
+            $migration
+        );
     }
 
     /**
@@ -286,7 +338,9 @@ class MigrationCommand extends AbstractCommand
      */
     private function checkMigrationExistance($migration)
     {
-        $result = $this->getMigrationTable()->where('migration', $migration)->first();
+        $result = $this->getMigrationTable()
+            ->where('migration', $migration)
+            ->first();
 
         return !is_null($result);
     }
@@ -363,7 +417,8 @@ class MigrationCommand extends AbstractCommand
             'table' => $table ?? 'table_name',
             'className' => $filename
         ]);
-
+        
+        // Print console information
         echo Color::green('The migration file has been successfully created')."\n";
     }
 }
