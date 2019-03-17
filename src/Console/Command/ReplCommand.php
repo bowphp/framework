@@ -1,37 +1,54 @@
 <?php
 
+namespace Bow\Console\Command;
 
-class ReplCommand extends AbstratCommand
+use Bow\Console\Color;
+
+class ReplCommand extends AbstractCommand
 {
     /**
      * Launch the REPL console
      *
-     * @return void
+     * @return mixed
      */
-    public function console()
+    public function run()
     {
-        if (is_string($this->arg->getParameter('--include'))) {
-            $this->setBootstrap(
-                array_merge($this->bootstrap, [$this->arg->getParameter('--include')])
+        $include = $this->arg->getParameter('--include');
+
+        if (is_string($include)) {
+            $bootstraps = array_merge(
+                $this->setting->getBootstrap(),
+                (array) $include
             );
+
+            $this->setting->setBootstrap($bootstraps);
         }
 
         if (!class_exists('\Psy\Shell')) {
-            echo 'Please, insall psy/psysh:@stable';
+            echo Color::red('Please, insall psy/psysh:@stable');
 
             return;
         }
 
         $config = new \Psy\Configuration();
 
-        $config->setPrompt('(bow) >> ');
-
         $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
+
+        // Load the custum prompt
+        $prompt = $this->arg->options('--prompt');
+
+        if (is_null($prompt)) {
+            $prompt = '(bow) >>';
+        }
+
+        $prompt = trim($prompt).' ';
+        
+        $config->setPrompt($prompt);
 
         $shell = new \Psy\Shell($config);
 
-        $shell->setIncludes($this->bootstrap);
+        $shell->setIncludes($this->setting->getBootstrap());
 
-        $shell->run();
+        return $shell->run();
     }
 }

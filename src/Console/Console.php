@@ -57,7 +57,9 @@ class Console
      *
      * @var array
      */
-    const COMMAND = ['add', 'migration', 'run', 'generate', 'seed', 'help', 'launch', 'clear'];
+    const COMMAND = [
+        'add', 'migration', 'migrate', 'run', 'generate', 'seed', 'help', 'launch', 'clear'
+    ];
 
     /**
      * The action list
@@ -196,15 +198,42 @@ class Console
      */
     private function migration()
     {
-        $command = $this->arg->getParameter('action');
+        $action = $this->arg->getParameter('action');
 
-        if (!in_array($command, ['migrate', 'rollback', 'reset'])) {
-            $this->throwFailsCommand('This action is not exists!', 'help migrate');
+        if (!in_array($action, ['migrate', 'rollback', 'reset'])) {
+            $this->throwFailsCommand('This action is not exists!', 'help migration');
         }
 
         $target = $this->arg->getParameter('target');
 
-        $this->command->call($command, 'migration', $target);
+        $this->command->call(
+            $action,
+            'migration',
+            $target
+        );
+    }
+
+
+    /**
+     * Launch a migration
+     *
+     * @return void
+     *
+     * @throws \ErrorException
+     */
+    private function migrate()
+    {
+        $action = $this->arg->getParameter('action');
+
+        if (!is_null($action)) {
+            $this->throwFailsCommand('This action is not allow!', 'help migration');
+        }
+
+        $this->command->call(
+            'migrate',
+            'migration',
+            null
+        );
     }
 
     /**
@@ -222,7 +251,11 @@ class Console
             $this->throwFailsCommand('This action is not exists', 'help add');
         }
         
-        $this->command->call('generate', $action, $this->arg->getParameter('target'));
+        $this->command->call(
+            'generate',
+            $action,
+            $this->arg->getParameter('target')
+        );
     }
 
     /**
@@ -245,7 +278,11 @@ class Console
             }
         }
 
-        $this->command->call($action, 'seeder', $this->arg->getParameter('target'));
+        $this->command->call(
+            'seeder',
+            $action,
+            $this->arg->getParameter('target')
+        );
     }
 
     /**
@@ -261,7 +298,11 @@ class Console
             $this->throwFailsCommand('help run');
         }
 
-        $this->command->call('run', $action, $this->arg->getParameter('target'));
+        $this->command->call(
+            'run',
+            $action,
+            $this->arg->getParameter('target')
+        );
     }
 
     /**
@@ -274,12 +315,14 @@ class Console
         $action = $this->arg->getParameter('action');
 
         if (!in_array($action, ['key', 'resource'])) {
-            echo Color::red("Bad $action command");
-
-            exit(1);
+            $this->throwFailsAction('This action is not exists', 'help generate');
         }
 
-        $this->command->call('generate', $action, $this->arg->getParameter('target'));
+        $this->command->call(
+            'generate',
+            $action,
+            $this->arg->getParameter('target')
+        );
     }
 
     /**
@@ -291,10 +334,12 @@ class Console
      */
     private function clear()
     {
+        $target = $this->arg->getParameter('action');
+
         $this->command->call(
             'make',
             'clear',
-            $this->arg->getParameter('action')
+            $target
         );
     }
 
@@ -328,10 +373,11 @@ Bow tqsk runner usage: php bow command:action [name] --option
    \033[0;33madd:seeder\033[00m          Create new table fake seeder
    \033[0;33madd:migration\033[00m       Create a new migration
 
- \033[0;32mMIGRATE\033[00m apply a migration in user model
-   \033[0;33mmigrate\033[00m             Make migration
-   \033[0;33mmigrate:reset\033[00m       Reset all migration
-   \033[0;33mmigrate:rollback\033[00m    Rollback to previous migration
+ \033[0;32mMIGRATION\033[00m apply a migration in user model
+   \033[0;33mmigration:migrate\033[00m   Make migration
+   \033[0;33mmigration:reset\033[00m     Reset all migration
+   \033[0;33mmigration:rollback\033[00m  Rollback to previous migration
+   \033[0;33mmigrate\033[00m             Alias of \033[0;33mmigration:migrate\033[00m
 
  \033[0;32mCLEAR\033[00m for clear cache information [not supported]
    \033[0;33mclear:view\033[00m          Clear view cached information
@@ -398,6 +444,7 @@ U;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:migrate   Make migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:reset     Reset all migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:rollback  Rollback to previous migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate             Alias of \033[0;33mmigration:migrate\033[00m
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration help      For display this
 
 U;
@@ -408,7 +455,7 @@ U;
 \n\033[0;32mrun\033[00m for launch repl and local server\n
     [option]
     run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
-    run:console [--include=filename.php]
+    run:console [--include=filename.php] [--prompt=prompt_name]
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server

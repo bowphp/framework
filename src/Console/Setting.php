@@ -317,7 +317,7 @@ class Setting
 
     /**
      * Get the namespaces
-     * 
+     *
      * @return array
      */
     public function getNamespaces()
@@ -327,7 +327,7 @@ class Setting
 
     /**
      * Get the var directory
-     * 
+     *
      * @return string
      */
     public function getVarDirectory()
@@ -337,7 +337,7 @@ class Setting
 
     /**
      * Get the component directory
-     * 
+     *
      * @return string
      */
     public function getComponentDirectory()
@@ -347,7 +347,7 @@ class Setting
 
     /**
      * Get the config directory
-     * 
+     *
      * @return string
      */
     public function getConfigDirectory()
@@ -357,7 +357,7 @@ class Setting
 
     /**
      * Get the package configuration directory
-     * 
+     *
      * @return string
      */
     public function getPackageDirectory()
@@ -367,7 +367,7 @@ class Setting
 
     /**
      * Get the migration directory
-     * 
+     *
      * @return string
      */
     public function getMigrationDirectory()
@@ -377,7 +377,7 @@ class Setting
 
     /**
      * Get the seeder directory
-     * 
+     *
      * @return string
      */
     public function getSeederDirectory()
@@ -387,7 +387,7 @@ class Setting
 
     /**
      * Get the validation directory
-     * 
+     *
      * @return string
      */
     public function getValidationDirectory()
@@ -397,7 +397,7 @@ class Setting
 
     /**
      * Get the service directory
-     * 
+     *
      * @return string
      */
     public function getServiceDirectory()
@@ -407,7 +407,7 @@ class Setting
 
     /**
      * Get the service directory
-     * 
+     *
      * @return string
      */
     public function getMiddlewareDirectory()
@@ -417,7 +417,7 @@ class Setting
 
     /**
      * Get the model directory
-     * 
+     *
      * @return string
      */
     public function getModelDirectory()
@@ -427,7 +427,7 @@ class Setting
 
     /**
      * Get the controller directory
-     * 
+     *
      * @return string
      */
     public function getControllerDirectory()
@@ -437,7 +437,7 @@ class Setting
 
     /**
      * Get the app directory
-     * 
+     *
      * @return string
      */
     public function getApplicationDirectory()
@@ -447,7 +447,7 @@ class Setting
 
     /**
      * Get base directory name
-     * 
+     *
      * @return string
      */
     public function getBaseDirectory()
@@ -457,7 +457,7 @@ class Setting
 
     /**
      * Get the bootstrap files
-     * 
+     *
      * @return array
      */
     public function getBootstrap()
@@ -467,7 +467,7 @@ class Setting
 
     /**
      * Get the local server file
-     * 
+     *
      * @return void
      */
     public function getServerFilename()
@@ -477,7 +477,7 @@ class Setting
 
     /**
      * Get the public base directory
-     * 
+     *
      * @return void
      */
     public function getPublicDirectory()
