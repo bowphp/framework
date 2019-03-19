@@ -114,6 +114,11 @@ class Console
         if ($this->booted) {
             return;
         }
+        
+        // Boot kernel and console
+        $this->kernel->boot();
+        
+        $this->booted = true;
 
         foreach ($this->setting->getBootstrap() as $item) {
             require $item;
@@ -132,10 +137,6 @@ class Console
         if ($command == 'run') {
             $command = 'launch';
         }
-
-        $this->kernel->boot();
-
-        $this->booted = true;
 
         $this->call($command);
     }
