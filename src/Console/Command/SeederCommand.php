@@ -2,7 +2,9 @@
 
 namespace Bow\Console\Command;
 
+use Bow\Console\Color;
 use Bow\Console\GeneratorCommand;
+use Bow\Database\Database;
 
 class SeederCommand extends AbstractCommand
 {
@@ -83,17 +85,15 @@ class SeederCommand extends AbstractCommand
     {
         $seed_collection = [];
 
-        $faker = \Faker\Factory::create();
-
         foreach ($seeds_filenames as $filename) {
-            $seeds = include $filename;
+            $seeds = require $filename;
 
             $seed_collection = array_merge($seeds, $seed_collection);
         }
 
         try {
-            foreach ($seed_collection as $table => $seeds) {
-                $n = Database::table($table)->insert($seeds);
+            foreach ($seed_collection as $table => $seed) {
+                $n = Database::table($table)->insert($seed);
 
                 echo Color::green("$n seed".($n > 1 ? 's' : '')." on $table table\n");
             }
