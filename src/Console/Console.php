@@ -279,9 +279,12 @@ class Console
             }
         }
 
+        // Set command for understand
+        $command = $action;
+
         $this->command->call(
+            $command,
             'seeder',
-            $action,
             $this->arg->getParameter('target')
         );
     }

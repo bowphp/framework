@@ -60,9 +60,7 @@ class SeederCommand extends AbstractCommand
         $table_name = trim($table_name);
 
         if (is_null($table_name)) {
-            echo Color::red('Specify the seeder table name');
-
-            $this->throwFailsCommand('help seed');
+            $this->throwFailsCommand('Specify the seeder table name', 'help seed');
         }
 
         if (!file_exists($this->setting->getSeederDirectory()."/{$table_name}_seeder.php")) {
@@ -97,14 +95,12 @@ class SeederCommand extends AbstractCommand
             foreach ($seed_collection as $table => $seeds) {
                 $n = Database::table($table)->insert($seeds);
 
-                echo Color::red("$n seed".($n > 1 ? 's' : '')." on $table table\n");
+                echo Color::green("$n seed".($n > 1 ? 's' : '')." on $table table\n");
             }
         } catch (\Exception $e) {
             echo Color::red($e->getMessage());
 
             exit(1);
         }
-
-        exit(0);
     }
 }
