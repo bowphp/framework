@@ -58,7 +58,7 @@ class Console
      * @var array
      */
     const COMMAND = [
-        'add', 'migration', 'migrate', 'run', 'generate', 'seed', 'help', 'launch', 'clear'
+        'add', 'migration', 'migrate', 'run', 'generate', 'gen', 'seed', 'help', 'launch', 'clear'
     ];
 
     /**
@@ -138,7 +138,12 @@ class Console
             $command = 'launch';
         }
 
-        $this->call($command);
+        try {
+            $this->call($command);
+        } catch (ConsoleException $exception) {
+            echo Color::red($exception->getMessage());
+            exit(1);
+        }
     }
 
     /**
@@ -318,7 +323,7 @@ class Console
     {
         $action = $this->arg->getParameter('action');
 
-        if (!in_array($action, ['key', 'resource'])) {
+        if (!in_array($action, ['key', 'resource', 'session'])) {
             $this->throwFailsAction('This action is not exists', 'help generate');
         }
 
@@ -327,6 +332,16 @@ class Console
             $action,
             $this->arg->getParameter('target')
         );
+    }
+
+    /**
+     * Alias of generate
+     *
+     * @return void
+     */
+    private function gen()
+    {
+        $this->generate();    
     }
 
     /**
@@ -365,6 +380,7 @@ Bow tqsk runner usage: php bow command:action [name] --option
 
  \033[0;32mGENERATE\033[00m create a new app key and resources
    \033[0;33mgenerate:resource\033[00m   Create new REST controller
+   \033[0;33mgenerate:session\033[00m    For generate session table
    \033[0;33mgenerate:key\033[00m        Create new app key
 
  \033[0;32mADD\033[00m Create a user class
@@ -436,6 +452,7 @@ U;
     --model=[model_name] Define the usable model
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   For create a new REST controller
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:session                  For generate session table
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      For generate a new APP KEY
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     For display this
 

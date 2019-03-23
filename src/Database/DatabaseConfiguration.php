@@ -13,9 +13,7 @@ class DatabaseConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('db', function () use ($config) {
-            return Database::configure(
-                is_null($config['db']) ? $config['database'] : $config['db']
-            );
+            return Database::configure($config['database'] ?? $config['db']);
         });
     }
 

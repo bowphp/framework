@@ -23,6 +23,7 @@ class Command extends AbstractCommand
         'seeder' => \Bow\Console\Command\SeederCommand::class,
         'validator' => \Bow\Console\Command\ValidatorCommand::class,
         'key' => \Bow\Console\Command\GenerateKeyCommand::class,
+        'session' => \Bow\Console\Command\GenerateSessionCommand::class,
         'clear' => \Bow\Console\Command\ClearCommand::class,
         'service' => \Bow\Console\Command\ServiceCommand::class
     ];

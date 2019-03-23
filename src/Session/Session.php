@@ -23,6 +23,16 @@ class Session implements CollectionInterface
     ];
 
     /**
+     * The session available driver
+     *
+     * @var array
+     */
+    private $driver = [
+        'database' => \Bow\Session\Driver\DatabaseDriver::class,
+        'filesystem' => \Bow\Session\Driver\FilesystemDriver::class,
+    ];
+
+    /**
      * The instance of Session
      *
      * @var Session
@@ -34,14 +44,7 @@ class Session implements CollectionInterface
      *
      * @var array
      */
-    private $config = [
-        'name' => 'Bow',
-        'path' => '/',
-        'domain' => null,
-        'secure' => false,
-        'httponly' => false,
-        'save_path' => null,
-    ];
+    private $config;
 
     /**
      * Session constructor.
@@ -50,9 +53,14 @@ class Session implements CollectionInterface
      */
     private function __construct(array $config)
     {
-        $this->config = array_merge($this->config, $config);
-
-        $this->start();
+        $this->config = array_merge($this->config, [
+            'name' => 'Bow',
+            'path' => '/',
+            'domain' => null,
+            'secure' => false,
+            'httponly' => false,
+            'save_path' => null,
+        ]);
     }
 
     /**
@@ -91,23 +99,21 @@ class Session implements CollectionInterface
             return true;
         }
 
-        /**
-         * Set session cookie params
-         */
-        session_set_cookie_params(
-            $this->config["lifetime"],
-            $this->config["path"],
-            $this->config['domain'],
-            $this->config["secure"],
-            $this->config["httponly"]
-        );
+        // Set the cookie param
+        $this->setCookieParmaters();
 
         /**
-         * Update session save path
+         * Set the session handler
          */
-        if (is_string($this->config['save_path'])) {
-            session_save_path($this->config['save_path']);
+        $driver = $this->driver[$this->config['driver']];
+        
+        if ($this->config['driver'] === 'database') {
+            $handler = new $driver($this->config['database']);
+        } else {
+            $handler = new $driver(realpath($this->config['save_path']));
         }
+
+        session_set_save_handler($handler, true);
 
         /**
          * Apply session cookie name
@@ -141,6 +147,22 @@ class Session implements CollectionInterface
         }
 
         return $started;
+    }
+
+    /**
+     * Set session cookie params
+     * 
+     * @return void
+     */
+    private function setCookieParmaters()
+    {
+        session_set_cookie_params(
+            $this->config["lifetime"],
+            $this->config["path"],
+            $this->config['domain'],
+            $this->config["secure"],
+            $this->config["httponly"]
+        );
     }
 
     /**

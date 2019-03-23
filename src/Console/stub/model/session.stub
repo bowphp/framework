@@ -1,0 +1,28 @@
+<?php
+
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\SQLGenerator;
+
+class {className} extends Migration
+{
+    /**
+     * Up Migration
+     */
+    public function up()
+    {
+        $this->create("sessions", function (SQLGenerator $table) {
+            $table->addColumn('id', 'string', ['primary' => true]);
+            $table->addColumn('time', 'timestamp');
+            $table->addColumn('data', 'text');
+            $table->addColumn('ip', 'string');
+        });
+    }
+
+    /**
+     * Rollback migration
+     */
+    public function rollback()
+    {
+        $this->dropIfExists("{table}");
+    }
+}
