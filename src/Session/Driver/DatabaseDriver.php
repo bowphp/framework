@@ -31,11 +31,6 @@ class DatabaseDriver implements \SessionHandlerInterface
         $this->table = $options['table'] ?? 'sessions';
     }
 
-    public function validate_sid()
-    {
-
-    }
-
     /**
      * Close the session handling
      *
@@ -84,9 +79,6 @@ class DatabaseDriver implements \SessionHandlerInterface
      */
     public function open($save_path, $name)
     {
-        var_dump($save_path, $name);
-        die();
-
         return true;
     }
 
@@ -119,12 +111,8 @@ class DatabaseDriver implements \SessionHandlerInterface
     {
         // When create the new session record
         if (! $this->sessions()->where('id', $session_id)->exists()) {
-            return (bool) $this->sessions()->insert([
-                'id' => $session_id,
-                'time' => $this->createTimestamp((int) (config('session.lifetime') * 60)),
-                'data' => '',
-                'ip' => Capsule::getInstance()->make('request')->ip()
-            ]);
+            return (bool) $this->sessions()
+                ->insert($this->data($session_id));
         }
 
         // Update the session information
@@ -134,6 +122,21 @@ class DatabaseDriver implements \SessionHandlerInterface
         ]);
 
         return true;
+    }
+
+    /**
+     * Get the insert data
+     *
+     * @return array
+     */
+    private function data($session_id)
+    {
+        return [
+            'id' => $session_id,
+            'time' => $this->createTimestamp((int) (config('session.lifetime') * 60)),
+            'data' => '',
+            'ip' => Capsule::getInstance()->make('request')->ip()
+        ];
     }
 
     /**

@@ -149,9 +149,7 @@ class Session implements CollectionInterface
      */
     private function initializeDriver()
     {
-       /**
-        * Apply session cookie name
-        */
+        // We Apply session cookie name
         session_name($this->config['name']);
 
         if (!isset($_COOKIE[$this->config['name']])) {

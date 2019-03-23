@@ -6,7 +6,7 @@ class FilesystemDriver implements \SessionHandlerInterface
 {
     /**
      * The session save path
-     * 
+     *
      * @var string
      */
     private $save_path;
