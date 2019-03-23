@@ -31,6 +31,11 @@ class DatabaseDriver implements \SessionHandlerInterface
         $this->table = $options['table'] ?? 'sessions';
     }
 
+    public function validate_sid()
+    {
+
+    }
+
     /**
      * Close the session handling
      *
@@ -79,6 +84,9 @@ class DatabaseDriver implements \SessionHandlerInterface
      */
     public function open($save_path, $name)
     {
+        var_dump($save_path, $name);
+        die();
+
         return true;
     }
 
@@ -94,7 +102,7 @@ class DatabaseDriver implements \SessionHandlerInterface
             ->where('id', $session_id)->first();
 
         if (is_null($session)) {
-            return false;
+            return '';
         }
 
         return $session->data;

@@ -5,6 +5,13 @@ namespace Bow\Session\Driver;
 class FilesystemDriver implements \SessionHandlerInterface
 {
     /**
+     * The session save path
+     * 
+     * @var string
+     */
+    private $save_path;
+
+    /**
      * Filesystem constructor
      *
      * @param string $save_path
@@ -108,7 +115,7 @@ class FilesystemDriver implements \SessionHandlerInterface
         $filename = basename($session_id);
 
         if (file_exists($filename)) {
-            return $this->save_path.'/'.$session_id;
+            return $this->save_path.'/'.$filename;
         }
 
         return false;

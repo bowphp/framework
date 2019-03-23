@@ -30,7 +30,7 @@ class Session implements CollectionInterface
      */
     private $driver = [
         'database' => \Bow\Session\Driver\DatabaseDriver::class,
-        'filesystem' => \Bow\Session\Driver\FilesystemDriver::class,
+        'file' => \Bow\Session\Driver\FilesystemDriver::class,
     ];
 
     /**
@@ -157,22 +157,22 @@ class Session implements CollectionInterface
         if (!isset($_COOKIE[$this->config['name']])) {
             session_id(hash("sha256", $this->generateId()));
         }
+
+        session_save_path(realpath($this->config['save_path']));
+
+        // We create get driver
+        $driver = $this->driver[$this->config['driver']];
         
-        if ($this->config['driver'] == 'filesystem') {
-            return session_save_path(realpath($this->config['save_path']));
+        if ($this->config['driver'] == 'file') {
+            $handler = new $driver(realpath($this->config['save_path']));
+        } else {
+            $handler = new $driver($this->config['database']);
         }
 
-        /**
-         * Set the session handler
-         */
-        $driver = $this->driver[$this->config['driver']];
-
-        $handler = new $driver($this->config['database']);
-
-        session_set_save_handler($handler, true);
-
-        // The following prevents unexpected effects when using objects as save handlers
-        register_shutdown_function('session_write_close');
+        // Set the session driver
+        if (!session_set_save_handler($handler, true)) {
+            throw new SessionException('Can not set the session driver');
+        }
     }
 
     /**
@@ -284,13 +284,13 @@ class Session implements CollectionInterface
         }
 
         if (!isset($cache[$key])) {
-            if (isset($cache[$key])) {
-                $value = $flash[$key];
-
-                return !is_null($value);
+            if (!isset($cache[$key])) {
+                return false;
             }
 
-            return false;
+            $value = $flash[$key];
+
+            return !is_null($value);
         }
 
         $value = $cache[$key];
@@ -402,7 +402,7 @@ class Session implements CollectionInterface
      */
     public function all()
     {
-        return  $this->filter();
+        return $this->filter();
     }
 
     /**
