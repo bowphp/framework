@@ -116,6 +116,7 @@ class Console
         }
         
         // Boot kernel and console
+        $this->kernel->withoutSession();
         $this->kernel->boot();
         
         $this->booted = true;
@@ -341,7 +342,7 @@ class Console
      */
     private function gen()
     {
-        $this->generate();    
+        $this->generate();
     }
 
     /**

@@ -40,6 +40,11 @@ class Loader implements \ArrayAccess
     private $namespaces = [];
 
     /**
+     * @var bool
+     */
+    private $without_session = false;
+
+    /**
      * @param string $base_path
      * @throws
      */
@@ -177,6 +182,18 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Define if the configuration going to boot without session manager
+     *
+     * @return void
+     */
+    public function withoutSession()
+    {
+        $this->without_session = true;
+
+        return $this;
+    }
+
+    /**
      * Load configuration
      *
      * @return Loader
@@ -197,6 +214,10 @@ class Loader implements \ArrayAccess
 
         // Configuration of services
         foreach ($services as $service) {
+            if ($this->without_session && $service == \Bow\Session\SessionConfiguration::class) {
+                continue;
+            }
+
             if (class_exists($service, true)) {
                 $class = new $service($container);
 

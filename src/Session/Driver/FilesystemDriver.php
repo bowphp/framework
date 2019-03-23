@@ -6,7 +6,7 @@ class FilesystemDriver implements \SessionHandlerInterface
 {
     /**
      * Filesystem constructor
-     * 
+     *
      * @param string $save_path
      */
     public function __construct($save_path)
@@ -34,9 +34,7 @@ class FilesystemDriver implements \SessionHandlerInterface
     {
         $file = $this->sessionFile($session_id);
 
-        if (file_exists($file)) {
-            @unlink($file);
-        }
+        @unlink($file);
 
         return true;
     }
@@ -94,7 +92,7 @@ class FilesystemDriver implements \SessionHandlerInterface
      */
     public function write($session_id, $session_data)
     {
-        $saved = file_put_contents($this->sessionFile($session_id), $session_data);
+        $saved = @file_put_contents($this->sessionFile($session_id), $session_data);
 
         return $saved !== false;
     }
@@ -107,6 +105,12 @@ class FilesystemDriver implements \SessionHandlerInterface
      */
     private function sessionFile($session_id)
     {
-        return $this->save_path.'/'.$session_id;
+        $filename = basename($session_id);
+
+        if (file_exists($filename)) {
+            return $this->save_path.'/'.$session_id;
+        }
+
+        return false;
     }
 }

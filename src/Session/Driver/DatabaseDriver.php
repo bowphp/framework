@@ -8,6 +8,20 @@ use Bow\Support\Capsule;
 class DatabaseDriver implements \SessionHandlerInterface
 {
     /**
+     * The session table name
+     *
+     * @var string
+     */
+    private $table;
+
+    /**
+     * The current session session_id
+     *
+     * @var string
+     */
+    private $session_id;
+
+    /**
      * Database constructor
      *
      * @param array $options
@@ -37,41 +51,35 @@ class DatabaseDriver implements \SessionHandlerInterface
     {
         $this->sessions()
             ->where(['id' => $session_id])->delete();
+
+        return true;
     }
 
     /**
-     * Garbage collector
+     * Garbage collector for cleans old sessions
      *
      * @param int $maxlifetime
      * @return bool|void
      */
     public function gc($maxlifetime)
     {
-        $this->sessions()->where(['time' => $maxlifetime]);
+        $this->sessions()
+            ->where('time', '<', $this->createTimestamp(time() + $maxlifetime))
+            ->delete();
+
+        return true;
     }
 
     /**
      * When the session start
      *
      * @param string $save_path
-     * @param string $session_id
+     * @param string $name
      * @return bool|void
      */
-    public function open($save_path, $session_id)
+    public function open($save_path, $name)
     {
-        $session = $this->sessions()
-            ->where('id', $session_id)->first();
-
-        if (!is_null($session)) {
-            return false;
-        }
-
-        $this->sessions()->insert([
-            'id' => $session_id,
-            'time' => time() + (int) (config('session.lifetime') * 60),
-            'data' => null,
-            'ip' => Capsule::getInstance()->make('request')->ip()
-        ]);
+        return true;
     }
 
     /**
@@ -85,6 +93,10 @@ class DatabaseDriver implements \SessionHandlerInterface
         $session = $this->sessions()
             ->where('id', $session_id)->first();
 
+        if (is_null($session)) {
+            return false;
+        }
+
         return $session->data;
     }
 
@@ -97,19 +109,42 @@ class DatabaseDriver implements \SessionHandlerInterface
      */
     public function write($session_id, $session_data)
     {
-        $this->sessions()->update([
+        // When create the new session record
+        if (! $this->sessions()->where('id', $session_id)->exists()) {
+            return (bool) $this->sessions()->insert([
+                'id' => $session_id,
+                'time' => $this->createTimestamp((int) (config('session.lifetime') * 60)),
+                'data' => '',
+                'ip' => Capsule::getInstance()->make('request')->ip()
+            ]);
+        }
+
+        // Update the session information
+        $this->sessions()->where('id', $session_id)->update([
             'data' => $session_data,
             'id' => $session_id
         ]);
+
+        return true;
     }
 
     /**
      * Get session QueryBuilder instance
-     * 
+     *
      * @return \Bow\Database\QueryBuilder
      */
     private function sessions()
     {
         return DB::table($this->table);
+    }
+
+    /**
+     * Create the timestamp
+     *
+     * @return string
+     */
+    private function createTimestamp($time)
+    {
+        return date('Y-m-d H:i:s', time() + $time);
     }
 }

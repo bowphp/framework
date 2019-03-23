@@ -4,6 +4,7 @@ namespace Bow\Session;
 
 use Bow\Contracts\CollectionInterface;
 use Bow\Security\Crypto;
+use Bow\Session\Exception\SessionException;
 use InvalidArgumentException;
 
 class Session implements CollectionInterface
@@ -53,14 +54,23 @@ class Session implements CollectionInterface
      */
     private function __construct(array $config)
     {
-        $this->config = array_merge($this->config, [
+        if (!isset($config['driver'])) {
+            throw new SessionException("The session driver is undefined");
+        }
+
+        if (!isset($this->driver[$config['driver']])) {
+            throw new SessionException("The session driver is not support");
+        }
+
+        // We merge configuration
+        $this->config = array_merge([
             'name' => 'Bow',
             'path' => '/',
             'domain' => null,
             'secure' => false,
             'httponly' => false,
             'save_path' => null,
-        ]);
+        ], $config);
     }
 
     /**
@@ -99,33 +109,79 @@ class Session implements CollectionInterface
             return true;
         }
 
+        // Load session driver
+        $this->initializeDriver();
+
         // Set the cookie param
         $this->setCookieParmaters();
 
-        /**
-         * Set the session handler
-         */
-        $driver = $this->driver[$this->config['driver']];
-        
-        if ($this->config['driver'] === 'database') {
-            $handler = new $driver($this->config['database']);
-        } else {
-            $handler = new $driver(realpath($this->config['save_path']));
+        // Boot session
+        $started = $this->boot();
+
+        // Init interne session manager
+        $this->initializeInterneSessionStorage();
+
+        return $started;
+    }
+
+    /**
+     * Start session nativily
+     *
+     * @return bool
+     */
+    private function boot()
+    {
+        if (strlen(session_id()) == 0) {
+            if (headers_sent()) {
+                throw new SessionException('Headers already sent. Cannot start session.');
+            }
+            
+            return @session_start();
         }
 
-        session_set_save_handler($handler, true);
+        return true;
+    }
 
-        /**
-         * Apply session cookie name
-         */
+    /**
+     * Load session driver
+     *
+     * @return void
+     */
+    private function initializeDriver()
+    {
+       /**
+        * Apply session cookie name
+        */
         session_name($this->config['name']);
 
         if (!isset($_COOKIE[$this->config['name']])) {
             session_id(hash("sha256", $this->generateId()));
         }
+        
+        if ($this->config['driver'] == 'filesystem') {
+            return session_save_path(realpath($this->config['save_path']));
+        }
 
-        $started = @session_start();
+        /**
+         * Set the session handler
+         */
+        $driver = $this->driver[$this->config['driver']];
 
+        $handler = new $driver($this->config['database']);
+
+        session_set_save_handler($handler, true);
+
+        // The following prevents unexpected effects when using objects as save handlers
+        register_shutdown_function('session_write_close');
+    }
+
+    /**
+     * Load internal session
+     *
+     * @return void
+     */
+    private function initializeInterneSessionStorage()
+    {
         if (!isset($_SESSION[static::CORE_KEY['csrf']])) {
             $_SESSION[static::CORE_KEY['csrf']] = new \stdClass();
         }
@@ -145,13 +201,11 @@ class Session implements CollectionInterface
         if (!isset($_SESSION[static::CORE_KEY['old']])) {
             $_SESSION[static::CORE_KEY['old']] = [];
         }
-
-        return $started;
     }
 
     /**
      * Set session cookie params
-     * 
+     *
      * @return void
      */
     private function setCookieParmaters()
@@ -330,6 +384,15 @@ class Session implements CollectionInterface
         $_SESSION[$key] = array_merge($_SESSION[$key], [$value]);
 
         return $value;
+    }
+
+    /**
+     * The add alias
+     * @see \Bow\Session\Session::add
+     */
+    public function put($key, $value, $next = false)
+    {
+        return $this->add($key, $value, $next);
     }
 
     /**

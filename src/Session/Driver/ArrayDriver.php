@@ -27,7 +27,7 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function destroy($session_id)
     {
-        
+         @unset($this->sessions[$session_id]);
     }
 
     /**
@@ -38,7 +38,11 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function gc($maxlifetime)
     {
-        //        
+        foreach ($this->sessions as $session_id => $content) {
+            if ($this->sessions[$session_id]['time'] <= $maxlifetime) {
+                $this->destroy($session_id);
+            }
+        }
     }
 
     /**
@@ -50,7 +54,9 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function open($save_path, $session_id)
     {
-        $this->sessions[$session_id] = [];
+        $this->sessions[$session_id] = [
+            'time' =>
+        ];
     }
 
     /**

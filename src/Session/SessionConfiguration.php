@@ -14,7 +14,6 @@ class SessionConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('session', function () use ($config) {
-
             $session = Session::configure($config['session']);
 
             Tokenize::makeCsrfToken($config['session.lifetime']);
