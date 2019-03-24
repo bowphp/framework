@@ -390,24 +390,26 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Check the existence of a file
+     * Check that a file exists
      *
      * @param string $filename
      * @return bool
      */
     public function exists($filename)
     {
+        $listing = $this->listDirectoryContents();
+        $dirname_info = array_filter($listing, function ($item) use ($filename) {
+            return $item['name'] === $filename;
+        });
+
+        return count($dirname_info) !== 0;
     }
 
     /**
-     * The file extension
-     *
-     * @param string $filename
-     * @return string
+     * Get the extension of a file
      */
     public function extension($filename)
     {
-        // TODO: Implement extension() method.
     }
 
     /**

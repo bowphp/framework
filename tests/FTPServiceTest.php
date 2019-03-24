@@ -150,6 +150,14 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->ftp_service->isFile('is_file'));
     }
 
+    public function testExists()
+    {
+        $this->createFile($this->ftp_service, 'exists.txt');
+
+        $this->assertTrue($this->ftp_service->exists('exists.txt'));
+        $this->assertFalse($this->ftp_service->exists('dont_exists.txt'));
+    }
+
     private function createFile(FTPService $ftp_service, $filename, $content = '')
     {
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
