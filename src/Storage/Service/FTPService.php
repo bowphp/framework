@@ -222,7 +222,7 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Write following a file specify
+     * Append content a file.
      *
      * @param  string $file
      * @param  string $content
@@ -230,7 +230,15 @@ class FTPService implements ServiceInterface
      */
     public function append($file, $content)
     {
-        // TODO: Implement append() method.
+        $h = fopen('php://temp', 'r+');
+        fwrite($h, $content);
+        rewind($h);
+
+        // prevent ftp_fput from seeking local "file" ($h)
+        ftp_set_option($this->getConnection(), FTP_AUTOSEEK, false);
+
+        $size = ftp_size($this->getConnection(), $file);
+        return ftp_fput($this->getConnection(), $file, $h, FTP_BINARY, $size);
     }
 
     /**
