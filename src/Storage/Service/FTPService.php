@@ -259,14 +259,18 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Alias sur readInDir
+     * List files in a directory
      *
      * @param  string $dirname
      * @return array
      */
-    public function files($dirname)
+    public function files($dirname = '.')
     {
-        // TODO: Implement files() method.
+        $listing = $this->listDirectoryContents($dirname);
+
+        return array_values(array_filter($listing, function ($item) {
+            return $item['type'] === 'file';
+        }));
     }
 
     /**

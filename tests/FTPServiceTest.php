@@ -119,6 +119,19 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEmpty($result);
     }
 
+    public function testFiles()
+    {
+        $this->createFile($this->ftp_service, 'only_file.txt');
+        $result = $this->ftp_service->files();
+        $has_only_files = array_reduce($result, function ($acc, $next) {
+            return $next['type'] === 'file';
+        }, true);
+
+        $this->assertInternalType('array', $result);
+        $this->assertNotEmpty($result);
+        $this->assertTrue($has_only_files);
+    }
+
     private function createFile(FTPService $ftp_service, $filename, $content = '')
     {
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
