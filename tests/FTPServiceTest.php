@@ -141,6 +141,15 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->ftp_service->isDirectory('a_file.txt'));
     }
 
+    public function testIsFile()
+    {
+        $this->ftp_service->makeDirectory('is_file');
+        $this->createFile($this->ftp_service, 'is_file.txt');
+
+        $this->assertTrue($this->ftp_service->isFile('is_file.txt'));
+        $this->assertFalse($this->ftp_service->isFile('is_file'));
+    }
+
     private function createFile(FTPService $ftp_service, $filename, $content = '')
     {
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);

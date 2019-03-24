@@ -418,7 +418,12 @@ class FTPService implements ServiceInterface
      */
     public function isFile($filename)
     {
-        // TODO: Implement isFile() method.
+        $listing = $this->listDirectoryContents();
+        $dirname_info = array_filter($listing, function ($item) use ($filename) {
+            return $item['type'] === 'file' && $item['name'] === $filename;
+        });
+
+        return count($dirname_info) !== 0;
     }
 
     /**
