@@ -238,7 +238,7 @@ class FTPService implements ServiceInterface
         ftp_set_option($this->getConnection(), FTP_AUTOSEEK, false);
 
         $size = ftp_size($this->getConnection(), $file);
-        return ftp_fput($this->getConnection(), $file, $h, FTP_BINARY, $size);
+        return ftp_fput($this->getConnection(), $file, $h, $this->transfer_mode, $size);
     }
 
     /**
