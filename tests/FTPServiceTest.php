@@ -105,7 +105,10 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function testDirectories()
     {
+        $this->ftp_service->makeDirectory('for_test');
+        $result = $this->ftp_service->directories();
 
+        $this->assertInternalType('array', $result);
     }
 
     private function createFile(FTPService $ftp_service, $filename, $content = '')
@@ -113,7 +116,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
         $uploadedFile->method('getContent')->willReturn($content);
         $uploadedFile->method('getFilename')->willReturn($filename);
-        
+
         return $ftp_service->store($uploadedFile, $filename);
     }
 }

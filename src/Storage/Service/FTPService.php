@@ -43,7 +43,7 @@ class FTPService implements ServiceInterface
      *
      * @var string
      */
-    private $root;
+    private $base_directory;
 
     /**
      * The FTPService Instance
@@ -51,6 +51,11 @@ class FTPService implements ServiceInterface
      * @var FTPService
      */
     private static $instance;
+
+    /**
+     * Cache the directory contents to avoid redundant server calls.
+     */
+    private static $cached_directory_contents = [];
 
     /**
      * FTPService constructor
@@ -61,7 +66,6 @@ class FTPService implements ServiceInterface
     private function __construct(array $config)
     {
         $this->config = $config;
-
         $this->connect();
     }
 
@@ -137,7 +141,7 @@ class FTPService implements ServiceInterface
 
         if (!$is_logged_in) {
             $this->disconnect();
-            
+
             throw new RuntimeException(
                 sprintf(
                     'Could not login with connection: (s)ftp://%s@%s:%s',
@@ -166,7 +170,7 @@ class FTPService implements ServiceInterface
         // This is needed when creating directories and
         // initial root was a relative path, else the root
         // would be relative to the chdir'd path.
-        $this->root = ftp_pwd($this->connection);
+        $this->base_directory = ftp_pwd($this->connection);
     }
 
     /**
@@ -273,9 +277,13 @@ class FTPService implements ServiceInterface
      * @param  string $dirname
      * @return array
      */
-    public function directories($dirname)
+    public function directories($dirname = '')
     {
-        // TODO: Implement directories() method.
+        $listing = $this->listDirectoryContents($dirname);
+
+        return array_values(array_filter($listing, function ($item) {
+            return $item['type'] === 'directory';
+        }));
     }
 
     /**
@@ -308,7 +316,7 @@ class FTPService implements ServiceInterface
     /**
      * Create a directory.
      *
-     * @param string   $directory
+     * @param string $directory
      *
      * @return bool
      */
@@ -387,7 +395,6 @@ class FTPService implements ServiceInterface
      */
     public function exists($filename)
     {
-        // TODO: Implement exists() method.
     }
 
     /**
@@ -466,6 +473,57 @@ class FTPService implements ServiceInterface
         return compact('type', 'path');
     }
 
+
+    /**
+     * @inheritdoc
+     *
+     * @param string $directory
+     */
+    protected function listDirectoryContents($directory = '')
+    {
+        $cache_key = $this->getCurrentDirectory() . $directory;
+
+        if (!isset(self::$cached_directory_contents[$cache_key])
+            || self::$cached_directory_contents[$cache_key] === null) {
+            if ($directory) {
+                chdir($directory);
+            }
+
+            $listing = ftp_rawlist($this->getConnection(), '-aln');
+
+            self::$cached_directory_contents[$cache_key] = $this->normalizeDirectoryListing($listing);
+        }
+
+        return self::$cached_directory_contents[$cache_key];
+    }
+
+    private function normalizeDirectoryListing($listing)
+    {
+        $normalizedListing = [];
+
+        foreach ($listing as $item) {
+            // array_values is needed to reset array keys
+            $parts = array_values(array_filter(explode(' ', $item), function ($part) {
+                return $part !== '';
+            }));
+
+            $type = (strpos($parts[0], 'd') === 0) ? 'directory' : 'file';
+
+            $normalizedListing[] = [
+                'permissions' => $parts[0],
+                'created' => [
+                    'month' => $parts[5],
+                    'day' => $parts[5],
+                    'time' => $parts[7]
+                ],
+                'name' => $parts[8],
+                'type' => $type
+            ];
+        }
+
+        return $normalizedListing;
+    }
+
     /**
      * Read stream
      *
@@ -485,7 +543,7 @@ class FTPService implements ServiceInterface
             }
 
             fclose($stream);
-            
+
             return false;
         } catch (\Exception $exception) {
             throw new ResourceException(sprintf('"%s" not found.', $path));
