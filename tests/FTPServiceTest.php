@@ -174,6 +174,14 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertRegExp('/something else/', $this->ftp_service->get('prepend.txt'));
     }
 
+    public function testPut()
+    {
+        $this->createFile($this->ftp_service, 'put.txt', 'something');
+        $this->ftp_service->put('put.txt', ' else');
+
+        $this->assertTrue(true);
+    }
+
     private function createFile(FTPService $ftp_service, $filename, $content = '')
     {
         $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);

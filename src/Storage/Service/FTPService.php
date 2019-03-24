@@ -278,7 +278,14 @@ class FTPService implements ServiceInterface
      */
     public function put($file, $content)
     {
-        // TODO: Implement put() method.
+        $stream = $this->readStream($file);
+        fwrite($stream, $content);
+        rewind($stream);
+
+        $result = $this->writeStream($file, $stream);
+        fclose($stream);
+
+        return $result;
     }
 
     /**
