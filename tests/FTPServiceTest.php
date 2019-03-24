@@ -29,6 +29,11 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->ftp_service = Storage::service('ftp');
     }
 
+    protected function tearDown()
+    {
+        $this->ftp_service->setConnectionRoot();
+    }
+
     public function testUnsecureConnection()
     {
         $this->assertInstanceOf(FTPService::class, $this->ftp_service);
@@ -38,8 +43,10 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     public function testHasCorrectRootFolder()
     {
         $config = require 'config/resource.php';
+        $current_directory = $this->ftp_service->getCurrentDirectory();
+        $root_folder = $config['services']['ftp']['root'];
 
-        $this->assertEquals($this->ftp_service->getCurrentDirectory(), $config['services']['ftp']['root']);
+        $this->assertEquals($current_directory, trim($root_folder, '/'));
     }
 
     public function testStore()
@@ -109,6 +116,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $result = $this->ftp_service->directories();
 
         $this->assertInternalType('array', $result);
+        $this->assertNotEmpty($result);
     }
 
     private function createFile(FTPService $ftp_service, $filename, $content = '')

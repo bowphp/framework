@@ -158,18 +158,15 @@ class FTPService implements ServiceInterface
      *
      * @return void
      */
-    private function setConnectionRoot()
+    public function setConnectionRoot($path = '')
     {
-        ['root' => $root] = $this->config;
+        $basePath = $path ?: $this->config['root'];
 
-        if ($root && (!ftp_chdir($this->connection, $root))) {
-            throw new RuntimeException('Root is invalid or does not exist: ' . $root);
+        if ($basePath && (!ftp_chdir($this->connection, $basePath))) {
+            throw new RuntimeException('Root is invalid or does not exist: ' . $basePath);
         }
 
         // Store absolute path for further reference.
-        // This is needed when creating directories and
-        // initial root was a relative path, else the root
-        // would be relative to the chdir'd path.
         $this->base_directory = ftp_pwd($this->connection);
     }
 
@@ -190,7 +187,8 @@ class FTPService implements ServiceInterface
      */
     public function getCurrentDirectory()
     {
-        return pathinfo(ftp_pwd($this->connection), PATHINFO_BASENAME);
+        $path = pathinfo(ftp_pwd($this->connection));
+        return $path['basename'];
     }
 
     /**
@@ -272,12 +270,12 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Read the contents of the file
+     * List directories
      *
      * @param  string $dirname
      * @return array
      */
-    public function directories($dirname = '')
+    public function directories($dirname = '.')
     {
         $listing = $this->listDirectoryContents($dirname);
 
@@ -479,46 +477,38 @@ class FTPService implements ServiceInterface
      *
      * @param string $directory
      */
-    protected function listDirectoryContents($directory = '')
+    protected function listDirectoryContents($directory = '.')
     {
-        $cache_key = $this->getCurrentDirectory() . $directory;
-
-        if (!isset(self::$cached_directory_contents[$cache_key])
-            || self::$cached_directory_contents[$cache_key] === null) {
-            if ($directory) {
-                chdir($directory);
-            }
-
-            $listing = ftp_rawlist($this->getConnection(), '-aln');
-
-            self::$cached_directory_contents[$cache_key] = $this->normalizeDirectoryListing($listing);
+        if ($directory && strpos($directory, '.') !== 0) {
+            ftp_chdir($this->getConnection(), $directory);
         }
 
-        return self::$cached_directory_contents[$cache_key];
+        $listing = @ftp_rawlist($this->getConnection(), '.') ?: [];
+
+        $this->setConnectionRoot();
+
+        return  $this->normalizeDirectoryListing($listing);
     }
 
     private function normalizeDirectoryListing($listing)
     {
         $normalizedListing = [];
 
-        foreach ($listing as $item) {
-            // array_values is needed to reset array keys
-            $parts = array_values(array_filter(explode(' ', $item), function ($part) {
-                return $part !== '';
-            }));
-
-            $type = (strpos($parts[0], 'd') === 0) ? 'directory' : 'file';
-
-            $normalizedListing[] = [
-                'permissions' => $parts[0],
-                'created' => [
-                    'month' => $parts[5],
-                    'day' => $parts[5],
-                    'time' => $parts[7]
-                ],
-                'name' => $parts[8],
-                'type' => $type
-            ];
+        foreach ($listing as $child) {
+            $chunks = preg_split("/\s+/", $child);
+            list(
+                $item['rights'],
+                $item['number'],
+                $item['user'],
+                $item['group'],
+                $item['size'],
+                $item['month'],
+                $item['day'],
+                $item['time'],
+                $item['name']) = $chunks;
+            $item['type'] = $chunks[0]{0} === 'd' ? 'directory' : 'file';
+            array_splice($chunks, 0, 8);
+            $normalizedListing[implode(" ", $chunks)] = $item;
         }
 
         return $normalizedListing;
