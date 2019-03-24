@@ -43,7 +43,7 @@ class FTPService implements ServiceInterface
      *
      * @var string
      */
-    private $root;
+    private $base_directory;
 
     /**
      * The FTPService Instance
@@ -51,6 +51,11 @@ class FTPService implements ServiceInterface
      * @var FTPService
      */
     private static $instance;
+
+    /**
+     * Cache the directory contents to avoid redundant server calls.
+     */
+    private static $cached_directory_contents = [];
 
     /**
      * FTPService constructor
@@ -61,7 +66,6 @@ class FTPService implements ServiceInterface
     private function __construct(array $config)
     {
         $this->config = $config;
-
         $this->connect();
     }
 
@@ -137,7 +141,7 @@ class FTPService implements ServiceInterface
 
         if (!$is_logged_in) {
             $this->disconnect();
-            
+
             throw new RuntimeException(
                 sprintf(
                     'Could not login with connection: (s)ftp://%s@%s:%s',
@@ -154,19 +158,16 @@ class FTPService implements ServiceInterface
      *
      * @return void
      */
-    private function setConnectionRoot()
+    public function setConnectionRoot($path = '')
     {
-        ['root' => $root] = $this->config;
+        $basePath = $path ?: $this->config['root'];
 
-        if ($root && (!ftp_chdir($this->connection, $root))) {
-            throw new RuntimeException('Root is invalid or does not exist: ' . $root);
+        if ($basePath && (!ftp_chdir($this->connection, $basePath))) {
+            throw new RuntimeException('Root is invalid or does not exist: ' . $basePath);
         }
 
         // Store absolute path for further reference.
-        // This is needed when creating directories and
-        // initial root was a relative path, else the root
-        // would be relative to the chdir'd path.
-        $this->root = ftp_pwd($this->connection);
+        $this->base_directory = ftp_pwd($this->connection);
     }
 
     /**
@@ -186,7 +187,8 @@ class FTPService implements ServiceInterface
      */
     public function getCurrentDirectory()
     {
-        return pathinfo(ftp_pwd($this->connection), PATHINFO_BASENAME);
+        $path = pathinfo(ftp_pwd($this->connection));
+        return $path['basename'];
     }
 
     /**
@@ -220,7 +222,7 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Write following a file specify
+     * Append content a file.
      *
      * @param  string $file
      * @param  string $content
@@ -228,7 +230,18 @@ class FTPService implements ServiceInterface
      */
     public function append($file, $content)
     {
-        // TODO: Implement append() method.
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $content);
+        rewind($stream);
+
+        // prevent ftp_fput from seeking local "file" ($h)
+        ftp_set_option($this->getConnection(), FTP_AUTOSEEK, false);
+
+        $size = ftp_size($this->getConnection(), $file);
+        $result = ftp_fput($this->getConnection(), $file, $stream, $this->transfer_mode, $size);
+        fclose($stream);
+
+        return $result;
     }
 
     /**
@@ -241,7 +254,19 @@ class FTPService implements ServiceInterface
      */
     public function prepend($file, $content)
     {
-        // TODO: Implement prepend() method.
+        $remote_file_content = $this->get($file);
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $content);
+        fwrite($stream, $remote_file_content);
+        rewind($stream);
+
+        // prevent ftp_fput from seeking local "file" ($h)
+        ftp_set_option($this->getConnection(), FTP_AUTOSEEK, false);
+
+        $result = $this->writeStream($file, $stream);
+        fclose($stream);
+
+        return $result;
     }
 
     /**
@@ -253,29 +278,44 @@ class FTPService implements ServiceInterface
      */
     public function put($file, $content)
     {
-        // TODO: Implement put() method.
+        $stream = $this->readStream($file);
+        fwrite($stream, $content);
+        rewind($stream);
+
+        $result = $this->writeStream($file, $stream);
+        fclose($stream);
+
+        return $result;
     }
 
     /**
-     * Alias sur readInDir
+     * List files in a directory
      *
      * @param  string $dirname
      * @return array
      */
-    public function files($dirname)
+    public function files($dirname = '.')
     {
-        // TODO: Implement files() method.
+        $listing = $this->listDirectoryContents($dirname);
+
+        return array_values(array_filter($listing, function ($item) {
+            return $item['type'] === 'file';
+        }));
     }
 
     /**
-     * Read the contents of the file
+     * List directories
      *
      * @param  string $dirname
      * @return array
      */
-    public function directories($dirname)
+    public function directories($dirname = '.')
     {
-        // TODO: Implement directories() method.
+        $listing = $this->listDirectoryContents($dirname);
+
+        return array_values(array_filter($listing, function ($item) {
+            return $item['type'] === 'directory';
+        }));
     }
 
     /**
@@ -308,7 +348,7 @@ class FTPService implements ServiceInterface
     /**
      * Create a directory.
      *
-     * @param string   $directory
+     * @param string $directory
      *
      * @return bool
      */
@@ -380,25 +420,26 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Check the existence of a file
+     * Check that a file exists
      *
      * @param string $filename
      * @return bool
      */
     public function exists($filename)
     {
-        // TODO: Implement exists() method.
+        $listing = $this->listDirectoryContents();
+        $dirname_info = array_filter($listing, function ($item) use ($filename) {
+            return $item['name'] === $filename;
+        });
+
+        return count($dirname_info) !== 0;
     }
 
     /**
-     * The file extension
-     *
-     * @param string $filename
-     * @return string
+     * Get the extension of a file
      */
     public function extension($filename)
     {
-        // TODO: Implement extension() method.
     }
 
     /**
@@ -409,7 +450,12 @@ class FTPService implements ServiceInterface
      */
     public function isFile($filename)
     {
-        // TODO: Implement isFile() method.
+        $listing = $this->listDirectoryContents();
+        $dirname_info = array_filter($listing, function ($item) use ($filename) {
+            return $item['type'] === 'file' && $item['name'] === $filename;
+        });
+
+        return count($dirname_info) !== 0;
     }
 
     /**
@@ -420,7 +466,12 @@ class FTPService implements ServiceInterface
      */
     public function isDirectory($dirname)
     {
-        // TODO: Implement isDirectory() method.
+        $listing = $this->listDirectoryContents();
+        $dirname_info = array_filter($listing, function ($item) use ($dirname) {
+            return $item['type'] === 'directory' && $item['name'] === $dirname;
+        });
+
+        return count($dirname_info) !== 0;
     }
 
     /**
@@ -466,6 +517,49 @@ class FTPService implements ServiceInterface
         return compact('type', 'path');
     }
 
+
+    /**
+     * @inheritdoc
+     *
+     * @param string $directory
+     */
+    protected function listDirectoryContents($directory = '.')
+    {
+        if ($directory && strpos($directory, '.') !== 0) {
+            ftp_chdir($this->getConnection(), $directory);
+        }
+
+        $listing = @ftp_rawlist($this->getConnection(), '.') ?: [];
+
+        $this->setConnectionRoot();
+
+        return  $this->normalizeDirectoryListing($listing);
+    }
+
+    private function normalizeDirectoryListing($listing)
+    {
+        $normalizedListing = [];
+
+        foreach ($listing as $child) {
+            $chunks = preg_split("/\s+/", $child);
+            list(
+                $item['rights'],
+                $item['number'],
+                $item['user'],
+                $item['group'],
+                $item['size'],
+                $item['month'],
+                $item['day'],
+                $item['time'],
+                $item['name']) = $chunks;
+            $item['type'] = $chunks[0]{0} === 'd' ? 'directory' : 'file';
+            array_splice($chunks, 0, 8);
+            $normalizedListing[implode(" ", $chunks)] = $item;
+        }
+
+        return $normalizedListing;
+    }
+
     /**
      * Read stream
      *
@@ -485,7 +579,7 @@ class FTPService implements ServiceInterface
             }
 
             fclose($stream);
-            
+
             return false;
         } catch (\Exception $exception) {
             throw new ResourceException(sprintf('"%s" not found.', $path));
