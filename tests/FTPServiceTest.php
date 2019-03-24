@@ -163,7 +163,15 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->createFile($this->ftp_service, 'append.txt', 'something');
         $this->ftp_service->append('append.txt', ' else');
 
-        $this->assertRegExp('/else/', $this->ftp_service->get('append.txt'));
+        $this->assertRegExp('/something else/', $this->ftp_service->get('append.txt'));
+    }
+
+    public function testPrepend()
+    {
+        $this->createFile($this->ftp_service, 'prepend.txt', 'else');
+        $this->ftp_service->prepend('prepend.txt', 'something ');
+
+        $this->assertRegExp('/something else/', $this->ftp_service->get('prepend.txt'));
     }
 
     private function createFile(FTPService $ftp_service, $filename, $content = '')

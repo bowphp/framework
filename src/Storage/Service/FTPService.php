@@ -230,15 +230,18 @@ class FTPService implements ServiceInterface
      */
     public function append($file, $content)
     {
-        $h = fopen('php://temp', 'r+');
-        fwrite($h, $content);
-        rewind($h);
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $content);
+        rewind($stream);
 
         // prevent ftp_fput from seeking local "file" ($h)
         ftp_set_option($this->getConnection(), FTP_AUTOSEEK, false);
 
         $size = ftp_size($this->getConnection(), $file);
-        return ftp_fput($this->getConnection(), $file, $h, $this->transfer_mode, $size);
+        $result = ftp_fput($this->getConnection(), $file, $stream, $this->transfer_mode, $size);
+        fclose($stream);
+
+        return $result;
     }
 
     /**
@@ -251,7 +254,19 @@ class FTPService implements ServiceInterface
      */
     public function prepend($file, $content)
     {
-        // TODO: Implement prepend() method.
+        $remote_file_content = $this->get($file);
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $content);
+        fwrite($stream, $remote_file_content);
+        rewind($stream);
+
+        // prevent ftp_fput from seeking local "file" ($h)
+        ftp_set_option($this->getConnection(), FTP_AUTOSEEK, false);
+
+        $result = $this->writeStream($file, $stream);
+        fclose($stream);
+
+        return $result;
     }
 
     /**
