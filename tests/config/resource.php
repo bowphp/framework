@@ -14,22 +14,12 @@ return [
         ]
     ],
 
-    /**
-     * Repertoire de log
-     */
-    'log' => __DIR__.'/../data/logs',
-
-    /**
-     * Repertoure de cache
-     */
-    'cache' => __DIR__.'/../data/cache',
-
     'services' => [
         /**
          * FTP configuration
          */
         'ftp' => [
-            'hostname' => app_env('FTP_HOST'),
+            'hostname' => app_env('FTP_HOST', 'localhost'),
             'password' => app_env('FTP_PASSWORD'),
             'username' => app_env('FTP_USERNAME'),
             'port'     => app_env('FTP_PORT', 21),
@@ -50,5 +40,16 @@ return [
             'region' => '',
             'version' => 'latest'
         ]
-    ]
+    ],
+
+
+    /**
+     * Repertoire de log
+     */
+    'log' => __DIR__.'/../data/logs',
+
+    /**
+     * Repertoure de cache
+     */
+    'cache' => __DIR__.'/../data/cache'
 ];

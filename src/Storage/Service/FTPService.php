@@ -133,10 +133,13 @@ class FTPService implements ServiceInterface
     {
         ['username' => $username, 'password' => $password] = $this->config;
 
-        // Disable error handling to avoid credentials leak
-        set_error_handler(function () {
-        });
+        // We disable error handling to avoid credentials leak :+1:
+        set_error_handler(
+            function () {}
+        );
+
         $is_logged_in = ftp_login($this->connection, $username, $password);
+
         restore_error_handler();
 
         if (!$is_logged_in) {
@@ -188,6 +191,7 @@ class FTPService implements ServiceInterface
     public function getCurrentDirectory()
     {
         $path = pathinfo(ftp_pwd($this->connection));
+
         return $path['basename'];
     }
 
@@ -255,15 +259,17 @@ class FTPService implements ServiceInterface
     public function prepend($file, $content)
     {
         $remote_file_content = $this->get($file);
+
         $stream = fopen('php://temp', 'r+');
         fwrite($stream, $content);
         fwrite($stream, $remote_file_content);
         rewind($stream);
 
-        // prevent ftp_fput from seeking local "file" ($h)
+        // We prevent ftp_fput from seeking local "file" ($h)
         ftp_set_option($this->getConnection(), FTP_AUTOSEEK, false);
 
         $result = $this->writeStream($file, $stream);
+
         fclose($stream);
 
         return $result;
@@ -385,6 +391,7 @@ class FTPService implements ServiceInterface
         }
 
         $contents = stream_get_contents($stream);
+
         fclose($stream);
 
         return $contents;
@@ -428,18 +435,12 @@ class FTPService implements ServiceInterface
     public function exists($filename)
     {
         $listing = $this->listDirectoryContents();
+
         $dirname_info = array_filter($listing, function ($item) use ($filename) {
             return $item['name'] === $filename;
         });
 
         return count($dirname_info) !== 0;
-    }
-
-    /**
-     * Get the extension of a file
-     */
-    public function extension($filename)
-    {
     }
 
     /**
@@ -451,6 +452,7 @@ class FTPService implements ServiceInterface
     public function isFile($filename)
     {
         $listing = $this->listDirectoryContents();
+
         $dirname_info = array_filter($listing, function ($item) use ($filename) {
             return $item['type'] === 'file' && $item['name'] === $filename;
         });
@@ -467,6 +469,7 @@ class FTPService implements ServiceInterface
     public function isDirectory($dirname)
     {
         $listing = $this->listDirectoryContents();
+
         $dirname_info = array_filter($listing, function ($item) use ($dirname) {
             return $item['type'] === 'directory' && $item['name'] === $dirname;
         });
@@ -483,7 +486,9 @@ class FTPService implements ServiceInterface
      */
     public function path($filename)
     {
-        // TODO: Implement path() method.
+        if ($this->exists($filename)) {
+
+        }
     }
 
 
@@ -519,9 +524,10 @@ class FTPService implements ServiceInterface
 
 
     /**
-     * @inheritdoc
+     * List the directory content
      *
      * @param string $directory
+     * @return array
      */
     protected function listDirectoryContents($directory = '.')
     {
@@ -536,12 +542,19 @@ class FTPService implements ServiceInterface
         return  $this->normalizeDirectoryListing($listing);
     }
 
+    /**
+     * Normalize directory content listing
+     * 
+     * @param array $listing
+     * @return array
+     */
     private function normalizeDirectoryListing($listing)
     {
         $normalizedListing = [];
 
         foreach ($listing as $child) {
             $chunks = preg_split("/\s+/", $child);
+
             list(
                 $item['rights'],
                 $item['number'],
@@ -551,9 +564,13 @@ class FTPService implements ServiceInterface
                 $item['month'],
                 $item['day'],
                 $item['time'],
-                $item['name']) = $chunks;
+                $item['name']
+            ) = $chunks;
+
             $item['type'] = $chunks[0]{0} === 'd' ? 'directory' : 'file';
+
             array_splice($chunks, 0, 8);
+
             $normalizedListing[implode(" ", $chunks)] = $item;
         }
 
@@ -564,7 +581,6 @@ class FTPService implements ServiceInterface
      * Read stream
      *
      * @param string $path
-     *
      * @return mixed
      */
     private function readStream($path)

@@ -113,14 +113,6 @@ interface FilesystemInterface
     public function exists($filename);
 
     /**
-     * The file extension
-     *
-     * @param string $filename
-     * @return string
-     */
-    public function extension($filename);
-
-    /**
      * isFile alias of is_file.
      *
      * @param string $filename
