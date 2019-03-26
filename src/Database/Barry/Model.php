@@ -7,9 +7,12 @@ use Bow\Database\Database as DB;
 use Bow\Database\Exception\NotFoundException;
 use Bow\Support\Str;
 use Carbon\Carbon;
+use Bow\Database\Barry\Concerns\Relationship;
 
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
+    use Relationship;
+
     /**
      * @var array
      */
@@ -330,7 +333,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @return Builder
      * @throws
      */
-    private static function query()
+    public static function query()
     {
         if (static::$builder instanceof Builder) {
             if (static::$builder->getModel() == static::class) {
@@ -623,6 +626,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Get the table name.
+     *
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    /**
      * Returns the data
      *
      * @return array
@@ -703,7 +716,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __get($name)
     {
-        if (!isset($this->attributes[$name])) {
+        $attributeExists = isset($this->attributes[$name]);
+
+        if (!$attributeExists && method_exists($this, $name)) {
+            return $this->$name()->getResults();
+        } else if (!$attributeExists) {
             return null;
         }
 
