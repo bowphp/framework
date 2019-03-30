@@ -14,7 +14,7 @@ class Session implements CollectionInterface
      *
      * @var array
      */
-    const CORE_KEY = [
+    const CORE_SESSION_KEY = [
         "flash" => "__bow.flash",
         "old" => "__bow.old",
         "listener" => "__bow.event.listener",
@@ -131,15 +131,11 @@ class Session implements CollectionInterface
      */
     private function boot()
     {
-        if (strlen(session_id()) == 0) {
-            if (headers_sent()) {
-                throw new SessionException('Headers already sent. Cannot start session.');
-            }
-            
+        if (!headers_sent()) {
             return @session_start();
         }
-
-        return true;
+        
+        throw new SessionException('Headers already sent. Cannot start session.');
     }
 
     /**
@@ -164,7 +160,7 @@ class Session implements CollectionInterface
         if ($this->config['driver'] == 'file') {
             $handler = new $driver(realpath($this->config['save_path']));
         } else {
-            $handler = new $driver($this->config['database']);
+            $handler = new $driver($this->config['database'], request()->ip());
         }
 
         // Set the session driver
@@ -180,24 +176,24 @@ class Session implements CollectionInterface
      */
     private function initializeInterneSessionStorage()
     {
-        if (!isset($_SESSION[static::CORE_KEY['csrf']])) {
-            $_SESSION[static::CORE_KEY['csrf']] = new \stdClass();
+        if (!isset($_SESSION[static::CORE_SESSION_KEY['csrf']])) {
+            $_SESSION[static::CORE_SESSION_KEY['csrf']] = new \stdClass();
         }
 
-        if (!isset($_SESSION[static::CORE_KEY['cache']])) {
-            $_SESSION[static::CORE_KEY['cache']] = [];
+        if (!isset($_SESSION[static::CORE_SESSION_KEY['cache']])) {
+            $_SESSION[static::CORE_SESSION_KEY['cache']] = [];
         }
 
-        if (!isset($_SESSION[static::CORE_KEY['listener']])) {
-            $_SESSION[static::CORE_KEY['listener']] = [];
+        if (!isset($_SESSION[static::CORE_SESSION_KEY['listener']])) {
+            $_SESSION[static::CORE_SESSION_KEY['listener']] = [];
         }
 
-        if (!isset($_SESSION[static::CORE_KEY['flash']])) {
-            $_SESSION[static::CORE_KEY['flash']] = [];
+        if (!isset($_SESSION[static::CORE_SESSION_KEY['flash']])) {
+            $_SESSION[static::CORE_SESSION_KEY['flash']] = [];
         }
 
-        if (!isset($_SESSION[static::CORE_KEY['old']])) {
-            $_SESSION[static::CORE_KEY['old']] = [];
+        if (!isset($_SESSION[static::CORE_SESSION_KEY['old']])) {
+            $_SESSION[static::CORE_SESSION_KEY['old']] = [];
         }
     }
 
@@ -250,7 +246,7 @@ class Session implements CollectionInterface
         $this->start();
 
         foreach ($_SESSION as $key => $value) {
-            if (!array_key_exists($key, static::CORE_KEY)) {
+            if (!array_key_exists($key, static::CORE_SESSION_KEY)) {
                 $arr[$key] = $value;
             }
         }
@@ -269,9 +265,9 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        $cache = $_SESSION[static::CORE_KEY['cache']];
+        $cache = $_SESSION[static::CORE_SESSION_KEY['cache']];
 
-        $flash = $_SESSION[static::CORE_KEY['flash']];
+        $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
         if (!$strict) {
             if (!isset($cache[$key])) {
@@ -329,14 +325,14 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        $flash = $_SESSION[static::CORE_KEY['flash']];
+        $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
         if (isset($flash[$key])) {
             $flash = $flash[$key];
 
             unset($flash[$key]);
 
-            $_SESSION[static::CORE_KEY['flash']] = $flash;
+            $_SESSION[static::CORE_SESSION_KEY['flash']] = $flash;
 
             return $flash;
         }
@@ -365,7 +361,7 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        $_SESSION[static::CORE_KEY['cache']][$key] = true;
+        $_SESSION[static::CORE_SESSION_KEY['cache']][$key] = true;
 
         if ($next == false) {
             return $_SESSION[$key] = $value;
@@ -439,7 +435,7 @@ class Session implements CollectionInterface
 
         $old = null;
 
-        $_SESSION[static::CORE_KEY['cache']][$key] = true;
+        $_SESSION[static::CORE_SESSION_KEY['cache']][$key] = true;
 
         if (!$this->has($key)) {
             $_SESSION[$key] = $value;
@@ -467,12 +463,12 @@ class Session implements CollectionInterface
         $this->start();
 
         if ($message !== null) {
-            $_SESSION[static::CORE_KEY['flash']][$key] = $message;
+            $_SESSION[static::CORE_SESSION_KEY['flash']][$key] = $message;
 
             return true;
         }
 
-        $flash = $_SESSION[static::CORE_KEY['flash']];
+        $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
         return isset($flash[$key]) ? $flash[$key] : null;
     }
@@ -494,7 +490,7 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        $_SESSION[static::CORE_KEY['flash']] = [];
+        $_SESSION[static::CORE_SESSION_KEY['flash']] = [];
     }
 
     /**
@@ -505,7 +501,7 @@ class Session implements CollectionInterface
         $this->start();
 
         foreach ($this->filter() as $key => $value) {
-            unset($_SESSION[static::CORE_KEY['cache']][$key]);
+            unset($_SESSION[static::CORE_SESSION_KEY['cache']][$key]);
 
             unset($_SESSION[$key]);
         }

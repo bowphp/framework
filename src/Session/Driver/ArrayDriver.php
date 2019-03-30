@@ -4,6 +4,8 @@ namespace Bow\Session\Driver;
 
 class ArrayDriver implements \SessionHandlerInterface
 {
+    use DurationTrait;
+
     /**
      * @var array
      */
@@ -27,7 +29,9 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function destroy($session_id)
     {
-         @unset($this->sessions[$session_id]);
+        @unset($this->sessions[$session_id]);
+
+        return true;
     }
 
     /**
@@ -39,10 +43,12 @@ class ArrayDriver implements \SessionHandlerInterface
     public function gc($maxlifetime)
     {
         foreach ($this->sessions as $session_id => $content) {
-            if ($this->sessions[$session_id]['time'] <= $maxlifetime) {
+            if ($this->sessions[$session_id]['time'] <= $this->createTimestamp()) {
                 $this->destroy($session_id);
             }
         }
+
+        return true;
     }
 
     /**
@@ -54,9 +60,7 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function open($save_path, $session_id)
     {
-        $this->sessions[$session_id] = [
-            'time' =>
-        ];
+        return true;
     }
 
     /**
@@ -67,7 +71,11 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function read($session_id)
     {
-        //
+        if (!isset($this->sessions[$session_id])) {
+            return '';
+        }
+
+        return $this->sessions[$session_id]['data'];
     }
 
     /**
@@ -79,6 +87,11 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function write($session_id, $session_data)
     {
-        $this->sessions[$session_id];
+        $this->sessions[$session_id] = [
+            'time' => $this->createTimestamp(),
+            'data' => $session_data
+        ];
+
+        return true;
     }
 }

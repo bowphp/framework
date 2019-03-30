@@ -11,7 +11,7 @@ class Cookie
      *
      * @var array
      */
-    private static $isDecrypt = [];
+    private static $is_decrypt = [];
 
     /**
      * __clone
@@ -34,10 +34,12 @@ class Cookie
     {
         $isset = isset($_COOKIE[$key]);
 
-        if ($strict) {
-            if ($isset) {
-                $isset = $isset && !empty($_COOKIE[$key]);
-            }
+        if (!$strict) {
+            return $isset;
+        }
+
+        if ($isset) {
+            $isset = $isset && !empty($_COOKIE[$key]);
         }
 
         return $isset;
@@ -138,10 +140,10 @@ class Cookie
             return $old;
         }
 
-        if (!static::$isDecrypt[$key]) {
+        if (!static::$is_decrypt[$key]) {
             $old = Crypto::decrypt($_COOKIE[$key]);
 
-            unset(static::$isDecrypt[$key]);
+            unset(static::$is_decrypt[$key]);
         }
 
         static::add($key, null, -1000);

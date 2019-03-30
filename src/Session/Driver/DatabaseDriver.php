@@ -7,6 +7,8 @@ use Bow\Support\Capsule;
 
 class DatabaseDriver implements \SessionHandlerInterface
 {
+    use DurationTrait;
+
     /**
      * The session table name
      *
@@ -22,13 +24,22 @@ class DatabaseDriver implements \SessionHandlerInterface
     private $session_id;
 
     /**
+     * The current user ip
+     *
+     * @var string
+     */
+    private $ip;
+
+    /**
      * Database constructor
      *
      * @param array $options
      */
-    public function __construct(array $options)
+    public function __construct(array $options, $ip)
     {
         $this->table = $options['table'] ?? 'sessions';
+
+        $this->ip = $ip;
     }
 
     /**
@@ -50,7 +61,7 @@ class DatabaseDriver implements \SessionHandlerInterface
     public function destroy($session_id)
     {
         $this->sessions()
-            ->where(['id' => $session_id])->delete();
+            ->where('id', $session_id)->delete();
 
         return true;
     }
@@ -111,17 +122,19 @@ class DatabaseDriver implements \SessionHandlerInterface
     {
         // When create the new session record
         if (! $this->sessions()->where('id', $session_id)->exists()) {
-            return (bool) $this->sessions()
-                ->insert($this->data($session_id));
+            $insert = $this->sessions()
+                ->insert($this->data($session_id, $session_data));
+
+            return $insert == 1;
         }
 
         // Update the session information
-        $this->sessions()->where('id', $session_id)->update([
+        $update = $this->sessions()->where('id', $session_id)->update([
             'data' => $session_data,
             'id' => $session_id
         ]);
 
-        return true;
+        return $update == 1;
     }
 
     /**
@@ -129,13 +142,13 @@ class DatabaseDriver implements \SessionHandlerInterface
      *
      * @return array
      */
-    private function data($session_id)
+    private function data($session_id, $session_data)
     {
         return [
             'id' => $session_id,
-            'time' => $this->createTimestamp((int) (config('session.lifetime') * 60)),
-            'data' => '',
-            'ip' => Capsule::getInstance()->make('request')->ip()
+            'time' => $this->createTimestamp(),
+            'data' => $session_data,
+            'ip' => $this->ip
         ];
     }
 
@@ -147,15 +160,5 @@ class DatabaseDriver implements \SessionHandlerInterface
     private function sessions()
     {
         return DB::table($this->table);
-    }
-
-    /**
-     * Create the timestamp
-     *
-     * @return string
-     */
-    private function createTimestamp($time)
-    {
-        return date('Y-m-d H:i:s', time() + $time);
     }
 }

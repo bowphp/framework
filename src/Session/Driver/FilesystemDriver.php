@@ -4,6 +4,8 @@ namespace Bow\Session\Driver;
 
 class FilesystemDriver implements \SessionHandlerInterface
 {
+    use DurationTrait;
+
     /**
      * The session save path
      *
@@ -55,7 +57,7 @@ class FilesystemDriver implements \SessionHandlerInterface
     public function gc($maxlifetime)
     {
         foreach (glob($this->save_path."/*") as $file) {
-            if (filemtime($file) + $maxlifetime < time() && file_exists($file)) {
+            if (filemtime($file) + $maxlifetime < $this->createTimestamp() && file_exists($file)) {
                 @unlink($file);
             }
         }
@@ -112,12 +114,6 @@ class FilesystemDriver implements \SessionHandlerInterface
      */
     private function sessionFile($session_id)
     {
-        $filename = basename($session_id);
-
-        if (file_exists($filename)) {
-            return $this->save_path.'/'.$filename;
-        }
-
-        return false;
+        return $this->save_path.'/'.basename($session_id);
     }
 }
