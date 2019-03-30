@@ -135,7 +135,8 @@ class FTPService implements ServiceInterface
 
         // We disable error handling to avoid credentials leak :+1:
         set_error_handler(
-            function () {}
+            function () {
+            }
         );
 
         $is_logged_in = ftp_login($this->connection, $username, $password);
@@ -487,7 +488,6 @@ class FTPService implements ServiceInterface
     public function path($filename)
     {
         if ($this->exists($filename)) {
-
         }
     }
 
@@ -544,7 +544,7 @@ class FTPService implements ServiceInterface
 
     /**
      * Normalize directory content listing
-     * 
+     *
      * @param array $listing
      * @return array
      */
