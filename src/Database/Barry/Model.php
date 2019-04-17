@@ -14,11 +14,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     use Relationship;
 
     /**
-     * @var array
-     */
-    protected $describeOrder = [];
-
-    /**
      * Enable the timestamps support
      *
      * @var bool
@@ -268,7 +263,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $r = $static->save();
 
         if ($r == 1) {
-            $static->fireEvent('oncreate');
+            $static->fireEvent('oncreated');
         }
 
         return $static;
@@ -296,7 +291,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function deleted(callable $cb)
     {
-        $env = static::formatEventName('ondelete');
+        $env = static::formatEventName('ondeleted');
 
         add_event_once($env, $cb);
     }
@@ -309,7 +304,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function created(callable $cb)
     {
-        $env = static::formatEventName('oncreate');
+        $env = static::formatEventName('oncreated');
 
         add_event_once($env, $cb);
     }
@@ -452,7 +447,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $this->original = $this->attributes;
 
             if ($r == 1) {
-                $this->fireEvent('oncreate');
+                $this->fireEvent('oncreated');
             }
 
             return $r;
@@ -509,7 +504,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             ->delete();
 
         if ($r == 1) {
-            $this->fireEvent('ondelete');
+            $this->fireEvent('ondeleted');
         }
 
         return $r;
@@ -720,7 +715,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if (!$attributeExists && method_exists($this, $name)) {
             return $this->$name()->getResults();
-        } else if (!$attributeExists) {
+        }
+
+        if (!$attributeExists) {
             return null;
         }
 

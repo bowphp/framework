@@ -12,28 +12,28 @@ class BelongsTo extends Relation
      *
      * @var string
      */
-    protected $foreignKey;
+    protected $foreign_key;
 
     /**
      * The associated key on the parent model.
      *
      * @var string
      */
-    protected $localKey;
+    protected $local_key;
 
     /**
      * Create a new belongs to relationship instance.
      *
      * @param Model $related
      * @param Model $parent
-     * @param string    $foreignKey
-     * @param string    $otherKey
-     * @param string    $relation
+     * @param string  $foreign_key
+     * @param string  $local_key
      */
-    public function __construct(Model $related, Model $parent, string $foreignKey, string $localKey)
+    public function __construct(Model $related, Model $parent, $foreign_key, $local_key)
     {
-        $this->localKey = $localKey;
-        $this->foreignKey = $foreignKey;
+        $this->local_key = $local_key;
+        $this->foreign_key = $foreign_key;
+
         parent::__construct($related, $parent);
     }
 
@@ -61,8 +61,8 @@ class BelongsTo extends Relation
             // For belongs to relationships, which are essentially the inverse of has one
             // or has many relationships, we need to actually query on the primary key
             // of the related models matching on the foreign key that's on a parent.
-            $foreignKeyValue = $this->parent->getAttribute($this->foreignKey);
-            $this->query->where($this->localKey, '=', $foreignKeyValue);
+            $foreign_keyValue = $this->parent->getAttribute($this->foreign_key);
+            $this->query->where($this->local_key, '=', $foreign_keyValue);
         }
     }
 }

@@ -12,28 +12,29 @@ class HasMany extends Relation
      *
      * @var string
      */
-    protected $foreignKey;
+    protected $foreign_key;
 
     /**
      * The associated key on the parent model.
      *
      * @var string
      */
-    protected $localKey;
+    protected $local_key;
 
     /**
      * Create a new belongs to relationship instance.
      *
      * @param Model $related
      * @param Model $parent
-     * @param string   $foreignKey
-     * @param string   $otherKey
+     * @param string   $foreign_key
+     * @param string   $local_key
      * @param string   $relation
      */
-    public function __construct(Model $related, Model $parent, string $foreignKey, string $localKey)
+    public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
     {
-        $this->localKey = $localKey;
-        $this->foreignKey = $foreignKey;
+        $this->local_key = $local_key;
+        $this->foreign_key = $foreign_key;
+
         parent::__construct($related, $parent);
     }
 
@@ -58,6 +59,7 @@ class HasMany extends Relation
     public function addConstraints()
     {
         if (static::$hasConstraints) {
+            // Todo
         }
     }
 }

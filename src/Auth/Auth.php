@@ -103,7 +103,7 @@ class Auth
         }
 
         if (! isset(static::$config[$guard])) {
-            throw new AuthenticateException("Aucune configuration trouvée", E_ERROR);
+            throw new AuthenticateException("Configuration not found for $guard guard.", E_ERROR);
         }
 
         $provider = static::$config[$guard];
@@ -151,17 +151,20 @@ class Auth
     {
         $model = $this->provider['model'];
 
-        $user  = $model::where('email', $credentials[$this->credentials['email']])->first();
+        $email = $credentials[$this->credentials['email']];
+        $password = $credentials[$this->credentials['password']];
+
+        $user = $model::where($this->credentials['email'], $email)->first();
 
         if (is_null($user)) {
             return false;
         }
 
-        if (!Hash::check($user->password, $credentials[$this->credentials['password']])) {
+        if (!Hash::check($user->password, $password)) {
             return false;
         }
 
-        static::$session->add('_auth', $user);
+        static::$session->put('_auth', $user);
 
         return true;
     }
@@ -204,6 +207,6 @@ class Auth
             return call_user_func_array([static::$instance, $method], $parameters);
         }
 
-        throw new \BadMethodCallException(sprintf("La methode %s n'existe pas", $method), 1);
+        throw new \BadMethodCallException(sprintf("The %s method is not found", $method), 1);
     }
 }

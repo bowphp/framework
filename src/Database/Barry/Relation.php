@@ -42,6 +42,12 @@ abstract class Relation
      */
     protected static $hasPivot = false;
 
+    /**
+     * Relation Contructor
+     *
+     * @param Model $related
+     * @param Model $parent
+     */
     public function __construct(Model $related, Model $parent)
     {
         $this->parent = $parent;
@@ -82,11 +88,17 @@ abstract class Relation
      *
      * @return Model
      */
-    public function getRelated(): Model
+    public function getRelated()
     {
         return $this->related;
     }
 
+    /**
+     * _Call
+     *
+     * @param string $method
+     * @param string $args
+     */
     public function __call($method, $args)
     {
         $result = call_user_func_array([$this->query, $method], $args);

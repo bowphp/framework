@@ -26,15 +26,15 @@ class Builder extends QueryBuilder
 
         $model = $this->model;
 
-        if (is_array($data)) {
-            foreach ($data as $key => $value) {
-                $data[$key] = new $model((array) $value);
-            }
-
-            return new Collection($data);
+        if (!is_array($data)) {
+            return new $model((array) $data);
+        }
+        
+        foreach ($data as $key => $value) {
+            $data[$key] = new $model((array) $value);
         }
 
-        return new $model((array) $data);
+        return new Collection($data);
     }
 
     /**
