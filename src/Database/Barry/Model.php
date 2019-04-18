@@ -28,18 +28,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $prefix;
 
     /**
-     * Enable the autoincrement support
+     * Enable the auto increment support
      *
      * @var bool
      */
-    protected $autoIncrement = true;
+    protected $auto_increment = true;
 
     /**
      * Enable the soft deletion
      *
      * @var bool
      */
-    protected $softDelete = false;
+    protected $soft_delete = false;
 
     /**
      * Defines the column where the query construct will use for the last query
@@ -245,7 +245,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         if (!array_key_exists($static->primary_key, $data)) {
-            if ($static->autoIncrement) {
+            if ($static->auto_increment) {
                 $id_value = [$static->primary_key => null];
 
                 $data = array_merge($id_value, $data);
@@ -638,6 +638,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function toArray()
     {
         return $this->attributes;
+    }
+
+    /**
+     * Returns the data
+     *
+     * @return array
+     */
+    public function toJson()
+    {
+        return json_encode($this->attributes);
     }
 
     /**
