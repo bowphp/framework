@@ -8,6 +8,8 @@ use Bow\Support\Str;
 
 class SQLGenerator
 {
+    use CustomColumn;
+    
     /**
      * The managed table name
      *

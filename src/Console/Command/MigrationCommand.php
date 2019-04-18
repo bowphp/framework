@@ -67,11 +67,10 @@ class MigrationCommand extends AbstractCommand
             $migrations[$file] = explode('.', basename($file))[0];
         }
 
-        $options = $this->arg->options();
-
+        // We create the migration database status
         $this->createMigrationTable();
 
-        // Get current migration status
+        // We get current migration status
         $current_migrations = $this->getMigrationTable()
         ->whereIn('migration', array_values($migrations))->get();
 
@@ -80,7 +79,7 @@ class MigrationCommand extends AbstractCommand
 
             return $this->$action($current_migrations, $migrations);
         } catch (\Exception $exception) {
-            $this->printExceptionMessage($exception);
+            throw $exception;
         }
     }
 
@@ -270,9 +269,10 @@ class MigrationCommand extends AbstractCommand
      */
     private function createMigrationTable()
     {
+        $adapter = Database::getConnectionAdapter();
         $generator = new SQLGenerator(
-            config('database.migration'),
-            Database::getConnectionAdapter()->getName(),
+            $adapter->getTablePrefix().config('database.migration'),
+            $adapter->getName(),
             'create'
         );
 
@@ -289,7 +289,7 @@ class MigrationCommand extends AbstractCommand
             $generator->make()
         );
 
-        statement($sql);
+        return Database::statement($sql);
     }
 
     /**
