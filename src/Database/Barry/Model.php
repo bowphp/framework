@@ -14,6 +14,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     use Relationship;
 
     /**
+     * The hidden field
+     *
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
      * Enable the timestamps support
      *
      * @var bool
@@ -28,18 +35,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $prefix;
 
     /**
-     * Enable the auto increment support
+     * Enable the autoincrement support
      *
      * @var bool
      */
-    protected $auto_increment = true;
+    protected $autoIncrement = true;
 
     /**
      * Enable the soft deletion
      *
      * @var bool
      */
-    protected $soft_delete = false;
+    protected $softDelete = false;
 
     /**
      * Defines the column where the query construct will use for the last query
@@ -245,7 +252,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         if (!array_key_exists($static->primary_key, $data)) {
-            if ($static->auto_increment) {
+            if ($static->autoIncrement) {
                 $id_value = [$static->primary_key => null];
 
                 $data = array_merge($id_value, $data);
@@ -647,7 +654,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function toJson()
     {
-        return json_encode($this->attributes);
+        $data = [];
+
+        foreach ($this->attributes as $key => $value) {
+            if (!in_array($key, $this->hidden)) {
+                $data[$key] = $value;
+            }
+        }
+
+        return json_encode($data);
     }
 
     /**
