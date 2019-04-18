@@ -270,8 +270,9 @@ class MigrationCommand extends AbstractCommand
     private function createMigrationTable()
     {
         $adapter = Database::getConnectionAdapter();
+        $table = $adapter->getTablePrefix().config('database.migration');
         $generator = new SQLGenerator(
-            $adapter->getTablePrefix().config('database.migration'),
+            $table,
             $adapter->getName(),
             'create'
         );
@@ -285,7 +286,7 @@ class MigrationCommand extends AbstractCommand
 
         $sql = sprintf(
             'CREATE TABLE IF NOT EXISTS %s (%s);',
-            config('database.migration'),
+            $table,
             $generator->make()
         );
 
