@@ -20,10 +20,10 @@ return [
          */
         'ftp' => [
             'hostname' => app_env('FTP_HOST', 'localhost'),
-            'password' => app_env('FTP_PASSWORD'),
-            'username' => app_env('FTP_USERNAME'),
+            'password' => app_env('FTP_PASSWORD', '12345'),
+            'username' => app_env('FTP_USERNAME', 'bob'),
             'port'     => app_env('FTP_PORT', 21),
-            'root' => app_env('FTP_ROOT', ''), // Start directory
+            'root' => app_env('FTP_ROOT', '/tmp'), // Start directory
             'tls' => app_env('FTP_SSL', false), // `true` enable the secure connexion.
             'timeout' => app_env('FTP_TIMEOUT', 90) // Temps d'attente de connection
         ],
