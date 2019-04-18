@@ -30,8 +30,8 @@ class ServerCommand extends AbstractCommand
 
         $message = sprintf(
             "[%s] Server start at http://%s:%s \033[0;31;7mCTRL-C for shutdown it\033[00m\n",
-            $hostname,
             date('F d Y H:i:s a'),
+            $hostname,
             $port
         );
 
