@@ -8,7 +8,8 @@ use Bow\Support\Str;
 
 class SQLGenerator
 {
-    use CustomColumn;
+    use Shortcut\NumberColumn;
+    use Shortcut\MixedColumn;
     
     /**
      * The managed table name
