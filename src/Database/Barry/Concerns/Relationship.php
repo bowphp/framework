@@ -24,7 +24,7 @@ trait Relationship
      * @param string $local_key
      * @return BelongsTo
      */
-    public function belongsTo(string $related, ?string $foreign_key = null, ?string $local_key = null)
+    public function belongsTo(string $related, string $foreign_key = null, string $local_key = null)
     {
         $relatedModel = app()->make($related);
         $local_key = $local_key ?? $this->getKey();
@@ -42,7 +42,7 @@ trait Relationship
      * @param string $foreign_key
      * @return BelongsToMany
      */
-    public function belongsToMany(string $related, ?string $primary_key = null, ?string $foreign_key = null)
+    public function belongsToMany(string $related, string $primary_key = null, string $foreign_key = null)
     {
         $relatedModel = app()->make($related);
         $local_key = $local_key ?? $this->getKey();
