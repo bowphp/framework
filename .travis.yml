@@ -22,7 +22,7 @@ env:
   - DB_USER=travis FTP_USER=bob FTP_PASSWORD=12345
 
 before_install:
-  - docker run --net=host -d --name proftpd -v ./:/home/$FTP_USER vipconsult/proftpd
+  - docker run --net=host -d --name proftpd -v $(pwd)/:/home/$FTP_USER vipconsult/proftpd
   - docker exec -it proftpd ftpasswd --file=/etc/proftpd/ftpd.passwd \ 
     --passwd=$FTP_PASSWORD --shell=/bin/false --name=$FTP_USER
 
