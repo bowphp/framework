@@ -36,7 +36,7 @@ class Console
      *
      * @var array
      */
-    private $registers;
+    private $registers = [];
 
     /**
      * Defines if console booted

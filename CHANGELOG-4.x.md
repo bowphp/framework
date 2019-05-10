@@ -7,4 +7,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Syntax error, unexpected '?', expecting variable Barry/Concerns/Relationship.php on line 27
+- Fix "Syntax error, unexpected '?', expecting variable" in Barry/Concerns/Relationship.php on line 27
+- Fix "array_key_exists() expects parameter 2 to be array" in Console/Console.php on line 130
