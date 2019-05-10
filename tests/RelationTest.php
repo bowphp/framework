@@ -30,7 +30,7 @@ class Pet extends \Bow\Database\Barry\Model
     /**
      * @var string
      */
-    protected $table = "pets";
+    protected $table = "pet2s";
 
     /**
      * @var string
@@ -59,12 +59,12 @@ class RelationTest extends \PHPUnit\Framework\TestCase
     {
         $this->db = $this->configureDatabase();
         $this->db->getPdo()->exec('CREATE TABLE IF NOT EXISTS masters (id INT, name VARCHAR(255))');
-        $this->db->getPdo()->exec('CREATE TABLE IF NOT EXISTS pets (id INT, name VARCHAR(255), master_id INT, FOREIGN KEY (master_id) REFERENCES masters(id))');
+        $this->db->getPdo()->exec('CREATE TABLE IF NOT EXISTS pet2s (id INT, name VARCHAR(255), master_id INT, FOREIGN KEY (master_id) REFERENCES masters(id))');
     }
 
     protected function tearDown()
     {
-        $this->db->getPdo()->exec('DROP TABLE IF EXISTS pets');
+        $this->db->getPdo()->exec('DROP TABLE IF EXISTS pet2s');
         $this->db->getPdo()->exec('DROP TABLE IF EXISTS masters');
     }
 
@@ -72,8 +72,8 @@ class RelationTest extends \PHPUnit\Framework\TestCase
     {
         // Create the records
         $this->db->getPdo()->exec("INSERT INTO masters VALUES (1, 'didi')");
-        $this->db->getPdo()->exec("INSERT INTO pets VALUES (1, 'fluffy', 1)");
-        $this->db->getPdo()->exec("INSERT INTO pets VALUES (2, 'dolly', 1)");
+        $this->db->getPdo()->exec("INSERT INTO pet2s VALUES (1, 'fluffy', 1)");
+        $this->db->getPdo()->exec("INSERT INTO pet2s VALUES (2, 'dolly', 1)");
 
         $pet = Pet::find(1);
         $master = $pet->master;

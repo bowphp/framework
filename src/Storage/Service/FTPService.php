@@ -92,7 +92,9 @@ class FTPService implements ServiceInterface
      */
     public function connect()
     {
-        ['hostname' => $host, 'port' => $port, 'timeout' => $timeout] = $this->config;
+        $host = $this->config['hostname'];
+        $port = $this->config['port'];
+        $timeout = $this->config['timeout'];
 
         if ($this->config['tls']) {
             $this->connection = ftp_ssl_connect($host, $port, $timeout);
