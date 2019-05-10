@@ -717,7 +717,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function offsetGet($offset)
     {
-        return isset($this->attributes[$offset]) ? $this->attributes[$offset] : null;
+        return isset($this->attributes[$offset])
+            ? $this->attributes[$offset]
+            : null;
     }
 
     /**
