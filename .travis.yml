@@ -8,6 +8,7 @@ sudo: false
 
 services:
   - mysql
+  - docker
 
 cache:
   directories:
@@ -18,20 +19,25 @@ php:
   - nightly
 
 env:
-  - DB_USER=travis
+  - DB_USER=travis FTP_USER=bob FTP_PASSWORD=12345
+
+before_install:
+  - docker run --net=host -d --name proftpd -v ./:/home/$FTP_USER vipconsult/proftpd
+  - docker exec -it proftpd ftpasswd --file=/etc/proftpd/ftpd.passwd \ 
+    --passwd=$FTP_PASSWORD --shell=/bin/false --name=$FTP_USER
+
+install:
+  - composer install --prefer-dist
 
 before_script:
   - ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
   - if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
   - mysql -u root -e 'CREATE DATABASE IF NOT EXISTS test;'
 
-install:
-  - composer install --prefer-dist
+script:
+  - ./vendor/bin/phpunit --configuration phpunit.dist.xml
 
 matrix:
   allow_failures:
     - php: nightly
   fast_finish: true
-
-script:
-  - ./vendor/bin/phpunit --configuration phpunit.dist.xml
