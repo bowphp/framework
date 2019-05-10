@@ -564,7 +564,7 @@ class Application
         }
 
         throw new RouterException(
-            sprintf('La route "%s" n\'existe pas', $this->request->path()),
+            sprintf('Route "%s" not found', $this->request->path()),
             E_ERROR
         );
     }
