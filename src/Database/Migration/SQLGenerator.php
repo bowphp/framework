@@ -8,7 +8,8 @@ use Bow\Support\Str;
 
 class SQLGenerator
 {
-    use CustomColumn;
+    use Shortcut\NumberColumn;
+    use Shortcut\MixedColumn;
     
     /**
      * The managed table name
@@ -231,16 +232,14 @@ class SQLGenerator
         $references = '';
 
         if (isset($attributes['on'])) {
-            $on = strtoupper('ON ' .$attributes['on']);
+            $on = strtoupper(' ON ' .$attributes['on']);
         }
 
         if (isset($attributes['references'])) {
-            $references = strtoupper(
-                sprintf(
-                    'REFERENCES %s(%s)',
-                    $attributes['table'],
-                    $attributes['references']
-                )
+            $references = sprintf(
+                ' REFERENCES %s(%s)',
+                $attributes['table'],
+                $attributes['references']
             );
         }
 

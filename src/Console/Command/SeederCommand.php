@@ -3,7 +3,7 @@
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
-use Bow\Console\GeneratorCommand;
+use Bow\Console\Generator;
 use Bow\Database\Database;
 
 class SeederCommand extends AbstractCommand
@@ -15,7 +15,7 @@ class SeederCommand extends AbstractCommand
      */
     public function generate($seeder)
     {
-        $generator = new GeneratorCommand(
+        $generator = new Generator(
             $this->setting->getSeederDirectory(),
             "{$seeder}_seeder"
         );
