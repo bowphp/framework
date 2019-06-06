@@ -40,7 +40,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         $r = Database::insert('INSERT INTO `bow_tests`(name) VALUES("Bow Framework")');
 
         $this->assertEquals($r, 1);
-        
+
         $r = Database::select('SELECT * FROM `bow_tests`');
 
         $this->assertTrue(is_array($r));
@@ -64,7 +64,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
             $this->assertTrue(true, 'Migration ok');
         } catch (\Exception $e) {
-            $this->assertTrue(false, $e->getMessage());
+            $this->assertFalse(false, $e->getMessage());
         }
 
         try {
@@ -72,10 +72,10 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
                 $generator->dropColumn('name');
                 $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
             });
-            
+
              $this->assertTrue(true, 'Migration ok');
         } catch (\Exception $e) {
-            $this->assertTrue(false, $e->getMessage());
+            $this->assertFalse(false, $e->getMessage());
         }
 
         $this->migration->drop('bow_tests');
