@@ -15,17 +15,14 @@ cache:
     - $HOME/.composer/cache
 
 php:
-  - 7.0
+  - 7.1
   - nightly
 
 env:
   - DB_USER=travis FTP_USER=bob FTP_PASSWORD=12345
 
 before_install:
-  - docker run --net=host -d --name proftpd -v $(pwd)/:/home/$FTP_USER vipconsult/proftpd
-  - docker exec -it proftpd ftpasswd --file=/etc/proftpd/ftpd.passwd \ 
-    --passwd=$FTP_PASSWORD --shell=/bin/false --name=$FTP_USER
-
+  - docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name proftpd -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
 install:
   - composer install --prefer-dist
 

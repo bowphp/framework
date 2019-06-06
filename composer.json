@@ -8,7 +8,7 @@
         "source": "https://github.com/bowphp/framework"
     },
     "require": {
-        "php": ">=7",
+        "php": "^7.1",
         "bowphp/tintin": "*",
         "filp/whoops": "^2.1",
         "nesbot/carbon": "^1.21",
