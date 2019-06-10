@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fix the unparsed parameter in url
+
 ### [4.0.3] - 2019-06-10
 
 - Fix "Syntax error, unexpected '?', expecting variable" in Barry/Concerns/Relationship.php on line 27
