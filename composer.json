@@ -11,7 +11,7 @@
         "php": "^7.1",
         "bowphp/tintin": "*",
         "filp/whoops": "^2.1",
-        "nesbot/carbon": "^1.21",
+        "nesbot/carbon": "^2.16",
         "psy/psysh": "@stable",
         "fzaninotto/faker": "^1.8"
     },
