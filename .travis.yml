@@ -3,6 +3,7 @@ language: php
 branches:
   only:
     - master
+    - 4.0
 
 sudo: false
 
