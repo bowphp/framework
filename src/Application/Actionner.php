@@ -210,12 +210,12 @@ class Actionner
             }
 
             if (!array_key_exists($middleware, $this->middlewares)) {
-                throw new RouterException(sprintf('%s n\'est pas un middleware définir.', $middleware), E_ERROR);
+                throw new RouterException(sprintf('%s is not define middleware.', $middleware), E_ERROR);
             }
 
             // We check if the defined middleware is a valid middleware.
             if (!class_exists($this->middlewares[$middleware])) {
-                throw new RouterException(sprintf('%s n\'est pas un class middleware.', $middleware));
+                throw new RouterException(sprintf('%s is not a middleware class.', $middleware));
             }
 
             // We qdd middleware into dispatch pipeline
@@ -256,6 +256,11 @@ class Actionner
     private function dispatchControllers(array $functions, array $param)
     {
         $response = null;
+
+        // Fix the unparsed parameter in url
+        foreach ($param as $key => $value) {
+            $param[$key] = urldecode($value);
+        }
 
         // We launch of the execution of the list of actions define
         // Function has been executed according to an order
