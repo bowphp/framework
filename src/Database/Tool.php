@@ -33,24 +33,21 @@ class Tool
         foreach ($data as $key => $value) {
             $param = PDO::PARAM_INT;
 
-            if (preg_match('/[a-z0-9A-Z_-]+|éàèëïùöôîüµ$£!?\.\+,;:/', $value) && !is_numeric($value)) {
-                /**
-                 * SECURITY OF DATA
-                 * - Injection SQL
-                 * - XSS
-                 */
-                $param = PDO::PARAM_STR;
+            /**
+             * We force the value in whole or in real.
+             *
+             * SECURITY OF DATA
+             * - Injection SQL
+             * - XSS
+             */
+            if (is_int($value)) {
+                $value = (int) $value;
+            } elseif (is_float($value)) {
+                $value = (float) $value;
+            } elseif (is_double($value)) {
+                $value = (double) $value;
             } else {
-                /**
-                 * We force the value in whole or in reel.
-                 */
-                if (is_int($value)) {
-                    $value = (int) $value;
-                } elseif (is_float($value)) {
-                    $value = (float) $value;
-                } else {
-                    $value = (double) $value;
-                }
+                $param = PDO::PARAM_STR;
             }
 
             if (is_string($key)) {
