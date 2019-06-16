@@ -39,7 +39,7 @@ class HttpClient
         }
 
         if (is_string($url)) {
-            $this->ch = curl_init(urlencode($url));
+            $this->ch = curl_init($url);
 
             $this->url = $url;
         }

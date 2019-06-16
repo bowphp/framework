@@ -49,6 +49,8 @@ class TestCase extends PHPUnitTestCase
     public function withHeader(array $headers)
     {
         $this->headers = $headers;
+
+        return $this;
     }
 
     /**
