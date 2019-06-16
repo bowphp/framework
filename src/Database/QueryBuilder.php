@@ -114,7 +114,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * SELECT $column | SELECT column1, column2, ...
      *
      * @param array $select
-     *
      * @return QueryBuilder
      */
     public function select(array $select = ['*'])
@@ -141,9 +140,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $comp
      * @param mixed $value
      * @param string $boolean
-     *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
     public function where($column, $comp = '=', $value = null, $boolean = 'and')
@@ -155,12 +152,12 @@ class QueryBuilder extends Tool implements \JsonSerializable
         }
 
         if ($value === null) {
-            throw new QueryBuilderException('Valeur de comparaison non définie', E_ERROR);
+            throw new QueryBuilderException('Unresolved comparison value', E_ERROR);
         }
 
         if (!in_array(Str::lower($boolean), ['and', 'or'])) {
             throw new QueryBuilderException(
-                'Le booléen '. $boolean . ' non accepté',
+                'The bool '. $boolean . ' not accepted',
                 E_ERROR
             );
         }
@@ -184,16 +181,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $column
      * @param string $comp
      * @param mixed   $value
-     *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
     public function orWhere($column, $comp = '=', $value = null)
     {
         if (is_null($this->where)) {
             throw new QueryBuilderException(
-                'Cette fonction ne peut pas être utiliser sans un where avant.',
+                'This function can not be used without a where before.',
                 E_ERROR
             );
         }
@@ -208,7 +203,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param string $boolean
-     *
      * @return QueryBuilder
      */
     public function whereNull($column, $boolean = 'and')
@@ -229,7 +223,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param $column
      * @param string $boolean
-     *
      * @return QueryBuilder
      */
     public function whereNotNull($column, $boolean = 'and')
@@ -251,9 +244,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $column
      * @param array $range
      * @param string boolean
-     *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
     public function whereBetween($column, array $range, $boolean = 'and')
@@ -305,9 +296,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $column
      * @param array  $range
      * @param string $boolean
-     *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
     public function whereIn($column, array $range, $boolean = 'and')
@@ -349,9 +338,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param array  $range
-     *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
     public function whereNotIn($column, array $range)
@@ -366,7 +353,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string   $table
      * @param callable $callabe
-     *
      * @return QueryBuilder
      */
     public function join($table, callable $callabe = null)
@@ -391,7 +377,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $table
      * @param callable $callable
-     *
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
@@ -430,7 +415,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $table
      * @param callable $callable
-     *
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
@@ -471,16 +455,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $first
      * @param string $comp
      * @param string $second
-     *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
     public function on($first, $comp = '=', $second = null)
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException(
-                'La clause intérieure rejoindre est dèja initialisé.',
+                'The inner join clause is already initialized.',
                 E_ERROR
             );
         }
@@ -513,9 +495,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $first
      * @param string $comp
      * @param string $second
-     *
      * @throws QueryBuilderException
-     *
      * @return QueryBuilder
      */
     public function orOn($first, $comp = '=', $second = null)
@@ -555,7 +535,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Clause Group By
      *
      * @param string $column
-     *
      * @return QueryBuilder
      */
     public function group($column)
@@ -574,7 +553,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $comp
      * @param mixed  $value
      * @param string $boolean
-     *
      * @return QueryBuilder
      */
     public function having($column, $comp = '=', $value = null, $boolean = 'and')
@@ -598,7 +576,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param string $type
-     *
      * @return QueryBuilder
      */
     public function orderBy($column, $type = 'asc')
@@ -635,7 +612,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Take = Limit
      *
      * @param int $limit
-     *
      * @return QueryBuilder
      */
     public function take($limit)
@@ -657,7 +633,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Max
      *
      * @param string $column
-     *
      * @return QueryBuilder|number|array|object
      */
     public function max($column)
@@ -669,7 +644,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Min
      *
      * @param string $column
-     *
      * @return QueryBuilder|number|object
      */
     public function min($column)
@@ -681,7 +655,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Avg
      *
      * @param string $column
-     *
      * @return QueryBuilder|number|object
      */
     public function avg($column)
@@ -693,7 +666,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Sum
      *
      * @param string $column
-     *
      * @return QueryBuilder|number|object
      */
     public function sum($column)
@@ -702,11 +674,10 @@ class QueryBuilder extends Tool implements \JsonSerializable
     }
 
     /**
-     * Lance en interne les requêtes utilisants les aggregats.
+     * Internally launches queries that use aggregates.
      *
      * @param $aggregat
      * @param string $column
-     *
      * @return QueryBuilder|number|object
      */
     private function executeAgregat($aggregat, $column)
@@ -944,7 +915,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $comp
      * @param string $value
      * @return int
-     *
      * @throws QueryBuilderException
      */
     public function remove($column, $comp = '=', $value = null)
@@ -973,7 +943,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param int    $step
-     *
      * @return int
      */
     public function decrement($column, $step = 1)
@@ -985,7 +954,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Allows a query with the DISTINCT clause
      *
      * @param  string $column
-     *
      * @return QueryBuilder
      */
     public function distinct($column)
@@ -1005,7 +973,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $column
      * @param int    $step
      * @param string $sign
-     *
      * @return int
      */
     private function incrementAction($column, $step = 1, $sign = '')
@@ -1044,7 +1011,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * The data to be inserted into the database.
      *
      * @param array $values
-     *
      * @return int
      */
     public function insert(array $values)
@@ -1075,7 +1041,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @see insert
      * @param array $value
-     *
      * @return int
      */
     private function insertOne(array $value)
@@ -1101,7 +1066,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * InsertAndGetLastId action launches the insert and lastInsertId actions
      *
      * @param array $values
-     *
      * @return int
      */
     public function insertAndGetLastId(array $values)
@@ -1128,7 +1092,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * IsComporaisonOperator utility, allows to validate an operator
      *
      * @param string $comp
-     *
      * @return bool
      */
     private static function isComporaisonOperator($comp)
@@ -1142,7 +1105,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param int $n
      * @param int $current
      * @param int $chunk
-     *
      * @return Collection
      */
     public function paginate($n, $current = 0, $chunk = null)
@@ -1201,7 +1163,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param  string $column
      * @param  mixed  $value
      * @return bool
-     *
      * @throws QueryBuilderException
      */
     public function exists($column = null, $value = null)
@@ -1342,7 +1303,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Change the table's name
      *
      * @param string $table
-     *
      * @return QueryBuilder
      */
     public function setTable($table)
