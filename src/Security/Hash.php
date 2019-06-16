@@ -11,6 +11,19 @@ class Hash
      * @param  int    $cost
      * @return bool|string
      */
+    public static function create($value, $cost = 10)
+    {
+        return password_hash($value, PASSWORD_BCRYPT, ['cast' => $cost]);
+    }
+
+    /**
+     * Allows to have a value and when the hash has failed it returns false.
+     *
+     * @deprecated
+     * @param  string $value
+     * @param  int    $cost
+     * @return bool|string
+     */
     public static function make($value, $cost = 10)
     {
         return password_hash($value, PASSWORD_BCRYPT, ['cast' => $cost]);
