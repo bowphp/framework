@@ -130,7 +130,13 @@ class HttpClient
     public function addHeaders(array $headers)
     {
         if (is_resource($this->ch)) {
-            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+            $data = [];
+
+            foreach ($headers as $key => $value) {
+                $data[] = $key.': '.$value;
+            }
+
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $data);
         }
 
         return $this;
