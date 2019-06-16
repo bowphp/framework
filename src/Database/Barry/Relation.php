@@ -33,14 +33,14 @@ abstract class Relation
      *
      * @var bool
      */
-    protected static $hasConstraints = true;
+    protected static $has_constraints = true;
 
     /**
      * Indicate whether the relationships use a pivot table.*.
      *
      * @var bool
      */
-    protected static $hasPivot = false;
+    protected static $has_pivot = false;
 
     /**
      * Relation Contructor
@@ -54,7 +54,7 @@ abstract class Relation
         $this->related = $related;
         $this->query = $this->related::query();
 
-        if (static::$hasConstraints) {
+        if (static::$has_constraints) {
             $this->addConstraints();
         }
     }
@@ -98,6 +98,7 @@ abstract class Relation
      *
      * @param string $method
      * @param string $args
+     * @return mixed
      */
     public function __call($method, $args)
     {

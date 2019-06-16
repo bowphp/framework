@@ -7,7 +7,7 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
 {
     public function testHashValue()
     {
-        return Hash::make('bow');
+        return Hash::create('bow');
     }
 
     public function testEncryptValue()
