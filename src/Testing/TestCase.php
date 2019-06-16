@@ -23,6 +23,13 @@ class TestCase extends PHPUnitTestCase
     protected $url = '';
 
     /**
+     * The list of additionnal header
+     *
+     * @var array
+     */
+    private $headers = [];
+
+    /**
      * Format url
      *
      * @param  $url
@@ -31,6 +38,17 @@ class TestCase extends PHPUnitTestCase
     private function formatUrl($url)
     {
         return rtrim($this->url, '/').$url;
+    }
+
+    /**
+     * Specify the additionnal who are use in the request
+     *
+     * @param array $headers
+     * @return TestCase
+     */
+    public function withHeader(array $headers)
+    {
+        $this->headers = $headers;
     }
 
     /**
@@ -44,6 +62,8 @@ class TestCase extends PHPUnitTestCase
     public function get($url, array $param = [])
     {
         $http = new HttpClient($this->formatUrl($url));
+
+        $http->addHeaders($this->headers);
 
         return $http->get($url, $param);
     }
@@ -63,6 +83,8 @@ class TestCase extends PHPUnitTestCase
         if (!empty($this->attach)) {
             $http->addAttach($this->attach);
         }
+
+        $http->addHeaders($this->headers);
 
         return $http->post($url, $param);
     }
@@ -93,6 +115,8 @@ class TestCase extends PHPUnitTestCase
     {
         $http = new HttpClient($this->formatUrl($url));
 
+        $http->addHeaders($this->headers);
+
         return $http->put($url, $param);
     }
 
@@ -110,6 +134,8 @@ class TestCase extends PHPUnitTestCase
             '_method' => 'DELETE'
         ], $param);
 
+        $http->addHeaders($this->headers);
+
         return $this->put($url, $param);
     }
 
@@ -126,6 +152,8 @@ class TestCase extends PHPUnitTestCase
         $param = array_merge([
             '_method' => 'PATCH'
         ], $param);
+
+        $http->addHeaders($this->headers);
 
         return $this->put($url, $param);
     }

@@ -39,7 +39,7 @@ class HttpClient
         }
 
         if (is_string($url)) {
-            $this->ch = curl_init($url);
+            $this->ch = curl_init(urlencode($url));
 
             $this->url = $url;
         }
@@ -122,6 +122,21 @@ class HttpClient
     }
 
     /**
+     * Add aditionnal header
+     *
+     * @param array $headers
+     * @return HttpClient
+     */
+    public function addHeaders(array $headers)
+    {
+        if (is_resource($this->ch)) {
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+        }
+
+        return $this;
+    }
+
+    /**
      * Reset alway connection
      *
      * @param string $url
@@ -131,7 +146,7 @@ class HttpClient
     private function resetAndAssociateUrl($url)
     {
         if (!is_resource($this->ch)) {
-            $this->ch = curl_init($url);
+            $this->ch = curl_init(urlencode($url));
         }
     }
 
