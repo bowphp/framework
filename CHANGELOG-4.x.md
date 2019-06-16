@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [4.0.6,4.0.5] - 2019-06-16
+
 - Fix the unparsed parameter in url
 - Fix [#60](https://github.com/bowphp/framework/issues/60)
 - Fix [#61](https://github.com/bowphp/framework/issues/61)
