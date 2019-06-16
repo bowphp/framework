@@ -26,13 +26,6 @@ class Auth
     ];
 
     /**
-     * The Session instance
-     *
-     * @var Session
-     */
-    private static $session;
-
-    /**
      * The Auth instance
      *
      * @var Auth
@@ -73,8 +66,6 @@ class Auth
 
         static::$config = $config;
 
-        static::$session = Session::getInstance();
-
         return static::$instance = new Auth($config[$config['default']]);
     }
 
@@ -86,6 +77,16 @@ class Auth
     public static function getInstance()
     {
         return static::$instance;
+    }
+
+    /**
+     * Get the session instance
+     *
+     * @return Session
+     */
+    private static function getSession()
+    {
+        return Session::getInstance();
     }
 
     /**
@@ -118,7 +119,7 @@ class Auth
      */
     public function check()
     {
-        return static::$session->has('_auth');
+        return static::getSession()->has('_auth');
     }
 
     /**
@@ -128,7 +129,7 @@ class Auth
      */
     public function guest()
     {
-        return !static::$session->has('_auth');
+        return !$this->getSession()->has('_auth');
     }
 
     /**
@@ -138,7 +139,7 @@ class Auth
      */
     public function user()
     {
-        return static::$session->get('_auth');
+        return static::getSession()->get('_auth');
     }
 
     /**
@@ -164,7 +165,7 @@ class Auth
             return false;
         }
 
-        static::$session->put('_auth', $user);
+        static::getSession()->put('_auth', $user);
 
         return true;
     }
@@ -177,7 +178,7 @@ class Auth
      */
     public function login(Authentication $user)
     {
-        static::$session->add('_auth', $user);
+        static::getSession()->add('_auth', $user);
 
         return true;
     }
@@ -189,7 +190,7 @@ class Auth
      */
     public function id()
     {
-        return static::$session->get('_auth')->getAuthenticateUserId();
+        return static::getSession()->get('_auth')->getAuthenticateUserId();
     }
 
     /**
@@ -207,6 +208,9 @@ class Auth
             return call_user_func_array([static::$instance, $method], $parameters);
         }
 
-        throw new \BadMethodCallException(sprintf("The %s method is not found", $method), 1);
+        throw new \BadMethodCallException(
+            sprintf("The %s method is not found", $method),
+            1
+        );
     }
 }
