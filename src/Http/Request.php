@@ -30,10 +30,18 @@ class Request
     private function __construct()
     {
         if ($this->getHeader('content-type') == 'application/json') {
-            $decode = json_decode(file_get_contents("php://input"), true);
-            $this->input = array_merge((array) $decode, $_GET);
+            $data = json_decode(file_get_contents("php://input"), true);
+            $this->input = array_merge((array) $data, $_GET);
         } else {
-            $this->input = array_merge($_POST, $_GET);
+            $data = [];
+            
+            if ($this->isPut()) {
+                parse_str(file_get_contents("php://input"), $data);
+            } elseif ($this->isPost()) {
+                $data = $_POST;
+            }
+
+            $this->input = array_merge($data, $_GET);
         }
 
         foreach ($this->input as $key => $value) {
