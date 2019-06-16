@@ -27,6 +27,10 @@ class Builder extends QueryBuilder
         $model = $this->model;
 
         if (!is_array($data)) {
+            if (is_null($data)) {
+                return null;
+            }
+
             return new $model((array) $data);
         }
         
