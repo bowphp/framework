@@ -5,8 +5,6 @@ branches:
     - master
     - 4.0
 
-sudo: false
-
 services:
   - mysql
   - docker
