@@ -5,9 +5,6 @@ namespace Bow\Database\Barry\Relations;
 use Bow\Database\Barry\Relation;
 use Bow\Database\Barry\Model;
 
-/**
-* @author Salomon Dion (dev.mrdion@gmail.com)
-*/
 class HasOne extends Relation
 {
     /**
@@ -60,7 +57,7 @@ class HasOne extends Relation
      */
     public function addConstraints()
     {
-        if (static::$hasConstraints) {
+        if (static::$has_constraints) {
             // Todo
         }
     }

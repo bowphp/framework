@@ -39,7 +39,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var bool
      */
-    protected $autoIncrement = true;
+    protected $auto_increment = true;
 
     /**
      * Enable the soft deletion
@@ -174,9 +174,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function find($id, $select = ['*'])
     {
-        if (! is_array($id)) {
-            $id = [$id];
-        }
+        $id = (array) $id;
 
         $static = new static();
 
@@ -184,7 +182,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $static->whereIn($static->primary_key, $id);
 
-        return count($id) == 1 ? $static->first() : $static->get();
+        if (count($id) != 1) {
+            return $static->get();
+        }
+
+        $result = $static->first();
+
+        return $result;
     }
 
     /**
@@ -252,7 +256,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         if (!array_key_exists($static->primary_key, $data)) {
-            if ($static->autoIncrement) {
+            if ($static->auto_increment) {
                 $id_value = [$static->primary_key => null];
 
                 $data = array_merge($id_value, $data);
@@ -473,6 +477,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 || $this->original[$key] != $value) {
                 $update_data[$key] = $value;
             }
+        }
+
+        // When the update data is empty, we load the original data
+        if (count($update_data) == 0) {
+            $update_data = $this->original;
         }
 
         $r = $builder

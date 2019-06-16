@@ -151,10 +151,10 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
      * @depends testGetConnection
      * @param Database $db
      */
-    public function testFindEmoty(Bow\Database\Database $db)
+    public function testFindEmpty(Bow\Database\Database $db)
     {
         $pet = Pets::find(100);
 
-        $this->assertInstanceOf(Pets::class, $pet);
+        $this->assertNull($pet);
     }
 }

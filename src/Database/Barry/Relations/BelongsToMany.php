@@ -57,7 +57,7 @@ class BelongsToMany extends Relation
      */
     public function addConstraints()
     {
-        if (static::$hasConstraints) {
+        if (static::$has_constraints) {
             // Todo
         }
     }

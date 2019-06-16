@@ -19,72 +19,72 @@ trait Relationship
     /**
      * The has one relative
      *
-     * @param strinf $related
+     * @param string $related
      * @param string $foreign_key
      * @param string $local_key
      * @return BelongsTo
      */
     public function belongsTo(string $related, string $foreign_key = null, string $local_key = null)
     {
-        $relatedModel = app()->make($related);
+        $related_model = app()->make($related);
         $local_key = $local_key ?? $this->getKey();
         // Make the table name singular and append ID to it
         // FIXME: Use a more reliable approach
-        $foreign_key = $foreign_key ?? rtrim($relatedModel->getTable(), 's').'_id';
-        return new BelongsTo($relatedModel, $this, $foreign_key, $local_key);
+        $foreign_key = $foreign_key ?? rtrim($related_model->getTable(), 's').'_id';
+        return new BelongsTo($related_model, $this, $foreign_key, $local_key);
     }
 
     /**
      * The belongs to many relative
      *
-     * @param strinf $related
+     * @param string $related
      * @param string $primary_key
      * @param string $foreign_key
      * @return BelongsToMany
      */
     public function belongsToMany(string $related, string $primary_key = null, string $foreign_key = null)
     {
-        $relatedModel = app()->make($related);
+        $related_model = app()->make($related);
         $local_key = $local_key ?? $this->getKey();
         // Make the table name singular and append ID to it
         // FIXME: Use a more reliable approach
-        $foreign_key = $foreign_key ?? rtrim($relatedModel->getTable(), 's').'_id';
-        return new BelongsToMany($relatedModel, $this, $primary_key, $foreign_key);
+        $foreign_key = $foreign_key ?? rtrim($related_model->getTable(), 's').'_id';
+        return new BelongsToMany($related_model, $this, $primary_key, $foreign_key);
     }
 
     /**
      * The has many relative
      *
-     * @param strinf $related
+     * @param string $related
      * @param string $primary_key
      * @param string $foreign_key
      * @return HasMany
      */
     public function hasMany(string $related, string $primary_key = '', string $foreign_key = '')
     {
-        $relatedModel = app()->make($related);
+        $related_model = app()->make($related);
         $local_key = $local_key ?? $this->getKey();
         // Make the table name singular and append ID to it
         // FIXME: Use a more reliable approach
-        $foreign_key = $foreign_key ?? rtrim($relatedModel->getTable(), 's').'_id';
-        return new HasMany($relatedModel, $this, $primary_key, $foreign_key);
+        $foreign_key = $foreign_key ?? rtrim($related_model->getTable(), 's').'_id';
+        return new HasMany($related_model, $this, $primary_key, $foreign_key);
     }
 
     /**
      * The has one relative
      *
-     * @param strinf $related
+     * @param string $related
      * @param string $primary_key
      * @param string $foreign_key
      * @return HasOne
      */
     public function hasOne(string $related, string $primary_key = '', string $foreign_key = '')
     {
-        $relatedModel = app()->make($related);
+        $related_model = app()->make($related);
         $local_key = $local_key ?? $this->getKey();
         // Make the table name singular and append ID to it
         // FIXME: Use a more reliable approach
-        $foreign_key = $foreign_key ?? rtrim($relatedModel->getTable(), 's').'_id';
-        return new HasOne($relatedModel, $this, $primary_key, $foreign_key);
+        $foreign_key = $foreign_key ?? rtrim($related_model->getTable(), 's').'_id';
+        return new HasOne($related_model, $this, $primary_key, $foreign_key);
     }
 }
