@@ -136,8 +136,6 @@ class TestCase extends PHPUnitTestCase
             '_method' => 'DELETE'
         ], $param);
 
-        $http->addHeaders($this->headers);
-
         return $this->put($url, $param);
     }
 
@@ -154,8 +152,6 @@ class TestCase extends PHPUnitTestCase
         $param = array_merge([
             '_method' => 'PATCH'
         ], $param);
-
-        $http->addHeaders($this->headers);
 
         return $this->put($url, $param);
     }
