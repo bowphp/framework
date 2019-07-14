@@ -1018,7 +1018,7 @@ if (!function_exists('route')) {
             $url = str_replace(':'. $key, $value, $url);
         }
 
-        return rtrim(env('APP_URL'), '/').'/'.ltrim($url, '/');
+        return rtrim(app_env('APP_URL'), '/').'/'.ltrim($url, '/');
     }
 }
 

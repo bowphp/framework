@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.11] - 2019-07-14
+
+- [Fix] In `Request::class` class, the `has` method is bad
+- [Fix] `route` helper call undefined method
+- [Fix] In `Auth::class` class, the `check` method called `$this` with static action
+
 ### [4.0.6,4.0.5] - 2019-06-16
 
 - Fix the unparsed parameter in url

@@ -75,7 +75,7 @@ class Request
      */
     public function has($key)
     {
-        return $this->input[$key] ?? null;
+        return isset($this->input[$key]);
     }
 
     /**

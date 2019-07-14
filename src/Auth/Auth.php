@@ -129,7 +129,7 @@ class Auth
      */
     public function guest()
     {
-        return !$this->getSession()->has('_auth');
+        return !static::getSession()->has('_auth');
     }
 
     /**
