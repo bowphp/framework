@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [4.0.11] - 2019-07-14
+## [4.0.91] - 2019-07-14
 
 - [Fix] In `Request::class` class, the `has` method is bad
 - [Fix] `route` helper call undefined method
