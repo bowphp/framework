@@ -9,24 +9,30 @@ For use this package, please create an application from this package [bowphp/app
 
 ## The Framework Main Feacture
 
-- Session Manager
+- Full Featured database classes with support for several platforms.
+- Query Builder Database Support
+- Form and Data Validation
+- Security and XSS Filtering
+- Data Encryption
+- Session Management
 - Controller Revoler
 - Middleware Support
 - Small and Robust Routing
-- Filesystem Manager with many driver like S3 and FTP
-- Security Layer
+- File Uploading Class
+- Pagination
+- File System Management with many driver like S3 and FTP
 - Extensible with External package which can plug-in
-- Application logs Manager
+- Application logs Management
 - Database Connection (MySQL and SQLite)
 - Simplest ORM which name Barry
 - Cache support (Only filesysteme caching)
-- Event manager (Interpage Event)
+- Event Management (Interpage Event)
 - Emailing (STMP, SES, Native PHP mail supports)
 - Task runner (Which help you to generate the controller and match more)
-- Testing Support
+- Unit Testing Support
 - Data validation support
 - View Rendering with [bowphp/tintin](https://github.com/bowphp/tintin) package (Tintin is the very small php template)
-- Very easy Translate Manager
+- Very easy Translate Management
 - Many helpers
 - The native authentification system
 
