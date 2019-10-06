@@ -11,11 +11,7 @@ class {className} extends Migration
     public function up()
     {
         $this->create("{table}", function (SQLGenerator $table) {
-            $table->addColumn('id', 'int', [
-                'primary' => true,
-                'increment' => true
-            ]);
-
+            $table->addIncrement('id');
             $table->addTimestamps();
         });
     }

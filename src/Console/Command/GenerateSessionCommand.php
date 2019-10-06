@@ -16,7 +16,7 @@ class GenerateSessionCommand extends AbstractCommand
     public function generate()
     {
         $create_at = date("YmdHis");
-        $filename = sprintf("Version%s%s", $create_at, ucfirst(Str::camel('sessions')));
+        $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('sessions')));
 
         $generator = new Generator(
             $this->setting->getMigrationDirectory(),

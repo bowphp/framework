@@ -128,7 +128,14 @@ class Console
         $command = $this->arg->getParameter('command');
 
         if (array_key_exists($command, $this->registers)) {
-            return $this->registers[$command]($this->arg);
+            try {
+                return $this->registers[$command]($this->arg);
+            } catch (\Exception $exception) {
+                echo Color::red($exception->getMessage());
+                echo Color::green($exception->getTraceAsString());
+
+                exit(1);
+            }
         }
 
         if ($command == 'launch') {
@@ -141,8 +148,10 @@ class Console
 
         try {
             $this->call($command);
-        } catch (ConsoleException $exception) {
+        } catch (\Exception $exception) {
             echo Color::red($exception->getMessage());
+            echo Color::green($exception->getTraceAsString());
+
             exit(1);
         }
     }
