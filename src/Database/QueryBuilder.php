@@ -1046,12 +1046,11 @@ class QueryBuilder extends Tool implements \JsonSerializable
     private function insertOne(array $value)
     {
         $fields = array_keys($value);
+        $column = implode(', ', $fields);
 
-        $sql = 'insert into `' . $this->table . '` values (';
+        $sql = 'insert into `' . $this->table . '`('.$column.') values';
 
-        $sql .= implode(', ', Util::add2points($fields, true));
-
-        $sql .= ');';
+        $sql .= '('.implode(', ', Util::add2points($fields, true)).');';
 
         $stmt = $this->connection->prepare($sql);
 
