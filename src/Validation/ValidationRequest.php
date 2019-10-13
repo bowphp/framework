@@ -5,7 +5,6 @@ namespace Bow\Validation;
 use BadMethodCallException;
 use Bow\Http\Request;
 use Bow\Validation\Exception\AuthorizationException;
-use Bow\Validation\Exception\ValidationException;
 
 abstract class ValidationRequest
 {
@@ -39,13 +38,9 @@ abstract class ValidationRequest
     public function __construct()
     {
         if (!$this->authorize()) {
-            $response = $this->authorizationFailAction();
+            $this->authorizationFailAction();
 
-            if (is_array($response) || is_object($response)) {
-                $response = json_encode($response);
-            }
-
-            die($response);
+            $this->sendFailAuthorization();
         }
 
         $this->request = app('request');
@@ -61,7 +56,9 @@ abstract class ValidationRequest
         $this->validate = Validator::make($this->data, $this->rules());
 
         if ($this->validate->fails()) {
-            return $this->validationFailAction();
+            $this->validationFailAction();
+
+            $this->validate->throwError();
         }
     }
 
@@ -100,42 +97,32 @@ abstract class ValidationRequest
     }
 
     /**
+     * Send fails authorization
+     *
+     * @param mixed $response
+     * @throws AuthorizationException
+     */
+    private function sendFailAuthorization($response = null)
+    {
+        throw new AuthorizationException(
+            'You do not have permission to make a request'
+        );
+    }
+
+    /**
      * When the user does not have the authorization to launch this request
-     * This is the method that is launched to block the user
+     * This is hook the method that can watch them for make an action
      *
      * @throws AuthorizationException
      */
     protected function authorizationFailAction()
     {
-        throw new AuthorizationException(
-            'You do not have permission to make a request'
-        );
-    }
-
-    /**
-     * Send fails authorization
-     *
-     * @throws AuthorizationException
-     */
-    protected function sendFailAuthorization()
-    {
-        throw new AuthorizationException(
-            'You do not have permission to make a request'
-        );
-    }
-
-    /**
-     * Throw validation error
-     *
-     * @throws ValidationException
-     */
-    protected function sendFailValidation()
-    {
-        throw new ValidationException('Validation error');
+        //
     }
 
     /**
      * When user have not authorize to launch a request
+     * This is hook the method that can watch them for make an action
      * This method permet to custom fail exception
      *
      * @throws AuthorizationException
