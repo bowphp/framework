@@ -565,7 +565,7 @@ if (!function_exists('curl')) {
      *
      * @return array|null
      */
-    function curl($method, $url, array $params = [], $return = false, & $header = null)
+    function curl($method, $url, array $params = [], $return = false, &$header = null)
     {
         $ch = curl_init($url);
 

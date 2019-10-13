@@ -360,7 +360,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
 
         $this->recursive(
             $this->storage,
-            function ($value) use (& $sum) {
+            function ($value) use (&$sum) {
                 if (is_numeric($value)) {
                     $sum += $value;
                 }
@@ -412,7 +412,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
 
         $this->recursive(
             $this->storage,
-            function ($value) use (& $data) {
+            function ($value) use (&$data) {
                 if (is_numeric($value)) {
                     $data[] = $value;
                 }
@@ -441,7 +441,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
 
         $this->recursive(
             $this->storage,
-            function ($value, $key) use (& $data, $except) {
+            function ($value, $key) use (&$data, $except) {
                 if (in_array($key, $except)) {
                     $data[$key] = $value;
                 }
@@ -464,7 +464,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
 
         $this->recursive(
             $this->storage,
-            function ($value, $key) use (& $data, $ignores) {
+            function ($value, $key) use (&$data, $ignores) {
                 if (!in_array($key, $ignores)) {
                     $data[$key] = $value;
                 }
@@ -591,7 +591,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
 
         $this->recursive(
             $this->storage,
-            function ($value, $key) use (& $collection) {
+            function ($value, $key) use (&$collection) {
                 if (is_object($value)) {
                     $collection[$key] = (array) $value;
                 } else {
