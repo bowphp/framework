@@ -5,6 +5,30 @@ namespace Bow\Database\Migration\Shortcut;
 trait NumberColumn
 {
     /**
+     * Add float column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addFloat($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'float', $attribute);
+    }
+
+    /**
+     * Add double column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addDouble($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'double', $attribute);
+    }
+
+    /**
      * Add integer primary column
      *
      * @param string $column
@@ -66,7 +90,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addTinyInteger($column, $attribute = [])
+    public function addTinyInteger($column, array $attribute = [])
     {
         return $this->addColumn($column, 'tinyint', $attribute);
     }
@@ -78,7 +102,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addInteger($column, $attribute = [])
+    public function addInteger($column, array $attribute = [])
     {
         return $this->addColumn($column, 'int', $attribute);
     }
@@ -90,8 +114,32 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addBigInteger($column, $attribute = [])
+    public function addBigInteger($column, array $attribute = [])
     {
         return $this->addColumn($column, 'bigint', $attribute);
+    }
+
+    /**
+     * Add Medium integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addMediumInteger($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'mediumint', $attribute);
+    }
+
+    /**
+     * Add Medium integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addMediumIncrement($column)
+    {
+        return $this->addColumn($column, 'mediumint', ['primary' => true, 'increment' => true]);
     }
 }

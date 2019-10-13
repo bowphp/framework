@@ -2,6 +2,7 @@
 
 namespace Bow\Database\Migration;
 
+use Bow\Console\Color;
 use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Database;
 
@@ -37,6 +38,21 @@ abstract class Migration
      * @return void
      */
     abstract public function rollback();
+
+    /**
+     * Swith connection
+     *
+     * @param string $name
+     * @return Migration
+     */
+    final public function connection($name)
+    {
+        Database::connection($name);
+
+        $this->adapter = Database::getConnectionAdapter();
+
+        return $this;
+    }
 
     /**
      * Drop table action
@@ -168,11 +184,11 @@ abstract class Migration
         try {
             $result = (bool) Database::statement($sql);
         } catch (\Exception $exception) {
-            echo "\n\033[0;31m▶\033[00m $sql\n";
+            echo Color::red("▶")."$sql\n";
             throw $exception;
         }
 
-        echo "\033[0;32m▶\033[00m $sql\n";
+        echo Color::green("▶")."$sql\n";
 
         return $this;
     }

@@ -10,6 +10,9 @@ class SQLGenerator
 {
     use Shortcut\NumberColumn;
     use Shortcut\MixedColumn;
+    use Shortcut\TextColumn;
+    use Shortcut\DateColumn;
+    use Shortcut\ConstraintColumn;
     
     /**
      * The managed table name
@@ -42,11 +45,25 @@ class SQLGenerator
     private $adapter;
 
     /**
-     * Defines the mysql ENGINE
+     * Defines ENGINE for mysql
      *
      * @var string
      */
     private $engine;
+
+    /**
+     * Defines COLLATION for mysql
+     *
+     * @var string
+     */
+    private $collation;
+
+    /**
+     * Defines CHARSET for mysql
+     *
+     * @var string
+     */
+    private $charset;
 
     /**
      * SQLGenerator constructor
@@ -64,6 +81,10 @@ class SQLGenerator
         $this->adapter = $adapter;
 
         $this->engine = 'InnoDB';
+
+        $this->collation = 'utf8_unicode_ci';
+
+        $this->charset = 'utf8';
     }
 
     /**
@@ -153,8 +174,8 @@ class SQLGenerator
         $statement = $pdo->query(sprintf('PRAGMA table_info(%s);', $this->table));
 
         $statement->execute();
-
-        $sql = [];
+        
+        $select = [];
 
         foreach ($statement->fetchAll() as $column) {
             if (!in_array($column->name, $names)) {
@@ -175,19 +196,6 @@ class SQLGenerator
         $pdo->exec(sprintf('ALTER TABLE __temp_sqlite_table RENAME TO %s;', $this->table));
 
         $pdo->exec('COMMIT;');
-    }
-
-    /**
-     * Add default timestamps
-     *
-     * @return SQLGenerator
-     */
-    public function addTimestamps()
-    {
-        $this->addColumn('created_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
-        $this->addColumn('updated_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
-
-        return $this;
     }
 
     /**
@@ -213,149 +221,47 @@ class SQLGenerator
     }
 
     /**
-     * Add constraintes
+     * Set the collation
      *
-     * @param string $name
-     * @param array $attributes
+     * @param string $collation
      *
-     * @return SQLGenerator
+     * @return void
      */
-    public function addForeign($name, array $attributes = [])
+    public function withCollation($collation)
     {
-        if ($this->scope == 'alter') {
-            $command = 'ADD ';
-        } else {
-            $command = '';
-        }
-
-        $on = '';
-        $references = '';
-
-        if (isset($attributes['on'])) {
-            $on = strtoupper(' ON ' .$attributes['on']);
-        }
-
-        if (isset($attributes['references'])) {
-            $references = sprintf(
-                ' REFERENCES %s(%s)',
-                $attributes['table'],
-                $attributes['references']
-            );
-        }
-
-        $sql = sprintf(
-            '%sFOREIGN KEY (`%s`)%s%s',
-            $command,
-            $name,
-            $references,
-            $on
-        );
-
-        $this->sqls[] = $sql;
-
-        return $this;
-    }
-
-
-    /**
-     * Add constraintes
-     *
-     * @param string $name
-     * @param array $attributes
-     *
-     * @return SQLGenerator
-     */
-    public function addConstraint($name, array $attributes = [])
-    {
-        if ($this->scope == 'alter') {
-            $command = 'ADD CONSTRAINT';
-        } else {
-            $command = 'CONSTRAINT';
-        }
-
-        $sql = sprintf(
-            '%s (%s) FOREIGN KEY (`%s`) REFERENCES %s(%s) ON %s',
-            $command,
-            $name,
-            $attributes['target'],
-            $attributes['table'],
-            $attributes['references'],
-            strtoupper($attributes['on'])
-        );
-
-        $this->sqls[] = $sql;
-
-        return $this;
+        $this->collation = $collation;
     }
 
     /**
-     * Drop constraintes column;
+     * Get the collation
      *
-     * @param string $name
-     *
-     * @return SQLGenerator
+     * @return string
      */
-    public function dropForeign($name)
+    public function getCollation()
     {
-        $names = (array) $name;
-
-        foreach ($names as $name) {
-            $this->sqls[] = sprintf('DROP FOREIGN KEY `%s`', $name);
-        }
-
-        return $this;
+        return $this->collation;
     }
 
     /**
-     * Add table index;
+     * Set the charset
      *
-     * @param string $name
+     * @param string $charset
      *
-     * @return SQLGenerator
+     * @return void
      */
-    public function addIndex($name)
+    public function withCharset($charset)
     {
-        if ($this->scope == 'alter') {
-            $command = 'ADD INDEX';
-        } else {
-            $command = 'INDEX';
-        }
-
-        $this->sqls[] = sprintf('%s `%s`', $command, $name);
-
-        return $this;
+        $this->charset = $charset;
     }
 
     /**
-     * Drop table index;
+     * Get the charset
      *
-     * @param string $name
-     *
-     * @return SQLGenerator
+     * @return string
      */
-    public function dropIndex($name)
+    public function getCharset()
     {
-        $names = (array) $name;
-
-        foreach ($names as $name) {
-            $this->sqls[] = sprintf('DROP INDEX `%s`', $name);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Drop primary column;
-     *
-     * @param string $name
-     *
-     * @return SQLGenerator
-     */
-    public function dropPrimary()
-    {
-        $this->sqls[] = 'DROP PRIMARY KEY';
-
-        return $this;
+        return $this->charset;
     }
 
     /**
@@ -379,6 +285,7 @@ class SQLGenerator
         $nullable = $attributes['nullable'] ?? false;
         $unique = $attributes['unique'] ?? false;
         $check = $attributes['check'] ?? false;
+        $unsigned = $attributes['unsigned'] ?? false;
 
         // String to VARCHAR
         if ($type == 'STRING') {
@@ -423,6 +330,11 @@ class SQLGenerator
 
         if ($check) {
             $type = sprintf('%s CHECK (%s)', $type, $check);
+        }
+
+        // Add unsigned mention
+        if ($unsigned) {
+            $type = sprintf('UNSIGNED %s', $type);
         }
 
         return trim(

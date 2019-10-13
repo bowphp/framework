@@ -5,38 +5,62 @@ namespace Bow\Database\Migration\Shortcut;
 trait MixedColumn
 {
     /**
-     * Add string column
+     * Add boolean column
      *
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addString($column, $attribute = [])
+    public function addBoolean($column, array $attribute = [])
     {
-        return $this->addColumn($column, 'string', $attribute);
+        return $this->addColumn($column, 'boolean', $attribute);
+    }
+    
+    /**
+    * Add UUID column
+    *
+    * @param string $column
+    * @param array $attribute
+    * @return SQLGenerator
+    */
+    public function addUuid($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'uuid', $attribute);
+    }
+    
+   /**
+    * Add BLOB column
+    *
+    * @param string $column
+    * @param array $attribute
+    * @return SQLGenerator
+    */
+    public function addBinary($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'blob', $attribute);
+    }
+    
+    /**
+     * Add ip column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addIpAddress($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'ip', $attribute);
     }
 
     /**
-     * Add float column
+     * Add mac column
      *
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addFloat($column, $attribute = [])
+    public function addMacAddress($column, array $attribute = [])
     {
-        return $this->addColumn($column, 'float', $attribute);
-    }
-
-    /**
-     * Add double column
-     *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
-     */
-    public function addDouble($column, $attribute = [])
-    {
-        return $this->addColumn($column, 'double', $attribute);
+        return $this->addColumn($column, 'mac', $attribute);
     }
 }
