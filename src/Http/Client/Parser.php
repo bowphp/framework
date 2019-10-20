@@ -51,7 +51,7 @@ class Parser
      *
      * @param $ch
      */
-    public function __construct(& $ch)
+    public function __construct(&$ch)
     {
         $this->ch = $ch;
     }
@@ -374,13 +374,12 @@ class Parser
     /**
      * Add attach file
      *
-     * @param string $attach
-     *
+     * @param string|array$attach
      * @return void
      */
     public function addAttach($attach)
     {
-        $this->attach = array_merge($this->attach, $attach);
+        $this->attach = array_merge($this->attach, (array) $attach);
     }
 
     /**
@@ -397,7 +396,6 @@ class Parser
      * Set attach files
      *
      * @param array $attachs
-     *
      * @return void
      */
     public function setAttach(array $attachs)

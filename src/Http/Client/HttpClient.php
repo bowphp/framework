@@ -29,7 +29,6 @@ class HttpClient
      * HttpClient Constructor.
      *
      * @param string $url
-     *
      * @return void
      */
     public function __construct($url = null)
@@ -48,8 +47,8 @@ class HttpClient
     /**
      * Make get requete
      *
-     * @param  string $url
-     * @param  array  $data
+     * @param string $url
+     * @param array $data
      *
      * @return Parser
      */
@@ -65,8 +64,8 @@ class HttpClient
     /**
      * make post requete
      *
-     * @param  string $url
-     * @param  array  $data
+     * @param string $url
+     * @param array $data
      * @return Parser
      */
     public function post($url, array $data = [])
@@ -93,8 +92,8 @@ class HttpClient
     /**
      * Make put requete
      *
-     * @param  string $url
-     * @param  array  $data
+     * @param string $url
+     * @param array $data
      *
      * @return Parser
      */
@@ -113,7 +112,6 @@ class HttpClient
      * Attach new file
      *
      * @param string $attach
-     *
      * @return mixed
      */
     public function addAttach($attach)
@@ -146,7 +144,6 @@ class HttpClient
      * Reset alway connection
      *
      * @param string $url
-     *
      * @return void
      */
     private function resetAndAssociateUrl($url)
@@ -160,7 +157,6 @@ class HttpClient
      * Add field
      *
      * @param array $data
-     *
      * @return void
      */
     private function addFields(array $data)
