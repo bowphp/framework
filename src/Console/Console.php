@@ -3,6 +3,7 @@
 namespace Bow\Console;
 
 use Bow\Configuration\Loader;
+use Bow\Console\Exception\ConsoleException;
 use Bow\Database\Database;
 use Bow\Support\Faker;
 
@@ -117,7 +118,15 @@ class Console
         
         // Boot kernel and console
         $this->kernel->withoutSession();
-        $this->kernel->boot();
+
+        try {
+            $this->kernel->boot();
+        } catch (\Exception $exception) {
+            echo Color::red($exception->getMessage());
+            echo Color::green($exception->getTraceAsString());
+            
+            exit(1);
+        }
         
         $this->booted = true;
 
@@ -228,7 +237,6 @@ class Console
             $target
         );
     }
-
 
     /**
      * Launch a migration

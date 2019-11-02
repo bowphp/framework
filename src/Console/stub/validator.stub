@@ -24,7 +24,7 @@ class {className} extends Validator
     protected function rules()
     {
 	    return [
-            // Vos régles
+            // Your roles here
         ];
     }
 
