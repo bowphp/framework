@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] - 2019-11-02
+
 - [add] add seeder name and fix translate for validation stub
 - [add] init routing externalisation process
 - [add] add response exception
