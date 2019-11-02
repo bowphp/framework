@@ -3,6 +3,7 @@
 use Bow\Auth\Auth;
 use Bow\Database\Database as DB;
 use Bow\Event\Event;
+use Bow\Http\Exception\ResponseException;
 use Bow\Mail\Mail;
 use Bow\Security\Hash;
 use Bow\Security\Tokenize;
@@ -12,7 +13,6 @@ use Bow\Storage\Storage;
 use Bow\Support\Capsule;
 use Bow\Support\Collection;
 use Bow\Support\Env;
-use Bow\Support\Faker;
 use Bow\Support\Util;
 use Bow\Translate\Translator;
 
@@ -22,7 +22,6 @@ if (!function_exists('app')) {
      *
      * @param  null  $key
      * @param  array $setting
-     *
      * @return \Bow\Support\Capsule|mixed
      */
     function app($key = null, array $setting = [])
@@ -47,7 +46,6 @@ if (!function_exists('config')) {
      *
      * @param  string|array $key
      * @param  mixed        $setting
-     *
      * @return \Bow\Configuration\Loader|mixed
      * @throws
      */
@@ -73,7 +71,6 @@ if (!function_exists('response')) {
      *
      * @param  string $content
      * @param  int    $code
-     *
      * @return \Bow\Http\Response
      */
     function response($content = '', $code = 200)
@@ -95,7 +92,6 @@ if (!function_exists('response')) {
 if (!function_exists('request')) {
     /**
      * Represents the Request class
-     *
      * @return \Bow\Http\Request
      */
     function request()
@@ -110,7 +106,6 @@ if (!function_exists('db')) {
      *
      * @param string  $name
      * @param callable $cb
-     *
      * @return DB
      * @throws
      */
@@ -147,7 +142,6 @@ if (!function_exists('view')) {
      * @param string    $template
      * @param array|int $data
      * @param int       $code
-     *
      * @return mixed
      */
     function view($template, $data = [], $code = 200)
@@ -171,7 +165,6 @@ if (!function_exists('table')) {
      *
      * @param  string $name
      * @param  string $connexion
-     *
      * @return Bow\Database\QueryBuilder
      */
     function table($name, $connexion = null)
@@ -190,7 +183,6 @@ if (!function_exists('last_insert_id')) {
      * on a table whose ID is auto_increment.
      *
      * @param  string $name
-     *
      * @return int
      */
     function last_insert_id($name = null)
@@ -207,7 +199,6 @@ if (!function_exists('select')) {
      *
      * @param string   $sql
      * @param array    $data
-     *
      * @return int|array|stdClass
      */
     function select($sql, $data = [])
@@ -222,7 +213,6 @@ if (!function_exists('select_one')) {
      *
      * @param string   $sql
      * @param array    $data
-     *
      * @return int|array|StdClass
      */
     function select_one($sql, $data = [])
@@ -237,7 +227,6 @@ if (!function_exists('insert')) {
      *
      * @param string   $sql
      * @param array    $data
-     *
      * @return int
      */
     function insert($sql, array $data = [])
@@ -252,7 +241,6 @@ if (!function_exists('delete')) {
      *
      * @param string   $sql
      * @param array    $data
-     *
      * @return int
      */
     function delete($sql, $data = [])
@@ -267,7 +255,6 @@ if (!function_exists('update')) {
      *
      * @param string $sql
      * @param array  $data
-     *
      * @return int
      */
     function update($sql, array $data = [])
@@ -281,7 +268,6 @@ if (!function_exists('statement')) {
      * Launches CREATE TABLE, ALTER TABLE, RENAME, DROP TABLE SQL Query
      *
      * @param string $sql
-     *
      * @return int
      */
     function statement($sql)
@@ -313,7 +299,6 @@ if (!function_exists('create_csrf_token')) {
      * Create a new token
      *
      * @param  int $time [optional]
-     *
      * @return \stdClass
      */
     function create_csrf_token($time = null)
@@ -383,7 +368,6 @@ if (!function_exists('verify_csrf')) {
      *
      * @param  string $token
      * @param  bool   $strict
-     *
      * @return string
      */
     function verify_csrf($token, $strict = false)
@@ -412,7 +396,6 @@ if (!function_exists('json')) {
      * @param  mixed $data
      * @param  int   $code
      * @param  array $headers
-     *
      * @return mixed
      */
     function json($data, $code = 200, array $headers = [])
@@ -429,7 +412,6 @@ if (!function_exists('download')) {
      * @param null|string $filename
      * @param array       $headers
      * @param string      $disposition
-     *
      * @return string
      */
     function download($file, $filename = null, array $headers = [], $disposition = 'attachment')
@@ -443,7 +425,6 @@ if (!function_exists('status_code')) {
      * Set status code
      *
      * @param  int $code
-     *
      * @return mixed
      */
     function status_code($code)
@@ -457,7 +438,6 @@ if (!function_exists('sanitaze')) {
      * Sanitaze data
      *
      * @param  mixed $data
-     *
      * @return mixed
      */
     function sanitaze($data)
@@ -475,7 +455,6 @@ if (!function_exists('secure')) {
      * Secure data with sanitaze it
      *
      * @param  mixed $data
-     *
      * @return mixed
      */
     function secure($data)
@@ -494,7 +473,6 @@ if (!function_exists('set_header')) {
      *
      * @param string $key
      * @param string $value
-     *
      * @return void
      */
     function set_header($key, $value)
@@ -509,7 +487,6 @@ if (!function_exists('get_header')) {
      * Get http header
      *
      * @param  string $key
-     *
      * @return string|null
      */
     function get_header($key)
@@ -524,7 +501,6 @@ if (!function_exists('redirect')) {
      * Make redirect response
      *
      * @param  string|array $path
-     *
      * @return \Bow\Http\Redirect
      */
     function redirect($path = null)
@@ -544,7 +520,6 @@ if (!function_exists('send')) {
      * Send simple message to client
      *
      * @param  string $data
-     *
      * @return mixed
      */
     function send($data)
@@ -562,7 +537,6 @@ if (!function_exists('curl')) {
      * @param  array  $params
      * @param  bool   $return
      * @param  string $header
-     *
      * @return array|null
      */
     function curl($method, $url, array $params = [], $return = false, &$header = null)
@@ -607,7 +581,6 @@ if (!function_exists('url')) {
      *
      * @param string|null $url
      * @param array       $parameters
-     *
      * @return string
      */
     function url($url = null, array $parameters = [])
@@ -649,7 +622,6 @@ if (!function_exists('set_pdo')) {
      * Set PDO instance
      *
      * @param  PDO $pdo
-     *
      * @return PDO
      */
     function set_pdo(PDO $pdo)
@@ -666,7 +638,6 @@ if (!function_exists('collect')) {
      * Create new Ccollection instance
      *
      * @param  array $data
-     *
      * @return \Bow\Support\Collection
      */
     function collect(array $data = [])
@@ -680,7 +651,6 @@ if (!function_exists('encrypt')) {
      * Encrypt data
      *
      * @param  string $data
-     *
      * @return string
      */
     function encrypt($data)
@@ -694,7 +664,6 @@ if (!function_exists('decrypt')) {
      * Decrypt data
      *
      * @param  string $data
-     *
      * @return string
      */
     function decrypt($data)
@@ -730,6 +699,8 @@ if (!function_exists('db_transaction_started')) {
 if (!function_exists('db_rollback')) {
     /**
      * Stop database transaction
+     *
+     * @return void
      */
     function db_rollback()
     {
@@ -740,6 +711,8 @@ if (!function_exists('db_rollback')) {
 if (!function_exists('db_commit')) {
     /**
      * Commit request after transaction
+     *
+     * @return void
      */
     function db_commit()
     {
@@ -778,7 +751,6 @@ if (!function_exists('add_event_once')) {
      *
      * @param  string                $event
      * @param  callable|array|string $fn
-     *
      * @return Event
      * @throws \Bow\Event\EventException
      */
@@ -803,7 +775,6 @@ if (!function_exists('add_transmisson_event')) {
      *
      * @param  string       $event
      * @param  array|string $fn
-     *
      * @return Event
      * @throws \Bow\Event\EventException
      */
@@ -839,7 +810,6 @@ if (!function_exists('emit_event')) {
      * Fire event
      *
      * @param  string $event
-     *
      * @return void
      * @throws \Bow\Event\EventException
      */
@@ -864,7 +834,6 @@ if (!function_exists('flash')) {
      *
      * @param string $key
      * @param string $message
-     *
      * @return mixed
      */
     function flash($key, $message)
@@ -881,7 +850,6 @@ if (!function_exists('email')) {
      * @param null|string $view
      * @param array       $data
      * @param callable    $cb
-     *
      * @return \Bow\Mail\Driver\SimpleMail|\Bow\Mail\Driver\Smtp|bool
      * @throws
      */
@@ -903,7 +871,6 @@ if (!function_exists('raw_email')) {
      * @param  string       $subject
      * @param  string       $message
      * @param  array        $headers
-     *
      * @return Mail|mixed
      */
     function raw_email($to, $subject, $message, array $headers = [])
@@ -918,7 +885,6 @@ if (!function_exists('session')) {
      *
      * @param  mixed $value
      * @param  mixed $default
-     *
      * @return mixed
      */
     function session($value = null, $default = null)
@@ -949,7 +915,6 @@ if (!function_exists('cookie')) {
      * @param  string   $domain
      * @param  bool     $secure
      * @param  bool     $http
-     *
      * @return null|string
      */
     function cookie(
@@ -983,7 +948,6 @@ if (!function_exists('validator')) {
      *
      * @param  array $inputs
      * @param  array $rules
-     *
      * @return \Bow\Validation\Validate
      */
     function validator(array $inputs, array $rules)
@@ -998,7 +962,6 @@ if (!function_exists('route')) {
      *
      * @param  string $name
      * @param  array  $data
-     *
      * @return string
      */
     function route($name, array $data = [])
@@ -1027,7 +990,6 @@ if (!function_exists('e')) {
      * Escape the HTML tags in the chain.
      *
      * @param  string $value
-     *
      * @return string
      */
     function e($value)
@@ -1039,7 +1001,6 @@ if (!function_exists('e')) {
 if (!function_exists('ftp')) {
     /**
      * Ftp Service loader
-     *
      * @return \Bow\Storage\Service\FTPService
      */
     function ftp()
@@ -1051,7 +1012,6 @@ if (!function_exists('ftp')) {
 if (!function_exists('s3')) {
     /**
      * S3 Service loader.
-     *
      * @return \Bow\Storage\Service\S3Service
      */
     function s3()
@@ -1065,7 +1025,6 @@ if (!function_exists('mount')) {
      * Alias on the mount method
      *
      * @param string $mount
-     *
      * @return \Bow\Storage\MountFilesystem
      *
      * @throws \Bow\Storage\Exception\ResourceException
@@ -1082,16 +1041,16 @@ if (!function_exists('cache')) {
      *
      * @param  string $key
      * @param  mixed  $value
-     *
+     * @param  int  $ttl
      * @return mixed
      */
-    function cache($key = null, $value = null)
+    function cache($key = null, $value = null, $ttl = null)
     {
         if ($key !== null && $value === null) {
             return \Bow\Cache\Cache::get($key);
         }
 
-        return \Bow\Cache\Cache::add($key, $value);
+        return \Bow\Cache\Cache::add($key, $value, $ttl);
     }
 }
 
@@ -1100,7 +1059,6 @@ if (!function_exists('back')) {
      * Make redirection to back
      *
      * @param int $status
-     *
      * @return Bow\Http\Redirect
      */
     function back($status = 302)
@@ -1115,10 +1073,27 @@ if (!function_exists('bhash')) {
      *
      * @param  string $data
      * @param  mixed  $hash_value
-     *
      * @return mixed
      */
     function bhash($data, $hash_value = null)
+    {
+        if (!is_null($hash_value)) {
+            return Hash::check($data, $hash_value);
+        }
+
+        return Hash::make($data);
+    }
+}
+
+if (!function_exists('bow_hash')) {
+    /**
+     * Alias on the class Hash.
+     *
+     * @param  string $data
+     * @param  mixed  $hash_value
+     * @return mixed
+     */
+    function bow_hash($data, $hash_value = null)
     {
         if (!is_null($hash_value)) {
             return Hash::check($data, $hash_value);
@@ -1135,7 +1110,6 @@ if (!function_exists('trans')) {
      * @param string $key
      * @param array $data
      * @param bool $choose
-     *
      * @return string | Bow\Translate\Translator
      */
     function trans($key = null, $data = [], $choose = false)
@@ -1161,10 +1135,24 @@ if (!function_exists('t')) {
      * @param  $key
      * @param  $data
      * @param  bool $choose
-     *
      * @return string
      */
     function t($key, $data = [], $choose = false)
+    {
+        return trans($key, $data, $choose);
+    }
+}
+
+if (!function_exists('__')) {
+    /**
+     * Alias of trans
+     *
+     * @param  $key
+     * @param  $data
+     * @param  bool $choose
+     * @return string
+     */
+    function __($key, $data = [], $choose = false)
     {
         return trans($key, $data, $choose);
     }
@@ -1176,7 +1164,6 @@ if (!function_exists('app_env')) {
      *
      * @param $key
      * @param $default
-     *
      * @return string
      */
     function app_env($key, $default = null)
@@ -1195,12 +1182,11 @@ if (!function_exists('abort')) {
      *
      * @param int    $code
      * @param string $message
-     *
      * @return \Bow\Http\Response
      */
     function abort($code = 500, $message = '')
     {
-        return response($message, $code);
+        throw new ResponseException($message, $code);
     }
 }
 
@@ -1209,9 +1195,8 @@ if (!function_exists('abort_if')) {
      * Abort bow execution if condiction is true
      *
      * @param boolean $boolean
-     * @param int     $code
+     * @param int $code
      * @param string $message
-     *
      * @return \Bow\Http\Response|null
      */
     function abort_if($boolean, $code, $message = '')
@@ -1227,7 +1212,6 @@ if (!function_exists('abort_if')) {
 if (!function_exists('app_mode')) {
     /**
      * Get app enviroment mode
-     *
      * @return string
      */
     function app_mode()
@@ -1239,7 +1223,6 @@ if (!function_exists('app_mode')) {
 if (!function_exists('client_locale')) {
     /**
      * Get client request language
-     *
      * @return string
      */
     function client_locale()
@@ -1253,7 +1236,6 @@ if (!function_exists('old')) {
      * Get old request valude
      *
      * @param string $key
-     *
      * @return mixed
      */
     function old($key)
@@ -1267,7 +1249,6 @@ if (!function_exists('auth')) {
      * Recovery of the guard
      *
      * @param string $guard
-     *
      * @return Bow\Auth\Auth
      * @throws
      */
@@ -1290,7 +1271,6 @@ if (!function_exists('logger')) {
      * @param string $level
      * @param string $message
      * @param array $context
-     *
      * @return bool
      */
     function logger($level, $message, array $context = [])
@@ -1309,7 +1289,6 @@ if (!function_exists('str_slug')) {
      *
      * @param  string $str
      * @param  string $sep
-     *
      * @return string
      */
     function str_slug($str, $sep = '-')
@@ -1323,7 +1302,6 @@ if (!function_exists('str_is_mail')) {
      * Check if the email is valid
      *
      * @param string $email
-     *
      * @return bool
      */
     function str_is_mail($email)
@@ -1337,7 +1315,6 @@ if (!function_exists('str_is_domain')) {
      * Check if the string is domain
      *
      * @param string $domain
-     *
      * @return bool
      * @throws
      */
@@ -1352,7 +1329,6 @@ if (!function_exists('str_is_slug')) {
      * Check if string is slug
      *
      * @param string $slug
-     *
      * @return bool
      * @throws
      */
@@ -1367,7 +1343,6 @@ if (!function_exists('str_is_alpha')) {
      * Check if the string is alpha
      *
      * @param string $string
-     *
      * @return bool
      * @throws
      */
@@ -1382,7 +1357,6 @@ if (!function_exists('str_is_lower')) {
      * Check if the string is lower
      *
      * @param string $string
-     *
      * @return bool
      */
     function str_is_lower($string)
@@ -1396,7 +1370,6 @@ if (!function_exists('str_is_upper')) {
      * Check if the string is upper
      *
      * @param string $string
-     *
      * @return bool
      */
     function str_is_upper($string)
@@ -1410,7 +1383,6 @@ if (!function_exists('str_is_alpha_num')) {
      * Check if string is alpha numeric
      *
      * @param string $slug
-     *
      * @return bool
      * @throws
      */
@@ -1425,7 +1397,6 @@ if (!function_exists('str_shuffle_words')) {
      * Shuffle words
      *
      * @param string $words
-     *
      * @return string
      */
     function str_shuffle_words($words)
@@ -1440,7 +1411,6 @@ if (!function_exists('str_wordify')) {
      *
      * @param string $words
      * @param string $sep
-     *
      * @return array
      */
     function str_wordify($words, $sep = '')
@@ -1454,7 +1424,6 @@ if (!function_exists('str_plurial')) {
      * Transform text to plurial
      *
      * @param string $slug
-     *
      * @return string
      */
     function str_plurial($slug)
@@ -1468,7 +1437,6 @@ if (!function_exists('str_camel')) {
      * Transform text to camel case
      *
      * @param string $slug
-     *
      * @return string
      */
     function str_camel($slug)
@@ -1482,7 +1450,6 @@ if (!function_exists('str_snake')) {
      * Transform text to snake case
      *
      * @param string $slug
-     *
      * @return string
      */
     function str_snake($slug)
@@ -1497,7 +1464,6 @@ if (!function_exists('str_contains')) {
      *
      * @param string $search
      * @param string $string
-     *
      * @return bool
      */
     function str_contains($search, $string)
@@ -1511,7 +1477,6 @@ if (!function_exists('str_capitalize')) {
      * Capitalize
      *
      * @param string $slug
-     *
      * @return string
      */
     function str_capitalize($slug)
@@ -1525,7 +1490,6 @@ if (!function_exists('str_random')) {
      * Random string
      *
      * @param string $string
-     *
      * @return string
      */
     function str_random($string)
@@ -1539,7 +1503,6 @@ if (!function_exists('str_force_in_utf8')) {
      * Force output string to utf8
      *
      * @param string $string
-     *
      * @return void
      */
     function str_force_in_utf8($string)
