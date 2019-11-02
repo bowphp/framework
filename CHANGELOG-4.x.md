@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [add] add seeder name and fix translate for validation stub
+- [add] init routing externalisation process
+- [add] add response exception
+- [fix] refonte pagination system and add drop statement
+- [fix] default value cost to string in Migration
+- [fix] Fix count(): Parameter must be an array or an object that implements Countable in Model::find method
+- [Fix] update translate in validation request stub
+- [add] add swith connection in migration
+- [change] update migration stub
+- [fix] add exception catcher in console system
+- [fix] add drop database possibity on `statement`
+- [fix] [#72](https://github.com/bowphp/framework/issues/72)
+
 ## [4.0.91] - 2019-07-14
 
 - [Fix] In `Request::class` class, the `has` method is bad
