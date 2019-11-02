@@ -58,7 +58,6 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     *
      * @return Parser
      */
     public function get($url, array $param = [])
@@ -75,7 +74,6 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     *
      * @return Parser
      */
     public function post($url, array $param = [])
@@ -95,7 +93,6 @@ class TestCase extends PHPUnitTestCase
      * Add attachment
      *
      * @param array $attach
-     *
      * @return Parser
      */
     public function attach(array $attach)
@@ -110,7 +107,6 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     *
      * @return Parser
      */
     public function put($url, array $param = [])
@@ -127,7 +123,6 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     *
      * @return Parser
      */
     public function delete($url, array $param = [])
@@ -144,7 +139,6 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     *
      * @return Parser
      */
     public function patch($url, array $param = [])
@@ -162,7 +156,6 @@ class TestCase extends PHPUnitTestCase
      * @param string $method
      * @param string $url
      * @param array  $params
-     *
      * @return Behavior
      */
     public function visit($method, $url, array $params = [])
@@ -176,5 +169,22 @@ class TestCase extends PHPUnitTestCase
         }
 
         return new Behavior($this->$method($url, $params));
+    }
+
+    /**
+     * Get fake instance
+     *
+     * @see https://github.com/fzaninotto/Faker for all documentation
+     * @return \Faker\Generator;
+     */
+    public function faker()
+    {
+        static $faker;
+
+        if (is_null($faker)) {
+            $faker = \Faker\Factory::create();
+        }
+
+        return $faker;
     }
 }

@@ -84,7 +84,7 @@ class Mail
     /**
      * @inheritdoc
      */
-    public static function send($view, $bind, \Closure $cb)
+    public static function send($view, $bind, callable $cb)
     {
         if (is_callable($bind)) {
             $cb = $bind;
