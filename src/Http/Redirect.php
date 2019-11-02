@@ -36,6 +36,8 @@ class Redirect implements ResponseInterface
 
     /**
      * Redirect constructor.
+     * 
+     * @return void
      */
     private function __construct()
     {

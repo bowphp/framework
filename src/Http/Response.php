@@ -3,7 +3,6 @@
 namespace Bow\Http;
 
 use Bow\Contracts\ResponseInterface;
-use Bow\Exception\ResponseException;
 use Bow\View\View;
 
 class Response implements ResponseInterface

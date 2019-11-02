@@ -7,6 +7,8 @@ use Bow\Http\Exception\AccessControlException;
 class AccessControl
 {
     /**
+     * The instance of Response
+     *
      * @var Response
      */
     private $response;
@@ -50,7 +52,7 @@ class AccessControl
     {
         if (!is_array($excepted)) {
             throw new AccessControlException(
-                'Attend un tableau.' . gettype($excepted) . ' donner.',
+                'Waiting for a data table.' . gettype($excepted) . ' given.',
                 E_USER_ERROR
             );
         }
@@ -65,16 +67,14 @@ class AccessControl
      * Active Access-control-Allow-Methods
      *
      * @param  array $excepted
-     *
      * @return AccessControl
-     *
      * @throws AccessControlException
      */
     public function allowMethods(array $excepted)
     {
         if (count($excepted) == 0) {
             throw new AccessControlException(
-                'Parameter is empty.',
+                'The list is empty.',
                 E_USER_ERROR
             );
         }
@@ -92,7 +92,7 @@ class AccessControl
     public function allowHeaders(array $excepted)
     {
         if (count($excepted) == 0) {
-            throw new AccessControlException('Parameter is empty.', E_USER_ERROR);
+            throw new AccessControlException('The list is empty.', E_USER_ERROR);
         }
 
         return $this->push('Access-Control-Allow-Headers', implode(', ', $excepted));
@@ -138,7 +138,7 @@ class AccessControl
     {
         if (count($excepted) == 0) {
             throw new AccessControlException(
-                'Le tableau est vide.' . gettype($excepted) . ' donner.',
+                'The list is empty',
                 E_USER_ERROR
             );
         }
