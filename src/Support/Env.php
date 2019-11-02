@@ -35,10 +35,17 @@ class Env
             return;
         }
 
-        static::$env = json_decode(trim(file_get_contents($filename)), true);
+        if (!file_exists($filename)) {
+            throw new \InvalidArgumentException("The application environment file [.env.json] cannot be empty or is not define.");
+        }
+
+        // Get the env file content
+        $content = file_get_contents($filename);
+
+        static::$env = json_decode(trim($content), true);
 
         if (json_last_error() == JSON_ERROR_SYNTAX) {
-            throw new \ErrorException('');
+            throw new \ErrorException(json_last_error_msg());
         }
 
         if (json_last_error() == JSON_ERROR_INVALID_PROPERTY_NAME) {
