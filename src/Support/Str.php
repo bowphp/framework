@@ -90,6 +90,12 @@ class Str
      */
     public static function plurial($str)
     {
+        if (preg_match('/y$/', $str)) {
+            $str = static::slice($str, 0, static::len($str) - 1);
+
+            return $str.'ies';
+        }
+
         preg_match('/s$/', $str) ?: $str = $str.'s';
 
         return $str;
