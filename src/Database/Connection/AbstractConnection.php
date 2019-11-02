@@ -120,4 +120,16 @@ abstract class AbstractConnection extends Tool
             ? $this->config['charset']
             : 'utf8';
     }
+
+    /**
+     * Retrieves the define Collation
+     *
+     * @return mixed|string
+     */
+    public function getCollation()
+    {
+        return isset($this->config['collation'])
+            ? $this->config['collation']
+            : 'utf8_unicode_ci';
+    }
 }
