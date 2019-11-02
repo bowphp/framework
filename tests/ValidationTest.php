@@ -153,8 +153,6 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
 
         $v2 = Validator::make(['name' => 'Milou'], ['name' => 'required|unique:pets']);
 
-        $pets = select('select * from pets');
-
         $this->assertFalse($v->fails());
 
         $this->assertTrue($v2->fails());
