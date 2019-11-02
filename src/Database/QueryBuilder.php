@@ -1145,15 +1145,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
         }
 
         // Enables automatic paging.
-        $data = [
+        return [
             'next' => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
             'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),
             'total' => (int) ($restOfPage + $current),
+            'per_page' => $n,
             'current' => $current,
             'data' => $data
         ];
-
-        return new Collection($data);
     }
 
     /**

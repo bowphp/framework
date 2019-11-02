@@ -290,7 +290,7 @@ class Database
         static::verifyConnection();
 
         if (!preg_match(
-            "/^((drop|alter|create)\s+(?:(?:temp|temporary)\s+)?table|truncate|call)(\s+)?(.+?);?$/i",
+            "/^(((drop|alter|create)\s+)?(?:(?:temp|temporary)\s+)?table|truncate|call|database)(\s+)?(.+?);?$/i",
             $sqlstatement
         )) {
             throw new DatabaseException(
