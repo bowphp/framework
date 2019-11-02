@@ -296,6 +296,13 @@ class SQLGenerator
             }
         }
 
+        // Wrap defaulte value
+        if (in_array($type, ['VARCHAR', 'CHAR'])) {
+            if (!is_null($default)) {
+                $default = "'".$default."'";
+            }
+        }
+
         // Add column size
         if ($size) {
             $type = sprintf('%s(%s)', $type, $size);
