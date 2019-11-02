@@ -127,11 +127,12 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
 
     public function testExists()
     {
+        var_dump(select('select * from pets'));
         $v = Validator::make(['name' => 'Couli'], ['name' => 'required|exists:pets,name']);
 
         $v2 = Validator::make(['name' => 'bow'], ['name' => 'required|exists:pets']);
 
-        $this->assertTrue($v->fails());
+        $this->assertFalse($v->fails());
 
         $this->assertTrue($v2->fails());
     }
@@ -144,7 +145,7 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertFalse($v->fails());
 
-        $this->assertFalse($v2->fails());
+        $this->assertTrue($v2->fails());
     }
 
     public function testUnique()

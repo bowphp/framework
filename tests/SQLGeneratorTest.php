@@ -35,7 +35,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
         $this->generator->addColumn('name', 'string', ['default' => 'bow', 'size' => 100]);
         $sql = $this->generator->make();
-        $this->assertEquals($sql, '`name` VARCHAR(100) NOT NULL DEFAULT bow');
+        $this->assertEquals($sql, "`name` VARCHAR(100) NOT NULL DEFAULT 'bow'");
     }
     
     /**
