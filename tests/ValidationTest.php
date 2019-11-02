@@ -127,7 +127,6 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
 
     public function testExists()
     {
-        var_dump(select('select * from pets'));
         $v = Validator::make(['name' => 'Couli'], ['name' => 'required|exists:pets,name']);
 
         $v2 = Validator::make(['name' => 'bow'], ['name' => 'required|exists:pets']);
