@@ -231,7 +231,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $data = static::find($id, $select);
 
-        if (is_null($data) || count($data) == 0) {
+        if (is_null($data)) {
             throw new NotFoundException('No recordings found.');
         }
 
