@@ -357,7 +357,7 @@ class Router
 
     /**
      * Get the all defined route
-     * 
+     *
      * @return array
      */
     public function getRoutes()
