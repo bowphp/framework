@@ -36,7 +36,9 @@ class Env
         }
 
         if (!file_exists($filename)) {
-            throw new \InvalidArgumentException("The application environment file [.env.json] cannot be empty or is not define.");
+            throw new \InvalidArgumentException(
+                "The application environment file [.env.json] cannot be empty or is not define."
+            );
         }
 
         // Get the env file content
