@@ -36,13 +36,15 @@ class SessionGuard implements AuthGuardContract
      */
     public function attempts(array $credentials)
     {
-        $user = $this->makeLogin();
+        $user = $this->makeLogin($credentials);
+        $fields = $this->provider['credentials'];
+        $password = $credentials[$fields['password']];
 
         if (is_null($user)) {
             return false;
         }
 
-        if (Hash::check($user->password, $password)) {
+        if (Hash::check($password, $user->${$fields['password']})) {
             $this->getSession()->put('_auth', $user);
             return true;
         }

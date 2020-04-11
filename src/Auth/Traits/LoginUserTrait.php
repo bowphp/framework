@@ -7,19 +7,24 @@ trait LoginUserTrait
     /**
      * Make login
      *
-     * @return \Bow\Database\Barry\Model
+     * @param array $credentials
+     * @return \Bow\Database\Barry\Model|null
      */
-    private function makeLogin()
+    private function makeLogin(array $credentials)
     {
         $model = $this->provider['model'];
-        $credentials = $this->provider['credentials'];
-        
-        $email = $credentials['username'];
-        $password = $credentials['password'];
+        $fields = $this->provider['credentials'];
 
-        return $model::where($this->credentials['email'], $email)->first();
+        return $model::where($fields['username'], $credentials[$fields['username']])->first();
     }
 
+    /**
+     * Get user by key
+     *
+     * @param string $key
+     * @param string $value
+     * @return \Bow\Database\Barry\Model|null
+     */
     private function getUserBy($key, $value)
     {
         $model = $this->provider['model'];
