@@ -42,7 +42,7 @@
         "papac/bow-blade": "For the use of template engine 'Blade'"
     },
     "scripts": {
-        "fix-sniffer": "phpcbf --standard=psr2 --tab-width=4 src tests",
-        "sniffer": "phpcs --standard=psr2 --tab-width=4 src tests"
+        "fix-sniffer": "phpcbf --standard=psr2 --severity=4 --tab-width=4 src tests",
+        "sniffer": "phpcs --standard=psr2 --severity=4 --tab-width=4 src tests"
     }
 }
