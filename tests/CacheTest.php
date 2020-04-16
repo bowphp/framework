@@ -13,12 +13,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         Cache::confirgure(__DIR__.'/data/cache/bow');
     }
 
-    public function tearDown()
-    {
-        parent::tearDown();
 
-        Cache::clear();
-    }
 
     public function testCreateCache()
     {
@@ -143,6 +138,16 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(Cache::get('first_name'), 'John');
     }
 
-    
+    public function testClearCache()
+    {
+        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
 
+        $this->assertEquals(Cache::get('first_name'), 'John');
+        $this->assertEquals(Cache::get('name'), 'Doe');
+
+        Cache::clear();
+
+        $this->assertNull(Cache::get('name'));
+        $this->assertNull(Cache::get('first_name'));
+    }
 }
