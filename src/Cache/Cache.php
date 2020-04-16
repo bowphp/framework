@@ -324,4 +324,17 @@ class Cache
 
         throw new BadMethodCallException("The $name method does not exist");
     }
+
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public static function addMany(array $data) : bool
+    {
+        foreach ($data as $attributes => $value) {
+            static::add($attributes, $value);
+        }
+
+        return true;
+    }
 }
