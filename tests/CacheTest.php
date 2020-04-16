@@ -6,6 +6,13 @@ use \Bow\Cache\Cache;
 
 class CacheTest extends \PHPUnit\Framework\TestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+
+        Cache::confirgure(__DIR__.'/data/cache/bow');
+    }
+
     public function testCreateCache()
     {
         Cache::confirgure(__DIR__.'/data/cache/bow');
@@ -114,5 +121,20 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         $r1 = Cache::timeOf('age');
 
         $this->assertEquals(is_int($r1), true);
+    }
+
+    public function testCanAddManyDataAtTheSameTimeInTheCache()
+    {
+        $passes = Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+
+        $this->assertEquals($passes, true);
+    }
+
+    public function testCanRetrieveMultipleCacheStored()
+    {
+        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+
+        $this->assertEquals(Cache::get('name'), 'Doe');
+        $this->assertEquals(Cache::get('first_name'), 'John');
     }
 }
