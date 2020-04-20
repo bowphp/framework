@@ -4,6 +4,9 @@ namespace Bow\Cache;
 
 use BadMethodCallException;
 use Bow\Support\Str;
+use DirectoryIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class Cache
 {
@@ -302,10 +305,15 @@ class Cache
      */
     public static function clear()
     {
-        $glob = glob(static::$directory);
+        $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(static::$directory),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
 
-        foreach ($glob as $item) {
-            @unlink($item);
+        foreach($iterator as $file) {
+            if(! $file->isDir()) {
+               unlink($file->getRealPath());
+            }
         }
     }
 
@@ -323,5 +331,18 @@ class Cache
         }
 
         throw new BadMethodCallException("The $name method does not exist");
+    }
+
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public static function addMany(array $data) : bool
+    {
+        foreach ($data as $attributes => $value) {
+            static::add($attributes, $value);
+        }
+
+        return true;
     }
 }
