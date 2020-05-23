@@ -22,6 +22,7 @@ env:
 
 before_install:
   - docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
+  - docker run -p 1025:25 -p 1080:80 -d --name maildev  maildev/maildev
 install:
   - composer install --prefer-dist
 
