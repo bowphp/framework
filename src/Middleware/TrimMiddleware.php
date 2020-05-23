@@ -20,7 +20,7 @@ class TrimMiddleware
         }
 
         foreach ($_POST as $key => $value) {
-            $_GET[$key] = trim($value);
+            $_POST[$key] = trim($value);
         }
 
         return $next($request);

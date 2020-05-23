@@ -14,9 +14,9 @@ class AuthMiddleware
      * @param  Callable  $next
      * @return boolean
      */
-    public function process(Request $request, callable $next)
+    public function process(Request $request, callable $next, array $guard = [])
     {
-        if (Auth::check()) {
+        if (Auth::getInstance()->check()) {
             return $next($request);
         }
 
