@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [add] Add "service" and "exception" command to console
+- [add] Add docker composer configuration
+- [change] Update authentication system
+- [change] Update top application structure
+
 ## [4.1.0] - 2019-11-02
 
 - [fix] validation bug fix
