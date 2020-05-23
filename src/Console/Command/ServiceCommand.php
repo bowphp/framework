@@ -3,7 +3,7 @@
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
-use Bow\Console\ConsoleInformation;
+use Bow\Console\Generator;
 
 class ServiceCommand extends AbstractCommand
 {

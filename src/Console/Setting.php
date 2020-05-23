@@ -530,14 +530,4 @@ class Setting
     {
         return $this->exception_directory;
     }
-
-    /**
-     * Get the service directory
-     *
-     * @return string
-     */
-    public function getServiceDirectory()
-    {
-        return $this->exception_directory;
-    }
 }
