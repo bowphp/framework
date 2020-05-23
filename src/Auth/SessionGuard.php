@@ -7,7 +7,7 @@ use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
 use Bow\Session\Session;
 
-class SessionGuard implements AuthGuardContract
+class SessionGuard implements GuardContract
 {
     use LoginUserTrait;
 
