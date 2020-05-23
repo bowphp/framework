@@ -20,3 +20,9 @@ services:
       PASS: "12345"
     volumes:
       - "./:/ftp/$USER"
+  mail:
+    container_name: mail
+    image: maildev/maildev
+    ports:
+      - "1025:25"
+      - "1080:80"
