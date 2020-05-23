@@ -1,0 +1,19 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Exception;
+
+class {className}
+{
+    /**
+     * handle the error
+     *
+     * @param Exception $exception
+     * @return void
+     */
+    public function handle(Exception $exception)
+    {
+        // Do something
+    }
+}
