@@ -2,13 +2,13 @@
 
 namespace Bow\Mail\Driver;
 
+use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Exception\SmtpException;
 use Bow\Mail\Exception\SocketException;
 use Bow\Mail\Message;
-use Bow\Mail\Send;
 use ErrorException;
 
-class Smtp implements Send
+class SmtpDriver implements MailDriverInterface
 {
 
     /**
@@ -70,25 +70,25 @@ class Smtp implements Send
     /**
      * Smtp Constructor
      *
-     * @param array $param
+     * @param array $config
      */
-    public function __construct(array $param)
+    public function __construct(array $config)
     {
-        if (!isset($param['secure'])) {
-            $param['secure'] = false;
+        if (!isset($config['secure'])) {
+            $config['secure'] = false;
 
-            if (!isset($param['tls'])) {
-                $param['tls'] = false;
+            if (!isset($config['tls'])) {
+                $config['tls'] = false;
             }
         }
 
-        $this->url = $param['hostname'];
-        $this->username = $param['username'];
-        $this->password = $param['password'];
-        $this->secure = $param['ssl'];
-        $this->tls = $param['tls'];
-        $this->timeout = $param['timeout'];
-        $this->port = $param['port'];
+        $this->url = $config['hostname'];
+        $this->username = $config['username'];
+        $this->password = $config['password'];
+        $this->secure = $config['ssl'];
+        $this->tls = $config['tls'];
+        $this->timeout = $config['timeout'];
+        $this->port = $config['port'];
     }
 
     /**
