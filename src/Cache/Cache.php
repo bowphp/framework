@@ -306,13 +306,13 @@ class Cache
     public static function clear()
     {
         $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(static::$directory),
+            new RecursiveDirectoryIterator(static::$directory),
             RecursiveIteratorIterator::SELF_FIRST
         );
 
-        foreach($iterator as $file) {
-            if(! $file->isDir()) {
-               unlink($file->getRealPath());
+        foreach ($iterator as $file) {
+            if (! $file->isDir()) {
+                unlink($file->getRealPath());
             }
         }
     }
