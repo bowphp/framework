@@ -46,7 +46,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var bool
      */
-    protected $softDelete = false;
+    protected $soft_delete = false;
 
     /**
      * Defines the column where the query construct will use for the last query

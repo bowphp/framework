@@ -8,7 +8,7 @@ use Bow\Security\Hash;
 use Bow\Session\Session;
 use Policier\Policier;
 
-class JwtGaurd implements AuthGuardContract
+class JwtGuard implements AuthGuardContract
 {
     use LoginUserTrait;
 
@@ -18,13 +18,6 @@ class JwtGaurd implements AuthGuardContract
      * @var array
      */
     private $provider;
-
-    /**
-     * Defines policier instance
-     *
-     * @var Policier
-     */
-    private $policier;
 
     /**
      * Defines token data
@@ -40,8 +33,11 @@ class JwtGaurd implements AuthGuardContract
      */
     public function __construct(array $provider)
     {
+        if (!class_exists(Policier::class)) {
+            throw new AuthenticateException('Please install bowphp/policier package.');
+        }
+
         $this->provider = $provider;
-        $this->policier = Policier::getInstance();
     }
 
     /**
@@ -52,25 +48,28 @@ class JwtGaurd implements AuthGuardContract
      */
     public function attempts(array $credentials)
     {
-        $user = $this->makeLogin();
+        $user = $this->makeLogin($credentials);
+        $fields = $this->provider['credentials'];
+        $password = $credentials[$fields['password']];
 
         if (is_null($user)) {
             return false;
         }
 
-        if (!Hash::check($user->password, $password)) {
-            return false;
+        if (Hash::check($password, $user->${$fields['password']})) {
+            $this->login($user);
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
-     * Get the session instance
+     * Get the Policier instance
      *
-     * @return Session
+     * @return Policier
      */
-    private static function getPolicier()
+    public function getPolicier()
     {
         return Policier::getInstance();
     }
@@ -89,6 +88,7 @@ class JwtGaurd implements AuthGuardContract
         }
 
         $token = trim(end($match));
+        $policier = $this->getPolicier();
 
         if (!$policier->verify($token)) {
             return false;
@@ -126,7 +126,7 @@ class JwtGaurd implements AuthGuardContract
             throw new AuthenticateException('The token is undefined please generate some one when your log user.');
         }
 
-        $result = $policier->decode($this->token);
+        $result = $this->getPolicier()->decode($this->token);
 
         if (!isset($result['claims']['email'], $result['claims']['id'], $result['claims']['logged'])) {
             throw new AuthenticateException('The token payload malformed.');
@@ -154,12 +154,12 @@ class JwtGaurd implements AuthGuardContract
     public function login(Authentication $user)
     {
         $claims = [
-            "email" => $user->email,
-            "id" => $user->getAuthenticateUserId(),
-            "logged" => true
+          "email" => $user->email,
+          "id" => $user->getAuthenticateUserId(),
+          "logged" => true
         ];
 
-        $this->token = $this->policier->encode($user->getAuthenticateUserId(), $claims);
+        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), $claims);
 
         return $this->token;
     }
@@ -171,7 +171,7 @@ class JwtGaurd implements AuthGuardContract
      */
     public function id()
     {
-        $result = $policier->decode($this->token);
+        $result = $this->getPolicier()->decode($this->token);
 
         return $result['claims']['id'];
     }

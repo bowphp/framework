@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [change] Update authentication system
 - [change] Update top application structure
 
+## [4.1.1] - 2020-04-11
+
+- [add] add jwt authentication support
+- [fix] remove call static in middleware
+
 ## [4.1.0] - 2019-11-02
 
 - [fix] validation bug fix
