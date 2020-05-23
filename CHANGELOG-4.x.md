@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [add] Add "service" and "exception" command to console
 - [add] Add docker composer configuration
+- [change] refactoring of mail service and add unity test
 - [change] Update authentication system
 - [change] Update top application structure
 
