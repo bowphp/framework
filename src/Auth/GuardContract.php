@@ -2,7 +2,7 @@
 
 namespace Bow\Auth;
 
-interface AuthGuardContract
+interface GuardContract
 {
     /**
      * Check if user is authenticate

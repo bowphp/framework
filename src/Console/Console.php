@@ -69,7 +69,8 @@ class Console
      */
     const ACTION = [
         'middleware', 'controller', 'model', 'validator',
-        'seeder', 'migration', 'configuration'
+        'seeder', 'migration', 'configuration', 'service',
+        'exception',
     ];
 
     /**
@@ -405,6 +406,7 @@ Bow tqsk runner usage: php bow command:action [name] --option
    \033[0;33madd:middleware\033[00m      Create new middleware
    \033[0;33madd:configuration\033[00m   Create new configuration
    \033[0;33madd:service\033[00m         Create new service
+   \033[0;33madd:exception\033[00m       Create new exception
    \033[0;33madd:controller\033[00m      Create new controller
    \033[0;33madd:model\033[00m           Create new model
    \033[0;33madd:validator\033[00m       Create new validator
@@ -454,6 +456,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           For create a new middleware
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name        For create a new configuration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:exception name            For create a new exception
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       For create a new model
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    For create a new seeder

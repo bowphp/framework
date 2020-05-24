@@ -25,7 +25,8 @@ class Command extends AbstractCommand
         'key' => \Bow\Console\Command\GenerateKeyCommand::class,
         'session' => \Bow\Console\Command\GenerateSessionCommand::class,
         'clear' => \Bow\Console\Command\ClearCommand::class,
-        'service' => \Bow\Console\Command\ServiceCommand::class
+        'service' => \Bow\Console\Command\ServiceCommand::class,
+        'exception' => \Bow\Console\Command\ExceptionCommand::class,
     ];
 
     /**

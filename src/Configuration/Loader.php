@@ -3,6 +3,7 @@
 namespace Bow\Configuration;
 
 use Bow\Application\Exception\ApplicationException;
+use Bow\Event\Event;
 use Bow\Support\Arraydotify;
 use Bow\Support\Capsule;
 use Bow\Support\Env;

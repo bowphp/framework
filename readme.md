@@ -49,4 +49,4 @@ Thank you for considering contributing to Bow Framework! The contribution guide 
 
 **Please, if there is a bug on the project please contact me by email or leave me a message on the [slack](https://bowphp.slack.com). or [join us on slask](https://join.slack.com/t/bowphp/shared_invite/enQtNzMxOTQ0MTM2ODM5LTQ3MWQ3Mzc1NDFiNDYxMTAyNzBkNDJlMTgwNDJjM2QyMzA2YTk4NDYyN2NiMzM0YTZmNjU1YjBhNmJjZThiM2Q)**
 
-<a href="https://www.buymeacoffee.com/iOLqZ3h" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-black.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
+<a href="https://www.buymeacoffee.com/iOLqZ3h" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-black.png" alt="Buy Me A Coffee" style="height: 30px !important; width: 150px !important;" ></a>

@@ -2,12 +2,12 @@
 
 namespace Bow\Mail\Driver;
 
-use Bow\Mail\Send;
+use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Message;
 use Bow\Support\Str;
 use InvalidArgumentException;
-use Bow\Mail\Message;
 
-class Native implements Send
+class NativeDriver implements MailDriverInterface
 {
     /**
      * The configuration

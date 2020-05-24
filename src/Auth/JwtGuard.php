@@ -8,7 +8,7 @@ use Bow\Security\Hash;
 use Bow\Session\Session;
 use Policier\Policier;
 
-class JwtGuard implements AuthGuardContract
+class JwtGuard implements GuardContract
 {
     use LoginUserTrait;
 

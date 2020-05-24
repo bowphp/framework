@@ -2,7 +2,6 @@
 
 namespace Bow\Configuration;
 
-use Bow\Event\Event;
 use Bow\Support\Capsule as Container;
 
 abstract class Configuration
@@ -23,6 +22,16 @@ abstract class Configuration
     }
 
     /**
+     * Get la service class name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return get_called_class();
+    }
+
+    /**
      * Create the service
      *
      * @param Loader $config
@@ -36,36 +45,4 @@ abstract class Configuration
      * @return void
      */
     abstract public function run();
-
-    /**
-     * Start listener
-     *
-     * @param callable $cb
-     * @return void
-     */
-    public function runned($cb)
-    {
-        Event::once(static::class.'\Service\Started', $cb);
-    }
-
-    /**
-     * Make listener
-     *
-     * @param callable $cb
-     * @return void
-     */
-    public function created($cb)
-    {
-        Event::once(static::class.'\Service\Maked', $cb);
-    }
-
-    /**
-     * Get la service class name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return get_called_class();
-    }
 }

@@ -1,11 +1,13 @@
 <?php
 
-namespace Bow\Mail;
+namespace Bow\Mail\Contracts;
 
-interface Send
+use Bow\Mail\Message;
+
+interface MailDriverInterface
 {
     /**
-     * Send, envoie de mail.
+     * Send mail by any driver
      *
      * @param Message $message
      * @return mixed

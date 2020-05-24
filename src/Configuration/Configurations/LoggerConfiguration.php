@@ -21,7 +21,7 @@ class LoggerConfiguration extends Configuration
                 $config['app.name'] ?? 'Bow'
             );
 
-            $this->loadFrontLogger($monolog);
+            $this->loadFrontLogger($monolog, $config['app.error_handle']);
 
             return $monolog;
         });
@@ -41,7 +41,7 @@ class LoggerConfiguration extends Configuration
      * @param Logger $monolog
      * @return void
      */
-    private function loadFrontLogger(Logger $monolog)
+    private function loadFrontLogger(Logger $monolog, $error_handler)
     {
         $whoops = new \Whoops\Run;
 
@@ -51,13 +51,13 @@ class LoggerConfiguration extends Configuration
             );
         }
 
-        if (class_exists(\App\ErrorHandle::class)) {
+        if (class_exists($error_handler)) {
             $handler = new \Whoops\Handler\CallbackHandler(
-                function ($exception, $inspector, $run) use ($monolog) {
+                function ($exception, $inspector, $run) use ($monolog, $error_handler) {
                     $monolog->error($exception->getMessage(), $exception->getTrace());
 
                     return call_user_func_array(
-                        [new \App\ErrorHandle, 'handle'],
+                        [new $error_handler, 'handle'],
                         [$exception]
                     );
                 }

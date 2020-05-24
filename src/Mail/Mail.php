@@ -2,13 +2,22 @@
 
 namespace Bow\Mail;
 
-use Bow\Mail\Driver\Native;
-use Bow\Mail\Driver\Smtp;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 
 class Mail
 {
+    /**
+     * The driver collector
+     *
+     * @var array
+     */
+    private static $drivers = [
+        'smtp' => \Bow\Mail\Driver\SmtpDriver::class,
+        'mail' => \Bow\Mail\Driver\NativeDriver::class,
+        'ses' => \Bow\Mail\Driver\SesDriver::class,
+    ];
+
     /**
      * The mail driver instance
      *
@@ -54,21 +63,36 @@ class Mail
             static::$config = $config;
         }
 
-        if (!in_array($config['driver'], ["smtp", "mail"])) {
+        if (!in_array($config['driver'], array_keys(static::$drivers))) {
             throw new MailException("The type is not known.", E_USER_ERROR);
         }
 
-        if ($config['driver'] == "mail") {
-            if (!static::$instance instanceof Native) {
-                static::$instance = new Native($config['mail']);
-            }
-        } else {
-            if (!static::$instance instanceof Smtp) {
-                static::$instance = new Smtp($config['smtp']);
-            }
+        $name = $config['driver'];
+        $driver = static::$drivers[$name];
+
+        if (!static::$instance instanceof $driver) {
+            static::$instance = new $driver($config[$name]);
         }
 
         return static::$instance;
+    }
+
+    /**
+     * Push new driver
+     *
+     * @param strinb $name
+     * @param strinb $class_name
+     * @return bool
+     */
+    public function pushDriver(string $name, string $class_name)
+    {
+        if (array_key_exists($name, static::$drivers)) {
+            return false;
+        }
+
+        static::$drivers[$name] = $class_name;
+
+        return true;
     }
 
     /**
@@ -132,7 +156,7 @@ class Mail
      * Modify the smtp|mail driver
      *
      * @param string $driver
-     * @return SimpleMail|Smtp
+     * @return SendInterface
      * @throws MailException
      */
     public static function setDriver($driver)
@@ -141,7 +165,12 @@ class Mail
             throw new MailException('Mail non configurer.');
         }
 
+        if (in_array($driver, array_keys(static::$drivers))) {
+            throw new MailException('The driver [$driver] is not available');
+        }
+
         static::$config['driver'] = $driver;
+
         return static::configure(static::$config);
     }
 
@@ -151,7 +180,6 @@ class Mail
      * @param  string $name
      * @param  array  $arguments
      * @return mixed
-     *
      * @throws \ErrorException
      */
     public function __call($name, $arguments)
@@ -160,6 +188,6 @@ class Mail
             return call_user_func_array([static::class, $name], $arguments);
         }
 
-        throw new \ErrorException('This function does not exist. [' . $name . ']', E_ERROR);
+        throw new \ErrorException("This function does not exist. [$name]", E_ERROR);
     }
 }

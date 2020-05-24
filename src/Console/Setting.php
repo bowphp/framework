@@ -122,6 +122,20 @@ class Setting
     private $serve_filename;
 
     /**
+     * The exception directory
+     *
+     * @var string
+     */
+    private $exception_directory;
+
+    /**
+     * The service directory
+     *
+     * @var string
+     */
+    private $service_directory;
+
+    /**
      * The namesapces directory
      *
      * @var array
@@ -300,6 +314,28 @@ class Setting
     public function setVarDirectory($var_directory)
     {
         $this->var_directory = $var_directory;
+    }
+
+    /**
+     * Set the exception directory
+     *
+     * @param string $exception_directory
+     * @return void
+     */
+    public function setExceptionDirectory($exception_directory)
+    {
+        $this->exception_directory = $exception_directory;
+    }
+
+    /**
+     * Set the service directory
+     *
+     * @param string $service_directory
+     * @return void
+     */
+    public function setServiceDirectory($service_directory)
+    {
+        $this->service_directory = $service_directory;
     }
 
     /**
@@ -483,5 +519,15 @@ class Setting
     public function getPublicDirectory()
     {
         return $this->public_directory;
+    }
+
+    /**
+     * Get the exception directory
+     *
+     * @return string
+     */
+    public function getExceptionDirectory()
+    {
+        return $this->exception_directory;
     }
 }

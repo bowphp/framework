@@ -13,7 +13,7 @@ class MiddlewareCommand extends AbstractCommand
      *
      * @return void
      */
-    public function generate($middleware)
+    public function generate(string $middleware)
     {
         $generator = new Generator(
             $this->setting->getMiddlewareDirectory(),
