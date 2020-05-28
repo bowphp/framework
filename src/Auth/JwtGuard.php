@@ -158,11 +158,21 @@ class JwtGuard implements GuardContract
     /**
      * Get the generated token
      *
-     * @return string
+     * @return \Policier\Token
      */
     public function getToken()
     {
         return $this->token;
+    }
+
+    /**
+     * Get the token string
+     *
+     * @return string
+     */
+    public function getTokenString()
+    {
+        return (string) $this->token;
     }
 
     /**

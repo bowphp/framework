@@ -86,7 +86,7 @@ class Auth
 
     /**
      * __callStatic
-     * 
+     *
      * @param string $method
      * @param array $params
      * @return GuardContract
