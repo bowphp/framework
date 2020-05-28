@@ -91,7 +91,7 @@ class Auth
      * @param array $params
      * @return GuardContract
      */
-    public function __callStatic(string $method, array $params)
+    public static function __callStatic(string $method, array $params)
     {
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array([static::$instance, $method], $params);
