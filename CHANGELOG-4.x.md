@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.1] - 2020-05-28
+
 - [fix] Refonte JWT Guard system: Force the policier singkey using the native encrypt key
 - [fix] The magic method "\_\_callStatic()" must have public visibility and be static
 
