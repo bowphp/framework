@@ -63,4 +63,28 @@ trait TextColumn
     {
         return $this->addColumn($column, 'longtext', $attribute);
     }
+
+    /**
+     * Add text column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addText($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'text', $attribute);
+    }
+
+    /**
+     * Add blob column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addBlob($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'blob', $attribute);
+    }
 }
