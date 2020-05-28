@@ -71,7 +71,25 @@ class JwtGuard implements GuardContract
      */
     public function getPolicier()
     {
-        return Policier::getInstance();
+        if (!class_exists(Policier::class)) {
+            throw new \Exception('Please install: composer require bowphp/policier');
+        }
+
+        $policier = Policier::getInstance();
+
+        if (is_null($policier)) {
+            throw new \Exception('Please load the \Policier\Bow\PolicierConfiguration::class configuration.');
+        }
+
+        $config = (array) config('policier');
+        
+        if (is_null($config['keychain']['private']) || is_null($config['keychain']['publlic'])) {
+            if (is_null($config['signkey'])) {
+                $policier->setConfig(['signkey' => file_get_contents(config('security.key'))]);
+            }
+        }
+
+        return $policier;
     }
 
     /**
@@ -112,7 +130,7 @@ class JwtGuard implements GuardContract
      */
     public function guest()
     {
-        return true;
+        return !$this->check();
     }
 
     /**
@@ -123,7 +141,9 @@ class JwtGuard implements GuardContract
     public function user()
     {
         if (is_null($this->token)) {
-            throw new AuthenticateException('The token is undefined please generate some one when your log user.');
+            throw new AuthenticateException(
+                'The token is undefined please generate some one when your log user.'
+            );
         }
 
         $result = $this->getPolicier()->decode($this->token);
@@ -154,9 +174,9 @@ class JwtGuard implements GuardContract
     public function login(Authentication $user)
     {
         $claims = [
-          "email" => $user->email,
-          "id" => $user->getAuthenticateUserId(),
-          "logged" => true
+            "email" => $user->email,
+            "id" => $user->getAuthenticateUserId(),
+            "logged" => true
         ];
 
         $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), $claims);
