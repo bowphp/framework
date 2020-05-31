@@ -4,16 +4,7 @@ namespace {baseNamespace}{namespace};
 
 use Exception;
 
-class {className}
+class {className} extends Exception
 {
-    /**
-     * handle the error
-     *
-     * @param Exception $exception
-     * @return void
-     */
-    public function handle(Exception $exception)
-    {
-        // Do something
-    }
+    //
 }
