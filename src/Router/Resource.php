@@ -31,11 +31,6 @@ class Resource
             'method' => 'post'
         ],
         [
-            'url'    => '/create',
-            'call'   => 'create',
-            'method' => 'get'
-        ],
-        [
             'url'    => '/:id',
             'call'   => 'show',
             'method' => 'get'
@@ -49,11 +44,6 @@ class Resource
             'url'    => '/:id',
             'call'   => 'destroy',
             'method' => 'delete'
-        ],
-        [
-            'url'    => '/:id/edit',
-            'call'   => 'edit',
-            'method' => 'get'
         ]
     ];
 
