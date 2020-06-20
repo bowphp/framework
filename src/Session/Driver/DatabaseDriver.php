@@ -32,7 +32,7 @@ class DatabaseDriver implements \SessionHandlerInterface
 
     /**
      * Database constructor
-     * 
+     *
      * @param string $ip
      * @param array $options
      */

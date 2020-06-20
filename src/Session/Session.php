@@ -338,13 +338,13 @@ class Session implements CollectionInterface
         $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
         if (isset($flash[$key])) {
-            $flash = $flash[$key];
+            $content = $flash[$key];
 
             unset($flash[$key]);
 
-            $_SESSION[static::CORE_SESSION_KEY['flash']] = $flash;
+            $_SESSION[static::CORE_SESSION_KEY['flash']] = $content;
 
-            return $flash;
+            return $content;
         }
 
         if ($this->has($key)) {

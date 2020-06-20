@@ -8,7 +8,7 @@ class ArrayDriver implements \SessionHandlerInterface
 
     /**
      * Define the data store
-     * 
+     *
      * @var array
      */
     private $sessions;
