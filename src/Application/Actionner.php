@@ -441,11 +441,18 @@ class Actionner
         }
 
         $injections = $this->injector($class, $method);
-        $controller_injections = $this->injector($class, '__construct');
-        $controller = (new \ReflectionClass($class))->newInstanceArgs($controller_injections);
+        $controller = (new \ReflectionClass($class));
+        $constructor = $controller->getConstructor();
+
+        $controller_injections = [];
+        if (!is_null($constructor)) {
+            $controller_injections = $this->getInjectParameters($constructor->getParameters());
+        }
+
+        $instance = $controller->newInstanceArgs($controller_injections);
 
         return [
-            'action' => [$controller, $method],
+            'action' => [$instance, $method],
             'injection' => $injections
         ];
     }
