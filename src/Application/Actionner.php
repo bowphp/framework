@@ -328,7 +328,7 @@ class Actionner
 
     /**
      * Get all paramters define by user in method injectable
-     * 
+     *
      * @param array $parameters
      * @return array
      */
