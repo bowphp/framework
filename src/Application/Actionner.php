@@ -249,17 +249,17 @@ class Actionner
      * Execution of define controller
      *
      * @param array $functions
-     * @param array $param
+     * @param array $params
      *
      * @return mixed
      */
-    private function dispatchControllers(array $functions, array $param)
+    private function dispatchControllers(array $functions, array $params)
     {
         $response = null;
 
         // Fix the unparsed parameter in url
-        foreach ($param as $key => $value) {
-            $param[$key] = urldecode($value);
+        foreach ($params as $key => $value) {
+            $params[$key] = urldecode($value);
         }
 
         // We launch of the execution of the list of actions define
@@ -267,7 +267,7 @@ class Actionner
         foreach ($functions as $function) {
             $response = call_user_func_array(
                 $function['action'],
-                array_merge($function['injection'], $param)
+                array_merge($function['injection'], $params)
             );
 
             if ($response === true) {
@@ -292,7 +292,7 @@ class Actionner
      *
      * @throws
      */
-    public function injector($classname, $method = null)
+    public function injector(string $classname, string $method = null)
     {
         $params = [];
         $reflection = new \ReflectionClass($classname);
@@ -303,27 +303,7 @@ class Actionner
 
         $parameters = $reflection->getMethod($method)->getParameters();
 
-        foreach ($parameters as $parameter) {
-            $class = $parameter->getClass();
-
-            if (is_null($class)) {
-                continue;
-            }
-
-            $constructor = $class->getName();
-
-            if (! class_exists($constructor, true)) {
-                continue;
-            }
-
-            if (!in_array(strtolower($constructor), $this->getInjectorExceptedType())) {
-                if (method_exists($constructor, 'getInstance')) {
-                    $params[] = $constructor::getInstance();
-                } else {
-                    $params[] = new $constructor();
-                }
-            }
-        }
+        $params = $this->getInjectParameters($parameters);
 
         return $params;
     }
@@ -341,27 +321,45 @@ class Actionner
     {
         $reflection = new \ReflectionFunction($closure);
         $parameters = $reflection->getParameters();
+        $params = $this->getInjectParameters($parameters);
+
+        return $params;
+    }
+
+    /**
+     * Get all paramters define by user in method injectable
+     * 
+     * @param array $parameters
+     * @return array
+     */
+    private function getInjectParameters(array $parameters)
+    {
         $params = [];
 
         foreach ($parameters as $parameter) {
-            $type = $parameter->getType();
+            $class = $parameter->getClass();
 
-            if (is_null($type)) {
+            if (is_null($class)) {
                 continue;
             }
 
-            $class = trim($type->getName());
+            $class_name = $class->getName();
 
-            if (! class_exists($class, true)) {
-                continue;
+            if (! class_exists($class_name, true)) {
+                throw new \InvalidArgumentException(
+                    sprintf('class %s not exists', $class_name)
+                );
             }
 
-            if (!in_array(strtolower($class), $this->getInjectorExceptedType())) {
-                if (method_exists($class, 'getInstance')) {
-                    $params[] = $class::getInstance();
-                } else {
-                    $params[] = new $class();
+            if (!in_array(strtolower($class_name), $this->getInjectorExceptedType())) {
+                if (method_exists($class_name, 'getInstance')) {
+                    $params[] = $class_name::getInstance();
+                    continue;
                 }
+
+                $injection = $this->injector($class_name, '__construct');
+                $param = (new \ReflectionClass($class_name))->newInstanceArgs($injection);
+                $params[] = $param;
             }
         }
 
@@ -443,9 +441,11 @@ class Actionner
         }
 
         $injections = $this->injector($class, $method);
+        $controller_injections = $this->injector($class, '__construct');
+        $controller = (new \ReflectionClass($class))->newInstanceArgs($controller_injections);
 
         return [
-            'action' => [new $class(), $method],
+            'action' => [$controller, $method],
             'injection' => $injections
         ];
     }
