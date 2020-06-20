@@ -453,6 +453,8 @@ class Application
      */
     private function routeLoader($method, $path, $cb)
     {
+        $path = '/'.trim($path, '/');
+        
         // We build the original path based on the application loader
         $path = $this->config['app.root'].$this->prefix.$path;
 

@@ -20,6 +20,7 @@ class {className} extends Controller
     /**
      * Displays the view for creating a resource.
      *
+     * @param Request $request
      * @return void
      */
     public function create()
@@ -30,9 +31,10 @@ class {className} extends Controller
     /**
      * Add a new resource in the information base
      *
+     * @param Request $request
      * @return void
      */
-    public function store()
+    public function store(Request $request)
     {
         // Code Here
     }
@@ -62,10 +64,11 @@ class {className} extends Controller
     /**
      * Update a resource
      *
+     * @param Request $request
      * @param  mixed $id
      * @return void
      */
-    public function update($id)
+    public function update(Request $request, $id)
     {
         // Code Here
     }

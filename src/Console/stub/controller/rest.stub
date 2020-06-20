@@ -20,25 +20,14 @@ class {className} extends Controller
     }
 
     /**
-     * Displays the view for creating a resource.
-     *
-     * GET {prefix}/create
-     *
-     * @return void
-     */
-    public function create()
-    {
-        // Code Here
-    }
-
-    /**
      * Add a new resource in the information base
      *
      * POST {prefix}
      *
+     * @param Request $request
      * @return void
      */
-    public function store()
+    public function store(Request $request)
     {
         // Code Here
     }
@@ -52,19 +41,6 @@ class {className} extends Controller
      * @return void
      */
     public function show($id)
-    {
-        // Code Here
-    }
-
-    /**
-     * Updating a resource using GET parameter
-     *
-     * GET {prefix}/:id/edit
-     *
-     * @param mixed $id
-     * @return void
-     */
-    public function edit($id)
     {
         // Code Here
     }

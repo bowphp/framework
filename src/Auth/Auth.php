@@ -26,7 +26,7 @@ class Auth
      * Configure Auth system
      *
      * @param array $config
-     * @return Auth
+     * @return GuardContract
      */
     public static function configure(array $config)
     {
@@ -42,7 +42,7 @@ class Auth
     /**
      * Get Auth Instance
      *
-     * @return Auth
+     * @return GuardContract
      */
     public static function getInstance()
     {
@@ -53,7 +53,7 @@ class Auth
      * Check if user is authenticate
      *
      * @param null|string $guard
-     * @return Auth|null
+     * @return GuardContract
      *
      * @throws AuthenticateException
      */
@@ -70,9 +70,31 @@ class Auth
         $provider = static::$config[$guard];
 
         if ($provider['type'] == 'session') {
+            if (static::$instance instanceof SessionGuard) {
+                return static::$instance;
+            }
+
             return static::$instance = new SessionGuard($provider);
         }
 
+        if (static::$instance instanceof JwtGuard) {
+            return static::$instance;
+        }
+
         return static::$instance = new JwtGuard($provider);
+    }
+
+    /**
+     * __callStatic
+     *
+     * @param string $method
+     * @param array $params
+     * @return GuardContract
+     */
+    public static function __callStatic(string $method, array $params)
+    {
+        if (method_exists(static::$instance, $method)) {
+            return call_user_func_array([static::$instance, $method], $params);
+        }
     }
 }
