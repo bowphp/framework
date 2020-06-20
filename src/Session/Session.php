@@ -30,6 +30,7 @@ class Session implements CollectionInterface
      */
     private $driver = [
         'database' => \Bow\Session\Driver\DatabaseDriver::class,
+        'array' => \Bow\Session\Driver\ArrayDriver::class,
         'file' => \Bow\Session\Driver\FilesystemDriver::class,
     ];
 
@@ -156,11 +157,20 @@ class Session implements CollectionInterface
 
         // We create get driver
         $driver = $this->driver[$this->config['driver']];
-        
-        if ($this->config['driver'] == 'file') {
-            $handler = new $driver(realpath($this->config['save_path']));
-        } else {
-            $handler = new $driver($this->config['database'], request()->ip());
+
+        switch ($this->config['driver']) {
+            case 'file':
+                $handler = new $driver(realpath($this->config['save_path']));
+                break;
+            case 'database':
+                $handler = new $driver($this->config['database'], request()->ip());
+                break;
+            case 'array':
+                $handler = new $driver();
+                break;
+            default:
+                throw new SessionException('Can not set the session driver');
+                break;
         }
 
         // Set the session driver

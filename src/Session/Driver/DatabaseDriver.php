@@ -32,7 +32,8 @@ class DatabaseDriver implements \SessionHandlerInterface
 
     /**
      * Database constructor
-     *
+     * 
+     * @param string $ip
      * @param array $options
      */
     public function __construct(array $options, $ip)
@@ -69,13 +70,13 @@ class DatabaseDriver implements \SessionHandlerInterface
     /**
      * Garbage collector for cleans old sessions
      *
-     * @param int $maxlifetime
+     * @param int $max_lifetime
      * @return bool|void
      */
-    public function gc($maxlifetime)
+    public function gc($max_lifetime)
     {
         $this->sessions()
-            ->where('time', '<', $this->createTimestamp(time() + $maxlifetime))
+            ->where('time', '<', $this->createTimestamp())
             ->delete();
 
         return true;
@@ -116,7 +117,7 @@ class DatabaseDriver implements \SessionHandlerInterface
      *
      * @param string $session_id
      * @param string $session_data
-     * @return bool|void
+     * @return bool
      */
     public function write($session_id, $session_data)
     {
@@ -125,7 +126,7 @@ class DatabaseDriver implements \SessionHandlerInterface
             $insert = $this->sessions()
                 ->insert($this->data($session_id, $session_data));
 
-            return $insert == 1;
+            return (bool) $insert;
         }
 
         // Update the session information
@@ -134,7 +135,7 @@ class DatabaseDriver implements \SessionHandlerInterface
             'id' => $session_id
         ]);
 
-        return $update == 1;
+        return (bool) $update;
     }
 
     /**
