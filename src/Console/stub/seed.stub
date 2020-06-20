@@ -1,7 +1,6 @@
 <?php
 /**
  * The {name} seeder
- * 
  * @see https://github.com/fzaninotto/Faker for all documentation
  */
 $faker = \Faker\Factory::create();
@@ -10,10 +9,9 @@ $seeds = [];
 
 foreach (range(1, {num}) as $key) {
     $seeds[] = [
-        'id' => 1,
         'name' => $faker->name,
-        'created_at' => $faker->dateTime(),
-        'updated_at' => $faker->dateTime()
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
     ];
 }
 
