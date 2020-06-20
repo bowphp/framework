@@ -249,7 +249,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function whereBetween($column, array $range, $boolean = 'and')
     {
-
         if (count($range) !== 2) {
             throw new QueryBuilderException(
                 'Parameter 2 must be contains two values.',
