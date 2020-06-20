@@ -342,7 +342,7 @@ class Session implements CollectionInterface
 
             unset($flash[$key]);
 
-            $_SESSION[static::CORE_SESSION_KEY['flash']] = $content;
+            $_SESSION[static::CORE_SESSION_KEY['flash']] = $flash;
 
             return $content;
         }
