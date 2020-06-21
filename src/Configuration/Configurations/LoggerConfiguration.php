@@ -82,7 +82,7 @@ class LoggerConfiguration extends Configuration
         $monolog = new Logger($name);
 
         $monolog->pushHandler(
-            new StreamHandler($log_dir . '/bow.log', Logger::DEBUG)
+            new StreamHandler($log_dir . '/bow-'.date('Y-m-d').'.log', Logger::DEBUG)
         );
 
         $monolog->pushHandler(

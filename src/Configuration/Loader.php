@@ -3,9 +3,9 @@
 namespace Bow\Configuration;
 
 use Bow\Application\Exception\ApplicationException;
+use Bow\Container\Capsule;
 use Bow\Event\Event;
 use Bow\Support\Arraydotify;
-use Bow\Support\Capsule;
 use Bow\Support\Env;
 
 class Loader implements \ArrayAccess
@@ -207,7 +207,7 @@ class Loader implements \ArrayAccess
 
         $services = $this->configurations();
 
-        $services[] = \Bow\Configuration\Configurations\ActionnerConfiguration::class;
+        $services[] = \Bow\Container\ContainerConfiguration::class;
 
         $service_collection = [];
 

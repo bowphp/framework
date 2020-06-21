@@ -2,7 +2,7 @@
 
 namespace Bow\Configuration;
 
-use Bow\Support\Capsule as Container;
+use Bow\Container\Capsule as Container;
 
 abstract class Configuration
 {
