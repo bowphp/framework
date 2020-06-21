@@ -280,24 +280,16 @@ class Session implements CollectionInterface
         $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
         if (!$strict) {
-            if (!isset($cache[$key])) {
-                return isset($flash[$key]);
-            }
-
-            return true;
+            return isset($cache[$key]) ? true : isset($flash[$key]);
         }
 
         if (!isset($cache[$key])) {
-            if (!isset($cache[$key])) {
-                return false;
-            }
-
-            $value = $flash[$key];
+            $value = $flash[$key] ?? null;
 
             return !is_null($value);
         }
 
-        $value = $cache[$key];
+        $value = $cache[$key] ?? null;
 
         return !is_null($value);
     }
@@ -333,21 +325,13 @@ class Session implements CollectionInterface
      */
     public function get($key, $default = null)
     {
-        $this->start();
+        $content = $this->flash($key);
 
-        $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
-
-        if (isset($flash[$key])) {
-            $content = $flash[$key];
-
-            unset($flash[$key]);
-
-            $_SESSION[static::CORE_SESSION_KEY['flash']] = $flash;
-
+        if (!is_null($content)) {
             return $content;
         }
 
-        if ($this->has($key)) {
+        if (is_null($content) && $this->has($key)) {
             return $_SESSION[$key];
         }
 
@@ -392,6 +376,7 @@ class Session implements CollectionInterface
 
     /**
      * The add alias
+     *
      * @see \Bow\Session\Session::add
      */
     public function put($key, $value, $next = false)
@@ -472,7 +457,7 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        if ($message !== null) {
+        if ($message != null) {
             $_SESSION[static::CORE_SESSION_KEY['flash']][$key] = $message;
 
             return true;
@@ -480,7 +465,18 @@ class Session implements CollectionInterface
 
         $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
-        return isset($flash[$key]) ? $flash[$key] : null;
+        $content = isset($flash[$key]) ? $flash[$key] : null;
+        $tmp = [];
+
+        foreach ($flash as $i => $value) {
+            if ($i != $key) {
+                $tmp[$i] = $value;
+            }
+        }
+
+        $_SESSION[static::CORE_SESSION_KEY['flash']] = $tmp;
+
+        return $content;
     }
 
     /**
