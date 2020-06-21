@@ -2,7 +2,7 @@
 
 namespace Bow\Event;
 
-use Bow\Application\Actionner;
+use Bow\Container\Actionner;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 
@@ -64,7 +64,7 @@ class Event
     }
 
     /**
-     * Send an event from page to page
+     * Send an event page to page
      *
      * @param string $event
      * @param array|string $fn
@@ -106,10 +106,10 @@ class Event
      */
     public static function emit($event)
     {
+        $data = array_slice(func_get_args(), 1);
+        
         if (isset(static::$events['__bow.once.event'][$event])) {
             $listener = static::$events['__bow.once.event'][$event];
-
-            $data = array_slice(func_get_args(), 1);
 
             return $listener->call($data);
         }
@@ -126,10 +126,7 @@ class Event
 
         $listeners = new Collection($events);
 
-        $data = array_slice(func_get_args(), 1);
-
         $listeners->each(function (Listener $listener) use ($data) {
-
             if ($listener->getActionType() === 'string') {
                 $callable = $listener->getAction();
             } else {
