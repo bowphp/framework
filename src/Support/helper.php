@@ -1,6 +1,7 @@
 <?php
 
 use Bow\Auth\Auth;
+use Bow\Container\Capsule;
 use Bow\Database\Database as DB;
 use Bow\Event\Event;
 use Bow\Http\Exception\ResponseException;
@@ -10,7 +11,6 @@ use Bow\Security\Tokenize;
 use Bow\Session\Cookie;
 use Bow\Session\Session;
 use Bow\Storage\Storage;
-use Bow\Support\Capsule;
 use Bow\Support\Collection;
 use Bow\Support\Env;
 use Bow\Support\Util;
