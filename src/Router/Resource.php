@@ -3,7 +3,7 @@
 namespace Bow\Router;
 
 use Bow\Application\Application;
-use Bow\Support\Capsule;
+use Bow\Container\Capsule;
 
 class Resource
 {

@@ -2,7 +2,7 @@
 
 namespace Bow\Router;
 
-use Bow\Application\Actionner;
+use Bow\Container\Actionner;
 use Bow\Configuration\Loader;
 use Bow\Http\Request;
 
@@ -133,6 +133,107 @@ class Route
     }
 
     /**
+     * Add the url rules
+     *
+     * @param array|string $where
+     * @param string   $regex_constraint
+     *
+     * @return Route
+     */
+    public function where($where, $regex_constraint = null)
+    {
+        if (is_array($where)) {
+            $other_rule = $where;
+        } else {
+            $other_rule = [$where => $regex_constraint];
+        }
+
+        $this->with = array_merge($this->with, $other_rule);
+
+        return $this;
+    }
+
+    /**
+     * Function to launch callback functions where the rule have matching.
+     *
+     * @return mixed
+     * @throws
+     */
+    public function call()
+    {
+        // Association of parmatres at the request
+        foreach ($this->keys as $key => $value) {
+            if (!isset($this->match[$key])) {
+                continue;
+            }
+
+            if (!is_int($this->match[$key])) {
+                $this->params[$value] = urldecode($this->match[$key]);
+
+                continue;
+            }
+
+            $tmp = (int) $this->match[$key];
+
+            $this->params[$value] = $tmp;
+
+            $this->match[$key] = $tmp;
+        }
+
+        return Actionner::getInstance()->call($this->cb, $this->match);
+    }
+
+    /**
+     * To give a name to the road
+     *
+     * @param string $name
+     */
+    public function name($name)
+    {
+        $this->name = $name;
+
+        $routes = (array) $this->config['app.routes'];
+
+        $this->config['app.routes'] = array_merge(
+            $routes,
+            [$name => $this->getPath()]
+        );
+
+        return $this;
+    }
+
+    /**
+     * Get the name of the route
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get the settings
+     *
+     * @return array
+     */
+    public function getParamters()
+    {
+        return $this->params;
+    }
+
+    /**
+     * Get a parameter element
+     *
+     * @param string $key
+     * @return string|null
+     */
+    public function getParamter($key)
+    {
+        return isset($this->params[$key]) ? $this->params[$key] : null;
+    }
+    
+    /**
      * Lets check if the url of the query is
      * conform to that defined by the router
      *
@@ -235,104 +336,5 @@ class Route
         }
 
         return false;
-    }
-
-    /**
-     * Add the url rules
-     *
-     * @param array|string $where
-     * @param string   $regex_constraint
-     *
-     * @return Route
-     */
-    public function where($where, $regex_constraint = null)
-    {
-        if (is_array($where)) {
-            $other_rule = $where;
-        } else {
-            $other_rule = [$where => $regex_constraint];
-        }
-
-        $this->with = array_merge($this->with, $other_rule);
-
-        return $this;
-    }
-
-    /**
-     * Function to launch callback functions where the rule have matching.
-     *
-     * @return mixed
-     * @throws
-     */
-    public function call()
-    {
-        // Association of parmatres at the request
-        foreach ($this->keys as $key => $value) {
-            if (!isset($this->match[$key])) {
-                continue;
-            }
-
-            if (!is_int($this->match[$key])) {
-                $this->params[$value] = urldecode($this->match[$key]);
-
-                continue;
-            }
-
-            $tmp = (int) $this->match[$key];
-
-            $this->params[$value] = $tmp;
-
-            $this->match[$key] = $tmp;
-        }
-
-        return Actionner::getInstance()->call($this->cb, $this->match);
-    }
-
-    /**
-     * To give a name to the road
-     *
-     * @param string $name
-     */
-    public function name($name)
-    {
-        $this->name = $name;
-
-        $routes = (array) $this->config['app.routes'];
-
-        $this->config['app.routes'] = array_merge(
-            $routes,
-            [$name => $this->getPath()]
-        );
-    }
-
-    /**
-     * Get the name of the route
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Get the settings
-     *
-     * @return array
-     */
-    public function getParamters()
-    {
-        return $this->params;
-    }
-
-    /**
-     * Get a parameter element
-     *
-     * @param string $key
-     * @return string|null
-     */
-    public function getParamter($key)
-    {
-        return isset($this->params[$key]) ? $this->params[$key] : null;
     }
 }

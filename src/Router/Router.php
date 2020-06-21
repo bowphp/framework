@@ -3,7 +3,6 @@
 namespace Bow\Router;
 
 use Bow\Router\Exception\RouterException;
-use Bow\Support\Capsule;
 
 class Router
 {
@@ -13,33 +12,33 @@ class Router
      *
      * @var array
      */
-    private $error_code = [];
+    protected $error_code = [];
 
     /**
      * Define the gloal middleware
      *
      * @var array
      */
-    private $middlewares = [];
+    protected $middlewares = [];
 
     /**
-     * The routing prefixer
+     * Define the routing prefixer
      *
      * @var string
      */
-    private $prefix;
+    protected $prefix;
 
     /**
      * @var string
      */
-    private $special_method;
+    protected $special_method;
 
     /**
      * Method Http courrante.
      *
      * @var array
      */
-    private $current = [];
+    protected $current = [];
 
     /**
      * Route collection.
@@ -49,21 +48,48 @@ class Router
     private $routes = [];
 
     /**
-     * The HTTP Request
+     * Define the base route
      *
-     * @var Request
+     * @var string
      */
-    private $request;
+    private $base_route;
+
+    /**
+     * Definte the request method
+     *
+     * @var string
+     */
+    private $method;
+
+    /**
+     * Definte the request _method parse to form
+     * for helper router define a good method called
+     *
+     * @var string
+     */
+    private $magic_method;
 
     /**
      * Router constructor
      *
-     * @param Capsule $app
      * @return void
      */
-    private function __construct(Capsule $app)
+    protected function __construct($method, $magic_method = null, $base_route = '', array $middlewares = [])
     {
-        $this->app = $app;
+        $this->method = $method;
+        $this->magic_method = $magic_method;
+        $this->middlewares = $middlewares;
+        $this->base_route = $base_route;
+    }
+
+    /**
+     * Set the base route
+     *
+     * @param string $base_route
+     */
+    public function setBaseRoute(string $base_route)
+    {
+        $this->base_route = $base_route;
     }
 
     /**
@@ -105,19 +131,19 @@ class Router
     {
         $middlewares = (array) $middlewares;
 
-        $this->middlewares = [];
+        $collection = [];
 
         foreach ($middlewares as $middleware) {
             if (is_callable($middleware)) {
-                $this->middlewares[] = $middleware;
+                $collection[] = $middleware;
             } elseif (class_exists($middleware, true)) {
-                $this->middlewares[] = [new $middleware, 'process'];
+                $collection[] = [new $middleware, 'process'];
             } else {
-                $this->middlewares[] = $middleware;
+                $collection[] = $middleware;
             }
         }
 
-        return $this;
+        return new Router($this->method, $this->magic_method, $this->base_route, $collection);
     }
 
     /**
@@ -129,15 +155,15 @@ class Router
     public function route(array $definition)
     {
         if (!isset($definition['path'])) {
-            throw new RouterException('The path is undefined');
+            throw new RouterException('The undefined path');
         }
 
         if (!isset($definition['method'])) {
-            throw new RouterException('Http method is unspecified');
+            throw new RouterException('Unspecified method');
         }
 
         if (!isset($definition['handler'])) {
-            throw new RouterException('Hanlder is undefined');
+            throw new RouterException('Undefined controller');
         }
 
         $method = $definition['method'];
@@ -205,13 +231,11 @@ class Router
      */
     public function post($path, $cb)
     {
-        $input = $this->request;
-
-        if (!$input->has('_method')) {
+        if (!$this->magic_method) {
             return $this->routeLoader('POST', $path, $cb);
         }
 
-        $method = strtoupper($input->get('_method'));
+        $method = strtoupper($this->magic_method);
 
         if (in_array($method, ['DELETE', 'PUT'])) {
             $this->special_method = $method;
@@ -294,7 +318,7 @@ class Router
     public function match(array $methods, $path, $cb)
     {
         foreach ($methods as $method) {
-            if ($this->request->method() === strtoupper($method)) {
+            if ($this->method == strtoupper($method)) {
                 $this->pushHttpVerbe(strtoupper($method), $path, $cb);
             }
         }
@@ -312,11 +336,9 @@ class Router
      */
     private function pushHttpVerbe($method, $path, $cb)
     {
-        $input = $this->request;
-
-        if ($input->has('_method')) {
-            if ($input->get('_method') === $method) {
-                $method = $input->get('_method');
+        if ($this->magic_method) {
+            if ($this->magic_method === $method) {
+                $method = $this->magic_method;
             }
         }
 
@@ -333,8 +355,10 @@ class Router
      */
     private function routeLoader($method, $path, $cb)
     {
+        $path = '/'.trim($path, '/');
+        
         // We build the original path based on the Router loader
-        $path = $this->app->getConfig('app.root').$this->prefix.$path;
+        $path = $this->base_route.$this->prefix.$path;
 
         // We define the current route and current method
         $this->current = ['path' => $path, 'method' => $method];
@@ -356,7 +380,27 @@ class Router
     }
 
     /**
-     * Get the all defined route
+     * Retrieve the define special method
+     *
+     * @return string
+     */
+    public function getSpecialMethod()
+    {
+        return $this->special_method;
+    }
+
+    /**
+     * Check user define the special method
+     *
+     * @return bool
+     */
+    public function hasSpecialMethod()
+    {
+        return !is_null($this->special_method);
+    }
+
+    /**
+     * Get the route collection
      *
      * @return array
      */
