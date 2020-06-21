@@ -1,6 +1,6 @@
 <?php
 
-use Bow\Support\Capsule;
+use Bow\Container\Capsule;
 
 class MyClass
 {
