@@ -3,6 +3,8 @@
 namespace Bow\Application;
 
 use Bow\Application\Exception\ApplicationException;
+use Bow\Container\Capsule;
+use Bow\Container\Actionner;
 use Bow\Configuration\Loader;
 use Bow\Contracts\ResponseInterface;
 use Bow\Http\Exception\HttpException;
@@ -10,10 +12,10 @@ use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Router\Exception\RouterException;
 use Bow\Router\Resource;
+use Bow\Router\Router;
 use Bow\Router\Route;
-use Bow\Support\Capsule;
 
-class Application
+class Application extends Router
 {
     /**
      * The Capsule instance
@@ -30,52 +32,11 @@ class Application
     private $booted = false;
 
     /**
-     * Define the functions related to an http
-     * code executed if this code is up
-     *
-     * @var array
-     */
-    private $error_code = [];
-
-    /**
-     * Define the gloal middleware
-     *
-     * @var array
-     */
-    private $middlewares = [];
-
-    /**
-     * The routing prefixer
-     *
-     * @var string
-     */
-    private $prefix;
-
-    /**
-     * @var string
-     */
-    private $special_method;
-
-    /**
-     * Method Http courrante.
-     *
-     * @var array
-     */
-    private $current = [];
-
-    /**
      * The Application instance
      *
      * @var Application
      */
     private static $instance;
-
-    /**
-     * Route collection.
-     *
-     * @var array
-     */
-    private $routes = [];
 
     /**
      * The HTTP Request
@@ -125,6 +86,8 @@ class Application
         $this->capsule->instance('response', $response);
 
         $this->capsule->instance('app', $this);
+
+        parent::__construct($request->method(), $request->get('_method'));
     }
 
     /**
@@ -146,6 +109,8 @@ class Application
     public function bind(Loader $config)
     {
         $this->config = $config;
+
+        $this->setBaseRoute($config['app.root']);
 
         $this->capsule->instance('config', $config);
 
@@ -185,299 +150,6 @@ class Application
     }
 
     /**
-     * Add a prefix on the roads
-     *
-     * @param string $prefix
-     * @param callable $cb
-     *
-     * @return Application
-     *
-     * @throws
-     */
-    public function prefix($prefix, callable $cb)
-    {
-        $prefix = rtrim($prefix, '/');
-
-        if (!preg_match('@^/@', $prefix)) {
-            $prefix = '/' . $prefix;
-        }
-
-        if ($this->prefix !== null) {
-            $this->prefix .= $prefix;
-        } else {
-            $this->prefix = $prefix;
-        }
-
-        call_user_func_array($cb, [$this]);
-
-        $this->prefix = '';
-
-        return $this;
-    }
-
-    /**
-     * Allows to associate a global middleware on an route
-     *
-     * @param array $middlewares
-     * @return Application
-     */
-    public function middleware($middlewares)
-    {
-        $middlewares = (array) $middlewares;
-
-        $this->middlewares = [];
-
-        foreach ($middlewares as $middleware) {
-            if (is_callable($middleware)) {
-                $this->middlewares[] = $middleware;
-            } elseif (class_exists($middleware, true)) {
-                $this->middlewares[] = [new $middleware, 'process'];
-            } else {
-                $this->middlewares[] = $middleware;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Route mapper
-     *
-     * @param array $definition
-     * @throws RouterException
-     */
-    public function route(array $definition)
-    {
-        if (!isset($definition['path'])) {
-            throw new RouterException('The undefined path');
-        }
-
-        if (!isset($definition['method'])) {
-            throw new RouterException('Unspecified method');
-        }
-
-        if (!isset($definition['handler'])) {
-            throw new RouterException('Undefined controller');
-        }
-
-        $method = $definition['method'];
-
-        $path = $definition['path'];
-
-        $where = $definition['where'] ?? [];
-
-        $cb = (array) $definition['handler'];
-
-        if (isset($cb['middleware'])) {
-            unset($cb['middleware']);
-        }
-
-        if (isset($cb['controller'])) {
-            unset($cb['controller']);
-        }
-
-        $route = $this->pushHttpVerbe($method, $path, $cb);
-
-        if (isset($definition['middleware'])) {
-            $route->middleware($definition['middleware']);
-        }
-
-        $route->where($where);
-    }
-
-    /**
-     * Add a route for
-     *
-     * GET, POST, DELETE, PUT, OPTIONS, PATCH
-     *
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Application
-     * @throws
-     */
-    public function any($path, $cb)
-    {
-        foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
-            $this->$method($path, $cb);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add a GET route
-     *
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Route
-     */
-    public function get($path, $cb)
-    {
-        return $this->routeLoader('GET', $path, $cb);
-    }
-
-    /**
-     * Add a POST route
-     *
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Route
-     */
-    public function post($path, $cb)
-    {
-        $input = $this->request;
-
-        if (!$input->has('_method')) {
-            return $this->routeLoader('POST', $path, $cb);
-        }
-
-        $method = strtoupper($input->get('_method'));
-
-        if (in_array($method, ['DELETE', 'PUT'])) {
-            $this->special_method = $method;
-        }
-
-        return $this->pushHttpVerbe($method, $path, $cb);
-    }
-
-    /**
-     * Add a DELETE route
-     *
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Route
-     */
-    public function delete($path, $cb)
-    {
-        return $this->pushHttpVerbe('DELETE', $path, $cb);
-    }
-
-    /**
-     * Add a PUT route
-     *
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Route
-     */
-    public function put($path, $cb)
-    {
-        return $this->pushHttpVerbe('PUT', $path, $cb);
-    }
-
-    /**
-     * Add a PATCH route
-     *
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Route
-     */
-    public function patch($path, $cb)
-    {
-        return $this->pushHttpVerbe('PATCH', $path, $cb);
-    }
-
-    /**
-     * Add a OPTIONS route
-     *
-     * @param string $path
-     * @param callable $cb
-     * @return Route
-     */
-    public function options($path, callable $cb)
-    {
-        return $this->pushHttpVerbe('OPTIONS', $path, $cb);
-    }
-
-    /**
-     * Launch a callback function for each HTTP error code.
-     * When the define code match with response code.
-     *
-     * @param int $code
-     * @param callable $cb
-     * @return Application
-     */
-    public function code($code, callable $cb)
-    {
-        $this->error_code[$code] = $cb;
-
-        return $this;
-    }
-
-    /**
-     * Match route de tout type de method
-     *
-     * @param array $methods
-     * @param string $path
-     * @param callable|string|array $cb
-     * @return Application
-     */
-    public function match(array $methods, $path, $cb)
-    {
-        foreach ($methods as $method) {
-            if ($this->request->method() === strtoupper($method)) {
-                $this->pushHttpVerbe(strtoupper($method), $path, $cb);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add other HTTP verbs [PUT, DELETE, UPDATE, HEAD, PATCH]
-     *
-     * @param string $method
-     * @param string $path
-     * @param callable|array|string $cb
-     * @return Route
-     */
-    private function pushHttpVerbe($method, $path, $cb)
-    {
-        $input = $this->request;
-
-        if ($input->has('_method')) {
-            if ($input->get('_method') === $method) {
-                $method = $input->get('_method');
-            }
-        }
-
-        return $this->routeLoader($method, $path, $cb);
-    }
-
-    /**
-     * Start loading a route.
-     *
-     * @param string $method
-     * @param string $path
-     * @param Callable|string|array $cb
-     * @return Route
-     */
-    private function routeLoader($method, $path, $cb)
-    {
-        $path = '/'.trim($path, '/');
-        
-        // We build the original path based on the application loader
-        $path = $this->config['app.root'].$this->prefix.$path;
-
-        // We define the current route and current method
-        $this->current = ['path' => $path, 'method' => $method];
-
-        // We add the new route
-        $route = new Route($path, $cb);
-
-        $route->middleware($this->middlewares);
-
-        $this->routes[$method][] = $route;
-
-        $route->middleware('trim');
-
-        if (in_array($method, ['POST', 'DELETE', 'PUT'])) {
-            $route->middleware('csrf');
-        }
-
-        return $route;
-    }
-
-    /**
      * Launcher of the application
      *
      * @return mixed
@@ -500,14 +172,16 @@ class Application
 
         // We verify the existence of a special method DELETE, PUT
         if ($method == 'POST') {
-            if ($this->special_method !== null) {
-                $method = $this->special_method;
+            if ($this->hasSpecialMethod()) {
+                $method = $this->getSpecialMethod();
             }
         }
 
         // We verify the existence of the method of the request in
         // the routing collection
-        if (!isset($this->routes[$method])) {
+        $routes = $this->getRoutes();
+
+        if (!isset($routes[$method])) {
             // We verify and call function associate by 404 code
             $this->response->status(404);
 
@@ -521,10 +195,9 @@ class Application
         }
 
         $response = null;
+        $resolved = false;
 
-        $error = true;
-
-        foreach ($this->routes[$method] as $key => $route) {
+        foreach ($routes[$method] as $key => $route) {
             // The route must be an instance of Route
             if (!($route instanceof Route)) {
                 continue;
@@ -540,13 +213,13 @@ class Application
 
             // We call the action associate with the route
             $response = $route->call();
-            $error = false;
+            $resolved = true;
 
             break;
         }
 
         // Error management
-        if (!$error) {
+        if ($resolved) {
             return $this->sendResponse($response);
         }
 
@@ -556,13 +229,14 @@ class Application
         if (array_key_exists(404, $this->error_code)) {
             $response = Actionner::execute($this->error_code[404], []);
 
-            return $this->sendResponse($response);
+            return $this->sendResponse($response, 404);
         }
 
         if (is_string($this->config['view.404'])) {
-            $response = $this->response->render($this->config['view.404']);
+            $view = $this->container('view');
+            $response = $this->container('view')->parse($this->config['view.404']);
 
-            return $this->sendResponse($response);
+            return $this->sendResponse($response, 404);
         }
 
         throw new RouterException(
@@ -575,14 +249,15 @@ class Application
      * Send the answer to the customer
      *
      * @param mixed $response
+     * @param int $code
      * @return null
      */
-    private function sendResponse($response)
+    private function sendResponse($response, $code = 200)
     {
         if ($response instanceof ResponseInterface) {
             $response->sendContent();
         } else {
-            echo $this->response->send($response);
+            echo $this->response->send($response, $code);
         }
     }
 
