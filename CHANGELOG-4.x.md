@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [fix] session flash error
+- [change] update Application class
+- [change] update default configuration
+- [change] update Event Management system
+- [change] refactoring of Container Manager
+- [change] use Router has base routing management
+
 ## [4.2.1] - 2020-05-28
 
 - [fix] Refonte JWT Guard system: Force the policier singkey using the native encrypt key
