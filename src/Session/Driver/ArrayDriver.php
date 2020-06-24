@@ -31,8 +31,6 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function destroy($session_id)
     {
-        @unset($this->sessions[$session_id]);
-
         return true;
     }
 
