@@ -15,7 +15,7 @@ class Router
     protected $error_code = [];
 
     /**
-     * Define the gloal middleware
+     * Define the global middleware
      *
      * @var array
      */
@@ -34,7 +34,7 @@ class Router
     protected $special_method;
 
     /**
-     * Method Http courrante.
+     * Method Http current.
      *
      * @var array
      */
@@ -55,14 +55,14 @@ class Router
     private $base_route;
 
     /**
-     * Definte the request method
+     * Define the request method
      *
      * @var string
      */
     private $method;
 
     /**
-     * Definte the request _method parse to form
+     * Define the request _method parse to form
      * for helper router define a good method called
      *
      * @var string
@@ -182,7 +182,7 @@ class Router
             unset($cb['controller']);
         }
 
-        $route = $this->pushHttpVerbe($method, $path, $cb);
+        $route = $this->pushHttpVerb($method, $path, $cb);
 
         if (isset($definition['middleware'])) {
             $route->middleware($definition['middleware']);
@@ -241,7 +241,7 @@ class Router
             $this->special_method = $method;
         }
 
-        return $this->pushHttpVerbe($method, $path, $cb);
+        return $this->pushHttpVerb($method, $path, $cb);
     }
 
     /**
@@ -253,7 +253,7 @@ class Router
      */
     public function delete($path, $cb)
     {
-        return $this->pushHttpVerbe('DELETE', $path, $cb);
+        return $this->pushHttpVerb('DELETE', $path, $cb);
     }
 
     /**
@@ -265,7 +265,7 @@ class Router
      */
     public function put($path, $cb)
     {
-        return $this->pushHttpVerbe('PUT', $path, $cb);
+        return $this->pushHttpVerb('PUT', $path, $cb);
     }
 
     /**
@@ -277,7 +277,7 @@ class Router
      */
     public function patch($path, $cb)
     {
-        return $this->pushHttpVerbe('PATCH', $path, $cb);
+        return $this->pushHttpVerb('PATCH', $path, $cb);
     }
 
     /**
@@ -289,7 +289,7 @@ class Router
      */
     public function options($path, callable $cb)
     {
-        return $this->pushHttpVerbe('OPTIONS', $path, $cb);
+        return $this->pushHttpVerb('OPTIONS', $path, $cb);
     }
 
     /**
@@ -319,7 +319,7 @@ class Router
     {
         foreach ($methods as $method) {
             if ($this->method == strtoupper($method)) {
-                $this->pushHttpVerbe(strtoupper($method), $path, $cb);
+                $this->pushHttpVerb(strtoupper($method), $path, $cb);
             }
         }
 
@@ -334,7 +334,7 @@ class Router
      * @param callable|array|string $cb
      * @return Route
      */
-    private function pushHttpVerbe($method, $path, $cb)
+    private function pushHttpVerb($method, $path, $cb)
     {
         if ($this->magic_method) {
             if ($this->magic_method === $method) {
