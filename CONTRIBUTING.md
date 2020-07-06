@@ -1,8 +1,10 @@
 # Contribution
 
-- [Introduction](#introduction)
-- [Découpage du projet](#découpage-du-projet)
-- [How to make the commits](#comment-faire-les-commits)
+- [Contribution](#contribution)
+  - [Introduction](#introduction)
+  - [Cutting the project](#cutting-the-project)
+  - [How to make the commits](#how-to-make-the-commits)
+  - [Contact](#contact)
 
 ## Introduction
 
@@ -23,7 +25,13 @@ Imagine that you are more comfortable with the construction of Routing. Just foc
 
 ## How to make the commits
 
-Commits validate your change. But in the Bow project, there is a way to write the commit message. For example, you have worked on the `Session` section and you want to validate your changes.
+Commits validate your change. But in the Bow project, there is a way to write the commit message.
+
+- `change` to add a change to a function
+- `fix` to fix a bug
+- `feat` to add a new feature
+
+For example, you have worked on the `Session` section and you want to validate your changes.
 
 To do it look a bit the nomenclature of a commit message:
 
@@ -33,22 +41,22 @@ git commit
 
 In your editor:
 
-```
-[nom-de-la-section] message
+```txt
+change(module_name): your commit message
 
 Description
 ```
 
 In our previous example we will do:
 
-```
-git commit -m "[session] change message"
+```bash
+git commit -m "change(session): rename init variable"
 ```
 
-The modification can also read an element in a section:
+> The modification can also read an element in a section:
 
-```
-git commit -m "[http:request] bug fix #40"
+```bash
+git commit -m "fix(http:request): bug fix #40"
 ```
 
 In case your modification affect more section? You give a message and a description of the changes as a smart list.
