@@ -218,7 +218,7 @@ class Actionner
                 throw new RouterException(sprintf('%s is not a middleware class.', $middleware));
             }
 
-            // We qdd middleware into dispatch pipeline
+            // We add middleware into dispatch pipeline
             $this->dispatcher->pipe(
                 $this->middlewares[$middleware],
                 count($parts) != 2 ? [] : explode(',', $parts[1])
