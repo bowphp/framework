@@ -36,11 +36,11 @@ class Message
     private $subject = null;
 
     /**
-     * The mail attachement list
+     * The mail attachment list
      *
      * @var array
      */
-    private $attachement = [];
+    private $attachment = [];
 
     /**
      * Define the mail sender
@@ -129,7 +129,7 @@ class Message
      * Define the receiver
      *
      * @param string $to
-     * @param string $name
+     * @param null $name
      *
      * @return Message
      */
@@ -143,12 +143,13 @@ class Message
     /**
      * Define the receiver in list
      *
-     * @param array $to
+     * @param array $sendTo
+     *
      * @return $this
      */
-    public function toList(array $to)
+    public function toList(array $sendTo)
     {
-        foreach ($to as $name => $to) {
+        foreach ($sendTo as $name => $to) {
             $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
         }
 
@@ -159,7 +160,7 @@ class Message
      * Format the email receiver
      *
      * @param string $email
-     * @param string $name
+     * @param null $name
      *
      * @return array
      */
@@ -196,7 +197,7 @@ class Message
             throw new MailException("File not found.", E_USER_ERROR);
         }
 
-        $this->attachement[] = $file;
+        $this->attachment[] = $file;
 
         return $this;
     }
@@ -208,10 +209,10 @@ class Message
      */
     public function compileHeaders()
     {
-        if (count($this->attachement) > 0) {
+        if (count($this->attachment) > 0) {
             $this->headers[] = "Content-type: multipart/mixed; boundary=\"{$this->boundary}\"" . self::END;
 
-            foreach ($this->attachement as $file) {
+            foreach ($this->attachment as $file) {
                 $filename = basename($file);
                 $this->headers[] = "--" . $this->boundary;
                 $this->headers[] = "Content-Type: application/octet-stream; name=\"{$filename}\"";
@@ -244,7 +245,7 @@ class Message
      * Define the sender of the mail
      *
      * @param string $from
-     * @param string $name
+     * @param null $name
      *
      * @return Message
      */
@@ -300,7 +301,7 @@ class Message
      * Adds blind carbon copy
      *
      * @param string $mail
-     * @param string $name [optional]
+     * @param null $name [optional]
      *
      * @return Message
      */
@@ -317,7 +318,7 @@ class Message
      * Add carbon copy
      *
      * @param string $mail
-     * @param string $name [optional]
+     * @param null $name [optional]
      *
      * @return Message
      */
@@ -334,7 +335,7 @@ class Message
      * Add Reply-To
      *
      * @param string $mail
-     * @param string $name=null
+     * @param null $name
      *
      * @return Message
      */
@@ -361,7 +362,7 @@ class Message
      * Add Return-Path
      *
      * @param string $mail
-     * @param string $name=null
+     * @param null $name = null
      *
      * @return Message
      */
