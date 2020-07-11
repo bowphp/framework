@@ -132,7 +132,7 @@ class Actionner
 
         if (!is_array($actions)) {
             throw new \InvalidArgumentException(
-                'Le premier paramètre doit être un tableau, une chaine ou une closure',
+                'The first parameter must be an array, a string or a closure.',
                 E_USER_ERROR
             );
         }
