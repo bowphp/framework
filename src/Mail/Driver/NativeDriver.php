@@ -55,11 +55,11 @@ class NativeDriver implements MailDriverInterface
             if (!$message->fromIsDefined()) {
                 $form = $this->config['mail'][$section];
 
-                $message->from($form["address"], $form["username"]);
+                $message->from($form["address"], $form["name"]);
             } elseif (!Str::isMail($message->getFrom())) {
                 $form = $this->config['mail'][$message->getFrom()];
 
-                $message->from($form["address"], $form["username"]);
+                $message->from($form["address"], $form["name"]);
             }
         }
 
