@@ -214,7 +214,8 @@ class Actionner
 
                 $middleware = $parts[0];
             }
-
+            
+            // We check if middleware if define via aliases
             if (!array_key_exists($middleware, $this->middlewares)) {
                 throw new RouterException(sprintf('%s is not define middleware.', $middleware), E_ERROR);
             }
@@ -289,101 +290,6 @@ class Actionner
     }
 
     /**
-     * Make any class injection
-     *
-     * @param string $classname
-     * @param string|null $method
-     *
-     * @return array
-     *
-     * @throws ReflectionException
-     */
-    public function injector(string $classname, string $method = null)
-    {
-        $reflection = new ReflectionClass($classname);
-
-        if (is_null($method)) {
-            $method = "__invoke";
-        }
-
-        $parameters = $reflection->getMethod($method)->getParameters();
-
-        return $this->getInjectParameters($parameters);
-    }
-
-    /**
-     * Injection for closure
-     *
-     * @param callable $closure
-     *
-     * @return array
-     *
-     * @throws
-     */
-    public function injectorForClosure(callable $closure)
-    {
-        $reflection = new ReflectionFunction($closure);
-        $parameters = $reflection->getParameters();
-        return $this->getInjectParameters($parameters);
-    }
-
-    /**
-     * Get all parameters define by user in method injectable
-     *
-     * @param array $parameters
-     * @return array
-     *
-     * @throws ReflectionException
-     */
-    private function getInjectParameters(array $parameters)
-    {
-        $params = [];
-
-        foreach ($parameters as $parameter) {
-            $class = $parameter->getClass();
-
-            if (is_null($class)) {
-                continue;
-            }
-
-            $class_name = $class->getName();
-
-            if (! class_exists($class_name, true)) {
-                throw new InvalidArgumentException(
-                    sprintf('class %s not exists', $class_name)
-                );
-            }
-
-            if (!in_array(strtolower($class_name), $this->getInjectorExceptedType())) {
-                if (method_exists($class_name, 'getInstance')) {
-                    $params[] = $class_name::getInstance();
-                    continue;
-                }
-
-                $injection = $this->injector($class_name, '__construct');
-                $param = (new ReflectionClass($class_name))->newInstanceArgs($injection);
-                $params[] = $param;
-            }
-        }
-
-        return $params;
-    }
-
-    /**
-     * The list of type not allowed to injection
-     *
-     * @return array
-     */
-    private function getInjectorExceptedType()
-    {
-        return [
-            'string', 'array', 'bool', 'int',
-            'integer', 'double', 'float', 'callable',
-            'object', 'stdclass', '\closure', 'closure'
-        ];
-    }
-
-    /**
      * Successively launches a function list.
      *
      * @param array|callable $arr
@@ -424,9 +330,7 @@ class Actionner
      * Load the controllers defined as string
      *
      * @param string $controller_name
-     *
      * @return array
-     *
      * @throws ReflectionException
      */
     public function controller($controller_name)
@@ -469,7 +373,6 @@ class Actionner
      * Load the closure define as action
      *
      * @param Closure $closure
-     *
      * @return array
      */
     public function closure($closure)
@@ -484,6 +387,126 @@ class Actionner
         return [
             'action' => $closure,
             'injection' => $injections
+        ];
+    }
+
+    
+    
+    /**
+    * Make any class injection
+    *
+    * @param string $classname
+    * @param string|null $method
+    * @return array
+    *
+    * @throws ReflectionException
+    */
+    public function injector(string $classname, string $method = null)
+    {
+        $reflection = new ReflectionClass($classname);
+        
+        if (is_null($method)) {
+            $method = "__invoke";
+        }
+        
+        $parameters = $reflection->getMethod($method)->getParameters();
+        
+        return $this->getInjectParameters($parameters);
+    }
+    
+    /**
+    * Injection for closure
+    *
+    * @param callable $closure
+    * @return array
+    * @throws
+    */
+    public function injectorForClosure(callable $closure)
+    {
+        $reflection = new ReflectionFunction($closure);
+        
+        $parameters = $reflection->getParameters();
+        
+        return $this->getInjectParameters($parameters);
+    }
+    
+    /**
+    * Get all parameters define by user in method injectable
+    *
+    * @param array $parameters
+    * @return array
+    *
+    * @throws ReflectionException
+    */
+    private function getInjectParameters(array $parameters)
+    {
+        $params = [];
+        
+        foreach ($parameters as $parameter) {
+            $class = $parameter->getClass();
+            
+            if (is_null($class)) {
+                continue;
+            }
+            
+            $param = $this->getInjectParameter($class);
+
+            if (is_null($param)) {
+                continue;
+            }
+
+            $params[] = $param;
+        }
+        
+        return $params;
+    }
+
+    /**
+     * Get injectable parameter
+     *
+     * @param mixed $class
+     * @return void
+     */
+    private function getInjectParameter($class)
+    {
+        $class_name = $class->getName();
+            
+        if (! class_exists($class_name, true)) {
+            throw new InvalidArgumentException(
+                sprintf('class %s not exists', $class_name)
+            );
+        }
+        
+        if (in_array(strtolower($class_name), $this->getInjectorExceptedType())) {
+            return null;
+        }
+
+        if (method_exists($class_name, 'getInstance')) {
+            return $class_name::getInstance();
+        }
+
+        $reflection = new ReflectionClass($class_name);
+        
+        $args = [];
+
+        if (!$reflection->isInstantiable()) {
+            $args = $this->injector($class_name, '__construct');
+        }
+        
+        return (new ReflectionClass($class_name))->newInstanceArgs($args);
+    }
+
+    /**
+    * The list of type not allowed to injection
+    *
+    * @return array
+    */
+    private function getInjectorExceptedType()
+    {
+        return [
+            'string', 'array', 'bool', 'int',
+            'integer', 'double', 'float', 'callable',
+            'object', 'stdclass', '\closure', 'closure'
         ];
     }
 }
