@@ -569,7 +569,7 @@ class FTPService implements ServiceInterface
                 $item['name']
             ) = $chunks;
 
-            $item['type'] = $chunks[0]{0} === 'd' ? 'directory' : 'file';
+            $item['type'] = $chunks[0][0] === 'd' ? 'directory' : 'file';
 
             array_splice($chunks, 0, 8);
 
