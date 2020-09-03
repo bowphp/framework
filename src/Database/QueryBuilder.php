@@ -764,7 +764,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
     {
         $this->first = true;
 
-        $this->limit = 1;
+        $this->take(1);
 
         return $this->get();
     }
