@@ -1518,13 +1518,13 @@ if (!function_exists('seed')) {
      * @param string $table
      * @return void
      */
-    function seed($table)
+    function seed($entry)
     {
         $collection = [];
-        $filename = rtrim(config('app.seeder_path'), '/').'/'.$table.'_seeder.php';
+        $filename = rtrim(config('app.seeder_path'), '/').'/'.$entry.'_seeder.php';
 
         if (!file_exists($filename)) {
-            throw new \ErrorException('['.$table.'] seeder file not found');
+            throw new \ErrorException('['.$entry.'] seeder file not found');
         }
 
         $seeds = require $filename;
