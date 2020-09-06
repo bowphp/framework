@@ -13,7 +13,13 @@ class Hash
      */
     public static function create($value, $cost = 10)
     {
-        return password_hash($value, PASSWORD_BCRYPT, ['cast' => $cost]);
+        $hash_method = config('security.hash_method');
+
+        if (is_null($hash_method)) {
+            $hash_method = PASSWORD_BCRYPT;
+        }
+
+        return password_hash($value, $hash_method, ['cast' => $cost]);
     }
 
     /**
@@ -26,7 +32,13 @@ class Hash
      */
     public static function make($value, $cost = 10)
     {
-        return password_hash($value, PASSWORD_BCRYPT, ['cast' => $cost]);
+        $hash_method = config('security.hash_method');
+
+        if (is_null($hash_method)) {
+            $hash_method = PASSWORD_BCRYPT;
+        }
+        
+        return password_hash($value, $hash_method, ['cast' => $cost]);
     }
 
     /**
