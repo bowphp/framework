@@ -1521,7 +1521,7 @@ if (!function_exists('seed')) {
     function seed($table)
     {
         $collection = [];
-        $filename = rtrim(config('app.seeder_path'), '/').'/'. $table.'_seeder.php';
+        $filename = rtrim(config('app.seeder_path'), '/').'/'.$table.'_seeder.php';
 
         if (!file_exists($filename)) {
             throw new \ErrorException('['.$table.'] seeder file not found');
