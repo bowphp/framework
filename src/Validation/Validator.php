@@ -155,7 +155,7 @@ class Validator
         }
 
         // Get lexical provider by application part
-        $lexical = trans('lexical.'.$key, $attributes);
+        $lexical = trans('validation.'.$key, $attributes);
 
         if (is_null($lexical)) {
             $lexical = $this->lexical[$key];
@@ -173,7 +173,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileRequired($key, $masque)
@@ -198,7 +197,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileEmpty($key, $masque)
@@ -223,7 +221,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileMin($key, $masque)
@@ -259,7 +256,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileMax($key, $masque)
@@ -294,7 +290,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileSame($key, $masque)
@@ -328,7 +323,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileEmail($key, $masque)
@@ -358,7 +352,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileNumber($key, $masque)
@@ -388,7 +381,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileInt($key, $masque)
@@ -418,7 +410,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileFloat($key, $masque)
