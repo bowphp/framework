@@ -3,6 +3,7 @@
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
+use Bow\Console\ConsoleInformation;
 use Bow\Console\Generator;
 use Bow\Database\Database;
 use Bow\Database\Migration\SQLGenerator;
@@ -10,6 +11,8 @@ use Bow\Support\Str;
 
 class MigrationCommand extends AbstractCommand
 {
+    use ConsoleInformation;
+    
     /**
      * Make a migration command
      *
@@ -100,7 +103,7 @@ class MigrationCommand extends AbstractCommand
         }
 
         foreach ($migrations as $file => $migration) {
-            if ($this->checkMigrationExistance($migration)) {
+            if ($this->checkIfMigrationExist($migration)) {
                 continue;
             }
 
@@ -158,7 +161,7 @@ class MigrationCommand extends AbstractCommand
                 // Include the migration file
                 require $file;
 
-                // Rollabck migration
+                // Rollback migration
                 try {
                     (new $migration)->rollback();
                 } catch (\Exception $exception) {
@@ -218,7 +221,7 @@ class MigrationCommand extends AbstractCommand
                 // Include the migration file
                 require $file;
 
-                // Rollabck migration
+                // Rollback migration
                 try {
                     (new $migration)->rollback();
                 } catch (\Exception $exception) {
@@ -294,7 +297,7 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Cretae migration status
+     * Create migration status
      *
      * @param string $migration
      * @param int $batch
@@ -331,13 +334,12 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Check the migration existance
+     * Check the migration existence
      *
      * @param string $migration
-     *
      * @return bool
      */
-    private function checkMigrationExistance($migration)
+    private function checkIfMigrationExist($migration)
     {
         $result = $this->getMigrationTable()
             ->where('migration', $migration)
@@ -359,15 +361,15 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Get migration parten
+     * Get migration pattern
      *
      * @return array
      */
     private function getMigrationFiles()
     {
-        $file_partern = $this->setting->getMigrationDirectory().strtolower("/*.php");
+        $file_pattern = $this->setting->getMigrationDirectory().strtolower("/*.php");
 
-        return glob($file_partern);
+        return glob($file_pattern);
     }
 
     /**

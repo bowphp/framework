@@ -3,12 +3,15 @@
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
+use Bow\Console\ConsoleInformation;
 use Bow\Console\Generator;
 use Bow\Database\Database;
 use Bow\Support\Str;
 
 class SeederCommand extends AbstractCommand
 {
+    use ConsoleInformation;
+    
     /**
      * Create a seeder
      *

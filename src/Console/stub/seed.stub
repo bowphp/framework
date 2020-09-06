@@ -5,14 +5,10 @@
  */
 $faker = \Faker\Factory::create();
 
-$seeds = [];
+$seeder = [
+    'name' => $faker->name,
+    'created_at' => date('Y-m-d H:i:s'),
+    'updated_at' => date('Y-m-d H:i:s')
+];
 
-foreach (range(1, {num}) as $key) {
-    $seeds[] = [
-        'name' => $faker->name,
-        'created_at' => date('Y-m-d H:i:s'),
-        'updated_at' => date('Y-m-d H:i:s')
-    ];
-}
-
-return ['{name}' => $seeds];
+return ['{name}' => $seeder];

@@ -9,8 +9,8 @@ trait ConsoleInformation
     /**
      * Throw fails command
      *
+     * @param string $message
      * @param string $command
-     *
      * @throws \ErrorException
      */
     private function throwFailsCommand($message, $command = null)

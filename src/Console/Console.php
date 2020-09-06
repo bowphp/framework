@@ -299,7 +299,7 @@ class Console
 
         if ($action == 'all') {
             if ($this->arg->getParameter('target') != null) {
-                $this->throwFailsAction('Bad command usage', 'help seed');
+                $this->throwFailsCommand('Bad command usage', 'help seed');
             }
         }
 
@@ -323,7 +323,7 @@ class Console
         $action = $this->arg->getParameter('action');
 
         if (!in_array($action, ['server', 'console'])) {
-            $this->throwFailsCommand('help run');
+            $this->throwFailsCommand('Bad command usage', 'help run');
         }
 
         $this->command->call(
