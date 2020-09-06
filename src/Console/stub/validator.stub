@@ -17,9 +17,9 @@ class {className} extends RequestValidation
     }
 
 	/**
-	 * Validation rule
+	 * Validation rules
 	 *
-	 * @var array
+	 * @return array
 	 */
     protected function rules()
     {
