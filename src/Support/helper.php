@@ -1510,3 +1510,28 @@ if (!function_exists('str_force_in_utf8')) {
         return \Bow\Support\Str::forceInUTF8($string);
     }
 }
+
+if (!function_exists('seed')) {
+    /**
+     * Make programmatic seeding
+     *
+     * @param string $table
+     * @return void
+     */
+    function seed($table)
+    {
+        $collection = [];
+        $filename = rtrim(config('app.seeder_path'), '/').'/'. $table.'_seeder.php';
+
+        if (!file_exists($filename)) {
+            throw new \ErrorException('['.$table.'] seeder file not found');
+        }
+
+        $seeds = require $filename;
+        $collection = array_merge($seeds, $collection);
+
+        foreach ($collection as $table => $seed) {
+            DB::table($table)->insert($seed);
+        }
+    }
+}
