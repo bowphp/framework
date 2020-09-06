@@ -15,7 +15,7 @@ abstract class EngineAbstract
     const HELPERS = [
         'secure' => 'secure',
         'route' => 'route',
-        'bhash' => 'bhash',
+        'bow_hash' => 'bow_hash',
         'config' => 'config',
         'faker' => 'faker',
         'env' => 'env',
