@@ -433,14 +433,14 @@ if (!function_exists('status_code')) {
     }
 }
 
-if (!function_exists('sanitaze')) {
+if (!function_exists('sanitize')) {
     /**
-     * Sanitaze data
+     * Sanitize data
      *
      * @param  mixed $data
      * @return mixed
      */
-    function sanitaze($data)
+    function sanitize($data)
     {
         if (is_numeric($data)) {
             return $data;
