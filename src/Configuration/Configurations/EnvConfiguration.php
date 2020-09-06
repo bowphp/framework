@@ -14,7 +14,7 @@ class EnvConfiguration extends Configuration
     public function create(Loader $config)
     {
         $this->container->bind('env', function () use ($config) {
-            Env::load($config['app.envfile']);
+            Env::load($config['app.env_file']);
         });
     }
 
