@@ -19,11 +19,18 @@ interface GuardContract
     public function guest();
 
     /**
-     * Check if user is authenticate
+     * Get authenticated user
      *
-     * @return bool
+     * @return Authenticate
      */
     public function user();
+
+    /**
+     * Load the a guard
+     *
+     * @return GuardContract
+     */
+    public function guard();
 
     /**
      * Check if user is authenticate

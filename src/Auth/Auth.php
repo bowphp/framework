@@ -3,8 +3,6 @@
 namespace Bow\Auth;
 
 use Bow\Auth\Exception\AuthenticateException;
-use Bow\Security\Hash;
-use Bow\Session\Session;
 
 class Auth
 {
