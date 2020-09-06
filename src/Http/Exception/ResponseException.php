@@ -7,7 +7,7 @@ use ErrorException;
 class ResponseException extends ErrorException
 {
     /**
-     * The response code
+     * Define the http response code
      *
      * @var int
      */
