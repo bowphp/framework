@@ -4,7 +4,7 @@ namespace Bow\Validation\Rules;
 
 use Bow\Support\Str;
 
-class Email
+trait Email
 {
     /**
      * Compile Email Rule
@@ -13,9 +13,9 @@ class Email
      *
      * @param string $key
      * @param string $masque
-     * @return void
+     * @return array
      */
-    protected function compile($key, $masque)
+    protected function compileEmail($key, $masque)
     {
         if (!preg_match("/^email$/", $masque, $match)) {
             return;
@@ -29,7 +29,7 @@ class Email
 
         $this->fails = true;
 
-        $this->errors[$key][] = [
+        return [
             "masque" => $masque,
             "message" => $this->last_message
         ];

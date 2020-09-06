@@ -7,6 +7,8 @@ use Bow\Support\Str;
 
 class Validator
 {
+    use FieldLexical;
+
     /**
      * The Fails flag
      *
@@ -36,11 +38,11 @@ class Validator
     protected $inputs = [];
 
     /**
-     * The compile Rule
+     * Define the valid rule list
      *
      * @var array
      */
-    protected $compiles = [
+    protected $rules = [
         'Required',
         'Max',
         'Min',
@@ -122,8 +124,8 @@ class Validator
                 $this->errors[$key] = [];
 
                 // Mask on the required rule
-                foreach ($this->compiles as $compile) {
-                    $this->{'compile'.$compile}($key, $masque);
+                foreach ($this->rules as $rule) {
+                    $this->{'compile'.$rule}($key, $masque);
                 }
 
                 // We clean the list of errors if the key is valid
@@ -138,34 +140,6 @@ class Validator
             $this->last_message,
             $this->errors
         );
-    }
-
-    /**
-     * Get error debugging information
-     *
-     * @param string       $key
-     * @param string|array $attributes
-     *
-     * @return mixed
-     */
-    private function lexical($key, $attributes)
-    {
-        if (is_string($attributes)) {
-            $attributes = ['attribute' => $attributes];
-        }
-
-        // Get lexical provider by application part
-        $lexical = trans('validation.'.$key, $attributes);
-
-        if (is_null($lexical)) {
-            $lexical = $this->lexical[$key];
-
-            foreach ($attributes as $key => $value) {
-                $lexical = str_replace(':'.$key, $value, $lexical);
-            }
-        }
-
-        return $lexical;
     }
 
     /**
