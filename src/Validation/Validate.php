@@ -124,6 +124,8 @@ class Validate
      */
     public function throwError()
     {
+        response()->status(400);
+
         throw new ValidationException(implode(', ', $this->messages), E_USER_ERROR);
     }
 }

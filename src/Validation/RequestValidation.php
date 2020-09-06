@@ -48,9 +48,9 @@ abstract class RequestValidation
         $keys = $this->keys();
 
         if ((count($keys) == 1 && $keys[0] === '*') || count($keys) == 0) {
-            $this->data = $this->request->input()->all();
+            $this->data = $this->request->all();
         } else {
-            $this->data = $this->request->input()->excepts($keys);
+            $this->data = $this->request->excepts($keys);
         }
 
         $this->validate = Validator::make($this->data, $this->rules());
