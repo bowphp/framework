@@ -34,5 +34,4 @@ trait Email
             "message" => $this->last_message
         ];
     }
-
 }
