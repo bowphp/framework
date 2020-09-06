@@ -7,7 +7,7 @@ use Aws\Exception\AwsException;
 use Bow\Mail\Message;
 use Bow\Mail\Contracts\MailDriverInterface;
 
-class SesDriver implements MailDriverInterface
+class SesDriver extends MailDriverInterface
 {
     /**
      * The SES Instance
@@ -25,13 +25,6 @@ class SesDriver implements MailDriverInterface
     public function __construct(array $config)
     {
         $this->ses = new SesClient($config);
-    }
-
-    /**
-     * Private setting of the magic functions
-     */
-    private function __clone()
-    {
     }
 
     /**

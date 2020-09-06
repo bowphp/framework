@@ -7,7 +7,7 @@ use Bow\Mail\Message;
 use Bow\Support\Str;
 use InvalidArgumentException;
 
-class NativeDriver implements MailDriverInterface
+class NativeDriver extends MailDriverInterface
 {
     /**
      * The configuration
@@ -15,13 +15,6 @@ class NativeDriver implements MailDriverInterface
      * @var array
      */
     private $config;
-
-    /**
-     * Private setting of the magic functions
-     */
-    private function __clone()
-    {
-    }
 
     /**
      * SimpleMail Constructor

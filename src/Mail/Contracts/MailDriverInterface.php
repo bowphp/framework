@@ -4,7 +4,7 @@ namespace Bow\Mail\Contracts;
 
 use Bow\Mail\Message;
 
-interface MailDriverInterface
+abstract class MailDriverInterface
 {
     /**
      * Send mail by any driver
@@ -12,5 +12,12 @@ interface MailDriverInterface
      * @param Message $message
      * @return mixed
      */
-    public function send(Message $message);
+    abstract public function send(Message $message);
+
+    /**
+     * Private setting of the magic functions
+     */
+    private function __clone()
+    {
+    }
 }

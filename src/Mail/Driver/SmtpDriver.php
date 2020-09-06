@@ -8,7 +8,7 @@ use Bow\Mail\Exception\SocketException;
 use Bow\Mail\Message;
 use ErrorException;
 
-class SmtpDriver implements MailDriverInterface
+class SmtpDriver extends MailDriverInterface
 {
 
     /**
@@ -33,7 +33,7 @@ class SmtpDriver implements MailDriverInterface
     private $password;
 
     /**
-     * The SMPT server
+     * The SMTP server
      *
      * @var string
      */
@@ -89,13 +89,6 @@ class SmtpDriver implements MailDriverInterface
         $this->tls = $config['tls'];
         $this->timeout = $config['timeout'];
         $this->port = $config['port'];
-    }
-
-    /**
-     * Private setting of the magic functions
-     */
-    private function __clone()
-    {
     }
 
     /**
