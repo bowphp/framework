@@ -2,13 +2,14 @@
 
 namespace Bow\Support;
 
+use ErrorException;
+
 class Str
 {
     /**
      * upper case
      *
      * @param  string $str
-     *
      * @return array|string
      */
     public static function upper($str)
@@ -24,7 +25,6 @@ class Str
      * lower case
      *
      * @param  string $str
-     *
      * @return array|string
      */
     public static function lower($str)
@@ -40,7 +40,6 @@ class Str
      * camel
      *
      * @param  string $str
-     *
      * @return string
      */
     public static function camel($str)
@@ -67,7 +66,6 @@ class Str
      *
      * @param  string $str
      * @param  string $delimiter
-     *
      * @return mixed
      */
     public static function snake($str, $delimiter = '_')
@@ -85,7 +83,6 @@ class Str
      * Get str plurial
      *
      * @param string $str
-     *
      * @return string
      */
     public static function plurial($str)
@@ -105,9 +102,8 @@ class Str
      * slice
      *
      * @param  string $str
-     * @param  $start
-     * @param  null   $end
-     *
+     * @param  string $start
+     * @param  string|null $end
      * @return string
      */
     public static function slice($str, $start, $end = null)
@@ -132,8 +128,7 @@ class Str
      *
      * @param string $pattern
      * @param string $str
-     * @param null   $limit
-     *
+     * @param int|null $limit
      * @return array
      */
     public static function split($pattern, $str, $limit = null)
@@ -146,8 +141,7 @@ class Str
      *
      * @param string $search
      * @param string $string
-     * @param int    $offset
-     *
+     * @param int $offset
      * @return int
      */
     public static function pos($search, $string, $offset = 0)
@@ -160,7 +154,6 @@ class Str
      *
      * @param string $search
      * @param string $str
-     *
      * @return bool
      */
     public static function contains($search, $str)
@@ -178,7 +171,6 @@ class Str
      * @param string $pattern
      * @param string $replaceBy
      * @param string $str
-     *
      * @return string
      */
     public static function replace($pattern, $replaceBy, $str)
@@ -190,7 +182,6 @@ class Str
      * capitalize
      *
      * @param string $str
-     *
      * @return string
      */
     public static function capitalize($str)
@@ -202,7 +193,6 @@ class Str
      * Len
      *
      * @param string $str
-     *
      * @return int
      */
     public static function len($str)
@@ -215,7 +205,6 @@ class Str
      *
      * @param string $str
      * @param string $sep
-     *
      * @return array
      */
     public static function wordify($str, $sep = ' ')
@@ -228,7 +217,6 @@ class Str
      *
      * @param string $str
      * @param string $number
-     *
      * @return string
      */
     public static function repeat($str, $number)
@@ -240,7 +228,6 @@ class Str
      * Randomize
      *
      * @param int $size
-     *
      * @return string
      */
     public static function randomize($size = 16)
@@ -254,7 +241,6 @@ class Str
      *
      * @param string $str
      * @param string $delimiter
-     *
      * @return string
      */
     public static function slugify($str, $delimiter = '-')
@@ -272,7 +258,6 @@ class Str
      * unslugify, Lets you undo a slug
      *
      * @param string $str
-     *
      * @return string
      */
     public static function unSlugify($str)
@@ -283,10 +268,9 @@ class Str
     /**
      * Check if the email is a valid email.
      *
-     * eg: dakiafranck@gmail.com => true
+     * eg: example@email.com => true
      *
      * @param string $email
-     *
      * @return bool
      */
     public static function isMail($email)
@@ -307,14 +291,13 @@ class Str
      * eg: http:/exemple.com => false
      *
      * @param string $domain
-     *
      * @return bool
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public static function isDomain($domain)
     {
         if (!is_string($domain)) {
-            throw new \ErrorException('Accept string ' . gettype($domain) . ' given');
+            throw new ErrorException('Accept string ' . gettype($domain) . ' given');
         }
 
         return  (bool) preg_match(
@@ -327,14 +310,13 @@ class Str
      * Check if the string is in alphanumeric
      *
      * @param string $str
-     *
      * @return bool
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public static function isAlphaNum($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
+            throw new ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
         return (bool) preg_match('/^[a-zA-Z0-9]+$/', $str);
@@ -345,13 +327,12 @@ class Str
      *
      * @param string $str
      * @return bool
-     *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public static function isNumeric($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
+            throw new ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
         return  (bool) preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
@@ -362,13 +343,12 @@ class Str
      *
      * @param string $str
      * @return bool
-     *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public static function isAlpha($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
+            throw new ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
         return (bool) preg_match('/^[a-zA-Z]+$/', $str);
@@ -378,14 +358,13 @@ class Str
      * Check if the string is in slug format
      *
      * @param string $str
-     *
      * @return bool
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public static function isSlug($str)
     {
         if (!is_string($str)) {
-            throw new \ErrorException('Accept string ' . gettype($str) . ' given');
+            throw new ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
         return  (bool) preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
@@ -395,7 +374,6 @@ class Str
      * Check if the string is in uppercase
      *
      * @param  string $str
-     *
      * @return bool
      */
     public static function isUpper($str)
@@ -407,7 +385,6 @@ class Str
      * Check if the string is lowercase
      *
      * @param  string $str
-     *
      * @return bool
      */
     public static function isLower($str)
@@ -420,7 +397,6 @@ class Str
      *
      * @param string $pattern
      * @param string $str
-     *
      * @return int
      */
     public static function count($pattern, $str)
@@ -432,8 +408,7 @@ class Str
      * Returns a determined number of words in a string.
      *
      * @param string $words
-     * @param int    $len
-     *
+     * @param int $len
      * @return string
      */
     public static function getWords($words, $len)
@@ -453,7 +428,6 @@ class Str
      * Returns a string of words whose words are mixed.
      *
      * @param string $words
-     *
      * @return string
      */
     public static function shuffleWords($words)
@@ -498,7 +472,6 @@ class Str
      *
      * @param  string $method
      * @param  array  $arguments
-     *
      * @return mixed
      */
     public function __call($method, $arguments)

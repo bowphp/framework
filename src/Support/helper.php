@@ -4,7 +4,7 @@ use Bow\Auth\Auth;
 use Bow\Container\Capsule;
 use Bow\Database\Database as DB;
 use Bow\Event\Event;
-use Bow\Http\Exception\ResponseException;
+use Bow\Http\Exception\HttpException;
 use Bow\Mail\Mail;
 use Bow\Security\Hash;
 use Bow\Security\Tokenize;
@@ -1186,7 +1186,7 @@ if (!function_exists('abort')) {
      */
     function abort($code = 500, $message = '')
     {
-        throw new ResponseException($message, $code);
+        throw new HttpException($message, $code);
     }
 }
 
