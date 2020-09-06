@@ -64,11 +64,11 @@ class Validator
     ];
 
     /**
-     * The lexique
+     * The lexical
      *
      * @var array
      */
-    private $lexique;
+    private $lexical;
 
     /**
      * Validator constructor
@@ -77,7 +77,7 @@ class Validator
      */
     public function __construct()
     {
-        $this->lexique = require __DIR__.'/stubs/lexique.php';
+        $this->lexical = require __DIR__.'/stubs/lexical.php';
     }
 
     /**
@@ -141,31 +141,31 @@ class Validator
     }
 
     /**
-     * Get error debuging information
+     * Get error debugging information
      *
      * @param string       $key
      * @param string|array $attributes
      *
      * @return mixed
      */
-    private function lexique($key, $attributes)
+    private function lexical($key, $attributes)
     {
         if (is_string($attributes)) {
             $attributes = ['attribute' => $attributes];
         }
 
-        // Get lexique provider by application part
-        $lexique = trans('lexique.'.$key, $attributes);
+        // Get lexical provider by application part
+        $lexical = trans('lexical.'.$key, $attributes);
 
-        if (is_null($lexique)) {
-            $lexique = $this->lexique[$key];
+        if (is_null($lexical)) {
+            $lexical = $this->lexical[$key];
 
             foreach ($attributes as $key => $value) {
-                $lexique = str_replace(':'.$key, $value, $lexique);
+                $lexical = str_replace(':'.$key, $value, $lexical);
             }
         }
 
-        return $lexique;
+        return $lexical;
     }
 
     /**
@@ -182,7 +182,7 @@ class Validator
             || is_null($this->inputs[$key])
             || $this->inputs[$key] === ''
         ) {
-            $this->last_message = $message = $this->lexique('required', $key);
+            $this->last_message = $message = $this->lexical('required', $key);
             
             $this->errors[$key][] = [
                 "masque" => $masque,
@@ -206,7 +206,7 @@ class Validator
         if (!isset($this->inputs[$key])) {
             $this->fails = true;
 
-            $this->last_message = $message = $this->lexique('empty', $key);
+            $this->last_message = $message = $this->lexical('empty', $key);
 
             $this->errors[$key][] = [
                 "masque" => $masque,
@@ -216,7 +216,7 @@ class Validator
     }
 
     /**
-     * Complie Min Mask
+     * Compile Min Mask
      *
      * [min:value] Check that the content of the field is a number of
      * minimal character following the defined value
@@ -240,7 +240,7 @@ class Validator
 
         $this->fails = true;
         
-        $this->last_message = $this->lexique('min', [
+        $this->last_message = $this->lexical('min', [
             'attribute' => $key,
             'length' => $length
         ]);
@@ -276,7 +276,7 @@ class Validator
 
         $this->fails = true;
         
-        $this->last_message = $this->lexique('max', [
+        $this->last_message = $this->lexical('max', [
             'attribute' => $key,
             'length' => $length
         ]);
@@ -309,7 +309,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('same', [
+        $this->last_message = $this->lexical('same', [
             'attribute' => $key,
             'value' => $value
         ]);
@@ -341,7 +341,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('email', $key);
+        $this->last_message = $this->lexical('email', $key);
 
         $this->fails = true;
         
@@ -371,7 +371,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('number', $key);
+        $this->last_message = $this->lexical('number', $key);
 
         $this->fails = true;
 
@@ -382,7 +382,7 @@ class Validator
     }
 
     /**
-     * Complie Int Rule
+     * Compile Int Rule
      *
      * [int] Check that the contents of the field is an integer number
      *
@@ -401,7 +401,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('int', $key);
+        $this->last_message = $this->lexical('int', $key);
         
         $this->fails = true;
         
@@ -412,7 +412,7 @@ class Validator
     }
 
     /**
-     * Complie Float Rule
+     * Compile Float Rule
      *
      * [float] Check that the field content is a float number
      *
@@ -431,7 +431,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('float', $key);
+        $this->last_message = $this->lexical('float', $key);
 
         $this->fails = true;
 
@@ -448,7 +448,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileAlphaNum($key, $masque)
@@ -461,7 +460,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('alphanum', $key);
+        $this->last_message = $this->lexical('alphanum', $key);
         
         $this->fails = true;
         
@@ -472,13 +471,12 @@ class Validator
     }
 
     /**
-     * Complie In Rule
+     * Compile In Rule
      *
      * [in:(value, ...)] Check that the contents of the field are equal to the defined value
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileIn($key, $masque)
@@ -497,7 +495,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('in', [
+        $this->last_message = $this->lexical('in', [
             'attribute' => $key,
             'value' => implode(", ", $values)
         ]);
@@ -518,7 +516,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileSize($key, $masque)
@@ -535,7 +532,7 @@ class Validator
 
         $this->fails = true;
 
-        $this->last_message = $this->lexique('size', [
+        $this->last_message = $this->lexical('size', [
             'attribute' => $key,
             'length' => $length
         ]);
@@ -553,7 +550,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileLower($key, $masque)
@@ -568,7 +564,7 @@ class Validator
 
         $this->fails = true;
         
-        $this->last_message = $this->lexique('lower', $key);
+        $this->last_message = $this->lexical('lower', $key);
 
         $this->errors[$key][] = [
             "masque" => $masque,
@@ -583,7 +579,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileUpper($key, $masque)
@@ -598,7 +593,7 @@ class Validator
 
         $this->fails = true;
         
-        $this->last_message = $this->lexique('upper', $key);
+        $this->last_message = $this->lexical('upper', $key);
         
         $this->errors[$key][] = [
             "masque" => $masque,
@@ -613,7 +608,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileAlpha($key, $masque)
@@ -626,7 +620,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('alpha', $key);
+        $this->last_message = $this->lexical('alpha', $key);
         
         $this->fails = true;
         
@@ -643,7 +637,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileExists($key, $masque)
@@ -664,7 +657,7 @@ class Validator
         }
 
         if (!$exists) {
-            $this->last_message = $this->lexique('exists', $key);
+            $this->last_message = $this->lexical('exists', $key);
             
             $this->fails = true;
             
@@ -682,7 +675,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileNotExists($key, $masque)
@@ -703,7 +695,7 @@ class Validator
         }
 
         if ($exists) {
-            $this->last_message = $this->lexique('not_exists', $key);
+            $this->last_message = $this->lexical('not_exists', $key);
             
             $this->fails = true;
             
@@ -721,7 +713,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileUnique($key, $masque)
@@ -742,7 +733,7 @@ class Validator
         }
 
         if ($count > 1) {
-            $this->last_message = $this->lexique('exists', $key);
+            $this->last_message = $this->lexical('exists', $key);
             
             $this->fails = true;
             
@@ -760,7 +751,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileDate($key, $masque)
@@ -775,7 +765,7 @@ class Validator
 
         $this->fails = true;
         
-        $this->last_message = $this->lexique('date', $key);
+        $this->last_message = $this->lexical('date', $key);
         
         $this->errors[$key][] = [
             "masque" => $masque,
@@ -790,7 +780,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileDateTime($key, $masque)
@@ -806,7 +795,7 @@ class Validator
             return;
         }
 
-        $this->last_message = $this->lexique('datetime', $key);
+        $this->last_message = $this->lexical('datetime', $key);
         
         $this->fails = true;
         
@@ -823,7 +812,6 @@ class Validator
      *
      * @param string $key
      * @param string $masque
-     *
      * @return void
      */
     protected function compileRegex($key, $masque)
@@ -840,7 +828,7 @@ class Validator
 
         $this->fails = true;
         
-        $this->last_message = $this->lexique('regex', $key);
+        $this->last_message = $this->lexical('regex', $key);
         
         $this->errors[$key][] = [
             "masque" => $masque,

@@ -6,7 +6,7 @@ use BadMethodCallException;
 use Bow\Http\Request;
 use Bow\Validation\Exception\AuthorizationException;
 
-abstract class ValidationRequest
+abstract class RequestValidation
 {
     /**
      * The Validate instance

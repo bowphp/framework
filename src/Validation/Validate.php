@@ -32,14 +32,14 @@ class Validate
      *
      * @var array
      */
-    private $corruptes_fields = [];
+    private $corrupted_fields = [];
 
     /**
      * The corrupted rule list
      *
      * @var array
      */
-    private $corruptes_rules = [];
+    private $corrupted_rules = [];
 
 
     /**
@@ -47,22 +47,22 @@ class Validate
      *
      * @param bool   $fails
      * @param string $message
-     * @param array  $corruptes_fields
+     * @param array  $corrupted_fields
      *
      * @return void
      */
-    public function __construct($fails, $message, array $corruptes_fields)
+    public function __construct($fails, $message, array $corrupted_fields)
     {
         $this->fails = $fails;
         $this->last_message = $message;
-        $this->corruptes_fields = array_keys($corruptes_fields);
-        $this->corruptes_rules = [];
+        $this->corrupted_fields = array_keys($corrupted_fields);
+        $this->corrupted_rules = [];
         $this->messages = [];
 
-        foreach ($corruptes_fields as $key => $corruptes) {
-            foreach ($corruptes as $fields) {
+        foreach ($corrupted_fields as $key => $corrupted) {
+            foreach ($corrupted as $fields) {
                 $this->messages[$key] = $fields["message"];
-                $this->corruptes_rules[$key] = $fields["masque"];
+                $this->corrupted_rules[$key] = $fields["masque"];
             }
         }
     }
@@ -82,9 +82,9 @@ class Validate
      *
      * @return array
      */
-    public function getCorrupteFields()
+    public function getCorruptedFields()
     {
-        return $this->corruptes_fields;
+        return $this->corrupted_fields;
     }
 
     /**
@@ -94,7 +94,7 @@ class Validate
      */
     public function getFailsRules()
     {
-        return $this->corruptes_rules;
+        return $this->corrupted_rules;
     }
 
     /**
