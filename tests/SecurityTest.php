@@ -5,12 +5,12 @@ use Bow\Security\Crypto;
 
 class SecurityTest extends \PHPUnit\Framework\TestCase
 {
-    public function testHashValue()
+    public function depGetHashValue()
     {
         return Hash::create('bow');
     }
 
-    public function testEncryptValue()
+    public function depGetEncryptValue()
     {
         Crypto::setKey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
 
@@ -18,10 +18,10 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testEncryptValue
+     * @depends depGetEncryptValue
      * @param $data
      */
-    public function testDecrypt($data)
+    public function testShouldDecryptData($data)
     {
         Crypto::setkey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
 
@@ -29,10 +29,10 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testHashValue
+     * @depends depGetHashValue
      * @param $data
      */
-    public function testHash($data)
+    public function testShouldCheckHashValue($data)
     {
         $this->assertTrue(Hash::check('bow', $data));
     }

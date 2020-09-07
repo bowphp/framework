@@ -11,15 +11,16 @@ class Hash
      * @param  int    $cost
      * @return bool|string
      */
-    public static function create($value, $cost = 10)
+    public static function create($value)
     {
         $hash_method = config('security.hash_method');
+        $options = config('security.hash_method');
 
-        if (is_null($hash_method)) {
+        if (is_null($hash_method) || $hash_method == PASSWORD_BCRYPT) {
             $hash_method = PASSWORD_BCRYPT;
         }
 
-        return password_hash($value, $hash_method, ['cast' => $cost]);
+        return password_hash($value, $hash_method, $options);
     }
 
     /**
