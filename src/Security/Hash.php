@@ -23,10 +23,9 @@ class Hash
      *
      * @deprecated
      * @param  string $value
-     * @param  int    $cost
      * @return bool|string
      */
-    public static function make($value, $cost = 10)
+    public static function make($value)
     {
         [$hash_method, $options] = static::getHashConfig();
         
@@ -56,7 +55,7 @@ class Hash
      * @param  int  $cost
      * @return bool
      */
-    public function needsRehash($hash, $cost = 10)
+    public function needsRehash($hash)
     {
         [$hash_method, $options] = static::getHashConfig();
 
