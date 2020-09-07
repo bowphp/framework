@@ -15,14 +15,14 @@ return [
 
     /**
      * The Hash method
-     * 
+     *
      * @see https://github.com/bowphp/framework/issues/55
      */
     'hash_method' => PASSWORD_BCRYPT,
 
     /**
      * The Hash method options
-     * 
+     *
      * @see https://www.php.net/manual/fr/password.constants.php
      */
     'hash_options' => [

@@ -13,12 +13,7 @@ class Hash
      */
     public static function create($value)
     {
-        $hash_method = config('security.hash_method');
-        $options = config('security.hash_method');
-
-        if (is_null($hash_method) || $hash_method == PASSWORD_BCRYPT) {
-            $hash_method = PASSWORD_BCRYPT;
-        }
+        [$hash_method, $options] = static::getHashConfig();
 
         return password_hash($value, $hash_method, $options);
     }
@@ -33,13 +28,9 @@ class Hash
      */
     public static function make($value, $cost = 10)
     {
-        $hash_method = config('security.hash_method');
-
-        if (is_null($hash_method)) {
-            $hash_method = PASSWORD_BCRYPT;
-        }
+        [$hash_method, $options] = static::getHashConfig();
         
-        return password_hash($value, $hash_method, ['cast' => $cost]);
+        return password_hash($value, $hash_method, $options);
     }
 
     /**
@@ -67,6 +58,25 @@ class Hash
      */
     public function needsRehash($hash, $cost = 10)
     {
-        return password_needs_rehash($hash, PASSWORD_BCRYPT, ['cost' => $cost]);
+        [$hash_method, $options] = static::getHashConfig();
+
+        return password_needs_rehash($hash, $hash_method, $options);
+    }
+
+    /**
+     * Get the hash configuration
+     *
+     * @return array
+     */
+    protected static function getHashConfig()
+    {
+        $hash_method = config('security.hash_method');
+        $options = config('security.hash_method');
+
+        if (is_null($hash_method) || $hash_method == PASSWORD_BCRYPT) {
+            $hash_method = PASSWORD_BCRYPT;
+        }
+
+        return [$hash_method, $options];
     }
 }
