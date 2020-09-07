@@ -8,7 +8,6 @@ class Hash
      * Allows to have a value and when the hash has failed it returns false.
      *
      * @param  string $value
-     * @param  int    $cost
      * @return bool|string
      */
     public static function create($value)
@@ -21,7 +20,6 @@ class Hash
     /**
      * Allows to have a value and when the hash has failed it returns false.
      *
-     * @deprecated
      * @param  string $value
      * @return bool|string
      */
@@ -52,7 +50,6 @@ class Hash
      * Allows you to rehash a value.
      *
      * @param  $hash
-     * @param  int  $cost
      * @return bool
      */
     public function needsRehash($hash)
