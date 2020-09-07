@@ -5,7 +5,7 @@ namespace Bow\Database\Migration\Shortcut;
 trait ConstraintColumn
 {
     /**
-     * Add constraintes
+     * Add Foreign KEY constraints
      *
      * @param string $name
      * @param array $attributes
