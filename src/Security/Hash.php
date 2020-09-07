@@ -70,7 +70,7 @@ class Hash
     protected static function getHashConfig()
     {
         $hash_method = config('security.hash_method');
-        $options = config('security.hash_method');
+        $options = config('security.hash_options');
 
         if (is_null($hash_method) || $hash_method == PASSWORD_BCRYPT) {
             $hash_method = PASSWORD_BCRYPT;
