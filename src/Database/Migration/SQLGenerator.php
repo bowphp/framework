@@ -296,7 +296,7 @@ class SQLGenerator
             }
         }
 
-        // Wrap defaulte value
+        // Wrap default value
         if (in_array($type, ['VARCHAR', 'CHAR'])) {
             if (!is_null($default)) {
                 $default = "'".$default."'";
@@ -358,6 +358,19 @@ class SQLGenerator
     public function setScope($scope)
     {
         $this->scope = $scope;
+
+        return $this;
+    }
+
+    /**
+     * Set the adapter
+     *
+     * @param string $adapter
+     * @return SQLGenerator
+     */
+    public function setAdapter($adapter)
+    {
+        $this->adapter = $adapter;
 
         return $this;
     }

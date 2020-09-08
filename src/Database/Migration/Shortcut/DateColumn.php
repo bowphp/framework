@@ -13,6 +13,10 @@ trait DateColumn
      */
     public function addDatetime(string $column, array $attribute = [])
     {
+        if ($this->adapter == 'sqlite') {
+            return $this->addColumn($column, 'text', $attribute);
+        }
+        
         return $this->addColumn($column, 'datetime', $attribute);
     }
 
@@ -71,8 +75,13 @@ trait DateColumn
      */
     public function addTimestamps()
     {
-        $this->addColumn('created_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
-        $this->addColumn('updated_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
+        if ($this->adapter == 'sqlite') {
+            $this->addColumn('created_at', 'text', ['default' => 'CURRENT_TIMESTAMP']);
+            $this->addColumn('updated_at', 'text', ['default' => 'CURRENT_TIMESTAMP']);
+        } else {
+            $this->addColumn('created_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
+            $this->addColumn('updated_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
+        }
 
         return $this;
     }
