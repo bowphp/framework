@@ -62,4 +62,26 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
+
+    public function testShouldCreateNotCorrectDatetimeSqlStatement()
+    {
+        $this->generator->setAdapter('sqlite');
+
+        $this->generator->addDatetime('created_at');
+
+        $sql = $this->generator->make();
+
+        $this->assertNotEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    }
+
+    public function testShouldCreateCorrectTimestampsSqlStatement()
+    {
+        $this->generator->setAdapter('sqlite');
+
+        $this->generator->addTimestamps();
+
+        $sql = $this->generator->make();
+
+        $this->assertNotEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    }
 }
