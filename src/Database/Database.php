@@ -104,9 +104,9 @@ class Database
         static::$name = $name;
 
         if (static::$adapter === null) {
-            if ($name == 'mysql') {
+            if ($config['driver'] == 'mysql') {
                 static::$adapter = new MysqlAdapter($config);
-            } elseif ($name == 'sqlite') {
+            } elseif ($config['driver'] == 'sqlite') {
                 static::$adapter = new SqliteAdapter($config);
             } else {
                 throw new ConnectionException('This driver is not praised');
@@ -123,7 +123,7 @@ class Database
     }
 
     /**
-     * Get connexion nane
+     * Get connexion name
      *
      * @return string|null
      */
@@ -147,16 +147,16 @@ class Database
     /**
      * Execute an UPDATE request
      *
-     * @param  string $sqlstatement
+     * @param  string $sql_statement
      * @param  array  $data
      * @return bool
      */
-    public static function update($sqlstatement, array $data = [])
+    public static function update($sql_statement, array $data = [])
     {
         static::verifyConnection();
 
-        if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sqlstatement)) {
-            return static::executePrepareQuery($sqlstatement, $data);
+        if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sql_statement)) {
+            return static::executePrepareQuery($sql_statement, $data);
         }
 
         return false;
@@ -165,17 +165,17 @@ class Database
     /**
      * Execute a SELECT request
      *
-     * @param  string $sqlstatement
+     * @param  string $sql_statement
      * @param  array        $data
      * @return mixed|null
      */
-    public static function select($sqlstatement, array $data = [])
+    public static function select($sql_statement, array $data = [])
     {
         static::verifyConnection();
 
         if (!preg_match(
             "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
-            $sqlstatement
+            $sql_statement
         )) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
@@ -183,32 +183,32 @@ class Database
             );
         }
 
-        $pdostatement = static::$adapter
+        $pdo_statement = static::$adapter
             ->getConnection()
-            ->prepare($sqlstatement);
+            ->prepare($sql_statement);
 
         static::$adapter->bind(
-            $pdostatement,
+            $pdo_statement,
             Sanitize::make($data, true)
         );
 
-        $pdostatement->execute();
+        $pdo_statement->execute();
 
-        return Sanitize::make($pdostatement->fetchAll());
+        return Sanitize::make($pdo_statement->fetchAll());
     }
 
     /**
      * Executes a select query and returns a single record
      *
-     * @param  string $sqlstatement
+     * @param  string $sql_statement
      * @param  array  $data
      * @return mixed|null
      */
-    public static function selectOne($sqlstatement, array $data = [])
+    public static function selectOne($sql_statement, array $data = [])
     {
         static::verifyConnection();
 
-        if (!preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sqlstatement)) {
+        if (!preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sql_statement)) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -216,33 +216,33 @@ class Database
         }
 
         // Prepare query
-        $pdostatement = static::$adapter
+        $pdo_statement = static::$adapter
             ->getConnection()
-            ->prepare($sqlstatement);
+            ->prepare($sql_statement);
 
         // Bind data
-        static::$adapter->bind($pdostatement, $data);
+        static::$adapter->bind($pdo_statement, $data);
 
         // Execute query
-        $pdostatement->execute();
+        $pdo_statement->execute();
 
-        return Sanitize::make($pdostatement->fetch());
+        return Sanitize::make($pdo_statement->fetch());
     }
 
     /**
      * Execute an insert query
      *
-     * @param  $sqlstatement
+     * @param  $sql_statement
      * @param  array        $data
      * @return null
      */
-    public static function insert($sqlstatement, array $data = [])
+    public static function insert($sql_statement, array $data = [])
     {
         static::verifyConnection();
 
         if (!preg_match(
             "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
-            $sqlstatement
+            $sql_statement
         )) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
@@ -251,11 +251,11 @@ class Database
         }
 
         if (empty($data)) {
-            $pdoStement = static::$adapter->getConnection()->prepare($sqlstatement);
+            $pdo_statement = static::$adapter->getConnection()->prepare($sql_statement);
 
-            $pdoStement->execute();
+            $pdo_statement->execute();
 
-            return $pdoStement->rowCount();
+            return $pdo_statement->rowCount();
         }
 
         $collector = [];
@@ -264,7 +264,7 @@ class Database
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $r += static::executePrepareQuery($sqlstatement, $value);
+                $r += static::executePrepareQuery($sql_statement, $value);
 
                 continue;
             }
@@ -273,25 +273,25 @@ class Database
         }
 
         if (!empty($collector)) {
-            return static::executePrepareQuery($sqlstatement, $collector);
+            return static::executePrepareQuery($sql_statement, $collector);
         }
 
         return $r;
     }
 
     /**
-     * Executes a request of type DROP | CREATE TABLE | TRAUNCATE | ALTER Builder
+     * Executes a request of type DROP | CREATE TABLE | TRUNCATE | ALTER Builder
      *
-     * @param string $sqlstatement
+     * @param string $sql_statement
      * @return bool
      */
-    public static function statement($sqlstatement)
+    public static function statement($sql_statement)
     {
         static::verifyConnection();
 
         if (!preg_match(
             "/^(((drop|alter|create)\s+)?(?:(?:temp|temporary)\s+)?table|truncate|call|database)(\s+)?(.+?);?$/i",
-            $sqlstatement
+            $sql_statement
         )) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
@@ -301,23 +301,23 @@ class Database
 
         return static::$adapter
             ->getConnection()
-            ->exec($sqlstatement) === 0;
+            ->exec($sql_statement) === 0;
     }
 
     /**
      * Execute a delete request
      *
-     * @param  $sqlstatement
+     * @param  $sql_statement
      * @param  array        $data
      * @return bool
      */
-    public static function delete($sqlstatement, array $data = [])
+    public static function delete($sql_statement, array $data = [])
     {
         static::verifyConnection();
 
         if (!preg_match(
             "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
-            $sqlstatement
+            $sql_statement
         )) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
@@ -325,7 +325,7 @@ class Database
             );
         }
 
-        return static::executePrepareQuery($sqlstatement, $data);
+        return static::executePrepareQuery($sql_statement, $data);
     }
 
     /**
@@ -371,7 +371,7 @@ class Database
     }
 
     /**
-     * Check if database execution is in transation
+     * Check if database execution is in transaction
      *
      * @return bool
      */
@@ -432,24 +432,24 @@ class Database
     /**
      * Execute the request of type delete insert update
      *
-     * @param string $sqlstatement
+     * @param string $sql_statement
      * @param array $data
      * @return mixed
      */
-    private static function executePrepareQuery($sqlstatement, array $data = [])
+    private static function executePrepareQuery($sql_statement, array $data = [])
     {
-        $pdostatement = static::$adapter
+        $pdo_statement = static::$adapter
             ->getConnection()
-            ->prepare($sqlstatement);
+            ->prepare($sql_statement);
 
         static::$adapter->bind(
-            $pdostatement,
+            $pdo_statement,
             Sanitize::make($data, true)
         );
 
-        $pdostatement->execute();
+        $pdo_statement->execute();
 
-        $r = $pdostatement->rowCount();
+        $r = $pdo_statement->rowCount();
 
         return $r;
     }

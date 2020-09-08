@@ -20,6 +20,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
             'default' => 'mysql',
             'connection' => [
                 'mysql' => [
+                    'driver' => 'mysql',
                     'hostname' => getenv('DB_HOSTNAME') ? getenv('DB_HOSTNAME') : 'localhost',
                     'username' => getenv('DB_USERNAME') ? getenv('DB_USERNAME') : 'root',
                     'password' => getenv('DB_USERNAME') == 'travis' ? '' : getenv('DB_PASSWORD'),
