@@ -96,7 +96,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends testGetDatabaseConnection
      * @param Database $db
      */
-    public function testwhereInChainRows(Bow\Database\Database $db)
+    public function testWhereInChainRows(Bow\Database\Database $db)
     {
         $table = $db->table('pets');
 
