@@ -56,7 +56,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     {
         $this->generator->setAdapter('sqlite');
 
-        $this->generator->addDatetime('created_at');
+        $this->generator->addDatetime('created_at', ['default' => 'CURRENT_TIMESTAMP']);
 
         $sql = $this->generator->make();
 
