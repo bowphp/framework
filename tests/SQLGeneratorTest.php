@@ -60,6 +60,6 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
         $sql = $this->generator->make();
 
-        $this->assertEquals($sql, '`created_at` TEXT NOT NULL default CURRENT_TIMESTAMP');
+        $this->assertEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 }
