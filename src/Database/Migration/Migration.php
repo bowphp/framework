@@ -40,7 +40,7 @@ abstract class Migration
     abstract public function rollback();
 
     /**
-     * Swith connection
+     * Switch connection
      *
      * @param string $name
      * @return Migration

@@ -962,26 +962,42 @@ if (!function_exists('route')) {
      *
      * @param  string $name
      * @param  array  $data
+     * @param  bool  $absolute
      * @return string
      */
-    function route($name, array $data = [])
+    function route($name, $data = [], $absolute = false)
     {
         $routes = config('app.routes');
 
+        if (is_bool($data)) {
+            $absolute = $data;
+            $data = [];
+        }
+
         if (!isset($routes[$name])) {
             throw new \InvalidArgumentException(
-                'The route named ' .$name .' does not define.',
+                'The route named ' . $name . ' does not define.',
                 E_USER_ERROR
             );
         }
 
         $url = $routes[$name];
 
-        foreach ($data as $key => $value) {
-            $url = str_replace(':'. $key, $value, $url);
+        if (preg_match('/:/', $url)) {
+            foreach ($data as $key => $value) {
+                $url = str_replace(':' . $key, $value, $url);
+            }
+        } else {
+            if (count($data) > 0) {
+                $url = $url . '?' . http_build_query($data);
+            }
         }
 
-        return rtrim(app_env('APP_URL'), '/').'/'.ltrim($url, '/');
+        if ($absolute) {
+            return rtrim(app_env('APP_URL'), '/') . '/' . ltrim($url, '/');
+        }
+
+        return '/' . ltrim($url, '/');
     }
 }
 
