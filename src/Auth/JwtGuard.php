@@ -152,7 +152,9 @@ class JwtGuard implements GuardContract
             throw new AuthenticateException('The token payload malformed.');
         }
 
-        return $this->getUserBy('email', $result['claims']['email']);
+        $user = new Authentication;
+
+        return $this->getUserBy($user->getKey(), $result['claims']['id']);
     }
 
     /**
@@ -184,7 +186,6 @@ class JwtGuard implements GuardContract
     public function login(Authentication $user)
     {
         $claims = [
-            "email" => $user->email,
             "id" => $user->getAuthenticateUserId(),
             "logged" => true
         ];
