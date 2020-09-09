@@ -56,7 +56,7 @@ class JwtGuard implements GuardContract
             return false;
         }
 
-        if (Hash::check($password, $user->${$fields['password']})) {
+        if (Hash::check($password, $user->$fields['password'])) {
             $this->login($user);
             return true;
         }
