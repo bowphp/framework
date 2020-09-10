@@ -100,7 +100,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Session starteur.
+     * Session starter.
      *
      * @return boolean
      */
@@ -114,7 +114,7 @@ class Session implements CollectionInterface
         $this->initializeDriver();
 
         // Set the cookie param
-        $this->setCookieParmaters();
+        $this->setCookieParameters();
 
         // Boot session
         $started = $this->boot();
@@ -126,7 +126,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Start session nativily
+     * Start session natively
      *
      * @return bool
      */
@@ -212,7 +212,7 @@ class Session implements CollectionInterface
      *
      * @return void
      */
-    private function setCookieParmaters()
+    private function setCookieParameters()
     {
         session_set_cookie_params(
             $this->config["lifetime"],
@@ -280,18 +280,30 @@ class Session implements CollectionInterface
         $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
         if (!$strict) {
-            return isset($cache[$key]) ? true : isset($flash[$key]);
-        }
+            if (isset($cache[$key])) {
+                return true;
+            }
+            
+            if (isset($flash[$key])) {
+                return true;
+            }
 
-        if (!isset($cache[$key])) {
-            $value = $flash[$key] ?? null;
-
-            return !is_null($value);
+            return isset($_SESSION[$key]);
         }
 
         $value = $cache[$key] ?? null;
 
-        return !is_null($value);
+        if (!is_null($value)) {
+            return true;
+        }
+
+        $value = $flash[$key] ?? null;
+        
+        if (!is_null($value)) {
+            return true;
+        }
+
+        return isset($_SESSION[$key]) && !is_null($_SESSION[$key]);
     }
 
     /**
@@ -332,7 +344,7 @@ class Session implements CollectionInterface
         }
 
         if (is_null($content) && $this->has($key)) {
-            return $_SESSION[$key];
+            return $_SESSION[$key] ?? null;
         }
 
         if (is_callable($default)) {
@@ -486,7 +498,7 @@ class Session implements CollectionInterface
      */
     public function toArray()
     {
-        return self::filter();
+        return $this->filter();
     }
 
     /**
@@ -528,7 +540,7 @@ class Session implements CollectionInterface
      */
     public function toObject()
     {
-        throw new \BadMethodCallException("Bad methode called");
+        throw new \BadMethodCallException("Bad method called");
     }
 
     /**

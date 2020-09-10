@@ -26,7 +26,7 @@ interface CollectionInterface
      * @param  mixed  $default
      * @return mixed
      */
-    public function get($key, $default);
+    public function get($key, $default = null);
 
     /**
      * Add an entry to the collection
