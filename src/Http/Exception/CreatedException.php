@@ -4,17 +4,17 @@ namespace Bow\Http\Exception;
 
 use Bow\Http\Exception\HttpException;
 
-class NotFoundException extends HttpException
+class CreatedException extends HttpException
 {
     /**
-     * NotFoundException constructor
+     * CreatedException constructor
      *
      * @param string $message
      * @param string $status
      */
-    public function __construct(string $message, $status = 'NOT_FOUND')
+    public function __construct(string $message, $status = 'CONTENT_CREATED')
     {
-        parent::__construct($message, 404);
+        parent::__construct($message, 201);
 
         $this->status = $status;
     }
