@@ -35,7 +35,7 @@ abstract class GuardContract
 
     /**
      * Load the a guard
-     * 
+     *
      * @param string $guard
      * @return GuardContract
      */
