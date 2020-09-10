@@ -5,10 +5,9 @@ namespace Bow\Auth;
 use Bow\Auth\Exception\AuthenticateException;
 use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
-use Bow\Session\Session;
 use Policier\Policier;
 
-class JwtGuard implements GuardContract
+class JwtGuard extends GuardContract
 {
     use LoginUserTrait;
 
@@ -27,7 +26,7 @@ class JwtGuard implements GuardContract
     private $token;
 
     /**
-     * JwtGaurd constructor.
+     * JwtGuard constructor.
      *
      * @param array $provider
      */

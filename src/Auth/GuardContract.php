@@ -2,35 +2,28 @@
 
 namespace Bow\Auth;
 
-interface GuardContract
+abstract class GuardContract
 {
     /**
      * Check if user is authenticate
      *
      * @return bool
      */
-    public function check();
+    abstract public function check();
 
     /**
      * Check if user is guest
      *
      * @return bool
      */
-    public function guest();
+    abstract public function guest();
 
     /**
      * Get authenticated user
      *
      * @return Authenticate
      */
-    public function user();
-
-    /**
-     * Load the a guard
-     *
-     * @return GuardContract
-     */
-    public function guard();
+    abstract public function user();
 
     /**
      * Check if user is authenticate
@@ -38,5 +31,16 @@ interface GuardContract
      * @param array $credentials
      * @return bool
      */
-    public function attempts(array $credentials);
+    abstract public function attempts(array $credentials);
+
+    /**
+     * Load the a guard
+     * 
+     * @param string $guard
+     * @return GuardContract
+     */
+    public function guard($guard = null)
+    {
+        return Auth::guard($guard);
+    }
 }

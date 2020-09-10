@@ -2,12 +2,11 @@
 
 namespace Bow\Auth;
 
-use Bow\Auth\Exception\AuthenticateException;
 use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
 use Bow\Session\Session;
 
-class SessionGuard implements GuardContract
+class SessionGuard extends GuardContract
 {
     use LoginUserTrait;
 
