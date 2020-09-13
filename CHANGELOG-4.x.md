@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.0] - 2020-09-13
+
+- [fix] fix [#97](https://github.com/bowphp/framework/issues/97)
+- [fix] fix [#96](https://github.com/bowphp/framework/issues/96)
+- [fix] fix [#95](https://github.com/bowphp/framework/issues/95)
+- [fix] fix [#94](https://github.com/bowphp/framework/issues/94)
+- [fix] fix [#93](https://github.com/bowphp/framework/issues/93)
+- [fix] fix [#92](https://github.com/bowphp/framework/issues/92)
+- [fix] fix [#91](https://github.com/bowphp/framework/issues/91)
+- [fix] fix [#90](https://github.com/bowphp/framework/issues/90)
+- [fix] fix [#89](https://github.com/bowphp/framework/issues/89)
+- [add] fix [#62](https://github.com/bowphp/framework/issues/62)
 - [fix] session flash error
 - [change] update Application class
 - [change] update default configuration
