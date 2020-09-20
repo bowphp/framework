@@ -65,7 +65,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @var string
      */
-    protected $havin;
+    protected $having;
 
     /**
      * Order By statement collector
@@ -145,7 +145,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function where($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        if (!static::isComporaisonOperator($comp) || is_null($value)) {
+        if (!static::isComparisonOperator($comp) || is_null($value)) {
             $value = $comp;
 
             $comp = '=';
@@ -351,10 +351,10 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Join clause
      *
      * @param string   $table
-     * @param callable $callabe
+     * @param callable $callable
      * @return QueryBuilder
      */
-    public function join($table, callable $callabe = null)
+    public function join($table, callable $callable = null)
     {
         $table = $this->getPrefix().$table;
 
@@ -364,8 +364,8 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $this->join .= ', `'.$table.'`';
         }
 
-        if (is_callable($callabe)) {
-            $callabe($this);
+        if (is_callable($callable)) {
+            $callable($this);
         }
 
         return $this;
@@ -466,7 +466,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             );
         }
 
-        if (!$this->isComporaisonOperator($comp)) {
+        if (!$this->isComparisonOperator($comp)) {
             $second = $comp;
         }
 
@@ -506,7 +506,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             );
         }
 
-        if (!$this->isComporaisonOperator($comp)) {
+        if (!$this->isComparisonOperator($comp)) {
             $second = $comp;
         }
 
@@ -556,15 +556,15 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function having($column, $comp = '=', $value = null, $boolean = 'and')
     {
-        if (!$this->isComporaisonOperator($comp)) {
+        if (!$this->isComparisonOperator($comp)) {
             $value = $comp;
             $comp = '=';
         }
 
-        if (is_null($this->havin)) {
-            $this->havin = '`'.$column.'` '.$comp.' '.$value;
+        if (is_null($this->having)) {
+            $this->having = '`'.$column.'` '.$comp.' '.$value;
         } else {
-            $this->havin .= ' '.$boolean.' `'.$column.'` '.$comp.' '.$value;
+            $this->having .= ' '.$boolean.' `'.$column.'` '.$comp.' '.$value;
         }
 
         return $this;
@@ -636,7 +636,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function max($column)
     {
-        return $this->executeAgregat('max', $column);
+        return $this->aggregate('max', $column);
     }
 
     /**
@@ -647,7 +647,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function min($column)
     {
-        return $this->executeAgregat('min', $column);
+        return $this->aggregate('min', $column);
     }
 
     /**
@@ -658,7 +658,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function avg($column)
     {
-        return $this->executeAgregat('avg', $column);
+        return $this->aggregate('avg', $column);
     }
 
     /**
@@ -669,19 +669,19 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function sum($column)
     {
-        return $this->executeAgregat('sum', $column);
+        return $this->aggregate('sum', $column);
     }
 
     /**
      * Internally launches queries that use aggregates.
      *
-     * @param $aggregat
+     * @param $aggregate
      * @param string $column
      * @return QueryBuilder|number|object
      */
-    private function executeAgregat($aggregat, $column)
+    private function aggregate($aggregate, $column)
     {
-        $sql = 'select ' . $aggregat . '(`' . $column . '`) from `' . $this->table . '`';
+        $sql = 'select ' . $aggregate . '(`' . $column . '`) from `' . $this->table . '`';
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
@@ -694,8 +694,8 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
             $this->group = null;
 
-            if (!isNull($this->havin)) {
-                $sql .= ' having ' . $this->havin;
+            if (!isNull($this->having)) {
+                $sql .= ' having ' . $this->having;
             }
         }
 
@@ -787,8 +787,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         $this->where_data_binding = $whereData;
 
-        return $this->jump($c - 1)
-            ->take(1)->first();
+        return $this->jump($c - 1)->take(1)->first();
     }
 
     /**
@@ -797,7 +796,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param  callable $cb
      * @return QueryBuilder
      */
-    public function transition(callable $cb)
+    public function transaction(callable $cb)
     {
         $where = $this->where;
 
@@ -1087,14 +1086,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
     }
 
     /**
-     * IsComporaisonOperator utility, allows to validate an operator
+     * Utility, allows to validate an operator
      *
      * @param string $comp
      * @return bool
      */
-    private static function isComporaisonOperator($comp)
+    private static function isComparisonOperator($comp)
     {
-        return in_array($comp, ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'like'], true);
+        return in_array(Str::upper($comp), ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT'], true);
     }
 
     /**
@@ -1130,7 +1129,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
         $data = $this->jump($jump)
             ->take($n)->get();
 
-        // Reinitialization of where
+        // Reinitialisation of where
         $this->where = $where;
 
         $this->where_data_binding = $dataBind;
@@ -1194,7 +1193,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
     }
 
     /**
-     * Transformation automaticly the result to JSON
+     * Transformation automatically the result to JSON
      *
      * @param int $option
      * @return string
@@ -1256,8 +1255,8 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
             $this->group = null;
 
-            if (!is_null($this->havin)) {
-                $sql .= ' having ' . $this->havin;
+            if (!is_null($this->having)) {
+                $sql .= ' having ' . $this->having;
             }
         }
 
@@ -1304,7 +1303,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function setTable($table)
     {
-        $this->table = $table;
+        $this->table = $this->getPrefix().$table;
 
         return $this;
     }
