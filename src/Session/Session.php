@@ -294,16 +294,20 @@ class Session implements CollectionInterface
         $value = $cache[$key] ?? null;
 
         if (!is_null($value)) {
-            return true;
+            return count((array) $value) > 0;
         }
 
         $value = $flash[$key] ?? null;
         
         if (!is_null($value)) {
-            return true;
+            return count((array) $value) > 0;
         }
 
-        return isset($_SESSION[$key]) && !is_null($_SESSION[$key]);
+        if (isset($_SESSION[$key]) && !is_null($_SESSION[$key])) {
+            return count((array) $_SESSION[$key]) > 0;
+        }
+        
+        return false;
     }
 
     /**

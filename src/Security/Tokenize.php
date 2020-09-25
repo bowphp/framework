@@ -22,7 +22,7 @@ class Tokenize
      */
     public static function makeCsrfToken($time = null)
     {
-        if (Session::getInstance()->has('__bow.csrf')) {
+        if (Session::getInstance()->has('__bow.csrf', true)) {
             return true;
         }
 
