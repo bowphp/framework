@@ -2,6 +2,7 @@
 
 namespace Bow\Http;
 
+use Bow\Auth\Authentication;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 use Bow\Support\Str;
@@ -133,10 +134,6 @@ class Request
      */
     public function origin()
     {
-        if (!isset($_SERVER['REQUEST_SCHEME'])) {
-            return 'http://' . $this->hostname();
-        }
-
         return $this->scheme().'://'.$this->hostname();
     }
 
@@ -357,7 +354,7 @@ class Request
      */
     public function referer()
     {
-        return isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/';
+        return $_SERVER['HTTP_REFERER'] ?? '/';
     }
 
     /**
@@ -470,6 +467,17 @@ class Request
     }
 
     /**
+     * Get auth user information
+     *
+     * @param string|null $guard
+     * @return Authentication|null
+     */
+    public function user($guard = null)
+    {
+        return auth($guard)->user();
+    }
+
+    /**
      * Get cookie
      *
      * @param string $property
@@ -483,13 +491,19 @@ class Request
     /**
      * Retrieve a value or a collection of values.
      *
-     * @param  string $key     =null
-     * @param  mixed  $default =false
+     * @param  string $key
+     * @param  mixed  $default
      * @return mixed
      */
     public function get($key, $default = null)
     {
-        return $this->input[$key] ?? $default;
+        $value = $this->input[$key] ?? $default;
+
+        if (is_callable($value)) {
+            return $value();
+        }
+
+        return $value;
     }
 
     /**

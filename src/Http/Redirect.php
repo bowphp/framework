@@ -3,6 +3,7 @@
 namespace Bow\Http;
 
 use Bow\Contracts\ResponseInterface;
+use Bow\Session\Session;
 
 class Redirect implements ResponseInterface
 {
@@ -73,6 +74,20 @@ class Redirect implements ResponseInterface
         } else {
             $this->request->session()->add('__bow.old', $data);
         }
+
+        return $this;
+    }
+
+    /**
+     * Redirection with define flash information
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return Redirect
+     */
+    public function withFlash($key, $value)
+    {
+        Session::getInstance()->flash($key, $value);
 
         return $this;
     }
