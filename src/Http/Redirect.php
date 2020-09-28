@@ -87,7 +87,7 @@ class Redirect implements ResponseInterface
      */
     public function withFlash($key, $value)
     {
-        Session::getInstance()->flash($key, $value);
+        $this->request->session()->flash($key, $value);
 
         return $this;
     }
