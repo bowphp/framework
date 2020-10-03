@@ -55,12 +55,14 @@ class BelongsTo extends Relation
      */
     public function addConstraints()
     {
-        if (static::$has_constraints) {
-            // For belongs to relationships, which are essentially the inverse of has one
-            // or has many relationships, we need to actually query on the primary key
-            // of the related models matching on the foreign key that's on a parent.
-            $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
-            $this->query->where($this->local_key, '=', $foreign_key_value);
+        if (!static::$has_constraints) {
+            return;
         }
+
+        // For belongs to relationships, which are essentially the inverse of has one
+        // or has many relationships, we need to actually query on the primary key
+        // of the related models matching on the foreign key that's on a parent.
+        $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
+        $this->query->where($this->local_key, '=', $foreign_key_value);
     }
 }

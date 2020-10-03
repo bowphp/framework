@@ -147,6 +147,10 @@ class Cache
         if (!static::has($key)) {
             static::$with_meta = false;
 
+            if (is_callable($default)) {
+                return $default();
+            }
+            
             return $default;
         }
 
