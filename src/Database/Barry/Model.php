@@ -752,7 +752,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.', E_ERROR
+            'method '.$name.' is not defined.',
+            E_ERROR
         );
     }
 
@@ -772,7 +773,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.', E_ERROR
+            'method '.$name.' is not defined.',
+            E_ERROR
         );
     }
 }
