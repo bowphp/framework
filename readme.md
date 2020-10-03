@@ -7,7 +7,7 @@
 
 For use this package, please create an application from this package [bowphp/app](https://github.com/bowphp/app)
 
-## The Framework Main Feacture
+## The Framework Main Feature
 
 - Full Featured database classes with support for several platforms.
 - Query Builder Database Support
@@ -15,7 +15,7 @@ For use this package, please create an application from this package [bowphp/app
 - Security and XSS Filtering
 - Data Encryption
 - Session Management
-- Controller Revoler
+- Controller Revolver
 - Middleware Support
 - Small and Robust Routing
 - File Uploading Class
@@ -25,16 +25,15 @@ For use this package, please create an application from this package [bowphp/app
 - Application logs Management
 - Database Connection (MySQL and SQLite)
 - Simplest ORM which name Barry
-- Cache support (Only filesysteme caching)
+- Cache support (Only filesystem caching)
 - Event Management (Interpage Event)
-- Emailing (STMP, SES, Native PHP mail supports)
+- Emailing (SMTP, SES, Native PHP mail supports)
 - Task runner (Which help you to generate the controller and match more)
 - Unit Testing Support
-- Data validation support
 - View Rendering with [bowphp/tintin](https://github.com/bowphp/tintin) package (Tintin is the very small php template)
 - Very easy Translate Management
 - Many helpers
-- The native authentification system
+- The native authentication system
 
 ## Contributing
 
