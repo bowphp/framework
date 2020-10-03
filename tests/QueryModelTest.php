@@ -157,4 +157,26 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNull($pet);
     }
+
+    /**
+     * @depends testGetConnection
+     * @param Database $db
+     */
+    public function testFindBy(Bow\Database\Database $db)
+    {
+        $pet = Pets::findBy('id', 1);
+
+        $this->assertEquals($pet->count(), 1);
+    }
+
+    /**
+     * @depends testGetConnection
+     * @param Database $db
+     */
+    public function testFindByEmpty(Bow\Database\Database $db)
+    {
+        $pet = Pets::findBy('id', 100);
+
+        $this->assertEquals($pet->count(), 0);
+    }
 }

@@ -5,13 +5,15 @@ namespace Bow\Database\Barry;
 use Bow\Database\Collection;
 use Bow\Database\Database as DB;
 use Bow\Database\Exception\NotFoundException;
+use Bow\Database\Barry\Concerns\Relationship;
+use Bow\Database\Barry\Traits\EventTrait;
+use Bow\Database\Barry\Traits\ArrayAccessTrait;
 use Bow\Support\Str;
 use Carbon\Carbon;
-use Bow\Database\Barry\Concerns\Relationship;
 
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
-    use Relationship;
+    use Relationship, EventTrait, ArrayAccessTrait;
 
     /**
      * The hidden field
@@ -137,10 +139,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $static = static::query();
 
         if (count($columns) > 0) {
-            $static->select($columns);
+            $model->select($columns);
         }
 
-        return $static->get();
+        return $model->get();
     }
 
     /**
@@ -176,19 +178,33 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $id = (array) $id;
 
-        $static = new static();
+        $model = new static();
 
-        $static->select($select);
-
-        $static->whereIn($static->primary_key, $id);
+        $model->select($select);
+        $model->whereIn($model->primary_key, $id);
 
         if (count($id) != 1) {
-            return $static->get();
+            return $model->get();
         }
 
-        $result = $static->first();
+        $result = $model->first();
 
         return $result;
+    }
+
+    /**
+     * Find by column name
+     *
+     * @param string $column
+     * @param mixed $value
+     * @return Collection|null
+     */
+    public function findBy($column, $value)
+    {
+        $model = new static();
+        $model->whereIn($column, $id);
+
+        return $model->get();
     }
 
     /**
@@ -213,7 +229,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $data = static::find($id, $select);
 
-        static::$builder->delete();
+        static::$model->delete();
 
         return $data;
     }
@@ -246,35 +262,35 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function create(array $data)
     {
-        $static = new static();
+        $model = new static();
 
-        if ($static->timestamps) {
+        if ($model->timestamps) {
             $data = array_merge($data, [
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
         }
 
-        if (!array_key_exists($static->primary_key, $data)) {
-            if ($static->auto_increment) {
-                $id_value = [$static->primary_key => null];
+        if (!array_key_exists($model->primary_key, $data)) {
+            if ($model->auto_increment) {
+                $id_value = [$model->primary_key => null];
 
                 $data = array_merge($id_value, $data);
             } else {
-                if ($static->primary_key_type == 'string') {
+                if ($model->primary_key_type == 'string') {
                     $data = array_merge([
-                        $static->primary_key => ''
+                        $model->primary_key => ''
                     ], $data);
                 }
             }
         }
 
-        $static->setAttributes($data);
+        $model->setAttributes($data);
 
-        $r = $static->save();
+        $r = $model->save();
 
         if ($r == 1) {
-            $static->fireEvent('oncreated');
+            $model->fireEvent('oncreated');
         }
 
         return $static;
@@ -286,7 +302,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param int $n
      * @param int $current
      * @param int $chunk
-     *
      * @return Collection
      */
     public static function paginate($n, $current = 0, $chunk = null)
@@ -342,7 +357,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function query()
     {
         if (static::$builder instanceof Builder) {
-            if (static::$builder->getModel() == static::class) {
+            if (static::$model->getModel() == static::class) {
                 return static::$builder;
             }
         }
@@ -376,9 +391,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         static::$builder = new Builder($table, DB::getPdo());
 
-        static::$builder->setPrefix($prefix);
+        static::$model->setPrefix($prefix);
 
-        static::$builder->setModel(static::class);
+        static::$model->setModel(static::class);
 
         return static::$builder;
     }
@@ -408,14 +423,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Save aliase on insert action
+     * Save aliases on insert action
      *
      * @return int
      * @throws
      */
     public function save()
     {
-        $builder = static::query();
+        $model = static::query();
 
         /**
          * Get the current primary key value
@@ -430,12 +445,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             /**
              * Insert information in the database
              */
-            $r = $builder->insert($this->attributes);
+            $r = $model->insert($this->attributes);
 
             /**
              * We get a last insertion id value
              */
-            $primary_key_value = $builder->getLastInsertId();
+            $primary_key_value = $model->getLastInsertId();
 
             /**
              * Transtype value to the define primary key type
@@ -464,7 +479,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return $r;
         }
 
-        if (!$builder->exists($this->primary_key, $primary_key_value)) {
+        if (!$model->exists($this->primary_key, $primary_key_value)) {
             return 0;
         }
 
@@ -505,25 +520,43 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $primary_key_value = $this->getKeyValue();
 
-        $builder = static::query();
+        $model = static::query();
 
         if ($primary_key_value == null) {
             return 0;
         }
 
-        if (!$builder->exists($this->primary_key, $primary_key_value)) {
+        if (!$model->exists($this->primary_key, $primary_key_value)) {
             return 0;
         }
 
-        $r = $builder
-            ->where($this->primary_key, $primary_key_value)
-            ->delete();
+        $deleted = $model->where($this->primary_key, $primary_key_value)
+                        ->delete();
 
-        if ($r == 1) {
+        if ($deleted) {
             $this->fireEvent('ondeleted');
         }
 
-        return $r;
+        return $deleted;
+    }
+
+    /**
+     * Delete Active Record
+     *
+     * @param string $column
+     * @param mixed $value
+     * @return int
+     */
+    public function deleteBy($column, $value)
+    {
+        $model = static::query();
+        $deleted = $model->where($column, $value)->delete();
+
+        if ($deleted) {
+            $this->fireEvent('ondeleted');
+        }
+
+        return $deleted;
     }
 
     /**
@@ -540,31 +573,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->setAttribute('updated_at', date('Y-m-d H:i:s'));
 
         return (bool) $this->save();
-    }
-
-    /**
-     * Get event name
-     *
-     * @param string $event
-     * @return mixed
-     */
-    private static function formatEventName($event)
-    {
-        return str_replace('\\', '.', strtolower(static::class)).'.'.$event;
-    }
-
-    /**
-     * Fire event
-     *
-     * @param string $event
-     */
-    private function fireEvent($event)
-    {
-        $env = $this->formatEventName($event);
-
-        if (emitter()->bound($env)) {
-            emitter()->emit($env, $this);
-        }
     }
 
     /**
@@ -598,7 +606,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $this->connexion = $connexion;
 
-        $builder = static::query();
+        $model = static::query();
 
         return $builder;
     }
@@ -675,63 +683,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * _offsetSet
-     *
-     * @param mixed $offset
-     * @param mixed $value
-     *
-     * @see http://php.net/manual/fr/class.arrayaccess.php
-     */
-    public function offsetSet($offset, $value)
-    {
-        if (is_null($offset)) {
-            $this->attributes[] = $value;
-        } else {
-            $this->attributes[$offset] = $value;
-        }
-    }
-
-    /**
-     * _offsetExists
-     *
-     * @param mixed $offset
-     * @see http://php.net/manual/fr/class.arrayaccess.php
-     *
-     * @return bool
-     */
-    public function offsetExists($offset)
-    {
-        return isset($this->attributes[$offset]);
-    }
-
-    /**
-     * _offsetUnset
-     *
-     * @param mixed $offset
-     *
-     * @see http://php.net/manual/fr/class.arrayaccess.php
-     */
-    public function offsetUnset($offset)
-    {
-        unset($this->attributes[$offset]);
-    }
-
-    /**
-     * _offsetGet
-     *
-     * @param mixed $offset
-     * @return mixed|null
-     *
-     * @see http://php.net/manual/fr/class.arrayaccess.php
-     */
-    public function offsetGet($offset)
-    {
-        return isset($this->attributes[$offset])
-            ? $this->attributes[$offset]
-            : null;
-    }
-
-    /**
      * @inheritDoc
      */
     public function jsonSerialize()
@@ -794,15 +745,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __call($name, $arguments)
     {
-        $builder = static::query();
+        $model = static::query();
 
         if (method_exists($builder, $name)) {
             return call_user_func_array([$builder, $name], $arguments);
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.',
-            E_ERROR
+            'method '.$name.' is not defined.', E_ERROR
         );
     }
 
@@ -815,15 +765,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function __callStatic($name, $arguments)
     {
-        $builder = static::query();
+        $model = static::query();
 
         if (method_exists($builder, $name)) {
             return call_user_func_array([$builder, $name], $arguments);
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.',
-            E_ERROR
+            'method '.$name.' is not defined.', E_ERROR
         );
     }
 }
