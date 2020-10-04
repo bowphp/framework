@@ -12,7 +12,7 @@ class Tokenize
      *
      * @static int
      */
-    private static $expirate_at;
+    private static $expire_at;
 
     /**
      * Csrf token creator
@@ -27,14 +27,14 @@ class Tokenize
         }
 
         if (is_int($time)) {
-            static::$expirate_at = $time;
+            static::$expire_at = $time;
         }
 
         $token = static::make();
 
         Session::getInstance()->add('__bow.csrf', [
             'token' => $token,
-            'expirate' => time() + static::$expirate_at,
+            'expire_at' => time() + static::$expire_at,
             'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
         ]);
 
@@ -78,7 +78,7 @@ class Tokenize
      *
      * @return boolean
      */
-    public static function csrfExpirated($time = null)
+    public static function csrfExpired($time = null)
     {
         if (Session::getInstance()->has('__bow.csrf')) {
             return false;
@@ -90,7 +90,7 @@ class Tokenize
 
         $csrf = Session::getInstance()->get('__bow.csrf');
 
-        if ($csrf['expirate'] >= (int) $time) {
+        if ($csrf['expire_at'] >= (int) $time) {
             return true;
         }
 
@@ -121,7 +121,7 @@ class Tokenize
         $status = true;
 
         if ($strict) {
-            $status = $status && static::CsrfExpirated(time());
+            $status = $status && static::CsrfExpired(time());
         }
 
         return $status;

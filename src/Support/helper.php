@@ -376,16 +376,16 @@ if (!function_exists('verify_csrf')) {
     }
 }
 
-if (!function_exists('csrf_time_is_expirate')) {
+if (!function_exists('csrf_time_is_expired')) {
     /**
-     * Check if token is expirate by time
+     * Check if token is expired by time
      *
      * @param  string $time
      * @return string
      */
-    function csrf_time_is_expirate($time = null)
+    function csrf_time_is_expired($time = null)
     {
-        return Tokenize::csrfExpirated($time);
+        return Tokenize::csrfExpired($time);
     }
 }
 

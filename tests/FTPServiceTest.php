@@ -34,7 +34,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->ftp_service->setConnectionRoot();
     }
 
-    public function testUnsecureConnection()
+    public function testUnsecuredConnection()
     {
         $this->assertInstanceOf(FTPService::class, $this->ftp_service);
         $this->assertInternalType('resource', $this->ftp_service->getConnection());

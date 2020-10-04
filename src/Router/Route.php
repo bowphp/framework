@@ -9,7 +9,7 @@ use Bow\Http\Request;
 class Route
 {
     /**
-     * The callaback has launched if the url of the query has matched.
+     * The callback has launched if the url of the query has matched.
      *
      * @var callable
      */
@@ -44,7 +44,7 @@ class Route
     private $params = [];
 
     /**
-     * List of paramaters that we match
+     * List of parameters that we match
      *
      * @var array
      */
@@ -65,7 +65,7 @@ class Route
     private $config;
 
     /**
-     * Route Contructeur
+     * Route constructor
      *
      * @param string $path
      * @param callable $cb
@@ -161,7 +161,7 @@ class Route
      */
     public function call()
     {
-        // Association of parmatres at the request
+        // Association of parameters at the request
         foreach ($this->keys as $key => $value) {
             if (!isset($this->match[$key])) {
                 continue;
@@ -217,7 +217,7 @@ class Route
      *
      * @return array
      */
-    public function getParamters()
+    public function getParameters()
     {
         return $this->params;
     }
@@ -228,7 +228,7 @@ class Route
      * @param string $key
      * @return string|null
      */
-    public function getParamter($key)
+    public function getParameter($key)
     {
         return isset($this->params[$key]) ? $this->params[$key] : null;
     }
@@ -242,7 +242,7 @@ class Route
      */
     public function match($uri)
     {
-        // Normalization of the url of the nagivator.
+        // Normalization of the url of the navigator.
         if (preg_match('~(.*)/$~', $uri, $match)) {
             $uri = end($match);
         }
@@ -267,7 +267,7 @@ class Route
             }
         }
 
-        // Copie de l'url
+        // Copied of url
         $path = $uri;
 
         // In case the developer did not add of constraint on captured variables

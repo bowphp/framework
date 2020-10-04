@@ -156,7 +156,7 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * Load serivces
+     * Load services
      *
      * @return array
      */
