@@ -2,7 +2,7 @@
 
 namespace Bow\Database\Barry\Traits;
 
-class EventTrait
+trait EventTrait
 {
     /**
      * Get event name

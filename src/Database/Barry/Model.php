@@ -65,7 +65,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $attributes = [];
 
     /**
-     * The table columns listing, initilize in first query
+     * The table columns listing, initialize in first query
      *
      * @var array
      */
@@ -100,11 +100,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $table;
 
     /**
-     * The connexion name
+     * The connection name
      *
      * @var string
      */
-    protected $connexion;
+    protected $connection;
 
     /**
      * The query builder instance
@@ -199,7 +199,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $value
      * @return Collection|null
      */
-    public function findBy($column, $value)
+    public static function findBy($column, $value)
     {
         $model = new static();
         $model->whereIn($column, $id);
@@ -377,8 +377,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $table = $properties['table'];
         }
 
-        if (!is_null($properties['connexion'])) {
-            DB::connection($properties['connexion']);
+        if (!is_null($properties['connection'])) {
+            DB::connection($properties['connection']);
         }
 
         if (!is_null($properties['prefix'])) {
@@ -541,20 +541,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Delete Active Record
+     * Delete Active Record by column name
      *
      * @param string $column
      * @param mixed $value
      * @return int
      */
-    public function deleteBy($column, $value)
+    public static function deleteBy($column, $value)
     {
         $model = static::query();
         $deleted = $model->where($column, $value)->delete();
-
-        if ($deleted) {
-            $this->fireEvent('ondeleted');
-        }
 
         return $deleted;
     }
@@ -597,14 +593,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Set connexion point
+     * Set connection point
      *
-     * @param string $connexion
+     * @param string $connection
      * @return Builder
      */
-    public function setConnexion($connexion)
+    public function setConnection($connection)
     {
-        $this->connexion = $connexion;
+        $this->connection = $connection;
 
         $model = static::query();
 
@@ -640,7 +636,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     private function mutableDateAttributes()
     {
         return array_merge($this->dates, [
-            'created_at', 'updated_at', 'expired_at', 'logged_at', 'sigined_at'
+            'created_at', 'updated_at', 'expired_at', 'logged_at', 'signed_at'
         ]);
     }
 

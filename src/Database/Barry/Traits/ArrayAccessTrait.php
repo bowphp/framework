@@ -2,7 +2,7 @@
 
 namespace Bow\Database\Barry\Traits;
 
-class ArrayAccessTrait
+trait ArrayAccessTrait
 {
     /**
      * _offsetSet
