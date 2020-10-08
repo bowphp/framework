@@ -350,23 +350,28 @@ class QueryBuilder extends Tool implements \JsonSerializable
     /**
      * Join clause
      *
-     * @param string   $table
-     * @param callable $callable
+     * @param string  $table
+     * @param string $first
+     * @param string $comp
+     * @param string $second
      * @return QueryBuilder
      */
-    public function join($table, callable $callable = null)
+    public function join($table, $first, $comp = '=', $second = null)
     {
         $table = $this->getPrefix().$table;
 
         if (is_null($this->join)) {
-            $this->join = 'inner join `'.$table.'`';
+            $this->join = '';
         } else {
-            $this->join .= ', `'.$table.'`';
+            $this->join .= ' ';
         }
 
-        if (is_callable($callable)) {
-            $callable($this);
+        if (!$this->isComparisonOperator($comp)) {
+            $second = $comp;
+            $comp = '=';
         }
+
+        $this->join .= 'inner join `'.$table.'` on ' . $first . ' ' . $comp . ' ' . $second;
 
         return $this;
     }
@@ -375,76 +380,60 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Left Join clause
      *
      * @param string $table
-     * @param callable $callable
+     * @param string $first
+     * @param string $comp
+     * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function leftJoin($table, callable $callable = null)
+    public function leftJoin($table, $first, $comp = '=', $second = null)
     {
         $table = $this->getPrefix().$table;
 
         if (is_null($this->join)) {
-            $this->join = 'left join `'.$table.'`';
-
-            if (is_callable($callable)) {
-                $callable($this);
-            }
-
-            return $this;
+            $this->join = '';
+        } else {
+            $this->join .= ' ';
         }
 
-        if (!preg_match('/^(inner|right)\sjoin\s.*/', $this->join)) {
-            $this->join .= ', `'.$table.'`';
-
-            if (is_callable($callable)) {
-                $callable($this);
-            }
-
-            return $this;
+        if (!$this->isComparisonOperator($comp)) {
+            $second = $comp;
+            $comp = '=';
         }
 
-        throw new QueryBuilderException(
-            'The inner join clause is already in effect.',
-            E_ERROR
-        );
+        $this->join .= 'left join `'.$table.'` on ' . $first . ' ' . $comp . ' ' . $second . ' ';
+
+        return $this;
     }
 
     /**
      * Right Join clause
      *
      * @param string $table
-     * @param callable $callable
+     * @param string $first
+     * @param string $comp
+     * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function rightJoin($table, callable $callable)
+    public function rightJoin($table, $first, $comp = '=', $second = null)
     {
         $table = $this->getPrefix().$table;
 
         if (is_null($this->join)) {
-            $this->join = 'right join `'.$table.'`';
-
-            if (is_callable($callable)) {
-                $callable($this);
-            }
-
-            return $this;
+            $this->join = '';
+        } else {
+            $this->join .= ' ';
         }
 
-        if (!preg_match('/^(inner|left)\sjoin\s.*/', $this->join)) {
-            $this->join .= ', `'.$table.'`';
-
-            if (is_callable($callable)) {
-                $callable($this);
-            }
-
-            return $this;
+        if (!$this->isComparisonOperator($comp)) {
+            $second = $comp;
+            $comp = '=';
         }
 
-        throw new QueryBuilderException(
-            'The inner join clause is already initialized.',
-            E_ERROR
-        );
+        $this->join .= 'right join `'.$table.'` on ' . $first . ' ' . $comp . ' ' . $second;
+
+        return $this;
     }
 
     /**
@@ -457,7 +446,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function on($first, $comp = '=', $second = null)
+    public function andOn($first, $comp = '=', $second = null)
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException(
@@ -468,21 +457,10 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (!$this->isComparisonOperator($comp)) {
             $second = $comp;
+            $comp = '=';
         }
 
-        if (count(explode('.', $first)) == 2) {
-            $first = $this->getPrefix().$first;
-        }
-
-        if (count(explode('.', $second)) == 2) {
-            $second = $this->getPrefix().$second;
-        }
-
-        if (!preg_match('/on/i', $this->join)) {
-            $this->join .= ' on `' . $first . '` ' . $comp . ' `' . $second . '`';
-        } else {
-            $this->join .= ' and `' . $first . '` ' . $comp . ' `' . $second . '`';
-        }
+        $this->join .= ' and ' . $first . ' ' . $comp . ' ' . $second;
 
         return $this;
     }
@@ -508,24 +486,10 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (!$this->isComparisonOperator($comp)) {
             $second = $comp;
+            $comp = '=';
         }
 
-        if (!preg_match('/on/i', $this->join)) {
-            throw new QueryBuilderException(
-                'The <b> on </ b> clause is not initialized',
-                E_ERROR
-            );
-        }
-
-        if (count(explode('.', $first)) == 2) {
-            $first = $this->getPrefix().$first;
-        }
-
-        if (count(explode('.', $second)) == 2) {
-            $second = $this->getPrefix().$second;
-        }
-
-        $this->join .= ' or `'.$first.'` '.$comp.' '.$second;
+        $this->join .= ' or ' . $first . ' ' . $comp . ' ' . $second;
 
         return $this;
     }
