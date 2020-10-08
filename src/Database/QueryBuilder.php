@@ -114,9 +114,10 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * SELECT $column | SELECT column1, column2, ...
      *
      * @param array $select
+     * @param bool $protected
      * @return QueryBuilder
      */
-    public function select(array $select = ['*'])
+    public function select(array $select = ['*'], $protected = false)
     {
         if (count($select) == 0) {
             return $this;
@@ -124,8 +125,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (count($select) == 1 && $select[0] == '*') {
             $this->select = '*';
-        } else {
+
+            return $this;
+        }
+        
+        if ($protected) {
             $this->select = '`' . implode('`, `', $select) . '`';
+        } else {
+            $this->select = implode(', ', $select);
         }
 
         return $this;
