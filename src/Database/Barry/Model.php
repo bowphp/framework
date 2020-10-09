@@ -728,7 +728,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __toString()
     {
-        return json_encode($this->attributes);
+        return $this->toJson();
     }
 
     /**
