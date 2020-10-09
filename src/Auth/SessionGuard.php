@@ -43,7 +43,7 @@ class SessionGuard extends GuardContract
             return false;
         }
 
-        if (Hash::check($password, $user->$fields['password'])) {
+        if (Hash::check($password, $user->{$fields['password']})) {
             $this->getSession()->put('_auth', $user);
             return true;
         }
