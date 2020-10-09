@@ -682,7 +682,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return $this->attributes;
+        $data = [];
+
+        foreach ($this->attributes as $key => $value) {
+            if (!in_array($key, $this->hidden)) {
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
     }
 
     /**
