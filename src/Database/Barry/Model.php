@@ -201,7 +201,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function findBy($column, $value)
     {
         $model = new static;
-        $model->whereIn($column, $id);
+        $model->whereIn($column, $value);
 
         return $model->get();
     }
@@ -292,7 +292,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $model->fireEvent('oncreated');
         }
 
-        return $static;
+        return $model;
     }
 
     /**
