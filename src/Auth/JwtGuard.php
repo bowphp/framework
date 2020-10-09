@@ -147,7 +147,7 @@ class JwtGuard extends GuardContract
 
         $result = $this->getPolicier()->decode($this->token);
 
-        if (!isset($result['claims']['email'], $result['claims']['id'], $result['claims']['logged'])) {
+        if (!isset($result['claims']['id'], $result['claims']['logged'])) {
             throw new AuthenticateException('The token payload malformed.');
         }
 
