@@ -136,7 +136,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function all($columns = [])
     {
-        $static = static::query();
+        $model = static::query();
 
         if (count($columns) > 0) {
             $model->select($columns);
@@ -498,7 +498,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $update_data = $this->original;
         }
 
-        $r = $builder
+        $r = $model
             ->where($this->primary_key, $primary_key_value)
             ->update($update_data);
 
@@ -750,8 +750,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $model = static::query();
 
-        if (method_exists($builder, $name)) {
-            return call_user_func_array([$builder, $name], $arguments);
+        if (method_exists($model, $name)) {
+            return call_user_func_array([$model, $name], $arguments);
         }
 
         throw new \BadMethodCallException(
@@ -771,8 +771,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $model = static::query();
 
-        if (method_exists($builder, $name)) {
-            return call_user_func_array([$builder, $name], $arguments);
+        if (method_exists($model, $name)) {
+            return call_user_func_array([$model, $name], $arguments);
         }
 
         throw new \BadMethodCallException(
