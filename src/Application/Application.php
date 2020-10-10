@@ -232,7 +232,7 @@ class Application extends Router
             return $this->sendResponse($response, 404);
         }
 
-        if (is_string($this->config['view.404'])) {
+        if (is_string($this->config['view.404']) && file_exists($this->config['view.404'])) {
             $view = $this->container('view');
             $response = $this->container('view')->parse($this->config['view.404']);
 
@@ -240,8 +240,7 @@ class Application extends Router
         }
 
         throw new RouterException(
-            sprintf('Route "%s" not found', $this->request->path()),
-            E_ERROR
+            sprintf('Route "%s" not found', $this->request->path())
         );
     }
 

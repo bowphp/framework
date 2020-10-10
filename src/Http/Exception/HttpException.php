@@ -11,7 +11,7 @@ class HttpException extends Exception
      *
      * @var string
      */
-    private $status = 'OK';
+    protected $status = 'OK';
 
     /**
      * HttpException constructor
