@@ -30,7 +30,7 @@ class CsrfMiddleware
 
             response()->status(401);
 
-            return response()->send('unauthorize.');
+            throw new TokenMismatch('Token Mismatch');
         }
 
         if ($request->get('_token') == $request->session()->get('_token')) {
