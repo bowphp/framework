@@ -298,14 +298,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Pagination configuration
      *
-     * @param int $n
+     * @param int $page_number
      * @param int $current
      * @param int $chunk
      * @return Collection
      */
-    public static function paginate($n, $current = 0, $chunk = null)
+    public static function paginate($page_number, $current = 0, $chunk = null)
     {
-        return static::query()->paginate($n, $current, $chunk);
+        return static::query()->paginate($page_number, $current, $chunk);
     }
 
     /**
@@ -573,22 +573,22 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Assign values to class attributes
      *
-     * @param array $data
+     * @param array $attributes
      */
-    public function setAttributes(array $data)
+    public function setAttributes(array $attributes)
     {
-        $this->attributes = $data;
+        $this->attributes = $attributes;
     }
 
     /**
      * Assign a value
      *
      * @param string $key
-     * @param string $data
+     * @param string $value
      */
-    public function setAttribute($key, $data)
+    public function setAttribute($key, $value)
     {
-        $this->attributes[$key] = $data;
+        $this->attributes[$key] = $value;
     }
 
     /**
@@ -601,7 +601,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $this->connection = $connection;
 
-        $model = static::query();
+        $builder = static::query();
 
         return $builder;
     }
@@ -619,12 +619,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Allows you to recover an attribute
      *
-     * @param  string $name
+     * @param  string $key
      * @return mixed|null
      */
-    public function getAttribute($name)
+    public function getAttribute($key)
     {
-        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
+        return $this->attributes[$key] ?? null;
     }
 
     /**
@@ -701,13 +701,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __get($name)
     {
-        $attributeExists = isset($this->attributes[$name]);
+        $attribute_exists = isset($this->attributes[$name]);
 
-        if (!$attributeExists && method_exists($this, $name)) {
+        if (!$attribute_exists && method_exists($this, $name)) {
             return $this->$name()->getResults();
         }
 
-        if (!$attributeExists) {
+        if (!$attribute_exists) {
             return null;
         }
 
