@@ -2,9 +2,9 @@
 
 namespace Bow\Http;
 
-use Bow\Http\Exception\AccessControlException;
+use Bow\Http\Exception\ServerAccessControlException;
 
-class AccessControl
+class ServerAccessControl
 {
     /**
      * The instance of Response
@@ -51,7 +51,7 @@ class AccessControl
     public function allowOrigin(array $excepted)
     {
         if (!is_array($excepted)) {
-            throw new AccessControlException(
+            throw new ServerAccessControlException(
                 'Waiting for a data table.' . gettype($excepted) . ' given.',
                 E_USER_ERROR
             );
@@ -68,12 +68,12 @@ class AccessControl
      *
      * @param  array $excepted
      * @return AccessControl
-     * @throws AccessControlException
+     * @throws ServerAccessControlException
      */
     public function allowMethods(array $excepted)
     {
         if (count($excepted) == 0) {
-            throw new AccessControlException(
+            throw new ServerAccessControlException(
                 'The list is empty.',
                 E_USER_ERROR
             );
@@ -87,12 +87,12 @@ class AccessControl
      *
      * @param  array $excepted
      * @return AccessControl
-     * @throws AccessControlException
+     * @throws ServerAccessControlException
      */
     public function allowHeaders(array $excepted)
     {
         if (count($excepted) == 0) {
-            throw new AccessControlException('The list is empty.', E_USER_ERROR);
+            throw new ServerAccessControlException('The list is empty.', E_USER_ERROR);
         }
 
         return $this->push('Access-Control-Allow-Headers', implode(', ', $excepted));
@@ -113,12 +113,12 @@ class AccessControl
      *
      * @param  string $excepted
      * @return AccessControl
-     * @throws AccessControlException
+     * @throws ServerAccessControlException
      */
     public function maxAge($excepted)
     {
         if (!is_numeric($excepted)) {
-            throw new AccessControlException(
+            throw new ServerAccessControlException(
                 'Parameter must be an integer',
                 E_USER_ERROR
             );
@@ -132,12 +132,12 @@ class AccessControl
      *
      * @param  array $excepted
      * @return AccessControl
-     * @throws AccessControlException
+     * @throws ServerAccessControlException
      */
     public function exposeHeaders(array $excepted)
     {
         if (count($excepted) == 0) {
-            throw new AccessControlException(
+            throw new ServerAccessControlException(
                 'The list is empty',
                 E_USER_ERROR
             );

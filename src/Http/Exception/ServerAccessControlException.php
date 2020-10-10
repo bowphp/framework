@@ -4,6 +4,6 @@ namespace Bow\Http\Exception;
 
 use ErrorException;
 
-class AccessControlException extends ErrorException
+class ServerAccessControlException extends ErrorException
 {
 }

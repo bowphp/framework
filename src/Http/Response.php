@@ -375,9 +375,9 @@ class Response implements ResponseInterface
      *
      * @return AccessControl
      */
-    public function accessControl()
+    public function serverAccessControl()
     {
-        return new AccessControl($this);
+        return new ServerAccessControl($this);
     }
 
     /**
