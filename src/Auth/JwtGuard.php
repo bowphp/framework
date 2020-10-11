@@ -2,7 +2,7 @@
 
 namespace Bow\Auth;
 
-use Bow\Auth\Exception\AuthenticateException;
+use Bow\Auth\Exception\AuthenticationException;
 use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
 use Policier\Policier;
@@ -33,7 +33,7 @@ class JwtGuard extends GuardContract
     public function __construct(array $provider)
     {
         if (!class_exists(Policier::class)) {
-            throw new AuthenticateException('Please install bowphp/policier package.');
+            throw new AuthenticationException('Please install bowphp/policier package.');
         }
 
         $this->provider = $provider;
@@ -140,15 +140,17 @@ class JwtGuard extends GuardContract
     public function user()
     {
         if (is_null($this->token)) {
-            throw new AuthenticateException(
-                'The token is undefined please generate some one when your log user.'
-            );
+            if (!$this->check()) {
+                throw new AuthenticationException(
+                    'The token is undefined please generate some one when your log user.'
+                );
+            }
         }
 
         $result = $this->getPolicier()->decode($this->token);
 
         if (!isset($result['claims']['id'], $result['claims']['logged'])) {
-            throw new AuthenticateException('The token payload malformed.');
+            throw new AuthenticationException('The token payload malformed.');
         }
 
         $user = new $this->provider['model'];
