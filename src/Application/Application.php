@@ -227,7 +227,7 @@ class Application extends Router
         $this->response->status(404);
 
         if (array_key_exists(404, $this->error_code)) {
-            $response = Actionner::execute($this->error_code[404], []);
+            $response = Actionner::getInstance()->execute($this->error_code[404], []);
 
             return $this->sendResponse($response, 404);
         }
