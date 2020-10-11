@@ -2,6 +2,8 @@
 
 namespace Bow\Database\Barry\Traits;
 
+use Bow\Database\Barry\Model;
+
 trait CanSerialized
 {
     /**
@@ -11,6 +13,10 @@ trait CanSerialized
      */
     public function __sleep()
     {
+        if ($this instanceof Model) {
+            return ['attributes' => $this->attributes];
+        }
+
         return $this->toArray();
     }
 

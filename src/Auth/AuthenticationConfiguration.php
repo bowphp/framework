@@ -5,7 +5,7 @@ namespace Bow\Auth;
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
 
-class AuthenticateConfiguration extends Configuration
+class AuthenticationConfiguration extends Configuration
 {
     /**
      * @inheritdoc
