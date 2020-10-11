@@ -697,8 +697,8 @@ class Validator
                 ->where($parts[1], $this->inputs[$key])->count();
         }
 
-        if ($count > 1) {
-            $this->last_message = $this->lexical('exists', $key);
+        if ($count >= 1) {
+            $this->last_message = $this->lexical('unique', $key);
             
             $this->fails = true;
             
