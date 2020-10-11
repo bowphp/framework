@@ -51,8 +51,8 @@ trait Relationship
     {
         $related_model = app()->make($related);
 
-        if (is_null($local_key)) {
-            $local_key = $this->getKey();
+        if (strlen($foreign_key) == 0) {
+            $foreign_key = $this->getKey();
         }
 
         if (is_null($foreign_key)) {
@@ -74,8 +74,8 @@ trait Relationship
     {
         $related_model = app()->make($related);
 
-        if (is_null($local_key)) {
-            $local_key = $this->getKey();
+        if (strlen($foreign_key) == 0) {
+            $foreign_key = $this->getKey();
         }
 
         if (is_null($foreign_key)) {
@@ -97,8 +97,8 @@ trait Relationship
     {
         $related_model = app()->make($related);
 
-        if (is_null($local_key)) {
-            $local_key = $this->getKey();
+        if (strlen($foreign_key) == 0) {
+            $foreign_key = $this->getKey();
         }
 
         if (is_null($foreign_key)) {
