@@ -4,7 +4,6 @@ namespace Bow\Configuration;
 
 use Bow\Application\Exception\ApplicationException;
 use Bow\Container\Capsule;
-use Bow\Event\Event;
 use Bow\Support\Arraydotify;
 use Bow\Support\Env;
 
