@@ -22,7 +22,7 @@ class Router
     protected $middlewares = [];
 
     /**
-     * Define the routing prefixer
+     * Define the routing prefix
      *
      * @var string
      */
@@ -45,7 +45,7 @@ class Router
      *
      * @var array
      */
-    private $routes = [];
+    protected static $routes = [];
 
     /**
      * Define the base route
@@ -134,9 +134,7 @@ class Router
         $collection = [];
 
         foreach ($middlewares as $middleware) {
-            if (is_callable($middleware)) {
-                $collection[] = $middleware;
-            } elseif (class_exists($middleware, true)) {
+            if (class_exists($middleware, true)) {
                 $collection[] = [new $middleware, 'process'];
             } else {
                 $collection[] = $middleware;
@@ -355,10 +353,10 @@ class Router
      */
     private function routeLoader($method, $path, $cb)
     {
-        $path = '/'.trim($path, '/');
-        
+        $path = '/' . trim($path, '/');
+
         // We build the original path based on the Router loader
-        $path = $this->base_route.$this->prefix.$path;
+        $path = $this->base_route . $this->prefix . $path;
 
         // We define the current route and current method
         $this->current = ['path' => $path, 'method' => $method];
@@ -368,7 +366,7 @@ class Router
 
         $route->middleware($this->middlewares);
 
-        $this->routes[$method][] = $route;
+        static::$routes[$method][] = $route;
 
         $route->middleware('trim');
 
@@ -384,7 +382,7 @@ class Router
      *
      * @return string
      */
-    public function getSpecialMethod()
+    protected function getSpecialMethod()
     {
         return $this->special_method;
     }
@@ -394,7 +392,7 @@ class Router
      *
      * @return bool
      */
-    public function hasSpecialMethod()
+    protected function hasSpecialMethod()
     {
         return !is_null($this->special_method);
     }
@@ -406,6 +404,6 @@ class Router
      */
     public function getRoutes()
     {
-        return $this->routes;
+        return static::$routes;
     }
 }
