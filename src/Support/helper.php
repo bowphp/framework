@@ -1265,7 +1265,7 @@ if (!function_exists('auth')) {
      * Recovery of the guard
      *
      * @param string $guard
-     * @return Bow\Auth\Auth
+     * @return Bow\Auth\GuardContract
      * @throws
      */
     function auth($guard = null)

@@ -64,7 +64,7 @@ class Application extends Router
      *
      * @var bool
      */
-    private $disable_x_powered_by = false;
+    private $disable_powered_by = false;
 
     /**
      * Application constructor
@@ -161,8 +161,8 @@ class Application extends Router
             return true;
         }
 
-        // We add of the X-Powered-By header when disable_x_powered_by is true
-        if (!$this->disable_x_powered_by) {
+        // We add of the X-Powered-By header when disable_powered_by is true
+        if (!$this->disable_powered_by) {
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
         }
 
@@ -227,7 +227,7 @@ class Application extends Router
         $this->response->status(404);
 
         if (array_key_exists(404, $this->error_code)) {
-            $response = Actionner::execute($this->error_code[404], []);
+            $response = Actionner::getInstance()->execute($this->error_code[404], []);
 
             return $this->sendResponse($response, 404);
         }
@@ -266,9 +266,9 @@ class Application extends Router
      *
      * @return void
      */
-    public function disableXpoweredBy()
+    public function disablePoweredByMention()
     {
-        $this->disable_x_powered_by = true;
+        $this->disable_powered_by = true;
     }
 
     /**

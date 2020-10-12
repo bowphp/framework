@@ -87,7 +87,7 @@ abstract class RequestValidation
     }
 
     /**
-     * The define the user authorisation
+     * The define the user authorization level
      *
      * @return bool
      */

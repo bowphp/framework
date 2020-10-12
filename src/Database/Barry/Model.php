@@ -746,7 +746,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param  array  $arguments
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public function __call($name, array $arguments)
     {
         $model = static::query();
 

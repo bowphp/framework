@@ -6,16 +6,6 @@ use Bow\Validation\RequestValidation as RequestValidation;
 
 class {className} extends RequestValidation
 {
-    /**
-     * Checks a user's permission
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
-
 	/**
 	 * Validation rules
 	 *
@@ -27,16 +17,4 @@ class {className} extends RequestValidation
             // Your roles here
         ];
     }
-
-	/**
-	 * List of keys to validate
-	 *
-	 * @var array
-	 */
-	protected function keys()
-	{
-        return [
-            '*'
-        ];
-	}
 }
