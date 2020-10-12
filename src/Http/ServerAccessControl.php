@@ -50,17 +50,14 @@ class ServerAccessControl
      */
     public function allowOrigin(array $excepted)
     {
-        if (!is_array($excepted)) {
+        if (count($excepted) == 0) {
             throw new ServerAccessControlException(
                 'Waiting for a data table.' . gettype($excepted) . ' given.',
                 E_USER_ERROR
             );
         }
 
-        return $this->push(
-            'Access-Control-Allow-Origin',
-            implode(', ', $excepted)
-        );
+        return $this->push('Access-Control-Allow-Origin', implode(', ', $excepted));
     }
 
     /**
