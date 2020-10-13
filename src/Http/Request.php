@@ -26,7 +26,9 @@ class Request
     private $input;
 
     /**
-     * Constructeur
+     * Request constructor
+     * 
+     * @return mixed
      */
     private function __construct()
     {
@@ -46,7 +48,7 @@ class Request
         }
 
         foreach ($this->input as $key => $value) {
-            if (strlen($value) == 0) {
+            if (!is_array($value) && strlen($value) == 0) {
                 $value = null;
             }
 
@@ -55,9 +57,9 @@ class Request
     }
 
     /**
-     * Singletion loader
+     * Singletons loader
      *
-     * @return null|self
+     * @return Request
      */
     public static function getInstance()
     {
@@ -96,10 +98,10 @@ class Request
      */
     public function path()
     {
-        $pos = strpos($_SERVER['REQUEST_URI'], '?');
+        $position = strpos($_SERVER['REQUEST_URI'], '?');
 
-        if ($pos) {
-            $uri = substr($_SERVER['REQUEST_URI'], 0, $pos);
+        if ($position) {
+            $uri = substr($_SERVER['REQUEST_URI'], 0, $position);
         } else {
             $uri = $_SERVER['REQUEST_URI'];
         }
@@ -144,7 +146,7 @@ class Request
      */
     private function scheme()
     {
-        return isset($_SERVER['REQUEST_SCHEME']) ? strtolower($_SERVER['REQUEST_SCHEME']) : 'http';
+        return strtolower($_SERVER['REQUEST_SCHEME'] ?? 'http');
     }
 
     /**
@@ -164,7 +166,7 @@ class Request
      */
     public function method()
     {
-        $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
+        $method = $_SERVER['REQUEST_METHOD'] ?? null;
 
         if ($method !== 'POST') {
             return $method;
@@ -186,11 +188,7 @@ class Request
      */
     public function isPost()
     {
-        if ($this->method() == 'POST') {
-            return true;
-        }
-
-        return false;
+        return $this->method() == 'POST';
     }
 
     /**
@@ -200,11 +198,7 @@ class Request
      */
     public function isGet()
     {
-        if ($this->method() == 'GET') {
-            return true;
-        }
-
-        return false;
+        return $this->method() == 'GET';
     }
 
     /**
@@ -214,11 +208,7 @@ class Request
      */
     public function isPut()
     {
-        if ($this->method() == 'PUT' || $this->get('_method') == 'PUT') {
-            return true;
-        }
-
-        return false;
+        return $this->method() == 'PUT' || $this->get('_method') == 'PUT';
     }
 
     /**
@@ -228,11 +218,7 @@ class Request
      */
     public function isDelete()
     {
-        if ($this->method() == 'DELETE' || $this->get('_method') == 'DELETE') {
-            return true;
-        }
-
-        return false;
+        return $this->method() == 'DELETE' || $this->get('_method') == 'DELETE';
     }
 
     /**
@@ -252,20 +238,15 @@ class Request
         }
 
         $files = $_FILES[$key];
-
         $collect = [];
-
         foreach ($files['name'] as $key => $name) {
-            $file['name'] = $name;
-
-            $file['type'] = $files['type'][$key];
-
-            $file['size'] = $files['size'][$key];
-
-            $file['error'] = $files['error'][$key];
-
-            $file['tmp_name'] = $files['tmp_name'][$key];
-
+            $file = [
+                'name' => $name,
+                'type' => $files['type'][$key],
+                'size' => $files['size'][$key],
+                'error' => $files['error'][$key],
+                'tmp_name' => $files['tmp_name'][$key],
+            ];
             $collect[] = new UploadFile($file);
         }
 
