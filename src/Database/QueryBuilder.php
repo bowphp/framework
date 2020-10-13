@@ -128,7 +128,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
             return $this;
         }
-        
+
         if ($protected) {
             $this->select = implode(', ', $select);
         } else {
@@ -164,7 +164,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (!in_array(Str::lower($boolean), ['and', 'or'])) {
             throw new QueryBuilderException(
-                'The bool '. $boolean . ' not accepted',
+                'The bool ' . $boolean . ' not accepted',
                 E_ERROR
             );
         }
@@ -172,9 +172,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
         $this->where_data_binding[] = $value;
 
         if ($this->where == null) {
-            $this->where = '('. $column . ' ' . $comp . ' ?)';
+            $this->where = '(' . $column . ' ' . $comp . ' ?)';
         } else {
-            $this->where .= ' ' . $boolean . ' ('. $column . ' '. $comp .' ?)';
+            $this->where .= ' ' . $boolean . ' (' . $column . ' ' . $comp . ' ?)';
         }
 
         return $this;
@@ -217,7 +217,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
         if (is_null($this->where)) {
             $this->where = '(' . $column . ' is null)';
         } else {
-            $this->where .= ' ' . $boolean .' (' . $column .' is null)';
+            $this->where .= ' ' . $boolean . ' (' . $column . ' is null)';
         }
 
         return $this;
@@ -235,9 +235,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function whereNotNull($column, $boolean = 'and')
     {
         if (is_null($this->where)) {
-            $this->where = '('. $column . ' is not null)';
+            $this->where = '(' . $column . ' is not null)';
         } else {
-            $this->where .= ' ' . $boolean .' (' . $column .' is not null)';
+            $this->where .= ' ' . $boolean . ' (' . $column . ' is not null)';
         }
 
         return $this;
@@ -267,15 +267,15 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
-                $this->where = '(' . $column.' not between ' . $between . ')';
+                $this->where = '(' . $column . ' not between ' . $between . ')';
             } else {
                 $this->where = '(' . $column . ' between ' . $between . ')';
             }
         } else {
             if ($boolean == 'not') {
-                $this->where .= ' and ('.$column .' not between ' . $between . ')';
+                $this->where .= ' and (' . $column . ' not between ' . $between . ')';
             } else {
-                $this->where .= ' ' . $boolean . ' (' . $column. ' between ' . $between . ')';
+                $this->where .= ' ' . $boolean . ' (' . $column . ' between ' . $between . ')';
             }
         }
 
@@ -324,15 +324,15 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
-                $this->where = '(' . $column . ' not in ('.$in.'))';
+                $this->where = '(' . $column . ' not in (' . $in . '))';
             } else {
-                $this->where = '(' . $column .' in ('.$in.'))';
+                $this->where = '(' . $column . ' in (' . $in . '))';
             }
         } else {
             if ($boolean == 'not') {
-                $this->where .= ' and (' . $column . ' not in ('.$in.'))';
+                $this->where .= ' and (' . $column . ' not in (' . $in . '))';
             } else {
-                $this->where .= ' and ('.$column.' in ('.$in.'))';
+                $this->where .= ' and (' . $column . ' in (' . $in . '))';
             }
         }
 
@@ -365,7 +365,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function join($table, $first, $comp = '=', $second = null)
     {
-        $table = $this->getPrefix().$table;
+        $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
             $this->join = '';
@@ -378,7 +378,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $comp = '=';
         }
 
-        $this->join .= 'inner join '.$table.' on ' . $first . ' ' . $comp . ' ' . $second;
+        $this->join .= 'inner join ' . $table . ' on ' . $first . ' ' . $comp . ' ' . $second;
 
         return $this;
     }
@@ -395,7 +395,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function leftJoin($table, $first, $comp = '=', $second = null)
     {
-        $table = $this->getPrefix().$table;
+        $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
             $this->join = '';
@@ -408,7 +408,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $comp = '=';
         }
 
-        $this->join .= 'left join '.$table.' on ' . $first . ' ' . $comp . ' ' . $second . ' ';
+        $this->join .= 'left join ' . $table . ' on ' . $first . ' ' . $comp . ' ' . $second . ' ';
 
         return $this;
     }
@@ -425,7 +425,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function rightJoin($table, $first, $comp = '=', $second = null)
     {
-        $table = $this->getPrefix().$table;
+        $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
             $this->join = '';
@@ -438,7 +438,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $comp = '=';
         }
 
-        $this->join .= 'right join '.$table.' on ' . $first . ' ' . $comp . ' ' . $second;
+        $this->join .= 'right join ' . $table . ' on ' . $first . ' ' . $comp . ' ' . $second;
 
         return $this;
     }
@@ -533,9 +533,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
         }
 
         if (is_null($this->having)) {
-            $this->having = ''.$column.' '.$comp.' '.$value;
+            $this->having = '' . $column . ' ' . $comp . ' ' . $value;
         } else {
-            $this->having .= ' '.$boolean.' '.$column.' '.$comp.' '.$value;
+            $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comp . ' ' . $value;
         }
 
         return $this;
@@ -550,7 +550,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function orderBy($column, $type = 'asc')
     {
-        if (! is_null($this->order)) {
+        if (!is_null($this->order)) {
             return $this;
         }
 
@@ -558,7 +558,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $type = 'asc';
         }
 
-        $this->order = 'order by '.$column.' '.$type;
+        $this->order = 'order by ' . $column . ' ' . $type;
 
         return $this;
     }
@@ -572,7 +572,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function jump($offset = 0)
     {
         if (is_null($this->limit)) {
-            $this->limit = $offset.', ';
+            $this->limit = $offset . ', ';
         }
 
         return $this;
@@ -593,7 +593,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
         }
 
         if (preg_match('/^([\d]+),\s$/', $this->limit, $match)) {
-            $this->limit = end($match).', '.$limit;
+            $this->limit = end($match) . ', ' . $limit;
         }
 
         return $this;
@@ -653,6 +653,13 @@ class QueryBuilder extends Tool implements \JsonSerializable
     private function aggregate($aggregate, $column)
     {
         $sql = 'select ' . $aggregate . '(' . $column . ') from ' . $this->table;
+
+        // Adding the join clause
+        if (!is_null($this->join)) {
+            $sql .= ' ' . $this->join;
+
+            $this->join = null;
+        }
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
@@ -714,9 +721,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
         if (!$this->first) {
             return $data;
         }
-   
+
         $current = current($data);
-        
+
         $this->first = false;
 
         if ($current == false) {
@@ -793,7 +800,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $column = $column;
         }
 
-        $sql = 'select count(' . $column . ') from ' . $this->table .'';
+        $sql = 'select count(' . $column . ') from ' . $this->table . '';
+
+        // Adding the join clause
+        if (!is_null($this->join)) {
+            $sql .= ' ' . $this->join;
+
+            $this->join = null;
+        }
 
         if ($this->where !== null) {
             $sql .= ' where ' . $this->where;
@@ -946,7 +960,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     private function incrementAction($column, $step = 1, $sign = '')
     {
-        $sql = 'update ' . $this->table . ' set '.$column.' = '.$column.' '.$sign.' '.$step;
+        $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $sign . ' ' . $step;
 
         if (!is_null($this->where)) {
             $sql .= ' ' . $this->where;
@@ -1017,9 +1031,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
         $fields = array_keys($value);
         $column = implode(', ', $fields);
 
-        $sql = 'insert into ' . $this->table . '('.$column.') values';
+        $sql = 'insert into ' . $this->table . '(' . $column . ') values';
 
-        $sql .= '('.implode(', ', Util::add2points($fields, true)).');';
+        $sql .= '(' . implode(', ', Util::add2points($fields, true)) . ');';
 
         $stmt = $this->connection->prepare($sql);
 
@@ -1088,7 +1102,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $current = 1;
         } else {
             $jump = $n * $current;
-            
+
             $current++;
         }
 
@@ -1185,7 +1199,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         // Adding the select clause
         if (is_null($this->select)) {
-            $sql .= '* from ' . $this->table .'';
+            $sql .= '* from ' . $this->table . '';
         } else {
             $sql .= $this->select . ' from ' . $this->table;
 
@@ -1231,7 +1245,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             }
         }
 
-        return $sql.';';
+        return $sql . ';';
     }
 
     /**
@@ -1274,7 +1288,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function setTable($table)
     {
-        $this->table = $this->getPrefix().$table;
+        $this->table = $this->getPrefix() . $table;
 
         return $this;
     }
