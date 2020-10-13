@@ -493,13 +493,13 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @return boolean
      */
-    public function update($key, $data, $overide = false)
+    public function update($key, $data, $override = false)
     {
         if (!$this->has($key)) {
             return false;
         }
 
-        if (!is_array($this->storage[$key]) || $overide === true) {
+        if (!is_array($this->storage[$key]) || $override === true) {
             $this->storage[$key] = $data;
 
             return true;
