@@ -117,7 +117,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param bool $protected
      * @return QueryBuilder
      */
-    public function select(array $select = ['*'], $protected = false)
+    public function select(array $select = ['*'])
     {
         if (count($select) == 0) {
             return $this;
@@ -129,11 +129,18 @@ class QueryBuilder extends Tool implements \JsonSerializable
             return $this;
         }
 
-        if ($protected) {
-            $this->select = implode(', ', $select);
-        } else {
-            $this->select = implode(', ', $select);
+        if (is_null($this->select)) {
+            $this->select = '';
         }
+
+        // Transaction Query builder to SQL for subquery
+        foreach ($select as $key => $value) {
+            if ($value instanceof QueryBuilder) {
+                $select[$key] = $value->toSql();
+            }
+        }
+
+        $this->select .= implode(', ', $select);
 
         return $this;
     }
@@ -314,12 +321,11 @@ class QueryBuilder extends Tool implements \JsonSerializable
             );
         }
 
+        $this->where_data_binding = array_merge($range, $this->where_data_binding);
+        
         $map = array_map(function () {
             return '?';
         }, $range);
-
-        $this->where_data_binding = array_merge($range, $this->where_data_binding);
-
         $in = implode(', ', $map);
 
         if (is_null($this->where)) {
