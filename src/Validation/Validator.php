@@ -56,13 +56,13 @@ class Validator
         'Email',
         'In',
         'Int',
+        'Regex',
         'Float',
-        'Exists',
-        'NotExists',
-        'Unique',
         'Date',
         'DateTime',
-        'Regex'
+        'NotExists',
+        'Unique',
+        'Exists',
     ];
 
     /**
@@ -126,6 +126,9 @@ class Validator
                 // Mask on the required rule
                 foreach ($this->rules as $rule) {
                     $this->{'compile'.$rule}($key, $masque);
+                    if ($rule == 'Required' && $this->fails) {
+                        break;
+                    }
                 }
 
                 // We clean the list of errors if the key is valid
