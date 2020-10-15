@@ -15,7 +15,7 @@ class Redirect implements ResponseInterface
     private $request;
 
     /**
-     * The redirect traget
+     * The redirect targets
      *
      * @var string
      */
