@@ -27,7 +27,7 @@ class Request
 
     /**
      * Request constructor
-     * 
+     *
      * @return mixed
      */
     private function __construct()

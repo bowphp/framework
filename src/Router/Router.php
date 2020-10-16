@@ -368,8 +368,6 @@ class Router
 
         static::$routes[$method][] = $route;
 
-        $route->middleware('trim');
-
         if (in_array($method, ['POST', 'DELETE', 'PUT'])) {
             $route->middleware('csrf');
         }
