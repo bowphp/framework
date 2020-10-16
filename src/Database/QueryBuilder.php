@@ -843,14 +843,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function update(array $data = [])
     {
         $sql = 'update ' . $this->table . ' set ';
-        $sql .= Util::rangeField(Util::add2points(array_keys($data)));
+        $sql .= implode(' = ?, ', array_keys($data)) . ' = ?';
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
 
             $this->where = null;
 
-            $data = array_merge($data, $this->where_data_binding);
+            $data = array_merge(array_values($data), $this->where_data_binding);
 
             $this->where_data_binding = [];
         }
