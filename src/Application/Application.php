@@ -73,7 +73,7 @@ class Application extends Router
      * @param Response $response
      * @return void
      */
-    private function __construct(Request $request, Response $response)
+    protected function __construct(Request $request, Response $response)
     {
         $this->request = $request;
 
