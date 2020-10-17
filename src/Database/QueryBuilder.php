@@ -176,12 +176,17 @@ class QueryBuilder extends Tool implements \JsonSerializable
             );
         }
 
-        $this->where_data_binding[] = $value;
+        if ($value instanceof QueryBuilder) {
+            $indicator = "(".$value->toSql().")";
+        } else {
+            $indicator = "?";
+            $this->where_data_binding[] = $value;
+        }
 
         if ($this->where == null) {
-            $this->where = '(' . $column . ' ' . $comp . ' ?)';
+            $this->where = '(' . $column . ' ' . $comp . ' '.$indicator.')';
         } else {
-            $this->where .= ' ' . $boolean . ' (' . $column . ' ' . $comp . ' ?)';
+            $this->where .= ' ' . $boolean . ' (' . $column . ' ' . $comp . ' '.$indicator.')';
         }
 
         return $this;
@@ -261,15 +266,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function whereBetween($column, array $range, $boolean = 'and')
+    public function whereBetween($column, $range, $boolean = 'and')
     {
-        if (count($range) !== 2) {
-            throw new QueryBuilderException(
-                'Parameter 2 must be contains two values.',
-                E_ERROR
-            );
-        }
-
+        $range = (array) $range;
         $between = implode(' and ', $range);
 
         if (is_null($this->where)) {
@@ -296,7 +295,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param array $range
      * @return QueryBuilder
      */
-    public function whereNotBetween($column, array $range)
+    public function whereNotBetween($column, $range)
     {
         $this->whereBetween($column, $range, 'not');
 
@@ -312,21 +311,23 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function whereIn($column, array $range, $boolean = 'and')
+    public function whereIn($column, $range, $boolean = 'and')
     {
-        if (count($range) == 0) {
-            throw new QueryBuilderException(
-                'Parameter 2 must be contains two values',
-                E_ERROR
-            );
+        if ($range instanceof QueryBuilder) {
+            $range = "(".$range->toSql().")";
         }
 
-        $this->where_data_binding = array_merge($range, $this->where_data_binding);
-        
-        $map = array_map(function () {
-            return '?';
-        }, $range);
-        $in = implode(', ', $map);
+        if (!is_string($range)) {
+            $range = (array) $range;
+            $this->where_data_binding = array_merge($range, $this->where_data_binding);
+
+            $map = array_map(function () {
+                return '?';
+            }, $range);
+            $in = implode(', ', $map);
+        } else {
+            $in = $range;
+        }
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
@@ -353,7 +354,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function whereNotIn($column, array $range)
+    public function whereNotIn($column, $range)
     {
         $this->whereIn($column, $range, 'not');
 
@@ -539,7 +540,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
         }
 
         if (is_null($this->having)) {
-            $this->having = '' . $column . ' ' . $comp . ' ' . $value;
+            $this->having = $column . ' ' . $comp . ' ' . $value;
         } else {
             $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comp . ' ' . $value;
         }
@@ -556,15 +557,15 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function orderBy($column, $type = 'asc')
     {
-        if (!is_null($this->order)) {
-            return $this;
-        }
-
         if (!in_array($type, ['asc', 'desc'])) {
             $type = 'asc';
         }
 
-        $this->order = 'order by ' . $column . ' ' . $type;
+        if (is_null($this->order)) {
+            $this->order = 'order by ' . $column . ' ' . strtolower($type);
+        } else {
+            $this->order .= ', ' . $column . ' ' . strtolower($type);
+        }
 
         return $this;
     }
@@ -765,32 +766,13 @@ class QueryBuilder extends Tool implements \JsonSerializable
         $whereData = $this->where_data_binding;
 
         // We count all.
-        $c = $this->count();
+        $count = $this->count();
 
         $this->where = $where;
 
         $this->where_data_binding = $whereData;
 
-        return $this->jump($c - 1)->take(1)->first();
-    }
-
-    /**
-     * Start a transaction in the database.
-     *
-     * @param  callable $cb
-     * @return QueryBuilder
-     */
-    public function transaction(callable $cb)
-    {
-        $where = $this->where;
-
-        $data = $this->get();
-
-        if (call_user_func_array($cb, [$data]) === true) {
-            $this->where = $where;
-        }
-
-        return $this;
+        return $this->jump($count - 1)->take(1)->first();
     }
 
     /**
@@ -1090,43 +1072,39 @@ class QueryBuilder extends Tool implements \JsonSerializable
     /**
      * Paginate, make pagination system
      *
-     * @param int $n
+     * @param int $number_of_page
      * @param int $current
      * @param int $chunk
      * @return Collection
      */
-    public function paginate($n, $current = 0, $chunk = null)
+    public function paginate($number_of_page, $current = 0, $chunk = null)
     {
-        // We go a page back
+        // We go to back page
         --$current;
 
         // Variable containing the number of jump. $jump;
-
         if ($current <= 0) {
             $jump = 0;
-
             $current = 1;
         } else {
-            $jump = $n * $current;
-
+            $jump = $number_of_page * $current;
             $current++;
         }
 
         // Saving information about where
         $where = $this->where;
 
-        $dataBind = $this->where_data_binding;
+        $data_dind = $this->where_data_binding;
 
-        $data = $this->jump($jump)
-            ->take($n)->get();
+        $data = $this->jump($jump)->take($number_of_page)->get();
 
         // Reinitialisation of where
         $this->where = $where;
 
-        $this->where_data_binding = $dataBind;
+        $this->where_data_binding = $data_dind;
 
         // We count the number of pages that remain
-        $restOfPage = ceil($this->count() / $n) - $current;
+        $rest_of_page = ceil($this->count() / $number_of_page) - $current;
 
         // Grouped data
         if (is_int($chunk)) {
@@ -1135,10 +1113,10 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         // Enables automatic paging.
         return [
-            'next' => $current >= 1 && $restOfPage > 0 ? $current + 1 : false,
+            'next' => $current >= 1 && $rest_of_page > 0 ? $current + 1 : false,
             'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),
-            'total' => (int) ($restOfPage + $current),
-            'per_page' => $n,
+            'total' => (int) ($rest_of_page + $current),
+            'per_page' => $number_of_page,
             'current' => $current,
             'data' => $data
         ];
