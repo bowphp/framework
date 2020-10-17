@@ -1229,7 +1229,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             }
         }
 
-        return $sql . ';';
+        return $sql;
     }
 
     /**
