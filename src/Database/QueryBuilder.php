@@ -779,41 +779,11 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * Count
      *
      * @param string $column
-     *
      * @return int
      */
     public function count($column = '*')
     {
-        if ($column != '*') {
-            $column = $column;
-        }
-
-        $sql = 'select count(' . $column . ') from ' . $this->table . '';
-
-        // Adding the join clause
-        if (!is_null($this->join)) {
-            $sql .= ' ' . $this->join;
-
-            $this->join = null;
-        }
-
-        if ($this->where !== null) {
-            $sql .= ' where ' . $this->where;
-
-            $this->where = null;
-        }
-
-        $stmt = $this->connection->prepare($sql);
-
-        $this->bind($stmt, $this->where_data_binding);
-
-        $this->where_data_binding = [];
-
-        $stmt->execute();
-
-        $r = $stmt->fetchColumn();
-
-        return (int) $r;
+        return $this->aggregate('count', $column);
     }
 
     /**
@@ -1183,7 +1153,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         // Adding the select clause
         if (is_null($this->select)) {
-            $sql .= '* from ' . $this->table . '';
+            $sql .= '* from ' . $this->table;
         } else {
             $sql .= $this->select . ' from ' . $this->table;
 
