@@ -1094,14 +1094,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
         // Saving information about where
         $where = $this->where;
 
-        $data_dind = $this->where_data_binding;
+        $data_bind = $this->where_data_binding;
 
         $data = $this->jump($jump)->take($number_of_page)->get();
 
         // Reinitialisation of where
         $this->where = $where;
 
-        $this->where_data_binding = $data_dind;
+        $this->where_data_binding = $data_bind;
 
         // We count the number of pages that remain
         $rest_of_page = ceil($this->count() / $number_of_page) - $current;
