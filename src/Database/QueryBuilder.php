@@ -1061,16 +1061,16 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $current++;
         }
 
-        // Saving information about where
+        // Saving information about current query
         $where = $this->where;
-
+        $join = $this->join;
         $data_bind = $this->where_data_binding;
 
         $data = $this->jump($jump)->take($number_of_page)->get();
 
-        // Reinitialisation of where
+        // Reinitialisation of current query
         $this->where = $where;
-
+        $this->join = $join;
         $this->where_data_binding = $data_bind;
 
         // We count the number of pages that remain
