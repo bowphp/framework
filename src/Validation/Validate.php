@@ -126,6 +126,6 @@ class Validate
     {
         response()->status(400);
 
-        throw new ValidationException(implode(', ', $this->messages), E_USER_ERROR);
+        throw new ValidationException(implode(', ', $this->messages));
     }
 }
