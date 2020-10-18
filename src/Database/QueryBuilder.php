@@ -687,6 +687,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
         $statement = $this->connection->prepare($sql);
 
         $this->bind($statement, $this->where_data_binding);
+        $this->where_data_binding = [];
 
         $statement->execute();
 
