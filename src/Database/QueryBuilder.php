@@ -684,17 +684,17 @@ class QueryBuilder extends Tool implements \JsonSerializable
             }
         }
 
-        $s = $this->connection->prepare($sql);
+        $statement = $this->connection->prepare($sql);
 
-        $this->bind($s, $this->where_data_binding);
+        $this->bind($statement, $this->where_data_binding);
 
-        $s->execute();
+        $statement->execute();
 
-        if ($s->rowCount() > 1) {
-            return Sanitize::make($s->fetchAll());
+        if ($statement->rowCount() > 1) {
+            return Sanitize::make($statement->fetchAll());
         }
 
-        return (int) $s->fetchColumn();
+        return (int) $statement->fetchColumn();
     }
 
     /**
@@ -714,16 +714,16 @@ class QueryBuilder extends Tool implements \JsonSerializable
         // Execution of request.
         $sql = $this->toSql();
 
-        $stmt = $this->connection->prepare($sql);
+        $statement = $this->connection->prepare($sql);
 
-        $this->bind($stmt, $this->where_data_binding);
+        $this->bind($statement, $this->where_data_binding);
 
         $this->where_data_binding = [];
-        $stmt->execute();
+        $statement->execute();
 
-        $data = Sanitize::make($stmt->fetchAll());
+        $data = Sanitize::make($statement->fetchAll());
 
-        $stmt->closeCursor();
+        $statement->closeCursor();
 
         if (!$this->first) {
             return $data;
@@ -763,14 +763,14 @@ class QueryBuilder extends Tool implements \JsonSerializable
     {
         $where = $this->where;
 
-        $whereData = $this->where_data_binding;
+        $where_data_binding = $this->where_data_binding;
 
         // We count all.
         $count = $this->count();
 
         $this->where = $where;
 
-        $this->where_data_binding = $whereData;
+        $this->where_data_binding = $where_data_binding;
 
         return $this->jump($count - 1)->take(1)->first();
     }
@@ -807,18 +807,18 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $this->where_data_binding = [];
         }
 
-        $stmt = $this->connection->prepare($sql);
+        $statement = $this->connection->prepare($sql);
 
         $data = Sanitize::make($data, true);
 
-        $this->bind($stmt, $data);
+        $this->bind($statement, $data);
 
         // Execution of the request
-        $stmt->execute();
+        $statement->execute();
 
-        $r = $stmt->rowCount();
+        $result = $statement->rowCount();
 
-        return (int) $r;
+        return (int) $result;
     }
 
     /**
@@ -836,17 +836,17 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $this->where = null;
         }
 
-        $stmt = $this->connection->prepare($sql);
+        $statement = $this->connection->prepare($sql);
 
-        $this->bind($stmt, $this->where_data_binding);
+        $this->bind($statement, $this->where_data_binding);
 
         $this->where_data_binding = [];
 
-        $stmt->execute();
+        $statement->execute();
 
-        $r = $stmt->rowCount();
+        $result = $statement->rowCount();
 
-        return (int) $r;
+        return (int) $result;
     }
 
     /**
@@ -900,7 +900,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function distinct($column)
     {
         if (!is_null($this->select)) {
-            $this->select .= " distinct $column";
+            $this->select .= ", distinct $column";
         } else {
             $this->select = "distinct $column";
         }
@@ -921,18 +921,18 @@ class QueryBuilder extends Tool implements \JsonSerializable
         $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $sign . ' ' . $step;
 
         if (!is_null($this->where)) {
-            $sql .= ' ' . $this->where;
+            $sql .= ' where ' . $this->where;
 
             $this->where = null;
         }
 
-        $stmt = $this->connection->prepare($sql);
+        $statement = $this->connection->prepare($sql);
 
-        $this->bind($stmt, $this->where_data_binding);
+        $this->bind($statement, $this->where_data_binding);
 
-        $stmt->execute();
+        $statement->execute();
 
-        return (int) $stmt->rowCount();
+        return (int) $statement->rowCount();
     }
 
     /**
@@ -942,8 +942,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function truncate()
     {
-        return (bool) $this->connection
-            ->exec('truncate ' . $this->table . ';');
+        return (bool) $this->connection->exec('truncate ' . $this->table . ';');
     }
 
     /**
@@ -956,13 +955,13 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function insert(array $values)
     {
-        $n_inserted = 0;
+        $row_affected = 0;
 
         $resets = [];
 
         foreach ($values as $key => $value) {
             if (is_array($value)) {
-                $n_inserted += $this->insertOne($value);
+                $row_affected += $this->insertOne($value);
             } else {
                 $resets[$key] = $value;
             }
@@ -971,10 +970,10 @@ class QueryBuilder extends Tool implements \JsonSerializable
         }
 
         if (!empty($resets)) {
-            $n_inserted += $this->insertOne($resets);
+            $row_affected += $this->insertOne($resets);
         }
 
-        return $n_inserted;
+        return $row_affected;
     }
 
     /**
@@ -993,13 +992,13 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         $sql .= '(' . implode(', ', Util::add2points($fields, true)) . ');';
 
-        $stmt = $this->connection->prepare($sql);
+        $statement = $this->connection->prepare($sql);
 
-        $this->bind($stmt, $value);
+        $this->bind($statement, $value);
 
-        $stmt->execute();
+        $statement->execute();
 
-        return (int) $stmt->rowCount();
+        return (int) $statement->rowCount();
     }
 
     /**
@@ -1012,9 +1011,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
     {
         $this->insert($values);
 
-        $n = $this->connection->lastInsertId();
+        $result = $this->connection->lastInsertId();
 
-        return $n;
+        return $result;
     }
 
     /**
@@ -1024,8 +1023,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      */
     public function drop()
     {
-        return (bool) $this->connection
-            ->exec('drop table ' . $this->table);
+        return (bool) $this->connection->exec('drop table ' . $this->table);
     }
 
     /**
