@@ -75,6 +75,13 @@ class QueryBuilder extends Tool implements \JsonSerializable
     protected $order;
 
     /**
+     * Define the table as
+     *
+     * @var string
+     */
+    protected $as;
+
+    /**
      * The PDO instance
      *
      * @var \PDO
@@ -136,11 +143,24 @@ class QueryBuilder extends Tool implements \JsonSerializable
         // Transaction Query builder to SQL for subquery
         foreach ($select as $key => $value) {
             if ($value instanceof QueryBuilder) {
-                $select[$key] = $value->toSql();
+                $select[$key] = '('.$value->toSql().')';
             }
         }
 
         $this->select .= implode(', ', $select);
+
+        return $this;
+    }
+
+    /**
+     * Create the table as
+     * 
+     * @param string $as
+     * @return QueryBuilder
+     */
+    public function as(string $as)
+    {
+        $this->as = $as;
 
         return $this;
     }
@@ -184,9 +204,32 @@ class QueryBuilder extends Tool implements \JsonSerializable
         }
 
         if ($this->where == null) {
-            $this->where = '(' . $column . ' ' . $comp . ' '.$indicator.')';
+            $this->where = $column . ' ' . $comp . ' '.$indicator;
         } else {
-            $this->where .= ' ' . $boolean . ' (' . $column . ' ' . $comp . ' '.$indicator.')';
+            $this->where .= ' ' . $boolean . ' ' . $column . ' ' . $comp . ' '.$indicator;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add where clause into the request
+     *
+     * WHERE column1 $comp $value|column
+     *
+     * @param string $column
+     * @param string $comp
+     * @param mixed $value
+     * @param string $boolean
+     * @throws QueryBuilderException
+     * @return QueryBuilder
+     */
+    public function whereRaw(string $where)
+    {
+        if ($this->where == null) {
+            $this->where = $where;
+        } else {
+            $this->where .= ' and '.$where;
         }
 
         return $this;
@@ -227,9 +270,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function whereNull($column, $boolean = 'and')
     {
         if (is_null($this->where)) {
-            $this->where = '(' . $column . ' is null)';
+            $this->where = $column . ' is null';
         } else {
-            $this->where .= ' ' . $boolean . ' (' . $column . ' is null)';
+            $this->where .= ' ' . $boolean . ' ' . $column . ' is null';
         }
 
         return $this;
@@ -247,9 +290,9 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function whereNotNull($column, $boolean = 'and')
     {
         if (is_null($this->where)) {
-            $this->where = '(' . $column . ' is not null)';
+            $this->where = $column . ' is not null';
         } else {
-            $this->where .= ' ' . $boolean . ' (' . $column . ' is not null)';
+            $this->where .= ' ' . $boolean . ' ' . $column . ' is not null';
         }
 
         return $this;
@@ -273,15 +316,15 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
-                $this->where = '(' . $column . ' not between ' . $between . ')';
+                $this->where = $column . ' not between ' . $between;
             } else {
-                $this->where = '(' . $column . ' between ' . $between . ')';
+                $this->where = $column . ' between ' . $between;
             }
         } else {
             if ($boolean == 'not') {
-                $this->where .= ' and (' . $column . ' not between ' . $between . ')';
+                $this->where .= ' and ' . $column . ' not between ' . $between;
             } else {
-                $this->where .= ' ' . $boolean . ' (' . $column . ' between ' . $between . ')';
+                $this->where .= ' ' . $boolean . ' ' . $column . ' between ' . $between;
             }
         }
 
@@ -317,7 +360,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $range = "(".$range->toSql().")";
         }
 
-        if (!is_string($range)) {
+        if (is_array($range)) {
             $range = (array) $range;
             $this->where_data_binding = array_merge($range, $this->where_data_binding);
 
@@ -326,20 +369,20 @@ class QueryBuilder extends Tool implements \JsonSerializable
             }, $range);
             $in = implode(', ', $map);
         } else {
-            $in = $range;
+            $in = (string) $range;
         }
 
         if (is_null($this->where)) {
             if ($boolean == 'not') {
-                $this->where = '(' . $column . ' not in (' . $in . '))';
+                $this->where = $column . ' not in (' . $in . ')';
             } else {
-                $this->where = '(' . $column . ' in (' . $in . '))';
+                $this->where = $column . ' in (' . $in . ')';
             }
         } else {
             if ($boolean == 'not') {
-                $this->where .= ' and (' . $column . ' not in (' . $in . '))';
+                $this->where .= ' and ' . $column . ' not in (' . $in . ')';
             } else {
-                $this->where .= ' and (' . $column . ' in (' . $in . '))';
+                $this->where .= ' and ' . $column . ' in (' . $in . ')';
             }
         }
 
@@ -1157,6 +1200,12 @@ class QueryBuilder extends Tool implements \JsonSerializable
             $sql .= $this->select . ' from ' . $this->table;
 
             $this->select = null;
+        }
+
+        if (!is_null($this->as)) {
+            $sql .= ' as '.$this->as;
+
+            $this->as = null;
         }
 
         // Adding the join clause
