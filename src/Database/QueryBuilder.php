@@ -362,7 +362,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
         if (is_array($range)) {
             $range = (array) $range;
-            $this->where_data_binding = array_merge($range, $this->where_data_binding);
+            $this->where_data_binding = array_merge($this->where_data_binding, $range);
 
             $map = array_map(function () {
                 return '?';
