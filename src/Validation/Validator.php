@@ -208,7 +208,7 @@ class Validator
 
         $length = (int) end($match);
 
-        if (Str::len($this->inputs[$key]) > $length) {
+        if (Str::len($this->inputs[$key]) >= $length) {
             return;
         }
 
@@ -246,6 +246,7 @@ class Validator
         if (Str::len($this->inputs[$key]) <= $length) {
             return;
         }
+        dd('here max');
 
         $this->fails = true;
         
