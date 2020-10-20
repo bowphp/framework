@@ -154,7 +154,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
     /**
      * Create the table as
-     * 
+     *
      * @param string $as
      * @return QueryBuilder
      */
