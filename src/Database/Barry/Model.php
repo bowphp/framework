@@ -549,6 +549,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public static function deleteBy($column, $value)
     {
         $model = static::query();
+
         $deleted = $model->where($column, $value)->delete();
 
         return $deleted;
@@ -755,8 +756,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.',
-            E_ERROR
+            'method '.$name.' is not defined.', E_ERROR
         );
     }
 
@@ -776,8 +776,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.',
-            E_ERROR
+            'method '.$name.' is not defined.', E_ERROR
         );
     }
 }
