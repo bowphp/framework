@@ -2,6 +2,9 @@
 
 namespace Bow\Auth;
 
+/**
+ * @method \Policier\Token getToken()
+ */
 abstract class GuardContract
 {
     /**
