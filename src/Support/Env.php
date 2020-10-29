@@ -75,7 +75,7 @@ class Env
             return $value;
         }
 
-        return isset(static::$env[$key]) ? static::$env[$key] : $default;
+        return static::$env[$key] ?? $default;
     }
 
     /**
