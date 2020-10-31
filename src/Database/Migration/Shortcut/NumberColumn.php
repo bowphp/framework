@@ -29,17 +29,6 @@ trait NumberColumn
     }
 
     /**
-     * Add integer primary column
-     *
-     * @param string $column
-     * @return SQLGenerator
-     */
-    public function addIntegerPrimary($column)
-    {
-        return $this->addColumn($column, 'int', ['primary' => true]);
-    }
-
-    /**
      * Add double primary column
      *
      * @param string $column
@@ -73,6 +62,29 @@ trait NumberColumn
     }
 
     /**
+     * Add integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addInteger($column, array $attribute = [])
+    {
+        return $this->addColumn($column, 'int', $attribute);
+    }
+
+    /**
+     * Add integer primary column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function addIntegerPrimary($column)
+    {
+        return $this->addColumn($column, 'int', ['primary' => true]);
+    }
+
+    /**
      * Add big increment primary column
      *
      * @param string $column
@@ -93,18 +105,6 @@ trait NumberColumn
     public function addTinyInteger($column, array $attribute = [])
     {
         return $this->addColumn($column, 'tinyint', $attribute);
-    }
-
-    /**
-     * Add integer column
-     *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
-     */
-    public function addInteger($column, array $attribute = [])
-    {
-        return $this->addColumn($column, 'int', $attribute);
     }
 
     /**
