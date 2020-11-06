@@ -213,7 +213,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function describe()
     {
-        return DB::statement('desc '. static::query()->getTable());
+        return DB::statement('desc ' . static::query()->getTable());
     }
 
     /**
@@ -226,11 +226,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function findAndDelete($id, $select = ['*'])
     {
-        $data = static::find($id, $select);
+        $model = static::find($id, $select);
 
-        static::$model->delete();
+        $model->delete();
 
-        return $data;
+        return $model;
     }
 
     /**
@@ -247,7 +247,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $data = static::find($id, $select);
 
         if (is_null($data)) {
-            throw new NotFoundException('No recordings found.');
+            throw new NotFoundException('No recordings found at ' . $id . '.');
         }
 
         return $data;
@@ -371,7 +371,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
             $table = end($parts);
 
-            $table = Str::camel(strtolower($table)).'s';
+            $table = Str::camel(strtolower($table)) . 's';
         } else {
             $table = $properties['table'];
         }
@@ -386,7 +386,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $prefix = DB::getConnectionAdapter()->getTablePrefix();
         }
 
-        $table = $prefix.$table;
+        $table = $prefix . $table;
 
         static::$builder = new Builder($table, DB::getPdo());
 
@@ -459,7 +459,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             } elseif ($this->primary_key_type == 'float') {
                 $primary_key_value = (float) $primary_key_value;
             } elseif ($this->primary_key_type == 'double') {
-                $primary_key_value = (double) $primary_key_value;
+                $primary_key_value = (float) $primary_key_value;
             } else {
                 $primary_key_value = (string) $primary_key_value;
             }
@@ -487,8 +487,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $update_data = [];
 
         foreach ($this->attributes as $key => $value) {
-            if (!isset($this->original[$key])
-                || $this->original[$key] != $value) {
+            if (
+                !isset($this->original[$key])
+                || $this->original[$key] != $value
+            ) {
                 $update_data[$key] = $value;
             }
         }
@@ -530,7 +532,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         $deleted = $model->where($this->primary_key, $primary_key_value)
-                        ->delete();
+            ->delete();
 
         if ($deleted) {
             $this->fireEvent('ondeleted');
@@ -756,7 +758,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.', E_ERROR
+            'method ' . $name . ' is not defined.',
+            E_ERROR
         );
     }
 
@@ -776,7 +779,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         throw new \BadMethodCallException(
-            'method '.$name.' is not defined.', E_ERROR
+            'method ' . $name . ' is not defined.',
+            E_ERROR
         );
     }
 }

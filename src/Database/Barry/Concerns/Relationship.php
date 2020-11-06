@@ -14,7 +14,7 @@ trait Relationship
      *
      * @return string
      */
-    abstract public function getKey(): string;
+    abstract public function getKey();
 
     /**
      * The has one relative
@@ -31,9 +31,9 @@ trait Relationship
         if (is_null($local_key)) {
             $local_key = $this->getKey();
         }
-        
+
         if (is_null($foreign_key)) {
-            $foreign_key = rtrim($related_model->getTable(), 's').'_id';
+            $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
 
         return new BelongsTo($related_model, $this, $foreign_key, $local_key);
@@ -56,7 +56,7 @@ trait Relationship
         }
 
         if (is_null($foreign_key)) {
-            $foreign_key = rtrim($related_model->getTable(), 's').'_id';
+            $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
 
         return new BelongsToMany($related_model, $this, $primary_key, $foreign_key);
@@ -79,7 +79,7 @@ trait Relationship
         }
 
         if (is_null($foreign_key)) {
-            $foreign_key = rtrim($related_model->getTable(), 's').'_id';
+            $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
 
         return new HasMany($related_model, $this, $primary_key, $foreign_key);
@@ -102,7 +102,7 @@ trait Relationship
         }
 
         if (is_null($foreign_key)) {
-            $foreign_key = rtrim($related_model->getTable(), 's').'_id';
+            $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
 
         return new HasOne($related_model, $this, $primary_key, $foreign_key);
