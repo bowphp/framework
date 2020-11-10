@@ -98,14 +98,9 @@ class JwtGuard extends GuardContract
      */
     public function check()
     {
-        $bearer = request()->getHeader('Authorization');
-
-        if (is_null($bearer) || !preg_match('/^Bearer\s+(.+)/', trim($bearer), $match)) {
-            return false;
-        }
-
-        $token = trim(end($match));
         $policier = $this->getPolicier();
+
+        $token = $policier->getToken();
 
         if (!$policier->verify($token)) {
             return false;
