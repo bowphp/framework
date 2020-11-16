@@ -487,8 +487,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $update_data = [];
 
         foreach ($this->attributes as $key => $value) {
-            if (
-                !isset($this->original[$key])
+            if (!isset($this->original[$key])
                 || $this->original[$key] != $value
             ) {
                 $update_data[$key] = $value;
