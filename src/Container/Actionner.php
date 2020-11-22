@@ -488,8 +488,7 @@ class Actionner
         $reflection = new ReflectionClass($class_name);
         
         $args = [];
-
-        if ($reflection->isInstantiable()) {
+        if ($reflection->isInstantiable() && $reflection->getConstructor()) {
             $args = $this->injector($class_name, '__construct');
         }
         
