@@ -14,6 +14,10 @@ trait FieldLexical
      */
     private function lexical($key, $attributes)
     {
+        if (is_string($attributes) && isset($this->messages[$attributes])) {
+            return $this->messages[$attributes][$key] ?? $this->messages[$attributes];
+        }
+
         if (is_string($attributes)) {
             $attributes = ['attribute' => $attributes];
         }

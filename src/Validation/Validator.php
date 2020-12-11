@@ -38,6 +38,13 @@ class Validator
     protected $inputs = [];
 
     /**
+     * The user messages
+     *
+     * @var array
+     */
+    protected $messages = [];
+
+    /**
      * Define the valid rule list
      *
      * @var array
@@ -87,14 +94,27 @@ class Validator
      *
      * @param array $inputs
      * @param array $rules
+     * @param array $messages
      *
      * @return Validate
      */
-    public static function make(array $inputs, array $rules)
+    public static function make(array $inputs, array $rules, array $messages = [])
     {
         $v = new static();
 
+        $v->setCustomMessages($messages);
+
         return $v->validate($inputs, $rules);
+    }
+
+    /**
+     * Set the user custom message
+     *
+     * @param array $messages
+     */
+    public function setCustomMessages(array $messages)
+    {
+        $this->messages = $messages;
     }
 
     /**
@@ -115,7 +135,7 @@ class Validator
              * eg. name => "required|max:100|alpha"
              */
             foreach (explode("|", $rule) as $masque) {
-                // In the box there is a | superflux.
+                // In the box there is a | super flux.
                 if (is_int($masque) || Str::len($masque) == "") {
                     continue;
                 }
