@@ -53,7 +53,7 @@ abstract class RequestValidation
             $this->data = $this->request->excepts($keys);
         }
 
-        $this->validate = Validator::make($this->data, $this->rules());
+        $this->validate = Validator::make($this->data, $this->rules(), $this->messages());
 
         if ($this->validate->fails()) {
             $this->validationFailAction();
@@ -94,6 +94,16 @@ abstract class RequestValidation
     protected function authorize()
     {
         return true;
+    }
+
+    /**
+     * The define the user custom message
+     *
+     * @return array
+     */
+    protected function messages()
+    {
+        return [];
     }
 
     /**
@@ -206,7 +216,7 @@ abstract class RequestValidation
             return call_user_func_array([$this->request, $name], $arguments);
         }
 
-        throw new BadMethodCallException('The method '. $name.' does not define.');
+        throw new BadMethodCallException('The method ' . $name . ' does not define.');
     }
 
     /**
