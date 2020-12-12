@@ -171,7 +171,7 @@ class UploadFile
             return false;
         }
 
-        if (!is_null($filename)) {
+        if (is_null($filename)) {
             $filename = $this->getHashName();
         }
 
