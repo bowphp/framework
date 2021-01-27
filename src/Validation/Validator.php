@@ -174,17 +174,24 @@ class Validator
      */
     protected function compileRequired($key, $masque)
     {
-        if (!isset($this->inputs[$key])
-            || is_null($this->inputs[$key])
-            || $this->inputs[$key] === ''
-        ) {
+        $error = false;
+
+        if (!isset($this->inputs[$key])) {
+            $error = true;
+        }
+
+        if (is_null($this->inputs[$key]) || $this->inputs[$key] === '') {
+            $error = true;
+        }
+
+        if ($error) {
             $this->last_message = $message = $this->lexical('required', $key);
-            
+
             $this->errors[$key][] = [
                 "masque" => $masque,
                 "message" => $message
             ];
-            
+
             $this->fails = true;
         }
     }
@@ -198,7 +205,7 @@ class Validator
      */
     protected function compileEmpty($key, $masque)
     {
-        if (!isset($this->inputs[$key])) {
+        if (isset($this->inputs[$key]) && !(is_null($this->inputs[$key]) || $this->inputs[$key] === '')) {
             $this->fails = true;
 
             $this->last_message = $message = $this->lexical('empty', $key);
