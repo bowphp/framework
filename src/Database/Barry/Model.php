@@ -436,60 +436,39 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
          */
         $primary_key_value = $this->getKeyValue();
 
-        /**
-         * If primary key value is null, we are going to start the creation of new
-         * row
-         */
+        // If primary key value is null, we are going to start the creation of new row
         if ($primary_key_value == null) {
-            /**
-             * Insert information in the database
-             */
-            $r = $model->insert($this->attributes);
+            // Insert information in the database
+            $row_affected = $model->insert($this->attributes);
 
-            /**
-             * We get a last insertion id value
-             */
+            // We get a last insertion id value
             $primary_key_value = $model->getLastInsertId();
 
-            /**
-             * Transtype value to the define primary key type
-             */
-            if ($this->primary_key_type == 'int') {
-                $primary_key_value = (int) $primary_key_value;
-            } elseif ($this->primary_key_type == 'float') {
-                $primary_key_value = (float) $primary_key_value;
-            } elseif ($this->primary_key_type == 'double') {
-                $primary_key_value = (float) $primary_key_value;
-            } else {
-                $primary_key_value = (string) $primary_key_value;
-            }
-
-            /**
-             * Set the primary key value
-             */
+            // Set the primary key value
             $this->attributes[$this->primary_key] = $primary_key_value;
-
             $this->original = $this->attributes;
 
-            if ($r == 1) {
+            if ($row_affected == 1) {
                 $this->fireEvent('oncreated');
             }
 
-            return $r;
+            return $row_affected;
         }
 
+        $primary_key_value = $this->transtypeKeyValue($primary_key_value);
+
+        // Check the existent in database
         if (!$model->exists($this->primary_key, $primary_key_value)) {
             return 0;
         }
 
+        // We set the primary key value
         $this->original[$this->primary_key] = $primary_key_value;
 
         $update_data = [];
 
         foreach ($this->attributes as $key => $value) {
-            if (!isset($this->original[$key])
-                || $this->original[$key] != $value
-            ) {
+            if (!array_key_exists($key, $this->original) || $this->original[$key] !== $value) {
                 $update_data[$key] = $value;
             }
         }
@@ -499,15 +478,35 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $update_data = $this->original;
         }
 
-        $r = $model
-            ->where($this->primary_key, $primary_key_value)
-            ->update($update_data);
+        $row_affected = $model->where($this->primary_key, $primary_key_value)->update($update_data);
 
-        if ($r == 1) {
+        if ($row_affected == 1) {
             $this->fireEvent('onupdate');
         }
 
-        return $r;
+        return $row_affected;
+    }
+
+    /**
+     * Transtype the primary key value
+     *
+     * @param mixed $primary_key_value
+     * @return mixed
+     */
+    private function transtypeKeyValue($primary_key_value)
+    {
+        // Transtype value to the define primary key type
+        if ($this->primary_key_type == 'int') {
+            $primary_key_value = (int) $primary_key_value;
+        } elseif ($this->primary_key_type == 'float') {
+            $primary_key_value = (float) $primary_key_value;
+        } elseif ($this->primary_key_type == 'double') {
+            $primary_key_value = (float) $primary_key_value;
+        } else {
+            $primary_key_value = (string) $primary_key_value;
+        }
+
+        return $primary_key_value;
     }
 
     /**
@@ -530,8 +529,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return 0;
         }
 
-        $deleted = $model->where($this->primary_key, $primary_key_value)
-            ->delete();
+        $deleted = $model->where($this->primary_key, $primary_key_value)->delete();
 
         if ($deleted) {
             $this->fireEvent('ondeleted');

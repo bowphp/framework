@@ -147,7 +147,13 @@ class QueryBuilder extends Tool implements \JsonSerializable
             }
         }
 
+        if (!is_null($this->select)) {
+            $this->select .= ", ";
+        }
+
         $this->select .= implode(', ', $select);
+
+        $this->select = trim($this->select, ', ');
 
         return $this;
     }

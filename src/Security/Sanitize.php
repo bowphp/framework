@@ -21,14 +21,8 @@ class Sanitize
         $rNum = '/^[0-9]+(\.[0-9]+)?$/';
 
         if (is_string($data)) {
-            if (! preg_match($rNum, $data, $match)) {
+            if (!preg_match($rNum, $data, $match)) {
                 return static::$method($data);
-            }
-
-            if (count($match) == 2) {
-                $data = (float) $data;
-            } else {
-                $data = (int) $data;
             }
 
             return $data;
