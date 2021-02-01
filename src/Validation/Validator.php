@@ -815,9 +815,9 @@ class Validator
             return;
         }
 
-        $regex = '/'.preg_quote($match[1]).'/';
+        $regex = '/^'.$match[1].'$/';
 
-        if (!preg_match($regex, $this->inputs[$key])) {
+        if (preg_match($regex, $this->inputs[$key])) {
             return;
         }
 

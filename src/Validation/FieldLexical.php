@@ -12,24 +12,25 @@ trait FieldLexical
      *
      * @return mixed
      */
-    private function lexical($key, $attributes)
+    private function lexical($key, $attribute)
     {
-        if (is_string($attributes) && isset($this->messages[$attributes])) {
-            return $this->messages[$attributes][$key] ?? $this->messages[$attributes];
+        if (is_string($attribute) && isset($this->messages[$attribute])) {
+            return $this->messages[$attribute][$key] ?? $this->messages[$attribute];
         }
 
-        if (is_string($attributes)) {
-            $attributes = ['attribute' => $attributes];
+        if (is_string($attribute)) {
+            $attribute = ['attribute' => $attribute];
         }
 
         // Get lexical provider by application part
-        $lexical = trans('validation.' . $key, $attributes);
+        $lexical = trans('validation.'.$key, $attribute);
 
+        // Get the stub lexical
         if (is_null($lexical)) {
             $lexical = $this->lexical[$key];
 
-            foreach ($attributes as $key => $value) {
-                $lexical = str_replace(':' . $key, $value, $lexical);
+            foreach ($attribute as $key => $value) {
+                $lexical = str_replace('{'.$key.'}', $value, $lexical);
             }
         }
 
