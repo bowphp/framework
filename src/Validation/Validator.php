@@ -129,19 +129,16 @@ class Validator
     {
         $this->inputs = $inputs;
 
+        /**
+         * Formatting and validation of each rule
+         * eg. name => "required|max:100|alpha"
+         */
         foreach ($rules as $key => $rule) {
-            /**
-             * Formatting and validation of each rule
-             * eg. name => "required|max:100|alpha"
-             */
             foreach (explode("|", $rule) as $masque) {
                 // In the box there is a | super flux.
                 if (is_int($masque) || Str::len($masque) == "") {
                     continue;
                 }
-
-                // Error lists.
-                $this->errors[$key] = [];
 
                 // Mask on the required rule
                 foreach ($this->rules as $rule) {
@@ -149,11 +146,6 @@ class Validator
                     if ($rule == 'Required' && $this->fails) {
                         break;
                     }
-                }
-
-                // We clean the list of errors if the key is valid
-                if (empty($this->errors[$key])) {
-                    unset($this->errors[$key]);
                 }
             }
         }
@@ -180,7 +172,7 @@ class Validator
             $error = true;
         }
 
-        if (is_null($this->inputs[$key]) || $this->inputs[$key] === '') {
+        if (isset($this->inputs[$key]) && (is_null($this->inputs[$key]) || $this->inputs[$key] === '')) {
             $error = true;
         }
 
@@ -815,7 +807,7 @@ class Validator
             return;
         }
 
-        $regex = '/^'.$match[1].'$/';
+        $regex = '~^'.$match[1].'$~';
 
         if (preg_match($regex, $this->inputs[$key])) {
             return;
