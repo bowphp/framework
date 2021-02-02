@@ -103,7 +103,9 @@ class FTPService implements ServiceInterface
         }
 
         if (!$this->connection) {
-            throw new RuntimeException(sprintf('Could not connect to %s:%s', $host, $port));
+            throw new RuntimeException(
+                sprintf('Could not connect to %s:%s', $host, $port)
+            );
         }
 
         $this->login();
