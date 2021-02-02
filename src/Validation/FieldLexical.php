@@ -12,26 +12,42 @@ trait FieldLexical
      *
      * @return mixed
      */
-    private function lexical($key, $attribute)
+    private function lexical($key, $attributes)
     {
-        if (is_string($attribute) && isset($this->messages[$attribute])) {
-            return $this->messages[$attribute][$key] ?? $this->messages[$attribute];
+        if (is_string($attributes) && isset($this->messages[$attributes])) {
+            return $this->messages[$attributes][$key] ?? $this->messages[$attributes];
         }
 
-        if (is_string($attribute)) {
-            $attribute = ['attribute' => $attribute];
+        if (is_array($attributes) && isset($attributes['attribute'])) {
+            return $this->messages[$attributes['attribute']][$key] ?? $this->messages[$attributes['attribute']];
+        }
+
+        if (is_string($attributes)) {
+            $attributes = ['attribute' => $attributes];
         }
 
         // Get lexical provider by application part
-        $lexical = trans('validation.'.$key, $attribute);
+        $lexical = trans('validation.' . $key, $attributes);
 
-        // Get the stub lexical
         if (is_null($lexical)) {
             $lexical = $this->lexical[$key];
+            $lexical = $this->parseAttribute($attributes, $lexical);
+        }
 
-            foreach ($attribute as $key => $value) {
-                $lexical = str_replace('{'.$key.'}', $value, $lexical);
-            }
+        return $lexical;
+    }
+
+    /**
+     * Normalize beneficiaries
+     *
+     * @param array $attributes
+     * @param string $lexical
+     * @return array
+     */
+    private function parseAttribute(array $attributes, $lexical)
+    {
+        foreach ($attributes as $key => $value) {
+            $lexical = str_replace('{' . $key . '}', $value, $lexical);
         }
 
         return $lexical;
