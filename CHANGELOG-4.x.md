@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.7] - 2021-04-11
+
+- [fix] Fix authentication guard "Illegal string offset [type]"
+
 ## [4.3.2] - 2020-11-16
 
 - [fix] JWT authentication failed [a8fdf4](https://github.com/bowphp/framework/commit/a8fdf4332e5ef1df5585734a72a947e20c8982f7)
-
 
 ## [4.3.0] - 2020-09-13
 

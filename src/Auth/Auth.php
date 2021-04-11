@@ -2,7 +2,7 @@
 
 namespace Bow\Auth;
 
-use Bow\Auth\Exception\AuthenticateException;
+use Bow\Auth\Exception\AuthenticationException;
 
 class Auth
 {
@@ -53,7 +53,7 @@ class Auth
      * @param null|string $guard
      * @return GuardContract
      *
-     * @throws AuthenticateException
+     * @throws AuthenticationException
      */
     public static function guard($guard = null)
     {
@@ -61,8 +61,8 @@ class Auth
             return static::$instance;
         }
 
-        if (! isset(static::$config[$guard])) {
-            throw new AuthenticateException("Configuration not found for $guard guard.", E_ERROR);
+        if (!isset(static::$config[$guard]) || !is_array(static::$config[$guard])) {
+            throw new AuthenticationException("Configuration not found for [$guard] guard.", E_ERROR);
         }
 
         $provider = static::$config[$guard];
