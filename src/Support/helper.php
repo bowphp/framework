@@ -997,7 +997,7 @@ if (!function_exists('route')) {
             return rtrim(app_env('APP_URL'), '/') . '/' . ltrim($url, '/');
         }
 
-        return '/' . ltrim($url, '/');
+        return rtrim(app_env('APP_URI_PREFIX', '/'), '/') . '/' . ltrim($url, '/');
     }
 }
 
@@ -1534,9 +1534,8 @@ if (!function_exists('seed')) {
      * @param string $table
      * @return void
      */
-    function seed($entry)
+    function seed($entry, array $data = [])
     {
-        $collection = [];
         $filename = rtrim(config('app.seeder_path'), '/').'/'.$entry.'_seeder.php';
 
         if (!file_exists($filename)) {
@@ -1544,7 +1543,11 @@ if (!function_exists('seed')) {
         }
 
         $seeds = require $filename;
-        $collection = array_merge($seeds, $collection);
+        $collection = array_merge($seeds, []);
+
+        if (count($data) > 0) {
+            return DB::table($table)->insert($data);
+        }
 
         foreach ($collection as $table => $seed) {
             DB::table($table)->insert($seed);
