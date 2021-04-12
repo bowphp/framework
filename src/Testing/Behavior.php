@@ -39,7 +39,7 @@ class Behavior
      *
      * @return Behavior
      */
-    public function mustBeJson($message = '')
+    public function assertJson($message = '')
     {
         Assert::assertJson(json_encode($this->content), $message);
 
@@ -55,7 +55,7 @@ class Behavior
      *
      * @return Behavior
      */
-    public function mustBeExactJson($data, $message = '')
+    public function assertExactJson($data, $message = '')
     {
         Assert::assertArraySubset($data, json_decode($this->content), $message);
 
@@ -70,10 +70,10 @@ class Behavior
      *
      * @return Behavior
      */
-    public function mustBeExactText($data, $message = '')
+    public function assertContainsExactText($data, $message = '')
     {
         Assert::assertEquals($this->content, $data, $message);
-        
+
         return $this;
     }
 
@@ -85,7 +85,7 @@ class Behavior
      *
      * @return Behavior
      */
-    public function headerExists($header, $message = '')
+    public function assertHeader($header, $message = '')
     {
         Assert::assertArrayHasKey($header, $this->parser->getHeaders(), $message);
 
@@ -99,23 +99,9 @@ class Behavior
      *
      * @return Behavior
      */
-    public function mustBeArray($message = '')
+    public function assertArray($message = '')
     {
         Assert::assertTrue(is_array($this->parser->toArray()), $message);
-
-        return $this;
-    }
-
-    /**
-     * Check the status code
-     *
-     * @param int $code
-     *
-     * @return Behavior
-     */
-    public function statusMustBe($code)
-    {
-        Assert::assertEquals($code, $this->parser->getCode());
 
         return $this;
     }
@@ -128,7 +114,7 @@ class Behavior
      *
      * @return Behavior
      */
-    public function contentTypeMustBe($content_type, $message = '')
+    public function assertContentType($content_type, $message = '')
     {
         $type = $this->parser->getContentType();
 
@@ -148,9 +134,9 @@ class Behavior
      *
      * @return Behavior
      */
-    public function contentTypeMustBeJson($message = '')
+    public function assertContentTypeJson($message = '')
     {
-        $this->contentTypeMustBe('application/json', $message);
+        $this->assertContentType('application/json', $message);
 
         return $this;
     }
@@ -162,9 +148,9 @@ class Behavior
      *
      * @return Behavior
      */
-    public function contentTypeMustBeText($message = '')
+    public function assertContentTypeText($message = '')
     {
-        $this->contentTypeMustBe('text/plain', $message);
+        $this->assertContentType('text/plain', $message);
 
         return $this;
     }
@@ -176,9 +162,9 @@ class Behavior
      *
      * @return Behavior
      */
-    public function contentTypeMustBeHtml($message = '')
+    public function assertContentTypeHtml($message = '')
     {
-        $this->contentTypeMustBe('text/html', $message);
+        $this->assertContentType('text/html', $message);
 
         return $this;
     }
@@ -190,48 +176,25 @@ class Behavior
      *
      * @return Behavior
      */
-    public function contentTypeMustBeXml($message = '')
+    public function assertContentTypeXml($message = '')
     {
-        $this->contentTypeMustBe('text/xml', $message);
+        $this->assertContentType('text/xml', $message);
 
         return $this;
     }
 
     /**
-     * Alias of mustBeExactJson
+     * Check the status code
      *
-     * @param array $data
-     * @param string $message
-     *
-     * @return Behavior
-     */
-    public function assertJson($data, $message = '')
-    {
-        return $this->mustBeExactJson($data, $message);
-    }
-
-    /**
-     * @param $code
-     * @param string $message
+     * @param int $code
      *
      * @return Behavior
      */
     public function assertStatus($code, $message = '')
     {
-        Assert::assertTrue($this->parser->getCode() == $code, $message);
+        Assert::assertEquals($this->parser->getCode(), $code, $message);
 
         return $this;
-    }
-
-    /**
-     * @param $type
-     * @param string $message
-     *
-     * @return Behavior
-     */
-    public function assertContentType($type, $message = '')
-    {
-        return $this->contentTypeMustBe($type, $message);
     }
 
     /**
@@ -276,10 +239,20 @@ class Behavior
      *
      * @return Behavior
      */
-    public function containsText($text)
+    public function assertContains($text)
     {
         Assert::assertContains($text, $this->content);
 
         return $this;
+    }
+
+    /**
+     * Get the response content
+     * 
+     * @return string
+     */
+    public function getContent()
+    {
+        return $this->content;
     }
 }

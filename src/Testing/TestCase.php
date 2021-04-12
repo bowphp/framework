@@ -20,7 +20,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @var string
      */
-    protected $url = '';
+    protected $url;
 
     /**
      * The list of additionnal header
@@ -37,6 +37,9 @@ class TestCase extends PHPUnitTestCase
      */
     private function formatUrl($url)
     {
+        if (!$this->url) {
+            $this->url = app_env('APP_URL', 'http://localhost:5000');
+        }
         return rtrim($this->url, '/').$url;
     }
 
