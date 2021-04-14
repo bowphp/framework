@@ -13,31 +13,26 @@ on:
     - cron: '0 0 * * 0'
 
 jobs:
-  services:
-    mysql:
-      image: mysql:5.7
-      env:
-        MYSQL_DATABASE: test
-        MYSQL_USER: test
-        MYSQL_PASSWORD: test
-        MYSQL_ROOT_PASSWORD: rootpassword
-      ports:
-        - 3306
-      options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
   build:
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test
+          MYSQL_ROOT_PASSWORD: rootpassword
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Set up MySQL
         run: sudo /etc/init.d/mysql start
         run: mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
-
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
-
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v2
@@ -46,15 +41,11 @@ jobs:
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-php-
-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
-
       - name: Create test cache directory
         run: if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
-
       - name: Check code standard
         run: ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
-
       - name: Run test suite
         run: composer run-script test
