@@ -14,6 +14,7 @@ on:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
     services:
       mysql:
         image: mysql:5.7
@@ -25,13 +26,14 @@ jobs:
         ports:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
+      - run: docker run -p 1025:25 -p 1080:80 -d --name maildev maildev/maildev
       - name: Set up MySQL
         run: |
           sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+          mysql -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
       - name: Cache Composer packages
