@@ -1,0 +1,48 @@
+name: Bow Framework CI
+
+on:
+  push:
+    branches: 
+      - 4.0
+      - master
+  pull_request:
+    branches: 
+      - 4.0
+      - master
+
+jobs:
+  services:
+    mysql:
+      image: mysql
+      ports:
+        - 3306/tcp
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Create test cache directory
+        run: if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
+
+      - name: Check code standard
+        run: ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
+
+      - name: Run test suite
+        run: composer run-script test
