@@ -9,19 +9,31 @@ on:
     branches: 
       - 4.0
       - master
+  schedule:
+    - cron: '0 0 * * 0'
 
 jobs:
   services:
     mysql:
-      image: mysql
+      image: mysql:5.7
+      env:
+        MYSQL_DATABASE: test
+        MYSQL_USER: test
+        MYSQL_PASSWORD: test
+        MYSQL_ROOT_PASSWORD: rootpassword
       ports:
-        - 3306/tcp
+        - 3306
+      options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
   build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set up MySQL
+        run: sudo /etc/init.d/mysql start
+        run: mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
