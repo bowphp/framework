@@ -29,7 +29,7 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
         self::$capsule = new Capsule();
     }
 
-    public function testAddContainer()
+    public function test_add_container()
     {
         $this->assertInstanceOf(Capsule::class, self::$capsule);
 
@@ -46,19 +46,19 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
         });
     }
 
-    public function testMakeContainer()
+    public function test_make_container()
     {
         $this->assertInstanceOf(\stdClass::class, self::$capsule->make('\stdClass'));
     }
 
-    public function testMakeCollectionContainer()
+    public function test_make_collection_container()
     {
         $this->assertNotInstanceOf(\stdClass::class, self::$capsule->make('\Bow\Support\Collection'));
 
         $this->assertInstanceOf(\Bow\Support\Collection::class, self::$capsule->make('\Bow\Support\Collection'));
     }
 
-    public function testMakeMyClassContainer()
+    public function test_make_my_class_container()
     {
         $myclass = self::$capsule->make('MyClass');
 

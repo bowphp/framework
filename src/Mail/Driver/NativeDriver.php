@@ -18,11 +18,11 @@ class NativeDriver extends MailDriverInterface
     private $config;
 
     /**
-     * The form configuration
+     * The from configuration
      *
      * @var array
      */
-    private $form = [];
+    private $from = [];
 
     /**
      * SimpleMail Constructor
@@ -35,26 +35,26 @@ class NativeDriver extends MailDriverInterface
         $this->config = $config;
 
         if (count($config) > 0) {
-            $this->form = $this->config["forms"][$config["default"]];
+            $this->from = $this->config["froms"][$config["default"]];
         }
     }
 
     /**
      * Switch on other define from
      *
-     * @param string $form
+     * @param string $from
      * @return NativeDriver
      */
     public function on(string $from)
     {
-        if (!isset($this->config["forms"][$from])) {
+        if (!isset($this->config["froms"][$from])) {
             throw new MailException(
                 "There are not entry for [$from]",
                 E_USER_ERROR
             );
         }
 
-        $this->form = $this->config["forms"][$from];
+        $this->from = $this->config["froms"][$from];
 
         return $this;
     }
@@ -76,8 +76,8 @@ class NativeDriver extends MailDriverInterface
         }
 
         if (!$message->fromIsDefined()) {
-            if (isset($this->form["address"])) {
-                $message->from($this->form["address"], $this->form["name"] ?? null);
+            if (isset($this->from["address"])) {
+                $message->from($this->from["address"], $this->from["name"] ?? null);
             }
         }
 

@@ -4,7 +4,7 @@ use \Bow\Support\Collection;
 
 class CollectionTest extends \PHPUnit\Framework\TestCase
 {
-    public function testGetInstance()
+    public function test_get_iInstance()
     {
         $collection = new Collection(range(1, 10));
 
@@ -17,7 +17,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testSum(Collection $collection)
+    public function test_sum(Collection $collection)
     {
         $this->assertEquals(array_sum(range(1, 10)), $collection->sum());
     }
@@ -26,7 +26,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testMax(Collection $collection)
+    public function test_max(Collection $collection)
     {
         $this->assertEquals(max(range(1, 10)), $collection->max());
     }
@@ -35,7 +35,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testMin(Collection $collection)
+    public function test_min(Collection $collection)
     {
         $this->assertEquals(min(range(1, 10)), $collection->min());
     }
@@ -44,7 +44,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testCount(Collection $collection)
+    public function test_count(Collection $collection)
     {
         $this->assertEquals(count(range(1, 10)), $collection->count());
     }
@@ -53,7 +53,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testPop(Collection $collection)
+    public function test_pop(Collection $collection)
     {
         $this->assertEquals(10, $collection->pop());
     }
@@ -62,7 +62,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testShift(Collection $collection)
+    public function test_shift(Collection $collection)
     {
         $this->assertEquals(1, $collection->shift());
     }
@@ -71,7 +71,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testReserve(Collection $collection)
+    public function test_reserve(Collection $collection)
     {
         $this->assertEquals(array_reverse(range(1, 9)), $collection->reverse()->toArray());
     }
@@ -80,7 +80,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testGenerator(Collection $collection)
+    public function test_generator(Collection $collection)
     {
         $gen = $collection->yieldify();
 
@@ -91,7 +91,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testJson(Collection $collection)
+    public function test_json(Collection $collection)
     {
         $this->assertJson($collection->toJson());
     }
@@ -100,7 +100,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testExcepts(Collection $collection)
+    public function test_excepts(Collection $collection)
     {
         $this->assertEquals(range(1, 2), $collection->excepts([0, 1])->toArray());
     }
@@ -109,7 +109,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      * @param $collection
      * @depends testGetInstance
      */
-    public function testPush(Collection $collection)
+    public function test_push(Collection $collection)
     {
         $collection->push(10);
 
