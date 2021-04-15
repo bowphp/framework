@@ -45,7 +45,6 @@ jobs:
       - name: Set up MySQL
         run: |
           sudo /etc/init.d/mysql start
-          sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS test_db;"
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
@@ -70,3 +69,10 @@ jobs:
 
       - name: Run test suite
         run: composer run-script test
+
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@master
+      #   if: failure()
+      #   with:
+      #     name: Logs
+      #     path: ./.github
