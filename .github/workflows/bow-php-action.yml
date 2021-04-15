@@ -70,10 +70,3 @@ jobs:
 
       - name: Run test suite
         run: composer run-script test
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@master
-        if: failure()
-        with:
-          name: Logs
-          path: .
