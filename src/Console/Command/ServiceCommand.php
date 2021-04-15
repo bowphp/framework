@@ -8,10 +8,9 @@ use Bow\Console\Generator;
 class ServiceCommand extends AbstractCommand
 {
     /**
-     * Add middleware
+     * Add service
      *
-     * @param string $middleware
-     *
+     * @param string $service
      * @return void
      */
     public function generate(string $service)

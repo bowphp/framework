@@ -67,10 +67,10 @@ class Console
      *
      * @var array
      */
-    const ACTION = [
+    const ADD_ACTION = [
         'middleware', 'controller', 'model', 'validator',
         'seeder', 'migration', 'configuration', 'service',
-        'exception',
+        'exception', 'event'
     ];
 
     /**
@@ -116,7 +116,7 @@ class Console
         if ($this->booted) {
             return;
         }
-        
+
         // Boot kernel and console
         $this->kernel->withoutSession();
 
@@ -180,8 +180,10 @@ class Console
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
         }
 
+        $target = $this->arg->getParameter('target');
+
         if (!$this->arg->getParameter('action')) {
-            if ($this->arg->getParameter('target') == 'help') {
+            if ($target == 'help') {
                 $this->help($command);
 
                 exit(0);
@@ -191,7 +193,7 @@ class Console
         try {
             call_user_func_array(
                 [$this, $command],
-                [$this->arg->getParameter('target')]
+                [$target]
             );
         } catch (\Exception $e) {
             echo $e->getMessage();
@@ -232,11 +234,7 @@ class Console
 
         $target = $this->arg->getParameter('target');
 
-        $this->command->call(
-            $action,
-            'migration',
-            $target
-        );
+        $this->command->call('migration', $action, $target);
     }
 
     /**
@@ -254,11 +252,7 @@ class Console
             $this->throwFailsCommand('This action is not allow!', 'help migration');
         }
 
-        $this->command->call(
-            'migrate',
-            'migration',
-            null
-        );
+        $this->command->call('migration', 'migrate', null);
     }
 
     /**
@@ -272,15 +266,13 @@ class Console
     {
         $action = $this->arg->getParameter('action');
 
-        if (!in_array($action, static::ACTION)) {
+        if (!in_array($action, static::ADD_ACTION)) {
             $this->throwFailsCommand('This action is not exists', 'help add');
         }
-        
-        $this->command->call(
-            'generate',
-            $action,
-            $this->arg->getParameter('target')
-        );
+
+        $target = $this->arg->getParameter('target');
+
+        $this->command->call('add', $action, $target);
     }
 
     /**
@@ -297,20 +289,18 @@ class Console
             $this->throwFailsCommand('This action is not exists', 'help seed');
         }
 
+        $target = $this->arg->getParameter('target');
+
         if ($action == 'all') {
-            if ($this->arg->getParameter('target') != null) {
-                $this->throwFailsCommand('Bad command usage', 'help seed');
+            if ($target != null) {
+                $this->throwFailsCommand(
+                    'Bad command usage target is not allow in this case',
+                    'help seed'
+                );
             }
         }
 
-        // Set command for understand
-        $command = $action;
-
-        $this->command->call(
-            $command,
-            'seeder',
-            $this->arg->getParameter('target')
-        );
+        $this->command->call('seeder', $action, $target);
     }
 
     /**
@@ -326,11 +316,9 @@ class Console
             $this->throwFailsCommand('Bad command usage', 'help run');
         }
 
-        $this->command->call(
-            'run',
-            $action,
-            $this->arg->getParameter('target')
-        );
+        $target = $this->arg->getParameter('target');
+
+        $this->command->call('runner', $action, $target);
     }
 
     /**
@@ -346,11 +334,9 @@ class Console
             $this->throwFailsAction('This action is not exists', 'help generate');
         }
 
-        $this->command->call(
-            'generate',
-            $action,
-            $this->arg->getParameter('target')
-        );
+        $target = $this->arg->getParameter('target');
+
+        $this->command->call('generator', $action, $target);
     }
 
     /**
@@ -372,13 +358,13 @@ class Console
      */
     private function clear()
     {
-        $target = $this->arg->getParameter('action');
+        $action = $this->arg->getParameter('action');
 
-        $this->command->call(
-            'make',
-            'clear',
-            $target
-        );
+        if (!in_array($action, ['view', 'cache', 'all'])) {
+            $this->throwFailsAction('This action is not exists', 'help clear');
+        }
+
+        $this->command->call('clear', "make", $action);
     }
 
     /**
@@ -412,6 +398,7 @@ Bow tqsk runner usage: php bow command:action [name] --option
    \033[0;33madd:validator\033[00m       Create new validator
    \033[0;33madd:seeder\033[00m          Create new table fake seeder
    \033[0;33madd:migration\033[00m       Create a new migration
+   \033[0;33madd:event\033[00m           Create a new event listener
 
  \033[0;32mMIGRATION\033[00m apply a migration in user model
    \033[0;33mmigration:migrate\033[00m   Make migration
@@ -461,6 +448,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validator
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    For create a new seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                For create a new event listener
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
 
 U;

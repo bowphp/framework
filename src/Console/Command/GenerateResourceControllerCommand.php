@@ -5,13 +5,12 @@ namespace Bow\Console\Command;
 use Bow\Console\Generator;
 use Bow\Support\Str;
 
-class ResourceControllerCommand extends AbstractCommand
+class GenerateResourceControllerCommand extends AbstractCommand
 {
     /**
      * Command used to set up the resource system.
      *
      * @param  string $controller
-     *
      * @return void
      * @throws
      */

@@ -9,7 +9,7 @@ use Bow\Support\Str;
 class GenerateSessionCommand extends AbstractCommand
 {
     /**
-     * Generate Key
+     * Generate session
      *
      * @return void
      */
