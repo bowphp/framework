@@ -25,6 +25,7 @@ class Command extends AbstractCommand
             'seeder' => \Bow\Console\Command\SeederCommand::class,
             'service' => \Bow\Console\Command\ServiceCommand::class,
             'validator' => \Bow\Console\Command\ValidatorCommand::class,
+            'event' => \Bow\Console\Command\EventCommand::class,
         ],
         "runner" => [
             'console' => \Bow\Console\Command\ReplCommand::class,

@@ -272,6 +272,10 @@ class Console
 
         $target = $this->arg->getParameter('target');
 
+        if (is_null($target)) {
+            $this->throwFailsCommand('Please provide the filename', 'help add');
+        }
+
         $this->command->call('add', $action, $target);
     }
 
@@ -360,10 +364,6 @@ class Console
     {
         $action = $this->arg->getParameter('action');
 
-        if (!in_array($action, ['view', 'cache', 'all'])) {
-            $this->throwFailsAction('This action is not exists', 'help clear');
-        }
-
         $this->command->call('clear', "make", $action);
     }
 
@@ -406,11 +406,13 @@ Bow tqsk runner usage: php bow command:action [name] --option
    \033[0;33mmigration:rollback\033[00m  Rollback to previous migration
    \033[0;33mmigrate\033[00m             Alias of \033[0;33mmigration:migrate\033[00m
 
- \033[0;32mCLEAR\033[00m for clear cache information [not supported]
+ \033[0;32mCLEAR\033[00m for clear cache information
    \033[0;33mclear:view\033[00m          Clear view cached information
    \033[0;33mclear:cache\033[00m         Clear cache information
+   \033[0;33mclear:session\033[00m       Clear session cache information
+   \033[0;33mclear:log\033[00m           Clear logs cache information
    \033[0;33mclear:all\033[00m           Clear all cache information
-   
+
  \033[0;32mSEED\033[00m Make seeding
    \033[0;33mseed:table\033[00m [name]   Make seeding for one table
    \033[0;33mseed:all\033[00m            Make seeding for all

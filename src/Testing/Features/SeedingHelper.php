@@ -4,12 +4,12 @@ namespace Bow\Testing\Features;
 
 trait SeedingHelper
 {
-	/**
-	 * Enable auto seeding
-	 * 
-	 * @var bool
-	 */
-	protected $seeding = false;
+    /**
+     * Enable auto seeding
+     *
+     * @var bool
+     */
+    protected $seeding = false;
 
     /**
      * Seed alias

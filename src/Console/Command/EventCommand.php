@@ -5,7 +5,7 @@ namespace Bow\Console\Command;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 
-class ServiceCommand extends AbstractCommand
+class EventCommand extends AbstractCommand
 {
     /**
      * Add event
@@ -16,7 +16,7 @@ class ServiceCommand extends AbstractCommand
     public function generate(string $event)
     {
         $generator = new Generator(
-            $this->setting->setEventDirectory(),
+            $this->setting->getEventDirectory(),
             $event
         );
 
