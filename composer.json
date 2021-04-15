@@ -8,11 +8,11 @@
         "source": "https://github.com/bowphp/framework"
     },
     "require": {
-        "php": "^7.1",
-        "bowphp/tintin": "*",
+        "php": "^7.2",
+        "bowphp/tintin": "^1.3",
         "filp/whoops": "^2.1",
         "nesbot/carbon": "^2.16",
-        "psy/psysh": "@stable",
+        "psy/psysh": "v0.10.*",
         "fzaninotto/faker": "^1.8"
     },
     "require-dev": {
@@ -43,6 +43,7 @@
     },
     "scripts": {
         "fix-sniffer": "phpcbf --standard=psr2 --severity=4 --tab-width=4 src tests",
-        "sniffer": "phpcs --standard=psr2 --severity=4 --tab-width=4 src tests"
+        "sniffer": "phpcs --standard=psr2 --severity=4 --tab-width=4 src tests",
+        "test": "phpunit --configuration phpunit.dist.xml"
     }
 }
