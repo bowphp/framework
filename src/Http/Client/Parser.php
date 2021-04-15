@@ -187,21 +187,18 @@ class Parser
     {
         $data = curl_exec($this->ch);
 
-        if ($data === false) {
-            $this->close();
-
-            throw new \Exception('Impossible to pass the result.');
-        }
-
         $this->error = curl_error($this->ch);
-
         $this->errno = curl_errno($this->ch);
-
         $this->header = curl_getinfo($this->ch);
-
         $this->executed = true;
 
         $this->close();
+
+        if ($data === false) {
+            throw new \Exception(
+                sprint("PASS ERROR: %s.", $this->error)
+            );
+        }
 
         return $data;
     }

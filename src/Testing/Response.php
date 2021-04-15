@@ -4,7 +4,7 @@ namespace Bow\Testing;
 
 use Bow\Http\Client\Parser;
 
-class Behavior
+class Response
 {
     /**
      * The http parser
@@ -254,5 +254,22 @@ class Behavior
     public function getContent()
     {
         return $this->content;
+    }
+
+    /**
+     * __call
+     *
+     * @param string $method
+     * @return mixed
+     */
+    public function __call(string $method)
+    {
+        if (method_exists($this->parser, $method)) {
+            return call_user_func([$this->parser, $method])
+        }
+
+        throw new ArgumentInvalidException(
+            "The method [$method] is not exists"
+        );
     }
 }

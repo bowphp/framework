@@ -47,7 +47,7 @@ class TestCase extends PHPUnitTestCase
      * Add attachment
      *
      * @param array $attach
-     * @return Behavior
+     * @return Response
      */
     public function attach(array $attach)
     {
@@ -74,7 +74,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Behavior
+     * @return Response
      */
     public function get($url, array $param = [])
     {
@@ -82,7 +82,7 @@ class TestCase extends PHPUnitTestCase
 
         $http->addHeaders($this->headers);
 
-        return new Behavior($http->get($url, $param));
+        return new Response($http->get($url, $param));
     }
 
     /**
@@ -90,7 +90,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Behavior
+     * @return Response
      */
     public function post($url, array $param = [])
     {
@@ -102,7 +102,7 @@ class TestCase extends PHPUnitTestCase
 
         $http->addHeaders($this->headers);
 
-        return new Behavior($http->post($url, $param));
+        return new Response($http->post($url, $param));
     }
 
     /**
@@ -110,7 +110,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Behavior
+     * @return Response
      */
     public function put($url, array $param = [])
     {
@@ -118,7 +118,7 @@ class TestCase extends PHPUnitTestCase
 
         $http->addHeaders($this->headers);
 
-        return new Behavior($http->put($url, $param));
+        return new Response($http->put($url, $param));
     }
 
     /**
@@ -126,7 +126,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Behavior
+     * @return Response
      */
     public function delete($url, array $param = [])
     {
@@ -134,7 +134,7 @@ class TestCase extends PHPUnitTestCase
             '_method' => 'DELETE'
         ], $param);
 
-        return new Behavior($this->put($url, $param));
+        return new Response($this->put($url, $param));
     }
 
     /**
@@ -142,7 +142,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Behavior
+     * @return Response
      */
     public function patch($url, array $param = [])
     {
@@ -150,16 +150,16 @@ class TestCase extends PHPUnitTestCase
             '_method' => 'PATCH'
         ], $param);
 
-        return new Behavior($this->put($url, $param));
+        return new Response($this->put($url, $param));
     }
 
     /**
-     * Initilalize Behavior action
+     * Initilalize Response action
      *
      * @param string $method
      * @param string $url
      * @param array  $params
-     * @return Behavior
+     * @return Response
      */
     public function visit($method, $url, array $params = [])
     {
