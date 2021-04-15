@@ -7,9 +7,9 @@ on:
     - cron: '0 0 * * 0'
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ${{ matrix.os }}
-    name: P${{ matrix.php }} / ${{ matrix.os }}
+    name: PHP-${{ matrix.php }} - ${{ matrix.os }}
 
     services:
       mysql:
@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.0, 7.4, 7.3, 7.2]
+        php: [7.4, 7.3, 7.2]
         os: [ubuntu-latest]
 
     steps:
@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction --no-suggest
+        run: composer install --prefer-dist --no-interaction
 
       - name: Create test cache directory
         run: if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
