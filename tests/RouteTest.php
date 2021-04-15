@@ -4,7 +4,7 @@ use Bow\Router\Route;
 
 class RouteTest extends \PHPUnit\Framework\TestCase
 {
-    public function testInstance()
+    public function test_route_instance()
     {
         $route = new Route('/', function () {
             return 'hello';
@@ -13,7 +13,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Route::class, $route);
     }
 
-    public function testSampleUri()
+    public function test_sample_uri()
     {
         $route = new Route('/', function () {
             return 'hello';
@@ -24,7 +24,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($route->call(), 'hello');
     }
 
-    public function testUriWithOneParameter()
+    public function test_uri_with_one_parameter()
     {
         $route = new Route('/:name', function ($name) {
             return $name == 'bow';
@@ -41,7 +41,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($route->match('/'));
     }
 
-    public function testUriWithMultiParameter()
+    public function test_uri_with_multi_parameter()
     {
         $route = new Route('/:name/:id', function ($name, $id) {
             return $name == 'bow' && $id == 1;
@@ -58,7 +58,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($route->match('/'));
     }
 
-    public function testUriWithOneParameterAndConstraint()
+    public function test_uri_with_one_parameter_and_constraint()
     {
         $route = new Route('/:name/:id', function ($name, $id) {
             return $name == 'bow' && $id == 1;

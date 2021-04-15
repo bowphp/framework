@@ -2,13 +2,11 @@
 
 class ConnectionTest extends \PHPUnit\Framework\TestCase
 {
-    public function testGetSqliteConnection()
+    public function test_get_sqlite_connection()
     {
-        $sqliteAdapter = new \Bow\Database\Connection\Adapter\SqliteAdapter([
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => ''
-        ]);
+        $config = require __DIR__.'/config/database.php';
+
+        $sqliteAdapter = new \Bow\Database\Connection\Adapter\SqliteAdapter($config['connection']['sqlite']);
 
         $this->assertInstanceOf(\Bow\Database\Connection\AbstractConnection::class, $sqliteAdapter);
 
@@ -18,7 +16,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetSqliteConnection
      */
-    public function testGetSqlitePdo($sqliteAdapter)
+    public function test_get_sqlite_pdo($sqliteAdapter)
     {
         $this->assertInstanceOf(\PDO::class, $sqliteAdapter->getConnection());
     }
@@ -26,18 +24,11 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     /**
      * @return \Bow\Database\Connection\Adapter\MysqlAdapter
      */
-    public function testGetMysqlConnection()
+    public function test_get_mysql_connection()
     {
-        $mysqlAdapter = new \Bow\Database\Connection\Adapter\MysqlAdapter([
-            'hostname' => getenv('DB_HOSTNAME') ? getenv('DB_HOSTNAME') : 'localhost',
-            'username' => getenv('DB_USERNAME') == 'travis' ? getenv('DB_USERNAME') : 'root',
-            'password' => getenv('DB_USERNAME') == 'travis' ? '' : getenv('DB_PASSWORD'),
-            'database' => 'test',
-            'charset'  => getenv('DB_CHARSET') ? getenv('DB_CHARSET') : 'utf8',
-            'collation' => getenv('DB_COLLATE') ? getenv('DB_COLLATE') : '',
-            'port' => null,
-            'socket' => null
-        ]);
+        $config = require __DIR__.'/config/database.php';
+
+        $mysqlAdapter = new \Bow\Database\Connection\Adapter\MysqlAdapter($config['connection']['mysql']);
 
         $this->assertInstanceOf(\Bow\Database\Connection\AbstractConnection::class, $mysqlAdapter);
 
@@ -47,8 +38,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetMysqlConnection
      */
-
-    public function testGetMysqlPdo($mysqlAdapter)
+    public function test_get_mysql_pdo($mysqlAdapter)
     {
         $this->assertInstanceOf(\PDO::class, $mysqlAdapter->getConnection());
     }

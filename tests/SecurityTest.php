@@ -21,7 +21,7 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
      * @depends depGetEncryptValue
      * @param $data
      */
-    public function testShouldDecryptData($data)
+    public function test_should_decrypt_data($data)
     {
         Crypto::setkey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
 
@@ -32,7 +32,7 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
      * @depends depGetHashValue
      * @param $data
      */
-    public function testShouldCheckHashValue($data)
+    public function test_should_check_hash_value($data)
     {
         $this->assertTrue(Hash::check('bow', $data));
     }

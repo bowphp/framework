@@ -13,12 +13,12 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
      * @dataProvider additionProvider
      * @param $name
      */
-    public function testInstanceOfDatabase($name)
+    public function test_instance_of_database($name)
     {
         $this->assertInstanceOf(Database::class, \Bow\Database\Database::connection($name));
     }
 
-    public function testGetDatabaseConnection()
+    public function test_get_database_connection()
     {
         return Database::getInstance();
     }
@@ -26,7 +26,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testCreateTable(Database $db)
+    public function test_create_table(Database $db)
     {
         $this->assertInstanceOf(Database::class, $db);
 
@@ -38,7 +38,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSimpleInsertTable(Database $db)
+    public function test_simple_insert_table(Database $db)
     {
         $this->assertEquals($db->insert("INSERT INTO pets VALUES (1, 'Bob'), (2, 'Milo');"), 2);
     }
@@ -46,7 +46,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testArrayInsertTable(Database $db)
+    public function test_array_insert_table(Database $db)
     {
         $this->assertEquals($db->insert("INSERT INTO pets VALUES(:id, :name);", [
             "id" => 3,
@@ -57,7 +57,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testArrayMultileInsertTable(Database $db)
+    public function test_array_multile_insert_table(Database $db)
     {
         $this->assertEquals($db->insert("INSERT INTO pets VALUES(:id, :name);", [
             [ "id" => 4, 'name' => 'Ploy'],
@@ -68,7 +68,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectTable(Database $db)
+    public function test_select_table(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets");
 
@@ -78,7 +78,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelect2Table(Database $db)
+    public function test_select_table_2(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets");
 
@@ -88,7 +88,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectWithGetOneElementTable(Database $db)
+    public function test_select_with_get_one_element_table(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets WHERE id = :id", ['id' => 1]);
 
@@ -98,7 +98,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectWithNotGetElementTable(Database $db)
+    public function test_select_with_not_get_element_table(Database $db)
     {
         $pets = $db->select("SELECT * FROM pets WHERE id = :id", [
             'id' => 6
@@ -112,7 +112,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testSelectOneTable(Database $db)
+    public function test_select_one_table(Database $db)
     {
         $pets = $db->selectOne("SELECT * FROM pets WHERE id = :id", [
             'id' => 1
@@ -124,7 +124,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testUpdateTable($db)
+    public function test_update_table($db)
     {
         $r = $db->update("UPDATE pets SET name = 'Filou' WHERE id = :id", [
             'id' => 1
@@ -136,7 +136,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testDeleteTable(Database $db)
+    public function test_delete_table(Database $db)
     {
         $r = $db->delete("DELETE FROM pets WHERE id = :id", ['id' => 1]);
 
@@ -146,7 +146,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testTransactionTable(Database $db)
+    public function test_transaction_table(Database $db)
     {
         $db->startTransaction(function () use ($db) {
             $r = $db->delete("DELETE FROM pets WHERE id = :id", ['id' => 2]);
@@ -160,7 +160,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testRollbackTable(Database $db)
+    public function test_rollback_table(Database $db)
     {
         $r = 0;
         
@@ -190,7 +190,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testStementTable(Database $db)
+    public function test_stement_table(Database $db)
     {
         $r = $db->statement("DROP TABLE pets");
 
@@ -200,7 +200,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testGetDatabaseConnection
      */
-    public function testStement2Table(Database $db)
+    public function test_stement_table_2(Database $db)
     {
         $r = $db->statement('CREATE TABLE IF NOT EXISTS pets (id INT, name VARCHAR(255))');
 

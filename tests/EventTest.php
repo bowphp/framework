@@ -33,7 +33,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
         statement('create table if not exists pets (id int, name varchar(255));');
     }
 
-    public function testAddEvent()
+    public function test_add_event()
     {
         Event::on('user.destroy', function ($name) {
             $this->assertEquals($name, 'destroy');
@@ -44,13 +44,13 @@ class EventTest extends \PHPUnit\Framework\TestCase
         });
     }
 
-    public function testEventEmit1()
+    public function test_event_emit_1()
     {
         Event::emit('user.created', 'created');
         Event::emit('user.destroy', 'destroy');
     }
 
-    public function testModelCreated()
+    public function test_model_created()
     {
         $pets = new EventTable();
 
@@ -64,7 +64,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($pets->save(), 1);
     }
 
-    public function testModelUpdated()
+    public function test_model_updated()
     {
         $pet = EventTable::find(1);
 
@@ -75,7 +75,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($pet->save(), 1);
     }
 
-    public function testModelDeleted()
+    public function test_model_deleted()
     {
         $pet = EventTable::find(1);
 

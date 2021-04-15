@@ -14,12 +14,12 @@ class EnvTest extends \PHPUnit\Framework\TestCase
         Env::load(__DIR__.'/data/.env.json');
     }
 
-    public function testIsLoaded()
+    public function test_is_loaded()
     {
         $this->assertEquals(Env::isLoaded(), true);
     }
 
-    public function testGet()
+    public function test_get()
     {
         $this->assertEquals(Env::get('NAME'), 'papac');
 
@@ -28,7 +28,7 @@ class EnvTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(Env::get('SINCE', date('Y')), date('Y'));
     }
 
-    public function testSet()
+    public function test_set()
     {
         Env::set('NAME', 'bow framework');
 
