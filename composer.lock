@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bac1db1b814e0fc92224ba4923ae0302",
+    "content-hash": "5279b1b905beaee3813415fc3dbf6a95",
     "packages": [
         {
             "name": "bowphp/tintin",
@@ -3587,7 +3587,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.2"
+        "php": "^7.2|^8.0"
     },
     "platform-dev": [],
     "plugin-api-version": "2.0.0"
