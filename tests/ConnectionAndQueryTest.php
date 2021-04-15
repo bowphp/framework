@@ -15,29 +15,6 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
      */
     public function testInstanceOfDatabase($name)
     {
-        Database::configure([
-            'fetch' => \PDO::FETCH_OBJ,
-            'default' => 'mysql',
-            'connection' => [
-                'mysql' => [
-                    'driver' => 'mysql',
-                    'hostname' => getenv('MYSQL_DATABASE'),
-                    'username' => getenv('MYSQL_USER'),
-                    'password' => getenv('MYSQL_PASSWORD'),
-                    'database' => getenv('MYSQL_DATABASE'),
-                    'charset'  => getenv('MYSQL_CHARSET'),
-                    'collation' => getenv('MYSQL_COLLATE') ? getenv('MYSQL_COLLATE') : 'utf8_unicode_ci',
-                    'port' => null,
-                    'socket' => null
-                ],
-                'sqlite' => [
-                    'driver' => 'sqlite',
-                    'database' => __DIR__ . '/data/database.sqlite',
-                    'prefix' => ''
-                ]
-            ]
-        ]);
-
         $this->assertInstanceOf(Database::class, \Bow\Database\Database::connection($name));
     }
 

@@ -6,6 +6,12 @@ on:
   schedule:
     - cron: '0 0 * * 0'
 
+env:
+  FTP_HOST: localhost
+  FTP_USER: bob
+  FTP_PASSWORD: 12345
+  FTP_PORT: 21
+
 jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
