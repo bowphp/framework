@@ -190,16 +190,4 @@ class TestCase extends PHPUnitTestCase
 
         return $faker;
     }
-
-    /**
-     * Seed alias
-     *
-     * @param string $seeder
-     * @param array $data
-     * @return int
-     */
-    public function seed($seeder, array $data = [])
-    {
-        return seed($seeder, $data);
-    }
 }
