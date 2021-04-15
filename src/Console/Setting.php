@@ -136,6 +136,13 @@ class Setting
     private $service_directory;
 
     /**
+     * The event directory
+     *
+     * @var string
+     */
+    private $event_directory;
+
+    /**
      * The namesapces directory
      *
      * @var array
@@ -339,6 +346,17 @@ class Setting
     }
 
     /**
+     * Set the event directory
+     *
+     * @param string $event_directory
+     * @return void
+     */
+    public function setEventDirectory($event_directory)
+    {
+        $this->event_directory = $event_directory;
+    }
+
+    /**
      * Set the namespaces
      *
      * @param array $namespaces
@@ -439,6 +457,16 @@ class Setting
     public function getServiceDirectory()
     {
         return $this->service_directory;
+    }
+
+    /**
+     * Get the event directory
+     *
+     * @return string
+     */
+    public function getEventDirectory()
+    {
+        return $this->event_directory;
     }
 
     /**
