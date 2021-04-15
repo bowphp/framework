@@ -110,7 +110,9 @@ class Application extends Router
     {
         $this->config = $config;
 
-        $this->setBaseRoute($config['app.root']);
+        if (is_string($config['app']['root'])) {
+            $this->setBaseRoute($config['app']['root']);
+        }
 
         $this->capsule->instance('config', $config);
 
