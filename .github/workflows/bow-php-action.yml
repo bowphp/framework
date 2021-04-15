@@ -1,6 +1,5 @@
 name: Bow Framework CI
 description: 'The Bow Framework Github action CI'
-author: 'Franck DAKIA'
 
 on:
   push:
