@@ -44,6 +44,19 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
+     * Add attachment
+     *
+     * @param array $attach
+     * @return Behavior
+     */
+    public function attach(array $attach)
+    {
+        $this->attach = $attach;
+
+        return $this;
+    }
+
+    /**
      * Specify the additionnal who are use in the request
      *
      * @param array $headers
@@ -61,7 +74,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Parser
+     * @return Behavior
      */
     public function get($url, array $param = [])
     {
@@ -69,7 +82,7 @@ class TestCase extends PHPUnitTestCase
 
         $http->addHeaders($this->headers);
 
-        return $http->get($url, $param);
+        return new Behavior($http->get($url, $param));
     }
 
     /**
@@ -77,7 +90,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Parser
+     * @return Behavior
      */
     public function post($url, array $param = [])
     {
@@ -89,20 +102,7 @@ class TestCase extends PHPUnitTestCase
 
         $http->addHeaders($this->headers);
 
-        return $http->post($url, $param);
-    }
-
-    /**
-     * Add attachment
-     *
-     * @param array $attach
-     * @return Parser
-     */
-    public function attach(array $attach)
-    {
-        $this->attach = $attach;
-
-        return $this;
+        return new Behavior($http->post($url, $param));
     }
 
     /**
@@ -110,7 +110,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Parser
+     * @return Behavior
      */
     public function put($url, array $param = [])
     {
@@ -118,7 +118,7 @@ class TestCase extends PHPUnitTestCase
 
         $http->addHeaders($this->headers);
 
-        return $http->put($url, $param);
+        return new Behavior($http->put($url, $param));
     }
 
     /**
@@ -126,7 +126,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Parser
+     * @return Behavior
      */
     public function delete($url, array $param = [])
     {
@@ -134,7 +134,7 @@ class TestCase extends PHPUnitTestCase
             '_method' => 'DELETE'
         ], $param);
 
-        return $this->put($url, $param);
+        return new Behavior($this->put($url, $param));
     }
 
     /**
@@ -142,7 +142,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $url
      * @param array $param
-     * @return Parser
+     * @return Behavior
      */
     public function patch($url, array $param = [])
     {
@@ -150,7 +150,7 @@ class TestCase extends PHPUnitTestCase
             '_method' => 'PATCH'
         ], $param);
 
-        return $this->put($url, $param);
+        return new Behavior($this->put($url, $param));
     }
 
     /**
@@ -167,27 +167,10 @@ class TestCase extends PHPUnitTestCase
 
         if (!method_exists($this, $method)) {
             throw new \BadMethodCallException(
-                'The ' . $method . ' method does not exists.'
+                'The HTTP [' . $method . '] method does not exists.'
             );
         }
 
-        return new Behavior($this->$method($url, $params));
-    }
-
-    /**
-     * Get fake instance
-     *
-     * @see https://github.com/fzaninotto/Faker for all documentation
-     * @return \Faker\Generator;
-     */
-    public function faker()
-    {
-        static $faker;
-
-        if (is_null($faker)) {
-            $faker = \Faker\Factory::create();
-        }
-
-        return $faker;
+        return $this->$method($url, $params);
     }
 }
