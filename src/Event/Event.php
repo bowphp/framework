@@ -9,13 +9,6 @@ use Bow\Support\Collection;
 class Event
 {
     /**
-     * __clone
-     */
-    final private function __clone()
-    {
-    }
-
-    /**
      * The event collector
      *
      * @var array

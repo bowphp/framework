@@ -39,7 +39,16 @@ class Listener
      */
     public function call(array $data)
     {
-        return call_user_func_array($this->callable, $data);
+        $callable = $this->callable;
+
+        if (class_exists($this->callable, true)) {
+            $instance = app($this->callable);
+            if ($instance instanceof EventListerner) {
+                $callable = [$instance, 'process'];
+            }
+        }
+
+        return call_user_func_array($callable, $data);
     }
 
     /**
