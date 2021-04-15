@@ -45,7 +45,7 @@ jobs:
       - name: Set up MySQL
         run: |
           sudo /etc/init.d/mysql start
-          mysql -u root -e "CREATE DATABASE IF NOT EXISTS test_db;" --protocol=TCP
+          # mysql -u root -e "CREATE DATABASE IF NOT EXISTS test_db;" --protocol=TCP
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
