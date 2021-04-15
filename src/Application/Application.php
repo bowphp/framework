@@ -114,6 +114,9 @@ class Application extends Router
             $this->setBaseRoute($config['app']['root']);
         }
 
+        // We active the auto csrf switcher
+        $this->setAutoCsrf($config['app']['auto_csrf']);
+
         $this->capsule->instance('config', $config);
 
         $this->boot();

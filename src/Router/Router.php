@@ -41,6 +41,13 @@ class Router
     protected $current = [];
 
     /**
+     * Define the auto csrf check status.
+     *
+     * @var bool
+     */
+    protected $auto_csrf = true;
+
+    /**
      * Route collection.
      *
      * @var array
@@ -90,6 +97,17 @@ class Router
     public function setBaseRoute(string $base_route)
     {
         $this->base_route = $base_route;
+    }
+
+    /**
+     * Set auto CSRF status
+     * Note: Disable only you run on test env
+     *
+     * @param bool $auto_csrf
+     */
+    public function setAutoCsrf(bool $auto_csrf)
+    {
+        $this->auto_csrf = $auto_csrf;
     }
 
     /**
@@ -368,8 +386,10 @@ class Router
 
         static::$routes[$method][] = $route;
 
-        if (in_array($method, ['POST', 'DELETE', 'PUT'])) {
-            $route->middleware('csrf');
+        if (app_env('APP_ENV') != 'production' && $this->auto_csrf === true) {
+            if (in_array($method, ['POST', 'DELETE', 'PUT'])) {
+                $route->middleware('csrf');
+            }
         }
 
         return $route;
