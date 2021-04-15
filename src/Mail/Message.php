@@ -194,7 +194,7 @@ class Message
     public function addFile($file)
     {
         if (!is_file($file)) {
-            throw new MailException("File not found.", E_USER_ERROR);
+            throw new MailException("The $file file was not found.", E_USER_ERROR);
         }
 
         $this->attachment[] = $file;

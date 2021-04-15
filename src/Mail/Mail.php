@@ -33,13 +33,6 @@ class Mail
     private static $config;
 
     /**
-     * Maxi singleton
-     */
-    private function __clone()
-    {
-    }
-
-    /**
      * Mail constructor
      *
      * @param array $config
