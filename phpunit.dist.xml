@@ -6,8 +6,8 @@
     <php>
         <env name="MYSQL_HOSTNAME" value="localhost"/>
         <env name="MYSQL_DATABASE" value="test_db"/>
-        <env name="MYSQL_USER" value="test_user"/>
-        <env name="MYSQL_PASSWORD" value="test_password"/>
+        <env name="MYSQL_USER" value="root"/>
+        <env name="MYSQL_PASSWORD" value=""/>
         <env name="MYSQL_CHARSET" value="utf8"/>
         <env name="MYSQL_COLLATE" value="utf8_unicode_ci"/>
     </php>
