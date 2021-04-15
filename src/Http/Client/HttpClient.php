@@ -72,19 +72,17 @@ class HttpClient
     {
         $this->resetAndAssociateUrl($url);
 
-        if (!curl_setopt($this->ch, CURLOPT_POST, true)) {
-            if (!empty($this->attach)) {
-                curl_setopt($this->ch, CURLOPT_SAFE_UPLOAD, true);
+        if (!empty($this->attach)) {
+            curl_setopt($this->ch, CURLOPT_UPLOAD, true);
 
-                foreach ($this->attach as $key => $attach) {
-                    $this->attach[$key] = '@'.ltrim('@', $attach);
-                }
-
-                $data = array_merge($this->attach, $data);
+            foreach ($this->attach as $key => $attach) {
+                $this->attach[$key] = '@'.ltrim('@', $attach);
             }
 
-            $this->addFields($data);
+            $data = array_merge($this->attach, $data);
         }
+
+        $this->addFields($data);
 
         return new Parser($this->ch);
     }
@@ -161,8 +159,6 @@ class HttpClient
      */
     private function addFields(array $data)
     {
-        if (!empty($data)) {
-            curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
-        }
+        curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
     }
 }
