@@ -1,14 +1,10 @@
 name: Bow Framework CI
+description: 'The Bow Framework Github action CI'
+author: 'Franck DAKIA'
 
 on:
   push:
-    branches: 
-      - 4.0
-      - master
   pull_request:
-    branches: 
-      - 4.0
-      - master
   schedule:
     - cron: '0 0 * * 0'
 
@@ -19,24 +15,28 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_DATABASE: test
-          MYSQL_USER: test
-          MYSQL_PASSWORD: test
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
         ports:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - uses: actions/checkout@v2
+
       - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
+
       - run: docker run -p 1025:25 -p 1080:80 -d --name maildev maildev/maildev
+
       - name: Set up MySQL
         run: |
           sudo /etc/init.d/mysql start
-          mysql -u root -e "CREATE DATABASE IF NOT EXISTS test;"
+          sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS test_db;"
+
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
+
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v2
@@ -45,11 +45,22 @@ jobs:
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-php-
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+
       - name: Create test cache directory
         run: if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
+
       - name: Check code standard
         run: ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
+
       - name: Run test suite
         run: composer run-script test
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        if: failure()
+        with:
+          name: Logs
+          path: ./logs
