@@ -76,4 +76,4 @@ jobs:
         if: failure()
         with:
           name: Logs
-          path: ./logs
+          path: .
