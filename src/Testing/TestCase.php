@@ -193,7 +193,7 @@ class TestCase extends PHPUnitTestCase
 
     /**
      * Seed alias
-     * 
+     *
      * @param string $seeder
      * @param array $data
      * @return int

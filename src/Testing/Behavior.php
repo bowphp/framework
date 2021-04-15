@@ -248,7 +248,7 @@ class Behavior
 
     /**
      * Get the response content
-     * 
+     *
      * @return string
      */
     public function getContent()
