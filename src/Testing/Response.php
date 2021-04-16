@@ -269,7 +269,7 @@ class Response
             return call_user_func([$this->parser, $method]);
         }
 
-        throw new ArgumentInvalidException(
+        throw new InvalidArgumentException(
             "The method [$method] is not exists"
         );
     }
