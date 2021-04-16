@@ -265,7 +265,7 @@ class Response
     public function __call(string $method)
     {
         if (method_exists($this->parser, $method)) {
-            return call_user_func([$this->parser, $method])
+            return call_user_func([$this->parser, $method]);
         }
 
         throw new ArgumentInvalidException(
