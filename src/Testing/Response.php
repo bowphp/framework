@@ -260,9 +260,10 @@ class Response
      * __call
      *
      * @param string $method
+     * @param array $params
      * @return mixed
      */
-    public function __call(string $method)
+    public function __call(string $method, array $params = [])
     {
         if (method_exists($this->parser, $method)) {
             return call_user_func([$this->parser, $method]);
