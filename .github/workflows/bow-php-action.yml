@@ -47,10 +47,6 @@ jobs:
 
       - run: docker run -p 1025:25 -p 1080:80 -d --name maildev maildev/maildev
 
-      - name: Set up MySQL
-        run: |
-          sudo /etc/init.d/mysql start
-
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
 
