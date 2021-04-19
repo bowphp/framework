@@ -22,7 +22,6 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_DATABASE: test_db
-          MYSQL_USER: test_user
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
         ports:
           - 3306
@@ -51,7 +50,6 @@ jobs:
       - name: Set up MySQL
         run: |
           sudo /etc/init.d/mysql start
-          # mysql -u root -e "CREATE DATABASE IF NOT EXISTS test_db;" --protocol=TCP
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
