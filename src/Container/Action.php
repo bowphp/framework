@@ -156,6 +156,16 @@ class Action
         }
 
         /**
+         * We verify if controller is associate to action
+         * like [AppController::class, 'action']
+         */
+        if (count($actions) === 2) {
+            if (class_exists($actions[0])) {
+                $actions = [$actions[0] . '::' . $actions[1]];
+            }
+        }
+
+        /**
          * We verify the existence of controller associated
          * with the action and extracting the controller
          */
@@ -206,7 +216,7 @@ class Action
 
                 continue;
             }
-            
+
             $parts = [];
 
             if (is_string($middleware)) {
@@ -214,7 +224,7 @@ class Action
 
                 $middleware = $parts[0];
             }
-            
+
             // We check if middleware if define via aliases
             if (!array_key_exists($middleware, $this->middlewares)) {
                 throw new RouterException(sprintf('%s is not define middleware.', $middleware), E_ERROR);
