@@ -2,7 +2,7 @@
 
 namespace Bow\Event;
 
-use Bow\Container\Actionner;
+use Bow\Container\Action;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 

@@ -4,7 +4,7 @@ namespace Bow\Application;
 
 use Bow\Application\Exception\ApplicationException;
 use Bow\Container\Capsule;
-use Bow\Container\Actionner;
+use Bow\Container\Action;
 use Bow\Configuration\Loader;
 use Bow\Contracts\ResponseInterface;
 use Bow\Http\Exception\HttpException;
@@ -232,7 +232,7 @@ class Application extends Router
         $this->response->status(404);
 
         if (array_key_exists(404, $this->error_code)) {
-            $response = Actionner::getInstance()->execute($this->error_code[404], []);
+            $response = Action::getInstance()->execute($this->error_code[404], []);
 
             return $this->sendResponse($response, 404);
         }

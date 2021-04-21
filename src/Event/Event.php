@@ -2,7 +2,7 @@
 
 namespace Bow\Event;
 
-use Bow\Container\Actionner;
+use Bow\Container\Action;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 
@@ -126,7 +126,7 @@ class Event
                 $callable = [$listener, 'call'];
             }
 
-            return Actionner::getInstance()->execute($callable, [$data]);
+            return Action::getInstance()->execute($callable, [$data]);
         });
 
         return true;

@@ -13,7 +13,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
 
-class Actionner
+class Action
 {
     /**
      * The list of namespaces defined in the application
@@ -30,9 +30,9 @@ class Actionner
     private $middlewares;
 
     /**
-     * The Actionner instance
+     * The Action instance
      *
-     * @var Actionner
+     * @var Action
      */
     private static $instance;
 
@@ -44,7 +44,7 @@ class Actionner
     private $dispatcher;
 
     /**
-     * Actionner constructor
+     * Action constructor
      *
      * @param array $namespaces
      * @param array $middlewares
@@ -59,7 +59,7 @@ class Actionner
     }
 
     /**
-     * Actionner configuration
+     * Action configuration
      *
      * @param array $namespaces
      * @param array $middlewares
@@ -76,9 +76,9 @@ class Actionner
     }
 
     /**
-     * Retrieves Actionner instance
+     * Retrieves Action instance
      *
-     * @return Actionner
+     * @return Action
      */
     public static function getInstance()
     {

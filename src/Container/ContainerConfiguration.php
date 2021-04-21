@@ -2,7 +2,7 @@
 
 namespace Bow\Container;
 
-use Bow\Container\Actionner;
+use Bow\Container\Action;
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
 
@@ -23,7 +23,7 @@ class ContainerConfiguration extends Configuration
         $this->container->bind('actionner', function () use ($config) {
             $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
 
-            return Actionner::configure($config->namespaces(), $middlewares);
+            return Action::configure($config->namespaces(), $middlewares);
         });
     }
 

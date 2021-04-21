@@ -2,7 +2,7 @@
 
 namespace Bow\Router;
 
-use Bow\Container\Actionner;
+use Bow\Container\Action;
 use Bow\Configuration\Loader;
 use Bow\Http\Request;
 
@@ -180,7 +180,7 @@ class Route
             $this->match[$key] = $tmp;
         }
 
-        return Actionner::getInstance()->call($this->cb, $this->match);
+        return Action::getInstance()->call($this->cb, $this->match);
     }
 
     /**
