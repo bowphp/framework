@@ -1550,6 +1550,12 @@ if (!function_exists('seed')) {
         }
 
         foreach ($collection as $table => $seed) {
+            if (class_exists($table, true)) {
+                $instance = app($table);
+                if ($instance instanceof \Bow\Database\Barry\Model) {
+                    $table = $instance->getTable();
+                }
+            }
             DB::table($table)->insert($seed);
         }
     }

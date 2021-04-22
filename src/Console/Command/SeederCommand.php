@@ -97,6 +97,12 @@ class SeederCommand extends AbstractCommand
 
         try {
             foreach ($seed_collection as $table => $seed) {
+                if (class_exists($table, true)) {
+                    $instance = app($table);
+                    if ($instance instanceof \Bow\Database\Barry\Model) {
+                        $table = $instance->getTable();
+                    }
+                }
                 $n = Database::table($table)->insert($seed);
 
                 echo Color::green("$n seed".($n > 1 ? 's' : '')." on $table table\n");
