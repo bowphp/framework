@@ -125,10 +125,16 @@ if (!function_exists('db')) {
 
         if ($last_connection !== $name) {
             DB::connection($name);
+
+            if (is_callable($cb)) {
+                $cb();
+
+                return DB::connection($last_connection);
+            }
         }
 
         if (is_callable($cb)) {
-            return $cb();
+            $cb();
         }
 
         return DB::connection($last_connection);
@@ -177,7 +183,7 @@ if (!function_exists('table')) {
     }
 }
 
-if (!function_exists('last_insert_id')) {
+if (!function_exists('get_last_insert_id')) {
     /**
      * Returns the last ID following an INSERT query
      * on a table whose ID is auto_increment.
@@ -185,29 +191,29 @@ if (!function_exists('last_insert_id')) {
      * @param  string $name
      * @return int
      */
-    function last_insert_id($name = null)
+    function get_last_insert_id($name = null)
     {
         return DB::lastInsertId($name);
     }
 }
 
-if (!function_exists('select')) {
+if (!function_exists('db_select')) {
     /**
      * Launches SELECT SQL Queries
      *
-     * select('SELECT * FROM users');
+     * db_select('SELECT * FROM users');
      *
      * @param string   $sql
      * @param array    $data
      * @return int|array|stdClass
      */
-    function select($sql, $data = [])
+    function db_select($sql, $data = [])
     {
         return DB::select($sql, $data);
     }
 }
 
-if (!function_exists('select_one')) {
+if (!function_exists('db_select_one')) {
     /**
      * Launches SELECT SQL Queries
      *
@@ -215,13 +221,13 @@ if (!function_exists('select_one')) {
      * @param array    $data
      * @return int|array|StdClass
      */
-    function select_one($sql, $data = [])
+    function db_select_one($sql, $data = [])
     {
         return DB::selectOne($sql, $data);
     }
 }
 
-if (!function_exists('insert')) {
+if (!function_exists('db_insert')) {
     /**
      * Launches INSERT SQL Queries
      *
@@ -229,13 +235,13 @@ if (!function_exists('insert')) {
      * @param array    $data
      * @return int
      */
-    function insert($sql, array $data = [])
+    function db_insert($sql, array $data = [])
     {
         return DB::insert($sql, $data);
     }
 }
 
-if (!function_exists('delete')) {
+if (!function_exists('db_delete')) {
     /**
      * Launches DELETE type SQL queries
      *
@@ -243,13 +249,13 @@ if (!function_exists('delete')) {
      * @param array    $data
      * @return int
      */
-    function delete($sql, $data = [])
+    function db_delete($sql, $data = [])
     {
         return DB::delete($sql, $data);
     }
 }
 
-if (!function_exists('update')) {
+if (!function_exists('db_update')) {
     /**
      * Launches UPDATE SQL Queries
      *
@@ -257,20 +263,20 @@ if (!function_exists('update')) {
      * @param array  $data
      * @return int
      */
-    function update($sql, array $data = [])
+    function db_update($sql, array $data = [])
     {
         return DB::update($sql, $data);
     }
 }
 
-if (!function_exists('statement')) {
+if (!function_exists('db_statement')) {
     /**
      * Launches CREATE TABLE, ALTER TABLE, RENAME, DROP TABLE SQL Query
      *
      * @param string $sql
      * @return int
      */
-    function statement($sql)
+    function db_statement($sql)
     {
         return DB::statement($sql);
     }
