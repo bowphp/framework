@@ -57,7 +57,7 @@ class Sanitize
      */
     public static function data($data)
     {
-        return stripslashes(stripslashes(trim($data)));
+        return trim($data);
     }
 
     /**
