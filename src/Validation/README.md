@@ -8,10 +8,11 @@ Let's show a little exemple:
 $data = ["name" => "Franck DAKIA"];
 
 $validation = validator($data, [
-	"name" => "required|max:50"
+    "name" => "required|max:50"
 ]);
 
 if ($validation->fails()) {
-	doSomething();
+    doSomething();
+    $validation->getMessages();
 }
 ```

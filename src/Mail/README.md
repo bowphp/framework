@@ -13,8 +13,8 @@ Let's show a little exemple:
 use Bow\Mail\Message;
 
 email('view.template', function (Message $message) {
-	$message->to("papac@bowphp.com");
-	$message->subject("Hello Franck DAKIA");
+    $message->to("papac@bowphp.com");
+    $message->subject("Hello Franck DAKIA");
 });
 ```
 

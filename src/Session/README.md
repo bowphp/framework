@@ -4,6 +4,6 @@ Bow Framework's session system is beautiful interface to manage PHP Session feat
 He support:
 
 - Native PHP Session
-- Database session driver 
+- Database session driver
 
-BN: You can add your custom session support
+NB: You can add your custom session support

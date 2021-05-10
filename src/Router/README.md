@@ -10,7 +10,7 @@ Let's show a little exemple:
 
 ```php
 $app->get('/', function () {
-	return "Hello guy!";
+    return "Hello guy!";
 });
 ```
 
