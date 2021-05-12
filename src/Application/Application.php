@@ -76,15 +76,12 @@ class Application extends Router
     protected function __construct(Request $request, Response $response)
     {
         $this->request = $request;
-
         $this->response = $response;
 
         $this->capsule = Capsule::getInstance();
 
         $this->capsule->instance('request', $request);
-
         $this->capsule->instance('response', $response);
-
         $this->capsule->instance('app', $this);
 
         parent::__construct($request->method(), $request->get('_method'));
@@ -277,7 +274,7 @@ class Application extends Router
     }
 
     /**
-     * REST API Maker.
+     * Make the REST API base on route and ressource controller.
      *
      * @param string $url
      * @param string|array $controller_name
@@ -387,7 +384,7 @@ class Application extends Router
      *
      * This point method on the container system
      *
-     * @param array ...$params
+     * @param array $params
      * @return Capsule
      * @throws ApplicationException
      */

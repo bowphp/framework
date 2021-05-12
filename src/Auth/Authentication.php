@@ -7,7 +7,7 @@ use Bow\Database\Barry\Model;
 class Authentication extends Model
 {
     /**
-     * Get User id
+     * Get the user id
      *
      * @return mixed
      */
