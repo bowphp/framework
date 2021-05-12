@@ -3,7 +3,7 @@
 return [
     'fetch' => \PDO::FETCH_OBJ,
     'default' => 'mysql',
-    'connection' => [
+    'connections' => [
         'mysql' => [
             'driver' => 'mysql',
             'hostname' => getenv('MYSQL_HOSTNAME'),

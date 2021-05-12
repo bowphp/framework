@@ -335,7 +335,7 @@ class Console
         $action = $this->arg->getParameter('action');
 
         if (!in_array($action, ['key', 'resource', 'session'])) {
-            $this->throwFailsAction('This action is not exists', 'help generate');
+            $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
         $target = $this->arg->getParameter('target');
@@ -377,7 +377,7 @@ class Console
     {
         if ($command === null) {
             $usage = <<<USAGE
-Bow tqsk runner usage: php bow command:action [name] --option
+Bow task runner usage: php bow command:action [name] --option
 
 \033[0;32mCOMMAND\033[00m:
 

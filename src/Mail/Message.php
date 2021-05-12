@@ -259,7 +259,7 @@ class Message
     /**
      * Define the type of content in text/html
      *
-     * @param  string $html=null
+     * @param  string $html
      * @return Message
      */
     public function html($html)

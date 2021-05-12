@@ -135,7 +135,6 @@ trait NumberColumn
      * Add Medium integer column
      *
      * @param string $column
-     * @param array $attribute
      * @return SQLGenerator
      */
     public function addMediumIncrement($column)

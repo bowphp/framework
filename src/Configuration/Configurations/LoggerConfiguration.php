@@ -2,6 +2,9 @@
 
 namespace Bow\Configuration\Configurations;
 
+use Bow\Contracts\ResponseInterface;
+use Bow\Database\Barry\Model;
+use Bow\Support\Collection;
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
 use Monolog\Handler\FirePHPHandler;
@@ -56,10 +59,24 @@ class LoggerConfiguration extends Configuration
                 function ($exception, $inspector, $run) use ($monolog, $error_handler) {
                     $monolog->error($exception->getMessage(), $exception->getTrace());
 
-                    return call_user_func_array(
+                    $result = call_user_func_array(
                         [new $error_handler, 'handle'],
                         [$exception]
                     );
+
+                    switch (true) {
+                        case is_null($result):
+                        case is_string($result):
+                        case is_array($result):
+                        case is_object($result):
+                        case $result instanceof \Iterable:
+                            return $result;
+                        case $result instanceof ResponseInterface:
+                            return $result->sendContent();
+                        case $result instanceof Model || $result instanceof Collection:
+                            return $result->toArray();
+                    }
+                    exit(1);
                 }
             );
 

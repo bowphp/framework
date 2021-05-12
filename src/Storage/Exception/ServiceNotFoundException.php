@@ -26,9 +26,7 @@ class ServiceNotFoundException extends ErrorException
     }
 
     /**
-     * Set the service name
-     *
-     * @param string $service_name
+     * Get the service name
      *
      * @return void
      */

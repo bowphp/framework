@@ -32,6 +32,7 @@ class Translator
      *
      * @param string $lang
      * @param string $directory
+     * @param bool $auto_detected
      */
     public function __construct($lang, $directory, $auto_detected = false)
     {

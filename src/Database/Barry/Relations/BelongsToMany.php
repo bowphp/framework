@@ -4,6 +4,7 @@ namespace Bow\Database\Barry\Relations;
 
 use Bow\Database\Barry\Relation;
 use Bow\Database\Barry\Model;
+use Bow\Database\Collection;
 
 class BelongsToMany extends Relation
 {
@@ -40,9 +41,7 @@ class BelongsToMany extends Relation
     /**
      * Get the results of the relationship.
      *
-     * @param  $relation
-     *
-     * @return Model
+     * @return Collection
      */
     public function getResults()
     {

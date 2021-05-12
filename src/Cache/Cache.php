@@ -27,7 +27,8 @@ class Cache
     /**
      * Cache constructor.
      *
-     * @param $base_directory
+     * @param string $base_directory
+     * @return mixed
      */
     public function __construct($base_directory)
     {
@@ -75,6 +76,23 @@ class Cache
             static::makeHashFilename($key, true),
             serialize($meta)
         );
+    }
+
+    /**
+     * Add many item
+     *
+     * @param array $data
+     * @return bool
+     */
+    public static function addMany(array $data) : bool
+    {
+        $return = true;
+
+        foreach ($data as $attribute => $value) {
+            $return = static::add($attribute, $value);
+        }
+
+        return $return;
     }
 
     /**
@@ -283,6 +301,25 @@ class Cache
     }
 
     /**
+     * Clear all cache
+     *
+     * @return void
+     */
+    public static function clear()
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(static::$directory),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            if (! $file->isDir()) {
+                unlink($file->getRealPath());
+            }
+        }
+    }
+
+    /**
      * Format the file
      *
      * @param  string $key
@@ -305,23 +342,6 @@ class Cache
     }
 
     /**
-     * Allows empty all cache
-     */
-    public static function clear()
-    {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(static::$directory),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($iterator as $file) {
-            if (! $file->isDir()) {
-                unlink($file->getRealPath());
-            }
-        }
-    }
-
-    /**
      * __call
      *
      * @param $name
@@ -335,18 +355,5 @@ class Cache
         }
 
         throw new BadMethodCallException("The $name method does not exist");
-    }
-
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public static function addMany(array $data) : bool
-    {
-        foreach ($data as $attributes => $value) {
-            static::add($attributes, $value);
-        }
-
-        return true;
     }
 }

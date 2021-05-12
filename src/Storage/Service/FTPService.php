@@ -360,10 +360,9 @@ class FTPService implements ServiceInterface
      * Create a directory.
      *
      * @param string $directory
-     *
      * @return bool
      */
-    protected function makeActualDirectory($directory, $mode)
+    protected function makeActualDirectory($directory)
     {
         $connection = $this->getConnection();
 

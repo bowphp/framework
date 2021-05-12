@@ -187,6 +187,7 @@ class Response
      * Check the status code
      *
      * @param int $code
+     * @param string $message
      *
      * @return Behavior
      */

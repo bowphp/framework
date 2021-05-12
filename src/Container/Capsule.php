@@ -194,14 +194,14 @@ class Capsule implements ArrayAccess
         if (!$constructor) {
             return $reflection->newInstance();
         }
-        
+
         $parameters = $constructor->getParameters();
         
         $parameters_lists = [];
         
         foreach ($parameters as $parameter) {
-            if ($parameter->getClass()) {
-                $parameters_lists[] = $this->make($parameter->getClass()->getName());
+            if ($parameter->getType()) {
+                $parameters_lists[] = $this->make($parameter->getType()->getName());
             } else {
                 $parameters_lists[] = $parameter->getDefaultValue();
             }

@@ -144,7 +144,8 @@ abstract class Migration
     /**
      * Add SQL query
      *
-     * @param string $sql
+     * @param string $table
+     * @param string $to
      * @return Migration
      */
     final public function renameTable($table, $to)

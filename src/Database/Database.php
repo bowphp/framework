@@ -91,7 +91,7 @@ class Database
             $name = static::$name;
         }
 
-        if (!isset(static::$config['connection'][$name])) {
+        if (!isset(static::$config['connections'][$name])) {
             throw new ConnectionException('The connection "' . $name . '" is not defined.');
         }
 
@@ -99,7 +99,7 @@ class Database
             static::$adapter = null;
         }
 
-        $config = static::$config['connection'][$name];
+        $config = static::$config['connections'][$name];
 
         static::$name = $name;
 

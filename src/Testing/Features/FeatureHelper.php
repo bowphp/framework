@@ -8,7 +8,7 @@ trait FeatureHelper
      * Get fake instance
      *
      * @see https://github.com/fzaninotto/Faker for all documentation
-     * @return \Faker\Generator;
+     * @return \Faker\Generator
      */
     public function faker()
     {

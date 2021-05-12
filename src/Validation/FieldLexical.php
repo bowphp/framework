@@ -28,7 +28,7 @@ trait FieldLexical
             $attributes = ['attribute' => $attributes];
         }
 
-        // Get lexical provider by application part
+        // Get lexical provided by dev app
         $lexical = trans('validation.' . $key, $attributes);
 
         if (is_null($lexical)) {
@@ -46,7 +46,7 @@ trait FieldLexical
      * @param string $lexical
      * @return array
      */
-    private function parseAttribute(array $attributes, $lexical)
+    private function parseAttribute(array $attributes, string $lexical)
     {
         foreach ($attributes as $key => $value) {
             $lexical = str_replace('{' . $key . '}', $value, $lexical);

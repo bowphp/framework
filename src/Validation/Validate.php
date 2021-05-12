@@ -3,6 +3,7 @@
 namespace Bow\Validation;
 
 use Bow\Validation\Exception\ValidationException;
+use Bow\Support\Arraydotify;
 
 class Validate
 {
@@ -126,6 +127,14 @@ class Validate
     {
         response()->status(400);
 
-        throw new ValidationException(implode(', ', $this->messages));
+        session()->flash("errors", Arraydotify::make($this->messages));
+
+        $message = implode(', ', $this->messages);
+
+        $exception = new ValidationException($message);
+
+        $exception->setErrors($this->messages);
+
+        throw new $exception;
     }
 }

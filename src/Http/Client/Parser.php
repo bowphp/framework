@@ -371,7 +371,7 @@ class Parser
     /**
      * Add attach file
      *
-     * @param string|array$attach
+     * @param array $attach
      * @return void
      */
     public function addAttach($attach)

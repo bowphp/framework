@@ -780,4 +780,24 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             E_ERROR
         );
     }
+
+    /**
+     * Prepare the object for serialization.
+     *
+     * @return array
+     */
+    public function __sleep()
+    {
+        return array_keys(get_object_vars($this));
+    }
+
+    /**
+     * When a model is being unserialized, check if it needs to be booted.
+     *
+     * @return void
+     */
+    public function __wakeup()
+    {
+        static::query();
+    }
 }

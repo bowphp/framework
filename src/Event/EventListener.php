@@ -2,11 +2,13 @@
 
 namespace Bow\Event;
 
-use Bow\Container\Action;
-use Bow\Session\Session;
-use Bow\Support\Collection;
-
 abstract class EventListener
 {
+    /**
+     * Process the event
+     *
+     * @param array $payload
+     * @return mixed
+     */
     abstract public function process(array $payload);
 }

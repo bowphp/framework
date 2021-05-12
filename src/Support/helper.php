@@ -20,7 +20,7 @@ if (!function_exists('app')) {
     /**
      * Application container
      *
-     * @param  null  $key
+     * @param  string|null  $key
      * @param  array $setting
      * @return \Bow\Support\Capsule|mixed
      */
@@ -92,6 +92,7 @@ if (!function_exists('response')) {
 if (!function_exists('request')) {
     /**
      * Represents the Request class
+     *
      * @return \Bow\Http\Request
      */
     function request()
@@ -300,6 +301,18 @@ if (!function_exists('debug')) {
     }
 }
 
+if (!function_exists("sep")) {
+    /**
+     * Get the PHP OS separator
+     *
+     * @return string
+     */
+    function sep()
+    {
+        return call_user_func([Util::class, 'sep']);
+    }
+}
+
 if (!function_exists('create_csrf_token')) {
     /**
      * Create a new token
@@ -416,24 +429,24 @@ if (!function_exists('download')) {
      *
      * @param string      $file
      * @param null|string $filename
-     * @param array       $headers
      * @param string      $disposition
+     * @param array       $headers
      * @return string
      */
-    function download($file, $filename = null, array $headers = [], $disposition = 'attachment')
+    function download($file, $filename = null, $disposition = 'attachment', array $headers = [])
     {
-        return response()->download($file, $filename, $headers, $disposition);
+        return response()->download($file, $filename, $disposition, $headers);
     }
 }
 
-if (!function_exists('status_code')) {
+if (!function_exists('set_status_code')) {
     /**
      * Set status code
      *
      * @param  int $code
      * @return mixed
      */
-    function status_code($code)
+    function set_status_code($code)
     {
         return response()->status($code);
     }
@@ -483,8 +496,7 @@ if (!function_exists('set_header')) {
      */
     function set_header($key, $value)
     {
-        response()
-            ->addHeader($key, $value);
+        response()->addHeader($key, $value);
     }
 }
 
@@ -497,8 +509,7 @@ if (!function_exists('get_header')) {
      */
     function get_header($key)
     {
-        return request()
-            ->getHeader($key);
+        return request()->getHeader($key);
     }
 }
 
@@ -726,17 +737,17 @@ if (!function_exists('db_commit')) {
     }
 }
 
-if (!function_exists('add_event')) {
+if (!function_exists('listen_event')) {
     /**
      * Add event
      *
-     * @param  string                $event
+     * @param  string  $event
      * @param  callable|array|string $fn
-     * @return Event;
+     * @return Event
      *
      * @throws \Bow\Event\EventException
      */
-    function add_event($event, $fn)
+    function listen_event($event, $fn)
     {
         if (!is_string($event)) {
             throw new \Bow\Event\EventException(
@@ -751,7 +762,7 @@ if (!function_exists('add_event')) {
     }
 }
 
-if (!function_exists('add_event_once')) {
+if (!function_exists('listen_event_once')) {
     /**
      * Add once event
      *
@@ -760,7 +771,7 @@ if (!function_exists('add_event_once')) {
      * @return Event
      * @throws \Bow\Event\EventException
      */
-    function add_event_once($event, $fn)
+    function listen_event_once($event, $fn)
     {
         if (!is_string($event)) {
             throw new \Bow\Event\EventException(
@@ -775,7 +786,7 @@ if (!function_exists('add_event_once')) {
     }
 }
 
-if (!function_exists('add_transmisson_event')) {
+if (!function_exists('listen_transmisson_event')) {
     /**
      * Add transmission event
      *
@@ -784,7 +795,7 @@ if (!function_exists('add_transmisson_event')) {
      * @return Event
      * @throws \Bow\Event\EventException
      */
-    function add_transmisson_event($event, $fn)
+    function listen_transmisson_event($event, $fn)
     {
         if (!is_string($event)) {
             throw new \Bow\Event\EventException(
@@ -902,6 +913,7 @@ if (!function_exists('session')) {
         if (!is_array($value)) {
             return Session::getInstance()->get($value, $default);
         }
+
         foreach ($value as $key => $item) {
             Session::getInstance()->add($key, $item);
         }
@@ -1057,6 +1069,21 @@ if (!function_exists('mount')) {
     }
 }
 
+if (!function_exists('file_system')) {
+    /**
+     * Alias on the mount method
+     *
+     * @param string $mount
+     * @return \Bow\Storage\MountFilesystem
+     *
+     * @throws \Bow\Storage\Exception\ResourceException
+     */
+    function file_system($mount)
+    {
+        return mount($mount);
+    }
+}
+
 if (!function_exists('cache')) {
     /**
      * Cache help
@@ -1076,20 +1103,20 @@ if (!function_exists('cache')) {
     }
 }
 
-if (!function_exists('back')) {
+if (!function_exists('redirect_back')) {
     /**
      * Make redirection to back
      *
      * @param int $status
      * @return Bow\Http\Redirect
      */
-    function back($status = 302)
+    function redirect_back($status = 302)
     {
         return redirect()->back($status);
     }
 }
 
-if (!function_exists('bhash')) {
+if (!function_exists('app_hash')) {
     /**
      * Alias on the class Hash.
      *
@@ -1097,7 +1124,7 @@ if (!function_exists('bhash')) {
      * @param  mixed  $hash_value
      * @return mixed
      */
-    function bhash($data, $hash_value = null)
+    function app_hash($data, $hash_value = null)
     {
         if (!is_null($hash_value)) {
             return Hash::check($data, $hash_value);
@@ -1117,11 +1144,7 @@ if (!function_exists('bow_hash')) {
      */
     function bow_hash($data, $hash_value = null)
     {
-        if (!is_null($hash_value)) {
-            return Hash::check($data, $hash_value);
-        }
-
-        return Hash::make($data);
+        return app_hash($data, $hash_value);
     }
 }
 
@@ -1198,7 +1221,20 @@ if (!function_exists('app_env')) {
     }
 }
 
-if (!function_exists('abort')) {
+if (!function_exists('app_assets')) {
+    /**
+     * Gets the app assets
+     *
+     * @param string $filename
+     * @return string
+     */
+    function app_assets($filename)
+    {
+        return rtrim(app_env("APP_ASSET_PREFIX", "/"), "/") . "/" . trim($filename, "/");
+    }
+}
+
+if (!function_exists('app_abort')) {
     /**
      * Abort bow execution
      *
@@ -1206,13 +1242,13 @@ if (!function_exists('abort')) {
      * @param string $message
      * @return \Bow\Http\Response
      */
-    function abort($code = 500, $message = '')
+    function app_abort($code = 500, $message = '')
     {
         throw new HttpException($message, $code);
     }
 }
 
-if (!function_exists('abort_if')) {
+if (!function_exists('app_abort_if')) {
     /**
      * Abort bow execution if condiction is true
      *
@@ -1221,7 +1257,7 @@ if (!function_exists('abort_if')) {
      * @param string $message
      * @return \Bow\Http\Response|null
      */
-    function abort_if($boolean, $code, $message = '')
+    function app_abort_if($boolean, $code, $message = '')
     {
         if ($boolean) {
             return abort($code, $message);
@@ -1238,13 +1274,14 @@ if (!function_exists('app_mode')) {
      */
     function app_mode()
     {
-        return app_env('APP_ENV');
+        return strtolower(app_env('APP_ENV'));
     }
 }
 
 if (!function_exists('client_locale')) {
     /**
      * Get client request language
+     *
      * @return string
      */
     function client_locale()
@@ -1533,14 +1570,15 @@ if (!function_exists('str_force_in_utf8')) {
     }
 }
 
-if (!function_exists('seed')) {
+if (!function_exists('db_seed')) {
     /**
      * Make programmatic seeding
      *
-     * @param string $table
+     * @param string $entry
+     * @param array $data
      * @return void
      */
-    function seed($entry, array $data = [])
+    function db_seed($entry, array $data = [])
     {
         $filename = rtrim(config('app.seeder_path'), '/').'/'.$entry.'_seeder.php';
 

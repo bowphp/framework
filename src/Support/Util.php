@@ -96,9 +96,9 @@ class Util
     /**
      * Function to secure the data.
      *
-     * @param array $data, les données à sécuriser
+     * @param array $data
      *
-     * @return string $field
+     * @return string
      */
     public static function rangeField($data)
     {

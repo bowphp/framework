@@ -121,7 +121,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * SELECT $column | SELECT column1, column2, ...
      *
      * @param array $select
-     * @param bool $protected
      * @return QueryBuilder
      */
     public function select(array $select = ['*'])
@@ -223,11 +222,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * WHERE column1 $comp $value|column
      *
-     * @param string $column
-     * @param string $comp
-     * @param mixed $value
-     * @param string $boolean
-     * @throws QueryBuilderException
+     * @param string $where
      * @return QueryBuilder
      */
     public function whereRaw(string $where)
@@ -248,7 +243,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param string $comp
-     * @param mixed   $value
+     * @param mixed  $value
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
@@ -311,7 +306,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @param string $column
      * @param array $range
-     * @param string boolean
+     * @param string $boolean
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
@@ -563,7 +558,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $column
      * @return QueryBuilder
      */
-    public function group($column)
+    public function groupBy($column)
     {
         if (is_null($this->group)) {
             $this->group = $column;
@@ -728,7 +723,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
             $this->group = null;
 
-            if (!isNull($this->having)) {
+            if (!is_null($this->having)) {
                 $sql .= ' having ' . $this->having;
             }
         }

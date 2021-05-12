@@ -134,7 +134,6 @@ trait ConstraintColumn
     /**
      * Drop primary column;
      *
-     * @param string $name
      * @return SQLGenerator
      */
     public function dropPrimary()

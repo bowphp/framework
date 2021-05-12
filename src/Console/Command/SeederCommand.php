@@ -15,7 +15,7 @@ class SeederCommand extends AbstractCommand
     /**
      * Create a seeder
      *
-     * @param string $name
+     * @param string $seeder
      */
     public function generate($seeder)
     {

@@ -227,15 +227,15 @@ class Response implements ResponseInterface
      *
      * @param string $file
      * @param null   $filename
-     * @param array  $headers
      * @param string $disposition
+     * @param array  $headers
      * @return string
      */
-    public function download($file, $filename = null, array $headers = [], $disposition = 'attachment')
+    public function download($file, $filename = null, $disposition = 'attachment', array $headers = [])
     {
         $type = mime_content_type($file);
 
-        if ($filename == null) {
+        if (is_null($filename)) {
             $filename = basename($file);
         }
 

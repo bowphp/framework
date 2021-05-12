@@ -20,7 +20,7 @@ class UploadFile
     }
 
     /**
-     * The file extension
+     * Get the file extension
      *
      * @return string
      */
@@ -39,7 +39,7 @@ class UploadFile
     }
 
     /**
-     * getExtension alias
+     * The is `getExtension` alias
      *
      * @return string
      */
@@ -49,7 +49,7 @@ class UploadFile
     }
 
     /**
-     * The file extension
+     * Get the file extension
      *
      * @return string
      */
@@ -63,7 +63,7 @@ class UploadFile
     }
 
     /**
-     * The size of the file
+     * Get the size of the file
      *
      * @return mixed
      */
@@ -77,7 +77,7 @@ class UploadFile
     }
 
     /**
-     * Checked if the file is valid
+     * Check if the file is valid
      *
      * @return bool
      */
@@ -149,7 +149,6 @@ class UploadFile
     /**
      * Get the file hash name
      *
-     * @param  string $method
      * @return string
      */
     public function getHashName()

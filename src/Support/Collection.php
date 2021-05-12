@@ -493,7 +493,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @param  string|integer $key
      * @param  mixed          $data
-     * @param  boolean        $overide
+     * @param  boolean        $override
      *
      * @return boolean
      */
