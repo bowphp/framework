@@ -1,0 +1,18 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Queue\Producer
+
+class {className} extends Producer
+{
+	/**
+	 * Handle producer
+	 * 
+	 * @return mixed
+	 */
+    public function process()
+    {
+	    // Do Something
+    }
+}

@@ -136,6 +136,13 @@ class Setting
     private $service_directory;
 
     /**
+     * The producer directory
+     *
+     * @var string
+     */
+    private $producer_directory;
+
+    /**
      * The event directory
      *
      * @var string
@@ -346,6 +353,17 @@ class Setting
     }
 
     /**
+     * Set the producer directory
+     *
+     * @param string $producer_directory
+     * @return void
+     */
+    public function setProducerDirectory($producer_directory)
+    {
+        $this->producer_directory = $producer_directory;
+    }
+
+    /**
      * Set the event directory
      *
      * @param string $event_directory
@@ -457,6 +475,16 @@ class Setting
     public function getServiceDirectory()
     {
         return $this->service_directory;
+    }
+
+    /**
+     * Get the producer directory
+     *
+     * @return string
+     */
+    public function getProducerDirectory()
+    {
+        return $this->producer_directory;
     }
 
     /**

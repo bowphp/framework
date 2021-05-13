@@ -399,6 +399,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:seeder\033[00m          Create new table fake seeder
    \033[0;33madd:migration\033[00m       Create a new migration
    \033[0;33madd:event\033[00m           Create a new event listener
+   \033[0;33madd:producer\033[00m        Create a new producer
 
  \033[0;32mMIGRATION\033[00m apply a migration in user model
    \033[0;33mmigration:migrate\033[00m   Make migration
@@ -420,6 +421,7 @@ Bow task runner usage: php bow command:action [name] --option
  \033[0;32mRUN\033[00m Launch process
    \033[0;33mrun:console\033[00m show psysh php REPL for debug you code.
    \033[0;33mrun:server\033[00m  run a local web server.
+   \033[0;33mrun:worker\033[00m  run a consumer/worker for handle queue.
 
 USAGE;
             echo $usage;
@@ -488,9 +490,11 @@ U;
     [option]
     run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
     run:console [--include=filename.php] [--prompt=prompt_name]
+    run:worker [--queue=default] [--connexion=beanstalkd,sqs] [--retry-after=duration]
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker\033[00m [option]  Start worker/consumer for handle the producer
 
 U;
                 break;
