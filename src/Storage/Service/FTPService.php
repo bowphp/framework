@@ -66,6 +66,7 @@ class FTPService implements ServiceInterface
     private function __construct(array $config)
     {
         $this->config = $config;
+
         $this->connect();
     }
 
@@ -73,13 +74,12 @@ class FTPService implements ServiceInterface
      * Configure service
      *
      * @param array $config
-     *
      * @return FTPService
      */
     public static function configure(array $config)
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($config);
+            static::$instance = new FTPService($config);
         }
 
         return static::$instance;

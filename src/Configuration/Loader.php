@@ -96,7 +96,7 @@ class Loader implements \ArrayAccess
     public static function configure($base_path)
     {
         if (!static::$instance instanceof Loader) {
-            static::$instance = new static($base_path);
+            static::$instance = new Loader($base_path);
         }
 
         return static::$instance;

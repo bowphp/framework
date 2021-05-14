@@ -69,7 +69,7 @@ class Action
     public static function configure(array $namespaces, array $middlewares)
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($namespaces, $middlewares);
+            static::$instance = new Action($namespaces, $middlewares);
         }
 
         return static::$instance;
@@ -475,7 +475,7 @@ class Action
      * Get injectable parameter
      *
      * @param mixed $class
-     * @return void
+     * @return mixed
      */
     private function getInjectParameter($class)
     {

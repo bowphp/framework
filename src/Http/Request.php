@@ -64,7 +64,7 @@ class Request
     public static function getInstance()
     {
         if (static::$instance === null) {
-            static::$instance = new static();
+            static::$instance = new Request();
         }
 
         return static::$instance;

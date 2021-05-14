@@ -43,7 +43,7 @@ class Listener
 
         if (is_string($this->callable) && class_exists($this->callable, true)) {
             $instance = app($this->callable);
-            if ($instance instanceof EventListerner) {
+            if ($instance instanceof EventListener) {
                 $callable = [$instance, 'process'];
             }
         }

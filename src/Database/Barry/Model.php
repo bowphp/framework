@@ -168,7 +168,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * find
+     * The method find the element in database
      *
      * @param  mixed $id
      * @param  array $select
@@ -192,7 +192,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Find by column name
+     * The method find the element in database by column name
      *
      * @param string $column
      * @param mixed $value
@@ -234,8 +234,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Find information by id or throws an
-     * exception in data box not found
+     * Find information by id or throws an exception in data box not found
      *
      * @param  mixed          $id
      * @param  array|callable $select
@@ -318,7 +317,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('ondeleted');
 
-        add_event_once($env, $cb);
+        listen_event_once($env, $cb);
     }
 
     /**
@@ -331,7 +330,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('oncreated');
 
-        add_event_once($env, $cb);
+        listen_event_once($env, $cb);
     }
 
     /**
@@ -344,7 +343,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('onupdate');
 
-        add_event_once($env, $cb);
+        listen_event_once($env, $cb);
     }
 
     /**

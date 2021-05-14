@@ -12,7 +12,7 @@ class ContainerConfiguration extends Configuration
      * @var array
      */
     private $middlewares = [
-        'trim' => \Bow\Middleware\TrimMiddleware::class,
+        //
     ];
     
     /**
@@ -20,7 +20,7 @@ class ContainerConfiguration extends Configuration
      */
     public function create(Loader $config)
     {
-        $this->container->bind('actionner', function () use ($config) {
+        $this->container->bind('action', function () use ($config) {
             $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
 
             return Action::configure($config->namespaces(), $middlewares);
@@ -32,6 +32,6 @@ class ContainerConfiguration extends Configuration
      */
     public function run()
     {
-        $this->container->make('actionner');
+        $this->container->make('action');
     }
 }

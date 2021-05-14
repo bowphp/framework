@@ -2,6 +2,7 @@
 
 namespace Bow\Testing;
 
+use InvalidArgumentException;
 use Bow\Http\Client\Parser;
 
 class Response

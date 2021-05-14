@@ -1260,7 +1260,7 @@ if (!function_exists('app_abort_if')) {
     function app_abort_if($boolean, $code, $message = '')
     {
         if ($boolean) {
-            return abort($code, $message);
+            return app_abort($code, $message);
         }
 
         return null;
@@ -1561,12 +1561,24 @@ if (!function_exists('str_force_in_utf8')) {
     /**
      * Force output string to utf8
      *
-     * @param string $string
      * @return void
      */
-    function str_force_in_utf8($string)
+    function str_force_in_utf8()
     {
-        return \Bow\Support\Str::forceInUTF8($string);
+        \Bow\Support\Str::forceInUTF8();
+    }
+}
+
+if (!function_exists('str_fix_utf8')) {
+    /**
+     * Force output string to utf8
+     *
+     * @param string $string
+     * @return string
+     */
+    function str_fix_utf8($string)
+    {
+        return \Bow\Support\Str::fixUTF8($string);
     }
 }
 
@@ -1589,10 +1601,6 @@ if (!function_exists('db_seed')) {
         $seeds = require $filename;
         $collection = array_merge($seeds, []);
 
-        if (count($data) > 0) {
-            return DB::table($table)->insert($data);
-        }
-
         foreach ($collection as $table => $seed) {
             if (class_exists($table, true)) {
                 $instance = app($table);
@@ -1600,6 +1608,7 @@ if (!function_exists('db_seed')) {
                     $table = $instance->getTable();
                 }
             }
+            $seed = array_merge($data, $seed);
             DB::table($table)->insert($seed);
         }
     }

@@ -145,7 +145,7 @@ class Application extends Router
     public static function make(Request $request, Response $response)
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($request, $response);
+            static::$instance = new Application($request, $response);
         }
 
         return static::$instance;

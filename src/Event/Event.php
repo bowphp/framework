@@ -30,7 +30,7 @@ class Event
     public static function getInstance()
     {
         if (static::$instance == null) {
-            static::$instance = new static();
+            static::$instance = new Event();
         }
 
         return static::$instance;

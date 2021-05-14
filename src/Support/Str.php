@@ -3,6 +3,7 @@
 namespace Bow\Support;
 
 use ErrorException;
+use ForceUTF8\Encoding;
 
 class Str
 {
@@ -465,6 +466,19 @@ class Str
         mb_internal_encoding('UTF-8');
 
         mb_http_output('UTF-8');
+    }
+
+    /**
+     * Enables to force the encoding in utf-8
+     *
+     * @param string $garbled_utf8_string
+     * @return string
+     */
+    public static function fixUTF8($garbled_utf8_string)
+    {
+        $utf8_string = Encoding::fixUTF8($garbled_utf8_string);
+
+        return $utf8_string;
     }
 
     /**

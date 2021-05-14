@@ -100,7 +100,7 @@ class Validator
      */
     public static function make(array $inputs, array $rules, array $messages = [])
     {
-        $v = new static();
+        $v = new Validator();
 
         $v->setCustomMessages($messages);
 
@@ -776,7 +776,7 @@ class Validator
         }
 
         if (!preg_match(
-            '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/z',
+            '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
             $this->inputs[$key]
         )) {
             return;

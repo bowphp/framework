@@ -3,6 +3,7 @@
 namespace Bow\Storage\Service;
 
 use Aws\S3\S3Client;
+use Bow\Http\UploadFile;
 use Bow\Storage\Contracts\ServiceInterface;
 
 class S3Service implements ServiceInterface
@@ -15,16 +16,30 @@ class S3Service implements ServiceInterface
     private static $instance;
 
     /**
+     * The attribute define the service configuration
+     * 
+     * @var array
+     */
+    private $config;
+
+    /**
+     * The attribute define the guzzle http configuration
+     * 
+     * @var S3Client
+     */
+    private $client;
+
+    /**
      * S3Service constructor
      *
      * @param array $config
      * @return void
      */
-    private function __consturct(array $config)
+    private function __construct(array $config)
     {
         $this->config = $config;
 
-        $this->client = new S3Client;
+        $this->client = new S3Client($config);
     }
 
     /**
@@ -37,7 +52,7 @@ class S3Service implements ServiceInterface
     public static function configure(array $config)
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($config);
+            static::$instance = new S3Service($config);
         }
 
         return static::$instance;
@@ -125,7 +140,7 @@ class S3Service implements ServiceInterface
      */
     public function delete($file)
     {
-        $result = $client->deleteObject(array(
+        $result = $this->client->deleteObject(array(
             'Bucket' => $this->config['bucket'],
             'Key' => $file
         ));

@@ -196,7 +196,7 @@ class Parser
 
         if ($data === false) {
             throw new \Exception(
-                sprint("PASS ERROR: %s.", $this->error)
+                sprintf("PASS ERROR: %s.", $this->error)
             );
         }
 

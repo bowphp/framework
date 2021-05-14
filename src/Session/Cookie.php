@@ -146,7 +146,7 @@ class Cookie
             unset(static::$is_decrypt[$key]);
         }
 
-        static::add($key, null, -1000);
+        static::set($key, null, -1000);
         unset($_COOKIE[$key]);
 
         return $old;

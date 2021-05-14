@@ -146,7 +146,7 @@ class Response implements ResponseInterface
     public static function getInstance()
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static();
+            static::$instance = new Response();
         }
 
         return static::$instance;

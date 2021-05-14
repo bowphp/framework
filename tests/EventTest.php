@@ -1,6 +1,7 @@
 <?php
 
 use Bow\Event\Event;
+use Bow\Database\Database;
 
 class EventTable extends \Bow\Database\Barry\Model
 {
@@ -30,7 +31,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
 {
     public function setUp()
     {
-        statement('create table if not exists pets (id int, name varchar(255));');
+        Database::statement('create table if not exists pets (id int, name varchar(255));');
     }
 
     public function test_add_event()

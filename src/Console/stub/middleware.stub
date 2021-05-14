@@ -7,7 +7,7 @@ use Bow\Http\Request;
 class {className}
 {
     /**
-     * Launch function of the middleware.
+     * Handle an incoming request.
      *
      * @param Request $request
      * @param callable $next

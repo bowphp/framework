@@ -107,7 +107,7 @@ class View implements ResponseInterface
     public static function getInstance()
     {
         if (!static::$instance instanceof View) {
-            static::$instance = new static(static::$config);
+            static::$instance = new View(static::$config);
         }
 
         return static::$instance;

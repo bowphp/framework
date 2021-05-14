@@ -83,7 +83,7 @@ class Session implements CollectionInterface
     public static function configure($config)
     {
         if (static::$instance == null) {
-            static::$instance = new static($config);
+            static::$instance = new Session($config);
         }
 
         return static::$instance;
