@@ -261,18 +261,17 @@ class SmtpDriver extends MailDriverInterface
 
         $response = null;
 
+        if ($code === null) {
+            return $response;
+        }
 
-        if ($code !== null) {
-            $response = $this->read();
+        $response = $this->read();
 
-            if (!in_array($response, (array) $code)) {
-                $message = isset($message) ? $message : '';
-
-                throw new SmtpException(
-                    sprintf('SMTP server did not accept %s with code [%s]', $message, $response),
-                    E_ERROR
-                );
-            }
+        if (!in_array($response, (array) $code)) {
+            throw new SmtpException(
+                sprintf('SMTP server did not accept %s with code [%s]', $message, $response),
+                E_ERROR
+            );
         }
 
         return $response;

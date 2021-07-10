@@ -13,11 +13,4 @@ abstract class MailDriverInterface
      * @return mixed
      */
     abstract public function send(Message $message);
-
-    /**
-     * Private setting of the magic functions
-     */
-    private function __clone()
-    {
-    }
 }
