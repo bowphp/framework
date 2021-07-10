@@ -20,15 +20,23 @@ class Sanitize
         // Strict integer regex
         $rNum = '/^[0-9]+(\.[0-9]+)?$/';
 
+        if (is_numeric($data)) {
+            if (is_int($data)) {
+                return (int) $data;
+            }
+            if (is_float($data)) {
+                return (float) $data;
+            }
+            if (is_double($data)) {
+                return (double) $data;
+            }
+            return $data;
+        }
+
         if (is_string($data)) {
             if (!preg_match($rNum, $data, $match)) {
                 return static::$method($data);
             }
-
-            return $data;
-        }
-
-        if (is_numeric($data)) {
             return $data;
         }
 
@@ -57,7 +65,7 @@ class Sanitize
      */
     public static function data($data)
     {
-        return trim($data);
+        return stripslashes(stripslashes(trim($data)));
     }
 
     /**
