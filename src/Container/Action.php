@@ -400,8 +400,6 @@ class Action
         ];
     }
 
-    
-    
     /**
     * Make any class injection
     *
