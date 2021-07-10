@@ -116,29 +116,22 @@ if (!function_exists('db')) {
             return DB::getInstance();
         }
 
-        if (!is_string($name)) {
-            throw new InvalidArgumentException(
-                'Error on parameter 1. Expected string type.'
-            );
+        $old_connection = DB::getConnectionName();
+
+        if ($old_connection === $name) {
+            $instance = DB::getInstance();
+        } else {
+            $instance = DB::connection($name);
         }
 
-        $last_connection = DB::getConnectionName();
-
-        if ($last_connection !== $name) {
-            DB::connection($name);
-
-            if (is_callable($cb)) {
-                $cb();
-
-                return DB::connection($last_connection);
-            }
-        }
-
+        // When callback is define, we execute the callback
+        // set the old connection name after execution
         if (is_callable($cb)) {
             $cb();
+            $instance = DB::connection($old_connection);
         }
 
-        return DB::connection($last_connection);
+        return $instance;
     }
 }
 
