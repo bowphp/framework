@@ -24,7 +24,7 @@ class Listener
      * @param callable|string $callable
      * @param int             $priority
      */
-    public function __construct($callable, $priority)
+    public function __construct($callable, int $priority)
     {
         $this->callable = $callable;
 
@@ -37,7 +37,7 @@ class Listener
      * @param  array $data
      * @return mixed
      */
-    public function call(array $data)
+    public function call(array $data = [])
     {
         $callable = $this->callable;
 

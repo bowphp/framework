@@ -70,7 +70,7 @@ class Event
             static::$events['__bow.transmission.event'][$event] = [];
         }
 
-        if (!is_string($fn)) {
+        if (!is_string($fn) || !is_array($fn)) {
             throw new EventException('The transmission event must be a string function name');
         }
 
