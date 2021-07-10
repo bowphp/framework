@@ -121,11 +121,11 @@ class View implements ResponseInterface
      *
      * @return View
      */
-    public static function parse($viewname, array $data = [])
+    public static function parse(string $view, array $data = [])
     {
         static::$content = static::getInstance()
             ->getTemplate()
-            ->render($viewname, $data);
+            ->render($view, $data);
 
         return static::$instance;
     }
@@ -197,7 +197,9 @@ class View implements ResponseInterface
         }
 
         if (!class_exists($engine)) {
-            throw new ViewException($engine . ' does not exists.');
+            throw new ViewException(
+                sprintf('%s does not exists.', $engine)
+            );
         }
 
         static::$engines[$name] = $engine;
@@ -249,11 +251,15 @@ class View implements ResponseInterface
     {
         if (static::$instance instanceof View) {
             if (method_exists(static::$instance, $name)) {
-                return call_user_func_array([static::$instance, $name], $arguments);
+                return call_user_func_array(
+                    [static::$instance, $name], $arguments
+                );
             }
         }
 
-        throw new BadMethodCallException($name . ' method does not exists.');
+        throw new BadMethodCallException(
+            sprintf('%s method does not exists.', $name)
+        );
     }
 
     /**
@@ -267,9 +273,13 @@ class View implements ResponseInterface
     public function __call(string $method, array $arguments)
     {
         if (method_exists(static::$instance, $method)) {
-            return call_user_func_array([static::$instance, $method], $arguments);
+            return call_user_func_array(
+                [static::$instance, $method], $arguments
+            );
         }
 
-        throw new BadMethodCallException("The method $method does not exists");
+        throw new BadMethodCallException(
+            "The method $method does not exists"
+        );
     }
 }
