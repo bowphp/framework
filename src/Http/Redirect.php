@@ -109,6 +109,21 @@ class Redirect implements ResponseInterface
     }
 
     /**
+     * Redirect with route definition
+     *
+     * @param  string $name
+     * @param  array  $data
+     * @param  bool  $absolute
+     * @return Redirect
+     */
+    public function route($name, $data = [], $absolute = false)
+    {
+        $this->to = route($name, $data, $absolute);
+
+        return $this;
+    }
+
+    /**
      * Redirect on the previous URL
      *
      * @param int $status

@@ -19,11 +19,18 @@ class Request
     private static $instance;
 
     /**
-     * All php instance
+     * All request input
      *
      * @var array
      */
-    private $input;
+    private $input = [];
+
+    /**
+     * Define the bag instance
+     *
+     * @var array
+     */
+    private $bag = [];
 
     /**
      * Request constructor
@@ -539,6 +546,28 @@ class Request
     public function validate(array $rule)
     {
         return Validator::make($this->input, $rule);
+    }
+
+    /**
+     * Set the value in request bag
+     * 
+     * @param string $name
+     * @param mixed $value
+     * @return mixed
+     */
+    public function setBag($name, $value)
+    {
+        $this->bag[$name] = $value;
+    }
+
+    /**
+     * Get the value in request bag
+     * 
+     * @return mixed
+     */
+    public function getBag($name)
+    {
+        return $this->bag[$name] ?? null;
     }
 
     /**
