@@ -2,9 +2,7 @@
 
 namespace Bow\Queue;
 
-use Pheanstalk\Pheanstalk;
-
-abstract class Producer
+abstract class ServiceProducer
 {
     /**
      * Define the delay
@@ -32,7 +30,7 @@ abstract class Producer
      *
      * @var int
      */
-    protected $priority = Pheanstalk::DEFAULT_PRIORITY;
+    protected $priority = 1;
 
     /**
      * Process the producer
