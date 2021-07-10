@@ -13,7 +13,7 @@ trait ConsoleInformation
      * @param string $command
      * @throws \ErrorException
      */
-    private function throwFailsCommand($message, $command = null)
+    protected function throwFailsCommand($message, $command = null)
     {
         echo Color::red($message)."\n";
 

@@ -272,7 +272,12 @@ class MigrationCommand extends AbstractCommand
      */
     private function createMigrationTable()
     {
+        $options = $this->arg->options();
+        $connection = $options->get("--connection", config("database.default"));
+
+        Database::connection($connection);
         $adapter = Database::getConnectionAdapter();
+
         $table = $adapter->getTablePrefix().config('database.migration');
         $generator = new SQLGenerator(
             $table,

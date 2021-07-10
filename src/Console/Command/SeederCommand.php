@@ -95,15 +95,11 @@ class SeederCommand extends AbstractCommand
             $seed_collection = array_merge($seeds, $seed_collection);
         }
 
+        $connection = $this->arg->options()->get('--connection', config("database.default"));
+
         try {
             foreach ($seed_collection as $table => $seed) {
-                if (class_exists($table, true)) {
-                    $instance = app($table);
-                    if ($instance instanceof \Bow\Database\Barry\Model) {
-                        $table = $instance->getTable();
-                    }
-                }
-                $n = Database::table($table)->insert($seed);
+                $n = Database::connection($connection)->table($table)->insert($seed);
 
                 echo Color::green("$n seed".($n > 1 ? 's' : '')." on $table table\n");
             }

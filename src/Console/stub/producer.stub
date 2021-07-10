@@ -2,9 +2,9 @@
 
 namespace {baseNamespace}{namespace};
 
-use Bow\Queue\Producer
+use Bow\Queue\ServiceProducer;
 
-class {className} extends Producer
+class {className} extends ServiceProducer
 {
 	/**
 	 * Handle producer
