@@ -347,7 +347,7 @@ class MountFilesystem implements FilesystemInterface
      */
     public function path($filename)
     {
-        if (preg_match('~^' . $this->base_directory . '~', $filename)) {
+        if (preg_match('#^' . $this->base_directory . '#', $filename)) {
             return $filename;
         }
 
