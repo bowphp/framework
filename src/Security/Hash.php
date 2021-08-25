@@ -52,7 +52,7 @@ class Hash
      * @param  $hash
      * @return bool
      */
-    public function needsRehash($hash)
+    public static function needsRehash($hash)
     {
         [$hash_method, $options] = static::getHashConfig();
 
