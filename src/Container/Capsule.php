@@ -183,6 +183,10 @@ class Capsule implements ArrayAccess
     */
     private function resolve($key)
     {
+        if ($key == "array") {
+            return [];
+        }
+
         $reflection = new ReflectionClass($key);
         
         if (!$reflection->isInstantiable()) {
