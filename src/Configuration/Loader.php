@@ -200,7 +200,6 @@ class Loader implements \ArrayAccess
         $services = $this->configurations();
 
         $services[] = \Bow\Container\ContainerConfiguration::class;
-        dd($services);
 
         $service_collection = [];
 
