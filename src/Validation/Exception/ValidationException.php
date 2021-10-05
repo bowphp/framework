@@ -7,7 +7,7 @@ use Bow\Http\Exception\HttpException;
 class ValidationException extends HttpException
 {
     /**
-     * The error collection
+     * The validation error fields
      *
      * @var array
      */
@@ -18,10 +18,15 @@ class ValidationException extends HttpException
      *
      * @param string $message
      * @param string $status
+     * @param array $errors
      */
-    public function __construct(string $message, $status = 'VALIDATION_ERROR')
-    {
+    public function __construct(
+        string $message,
+        string $status = 'VALIDATION_ERROR',
+        array $errors = []
+    ) {
         parent::__construct($message, 400);
+        $this->errors = $errors;
 
         $this->status = $status;
     }
@@ -34,15 +39,5 @@ class ValidationException extends HttpException
     public function getErrors()
     {
         return $this->errors;
-    }
-
-    /**
-     * Set the error
-     *
-     * @param array $errors
-     */
-    public function setErrors(array $errors)
-    {
-        $this->errors = $errors;
     }
 }
