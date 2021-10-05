@@ -779,30 +779,6 @@ if (!function_exists('listen_event_once')) {
     }
 }
 
-if (!function_exists('listen_transmisson_event')) {
-    /**
-     * Add transmission event
-     *
-     * @param  string       $event
-     * @param  array|string $fn
-     * @return Event
-     * @throws \Bow\Event\EventException
-     */
-    function listen_transmisson_event($event, $fn)
-    {
-        if (!is_string($event)) {
-            throw new \Bow\Event\EventException(
-                'The first parameter must be a string.'
-            );
-        }
-
-        return call_user_func_array(
-            [emitter(), 'onTransmission'],
-            [$event, $fn]
-        );
-    }
-}
-
 if (!function_exists('emitter')) {
     /**
      * Event emitter
@@ -1028,6 +1004,7 @@ if (!function_exists('e')) {
 if (!function_exists('ftp')) {
     /**
      * Ftp Service loader
+     * 
      * @return \Bow\Storage\Service\FTPService
      */
     function ftp()
@@ -1038,7 +1015,8 @@ if (!function_exists('ftp')) {
 
 if (!function_exists('s3')) {
     /**
-     * S3 Service loader.
+     * S3 Service loader
+     * 
      * @return \Bow\Storage\Service\S3Service
      */
     function s3()
@@ -1323,7 +1301,7 @@ if (!function_exists('logger')) {
      * @param string $level
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return Monolog
      */
     function logger($level, $message, array $context = [])
     {
@@ -1604,5 +1582,34 @@ if (!function_exists('db_seed')) {
             $seed = array_merge($data, $seed);
             DB::table($table)->insert($seed);
         }
+    }
+}
+
+if (! function_exists('is_blank')) {
+    /**
+     * Determine if the given value is "blank".
+     *
+     * @param  mixed  $value
+     * @return bool
+     */
+    function is_blank($value)
+    {
+        if (is_null($value)) {
+            return true;
+        }
+
+        if (is_string($value)) {
+            return trim($value) === '';
+        }
+
+        if (is_numeric($value) || is_bool($value)) {
+            return false;
+        }
+
+        if ($value instanceof Countable) {
+            return count($value) === 0;
+        }
+
+        return empty($value);
     }
 }

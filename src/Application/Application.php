@@ -112,7 +112,7 @@ class Application extends Router
         }
 
         // We active the auto csrf switcher
-        $this->setAutoCsrf($config['app']['auto_csrf']);
+        $this->setAutoCsrf($config['app']['auto_csrf'] ?? false);
 
         $this->capsule->instance('config', $config);
 

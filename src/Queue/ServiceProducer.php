@@ -33,6 +33,46 @@ abstract class ServiceProducer
     protected $priority = 1;
 
     /**
+     * Get the producer priority
+     * 
+     * @return int
+     */
+    final public function getPriority()
+    {
+        return $this->priority;
+    }
+
+    /**
+     * Get the producer retry
+     * 
+     * @return int
+     */
+    final public function getRetry()
+    {
+        return $this->retry;
+    }
+
+    /**
+     * Get the producer queue
+     * 
+     * @return int
+     */
+    final public function getQueue()
+    {
+        return $this->queue;
+    }
+
+    /**
+     * Get the producer delay
+     * 
+     * @return int
+     */
+    final public function getDelay()
+    {
+        return $this->delay;
+    }
+
+    /**
      * Process the producer
      *
      * @return mixed

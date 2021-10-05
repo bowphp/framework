@@ -156,17 +156,12 @@ class Event
      */
     public static function bound($event)
     {
-        return array_key_exists($event, static::$events)
-            || array_key_exists(
-                $event,
-                isset(static::$events['__bow.transmission.event'])
-                    ? static::$events['__bow.transmission.event']
-                    : []
-            )
-            || array_key_exists(
-                $event,
-                isset(static::$events['__bow.once.event']) ? static::$events['__bow.once.event'] : []
-            );
+        $onces = isset(static::$events['__bow.once.event']) ? static::$events['__bow.once.event'] : [];
+        $translations = isset(static::$events['__bow.transmission.event']) ? static::$events['__bow.transmission.event'] : [];
+
+        return array_key_exists($event, $onces)
+            || array_key_exists($event, static::$events)
+            || array_key_exists($event, $translations);
     }
 
     /**

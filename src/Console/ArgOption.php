@@ -46,6 +46,9 @@ class ArgOption
                 $this->options['options'][$param] = true;
             } elseif (count($part = explode('=', $param)) == 2) {
                 $this->options['options'][$part[0]] = $part[1];
+            } elseif (count($part = explode('=', $param)) > 2) {
+                $tmp = $part[0];
+                $this->options['options'][$tmp] = implode("=", array_slice($part, 1));
             } else {
                 $this->options['trash'][] = $param;
             }
