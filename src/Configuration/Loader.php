@@ -80,13 +80,6 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * Closing the magic __clone function to optimize the singleton
-     */
-    final private function __clone()
-    {
-    }
-
-    /**
      * Configuration Loader
      *
      * @param string $base_path
@@ -96,7 +89,7 @@ class Loader implements \ArrayAccess
     public static function configure($base_path)
     {
         if (!static::$instance instanceof Loader) {
-            static::$instance = new Loader($base_path);
+            static::$instance = new static($base_path);
         }
 
         return static::$instance;
@@ -207,6 +200,7 @@ class Loader implements \ArrayAccess
         $services = $this->configurations();
 
         $services[] = \Bow\Container\ContainerConfiguration::class;
+        dd($services);
 
         $service_collection = [];
 
