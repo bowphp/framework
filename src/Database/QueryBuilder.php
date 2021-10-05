@@ -568,6 +568,17 @@ class QueryBuilder extends Tool implements \JsonSerializable
     }
 
     /**
+     * Clause Group By
+     *
+     * @param string $column
+     * @return QueryBuilder
+     */
+    public function group($column)
+    {
+        return $this->groupBy($column);
+    }
+
+    /**
      * clause having, is used with a groupBy
      *
      * @param string $column
