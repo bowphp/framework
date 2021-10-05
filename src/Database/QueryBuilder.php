@@ -569,7 +569,8 @@ class QueryBuilder extends Tool implements \JsonSerializable
 
     /**
      * Clause Group By
-     *
+     * 
+     * @deprecated
      * @param string $column
      * @return QueryBuilder
      */
