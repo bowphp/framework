@@ -8,6 +8,13 @@ namespace Bow\Auth;
 abstract class GuardContract
 {
     /**
+     * The define guard
+     *
+     * @var string
+     */
+    protected $guard;
+
+    /**
      * Check if user is authenticate
      *
      * @return bool
@@ -44,6 +51,10 @@ abstract class GuardContract
      */
     public function guard($guard = null)
     {
+        if ($guard) {
+            $this->guard = $guard;
+        }
+
         return Auth::guard($guard);
     }
 }

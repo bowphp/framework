@@ -21,6 +21,13 @@ class Auth
     private static $config;
 
     /**
+     * The current guard
+     *
+     * @var string
+     */
+    private static $guard;
+
+    /**
      * Configure Auth system
      *
      * @param array $config
@@ -69,17 +76,23 @@ class Auth
 
         if ($provider['type'] == 'session') {
             if (static::$instance instanceof SessionGuard) {
-                return static::$instance;
+                if (static::$guard == $guard) {
+                    return static::$instance;
+                }
             }
 
-            return static::$instance = new SessionGuard($provider);
+            static::$guard = $guard;
+            return static::$instance = new SessionGuard($provider, $guard);
         }
 
         if (static::$instance instanceof JwtGuard) {
-            return static::$instance;
+            if (static::$guard == $guard) {
+                return static::$instance;
+            }
         }
 
-        return static::$instance = new JwtGuard($provider);
+        static::$guard = $guard;
+        return static::$instance = new JwtGuard($provider, $guard);
     }
 
     /**
@@ -94,7 +107,5 @@ class Auth
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array([static::$instance, $method], $params);
         }
-
-        throw new \RuntimeException("The method $method not found");
     }
 }

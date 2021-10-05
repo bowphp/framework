@@ -21,10 +21,12 @@ class SessionGuard extends GuardContract
      * SessionGuard constructor.
      *
      * @param array $provider
+     * @param string $guard
      */
-    public function __construct(array $provider)
+    public function __construct(array $provider, string $guard = null)
     {
         $this->provider = $provider;
+        $this->guard = $guard;
     }
 
     /**
