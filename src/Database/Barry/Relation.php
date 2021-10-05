@@ -100,12 +100,12 @@ abstract class Relation
      * @param string $args
      * @return mixed
      */
-    public function __call($method, $args)
+    public function __call($method, array $args)
     {
         $result = call_user_func_array([$this->query, $method], $args);
 
         if ($result === $this->query) {
-            return $this;
+            return $this->query;
         }
 
         return $result;

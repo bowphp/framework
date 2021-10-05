@@ -4,7 +4,6 @@ namespace Bow\Database\Barry\Relations;
 
 use Bow\Database\Barry\Relation;
 use Bow\Database\Barry\Model;
-use Bow\Database\Collection;
 
 class HasOne extends Relation
 {
@@ -32,21 +31,22 @@ class HasOne extends Relation
      */
     public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
     {
+        parent::__construct($related, $parent);
+
         $this->local_key = $local_key;
         $this->foreign_key = $foreign_key;
-
-        parent::__construct($related, $parent);
+        $this->query = $this->query->where($this->foreign_key, $this->parent->getKeyValue());
     }
 
     /**
      * Get the results of the relationship.
      *
-     * @return Collection
+     * @return Model
      */
     public function getResults()
     {
         // TODO: Cache the result
-        return $this->query->get();
+        return $this->query->first();
     }
 
     /**

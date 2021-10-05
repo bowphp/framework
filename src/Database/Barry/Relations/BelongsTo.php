@@ -4,7 +4,6 @@ namespace Bow\Database\Barry\Relations;
 
 use Bow\Database\Barry\Relation;
 use Bow\Database\Barry\Model;
-use Bow\Database\Collection;
 
 class BelongsTo extends Relation
 {
@@ -41,7 +40,7 @@ class BelongsTo extends Relation
     /**
      * Get the results of the relationship.
      *
-     * @return Collection
+     * @return Model
      */
     public function getResults()
     {

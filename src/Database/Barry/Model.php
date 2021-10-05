@@ -79,6 +79,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $dates = [];
 
     /**
+     * The casts mutation
+     *
+     * @var array
+     */
+    protected $casts = [];
+
+    /**
      * The table primary key column name
      *
      * @var string
@@ -168,7 +175,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * The method find the element in database
+     * find
      *
      * @param  mixed $id
      * @param  array $select
@@ -192,7 +199,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * The method find the element in database by column name
+     * Find by column name
      *
      * @param string $column
      * @param mixed $value
@@ -234,7 +241,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Find information by id or throws an exception in data box not found
+     * Find information by id or throws an
+     * exception in data box not found
      *
      * @param  mixed          $id
      * @param  array|callable $select
@@ -317,7 +325,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('ondeleted');
 
-        listen_event_once($env, $cb);
+        add_event_once($env, $cb);
     }
 
     /**
@@ -330,7 +338,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('oncreated');
 
-        listen_event_once($env, $cb);
+        add_event_once($env, $cb);
     }
 
     /**
@@ -343,7 +351,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('onupdate');
 
-        listen_event_once($env, $cb);
+        add_event_once($env, $cb);
     }
 
     /**
@@ -506,6 +514,51 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         return $primary_key_value;
+    }
+
+    /**
+     * Delete a record
+     *
+     * @return int
+     * @throws
+     */
+    public function update(array $attribute)
+    {
+        $primary_key_value = $this->getKeyValue();
+
+        $model = static::query();
+
+        if ($primary_key_value == null) {
+            return 0;
+        }
+
+        // We set the primary key value
+        $this->original[$this->primary_key] = $primary_key_value;
+
+        $update_data = $attribute;
+
+        if (count($this->original) > 0) {
+            $update_data = [];
+            foreach ($attribute as $key => $value) {
+                if (array_key_exists($key, $this->original) || $this->original[$key] !== $value) {
+                    $update_data[$key] = $value;
+                }
+            }
+        }
+
+        // When the update data is empty, we load the original data
+        if (count($update_data) == 0) {
+            $this->fireEvent('onupdate');
+            return true;
+        }
+
+        $row_affected = $model->where($this->primary_key, $primary_key_value)->update($update_data);
+
+        if ($row_affected == 1) {
+            $this->fireEvent('onupdate');
+        }
+
+        return $row_affected;
     }
 
     /**
@@ -714,6 +767,51 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return new Carbon($this->attributes[$name]);
         }
 
+        if (array_key_exists($name, $this->casts)) {
+            $type = $this->casts[$name];
+            $value = $this->attributes[$name];
+            if ($type === "date") {
+                return new Carbon($value);
+            }
+            if ($type === "int") {
+                return (int) $value;
+            }
+            if ($type === "float") {
+                return (float) $value;
+            }
+            if ($type === "double") {
+                return (double) $value;
+            }
+            if ($type === "json") {
+                if (is_array($value)) {
+                    return (object) $value;
+                }
+                if (is_object($value)) {
+                    return (object) $value;
+                }
+                return json_decode(
+                    $value,
+                    false,
+                    512,
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
+                );
+            }
+            if ($type === "array") {
+                if (is_array($value)) {
+                    return (array) $value;
+                }
+                if (is_object($value)) {
+                    return (array) $value;
+                }
+                return json_decode(
+                    $value,
+                    true,
+                    512,
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
+                );
+            }
+        }
+
         return $this->attributes[$name];
     }
 
@@ -778,25 +876,5 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'method ' . $name . ' is not defined.',
             E_ERROR
         );
-    }
-
-    /**
-     * Prepare the object for serialization.
-     *
-     * @return array
-     */
-    public function __sleep()
-    {
-        return array_keys(get_object_vars($this));
-    }
-
-    /**
-     * When a model is being unserialized, check if it needs to be booted.
-     *
-     * @return void
-     */
-    public function __wakeup()
-    {
-        static::query();
     }
 }
