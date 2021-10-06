@@ -27,6 +27,7 @@ class SessionGuard extends GuardContract
     {
         $this->provider = $provider;
         $this->guard = $guard;
+        $this->session_key = '_auth_' . $this->guard;
     }
 
     /**
@@ -46,7 +47,7 @@ class SessionGuard extends GuardContract
         }
 
         if (Hash::check($password, $user->{$fields['password']})) {
-            $this->getSession()->put('_auth', $user);
+            $this->getSession()->put($this->session_key, $user);
             return true;
         }
 
@@ -70,7 +71,7 @@ class SessionGuard extends GuardContract
      */
     public function check()
     {
-        return $this->getSession()->has('_auth');
+        return $this->getSession()->has($this->session_key);
     }
 
     /**
@@ -80,7 +81,7 @@ class SessionGuard extends GuardContract
      */
     public function guest()
     {
-        return !$this->getSession()->has('_auth');
+        return !$this->getSession()->has($this->session_key);
     }
 
     /**
@@ -90,7 +91,7 @@ class SessionGuard extends GuardContract
      */
     public function user()
     {
-        return $this->getSession()->get('_auth');
+        return $this->getSession()->get($this->session_key);
     }
 
     /**
@@ -101,7 +102,19 @@ class SessionGuard extends GuardContract
      */
     public function login(Authentication $user)
     {
-        $this->getSession()->add('_auth', $user);
+        $this->getSession()->add($this->session_key, $user);
+
+        return true;
+    }
+
+    /**
+     * Make direct logout
+     *
+     * @return bool
+     */
+    public function logout()
+    {
+        $this->getSession()->remove($this->session_key);
 
         return true;
     }
@@ -113,6 +126,6 @@ class SessionGuard extends GuardContract
      */
     public function id()
     {
-        return $this->getSession()->get('_auth')->getAuthenticateUserId();
+        return $this->getSession()->get($this->session_key)->getAuthenticateUserId();
     }
 }
