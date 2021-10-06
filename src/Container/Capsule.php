@@ -183,12 +183,8 @@ class Capsule implements ArrayAccess
     */
     private function resolve($key)
     {
-        if ($key == "array") {
-            return [];
-        }
-
         $reflection = new ReflectionClass($key);
-        
+
         if (!$reflection->isInstantiable()) {
             return $key;
         }
@@ -204,13 +200,15 @@ class Capsule implements ArrayAccess
         $parameters_lists = [];
         
         foreach ($parameters as $parameter) {
-            if ($parameter->getType()) {
-                $parameters_lists[] = $this->make($parameter->getType()->getName());
-            } else {
+            if ($parameter->isDefaultValueAvailable()) {
                 $parameters_lists[] = $parameter->getDefaultValue();
+                continue;
+            }
+            if (!$parameter->isOptional()) {
+                $parameters_lists[] = $this->make($parameter->getType()->getName());
             }
         }
-        
+
         if (!empty($this->parameters)) {
             $parameters_lists = $this->parameters;
             

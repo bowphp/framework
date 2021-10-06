@@ -15,6 +15,12 @@ use ReflectionFunction;
 
 class Action
 {
+    const INJECTION_EXCEPTION_TYPE = [
+        'string', 'array', 'bool', 'int',
+        'integer', 'double', 'float', 'callable',
+        'object', 'stdclass', '\closure', 'closure'
+    ];
+
     /**
      * The list of namespaces defined in the application
      *
@@ -485,7 +491,7 @@ class Action
             );
         }
         
-        if (in_array(strtolower($class_name), $this->getInjectorExceptedType())) {
+        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
             return null;
         }
 
@@ -502,18 +508,17 @@ class Action
         
         return (new ReflectionClass($class_name))->newInstanceArgs($args);
     }
+}
 
-    /**
-    * The list of type not allowed to injection
-    *
-    * @return array
-    */
-    private function getInjectorExceptedType()
-    {
-        return [
-            'string', 'array', 'bool', 'int',
-            'integer', 'double', 'float', 'callable',
-            'object', 'stdclass', '\closure', 'closure'
-        ];
-    }
+$users = table("tbl_utilisateurs")->select(["id_utilisateur", "type", "matricule", "id_profil"])->get();
+
+foreach ($users as $user) {
+    table("tbl_utilisateurs")
+        ->where("id_utilisateur", $user->id_utilisateur)
+        ->where("id_profil", $user->id_profil)
+        ->where("type", $user->type)
+        ->update([
+            "type" => 2,
+            "password" => matri_password($user->matricule)
+        ]);
 }
