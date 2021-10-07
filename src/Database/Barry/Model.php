@@ -552,6 +552,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return true;
         }
 
+        if ($this->timestamps) {
+            $update_data['updated_at'] = date('Y-m-d H:i:s');
+        }
+
         $row_affected = $model->where($this->primary_key, $primary_key_value)->update($update_data);
 
         if ($row_affected == 1) {
