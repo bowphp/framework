@@ -194,6 +194,16 @@ class JwtGuard extends GuardContract
     }
 
     /**
+     * Destruit token
+     *
+     * @return bool
+     */
+    public function logout()
+    {
+        //
+    }
+
+    /**
      * Get the user id
      *
      * @return bool

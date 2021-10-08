@@ -29,6 +29,13 @@ abstract class GuardContract
     abstract public function guest();
 
     /**
+     * Logout
+     *
+     * @return bool
+     */
+    abstract public function logout();
+
+    /**
      * Get authenticated user
      *
      * @return Authenticate
