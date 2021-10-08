@@ -71,7 +71,7 @@ class SessionGuard extends GuardContract
      */
     public function check()
     {
-        return $this->getSession()->has($this->session_key);
+        return $this->getSession()->exists($this->session_key);
     }
 
     /**
@@ -81,7 +81,7 @@ class SessionGuard extends GuardContract
      */
     public function guest()
     {
-        return !$this->getSession()->has($this->session_key);
+        return !$this->getSession()->exists($this->session_key);
     }
 
     /**

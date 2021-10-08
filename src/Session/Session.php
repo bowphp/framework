@@ -428,6 +428,8 @@ class Session implements CollectionInterface
         }
 
         unset($_SESSION[$key]);
+        unset($_SESSION[static::CORE_SESSION_KEY['cache']][$key]);
+        unset($_SESSION[static::CORE_SESSION_KEY['flash']][$key]);
 
         return $old;
     }
