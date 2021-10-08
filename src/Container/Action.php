@@ -509,16 +509,3 @@ class Action
         return (new ReflectionClass($class_name))->newInstanceArgs($args);
     }
 }
-
-$users = table("tbl_utilisateurs")->select(["id_utilisateur", "type", "matricule", "id_profil"])->get();
-
-foreach ($users as $user) {
-    table("tbl_utilisateurs")
-        ->where("id_utilisateur", $user->id_utilisateur)
-        ->where("id_profil", $user->id_profil)
-        ->where("type", $user->type)
-        ->update([
-            "type" => 2,
-            "password" => matri_password($user->matricule)
-        ]);
-}
