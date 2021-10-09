@@ -131,7 +131,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $this->original = $attributes;
 
-        static::query();
+        $this->table = static::query()->getTable();
     }
 
     /**
@@ -325,7 +325,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('ondeleted');
 
-        add_event_once($env, $cb);
+        listen_event_once($env, $cb);
     }
 
     /**
@@ -338,7 +338,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('oncreated');
 
-        add_event_once($env, $cb);
+        listen_event_once($env, $cb);
     }
 
     /**
@@ -351,7 +351,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $env = static::formatEventName('onupdate');
 
-        add_event_once($env, $cb);
+        listen_event_once($env, $cb);
     }
 
     /**
@@ -375,10 +375,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if ($properties['table'] == null) {
             $parts = explode('\\', static::class);
-
-            $table = end($parts);
-
-            $table = Str::camel(strtolower($table)) . 's';
+            $table = Str::snake(end($parts)).'s';
         } else {
             $table = $properties['table'];
         }
@@ -393,12 +390,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $prefix = DB::getConnectionAdapter()->getTablePrefix();
         }
 
+        // Set the table prefix
         $table = $prefix . $table;
 
         static::$builder = new Builder($table, DB::getPdo());
-
         static::$builder->setPrefix($prefix);
-
         static::$builder->setModel(static::class);
 
         return static::$builder;
@@ -550,10 +546,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (count($update_data) == 0) {
             $this->fireEvent('onupdate');
             return true;
-        }
-
-        if ($this->timestamps) {
-            $update_data['updated_at'] = date('Y-m-d H:i:s');
         }
 
         $row_affected = $model->where($this->primary_key, $primary_key_value)->update($update_data);
