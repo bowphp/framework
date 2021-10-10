@@ -72,6 +72,8 @@ class Builder extends QueryBuilder
     public function setModel($model)
     {
         $this->model = $model;
+
+        return $this;
     }
 
     /**
