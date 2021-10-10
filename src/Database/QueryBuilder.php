@@ -588,7 +588,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $boolean
      * @return QueryBuilder
      */
-    public function having($column, $comp = '=', $value = null, $boolean = 'and')
+    public function having(string $column, string $comp = '=', $value = null, $boolean = 'and')
     {
         if (!$this->isComparisonOperator($comp)) {
             $value = $comp;
@@ -704,6 +704,17 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function sum($column)
     {
         return $this->aggregate('sum', $column);
+    }
+
+    /**
+     * Count
+     *
+     * @param string $column
+     * @return int
+     */
+    public function count($column = '*')
+    {
+        return $this->aggregate('count', $column);
     }
 
     /**
@@ -833,17 +844,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
     }
 
     /**
-     * Count
-     *
-     * @param string $column
-     * @return int
-     */
-    public function count($column = '*')
-    {
-        return $this->aggregate('count', $column);
-    }
-
-    /**
      * Update action
      *
      * @param array $data
@@ -915,7 +915,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @return int
      * @throws QueryBuilderException
      */
-    public function remove($column, $comp = '=', $value = null)
+    public function remove(string $column, string $comp = '=', $value = null)
     {
         $this->where = null;
 
@@ -930,7 +930,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      *
      * @return int
      */
-    public function increment($column, $step = 1)
+    public function increment(string $column, int $step = 1)
     {
         return $this->incrementAction($column, $step, '+');
     }
@@ -943,7 +943,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param int    $step
      * @return int
      */
-    public function decrement($column, $step = 1)
+    public function decrement(string $column, int $step = 1)
     {
         return $this->incrementAction($column, $step, '-');
     }
@@ -954,7 +954,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param  string $column
      * @return QueryBuilder
      */
-    public function distinct($column)
+    public function distinct(string $column)
     {
         if (!is_null($this->select)) {
             $this->select .= ", distinct $column";
@@ -973,7 +973,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param string $sign
      * @return int
      */
-    private function incrementAction($column, $step = 1, $sign = '')
+    private function incrementAction(string $column, int $step = 1, string $sign = '')
     {
         $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $sign . ' ' . $step;
 
@@ -1084,17 +1084,6 @@ class QueryBuilder extends Tool implements \JsonSerializable
     }
 
     /**
-     * Utility, allows to validate an operator
-     *
-     * @param string $comp
-     * @return bool
-     */
-    private static function isComparisonOperator($comp)
-    {
-        return in_array(Str::upper($comp), ['=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT'], true);
-    }
-
-    /**
      * Paginate, make pagination system
      *
      * @param int $number_of_page
@@ -1102,7 +1091,7 @@ class QueryBuilder extends Tool implements \JsonSerializable
      * @param int $chunk
      * @return Collection
      */
-    public function paginate($number_of_page, $current = 0, $chunk = null)
+    public function paginate(int $number_of_page, int $current = 0, int $chunk = null)
     {
         // We go to back page
         --$current;
@@ -1326,5 +1315,18 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function __toString()
     {
         return $this->toJson();
+    }
+
+    /**
+     * Utility, allows to validate an operator
+     *
+     * @param string $comp
+     * @return bool
+     */
+    private static function isComparisonOperator($comp)
+    {
+        return in_array(Str::upper($comp), [
+            '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN"
+        ], true);
     }
 }

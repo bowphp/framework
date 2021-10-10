@@ -14,19 +14,20 @@ trait ConstraintColumn
     public function addForeign($name, array $attributes = [])
     {
         if ($this->scope == 'alter') {
-            $command = 'ADD ';
+            $command = 'ADD CONSTRAINT ';
         } else {
-            $command = '';
+            $command = 'CONSTRAINT ';
         }
 
         $on = '';
         $references = '';
+        $target = sprintf("%s_%s_foreign", $this->getTable(), $name);
 
         if (isset($attributes['on'])) {
             $on = strtoupper(' ON ' .$attributes['on']);
         }
 
-        if (isset($attributes['references'])) {
+        if (isset($attributes['references'], $attributes['table'])) {
             $references = sprintf(
                 ' REFERENCES %s(%s)',
                 $attributes['table'],
@@ -35,42 +36,12 @@ trait ConstraintColumn
         }
 
         $sql = sprintf(
-            '%sFOREIGN KEY (`%s`)%s%s',
+            '%s (%s) FOREIGN KEY (`%s`)%s%s',
             $command,
+            $target,
             $name,
             $references,
             $on
-        );
-
-        $this->sqls[] = $sql;
-
-        return $this;
-    }
-
-
-    /**
-     * Add constraintes
-     *
-     * @param string $name
-     * @param array $attributes
-     * @return SQLGenerator
-     */
-    public function addConstraint($name, array $attributes = [])
-    {
-        if ($this->scope == 'alter') {
-            $command = 'ADD CONSTRAINT';
-        } else {
-            $command = 'CONSTRAINT';
-        }
-
-        $sql = sprintf(
-            '%s (%s) FOREIGN KEY (`%s`) REFERENCES %s(%s) ON %s',
-            $command,
-            $name,
-            $attributes['target'],
-            $attributes['table'],
-            $attributes['references'],
-            strtoupper($attributes['on'])
         );
 
         $this->sqls[] = $sql;
@@ -89,6 +60,7 @@ trait ConstraintColumn
         $names = (array) $name;
 
         foreach ($names as $name) {
+            $name = sprintf("%s_%s_foreign", $this->getTable(), $name);
             $this->sqls[] = sprintf('DROP FOREIGN KEY `%s`', $name);
         }
 

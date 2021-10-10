@@ -265,6 +265,16 @@ class SQLGenerator
     }
 
     /**
+     * Get the define table name
+     * 
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    /**
      * Compose sql instruction
      *
      * @param string $name
