@@ -35,7 +35,6 @@ class WorkerService
     {
         $this->connection->setWatch($queue);
         $this->connection->setRetry($retry);
-        dd($this->connection);
 
         while (true) {
             $this->connection->run();
