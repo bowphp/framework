@@ -2,7 +2,7 @@
 
 namespace Bow\Queue;
 
-abstract class ServiceProducer
+abstract class ProducerService
 {
     /**
      * Define the delay

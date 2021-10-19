@@ -3,8 +3,11 @@
 namespace Bow\Queue\Adapters;
 
 use Pheanstalk\Pheanstalk;
+use Bow\Queue\ProducerService;
+use Bow\Queue\Adapters\QueueAdapter;
+use Pheanstalk\Job as PheanstalkJob;
 
-class BeanstalkdAdapter implements QueueAdapter
+class BeanstalkdAdapter extends QueueAdapter
 {
     /**
      * Define the instance Pheanstalk
@@ -18,7 +21,7 @@ class BeanstalkdAdapter implements QueueAdapter
      * 
      * @var string
      */
-    private $watch = "default";
+    private $default = "default";
 
     /**
      * Configure Beanstalkd driver
@@ -29,6 +32,8 @@ class BeanstalkdAdapter implements QueueAdapter
     public function configure(array $queue)
     {
         $this->pheanstalk = Pheanstalk::create($queue["hostname"], $queue["port"], $queue["timeout"]);
+
+        return $this;
     }
 
     /**
@@ -40,39 +45,94 @@ class BeanstalkdAdapter implements QueueAdapter
      */
     public function setWatch(string $name)
     {
-        $this->watch = $name;
+        $this->default = $name;
+    }
+
+    /**
+     * Get connexion
+     * 
+     * @param int $retry
+     * @return Pheanstalk
+     */
+    public function setRetry(int $retry)
+    {
+        $this->retry = $retry;
+    }
+
+    /**
+     * Delete a message from the Beanstalk queue.
+     *
+     * @param  string  $queue
+     * @param  string|int  $id
+     * @return void
+     */
+    public function deleteJob($queue, $id)
+    {
+        $queue = $this->getQueue($queue);
+
+        $this->pheanstalk->useTube($queue)->delete(new PheanstalkJob($id, ''));
+    }
+
+    /**
+     * Get the queue or return the default.
+     *
+     * @param  string|null $queue
+     * @return string
+     */
+    public function getQueue(string $queue = null)
+    {
+        return $queue ?: $this->default;
+    }
+
+    /**
+     * Get the size of the queue.
+     *
+     * @param  string|null  $queue
+     * @return int
+     */
+    public function size($queue = null)
+    {
+        $queue = $this->getQueue($queue);
+
+        return (int) $this->pheanstalk->statsTube($queue)->current_jobs_ready;
+    }
+
+    /**
+     * Queue a job
+     *
+     * @param ProducerService $producer
+     * @return QueueAdapter
+     */
+    public function push(ProducerService $producer)
+    {
+        $this->pheanstalk
+            ->useTube($this->getQueue())
+            ->put($this->serializeProducer($producer), $producer->getDelay(), $producer->getRetry());
     }
 
     /**
      * Run the worker
      * 
+     * @param string|null $queue
      * @return mixed
      */
-    public function run()
+    public function run(string $queue = null)
     {
         // we want jobs from 'testtube' only.
-        $this->pheanstalk->watch($this->watch);
+        $this->pheanstalk->watch($this->getQueue($queue));
 
         // this hangs until a Job is produced.
         $job = $this->pheanstalk->reserve();
 
         try {
-            $jobPayload = $job->getData();
-            // do work.
-
-            sleep(2);
-            // If it's going to take a long time, periodically
-            // tell beanstalk we're alive to stop it rescheduling the job.
-            $pheanstalk->touch($job);
-            sleep(2);
-
-            // eventually we're done, delete job.
-            $pheanstalk->delete($job);
+            $job_payload = $job->getData();
+            $job_payload = json_encode($job_payload, true);
+            call_user_func_array([$job_payload["command"], $job_payload["method"]], []); 
+            $this->pheanstalk->touch($job);
+            $this->deleteJob($queue, $job->getId());
         }
         catch(\Exception $e) {
-            // handle exception.
-            // and let some other worker retry.
-            $pheanstalk->release($job); 
+            $this->pheanstalk->release($job);
         }
     }
 }
