@@ -2,8 +2,6 @@
 
 namespace Bow\Console\Command;
 
-use Bow\Console\Setting;
-
 class ServerCommand extends AbstractCommand
 {
     /**

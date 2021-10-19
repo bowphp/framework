@@ -3,9 +3,6 @@
 namespace Bow\Console;
 
 use Bow\Configuration\Loader;
-use Bow\Console\Exception\ConsoleException;
-use Bow\Database\Database;
-use Bow\Support\Faker;
 
 class Console
 {
@@ -68,9 +65,9 @@ class Console
      * @var array
      */
     const ADD_ACTION = [
-        'middleware', 'controller', 'model', 'validator',
+        'middleware', 'controller', 'model', 'validation',
         'seeder', 'migration', 'configuration', 'service',
-        'exception', 'event'
+        'exception', 'event', 'producer'
     ];
 
     /**
@@ -316,7 +313,7 @@ class Console
     {
         $action = $this->arg->getParameter('action');
 
-        if (!in_array($action, ['server', 'console'])) {
+        if (!in_array($action, ['server', 'console', 'worker'])) {
             $this->throwFailsCommand('Bad command usage', 'help run');
         }
 
@@ -395,7 +392,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:exception\033[00m       Create new exception
    \033[0;33madd:controller\033[00m      Create new controller
    \033[0;33madd:model\033[00m           Create new model
-   \033[0;33madd:validator\033[00m       Create new validator
+   \033[0;33madd:validation\033[00m       Create new validation
    \033[0;33madd:seeder\033[00m          Create new table fake seeder
    \033[0;33madd:migration\033[00m       Create a new migration
    \033[0;33madd:event\033[00m           Create a new event listener
@@ -449,10 +446,11 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:exception name            For create a new exception
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       For create a new model
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validator
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validation
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    For create a new seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                For create a new event listener
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:producer name             For create a new queue producer
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
 
 U;

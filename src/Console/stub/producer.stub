@@ -2,10 +2,23 @@
 
 namespace {baseNamespace}{namespace};
 
-use Bow\Queue\ServiceProducer;
+use Bow\Queue\ProducerService;
+use Bow\Packages\Traits\SerializationService;
 
-class {className} extends ServiceProducer
+class {className} extends ProducerService
 {
+    use SerializationService;
+
+    /**
+     * {className} constructor
+     * 
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
 	/**
 	 * Handle producer
 	 * 

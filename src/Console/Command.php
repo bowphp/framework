@@ -25,12 +25,14 @@ class Command extends AbstractCommand
             "model" => \Bow\Console\Command\ModelCommand::class,
             "seeder" => \Bow\Console\Command\SeederCommand::class,
             "service" => \Bow\Console\Command\ServiceCommand::class,
-            "validator" => \Bow\Console\Command\ValidatorCommand::class,
+            "validation" => \Bow\Console\Command\ValidationCommand::class,
             "event" => \Bow\Console\Command\EventCommand::class,
+            "producer" => \Bow\Console\Command\ProducerCommand::class,
         ],
         "runner" => [
             "console" => \Bow\Console\Command\ReplCommand::class,
             "server" => \Bow\Console\Command\ServerCommand::class,
+            "worker" => \Bow\Console\Command\WorkerCommand::class,
         ],
         "generator" => [
             "key" => \Bow\Console\Command\GenerateKeyCommand::class,
