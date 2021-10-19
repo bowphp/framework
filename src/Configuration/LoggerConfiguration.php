@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Configuration\Configurations;
+namespace Bow\Configuration;
 
 use Bow\Contracts\ResponseInterface;
 use Bow\Database\Barry\Model;
@@ -24,7 +24,9 @@ class LoggerConfiguration extends Configuration
                 $config['app.name'] ?? 'Bow'
             );
 
-            $this->loadFrontLogger($monolog, $config['app.error_handle']);
+            if (php_sapi_name() != "cli") {
+                $this->loadFrontLogger($monolog, $config['app.error_handle']);
+            }
 
             return $monolog;
         });

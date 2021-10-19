@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Configuration\Configurations;
+namespace Bow\Configuration;
 
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
