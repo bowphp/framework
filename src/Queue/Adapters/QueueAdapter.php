@@ -14,11 +14,7 @@ abstract class QueueAdapter
      */
     public function serializeProducer(ProducerService $producer)
     {
-        return json_encode([
-            "serialization" => serialize($producer),
-            "command" => get_class($producer),
-            "method" => "process"
-        ]);
+        return serialize($producer);
     }
 
 	/**
@@ -43,7 +39,7 @@ abstract class QueueAdapter
     abstract public function setRetry(int $retry);
 
     /**
-     * Set the retry value
+     * Push new producer
      * 
      * @param ProducerService $producer
      */
@@ -57,7 +53,7 @@ abstract class QueueAdapter
     abstract public function size(string $queue);
 
     /**
-     * Delete a message from the Beanstalk queue.
+     * Delete a message from the queue.
      *
      * @param  string  $queue
      * @param  string|int  $id

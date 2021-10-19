@@ -106,7 +106,7 @@ class BeanstalkdAdapter extends QueueAdapter
     public function push(ProducerService $producer)
     {
         $this->pheanstalk
-            ->useTube($this->getQueue())
+            ->useTube($producer->getQueue())
             ->put($this->serializeProducer($producer), $producer->getDelay(), $producer->getRetry());
     }
 
@@ -121,13 +121,13 @@ class BeanstalkdAdapter extends QueueAdapter
         // we want jobs from 'testtube' only.
         $this->pheanstalk->watch($this->getQueue($queue));
 
-        // this hangs until a Job is produced.
+        // This hangs until a Job is produced.
         $job = $this->pheanstalk->reserve();
 
         try {
-            $job_payload = $job->getData();
-            $job_payload = json_encode($job_payload, true);
-            call_user_func_array([$job_payload["command"], $job_payload["method"]], []); 
+            $payload = $job->getData();
+            $producer = unserialize($payload);
+            call_user_func_array([$producer, "process"], []); 
             $this->pheanstalk->touch($job);
             $this->deleteJob($queue, $job->getId());
         }
