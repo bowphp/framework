@@ -2,14 +2,15 @@
 
 namespace Bow\Database;
 
-use Bow\Database\Exception\QueryBuilderException;
-use Bow\Security\Sanitize;
-use Bow\Support\Str;
-use Bow\Support\Util;
 use PDO;
 use stdClass;
+use PDOStatement;
+use Bow\Support\Str;
+use Bow\Support\Util;
+use Bow\Security\Sanitize;
+use Bow\Database\Exception\QueryBuilderException;
 
-class QueryBuilder extends Tool implements \JsonSerializable
+class QueryBuilder implements \JsonSerializable
 {
     /**
      * The table name
@@ -1300,11 +1301,11 @@ class QueryBuilder extends Tool implements \JsonSerializable
     /**
      * Define the data to associate
      *
-     * @param array $where_data_binding
+     * @param array $data_binding
      */
-    public function setWhereDataBinding($where_data_binding)
+    public function setWhereDataBinding(array $data_binding)
     {
-        $this->where_data_binding = $where_data_binding;
+        $this->where_data_binding = $data_binding;
     }
 
     /**
@@ -1315,6 +1316,55 @@ class QueryBuilder extends Tool implements \JsonSerializable
     public function __toString()
     {
         return $this->toJson();
+    }
+
+    /**
+     * Executes PDOStatement::bindValue on an instance of
+     *
+     * @param PDOStatement $pdo_statement
+     * @param array $bindings
+     *
+     * @return PDOStatement
+     */
+    private function bind(PDOStatement $pdo_statement, array $bindings = [])
+    {
+        foreach ($bindings as $key => $value) {
+            if (is_null($value) || strtolower($value) === 'null') {
+                $pdo_statement->bindValue(
+                    ':' . $key, $value, PDO::PARAM_NULL
+                );
+                unset($bindings[$key]);
+            }
+        }
+
+        foreach ($bindings as $key => $value) {
+            $param = PDO::PARAM_INT;
+
+            /**
+             * We force the value in whole or in real.
+             *
+             * SECURITY OF DATA
+             * - Injection SQL
+             * - XSS
+             */
+            if (is_int($value)) {
+                $value = (int) $value;
+            } elseif (is_float($value)) {
+                $value = (float) $value;
+            } elseif (is_double($value)) {
+                $value = (float) $value;
+            } elseif (is_resource($value)) {
+                $param = PDO::PARAM_LOB;
+            } else {
+                $param = PDO::PARAM_STR;
+            }
+
+            $pdo_statement->bindValue(
+                is_string($key) ? ":" . $key : $key + 1,
+                $value,
+                $param
+            );
+        }
     }
 
     /**
