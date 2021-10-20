@@ -2,8 +2,12 @@
 
 namespace Bow\Queue;
 
+use Bow\Packages\Traits\SerializationService;
+
 abstract class ProducerService
 {
+    use SerializationService;
+
     /**
      * Define the delay
      *
