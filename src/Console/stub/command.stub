@@ -2,7 +2,7 @@
 
 namespace {baseNamespace}{namespace};
 
-namespace Bow\Console\Command\AbstractCommand as ConsoleCommand;
+use Bow\Console\Command\AbstractCommand as ConsoleCommand;
 
 class {className} extends ConsoleCommand
 {
