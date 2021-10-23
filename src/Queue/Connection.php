@@ -84,4 +84,20 @@ class Connection
 
         return $queue->configure($connection);
     }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        $adapter = $this->getAdapter();
+
+        if (method_exists($adapter, $name)) {
+            return call_user_func_array([$adapter, $name], $arguments);
+        }
+    }
 }
