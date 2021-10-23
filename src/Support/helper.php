@@ -1,20 +1,21 @@
 <?php
 
 use Bow\Auth\Auth;
-use Bow\Container\Capsule;
-use Bow\Database\Database as DB;
-use Bow\Event\Event;
-use Bow\Http\Exception\HttpException;
 use Bow\Mail\Mail;
+use Bow\Event\Event;
+use Bow\Support\Env;
+use Bow\Support\Util;
 use Bow\Security\Hash;
-use Bow\Security\Tokenize;
 use Bow\Session\Cookie;
 use Bow\Session\Session;
 use Bow\Storage\Storage;
+use Bow\Container\Capsule;
+use Bow\Security\Tokenize;
 use Bow\Support\Collection;
-use Bow\Support\Env;
-use Bow\Support\Util;
 use Bow\Translate\Translator;
+use Bow\Queue\ProducerService;
+use Bow\Database\Database as DB;
+use Bow\Http\Exception\HttpException;
 
 if (!function_exists('app')) {
     /**
