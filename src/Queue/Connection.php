@@ -29,7 +29,6 @@ class Connection
      */
     private static $connections = [
         "beanstalkd" => BeanstalkdAdapter::class,
-        "sync" => BeanstalkdAdapter::class,
     ];
 
     /**
