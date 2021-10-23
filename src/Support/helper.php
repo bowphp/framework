@@ -1613,3 +1613,15 @@ if (! function_exists('is_blank')) {
         return empty($value);
     }
 }
+
+if (!function_exists("queue")) {
+    /**
+     * Push the producer on queue
+     * 
+     * @param ProducerService $producer
+     */
+    function queue(ProducerService $producer)
+    {
+        app("queue")->push($producer);
+    }
+}

@@ -4,13 +4,5 @@ namespace Bow\Packages\Traits;
 
 trait SerializationService
 {
-    public function __sleep()
-    {
-
-    }
-
-    public function __wakeup()
-    {
-
-    }
+    // TODO: Write the serialization process
 }
