@@ -11,7 +11,7 @@ listen_event("send.email", function ($payload) {
     doSomething();
 });
 
-sendEmailAction();
+// Send email action
 
 emit_event("send.email", ["name" => "Franck DAKIA"]);
 ```

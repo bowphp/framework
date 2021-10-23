@@ -15,5 +15,5 @@ Load some service for work on.
 
 ```php
 // Get the content of code.js file
-service("ftp")->get("code.js");
+ftp()->get("code.js");
 ```
