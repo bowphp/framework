@@ -2,28 +2,10 @@
 
 namespace {baseNamespace}{namespace};
 
-use Bow\Console\ArgOption as Argument;
+namespace Bow\Console\Command\AbstractCommand as ConsoleCommand;
 
-class {className}
+class {className} extends ConsoleCommand
 {
-    /**
-     * Define the instance of Argument
-     * 
-     * @var Argument
-     */
-    private $argument;
-
-    /**
-     * {className} constructor
-     * 
-     * @param Argument $argument
-     * @return void
-     */
-    public function __construct(Argument $argument)
-    {
-        $this->argument = $argument;
-    }
-
     /**
      * Handle console action
      * 

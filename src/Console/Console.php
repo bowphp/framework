@@ -137,11 +137,13 @@ class Console
         if (array_key_exists($command, $this->registers)) {
             try {
                 $classname = $this->registers[$command];
+
                 if (is_callable($classname)) {
                     return $classname($this->arg);
                 }
                 
-                $instance = new $classname($this->arg);
+                $instance = new $classname($this->setting, $this->arg);
+                
                 return call_user_func_array([$instance, "process"], []);
             } catch (\Exception $exception) {
                 echo Color::red($exception->getMessage());
