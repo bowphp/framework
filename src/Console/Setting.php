@@ -141,6 +141,13 @@ class Setting
      * @var string
      */
     private $producer_directory;
+ 
+    /**
+     * The command directory
+     *
+     * @var string
+     */
+    private $command_directory;
 
     /**
      * The event directory
@@ -364,6 +371,17 @@ class Setting
     }
 
     /**
+     * Set the command directory
+     *
+     * @param string $command_directory
+     * @return void
+     */
+    public function setCommandDirectory($command_directory)
+    {
+        $this->command_directory = $command_directory;
+    }
+
+    /**
      * Set the event directory
      *
      * @param string $event_directory
@@ -485,6 +503,16 @@ class Setting
     public function getProducerDirectory()
     {
         return $this->producer_directory;
+    }
+
+    /**
+     * Get the command directory
+     *
+     * @return string
+     */
+    public function getCommandDirectory()
+    {
+        return $this->command_directory;
     }
 
     /**

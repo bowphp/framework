@@ -67,7 +67,7 @@ class Console
     const ADD_ACTION = [
         'middleware', 'controller', 'model', 'validation',
         'seeder', 'migration', 'configuration', 'service',
-        'exception', 'event', 'producer'
+        'exception', 'event', 'producer', 'command'
     ];
 
     /**
@@ -136,7 +136,13 @@ class Console
 
         if (array_key_exists($command, $this->registers)) {
             try {
-                return $this->registers[$command]($this->arg);
+                $classname = $this->registers[$command];
+                if (is_callable($classname)) {
+                    return $classname($this->arg);
+                }
+                
+                $instance = new $classname($this->arg);
+                return call_user_func_array([$instance, "process"], []);
             } catch (\Exception $exception) {
                 echo Color::red($exception->getMessage());
                 echo Color::green($exception->getTraceAsString());
@@ -397,6 +403,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:migration\033[00m       Create a new migration
    \033[0;33madd:event\033[00m           Create a new event listener
    \033[0;33madd:producer\033[00m        Create a new producer
+   \033[0;33madd:command\033[00m         Create a new bow console command
 
  \033[0;32mMIGRATION\033[00m apply a migration in user model
    \033[0;33mmigration:migrate\033[00m   Make migration
@@ -451,6 +458,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                For create a new event listener
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:producer name             For create a new queue producer
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              For create a new bow console command
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
 
 U;

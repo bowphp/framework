@@ -28,6 +28,7 @@ class Command extends AbstractCommand
             "validation" => \Bow\Console\Command\ValidationCommand::class,
             "event" => \Bow\Console\Command\EventCommand::class,
             "producer" => \Bow\Console\Command\ProducerCommand::class,
+            "command" => \Bow\Console\Command\ConsoleCommand::class,
         ],
         "runner" => [
             "console" => \Bow\Console\Command\ReplCommand::class,

@@ -1,0 +1,36 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Console\ArgOption as Argument;
+
+class {className}
+{
+    /**
+     * Define the instance of Argument
+     * 
+     * @var Argument
+     */
+    private $argument;
+
+    /**
+     * {className} constructor
+     * 
+     * @param Argument $argument
+     * @return void
+     */
+    public function __construct(Argument $argument)
+    {
+        $this->argument = $argument;
+    }
+
+    /**
+     * Handle console action
+     * 
+     * @return void
+     */
+    public function process()
+    {
+        //
+    }
+}
