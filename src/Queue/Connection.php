@@ -4,6 +4,7 @@ namespace Bow\Queue;
 
 use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
+use ErrorException;
 
 class Connection
 {
@@ -26,7 +27,7 @@ class Connection
      * 
      * @param array
      */
-    private $connections = [
+    private static $connections = [
         "beanstalkd" => BeanstalkdAdapter::class,
         "sync" => BeanstalkdAdapter::class,
     ];
@@ -40,6 +41,25 @@ class Connection
     public function __construct(array $config)
     {
         $this->config = $config;
+    }
+
+    /**
+     * Push the new connection support in connectors managment
+     * 
+     * @param string $name
+     * @param string $name
+     */
+    public static function pushConnection(string $name, string $classname)
+    {
+        if (!array_key_exists($name, static::$connections)) {
+            static::$connections[$name] = $classname;
+
+            return true;
+        }
+
+        throw new ErrorException(
+            "An other connection with some name already exists"
+        );
     }
 
     /**
@@ -61,7 +81,7 @@ class Connection
     {
         $driver = $this->connection ?: $this->config["default"];
         $connection = $this->config["connections"][$driver];
-        $queue = new $this->connections[$driver];
+        $queue = new static::$connections[$driver];
 
         return $queue->configure($connection);
     }
