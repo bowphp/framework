@@ -16,7 +16,13 @@ class AuthMiddleware
      */
     public function process(Request $request, callable $next, array $guard = [])
     {
-        if (Auth::getInstance()->check()) {
+        $guard = current($guard);
+
+        if (!$guard) {
+            $guard = null;
+        }
+
+        if (Auth::getInstance()->guard($guard)->check()) {
             return $next($request);
         }
 
