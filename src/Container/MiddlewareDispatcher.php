@@ -4,7 +4,7 @@ namespace Bow\Container;
 
 use Bow\Http\Request;
 
-class Dispatcher
+class MiddlewareDispatcher
 {
     /**
      * @var array
