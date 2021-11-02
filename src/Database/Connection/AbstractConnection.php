@@ -2,7 +2,6 @@
 
 namespace Bow\Database\Connection;
 
-use Bow\Database\Tool;
 use PDO;
 
 abstract class AbstractConnection
