@@ -49,7 +49,7 @@ class MiddlewareDispatcher
     public function process(Request $request, ...$args)
     {
         if (!isset($this->middlewares[$this->index]) || empty($this->middlewares)) {
-            return Dispatcher::PIPE_EMPTY;
+            return MiddlewareDispatcher::PIPE_EMPTY;
         }
 
         $middleware = $this->middlewares[$this->index];

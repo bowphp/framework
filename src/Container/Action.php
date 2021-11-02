@@ -45,7 +45,7 @@ class Action
     /**
      * The Dispatcher instance
      *
-     * @var Dispatcher
+     * @var MiddlewareDispatcher
      */
     private $dispatcher;
 
