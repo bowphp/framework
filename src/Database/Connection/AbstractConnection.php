@@ -5,7 +5,7 @@ namespace Bow\Database\Connection;
 use Bow\Database\Tool;
 use PDO;
 
-abstract class AbstractConnection extends Tool
+abstract class AbstractConnection
 {
     /**
      * The connexion name
