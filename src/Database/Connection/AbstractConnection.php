@@ -25,7 +25,7 @@ abstract class AbstractConnection
      *
      * @var int
      */
-    protected $fetch = \PDO::FETCH_OBJ;
+    protected $fetch = PDO::FETCH_OBJ;
 
     /**
      * The PDO instance
