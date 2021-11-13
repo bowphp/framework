@@ -266,7 +266,7 @@ class SQLGenerator
 
     /**
      * Get the define table name
-     * 
+     *
      * @return string
      */
     public function getTable()

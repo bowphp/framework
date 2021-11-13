@@ -38,7 +38,7 @@ abstract class ProducerService
 
     /**
      * Get the producer priority
-     * 
+     *
      * @return int
      */
     final public function getPriority()
@@ -48,7 +48,7 @@ abstract class ProducerService
 
     /**
      * Get the producer retry
-     * 
+     *
      * @return int
      */
     final public function getRetry()
@@ -58,7 +58,7 @@ abstract class ProducerService
 
     /**
      * Get the producer queue
-     * 
+     *
      * @return int
      */
     final public function getQueue()
@@ -68,7 +68,7 @@ abstract class ProducerService
 
     /**
      * Get the producer delay
-     * 
+     *
      * @return int
      */
     final public function getDelay()

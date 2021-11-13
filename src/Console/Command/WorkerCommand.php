@@ -5,12 +5,11 @@ namespace Bow\Console\Command;
 use Bow\Queue\Adapters\Connection as QueueConnection;
 use Bow\Queue\WorkerService;
 
-
 class WorkerCommand extends AbstractCommand
 {
     /**
      * The run server command
-     * 
+     *
      * @param string $connection
      * @return void
      */

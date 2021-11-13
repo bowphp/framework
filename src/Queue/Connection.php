@@ -24,7 +24,7 @@ class Connection
 
     /**
      * The supported connection
-     * 
+     *
      * @param array
      */
     private static $connections = [
@@ -44,7 +44,7 @@ class Connection
 
     /**
      * Push the new connection support in connectors managment
-     * 
+     *
      * @param string $name
      * @param string $name
      */
@@ -63,7 +63,7 @@ class Connection
 
     /**
      * Set connection
-     * 
+     *
      * @param string $connection
      */
     public function setConnection(string $connection)

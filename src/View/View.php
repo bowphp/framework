@@ -252,7 +252,8 @@ class View implements ResponseInterface
         if (static::$instance instanceof View) {
             if (method_exists(static::$instance, $name)) {
                 return call_user_func_array(
-                    [static::$instance, $name], $arguments
+                    [static::$instance, $name],
+                    $arguments
                 );
             }
         }
@@ -274,7 +275,8 @@ class View implements ResponseInterface
     {
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array(
-                [static::$instance, $method], $arguments
+                [static::$instance, $method],
+                $arguments
             );
         }
 

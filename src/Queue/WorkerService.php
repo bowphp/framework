@@ -8,14 +8,14 @@ class WorkerService
 {
     /**
      * Determine the instance of QueueAdapter
-     * 
+     *
      * @var QueueAdapter
      */
     private $connection;
 
     /**
      * Make connection base on default name
-     * 
+     *
      * @param string $name
      * @return QueueAdapter
      */

@@ -17,14 +17,14 @@ class S3Service implements ServiceInterface
 
     /**
      * The attribute define the service configuration
-     * 
+     *
      * @var array
      */
     private $config;
 
     /**
      * The attribute define the guzzle http configuration
-     * 
+     *
      * @var S3Client
      */
     private $client;

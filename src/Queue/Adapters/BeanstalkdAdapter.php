@@ -11,21 +11,21 @@ class BeanstalkdAdapter extends QueueAdapter
 {
     /**
      * Define the instance Pheanstalk
-     * 
+     *
      * @var Pheanstalk
      */
     private $pheanstalk;
 
     /**
      * Determine the default watch name
-     * 
+     *
      * @var string
      */
     private $default = "default";
 
     /**
      * Configure Beanstalkd driver
-     * 
+     *
      * @param array $queue
      * @return mixed
      */
@@ -38,9 +38,9 @@ class BeanstalkdAdapter extends QueueAdapter
 
     /**
      * Get connexion
-     * 
+     *
      * @param string $name
-     * 
+     *
      * @return Pheanstalk
      */
     public function setWatch(string $name)
@@ -50,7 +50,7 @@ class BeanstalkdAdapter extends QueueAdapter
 
     /**
      * Get connexion
-     * 
+     *
      * @param int $retry
      * @return Pheanstalk
      */
@@ -112,7 +112,7 @@ class BeanstalkdAdapter extends QueueAdapter
 
     /**
      * Run the worker
-     * 
+     *
      * @param string|null $queue
      * @return mixed
      */
@@ -127,11 +127,10 @@ class BeanstalkdAdapter extends QueueAdapter
         try {
             $payload = $job->getData();
             $producer = unserialize($payload);
-            call_user_func_array([$producer, "process"], []); 
+            call_user_func_array([$producer, "process"], []);
             $this->pheanstalk->touch($job);
             $this->deleteJob($queue, $job->getId());
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->pheanstalk->release($job);
         }
     }
