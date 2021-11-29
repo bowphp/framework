@@ -14,9 +14,9 @@ trait ConstraintColumn
     public function addForeign($name, array $attributes = [])
     {
         if ($this->scope == 'alter') {
-            $command = 'ADD CONSTRAINT ';
+            $command = 'ADD CONSTRAINT';
         } else {
-            $command = 'CONSTRAINT ';
+            $command = 'CONSTRAINT';
         }
 
         $on = '';
@@ -36,7 +36,7 @@ trait ConstraintColumn
         }
 
         $sql = sprintf(
-            '%s (%s) FOREIGN KEY (`%s`)%s%s',
+            '%s %s FOREIGN KEY (`%s`)%s%s',
             $command,
             $target,
             $name,
