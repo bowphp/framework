@@ -51,8 +51,8 @@ trait Relationship
     {
         $related_model = app()->make($related);
 
-        if (strlen($foreign_key) == 0) {
-            $foreign_key = $this->getKey();
+        if (is_null($primary_key)) {
+            $primary_key = $this->getKey();
         }
 
         if (is_null($foreign_key)) {
@@ -70,12 +70,12 @@ trait Relationship
      * @param string $foreign_key
      * @return HasMany
      */
-    public function hasMany(string $related, string $primary_key = '', string $foreign_key = '')
+    public function hasMany(string $related, string $primary_key = null, string $foreign_key = null)
     {
         $related_model = app()->make($related);
 
-        if (strlen($foreign_key) == 0) {
-            $foreign_key = $this->getKey();
+        if (is_null($primary_key)) {
+            $primary_key = $this->getKey();
         }
 
         if (is_null($foreign_key)) {
@@ -93,12 +93,12 @@ trait Relationship
      * @param string $foreign_key
      * @return HasOne
      */
-    public function hasOne(string $related, string $primary_key = '', string $foreign_key = '')
+    public function hasOne(string $related, string $primary_key = null, string $foreign_key = null)
     {
         $related_model = app()->make($related);
 
-        if (strlen($foreign_key) == 0) {
-            $foreign_key = $this->getKey();
+        if (is_null($primary_key)) {
+            $primary_key = $this->getKey();
         }
 
         if (is_null($foreign_key)) {
