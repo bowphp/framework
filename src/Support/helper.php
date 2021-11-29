@@ -1005,7 +1005,7 @@ if (!function_exists('e')) {
 if (!function_exists('ftp')) {
     /**
      * Ftp Service loader
-     * 
+     *
      * @return \Bow\Storage\Service\FTPService
      */
     function ftp()
@@ -1017,7 +1017,7 @@ if (!function_exists('ftp')) {
 if (!function_exists('s3')) {
     /**
      * S3 Service loader
-     * 
+     *
      * @return \Bow\Storage\Service\S3Service
      */
     function s3()
@@ -1618,7 +1618,7 @@ if (! function_exists('is_blank')) {
 if (!function_exists("queue")) {
     /**
      * Push the producer on queue
-     * 
+     *
      * @param ProducerService $producer
      */
     function queue(ProducerService $producer)

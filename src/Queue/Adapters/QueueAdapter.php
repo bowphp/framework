@@ -17,37 +17,37 @@ abstract class QueueAdapter
         return serialize($producer);
     }
 
-	/**
-	 * Make adapter configuration
-	 * 
-	 * @param array $config
-	 */
+    /**
+     * Make adapter configuration
+     *
+     * @param array $config
+     */
     abstract public function configure(array $config);
 
     /**
      * Watch the the queue name
-     * 
+     *
      * @param string $queue
      */
     abstract public function setWatch(string $queue);
 
     /**
      * Set the retry value
-     * 
+     *
      * @param int $retry
      */
     abstract public function setRetry(int $retry);
 
     /**
      * Push new producer
-     * 
+     *
      * @param ProducerService $producer
      */
     abstract public function push(ProducerService $producer);
 
     /**
      * Get the queue size
-     * 
+     *
      * @param string $queue
      */
     abstract public function size(string $queue);
@@ -71,7 +71,7 @@ abstract class QueueAdapter
 
     /**
      * Start the worker server
-     * 
+     *
      * @param string|null $queue
      */
     abstract public function run(string $queue = null);

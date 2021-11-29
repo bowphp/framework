@@ -550,7 +550,7 @@ class Request
 
     /**
      * Set the value in request bag
-     * 
+     *
      * @param string $name
      * @param mixed $value
      * @return mixed
@@ -562,7 +562,7 @@ class Request
 
     /**
      * Get the value in request bag
-     * 
+     *
      * @return mixed
      */
     public function getBag($name)

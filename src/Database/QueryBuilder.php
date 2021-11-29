@@ -570,7 +570,7 @@ class QueryBuilder implements \JsonSerializable
 
     /**
      * Clause Group By
-     * 
+     *
      * @deprecated
      * @param string $column
      * @return QueryBuilder
@@ -1331,7 +1331,9 @@ class QueryBuilder implements \JsonSerializable
         foreach ($bindings as $key => $value) {
             if (is_null($value) || strtolower($value) === 'null') {
                 $pdo_statement->bindValue(
-                    ':' . $key, $value, PDO::PARAM_NULL
+                    ':' . $key,
+                    $value,
+                    PDO::PARAM_NULL
                 );
                 unset($bindings[$key]);
             }
