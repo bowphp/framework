@@ -867,8 +867,6 @@ class QueryBuilder implements \JsonSerializable
 
         $statement = $this->connection->prepare($sql);
 
-        $data = Sanitize::make($data, true);
-
         $this->bind($statement, $data);
 
         // Execution of the request
