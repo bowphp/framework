@@ -1,20 +1,11 @@
 # Bow Container
 
-Bow Framework's container system is very simple and powerful class dependences building:
+Bow Framework's console system is very simple and powerful which can help you create controller, model and much mores:
 
-Let's show a little exemple:
+Let's show a console guide:
 
-```php
-use Bow\Containers\Capsule;
-
-$capsule = Capsule::getInstance();
-
-$capsule->bind(Application::class, function ($config) {
-    return Application::make($config);
-});
-
-$app = $capsule->make(Application::class);
-$app->run();
+```bash
+php bow help
 ```
 
 Is very enjoyful api
