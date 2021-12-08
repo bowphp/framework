@@ -13,21 +13,21 @@ abstract class RequestValidation
      *
      * @var Validate
      */
-    private $validate;
+    protected $validate;
 
     /**
      * The request data
      *
      * @var array
      */
-    private $data;
+    protected $data;
 
     /**
      * The Request instance
      *
      * @var Request
      */
-    private $request;
+    protected $request;
 
     /**
      * TodoValidation constructor.
