@@ -13,21 +13,21 @@ abstract class RequestValidation
      *
      * @var Validate
      */
-    protected $validate;
+    private $validate;
 
     /**
      * The request data
      *
      * @var array
      */
-    protected $data;
+    private $data;
 
     /**
      * The Request instance
      *
      * @var Request
      */
-    protected $request;
+    private $request;
 
     /**
      * TodoValidation constructor.
@@ -190,6 +190,16 @@ abstract class RequestValidation
     protected function getValidationData()
     {
         return $this->data;
+    }
+
+    /**
+     * Get the current request
+     * 
+     * @return Request
+     */
+    protected function getRequest()
+    {
+        return $this->request;
     }
 
     /**

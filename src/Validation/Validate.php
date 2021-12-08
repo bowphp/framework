@@ -41,7 +41,6 @@ class Validate
      */
     private $corrupted_rules = [];
 
-
     /**
      * Validate constructor.
      *
