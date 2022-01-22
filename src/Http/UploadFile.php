@@ -77,26 +77,12 @@ class UploadFile
     }
 
     /**
-     * Check if the file is valid
-     *
-     * @return bool
-     */
-    private function isValid()
-    {
-        return count($this->file) === 5;
-    }
-
-    /**
      * Check if the file is uploader
      *
      * @return bool
      */
     public function isUploaded()
     {
-        if (!$this->isValid()) {
-            return false;
-        }
-
         if (!isset($this->file['tmp_name'], $this->file['error'])) {
             return false;
         }
