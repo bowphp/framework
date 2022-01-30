@@ -122,11 +122,10 @@ class Route
             return $this;
         }
 
-
         if (!isset($this->cb['middleware'])) {
             $this->cb['middleware'] = $middleware;
         } else {
-            $this->cb['middleware'] = array_merge($middleware, (array) $this->cb['middleware']);
+            $this->cb['middleware'] = array_merge((array) $this->cb['middleware'], $middleware);
         }
 
         return $this;
