@@ -7,6 +7,7 @@ use Bow\Database\Barry\Model;
 use Bow\Support\Collection;
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
+use Bow\Http\Redirect;
 use Monolog\Handler\FirePHPHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -73,8 +74,8 @@ class LoggerConfiguration extends Configuration
                         case is_object($result):
                         case $result instanceof \Iterable:
                             return $result;
-                        case $result instanceof ResponseInterface:
-                            return $result->sendContent();
+                        case $result instanceof ResponseInterface || $result instanceof Redirect:
+                            $result->sendContent();
                         case $result instanceof Model || $result instanceof Collection:
                             return $result->toArray();
                     }
