@@ -7,7 +7,7 @@
         <env name="MYSQL_HOSTNAME" value="127.0.0.1"/>
         <env name="MYSQL_DATABASE" value="test_db"/>
         <env name="MYSQL_USER" value="root"/>
-        <env name="MYSQL_PASSWORD" value=""/>
+        <env name="MYSQL_PASSWORD" value="secret"/>
         <env name="MYSQL_CHARSET" value="utf8"/>
         <env name="MYSQL_COLLATE" value="utf8_unicode_ci"/>
     </php>

@@ -4,7 +4,7 @@ use Bow\Translate\Translator;
 
 class TranslationTest extends \PHPUnit\Framework\TestCase
 {
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         Translator::configure('fr', __DIR__.'/config/lang');
     }

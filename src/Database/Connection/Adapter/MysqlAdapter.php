@@ -48,14 +48,17 @@ class MysqlAdapter extends AbstractConnection
             $hostname = $this->config['hostname'];
         }
 
-        $port = '';
+        $port = ';port=';
 
         if ($hostname !== 'localhost' || $hostname == '127.0.0.1') {
             if (isset($this->config['port']) && !is_null($this->config['port']) && !empty($this->config['port'])) {
-                $port = ':'.$this->config['port'];
+                $port .= $this->config['port'];
             } else {
-                $port = ':'.self::PORT;
+                $port .= self::PORT;
             }
+        }
+        if ($port === ';port=') {
+            $port .= '3306';
         }
 
         // Formatting connection parameters
