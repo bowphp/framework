@@ -5,35 +5,18 @@ use Bow\Security\Crypto;
 
 class SecurityTest extends \PHPUnit\Framework\TestCase
 {
-    public function depGetHashValue()
-    {
-        return Hash::create('bow');
-    }
-
-    public function depGetEncryptValue()
-    {
-        Crypto::setKey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
-
-        return Crypto::encrypt('bow');
-    }
-
-    /**
-     * @depends depGetEncryptValue
-     * @param $data
-     */
-    public function test_should_decrypt_data($data)
+    public function test_should_decrypt_data()
     {
         Crypto::setkey(file_get_contents(__DIR__.'/config/.key'), 'AES-256-CBC');
+        $encrypted = Crypto::encrypt('bow');
 
-        $this->assertEquals(Crypto::decrypt($data), 'bow');
+        $this->assertEquals(Crypto::decrypt($encrypted), 'bow');
     }
 
-    /**
-     * @depends depGetHashValue
-     * @param $data
-     */
-    public function test_should_check_hash_value($data)
+    public function test_should_check_hash_value()
     {
-        $this->assertTrue(Hash::check('bow', $data));
+        $hashed = Hash::create('bow');
+
+        $this->assertTrue(Hash::check('bow', $hashed));
     }
 }

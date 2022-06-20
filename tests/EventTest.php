@@ -29,7 +29,7 @@ class EventTable extends \Bow\Database\Barry\Model
 
 class EventTest extends \PHPUnit\Framework\TestCase
 {
-    public function setUp()
+    protected function setUp(): void
     {
         Database::statement('create table if not exists pets (id int, name varchar(255));');
     }

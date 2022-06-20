@@ -194,7 +194,7 @@ abstract class RequestValidation
 
     /**
      * Get the current request
-     * 
+     *
      * @return Request
      */
     protected function getRequest()

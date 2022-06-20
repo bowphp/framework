@@ -24,7 +24,7 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
      */
     protected static $capsule;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$capsule = new Capsule();
     }

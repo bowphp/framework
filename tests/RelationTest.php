@@ -55,14 +55,14 @@ class RelationTest extends \PHPUnit\Framework\TestCase
      */
     private $db;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->db = $this->configureDatabase();
         $this->db->getPdo()->exec('CREATE TABLE IF NOT EXISTS masters (id INT, name VARCHAR(255))');
         $this->db->getPdo()->exec('CREATE TABLE IF NOT EXISTS pet2s (id INT, name VARCHAR(255), master_id INT, FOREIGN KEY (master_id) REFERENCES masters(id))');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->db->getPdo()->exec('DROP TABLE IF EXISTS pet2s');
         $this->db->getPdo()->exec('DROP TABLE IF EXISTS masters');

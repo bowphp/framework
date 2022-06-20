@@ -76,8 +76,10 @@ class LoggerConfiguration extends Configuration
                             return $result;
                         case $result instanceof ResponseInterface || $result instanceof Redirect:
                             $result->sendContent();
+                            // no break
                         case $result instanceof Model || $result instanceof Collection:
                             return $result->toArray();
+                            // no break
                     }
                     exit(1);
                 }

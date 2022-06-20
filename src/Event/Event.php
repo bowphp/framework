@@ -157,7 +157,7 @@ class Event
     public static function bound($event)
     {
         $onces = isset(static::$events['__bow.once.event']) ? static::$events['__bow.once.event'] : [];
-        $translations = isset(static::$events['__bow.transmission.event']) ? static::$events['__bow.transmission.event'] : [];
+        $translations = isset(static::$events['__bow.transmission.event']) ? static::$events['__bow.transmission.event'] : []; // phpcs:ignore
 
         return array_key_exists($event, $onces)
             || array_key_exists($event, static::$events)

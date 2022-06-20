@@ -11,7 +11,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
      */
     private $ftp_service;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $env_file = dirname(__DIR__) . '/.env.json';
 
@@ -24,12 +24,12 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         Storage::pushService(['ftp' => FTPService::class]);
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->ftp_service = Storage::service('ftp');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->ftp_service->setConnectionRoot();
     }
@@ -37,7 +37,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     public function testUnsecuredConnection()
     {
         $this->assertInstanceOf(FTPService::class, $this->ftp_service);
-        $this->assertInternalType('resource', $this->ftp_service->getConnection());
+        $this->assertIsResource($this->ftp_service->getConnection());
     }
 
     public function testHasCorrectRootFolder()
@@ -55,14 +55,14 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $file_name = 'test.txt';
         $result = $this->createFile($this->ftp_service, $file_name, $file_content);
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertEquals($result['content'], $file_content);
         $this->assertEquals($result['path'], $file_name);
     }
 
     public function testGetInexistentFile()
     {
-        $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
+        $this->expectException(\Bow\Storage\Exception\ResourceException::class);
         $this->ftp_service->get('dummy.txt');
     }
 
@@ -80,7 +80,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $result = $this->ftp_service->delete($file_name);
 
         $this->assertTrue($result);
-        $this->setExpectedException(\Bow\Storage\Exception\ResourceException::class);
+        $this->expectException(\Bow\Storage\Exception\ResourceException::class);
         $this->ftp_service->get($file_name);
     }
 
@@ -97,7 +97,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     {
         $result = $this->ftp_service->copy('file-copy.txt', 'test.txt');
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertEquals($this->ftp_service->get('test.txt'), $this->ftp_service->get('file-copy.txt'));
     }
 
@@ -115,7 +115,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->ftp_service->makeDirectory('for_test');
         $result = $this->ftp_service->directories();
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
@@ -127,7 +127,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
             return $next['type'] === 'file';
         }, true);
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertNotEmpty($result);
         $this->assertTrue($has_only_files);
     }
@@ -184,7 +184,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     private function createFile(FTPService $ftp_service, $filename, $content = '')
     {
-        $uploadedFile = $this->getMock(\Bow\Http\UploadFile::class, [], [[]]);
+        $uploadedFile = $this->createMock(\Bow\Http\UploadFile::class, [], [[]]);
         $uploadedFile->method('getContent')->willReturn($content);
         $uploadedFile->method('getFilename')->willReturn($filename);
 

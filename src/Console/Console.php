@@ -492,7 +492,7 @@ U;
 U;
                 break;
 
-            case 'run':
+            case 'run': // phpcs:disable
                 echo <<<U
 \n\033[0;32mrun\033[00m for launch repl and local server\n
     [option]
@@ -504,7 +504,7 @@ U;
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker\033[00m [option]  Start worker/consumer for handle the producer
 
-U;
+U; // phpcs:enable
                 break;
 
             case 'clear':

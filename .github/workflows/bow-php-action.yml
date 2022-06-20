@@ -1,10 +1,6 @@
 name: Bow Framework CI
 
-on:
-  push:
-  pull_request:
-  schedule:
-    - cron: '0 0 * * 0'
+on: [ push, pull_request ]
 
 env:
   FTP_HOST: localhost
@@ -15,26 +11,27 @@ env:
 jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
-    name: PHP-${{ matrix.php }} - ${{ matrix.os }}
-
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_DATABASE: test_db
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-        ports:
-          - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     strategy:
       matrix:
         php: [7.4, 7.3, 7.2]
         os: [ubuntu-latest]
 
+    name: PHP-${{ matrix.php }} - ${{ matrix.os }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          host port: 3306
+          container port: 3306
+          character set server: 'utf8mb4'
+          collation server: 'utf8mb4_general_ci'
+          mysql version: '5.7'
+          mysql database: 'test_db'
+          mysql root password: 'secret'
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -47,9 +44,6 @@ jobs:
 
       - run: docker run -p 1025:25 -p 1080:80 -d --name maildev maildev/maildev
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate --strict
-
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v2
@@ -60,7 +54,7 @@ jobs:
             ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
+        run: composer update --prefer-dist --no-interaction
 
       - name: Create test cache directory
         run: if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
