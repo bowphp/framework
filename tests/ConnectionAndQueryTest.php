@@ -24,7 +24,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_create_table(Database $db)
     {
@@ -36,7 +36,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_simple_insert_table(Database $db)
     {
@@ -44,7 +44,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_array_insert_table(Database $db)
     {
@@ -55,7 +55,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_array_multile_insert_table(Database $db)
     {
@@ -66,7 +66,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_select_table(Database $db)
     {
@@ -76,7 +76,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_select_table_2(Database $db)
     {
@@ -86,7 +86,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_select_with_get_one_element_table(Database $db)
     {
@@ -96,7 +96,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_select_with_not_get_element_table(Database $db)
     {
@@ -110,7 +110,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_select_one_table(Database $db)
     {
@@ -122,7 +122,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_update_table($db)
     {
@@ -134,7 +134,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_delete_table(Database $db)
     {
@@ -144,7 +144,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_transaction_table(Database $db)
     {
@@ -158,7 +158,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_rollback_table(Database $db)
     {
@@ -188,7 +188,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_stement_table(Database $db)
     {
@@ -198,7 +198,7 @@ class ConnectionAndQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      */
     public function test_stement_table_2(Database $db)
     {

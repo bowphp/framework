@@ -6,7 +6,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $config = require __DIR__.'/config/database.php';
 
-        $sqliteAdapter = new \Bow\Database\Connection\Adapter\SqliteAdapter($config['connection']['sqlite']);
+        $sqliteAdapter = new \Bow\Database\Connection\Adapter\SqliteAdapter($config['connections']['sqlite']);
 
         $this->assertInstanceOf(\Bow\Database\Connection\AbstractConnection::class, $sqliteAdapter);
 
@@ -14,7 +14,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetSqliteConnection
+     * @depends test_get_sqlite_connection
      */
     public function test_get_sqlite_pdo($sqliteAdapter)
     {
@@ -28,7 +28,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $config = require __DIR__.'/config/database.php';
 
-        $mysqlAdapter = new \Bow\Database\Connection\Adapter\MysqlAdapter($config['connection']['mysql']);
+        $mysqlAdapter = new \Bow\Database\Connection\Adapter\MysqlAdapter($config['connections']['mysql']);
 
         $this->assertInstanceOf(\Bow\Database\Connection\AbstractConnection::class, $mysqlAdapter);
 
@@ -36,7 +36,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetMysqlConnection
+     * @depends test_get_mysql_connection
      */
     public function test_get_mysql_pdo($mysqlAdapter)
     {

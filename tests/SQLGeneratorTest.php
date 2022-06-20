@@ -11,7 +11,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
      */
     private $generator;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->generator = new SQLGenerator('bow_tests');
     }

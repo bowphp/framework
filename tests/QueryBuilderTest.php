@@ -4,22 +4,22 @@ use \Bow\Database\Database;
 
 class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 {
-    public function testGetDatabaseConnection()
+    public function test_get_database_connection()
     {
         return Database::getInstance();
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
-    public function testGetInstance(Bow\Database\Database $db)
+    public function test_get_instance(Bow\Database\Database $db)
     {
         $this->assertInstanceOf(\Bow\Database\QueryBuilder::class, $db->table('pets'));
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testInsertRows(Bow\Database\Database $db)
@@ -35,7 +35,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testInsertMutilRows(Bow\Database\Database $db)
@@ -52,7 +52,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testSelectRows(Bow\Database\Database $db)
@@ -67,7 +67,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testSelectChainRows(Bow\Database\Database $db)
@@ -80,7 +80,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testSelectFirstChainRows(Bow\Database\Database $db)
@@ -93,7 +93,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testWhereInChainRows(Bow\Database\Database $db)
@@ -106,7 +106,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testWhereNullChainRows(Bow\Database\Database $db)
@@ -119,7 +119,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testWhereBetweenChainRows(Bow\Database\Database $db)
@@ -132,7 +132,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testWhereNotBetweenChainRows(Bow\Database\Database $db)
@@ -145,7 +145,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testWhereNotNullChainRows(Bow\Database\Database $db)
@@ -158,7 +158,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetDatabaseConnection
+     * @depends test_get_database_connection
      * @param Database $db
      */
     public function testWhereChainRows(Bow\Database\Database $db)

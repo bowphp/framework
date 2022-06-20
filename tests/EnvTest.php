@@ -5,7 +5,7 @@ use \Bow\Support\Env;
 
 class EnvTest extends \PHPUnit\Framework\TestCase
 {
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         if (! file_exists(__DIR__.'/data/.env.json')) {
             file_put_contents(__DIR__.'/data/.env.json', json_encode(['NAME' => 'papac']));
