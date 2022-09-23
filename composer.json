@@ -54,8 +54,8 @@
         "papac/bow-blade": "For using Blade template engine"
     },
     "scripts": {
-        "fix-sniffer": "phpcbf --standard=psr2 --severity=4 --tab-width=4 src tests",
-        "sniffer": "phpcs --standard=psr2 --severity=4 --tab-width=4 src tests",
+        "phpcbf": "phpcbf --standard=psr2 --severity=4 --tab-width=4 src tests",
+        "phpcs": "phpcs --standard=psr2 --severity=4 --tab-width=4 src tests",
         "test": "phpunit --configuration phpunit.dist.xml"
     }
 }
