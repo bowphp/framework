@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
@@ -12,35 +12,35 @@ abstract class Relation
      *
      * @var Model
      */
-    protected $parent;
+    protected Model $parent;
 
     /**
      * The related model instance
      *
      * @var Model
      */
-    protected $related;
+    protected Model $related;
 
     /**
      * The Bow Query builder
      *
      * @var QueryBuilder
      */
-    protected $query;
+    protected QueryBuilder $query;
 
     /**
      * Indicates whether the relation is adding constraints.
      *
      * @var bool
      */
-    protected static $has_constraints = true;
+    protected static bool $has_constraints = true;
 
     /**
      * Indicate whether the relationships use a pivot table.*.
      *
      * @var bool
      */
-    protected static $has_pivot = false;
+    protected static bool $has_pivot = false;
 
     /**
      * Relation Contructor
@@ -54,6 +54,7 @@ abstract class Relation
         $this->related = $related;
         $this->query = $this->related::query();
 
+        // Build the constraint effect
         if (static::$has_constraints) {
             $this->addConstraints();
         }
@@ -64,14 +65,14 @@ abstract class Relation
      *
      * @return void
      */
-    abstract public function addConstraints();
+    abstract public function addConstraints(): void;
 
     /**
      * Get the results of the relationship.
      *
      * @return mixed
      */
-    abstract public function getResults();
+    abstract public function getResults(): mixed;
 
     /**
      * Get the parent model.
@@ -88,7 +89,7 @@ abstract class Relation
      *
      * @return Model
      */
-    public function getRelated()
+    public function getRelated(): Model
     {
         return $this->related;
     }
@@ -100,7 +101,7 @@ abstract class Relation
      * @param string $args
      * @return mixed
      */
-    public function __call($method, array $args)
+    public function __call(string $method, array $args)
     {
         $result = call_user_func_array([$this->query, $method], $args);
 

@@ -12,7 +12,7 @@ trait ArrayAccessTrait
      *
      * @see http://php.net/manual/fr/class.arrayaccess.php
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if (is_null($offset)) {
             $this->attributes[] = $value;
@@ -29,7 +29,7 @@ trait ArrayAccessTrait
      *
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->attributes[$offset]);
     }
@@ -41,7 +41,7 @@ trait ArrayAccessTrait
      *
      * @see http://php.net/manual/fr/class.arrayaccess.php
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->attributes[$offset]);
     }
@@ -54,7 +54,7 @@ trait ArrayAccessTrait
      *
      * @see http://php.net/manual/fr/class.arrayaccess.php
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return isset($this->attributes[$offset])
             ? $this->attributes[$offset]

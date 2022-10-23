@@ -8,9 +8,9 @@ trait EventTrait
      * Get event name
      *
      * @param string $event
-     * @return mixed
+     * @return string
      */
-    private static function formatEventName($event)
+    private static function formatEventName(string $event): string
     {
         return str_replace('\\', '.', strtolower(static::class)).'.'.$event;
     }
@@ -20,7 +20,7 @@ trait EventTrait
      *
      * @param string $event
      */
-    private function fireEvent($event)
+    private function fireEvent(string $event): void
     {
         $env = $this->formatEventName($event);
 

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
@@ -40,9 +40,9 @@ class BelongsToMany extends Relation
     /**
      * Get the results of the relationship.
      *
-     * @return Model
+     * @return Collection
      */
-    public function getResults()
+    public function getResults(): Collection
     {
         // TODO: Cache the result
         return $this->query->get();

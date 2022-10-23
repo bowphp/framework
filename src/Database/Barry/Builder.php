@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
@@ -49,7 +49,7 @@ class Builder extends QueryBuilder
      * @return bool
      * @throws
      */
-    public function exists($column = null, $value = null)
+    public function exists(string $column = null, string $value = null): bool
     {
         if ($value == null && $value == null) {
             return $this->count() > 0;
@@ -69,7 +69,7 @@ class Builder extends QueryBuilder
      *
      * @param string $model
      */
-    public function setModel($model)
+    public function setModel(string $model): Builder
     {
         $this->model = $model;
 
@@ -81,7 +81,7 @@ class Builder extends QueryBuilder
      *
      * @return string
      */
-    public function getModel()
+    public function getModel(): string
     {
         return $this->model;
     }
