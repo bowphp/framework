@@ -6,3 +6,4 @@ phpunit.xml
 .DS_Store
 .env.json
 composer.lock
+.phpunit.result.cache
