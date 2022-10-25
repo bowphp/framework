@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
@@ -29,8 +29,12 @@ class BelongsTo extends Relation
      * @param string  $foreign_key
      * @param string  $local_key
      */
-    public function __construct(Model $related, Model $parent, $foreign_key, $local_key)
-    {
+    public function __construct(
+        Model $related,
+        Model $parent,
+        string $foreign_key,
+        string $local_key
+    ) {
         $this->local_key = $local_key;
         $this->foreign_key = $foreign_key;
 
@@ -42,7 +46,7 @@ class BelongsTo extends Relation
      *
      * @return Model
      */
-    public function getResults()
+    public function getResults(): ?Model
     {
         // TODO: Cache the result
         return $this->query->first();
@@ -53,7 +57,7 @@ class BelongsTo extends Relation
      *
      * @return void
      */
-    public function addConstraints()
+    public function addConstraints(): void
     {
         if (!static::$has_constraints) {
             return;

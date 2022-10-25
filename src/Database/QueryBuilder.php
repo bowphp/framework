@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database;
 
@@ -17,91 +17,91 @@ class QueryBuilder implements \JsonSerializable
      *
      * @var string
      */
-    protected $table;
+    protected ?string $table = null;
 
     /**
      * Select statement collector
      *
      * @var string
      */
-    protected $select;
+    protected ?string $select = null;
 
     /**
      * Where statement collector
      *
      * @var string
      */
-    protected $where;
+    protected ?string $where = null;
 
     /**
      * The data binding information
      *
      * @var array
      */
-    protected $where_data_binding = [];
+    protected array $where_data_binding = [];
 
     /**
      * Join statement collector
      *
      * @var string
      */
-    protected $join;
+    protected ?string $join = null;
 
     /**
      * Limit statement collector
      *
      * @var string
      */
-    protected $limit;
+    protected ?string $limit = null;
 
     /**
      * Group statement collector
      *
      * @var string
      */
-    protected $group;
+    protected ?string $group = null;
 
     /**
      * Having statement collector
      *
      * @var string
      */
-    protected $having;
+    protected ?string $having = null;
 
     /**
      * Order By statement collector
      *
      * @var string
      */
-    protected $order;
+    protected ?string $order = null;
 
     /**
      * Define the table as
      *
      * @var string
      */
-    protected $as;
+    protected ?string $as = null;
 
     /**
      * The PDO instance
      *
      * @var \PDO
      */
-    protected $connection;
+    protected ?\PDO $connection = null;
 
     /**
      * Define whether to retrieve information from the list
      *
      * @var bool
      */
-    protected $first = false;
+    protected bool $first = false;
 
     /**
      * The table prefix
      *
      * @var string
      */
-    protected $prefix = '';
+    protected string $prefix = '';
 
     /**
      * QueryBuilder Constructor
@@ -109,7 +109,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $table
      * @param PDO $connection
      */
-    public function __construct($table, PDO $connection)
+    public function __construct(string $table, PDO $connection)
     {
         $this->connection = $connection;
 
@@ -164,7 +164,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $as
      * @return QueryBuilder
      */
-    public function as(string $as)
+    public function as(string $as): QueryBuilder
     {
         $this->as = $as;
 
@@ -174,21 +174,27 @@ class QueryBuilder implements \JsonSerializable
     /**
      * Add where clause into the request
      *
-     * WHERE column1 $comp $value|column
+     * WHERE column1 $comparator $value|column
      *
      * @param string $column
-     * @param string $comp
+     * @param mixed $comparator
      * @param mixed $value
      * @param string $boolean
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function where($column, $comp = '=', $value = null, $boolean = 'and')
-    {
-        if (!static::isComparisonOperator($comp) || is_null($value)) {
-            $value = $comp;
+    public function where(
+        string $column,
+        mixed $comparator = '=',
+        mixed $value = null,
+        string $boolean = 'and'
+    ): QueryBuilder {
+    
+    // We check here the applied comparator
+        if (!static::isComparisonOperator($comparator) || is_null($value)) {
+            $value = $comparator;
 
-            $comp = '=';
+            $comparator = '=';
         }
 
         if ($value === null) {
@@ -210,9 +216,9 @@ class QueryBuilder implements \JsonSerializable
         }
 
         if ($this->where == null) {
-            $this->where = $column . ' ' . $comp . ' '.$indicator;
+            $this->where = $column . ' ' . $comparator . ' '.$indicator;
         } else {
-            $this->where .= ' ' . $boolean . ' ' . $column . ' ' . $comp . ' '.$indicator;
+            $this->where .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' '.$indicator;
         }
 
         return $this;
@@ -221,12 +227,12 @@ class QueryBuilder implements \JsonSerializable
     /**
      * Add where clause into the request
      *
-     * WHERE column1 $comp $value|column
+     * WHERE column1 $comparator $value|column
      *
      * @param string $where
      * @return QueryBuilder
      */
-    public function whereRaw(string $where)
+    public function whereRaw(string $where): QueryBuilder
     {
         if ($this->where == null) {
             $this->where = $where;
@@ -243,12 +249,12 @@ class QueryBuilder implements \JsonSerializable
      * [where column = value or column = value]
      *
      * @param string $column
-     * @param string $comp
+     * @param mixed $comparator
      * @param mixed  $value
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function orWhere($column, $comp = '=', $value = null)
+    public function orWhere(string $column, mixed $comparator = '=', mixed $value = null): QueryBuilder
     {
         if (is_null($this->where)) {
             throw new QueryBuilderException(
@@ -269,7 +275,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $boolean
      * @return QueryBuilder
      */
-    public function whereNull($column, $boolean = 'and')
+    public function whereNull(string $column, $boolean = 'and'): QueryBuilder
     {
         if (is_null($this->where)) {
             $this->where = $column . ' is null';
@@ -289,7 +295,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $boolean
      * @return QueryBuilder
      */
-    public function whereNotNull($column, $boolean = 'and')
+    public function whereNotNull($column, $boolean = 'and'): QueryBuilder
     {
         if (is_null($this->where)) {
             $this->where = $column . ' is not null';
@@ -311,7 +317,7 @@ class QueryBuilder implements \JsonSerializable
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function whereBetween($column, $range, $boolean = 'and')
+    public function whereBetween(string $column, array $range, string $boolean = 'and'): QueryBuilder
     {
         $range = (array) $range;
         $between = implode(' and ', $range);
@@ -340,7 +346,7 @@ class QueryBuilder implements \JsonSerializable
      * @param array $range
      * @return QueryBuilder
      */
-    public function whereNotBetween($column, $range)
+    public function whereNotBetween(string $column, array $range): QueryBuilder
     {
         $this->whereBetween($column, $range, 'not');
 
@@ -356,7 +362,7 @@ class QueryBuilder implements \JsonSerializable
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function whereIn($column, $range, $boolean = 'and')
+    public function whereIn(string $column, array $range, string $boolean = 'and'): QueryBuilder
     {
         if ($range instanceof QueryBuilder) {
             $range = "(".$range->toSql().")";
@@ -366,9 +372,7 @@ class QueryBuilder implements \JsonSerializable
             $range = (array) $range;
             $this->where_data_binding = array_merge($this->where_data_binding, $range);
 
-            $map = array_map(function () {
-                return '?';
-            }, $range);
+            $map = array_map(fn() => '?', $range);
             $in = implode(', ', $map);
         } else {
             $in = (string) $range;
@@ -399,7 +403,7 @@ class QueryBuilder implements \JsonSerializable
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function whereNotIn($column, $range)
+    public function whereNotIn(string $column, array $range)
     {
         $this->whereIn($column, $range, 'not');
 
@@ -411,12 +415,16 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string  $table
      * @param string $first
-     * @param string $comp
+     * @param mixed $comparator
      * @param string $second
      * @return QueryBuilder
      */
-    public function join($table, $first, $comp = '=', $second = null)
-    {
+    public function join(
+        string $table,
+        string $first,
+        mixed $comparator = '=',
+        ?string $second = null
+    ): QueryBuilder {
         $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
@@ -424,13 +432,15 @@ class QueryBuilder implements \JsonSerializable
         } else {
             $this->join .= ' ';
         }
-
-        if (!$this->isComparisonOperator($comp)) {
-            $second = $comp;
-            $comp = '=';
+        
+        // We check here the applied comparator
+        if (!$this->isComparisonOperator($comparator)) {
+            $second = $comparator;
+            $comparator = '=';
         }
 
-        $this->join .= 'inner join ' . $table . ' on ' . $first . ' ' . $comp . ' ' . $second;
+        // Building the join query
+        $this->join .= 'inner join ' . $table . ' on ' . $first . ' ' . $comparator . ' ' . $second;
 
         return $this;
     }
@@ -440,13 +450,17 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string $table
      * @param string $first
-     * @param string $comp
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function leftJoin($table, $first, $comp = '=', $second = null)
-    {
+    public function leftJoin(
+        string $table,
+        string $first,
+        mixed $comparator = '=',
+        ?string $second = null
+    ): QueryBuilder {
         $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
@@ -454,13 +468,15 @@ class QueryBuilder implements \JsonSerializable
         } else {
             $this->join .= ' ';
         }
-
-        if (!$this->isComparisonOperator($comp)) {
-            $second = $comp;
-            $comp = '=';
+        
+        // We check here the applied comparator
+        if (!$this->isComparisonOperator($comparator)) {
+            $second = $comparator;
+            $comparator = '=';
         }
 
-        $this->join .= 'left join ' . $table . ' on ' . $first . ' ' . $comp . ' ' . $second . ' ';
+        // Building the join query
+        $this->join .= 'left join ' . $table . ' on ' . $first . ' ' . $comparator . ' ' . $second . ' ';
 
         return $this;
     }
@@ -470,13 +486,17 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string $table
      * @param string $first
-     * @param string $comp
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function rightJoin($table, $first, $comp = '=', $second = null)
-    {
+    public function rightJoin(
+        string $table,
+        string $first,
+        mixed $comparator = '=',
+        ?string $second = null
+    ): QueryBuilder {
         $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
@@ -485,12 +505,13 @@ class QueryBuilder implements \JsonSerializable
             $this->join .= ' ';
         }
 
-        if (!$this->isComparisonOperator($comp)) {
-            $second = $comp;
-            $comp = '=';
+        // We check here the applied comparator
+        if (!$this->isComparisonOperator($comparator)) {
+            $second = $comparator;
+            $comparator = '=';
         }
 
-        $this->join .= 'right join ' . $table . ' on ' . $first . ' ' . $comp . ' ' . $second;
+        $this->join .= 'right join ' . $table . ' on ' . $first . ' ' . $comparator . ' ' . $second;
 
         return $this;
     }
@@ -500,12 +521,12 @@ class QueryBuilder implements \JsonSerializable
      * if chained with "orOn" who add a "before"
      *
      * @param string $first
-     * @param string $comp
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function andOn($first, $comp = '=', $second = null)
+    public function andOn(string $first, $comparator = '=', $second = null): QueryBuilder
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException(
@@ -513,13 +534,14 @@ class QueryBuilder implements \JsonSerializable
                 E_ERROR
             );
         }
-
-        if (!$this->isComparisonOperator($comp)) {
-            $second = $comp;
-            $comp = '=';
+        
+        // We check here the applied comparator
+        if (!$this->isComparisonOperator($comparator)) {
+            $second = $comparator;
+            $comparator = '=';
         }
 
-        $this->join .= ' and ' . $first . ' ' . $comp . ' ' . $second;
+        $this->join .= ' and ' . $first . ' ' . $comparator . ' ' . $second;
 
         return $this;
     }
@@ -529,12 +551,12 @@ class QueryBuilder implements \JsonSerializable
      * The user has to do an "on()" before using the "orOn"
      *
      * @param string $first
-     * @param string $comp
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
      */
-    public function orOn($first, $comp = '=', $second = null)
+    public function orOn(string $first, $comparator = '=', $second = null): QueryBuilder
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException(
@@ -542,13 +564,14 @@ class QueryBuilder implements \JsonSerializable
                 E_ERROR
             );
         }
-
-        if (!$this->isComparisonOperator($comp)) {
-            $second = $comp;
-            $comp = '=';
+        
+        // We check here the applied comparator
+        if (!$this->isComparisonOperator($comparator)) {
+            $second = $comparator;
+            $comparator = '=';
         }
 
-        $this->join .= ' or ' . $first . ' ' . $comp . ' ' . $second;
+        $this->join .= ' or ' . $first . ' ' . $comparator . ' ' . $second;
 
         return $this;
     }
@@ -559,7 +582,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $column
      * @return QueryBuilder
      */
-    public function groupBy($column)
+    public function groupBy(string $column): QueryBuilder
     {
         if (is_null($this->group)) {
             $this->group = $column;
@@ -584,22 +607,27 @@ class QueryBuilder implements \JsonSerializable
      * clause having, is used with a groupBy
      *
      * @param string $column
-     * @param string $comp
+     * @param mixed $comparator
      * @param mixed  $value
      * @param string $boolean
      * @return QueryBuilder
      */
-    public function having(string $column, string $comp = '=', $value = null, $boolean = 'and')
-    {
-        if (!$this->isComparisonOperator($comp)) {
-            $value = $comp;
-            $comp = '=';
+    public function having(
+        string $column,
+        mixed $comparator = '=',
+        $value = null,
+        $boolean = 'and'
+    ): QueryBuilder {
+        // We check here the applied comparator
+        if (!$this->isComparisonOperator($comparator)) {
+            $value = $comparator;
+            $comparator = '=';
         }
 
         if (is_null($this->having)) {
-            $this->having = $column . ' ' . $comp . ' ' . $value;
+            $this->having = $column . ' ' . $comparator . ' ' . $value;
         } else {
-            $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comp . ' ' . $value;
+            $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' ' . $value;
         }
 
         return $this;
@@ -612,7 +640,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $type
      * @return QueryBuilder
      */
-    public function orderBy($column, $type = 'asc')
+    public function orderBy(string $column, string $type = 'asc'): QueryBuilder
     {
         if (!in_array($type, ['asc', 'desc'])) {
             $type = 'asc';
@@ -633,9 +661,10 @@ class QueryBuilder implements \JsonSerializable
      * @param int $offset
      * @return QueryBuilder
      */
-    public function jump($offset = 0)
+    public function jump(int $offset = 0): QueryBuilder
     {
-        if (is_null($this->limit)) {
+        // Check the limit value definition
+        if (is_null($this->limit) || strlen(trim($this->limit)) === 0) {
             $this->limit = $offset . ', ';
         }
 
@@ -648,10 +677,10 @@ class QueryBuilder implements \JsonSerializable
      * @param int $limit
      * @return QueryBuilder
      */
-    public function take($limit)
+    public function take(int $limit): QueryBuilder
     {
         if (is_null($this->limit)) {
-            $this->limit = (int) $limit;
+            $this->limit = (string) $limit;
 
             return $this;
         }
@@ -669,7 +698,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $column
      * @return QueryBuilder|number|array|object
      */
-    public function max($column)
+    public function max(string $column): QueryBuilder
     {
         return $this->aggregate('max', $column);
     }
@@ -723,9 +752,9 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param $aggregate
      * @param string $column
-     * @return QueryBuilder|number|object
+     * @return int|float
      */
-    private function aggregate($aggregate, $column)
+    private function aggregate($aggregate, $column): int|float
     {
         $sql = 'select ' . $aggregate . '(' . $column . ') from ' . $this->table;
 
@@ -763,7 +792,8 @@ class QueryBuilder implements \JsonSerializable
             return Sanitize::make($statement->fetchAll());
         }
 
-        return (int) $statement->fetchColumn();
+        // Notice: The result of the next action can be float or int type
+        return $statement->fetchColumn();
     }
 
     /**
@@ -771,10 +801,10 @@ class QueryBuilder implements \JsonSerializable
      * If the first selection mode is not active
      *
      * @param  array $columns
-     * @return array|stdClass
+     * @return array|object|null
      * @throws
      */
-    public function get(array $columns = [])
+    public function get(array $columns = []): array|object|null
     {
         if (count($columns) > 0) {
             $this->select($columns);
@@ -814,7 +844,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return object|null
      */
-    public function first()
+    public function first(): ?object
     {
         $this->first = true;
 
@@ -828,7 +858,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return mixed
      */
-    public function last()
+    public function last(): ?object
     {
         $where = $this->where;
 
@@ -850,7 +880,7 @@ class QueryBuilder implements \JsonSerializable
      * @param array $data
      * @return int
      */
-    public function update(array $data = [])
+    public function update(array $data = []): int
     {
         $sql = 'update ' . $this->table . ' set ';
         $sql .= implode(' = ?, ', array_keys($data)) . ' = ?';
@@ -882,7 +912,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return int
      */
-    public function delete()
+    public function delete(): int
     {
         $sql = 'delete from ' . $this->table;
 
@@ -909,12 +939,12 @@ class QueryBuilder implements \JsonSerializable
      * Remove simplified stream from delete.
      *
      * @param string $column
-     * @param string $comp
+     * @param mixed $comparator
      * @param string $value
      * @return int
      * @throws QueryBuilderException
      */
-    public function remove(string $column, string $comp = '=', $value = null)
+    public function remove(string $column, mixed $comparator = '=', $value = null): QueryBuilder
     {
         $this->where = null;
 
@@ -929,7 +959,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return int
      */
-    public function increment(string $column, int $step = 1)
+    public function increment(string $column, int $step = 1): int
     {
         return $this->incrementAction($column, $step, '+');
     }
@@ -942,7 +972,7 @@ class QueryBuilder implements \JsonSerializable
      * @param int    $step
      * @return int
      */
-    public function decrement(string $column, int $step = 1)
+    public function decrement(string $column, int $step = 1): int
     {
         return $this->incrementAction($column, $step, '-');
     }
@@ -969,12 +999,12 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string $column
      * @param int    $step
-     * @param string $sign
+     * @param string $direction
      * @return int
      */
-    private function incrementAction(string $column, int $step = 1, string $sign = '')
+    private function incrementAction(string $column, int $step = 1, string $direction)
     {
-        $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $sign . ' ' . $step;
+        $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $direction . ' ' . $step;
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
@@ -996,7 +1026,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return bool
      */
-    public function truncate()
+    public function truncate(): bool
     {
         return (bool) $this->connection->exec('truncate ' . $this->table . ';');
     }
@@ -1009,7 +1039,7 @@ class QueryBuilder implements \JsonSerializable
      * @param array $values
      * @return int
      */
-    public function insert(array $values)
+    public function insert(array $values): int
     {
         $row_affected = 0;
 
@@ -1039,7 +1069,7 @@ class QueryBuilder implements \JsonSerializable
      * @param array $value
      * @return int
      */
-    private function insertOne(array $value)
+    private function insertOne(array $value): int
     {
         $fields = array_keys($value);
         $column = implode(', ', $fields);
@@ -1063,7 +1093,7 @@ class QueryBuilder implements \JsonSerializable
      * @param array $values
      * @return int
      */
-    public function insertAndGetLastId(array $values)
+    public function insertAndGetLastId(array $values): int
     {
         $this->insert($values);
 
@@ -1077,7 +1107,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return mixed
      */
-    public function drop()
+    public function drop(): bool
     {
         return (bool) $this->connection->exec('drop table ' . $this->table);
     }
@@ -1088,9 +1118,9 @@ class QueryBuilder implements \JsonSerializable
      * @param int $number_of_page
      * @param int $current
      * @param int $chunk
-     * @return Collection
+     * @return array
      */
-    public function paginate(int $number_of_page, int $current = 0, int $chunk = null)
+    public function paginate(int $number_of_page, int $current = 0, int $chunk = null): array
     {
         // We go to back page
         --$current;
@@ -1143,13 +1173,13 @@ class QueryBuilder implements \JsonSerializable
      * @return bool
      * @throws QueryBuilderException
      */
-    public function exists($column = null, $value = null)
+    public function exists(?string $column = null, mixed $value = null): bool
     {
         if ($column == null && $value == null) {
             return $this->count() > 0;
         }
 
-        return $this->where($column, $value)->count() > 0;
+        return $this->whereIn($column, (array) $value)->count() > 0;
     }
 
     /**
@@ -1158,7 +1188,7 @@ class QueryBuilder implements \JsonSerializable
      * @param  string $name [optional]
      * @return string
      */
-    public function getLastInsertId($name = null)
+    public function getLastInsertId(?string $name = null)
     {
         return $this->connection->lastInsertId($name);
     }
@@ -1180,7 +1210,7 @@ class QueryBuilder implements \JsonSerializable
      * @param int $option
      * @return string
      */
-    public function toJson($option = 0)
+    public function toJson(int $option = 0): string
     {
         return json_encode($this->get(), $option);
     }
@@ -1190,7 +1220,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return string
      */
-    public function toSql()
+    public function toSql(): string
     {
         $sql = 'select ';
 
@@ -1256,7 +1286,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return string
      */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
@@ -1266,7 +1296,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return string
      */
-    public function getPrefix()
+    public function getPrefix(): string
     {
         return $this->prefix;
     }
@@ -1276,7 +1306,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string $prefix
      */
-    public function setPrefix($prefix)
+    public function setPrefix(string $prefix): QueryBuilder
     {
         $this->prefix = $prefix;
 
@@ -1289,7 +1319,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $table
      * @return QueryBuilder
      */
-    public function setTable($table)
+    public function setTable(string $table): QueryBuilder
     {
         $this->table = $this->getPrefix() . $table;
 
@@ -1301,7 +1331,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param array $data_binding
      */
-    public function setWhereDataBinding(array $data_binding)
+    public function setWhereDataBinding(array $data_binding): where
     {
         $this->where_data_binding = $data_binding;
     }
@@ -1311,7 +1341,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toJson();
     }
@@ -1324,10 +1354,10 @@ class QueryBuilder implements \JsonSerializable
      *
      * @return PDOStatement
      */
-    private function bind(PDOStatement $pdo_statement, array $bindings = [])
+    private function bind(PDOStatement $pdo_statement, array $bindings = []): PDOStatement
     {
         foreach ($bindings as $key => $value) {
-            if (is_null($value) || strtolower($value) === 'null') {
+            if (is_null($value) || strtolower((string) $value) === 'null') {
                 $pdo_statement->bindValue(
                     ':' . $key,
                     $value,
@@ -1359,23 +1389,26 @@ class QueryBuilder implements \JsonSerializable
                 $param = PDO::PARAM_STR;
             }
 
+            // Bind by value with native pdo statement object
             $pdo_statement->bindValue(
                 is_string($key) ? ":" . $key : $key + 1,
                 $value,
                 $param
             );
         }
+
+        return $pdo_statement;
     }
 
     /**
      * Utility, allows to validate an operator
      *
-     * @param string $comp
+     * comparatoram string $comp
      * @return bool
      */
-    private static function isComparisonOperator($comp)
+    private static function isComparisonOperator(mixed $comparator): bool
     {
-        return in_array(Str::upper($comp), [
+        return in_array(Str::upper($comparator), [
             '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN"
         ], true);
     }

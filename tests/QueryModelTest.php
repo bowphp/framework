@@ -1,37 +1,38 @@
 <?php
 
 use \Bow\Database\Database;
+use \Bow\Database\Barry\Model;
 
-class Pets extends \Bow\Database\Barry\Model
+class Pets extends Model
 {
     /**
      * @var string
      */
-    protected $table = "pets";
+    protected string $table = "pets";
 
     /**
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected string $primaryKey = 'id';
 
     /**
      * @var bool
      */
-    protected $timestamps = false;
+    protected bool $timestamps = false;
 }
 
 class QueryModelTest extends \PHPUnit\Framework\TestCase
 {
-    public function testGetConnection()
+    public function test_get_connection()
     {
         return Database::getInstance();
     }
 
     /**
      * @param Database $db
-     * @depends testGetConnection
+     * @depends test_get_connection
      */
-    public function testInstanceOfModel(Bow\Database\Database $db)
+    public function test_the_first_result_should_be_the_instance_of_same_model(Bow\Database\Database $db)
     {
         $pet = new Pets();
 
@@ -41,10 +42,10 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
-    public function testInstanceOfModel2(Bow\Database\Database $db)
+    public function test_take_method_and_the_result_should_be_the_instance_of_the_same_model(Bow\Database\Database $db)
     {
         $pet = new Pets();
 
@@ -54,7 +55,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
     public function testInstanceCollectionOf(Bow\Database\Database $db)
@@ -65,7 +66,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
     public function testChainSelectOf(Bow\Database\Database $db)
@@ -76,7 +77,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
     public function testCountOf(Bow\Database\Database $db)
@@ -87,7 +88,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
     public function testCountSelectCountOf(Bow\Database\Database $db)
@@ -100,7 +101,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      */
     public function testNotCountSelectCountOf(Bow\Database\Database $db)
     {
@@ -112,7 +113,7 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
     public function testSaveOf(Bow\Database\Database $db)
@@ -123,35 +124,35 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
     public function testInsert(Bow\Database\Database $db)
     {
-        $pet = Pets::create([
-            'name' => 'Couli',
-            'id' => 1
-        ]);
+        $insert_result = Pets::create(['name' => 'Couli', 'id' => 1 ]);
+        $select_result = Pet::findBy('id', 1)->first();
 
-        $this->assertInstanceOf(Pets::class, $pet);
+        $this->assertInstanceOf(Pets::class, $insert_result);
+        $this->assertInstanceOf(Pets::class, $select_result);
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
-    public function testFind(Bow\Database\Database $db)
+    public function test_find_should_not_be_empty(Bow\Database\Database $db)
     {
         $pet = Pets::find(1);
 
         $this->assertInstanceOf(Pets::class, $pet);
+        $this->assertEquals($pet->name, 'Couli');
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
-    public function testFindEmpty(Bow\Database\Database $db)
+    public function test_find_result_should_be_empty(Bow\Database\Database $db)
     {
         $pet = Pets::find(100);
 
@@ -159,24 +160,29 @@ class QueryModelTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
-    public function testFindBy(Bow\Database\Database $db)
+    public function test_findby_result_should_not_be_empty(Bow\Database\Database $db)
     {
-        $pet = Pets::findBy('id', 1);
+        $result = Pets::findBy('id', 1);
+        $pet = $result->first();
 
-        $this->assertNotEquals($pet->count(), 0);
+        $this->assertNotEquals($result->count(), 0);
+        $this->assertNotNull($pet);
+        $this->assertEquals($pet->name, 'Couli');
     }
 
     /**
-     * @depends testGetConnection
+     * @depends test_get_connection
      * @param Database $db
      */
-    public function testFindByEmpty(Bow\Database\Database $db)
+    public function test_find_by_method_should_be_empty(Bow\Database\Database $db)
     {
-        $pet = Pets::findBy('id', 100);
+        $result = Pets::findBy('id', 100);
+        $pet = $result->first();
 
         $this->assertEquals($pet->count(), 0);
+        $this->assertNull($pet);
     }
 }

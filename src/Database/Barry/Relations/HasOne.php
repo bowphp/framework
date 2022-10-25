@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
@@ -12,14 +12,14 @@ class HasOne extends Relation
      *
      * @var string
      */
-    protected $foreign_key;
+    protected string $foreign_key;
 
     /**
      * The associated key on the parent model.
      *
      * @var string
      */
-    protected $local_key;
+    protected string $local_key;
 
     /**
      * Create a new belongs to relationship instance.
@@ -43,7 +43,7 @@ class HasOne extends Relation
      *
      * @return Model
      */
-    public function getResults()
+    public function getResults(): ?Model
     {
         // TODO: Cache the result
         return $this->query->first();
@@ -54,7 +54,7 @@ class HasOne extends Relation
      *
      * @return void
      */
-    public function addConstraints()
+    public function addConstraints(): void
     {
         if (static::$has_constraints) {
             // Todo

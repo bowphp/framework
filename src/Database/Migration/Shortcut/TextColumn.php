@@ -2,6 +2,8 @@
 
 namespace Bow\Database\Migration\Shortcut;
 
+use Bow\Database\Migration\SQLGenerator;
+
 trait TextColumn
 {
     /**
@@ -11,7 +13,7 @@ trait TextColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addString($column, array $attribute = [])
+    public function addString(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'string', $attribute);
     }
@@ -23,7 +25,7 @@ trait TextColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addLongString($column, array $attribute = [])
+    public function addLongString(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'long varchar', $attribute);
     }
@@ -35,7 +37,7 @@ trait TextColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addJson($column, array $attribute = [])
+    public function addJson(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'json', $attribute);
     }
@@ -47,7 +49,7 @@ trait TextColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addChar($column, array $attribute = [])
+    public function addChar(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'character', $attribute);
     }
@@ -59,7 +61,7 @@ trait TextColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addLongtext($column, array $attribute = [])
+    public function addLongtext(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'longtext', $attribute);
     }
@@ -71,7 +73,7 @@ trait TextColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addText($column, array $attribute = [])
+    public function addText(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'text', $attribute);
     }
@@ -83,7 +85,7 @@ trait TextColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addBlob($column, array $attribute = [])
+    public function addBlob(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'blob', $attribute);
     }

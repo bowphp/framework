@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database\Connection;
 
@@ -11,28 +11,28 @@ abstract class AbstractConnection
      *
      * @var string
      */
-    protected $name = null;
+    protected ?string $name = null;
 
     /**
      * The configuration definition
      *
      * @var array
      */
-    protected $config = [];
+    protected array $config = [];
 
     /**
      * The PDO fetch mode
      *
      * @var int
      */
-    protected $fetch = PDO::FETCH_OBJ;
+    protected int $fetch = PDO::FETCH_OBJ;
 
     /**
      * The PDO instance
      *
      * @var PDO
      */
-    protected $pdo;
+    protected PDO $pdo;
 
     /**
      * Create an instance of the PDO
@@ -46,7 +46,7 @@ abstract class AbstractConnection
      *
      * @return PDO
      */
-    public function getConnection()
+    public function getConnection(): PDO
     {
         return $this->pdo;
     }
@@ -66,7 +66,7 @@ abstract class AbstractConnection
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -76,7 +76,7 @@ abstract class AbstractConnection
      *
      * @param int $fetch
      */
-    public function setFetchMode($fetch)
+    public function setFetchMode(int $fetch)
     {
         $this->fetch = $fetch;
 
@@ -91,17 +91,17 @@ abstract class AbstractConnection
      *
      * @return array
      */
-    public function getConfig()
+    public function getConfig(): array
     {
-        return $this->config;
+        return (array) $this->config;
     }
 
     /**
      * Retrieves the table prefix
      *
-     * @return mixed|string
+     * @return string
      */
-    public function getTablePrefix()
+    public function getTablePrefix(): string
     {
         return isset($this->config['prefix'])
             ? $this->config['prefix']
@@ -111,9 +111,9 @@ abstract class AbstractConnection
     /**
      * Retrieves the type of encoding
      *
-     * @return mixed|string
+     * @return string
      */
-    public function getCharset()
+    public function getCharset(): string
     {
         return isset($this->config['charset'])
             ? $this->config['charset']
@@ -123,12 +123,22 @@ abstract class AbstractConnection
     /**
      * Retrieves the define Collation
      *
-     * @return mixed|string
+     * @return string
      */
-    public function getCollation()
+    public function getCollation(): string
     {
         return isset($this->config['collation'])
             ? $this->config['collation']
             : 'utf8_unicode_ci';
+    }
+
+    /**
+     * Get the drive that PDO run on
+     *
+     * @return string
+     */
+    public function getPdoDriver(): string
+    {
+        return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     }
 }

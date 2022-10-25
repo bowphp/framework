@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database;
 
@@ -17,7 +17,7 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function toArray()
+    public function toArray(): array
     {
         $arr = [];
 
@@ -31,7 +31,7 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function toJson($option = 0)
+    public function toJson(int $option = 0): string
     {
         return json_encode($this->toArray(), $option = 0);
     }
@@ -41,7 +41,7 @@ class Collection extends \Bow\Support\Collection
      *
      * @return void
      */
-    public function dropAll()
+    public function dropAll(): void
     {
         $this->each(function (Model $model) {
             $model->delete();
@@ -51,7 +51,7 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function __toString()
+    public function __toString(): string
     {
         return json_encode($this->toArray());
     }
@@ -59,7 +59,7 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

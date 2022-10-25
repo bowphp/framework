@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bow\Database\Connection;
 
@@ -9,7 +9,7 @@ class Connection
      *
      * @var AbstractConnection
      */
-    private $adapter;
+    private AbstractConnection $adapter;
 
     /**
      * Connection constructor.
@@ -26,7 +26,7 @@ class Connection
      *
      * @return AbstractConnection
      */
-    public function getAdapter()
+    public function getAdapter(): AbstractConnection
     {
         return $this->adapter;
     }
