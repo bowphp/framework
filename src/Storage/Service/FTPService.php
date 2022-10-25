@@ -56,7 +56,7 @@ class FTPService implements ServiceInterface
 
     /**
      * Cache the directory contents to avoid redundant server calls.
-     * 
+     *
      * @var array
      */
     private static array $cached_directory_contents = [];
@@ -233,7 +233,7 @@ class FTPService implements ServiceInterface
         fwrite($stream, $content);
         rewind($stream);
 
-        // 
+        //
         $result = $this->writeStream($location, $stream, $option);
         fclose($stream);
 

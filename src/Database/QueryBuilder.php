@@ -1002,7 +1002,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $direction
      * @return int
      */
-    private function incrementAction(string $column, int $step = 1, string $direction)
+    private function incrementAction(string $column, int $step = 1, string $direction = '+')
     {
         $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $direction . ' ' . $step;
 
