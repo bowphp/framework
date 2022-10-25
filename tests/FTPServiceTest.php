@@ -20,8 +20,6 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         }
 
         Storage::configure(require 'config/resource.php');
-
-        Storage::pushService(['ftp' => FTPService::class]);
     }
 
     protected function setUp(): void
@@ -34,13 +32,13 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->ftp_service->setConnectionRoot();
     }
 
-    public function testUnsecuredConnection()
+    public function test_the_connection()
     {
         $this->assertInstanceOf(FTPService::class, $this->ftp_service);
-        $this->assertIsResource($this->ftp_service->getConnection());
+        $this->assertInstanceOf(\FTP\Connection::class, $this->ftp_service->getConnection());
     }
 
-    public function testHasCorrectRootFolder()
+    public function test_ftp_base_root_should_equal_with_config_definition()
     {
         $config = require 'config/resource.php';
         $current_directory = $this->ftp_service->getCurrentDirectory();
@@ -49,7 +47,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($current_directory, trim($root_folder, '/'));
     }
 
-    public function testStore()
+    public function test_create_new_file_into_ftp_server()
     {
         $file_content = 'Something very interesting';
         $file_name = 'test.txt';
@@ -60,20 +58,20 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($result['path'], $file_name);
     }
 
-    public function testGetInexistentFile()
+    public function test_file_should_not_be_existe()
     {
         $this->expectException(\Bow\Storage\Exception\ResourceException::class);
         $this->ftp_service->get('dummy.txt');
     }
 
-    public function testGet()
+    public function test_create_the_new_file_and_the_content()
     {
         $this->createFile($this->ftp_service, 'bow.txt', 'bow');
 
         $this->assertEquals($this->ftp_service->get('bow.txt'), 'bow');
     }
 
-    public function testDelete()
+    public function test_delete_file_from_ftp_service()
     {
         $file_name = 'delete.txt';
         $this->createFile($this->ftp_service, $file_name);
@@ -84,7 +82,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->ftp_service->get($file_name);
     }
 
-    public function testRename()
+    public function test_rename_file()
     {
         $this->createFile($this->ftp_service, 'file1.txt', 'from file 1');
         $result = $this->ftp_service->move('file1.txt', 'file2.txt');
@@ -93,15 +91,15 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->ftp_service->get('file2.txt'), 'from file 1');
     }
 
-    public function testCopy()
+    public function test_copy_file_and_the_contents()
     {
         $result = $this->ftp_service->copy('file-copy.txt', 'test.txt');
 
-        $this->assertIsArray($result);
+        $this->assertTrue($result);
         $this->assertEquals($this->ftp_service->get('test.txt'), $this->ftp_service->get('file-copy.txt'));
     }
 
-    public function testMakeDirectory()
+    public function test_make_directory()
     {
         $result = $this->ftp_service->makeDirectory('super/nested/dir');
         $result_1 = $this->ftp_service->makeDirectory('simple_dir');
@@ -110,7 +108,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($result_1);
     }
 
-    public function testDirectories()
+    public function test_get_directories_from_the_server()
     {
         $this->ftp_service->makeDirectory('for_test');
         $result = $this->ftp_service->directories();
@@ -119,7 +117,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEmpty($result);
     }
 
-    public function testFiles()
+    public function test_get_files_from_the_server()
     {
         $this->createFile($this->ftp_service, 'only_file.txt');
         $result = $this->ftp_service->files();
@@ -132,7 +130,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($has_only_files);
     }
 
-    public function testIsDirectory()
+    public function test_check_if_is_directory()
     {
         $this->ftp_service->makeDirectory('mock_dir');
         $this->createFile($this->ftp_service, 'a_file.txt');
@@ -141,7 +139,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->ftp_service->isDirectory('a_file.txt'));
     }
 
-    public function testIsFile()
+    public function test_check_if_is_file()
     {
         $this->ftp_service->makeDirectory('is_file');
         $this->createFile($this->ftp_service, 'is_file.txt');
@@ -150,7 +148,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->ftp_service->isFile('is_file'));
     }
 
-    public function testExists()
+    public function test_check_if_file_exists()
     {
         $this->createFile($this->ftp_service, 'exists.txt');
 
@@ -158,7 +156,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->ftp_service->exists('dont_exists.txt'));
     }
 
-    public function testAppend()
+    public function test_append_content_into_file()
     {
         $this->createFile($this->ftp_service, 'append.txt', 'something');
         $this->ftp_service->append('append.txt', ' else');
@@ -166,7 +164,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertRegExp('/something else/', $this->ftp_service->get('append.txt'));
     }
 
-    public function testPrepend()
+    public function test_prepend_content_into_file()
     {
         $this->createFile($this->ftp_service, 'prepend.txt', 'else');
         $this->ftp_service->prepend('prepend.txt', 'something ');
@@ -174,7 +172,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertRegExp('/something else/', $this->ftp_service->get('prepend.txt'));
     }
 
-    public function testPut()
+    public function test_put_content_into_file()
     {
         $this->createFile($this->ftp_service, 'put.txt', 'something');
         $this->ftp_service->put('put.txt', ' else');

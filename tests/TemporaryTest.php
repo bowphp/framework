@@ -14,7 +14,7 @@ class TemporaryTest extends PHPUnit\Framework\TestCase
         $this->assertFalse($temp->isOpen());
     }
 
-    public function testWriteAndRead()
+    public function test_write()
     {
         $temp = new Temporary(sys_get_temp_dir().'/temp');
 

@@ -5,7 +5,7 @@ use Bow\Database\Database;
 
 class EventTable extends \Bow\Database\Barry\Model
 {
-    protected $table = 'pets';
+    protected string $table = 'pets';
 
     public function __construct(array $data = [])
     {
