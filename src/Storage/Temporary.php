@@ -3,6 +3,7 @@
 namespace Bow\Storage;
 
 use Bow\Storage\Exception\ResourceException;
+use resource;
 
 class Temporary
 {
@@ -11,20 +12,19 @@ class Temporary
      *
      * @var resource
      */
-    private $stream;
+    private mixed $stream = null;
 
     /**
      * The Lock filename
      *
      * @var string
      */
-    private $lock_filename;
+    private string $lock_filename;
 
     /**
      * Temporary Constructor
      *
      * @param string $lock_filename
-     *
      * @return void
      */
     public function __construct($lock_filename = 'php://temp')
@@ -37,9 +37,9 @@ class Temporary
     /**
      * Check if the streaming is open
      *
-     * @return boolean
+     * @return bool
      */
-    public function isOpen()
+    public function isOpen(): bool
     {
         return is_resource($this->stream);
     }
@@ -49,7 +49,7 @@ class Temporary
      *
      * @return void
      */
-    public function open()
+    public function open(): void
     {
         if (is_resource($this->stream)) {
             throw new ResourceException(
@@ -67,7 +67,7 @@ class Temporary
      *
      * @return void
      */
-    public function lockFile($lock_filename)
+    public function lockFile(string $lock_filename): void
     {
         $this->close();
 
@@ -81,7 +81,7 @@ class Temporary
      *
      * @return void
      */
-    public function close()
+    public function close(): void
     {
         if ($this->isOpen()) {
             fclose($this->stream);
@@ -95,7 +95,7 @@ class Temporary
      *
      * @return mixed
      */
-    public function write($content)
+    public function write($content): mixed
     {
         if (!$this->isOpen()) {
             $this->open();
@@ -109,7 +109,7 @@ class Temporary
      *
      * @return string|null
      */
-    public function read()
+    public function read(): string
     {
         if (!$this->isOpen()) {
             $this->open();
@@ -126,8 +126,6 @@ class Temporary
 
     /**
      * Temporary destructor
-     *
-     * @return void
      */
     public function __destruct()
     {

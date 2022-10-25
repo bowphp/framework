@@ -12,7 +12,7 @@ class Sanitize
      *
      * @return mixed
      */
-    public static function make($data, $secure = false)
+    public static function make($data, bool $secure = false)
     {
         // Recovery of the function at the lance.
         $method = $secure === true ? 'secure' : 'data';

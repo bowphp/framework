@@ -1,12 +1,12 @@
 <?php
 
-namespace Bow\Storage;
+namespace Bow\Storage\Service;
 
 use Bow\Http\UploadFile;
 use Bow\Storage\Contracts\FilesystemInterface;
 use InvalidArgumentException;
 
-class MountFilesystem implements FilesystemInterface
+class DiskFilesystemService implements FilesystemInterface
 {
     /**
      * The base work directory
@@ -43,10 +43,10 @@ class MountFilesystem implements FilesystemInterface
      * @param  string $location
      * @param  array $option
      *
-     * @return mixed
+     * @return bool
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, $location = null, array $option = [])
+    public function store(UploadFile $file, ?string $location = null, array $option = []): bool
     {
         if (is_array($location)) {
             $option = $location;
@@ -76,9 +76,9 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return bool
      */
-    public function append($file, $content)
+    public function append(string $file, string $content): bool
     {
-        return file_put_contents($file, $content, FILE_APPEND);
+        return (bool) file_put_contents($file, $content, FILE_APPEND);
     }
 
     /**
@@ -90,7 +90,7 @@ class MountFilesystem implements FilesystemInterface
      * @return bool
      * @throws
      */
-    public function prepend($file, $content)
+    public function prepend(string $file, string $content): bool
     {
         $tmp_content = file_get_contents($file);
 
@@ -107,7 +107,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return bool
      */
-    public function put($file, $content)
+    public function put(string $file, string $content): bool
     {
         $file = $this->path($file);
 
@@ -115,7 +115,7 @@ class MountFilesystem implements FilesystemInterface
 
         $this->makeDirectory($dirname);
 
-        return file_put_contents($file, $content);
+        return (bool) file_put_contents($file, $content);
     }
 
     /**
@@ -123,9 +123,9 @@ class MountFilesystem implements FilesystemInterface
      *
      * @param  string $file
      *
-     * @return boolean
+     * @return bool
      */
-    public function delete($file)
+    public function delete(string $file): bool
     {
         $file = $this->path($file);
 
@@ -143,7 +143,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return array
      */
-    public function files($dirname)
+    public function files(string $dirname): array
     {
         $dirname = $this->path($dirname);
 
@@ -161,7 +161,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return array
      */
-    public function directories($dirname)
+    public function directories(string $dirname): array
     {
         $directory_contents = glob($this->path($dirname) . "/*");
 
@@ -176,9 +176,9 @@ class MountFilesystem implements FilesystemInterface
      * @param  string $dirname
      * @param  int $mode
      *
-     * @return boolean
+     * @return bool
      */
-    public function makeDirectory($dirname, $mode = 0777)
+    public function makeDirectory(string $dirname, int $mode = 0777): bool
     {
         $directories = explode('/', $dirname);
 
@@ -199,11 +199,11 @@ class MountFilesystem implements FilesystemInterface
     /**
      * Create a directory.
      *
-     * @param $dirname
-     * @param $mode
+     * @param string $dirname
+     * @param int $mode
      * @return bool
      */
-    private function makeActualDirectory($dirname, $mode)
+    private function makeActualDirectory(string $dirname, int $mode): bool
     {
         $listing = glob($this->current_working_dir . '/*', GLOB_ONLYDIR) ?: [];
 
@@ -224,9 +224,9 @@ class MountFilesystem implements FilesystemInterface
      *
      * @param  string $filename
      *
-     * @return null|string
+     * @return int
      */
-    public function get($filename)
+    public function get(string $filename): ?string
     {
         $filename = $this->path($filename);
 
@@ -245,7 +245,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return bool
      */
-    public function copy($target, $source)
+    public function copy(string $target, string $source): bool
     {
         if (!$this->exists($target)) {
             throw new \RuntimeException("$target does not exist.", E_ERROR);
@@ -255,7 +255,7 @@ class MountFilesystem implements FilesystemInterface
             $this->makeDirectory(dirname($source), true);
         }
 
-        return file_put_contents($source, $this->get($target));
+        return (bool) file_put_contents($source, $this->get($target));
     }
 
     /**
@@ -264,13 +264,15 @@ class MountFilesystem implements FilesystemInterface
      * @param string $target
      * @param string $source
      *
-     * @return void
+     * @return bool
      */
-    public function move($target, $source)
+    public function move(string $target, string $source): bool
     {
         $this->copy($target, $source);
 
         $this->delete($target);
+
+        return true;
     }
 
     /**
@@ -280,7 +282,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return bool
      */
-    public function exists($filename)
+    public function exists(string $filename): bool
     {
         $filename = $this->path($filename);
 
@@ -304,7 +306,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return string
      */
-    public function extension($filename)
+    public function extension(string $filename): ?string
     {
         if ($this->exists($filename)) {
             return pathinfo($this->path($filename), PATHINFO_EXTENSION);
@@ -320,7 +322,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return bool
      */
-    public function isFile($filename)
+    public function isFile(string $filename): bool
     {
         return is_file($this->path($filename));
     }
@@ -332,7 +334,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return bool
      */
-    public function isDirectory($dirname)
+    public function isDirectory(string $dirname): bool
     {
         return is_dir($this->path($dirname));
     }
@@ -345,7 +347,7 @@ class MountFilesystem implements FilesystemInterface
      *
      * @return string
      */
-    public function path($filename)
+    public function path(string $filename): string
     {
         if (preg_match('#^' . $this->base_directory . '#', $filename)) {
             return $filename;

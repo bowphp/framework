@@ -9,5 +9,5 @@ interface ServiceInterface extends FilesystemInterface
      *
      * @param array $config
      */
-    public static function configure(array $config);
+    public static function configure(array $config): FilesystemInterface;
 }
