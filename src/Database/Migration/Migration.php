@@ -45,7 +45,7 @@ abstract class Migration
      * @param string $name
      * @return Migration
      */
-    final public function connection($name)
+    final public function connection(string $name): Migration
     {
         Database::connection($name);
 
@@ -60,7 +60,7 @@ abstract class Migration
      * @param string $table
      * @return Migration
      */
-    final public function drop($table)
+    final public function drop(string $table): Migration
     {
         $table = $this->getTablePrefixed($table);
 
@@ -75,7 +75,7 @@ abstract class Migration
      * @param string $table
      * @return Migration
      */
-    final public function dropIfExists($table)
+    final public function dropIfExists(string $table): Migration
     {
         $table = $this->getTablePrefixed($table);
 
@@ -91,7 +91,7 @@ abstract class Migration
      * @param callable $cb
      * @return Migration
      */
-    final public function create($table, callable $cb)
+    final public function create(string $table, callable $cb): Migration
     {
         $table = $this->getTablePrefixed($table);
 
@@ -117,7 +117,7 @@ abstract class Migration
      * @param callable $cb
      * @return Migration
      */
-    final public function alter($table, callable $cb)
+    final public function alter(string $table, callable $cb): Migration
     {
         $table = $this->getTablePrefixed($table);
 
@@ -136,7 +136,7 @@ abstract class Migration
      * @param string $sql
      * @return Migration
      */
-    final public function addSql($sql)
+    final public function addSql(string $sql): Migration
     {
         return $this->executeSqlQuery($sql);
     }
@@ -148,7 +148,7 @@ abstract class Migration
      * @param string $to
      * @return Migration
      */
-    final public function renameTable($table, $to)
+    final public function renameTable(string $table, string $to): Migration
     {
         if ($this->adapter->getName() == 'mysql') {
             $command = 'RENAME';
@@ -167,7 +167,7 @@ abstract class Migration
      * @param string $table
      * @return string
      */
-    final public function getTablePrefixed($table)
+    final public function getTablePrefixed(string $table): string
     {
         $table = $this->adapter->getTablePrefix().$table;
 
@@ -180,16 +180,16 @@ abstract class Migration
      * @param string $sql
      * @return Migration
      */
-    private function executeSqlQuery($sql)
+    private function executeSqlQuery(string $sql): Migration
     {
         try {
             $result = (bool) Database::statement($sql);
         } catch (\Exception $exception) {
-            echo Color::red("▶")."$sql\n";
+            echo sprintf("%s%s\n", Color::red("▶"), $sql);
             throw $exception;
         }
 
-        echo Color::green("▶")."$sql\n";
+        echo sprintf("%s%s\n", Color::green("▶"), $sql);
 
         return $this;
     }

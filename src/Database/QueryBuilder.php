@@ -17,21 +17,21 @@ class QueryBuilder implements \JsonSerializable
      *
      * @var string
      */
-    protected string $table;
+    protected ?string $table = null;
 
     /**
      * Select statement collector
      *
      * @var string
      */
-    protected string $select;
+    protected ?string $select = null;
 
     /**
      * Where statement collector
      *
      * @var string
      */
-    protected string $where;
+    protected ?string $where = null;
 
     /**
      * The data binding information
@@ -45,49 +45,49 @@ class QueryBuilder implements \JsonSerializable
      *
      * @var string
      */
-    protected string $join;
+    protected ?string $join = null;
 
     /**
      * Limit statement collector
      *
      * @var string
      */
-    protected string $limit;
+    protected ?string $limit = null;
 
     /**
      * Group statement collector
      *
      * @var string
      */
-    protected string $group;
+    protected ?string $group = null;
 
     /**
      * Having statement collector
      *
      * @var string
      */
-    protected string $having;
+    protected ?string $having = null;
 
     /**
      * Order By statement collector
      *
      * @var string
      */
-    protected string $order;
+    protected ?string $order = null;
 
     /**
      * Define the table as
      *
      * @var string
      */
-    protected string $as;
+    protected ?string $as = null;
 
     /**
      * The PDO instance
      *
      * @var \PDO
      */
-    protected \PDO $connection;
+    protected ?\PDO $connection = null;
 
     /**
      * Define whether to retrieve information from the list
@@ -177,7 +177,7 @@ class QueryBuilder implements \JsonSerializable
      * WHERE column1 $comparator $value|column
      *
      * @param string $column
-     * @param string $comparator
+     * @param mixed $comparator
      * @param mixed $value
      * @param string $boolean
      * @throws QueryBuilderException
@@ -185,7 +185,7 @@ class QueryBuilder implements \JsonSerializable
      */
     public function where(
         string $column,
-        string $comparator = '=',
+        mixed $comparator = '=',
         mixed $value = null,
         string $boolean = 'and'
     ): QueryBuilder {
@@ -415,14 +415,14 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string  $table
      * @param string $first
-     * @param string $comparator
+     * @param mixed $comparator
      * @param string $second
      * @return QueryBuilder
      */
     public function join(
         string $table,
         string $first,
-        string $comparator = '=',
+        mixed $comparator = '=',
         ?string $second = null
     ): QueryBuilder {
         $table = $this->getPrefix() . $table;
@@ -450,7 +450,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string $table
      * @param string $first
-     * @param string $comparator
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
@@ -458,7 +458,7 @@ class QueryBuilder implements \JsonSerializable
     public function leftJoin(
         string $table,
         string $first,
-        string $comparator = '=',
+        mixed $comparator = '=',
         ?string $second = null
     ): QueryBuilder {
         $table = $this->getPrefix() . $table;
@@ -486,7 +486,7 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param string $table
      * @param string $first
-     * @param string $comparator
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
@@ -494,7 +494,7 @@ class QueryBuilder implements \JsonSerializable
     public function rightJoin(
         string $table,
         string $first,
-        string $comparator = '=',
+        mixed $comparator = '=',
         ?string $second = null
     ): QueryBuilder {
         $table = $this->getPrefix() . $table;
@@ -521,7 +521,7 @@ class QueryBuilder implements \JsonSerializable
      * if chained with "orOn" who add a "before"
      *
      * @param string $first
-     * @param string $comparator
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
@@ -551,7 +551,7 @@ class QueryBuilder implements \JsonSerializable
      * The user has to do an "on()" before using the "orOn"
      *
      * @param string $first
-     * @param string $comparator
+     * @param mixed $comparator
      * @param string $second
      * @throws QueryBuilderException
      * @return QueryBuilder
@@ -607,14 +607,14 @@ class QueryBuilder implements \JsonSerializable
      * clause having, is used with a groupBy
      *
      * @param string $column
-     * @param string $comparator
+     * @param mixed $comparator
      * @param mixed  $value
      * @param string $boolean
      * @return QueryBuilder
      */
     public function having(
         string $column,
-        string $comparator = '=',
+        mixed $comparator = '=',
         $value = null,
         $boolean = 'and'
     ): QueryBuilder {
@@ -677,10 +677,10 @@ class QueryBuilder implements \JsonSerializable
      * @param int $limit
      * @return QueryBuilder
      */
-    public function take(string $limit): QueryBuilder
+    public function take(int $limit): QueryBuilder
     {
         if (is_null($this->limit)) {
-            $this->limit = (int) $limit;
+            $this->limit = (string) $limit;
 
             return $this;
         }
@@ -801,10 +801,10 @@ class QueryBuilder implements \JsonSerializable
      * If the first selection mode is not active
      *
      * @param  array $columns
-     * @return array|object
+     * @return array|object|null
      * @throws
      */
-    public function get(array $columns = []): array | object
+    public function get(array $columns = []): array|object|null
     {
         if (count($columns) > 0) {
             $this->select($columns);
@@ -939,12 +939,12 @@ class QueryBuilder implements \JsonSerializable
      * Remove simplified stream from delete.
      *
      * @param string $column
-     * @param string $comparator
+     * @param mixed $comparator
      * @param string $value
      * @return int
      * @throws QueryBuilderException
      */
-    public function remove(string $column, string $comparator = '=', $value = null): QueryBuilder
+    public function remove(string $column, mixed $comparator = '=', $value = null): QueryBuilder
     {
         $this->where = null;
 
@@ -1173,13 +1173,13 @@ class QueryBuilder implements \JsonSerializable
      * @return bool
      * @throws QueryBuilderException
      */
-    public function exists(string $column = null, $value = null): bool
+    public function exists(?string $column = null, mixed $value = null): bool
     {
         if ($column == null && $value == null) {
             return $this->count() > 0;
         }
 
-        return $this->where($column, $value)->count() > 0;
+        return $this->whereIn($column, (array) $value)->count() > 0;
     }
 
     /**
@@ -1357,7 +1357,7 @@ class QueryBuilder implements \JsonSerializable
     private function bind(PDOStatement $pdo_statement, array $bindings = []): PDOStatement
     {
         foreach ($bindings as $key => $value) {
-            if (is_null($value) || strtolower($value) === 'null') {
+            if (is_null($value) || strtolower((string) $value) === 'null') {
                 $pdo_statement->bindValue(
                     ':' . $key,
                     $value,
@@ -1406,7 +1406,7 @@ class QueryBuilder implements \JsonSerializable
      * comparatoram string $comp
      * @return bool
      */
-    private static function isComparisonOperator(string $comparator): bool
+    private static function isComparisonOperator(mixed $comparator): bool
     {
         return in_array(Str::upper($comparator), [
             '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN"

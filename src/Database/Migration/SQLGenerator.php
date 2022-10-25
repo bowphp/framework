@@ -19,14 +19,14 @@ class SQLGenerator
      *
      * @var string
      */
-    private $table;
+    private string $table;
 
     /**
      * The query collection after building
      *
      * @var array
      */
-    private $sqls = [];
+    private array $sqls = [];
 
     /**
      * Defines the scope action
@@ -34,7 +34,7 @@ class SQLGenerator
      *
      * @var string
      */
-    private $scope;
+    private string $scope;
 
     /**
      * Defines the adapter name
@@ -42,28 +42,28 @@ class SQLGenerator
      *
      * @var string
      */
-    private $adapter;
+    private string $adapter;
 
     /**
      * Defines ENGINE for mysql
      *
      * @var string
      */
-    private $engine;
+    private string $engine;
 
     /**
      * Defines COLLATION for mysql
      *
      * @var string
      */
-    private $collation;
+    private string $collation;
 
     /**
      * Defines CHARSET for mysql
      *
      * @var string
      */
-    private $charset;
+    private string $charset;
 
     /**
      * SQLGenerator constructor
@@ -72,7 +72,7 @@ class SQLGenerator
      * @param string $adapter
      * @param string $scope
      */
-    public function __construct($table, $adapter = 'mysql', $scope = 'create')
+    public function __construct(string $table, string $adapter = 'mysql', string $scope = 'create')
     {
         $this->table = $table;
 
@@ -92,7 +92,7 @@ class SQLGenerator
      *
      * @return string
      */
-    public function make()
+    public function make(): string
     {
         $sql = trim(implode(', ', $this->sqls));
 
@@ -110,7 +110,7 @@ class SQLGenerator
      *
      * @return SQLGenerator
      */
-    public function addColumn($name, $type, array $attributes = [])
+    public function addColumn(string $name, string $type, array $attributes = []): SQLGenerator
     {
         if ($this->scope == 'alter') {
             $command = 'ADD COLUMN';
@@ -133,7 +133,7 @@ class SQLGenerator
      *
      * @return SQLGenerator
      */
-    public function dropColumn($name)
+    public function dropColumn(string $name): SQLGenerator
     {
         if ($this->adapter == 'mysql') {
             $this->dropColumnOnMysql($name);
@@ -151,7 +151,7 @@ class SQLGenerator
      *
      * @return void
      */
-    private function dropColumnOnMysql($name)
+    private function dropColumnOnMysql(string $name): void
     {
         $names = (array) $name;
 
@@ -165,7 +165,7 @@ class SQLGenerator
      *
      * @param string $name
      */
-    private function dropColumnOnSqlite($name)
+    private function dropColumnOnSqlite(string $name): void
     {
         $pdo = Database::getPdo();
 
@@ -205,7 +205,7 @@ class SQLGenerator
      *
      * @return void
      */
-    public function withEngine($engine)
+    public function withEngine(string $engine): void
     {
         $this->engine = $engine;
     }
@@ -215,7 +215,7 @@ class SQLGenerator
      *
      * @return string
      */
-    public function getEngine()
+    public function getEngine(): string
     {
         return $this->engine;
     }
@@ -227,7 +227,7 @@ class SQLGenerator
      *
      * @return void
      */
-    public function withCollation($collation)
+    public function withCollation(string $collation): void
     {
         $this->collation = $collation;
     }
@@ -237,7 +237,7 @@ class SQLGenerator
      *
      * @return string
      */
-    public function getCollation()
+    public function getCollation(): string
     {
         return $this->collation;
     }
@@ -249,7 +249,7 @@ class SQLGenerator
      *
      * @return void
      */
-    public function withCharset($charset)
+    public function withCharset(string $charset): void
     {
         $this->charset = $charset;
     }
@@ -259,7 +259,7 @@ class SQLGenerator
      *
      * @return string
      */
-    public function getCharset()
+    public function getCharset(): string
     {
         return $this->charset;
     }
@@ -269,7 +269,7 @@ class SQLGenerator
      *
      * @return string
      */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
@@ -282,7 +282,7 @@ class SQLGenerator
      *
      * @return string
      */
-    private function composeAddColumn($name, array $description)
+    private function composeAddColumn(string $name, array $description): string
     {
         $type = strtoupper($description['type']);
         $attributes = $description['attributes'];
@@ -365,7 +365,7 @@ class SQLGenerator
      * @param string $scope
      * @return SQLGenerator
      */
-    public function setScope($scope)
+    public function setScope(string $scope): SQLGenerator
     {
         $this->scope = $scope;
 
@@ -378,7 +378,7 @@ class SQLGenerator
      * @param string $adapter
      * @return SQLGenerator
      */
-    public function setAdapter($adapter)
+    public function setAdapter(string $adapter): SQLGenerator
     {
         $this->adapter = $adapter;
 
@@ -393,7 +393,7 @@ class SQLGenerator
      *
      * @return string
      */
-    private function prefixColumn($name, $by)
+    private function prefixColumn(string $name, string $by): string
     {
         return $this->table.'_'.$name.'_'.$by;
     }

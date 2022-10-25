@@ -10,6 +10,7 @@ Make database connexion is very simple
 ```php
 use Bow\Database\Database;
 
+// Configure the database
 Database::configure([
     "fetch" => PDO::FETCH_OBJ,
     "default" => "mysql",

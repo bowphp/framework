@@ -547,7 +547,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @return string
      */
-    public function toJson($option = 0)
+    public function toJson(int $option = 0): string
     {
         return json_encode($this->storage, $option);
     }

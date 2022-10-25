@@ -58,6 +58,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected string $latest = 'created_at';
 
     /**
+     * Defines the created_at column name
+     *
+     * @var string
+     */
+    protected string $created_at = 'created_at';
+
+    /**
+     * Defines the created_at column name
+     *
+     * @var string
+     */
+    protected string $updated_at = 'updated_at';
+
+    /**
      * The table columns listing
      *
      * @var array
@@ -90,7 +104,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var string
      */
-    protected array $primary_key = 'id';
+    protected string $primary_key = 'id';
 
     /**
      * The table primary key type
@@ -118,7 +132,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var Builder
      */
-    protected static Builder $builder;
+    protected static ?Builder $builder = null;
 
     /**
      * Model constructor.
@@ -181,8 +195,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param  array $select
      * @return Collection|static|null
      */
-    public static function find(int|string|array $id, array $select = ['*'])
-    {
+    public static function find(
+        int|string|array $id,
+        array $select = ['*']
+    ): Collection|Model|null {
         $id = (array) $id;
 
         $model = new static;
@@ -233,8 +249,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function findAndDelete(
         int | string | array $id,
-        $select = ['*']
-    ) {
+        array $select = ['*']
+    ): Model {
         $model = static::find($id, $select);
 
         $model->delete();
@@ -248,27 +264,27 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param  mixed          $id
      * @param  array|callable $select
-     * @return static
+     * @return Model
      * @throws NotFoundException
      */
-    public static function findOrFail($id, $select = ['*'])
+    public static function findOrFail(int | string $id, $select = ['*']): Model
     {
-        $data = static::find($id, $select);
+        $result = static::find($id, $select);
 
-        if (is_null($data)) {
+        if (is_null($result)) {
             throw new NotFoundException('No recordings found at ' . $id . '.');
         }
 
-        return $data;
+        return $result;
     }
 
     /**
      * Create a persist information
      *
      * @param array $data
-     * @return static
+     * @return Model
      */
-    public static function create(array $data)
+    public static function create(array $data): Model
     {
         $model = new static;
 
@@ -309,9 +325,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param int $page_number
      * @param int $current
      * @param int $chunk
-     * @return Collection
+     * @return array
      */
-    public static function paginate(int $page_number, int $current = 0, int $chunk = null)
+    public static function paginate(int $page_number, int $current = 0, ?int $chunk = null): array
     {
         return static::query()->paginate($page_number, $current, $chunk);
     }
@@ -322,7 +338,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param callable $cb
      * @throws
      */
-    public static function deleted(callable $cb)
+    public static function deleted(callable $cb): void
     {
         $env = static::formatEventName('ondeleted');
 
@@ -335,7 +351,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param callable $cb
      * @throws
      */
-    public static function created(callable $cb)
+    public static function created(callable $cb): void
     {
         $env = static::formatEventName('oncreated');
 
@@ -348,11 +364,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param callable $cb
      * @throws
      */
-    public static function updated(callable $cb): mixed
+    public static function updated(callable $cb): void
     {
         $env = static::formatEventName('onupdated');
 
-        return listen_event_once($env, $cb);
+        listen_event_once($env, $cb);
     }
 
     /**
@@ -361,7 +377,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @return Builder
      * @throws
      */
-    public static function query()
+    public static function query(): Builder
     {
         if (static::$builder instanceof Builder) {
             if (static::$builder->getModel() == static::class) {
@@ -381,11 +397,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $table = $properties['table'];
         }
 
-        if (!is_null($properties['connection'])) {
+        // Check the connection parameter before apply
+        if (isset($properties['connection']) && !is_null($properties['connection'])) {
             DB::connection($properties['connection']);
         }
 
-        if (!is_null($properties['prefix'])) {
+        // Check the prefix parameter before apply
+        if (isset($properties['prefix']) && !is_null($properties['prefix'])) {
             $prefix = $properties['prefix'];
         } else {
             $prefix = DB::getConnectionAdapter()->getTablePrefix();
@@ -408,11 +426,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getKeyValue(): mixed
     {
-        if (array_key_exists($this->primary_key, $this->original)) {
-            return $this->original[$this->primary_key];
-        }
-
-        return null;
+        return $this->original[$this->primary_key] ?? null;
     }
 
     /**
@@ -482,13 +496,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $update_data = $this->original;
         }
 
-        $row_affected = $model->where($this->primary_key, $primary_key_value)->update($update_data);
+        $updated = $model->where($this->primary_key, $primary_key_value)->update($update_data);
 
-        if ($row_affected == 1) {
+        // Fire the updated event if there are affected row
+        if ($updated) {
             $this->fireEvent('onupdated');
         }
 
-        return $row_affected;
+        return $updated;
     }
 
     /**
@@ -524,11 +539,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $primary_key_value = $this->getKeyValue();
 
-        $model = static::query();
-
         if ($primary_key_value == null) {
             return 0;
         }
+
+        $model = static::query();
 
         // We set the primary key value
         $this->original[$this->primary_key] = $primary_key_value;
@@ -551,13 +566,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         // We update the model data right now
-        $row_affected = $model->where($this->primary_key, $primary_key_value)->update($data_for_updating);
+        $updated = $model->where($this->primary_key, $primary_key_value)->update($data_for_updating);
 
-        if ($row_affected == 1) {
+        // Fire the updated event if there are affected row
+        if ($updated) {
             $this->fireEvent('onupdated');
         }
 
-        return $row_affected;
+        return $updated;
     }
 
     /**
@@ -583,6 +599,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // We apply the delete action
         $deleted = $model->where($this->primary_key, $primary_key_value)->delete();
 
+        // Fire the deleted event if there are affected row
         if ($deleted) {
             $this->fireEvent('ondeleted');
         }
@@ -613,11 +630,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function touch(): bool
     {
-        if (!$this->timestamps) {
-            return false;
+        if ($this->timestamps) {
+            $this->setAttribute($this->updated_at, date('Y-m-d H:i:s'));
         }
-
-        $this->setAttribute('updated_at', date('Y-m-d H:i:s'));
 
         return (bool) $this->save();
     }
@@ -638,7 +653,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param string $key
      * @param string $value
      */
-    public function setAttribute($key, $value): void
+    public function setAttribute(string $key, string $value): void
     {
         $this->attributes[$key] = $value;
     }
@@ -649,7 +664,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param string $connection
      * @return Builder
      */
-    public function setConnection($connection): Builder
+    public function setConnection(string $connection): Builder
     {
         $this->connection = $connection;
 
@@ -674,7 +689,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param  string $key
      * @return mixed|null
      */
-    public function getAttribute($key): mixed
+    public function getAttribute(string $key): mixed
     {
         return $this->attributes[$key] ?? null;
     }
@@ -687,7 +702,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     private function mutableDateAttributes(): array
     {
         return array_merge($this->dates, [
-            'created_at', 'updated_at', 'expired_at', 'logged_at', 'signed_at'
+            $this->created_at, $this->updated_at, 'expired_at', 'logged_at', 'signed_at'
         ]);
     }
 
@@ -749,9 +764,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * __get
      *
      * @param  string $name
-     * @return mixed|null
+     * @return mixed
      */
-    public function __get(string $name)
+    public function __get(string $name): mixed
     {
         $attribute_exists = isset($this->attributes[$name]);
 
@@ -831,7 +846,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toJson();
     }

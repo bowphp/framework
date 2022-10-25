@@ -2,22 +2,22 @@
 
 use \Bow\Database\Database;
 
-class Master extends \Bow\Database\Barry\Model
+class PetMaster extends \Bow\Database\Barry\Model
 {
     /**
      * @var string
      */
-    protected $table = "masters";
+    protected string $table = "masters";
 
     /**
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected string $primaryKey = 'id';
 
     /**
      * @var bool
      */
-    protected $timestamps = false;
+    protected bool $timestamps = false;
 
     public function pets()
     {
@@ -30,21 +30,21 @@ class Pet extends \Bow\Database\Barry\Model
     /**
      * @var string
      */
-    protected $table = "pet2s";
+    protected string $table = "pet2s";
 
     /**
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected string $primaryKey = 'id';
 
     /**
      * @var bool
      */
-    protected $timestamps = false;
+    protected bool $timestamps = false;
 
     public function master()
     {
-        return $this->belongsTo(Master::class);
+        return $this->belongsTo(PetMaster::class);
     }
 }
 
@@ -78,7 +78,7 @@ class RelationTest extends \PHPUnit\Framework\TestCase
         $pet = Pet::find(1);
         $master = $pet->master;
 
-        $this->assertInstanceOf(Master::class, $master);
+        $this->assertInstanceOf(PetMaster::class, $master);
         $this->assertEquals('didi', $master->name);
     }
 
@@ -87,7 +87,7 @@ class RelationTest extends \PHPUnit\Framework\TestCase
         Database::configure([
             'fetch' => \PDO::FETCH_OBJ,
             'default' => 'sqlite',
-            'connection' => [
+            'connections' => [
                 'sqlite' => [
                     'driver' => 'sqlite',
                     'database' => __DIR__ . '/data/database.sqlite',

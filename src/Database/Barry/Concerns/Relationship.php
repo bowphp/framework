@@ -26,8 +26,8 @@ trait Relationship
      */
     public function belongsTo(
         string $related,
-        string $foreign_key = null,
-        string $local_key = null
+        ?string $foreign_key = null,
+        ?string $local_key = null
     ): BelongsTo {
         // Create the new instance of model from container
         $related_model = app()->make($related);
@@ -54,8 +54,8 @@ trait Relationship
      */
     public function belongsToMany(
         string $related,
-        string $primary_key = null,
-        string $foreign_key = null
+        ?string $primary_key = null,
+        ?string $foreign_key = null
     ): BelongsToMany {
         $related_model = app()->make($related);
 
@@ -81,8 +81,8 @@ trait Relationship
      */
     public function hasMany(
         string $related,
-        string $primary_key = null,
-        string $foreign_key = null
+        ?string $primary_key = null,
+        ?string $foreign_key = null
     ): HasMany {
         $related_model = app()->make($related);
 
@@ -108,8 +108,8 @@ trait Relationship
      */
     public function hasOne(
         string $related,
-        string $primary_key = null,
-        string $foreign_key = null
+        ?string $primary_key = null,
+        ?string $foreign_key = null
     ): HasOne {
         $related_model = app()->make($related);
 
