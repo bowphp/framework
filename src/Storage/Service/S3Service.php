@@ -141,15 +141,17 @@ class S3Service implements ServiceInterface
     /**
      * Delete file or directory
      *
-     * @param  string $file
-     * @return boolean
+     * @param  string $filename
+     * @return bool
      */
-    public function delete(string $file)
+    public function delete(string $filename): bool
     {
-        $result = $this->client->deleteObject(array(
+        $result = $this->client->deleteObject([
             'Bucket' => $this->config['bucket'],
-            'Key' => $file
-        ));
+            'Key' => $filename
+        ]);
+
+        return $result["DeleteMarker"];
     }
 
     /**
@@ -195,7 +197,7 @@ class S3Service implements ServiceInterface
             "Bucket" => $dirname
         ]);
 
-        return $result["Location"];
+        return isset($result["Location"]);
     }
 
     /**
@@ -230,7 +232,7 @@ class S3Service implements ServiceInterface
 
         $this->put($target, $result);
 
-        return $result["Body"];
+        return true;
     }
 
     /**
