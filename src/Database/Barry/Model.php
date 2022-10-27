@@ -171,7 +171,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return Model
      */
-    public static function first(): Model
+    public static function first(): ?Model
     {
         return static::query()->first();
     }
@@ -181,7 +181,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return Model
      */
-    public static function latest(): Model
+    public static function latest(): ?Model
     {
         $query = new static;
 

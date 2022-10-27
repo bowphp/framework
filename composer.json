@@ -49,6 +49,11 @@
             "Bow\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Bow\\Tests\\": "tests/"
+        }
+    },
     "suggest": {
         "twig/twig": "For using Twig template engine",
         "papac/bow-blade": "For using Blade template engine"

@@ -102,16 +102,19 @@ class FTPService implements ServiceInterface
         $timeout = $this->config['timeout'];
 
         if ($this->config['tls']) {
-            $this->connection = ftp_ssl_connect($host, $port, $timeout);
+            $connection = ftp_ssl_connect($host, $port, $timeout);
         } else {
-            $this->connection = ftp_connect($host, $port, $timeout);
+            $connection = ftp_connect($host, $port, $timeout);
         }
 
-        if (!$this->connection) {
+        if (!$connection) {
             throw new RuntimeException(
                 sprintf('Could not connect to %s:%s', $host, $port)
             );
         }
+
+        // Set the FTP Connection resource
+        $this->connection = $connection;
 
         $this->login();
         $this->setConnectionRoot();

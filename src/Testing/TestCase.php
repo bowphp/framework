@@ -6,7 +6,7 @@ use Bow\Http\Client\HttpClient;
 use Bow\Http\Client\Parser;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
-class TestCase extends PHPUnitTestCase
+class TestCase extends \PHPUnitTestCase
 {
     /**
      * The request attachment collection

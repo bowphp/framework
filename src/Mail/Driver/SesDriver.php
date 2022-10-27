@@ -6,7 +6,7 @@ use Aws\Ses\SesClient;
 use Bow\Mail\Message;
 use Bow\Mail\Contracts\MailDriverInterface;
 
-class SesDriver extends MailDriverInterface
+class SesDriver implements MailDriverInterface
 {
     /**
     * The SES Instance

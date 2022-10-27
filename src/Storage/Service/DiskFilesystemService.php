@@ -13,23 +13,23 @@ class DiskFilesystemService implements FilesystemInterface
      *
      * @var string
      */
-    private $base_directory;
+    private string $base_directory;
 
     /**
      * The current working directory
      *
      * @var string
      */
-    private $current_working_dir;
+    private string $current_working_dir;
 
     /**
      * MountFilesystem constructor.
      *
-     * @param string $basedir
+     * @param string $base_directory
      */
-    public function __construct($basedir)
+    public function __construct(string $base_directory)
     {
-        $this->base_directory = realpath($basedir);
+        $this->base_directory = realpath($base_directory);
         $this->current_working_dir = $this->base_directory;
 
         // Set the root folder
@@ -129,11 +129,23 @@ class DiskFilesystemService implements FilesystemInterface
     {
         $file = $this->path($file);
 
-        if (is_dir($file)) {
-            return @rmdir($file);
+        if (!is_dir($file)) {
+            if (is_file($file)) {
+                return (bool) @unlink($file);
+            }
         }
 
-        return @unlink($file);
+        $files = glob($file . "/*", GLOB_MARK);
+
+        foreach($files as $file) {
+            if (is_dir($file)) {
+                $this->delete($file);
+            } else {
+                @unlink($file);
+            }
+        }
+
+        return (bool) @rmdir($file);;
     }
 
     /**
@@ -183,7 +195,7 @@ class DiskFilesystemService implements FilesystemInterface
         $directories = explode('/', $dirname);
 
         foreach ($directories as $directory) {
-            if (false === $this->makeActualDirectory($directory, $mode)) {
+            if ($this->makeActualDirectory($directory, $mode) === false) {
                 chdir($this->base_directory);
                 return false;
             }

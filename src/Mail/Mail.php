@@ -2,6 +2,7 @@
 
 namespace Bow\Mail;
 
+use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 
@@ -48,9 +49,9 @@ class Mail
      *
      * @param  array $config
      * @throws MailException
-     * @return SimpleMail|Smtp
+     * @return MailDriverInterface
      */
-    public static function configure($config = [])
+    public static function configure(array $config = []): MailDriverInterface
     {
         if (empty(static::$config)) {
             static::$config = $config;
