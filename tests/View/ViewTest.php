@@ -14,7 +14,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         View::configure($config["view"]);
     }
 
-    public function testTwigCompilation()
+    public function test_twig_compilation()
     {
         View::getInstance()->cachable(false);
 
@@ -23,7 +23,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(trim($resultat), '<p>bow see hello world by twig</p>');
     }
 
-    public function testTintinCompilation() // 1547890+262589
+    public function test_tintin_compilation()
     {
         View::getInstance()->setEngine('tintin')->setExtension('.tintin.php')->cachable(false);
 
@@ -32,7 +32,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(trim($resultat), '<p>bow see hello world by tintin</p>');
     }
 
-    public function testPHPCompilation()
+    public function test_php_compilation()
     {
         View::getInstance()->setEngine('php')->setExtension('.php')->cachable(false);
 
