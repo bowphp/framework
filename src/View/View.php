@@ -3,8 +3,9 @@
 namespace Bow\View;
 
 use BadMethodCallException;
-use Bow\Configuration\Loader;
+use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\Contracts\ResponseInterface;
+use Bow\View\EngineAbstract;
 use Bow\View\Exception\ViewException;
 
 class View implements ResponseInterface
@@ -12,44 +13,44 @@ class View implements ResponseInterface
     /**
      * The application loader
      *
-     * @var Loader
+     * @var array
      */
-    private static $config;
+    private static array $config;
 
     /**
      * The View singleton instance
      *
      * @var View
      */
-    private static $instance;
+    private static ?View $instance = null;
 
     /**
      * The template Engine extension
      *
      * @var EngineAbstract
      */
-    private static $template;
+    private static EngineAbstract $template;
 
     /**
      * The view rendering content
      *
      * @var string
      */
-    private static $content;
+    private static string $content;
 
     /**
      * The enable view caching
      *
      * @var bool
      */
-    private $cachabled = true;
+    private bool $cachabled = true;
 
     /**
      * The build-in template engine
      *
      * @var array
      */
-    private static $engines = [
+    private static array $engines = [
         'twig' => \Bow\View\Engine\TwigEngine::class,
         'php' => \Bow\View\Engine\PHPEngine::class,
         'tintin' => \Tintin\Bow\TintinEngine::class
@@ -63,9 +64,9 @@ class View implements ResponseInterface
      * @return  void
      * @throws ViewException
      */
-    public function __construct(Loader $config)
+    public function __construct(array $config)
     {
-        $engine = $config['view.engine'];
+        $engine = $config['engine'];
 
         if (is_null($engine)) {
             throw new ViewException(
@@ -89,11 +90,11 @@ class View implements ResponseInterface
     /**
      * Load view configuration
      *
-     * @param Loader $config
+     * @param array $config
      *
      * @return void
      */
-    public static function configure($config)
+    public static function configure(array $config)
     {
         static::$config = $config;
     }
@@ -151,7 +152,7 @@ class View implements ResponseInterface
     {
         static::$instance = null;
 
-        static::$config['view.engine'] = $engine;
+        static::$config['engine'] = $engine;
 
         return static::getInstance();
     }
@@ -176,7 +177,7 @@ class View implements ResponseInterface
     {
         static::$instance = null;
 
-        static::$config['view.extension'] = $extension;
+        static::$config['extension'] = $extension;
 
         return static::getInstance();
     }

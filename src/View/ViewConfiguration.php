@@ -16,7 +16,7 @@ class ViewConfiguration extends Configuration
          * Configuration of view
          */
         $this->container->bind('view', function () use ($config) {
-            View::configure($config);
+            View::configure($config["view"]);
 
             return View::getInstance();
         });

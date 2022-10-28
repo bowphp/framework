@@ -9,7 +9,9 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        View::configure(TestingConfiguration::getConfig());
+        $config = TestingConfiguration::getConfig();
+
+        View::configure($config["view"]);
     }
 
     public function testTwigCompilation()
@@ -21,7 +23,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(trim($resultat), '<p>bow see hello world by twig</p>');
     }
 
-    public function testTintinCompilation()
+    public function testTintinCompilation() // 1547890+262589
     {
         View::getInstance()->setEngine('tintin')->setExtension('.tintin.php')->cachable(false);
 

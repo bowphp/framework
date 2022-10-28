@@ -15,8 +15,6 @@ class EnvTest extends \PHPUnit\Framework\TestCase
             file_put_contents($env_filename, json_encode(['NAME' => 'papac']));
         }
 
-        var_dump($env_filename);
-
         Env::load($env_filename);
     }
 
