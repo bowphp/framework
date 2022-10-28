@@ -12,43 +12,43 @@ class Loader implements \ArrayAccess
     /**
      * @var Loader
      */
-    protected static $instance;
+    protected static ?Loader $instance = null;
 
     /**
      * @var Arraydotify
      */
-    protected $config;
+    protected Arraydotify $config;
 
     /**
      * @var string
      */
-    protected $base_path;
+    protected string $base_path;
 
     /**
      * @var bool
      */
-    protected $booted = false;
+    protected bool $booted = false;
 
     /**
      * @var array
      */
-    private $middlewares = [];
+    private array $middlewares = [];
 
     /**
      * @var array
      */
-    private $namespaces = [];
+    private array $namespaces = [];
 
     /**
      * @var bool
      */
-    private $without_session = false;
+    private bool $without_session = false;
 
     /**
      * @param string $base_path
      * @throws
      */
-    private function __construct($base_path)
+    private function __construct(string $base_path)
     {
         $this->base_path = $base_path;
 
@@ -100,7 +100,7 @@ class Loader implements \ArrayAccess
      *
      * @param array $middlewares
      */
-    public function pushMiddleware(array $middlewares)
+    public function pushMiddleware(array $middlewares): array
     {
         foreach ($middlewares as $key => $middleware) {
             $this->middlewares[$key] = $middleware;
@@ -112,7 +112,7 @@ class Loader implements \ArrayAccess
      *
      * @return array
      */
-    public function getMiddlewares()
+    public function getMiddlewares(): array
     {
         $middlewares = $this->middlewares();
 
@@ -128,7 +128,7 @@ class Loader implements \ArrayAccess
      *
      * @return array
      */
-    public function namespaces()
+    public function namespaces(): array
     {
         return [
             //
@@ -140,7 +140,7 @@ class Loader implements \ArrayAccess
      *
      * @return array
      */
-    public function middlewares()
+    public function middlewares(): array
     {
         return [
             //
@@ -152,7 +152,7 @@ class Loader implements \ArrayAccess
      *
      * @return array
      */
-    public function configurations()
+    public function configurations(): array
     {
         return [
             //
@@ -163,9 +163,9 @@ class Loader implements \ArrayAccess
      * Alias of singleton
      *
      * @return Loader
-     * @throws
+     * @throws ApplicationException
      */
-    public static function getInstance()
+    public static function getInstance(): Loader
     {
         if (is_null(static::$instance)) {
             throw new ApplicationException('The application did not load configurations.');
@@ -177,9 +177,9 @@ class Loader implements \ArrayAccess
     /**
      * Define if the configuration going to boot without session manager
      *
-     * @return void
+     * @return Loader
      */
-    public function withoutSession()
+    public function withoutSession(): Loader
     {
         $this->without_session = true;
 
@@ -191,7 +191,7 @@ class Loader implements \ArrayAccess
      *
      * @return Loader
      */
-    public function boot()
+    public function boot(): Loader
     {
         if ($this->booted) {
             return $this;
@@ -215,7 +215,6 @@ class Loader implements \ArrayAccess
                 $class = new $service($container);
 
                 $class->create($this);
-
                 $service_collection[] = $class;
             }
         }
@@ -234,10 +233,10 @@ class Loader implements \ArrayAccess
      * __invoke
      *
      * @param  $key
-     * @param  null $value
+     * @param  mixed $value
      * @return mixed
      */
-    public function __invoke($key, $value = null)
+    public function __invoke(string $key, mixed $value = null): mixed
     {
         if ($value == null) {
             return $this->config[$key];
@@ -249,7 +248,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return $this->config->offsetExists($offset);
     }
@@ -257,7 +256,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset):mixed
     {
         return $this->config->offsetExists($offset) ? $this->config[$offset] : null;
     }
@@ -265,7 +264,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): vod
     {
         $this->config->offsetSet($offset, $value);
     }
@@ -273,7 +272,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         $this->config->offsetUnset($offset);
     }
