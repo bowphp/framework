@@ -137,7 +137,7 @@ class DiskFilesystemService implements FilesystemInterface
 
         $files = glob($file . "/*", GLOB_MARK);
 
-        foreach($files as $file) {
+        foreach ($files as $file) {
             if (is_dir($file)) {
                 $this->delete($file);
             } else {
@@ -145,7 +145,8 @@ class DiskFilesystemService implements FilesystemInterface
             }
         }
 
-        return (bool) @rmdir($file);;
+        return (bool) @rmdir($file);
+        ;
     }
 
     /**
