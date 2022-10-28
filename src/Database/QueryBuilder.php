@@ -263,7 +263,7 @@ class QueryBuilder implements \JsonSerializable
             );
         }
 
-        return $this->where($column, $comp, $value, 'or');
+        return $this->where($column, $comparator, $value, 'or');
     }
 
     /**
@@ -275,7 +275,7 @@ class QueryBuilder implements \JsonSerializable
      * @param string $boolean
      * @return QueryBuilder
      */
-    public function whereNull(string $column, $boolean = 'and'): QueryBuilder
+    public function whereNull(string $column, string $boolean = 'and'): QueryBuilder
     {
         if (is_null($this->where)) {
             $this->where = $column . ' is null';
@@ -1028,7 +1028,16 @@ class QueryBuilder implements \JsonSerializable
      */
     public function truncate(): bool
     {
-        return (bool) $this->connection->exec('truncate ' . $this->table . ';');
+        if ($this->connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            $query = 'delete from `' . $this->table . '`;';
+            if (!$this->connection->inTransaction()) {
+                $query .= ' VACUUM;';
+            }
+        } else {
+            $query = 'truncate table `' . $this->table . '`;';
+        }
+
+        return (bool) $this->connection->exec($query);
     }
 
     /**

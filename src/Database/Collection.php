@@ -9,9 +9,21 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function __construct(array $arr = [])
+    public function __construct(array $storage = [])
     {
-        parent::__construct($arr);
+        parent::__construct($storage);
+    }
+
+    /**
+     * Get the first item of starage
+     *
+     * @return ?Model
+     */
+    public function first(): ?Model
+    {
+        $result = parent::first();
+
+        return $result !== false ? $result : null;
     }
 
     /**

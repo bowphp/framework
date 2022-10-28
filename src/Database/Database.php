@@ -149,9 +149,9 @@ class Database
      *
      * @param  string $sql_statement
      * @param  array  $data
-     * @return bool
+     * @return int
      */
-    public static function update(string $sql_statement, array $data = []): bool
+    public static function update(string $sql_statement, array $data = []): int
     {
         static::verifyConnection();
 
@@ -159,7 +159,7 @@ class Database
             return static::executePrepareQuery($sql_statement, $data);
         }
 
-        return false;
+        return 0;
     }
 
     /**
@@ -258,25 +258,25 @@ class Database
             return $pdo_statement->rowCount();
         }
 
-        $collector = [];
+        $collection = [];
         
-        $r = 0;
+        $result = 0;
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $r += static::executePrepareQuery($sql_statement, $value);
+                $result += static::executePrepareQuery($sql_statement, $value);
 
                 continue;
             }
 
-            $collector[$key] = $value;
+            $collection[$key] = $value;
         }
 
-        if (!empty($collector)) {
-            return static::executePrepareQuery($sql_statement, $collector);
+        if (!empty($collection)) {
+            return static::executePrepareQuery($sql_statement, $collection);
         }
 
-        return $r;
+        return $result;
     }
 
     /**
@@ -289,16 +289,6 @@ class Database
     {
         static::verifyConnection();
 
-        if (!preg_match(
-            "/^(((drop|alter|create)\s+)?(?:(?:temp|temporary)\s+)?table|truncate|call|database)(\s+)?(.+?);?$/i",
-            $sql_statement
-        )) {
-            throw new DatabaseException(
-                'Syntax Error on the Request',
-                E_USER_ERROR
-            );
-        }
-
         return static::$adapter
             ->getConnection()
             ->exec($sql_statement) === 0;
@@ -309,9 +299,9 @@ class Database
      *
      * @param  $sql_statement
      * @param  array        $data
-     * @return bool
+     * @return int
      */
-    public static function delete(string $sql_statement, array $data = []): bool
+    public static function delete(string $sql_statement, array $data = []): int
     {
         static::verifyConnection();
 

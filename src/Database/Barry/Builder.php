@@ -20,7 +20,7 @@ class Builder extends QueryBuilder
      * @param array $columns
      * @return Model|Collection
      */
-    public function get(array $columns = []): Model|Collection
+    public function get(array $columns = []): Model|Collection|null
     {
         $data = parent::get($columns);
 

@@ -8,7 +8,7 @@ use Bow\Mail\Exception\SocketException;
 use Bow\Mail\Message;
 use ErrorException;
 
-class SmtpDriver extends MailDriverInterface
+class SmtpDriver implements MailDriverInterface
 {
 
     /**

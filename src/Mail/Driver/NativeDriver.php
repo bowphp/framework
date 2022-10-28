@@ -8,7 +8,7 @@ use Bow\Support\Str;
 use Bow\Mail\Exception\MailException;
 use InvalidArgumentException;
 
-class NativeDriver extends MailDriverInterface
+class NativeDriver implements MailDriverInterface
 {
     /**
      * The configuration

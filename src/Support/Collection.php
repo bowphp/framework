@@ -2,6 +2,8 @@
 
 namespace Bow\Support;
 
+use Generator as PHPGenerator;
+
 class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \ArrayAccess
 {
     /**
@@ -16,9 +18,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @param array $arr
      */
-    public function __construct(array $arr = [])
+    public function __construct(array $storage = [])
     {
-        $this->storage = $arr;
+        $this->storage = $storage;
     }
 
     /**
@@ -26,7 +28,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @return mixed
      */
-    public function first()
+    public function first(): mixed
     {
         return current($this->storage);
     }
@@ -519,11 +521,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
-     * Launches a generator
+     * Launches the collection content as generator
      *
-     * @return \Generator
+     * @return PHPGenerator
      */
-    public function yieldify()
+    public function yieldify(): PHPGenerator
     {
         foreach ($this->storage as $key => $value) {
             yield (object) [
