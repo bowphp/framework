@@ -7,6 +7,7 @@ use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Mail;
 use Bow\Mail\Message;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\View\Exception\ViewException;
 use Bow\View\View;
 
 function mail()
@@ -17,7 +18,8 @@ function mail()
 class MailServiceTest extends \PHPUnit\Framework\TestCase
 {
     private ConfigurationLoader $config;
-    private MailDriverInterface $mail;
+
+    private static string $sendmail_command;
 
     protected function setUp(): void
     {
@@ -26,8 +28,10 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
-        if (function_exists('shell_exec') && !file_exists("/usr/sbin/sendmail")) {
-            shell_exec("echo 'exit 0;' > /usr/sbin/sendmail && chmod +x /usr/sbin/sendmail");
+        static::$sendmail_command = TESTING_RESOURCE_BASE_DIRECTORY . '/sendmail';
+
+        if (function_exists('shell_exec') && !file_exists(static::$sendmail_command)) {
+            shell_exec("echo 'exit 0;' > " . static::$sendmail_command ." && chmod +x " . static::$sendmail_command);
         }
     }
 
@@ -63,6 +67,20 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($response);
     }
 
+    public function test_send_mail_with_view_not_found_for_smtp_driver()
+    {
+        View::configure($this->config["view"]);
+        Mail::configure($this->config["mail"]);
+        
+        $this->expectException(ViewException::class);
+        $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');
+
+        Mail::send('mail_view_not_found', ['name' => "papac"], function (Message $message) {
+            $message->to('bow@bowphp.com');
+            $message->subject('test email');
+        });
+    }
+
     public function test_configuration_must_be_native_driver()
     {
         $config = $this->config["mail"];
@@ -74,6 +92,12 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 
     public function test_send_mail_with_raw_content_for_notive_driver()
     {
+        if (!file_exists('/usr/sbin/sendmail')) {
+            // This test can work in local by execute this command
+            // echo 'exit 0;' > /usr/bin/sendmail
+            return $this->markTestSkipped('Test have been skip because /usr/sbin/sendmail not found');
+        }
+
         $config = $this->config["mail"];
         $config['driver'] = 'mail';
 
@@ -85,6 +109,12 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 
     public function test_send_mail_with_view_for_notive_driver()
     {
+        if (!file_exists('/usr/sbin/sendmail')) {
+            // This test can work in local by execute this command
+            // echo 'exit 0;' > /usr/bin/sendmail
+            return $this->markTestSkipped('Test have been skip because /usr/sbin/sendmail not found');
+        }
+
         View::configure($this->config["view"]);
         Mail::configure([...$this->config["mail"], "driver" => "mail"]);
 
@@ -94,5 +124,19 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         });
 
         $this->assertTrue($response);
+    }
+
+    public function test_send_mail_with_view_not_found_for_notive_driver()
+    {
+        View::configure($this->config["view"]);
+        Mail::configure([...$this->config["mail"], "driver" => "mail"]);
+
+        $this->expectException(ViewException::class);
+        $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');
+
+        Mail::send('mail_view_not_found', ['name' => "papac"], function (Message $message) {
+            $message->to('bow@bowphp.com');
+            $message->subject('test email');
+        });
     }
 }

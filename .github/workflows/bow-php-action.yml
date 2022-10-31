@@ -53,6 +53,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
+      - name: Copy the php ini config
+        run: cp php.dist.ini php.ini
+
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction
 
@@ -61,9 +64,6 @@ jobs:
 
       - name: Check code standard
         run: ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
-
-      - name: Create the fake sendmail
-        run: sudo echo "exit 0" > /usr/sbin/sendmail
 
       - name: Run test suite
         run: composer run-script test
