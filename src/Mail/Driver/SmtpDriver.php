@@ -173,8 +173,10 @@ class SmtpDriver implements MailDriverInterface
         stream_set_timeout($this->sock, $this->timeout, 0);
         $code = $this->read();
 
-        // The client sends this command to the SMTP server to identify itself and initiate the SMTP conversation.
-        // The domain name or IP address of the SMTP client is usually sent as an argument together with the command (e.g. “EHLO client.example.com”).
+        // The client sends this command to the SMTP server to identify
+        // itself and initiate the SMTP conversation.
+        // The domain name or IP address of the SMTP client is usually sent as an argument
+        // together with the command (e.g. “EHLO client.example.com”).
         $client_host = isset($_SERVER['HTTP_HOST']) &&
         preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
