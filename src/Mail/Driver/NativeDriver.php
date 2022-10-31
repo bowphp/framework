@@ -66,7 +66,7 @@ class NativeDriver implements MailDriverInterface
      * @throws InvalidArgumentException
      * @return bool
      */
-    public function send(Message $message)
+    public function send(Message $message): bool
     {
         if (empty($message->getTo()) || empty($message->getSubject()) || empty($message->getMessage())) {
             throw new InvalidArgumentException(
@@ -96,7 +96,6 @@ class NativeDriver implements MailDriverInterface
         $headers = $message->compileHeaders();
 
         $headers .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
-
         $headers .= 'Content-Transfer-Encoding: 8bit' . Message::END;
 
         // Send email use the php native function
