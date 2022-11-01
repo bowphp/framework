@@ -35,18 +35,28 @@ class DiskFilesystemService implements FilesystemInterface
         // Set the root folder
         chdir($this->base_directory);
     }
+    
+    /**
+     * Get the base directory
+     *
+     * @return string
+     */
+    public function getBaseDirectory(): string
+    {
+        return $this->base_directory;
+    }
 
     /**
      * Function to upload a file
      *
      * @param  UploadFile $file
-     * @param  string $location
+     * @param  string|array $location
      * @param  array $option
      *
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, ?string $location = null, array $option = []): bool
+    public function store(UploadFile $file, string|array $location = null, array $option = []): bool
     {
         if (is_array($location)) {
             $option = $location;
@@ -66,6 +76,26 @@ class DiskFilesystemService implements FilesystemInterface
         }
 
         return $this->put($location, $file->getContent());
+    }
+
+    /**
+     * Put other file content in given file
+     *
+     * @param string $file
+     * @param string $content
+     *
+     * @return bool
+     */
+    public function put(string $file, string $content): bool
+    {
+        $file = $this->path($file);
+
+        $dirname = dirname($file);
+
+        // We try to create the directory
+        $this->makeDirectory($dirname);
+
+        return (bool) file_put_contents($file, $content);
     }
 
     /**
@@ -100,25 +130,6 @@ class DiskFilesystemService implements FilesystemInterface
     }
 
     /**
-     * Put other file content in given file
-     *
-     * @param string $file
-     * @param string $content
-     *
-     * @return bool
-     */
-    public function put(string $file, string $content): bool
-    {
-        $file = $this->path($file);
-
-        $dirname = dirname($file);
-
-        $this->makeDirectory($dirname);
-
-        return (bool) file_put_contents($file, $content);
-    }
-
-    /**
      * Delete file or directory
      *
      * @param  string $file
@@ -146,7 +157,6 @@ class DiskFilesystemService implements FilesystemInterface
         }
 
         return (bool) @rmdir($file);
-        ;
     }
 
     /**
@@ -160,7 +170,7 @@ class DiskFilesystemService implements FilesystemInterface
     {
         $dirname = $this->path($dirname);
 
-        $directory_contents = glob($dirname . "/*");
+        $directory_contents = glob($dirname . "/*", GLOB_FILE);
 
         return array_filter($directory_contents, function ($file) {
             return filetype($file) == "file";
@@ -171,16 +181,13 @@ class DiskFilesystemService implements FilesystemInterface
      * List the folder of a folder passed as a parameter
      *
      * @param  string $dirname
-     *
      * @return array
      */
     public function directories(string $dirname): array
     {
-        $directory_contents = glob($this->path($dirname) . "/*");
+        $directory_contents = glob($this->path($dirname) . "/*", GLOB_ONLYDIR);
 
-        return array_filter($directory_contents, function ($file) {
-            return filetype($file) == "dir";
-        });
+        return array_filter($directory_contents, fn ($file) => filetype($file) === "dir");
     }
 
     /**
@@ -188,48 +195,13 @@ class DiskFilesystemService implements FilesystemInterface
      *
      * @param  string $dirname
      * @param  int $mode
-     *
      * @return bool
      */
     public function makeDirectory(string $dirname, int $mode = 0777): bool
     {
-        $directories = explode('/', $dirname);
+        $result = @mkdir($dirname, $mode, true);
 
-        foreach ($directories as $directory) {
-            if ($this->makeActualDirectory($directory, $mode) === false) {
-                chdir($this->base_directory);
-                return false;
-            }
-            chdir($directory);
-            $this->current_working_dir = getcwd();
-        }
-
-        chdir($this->base_directory);
-
-        return true;
-    }
-
-    /**
-     * Create a directory.
-     *
-     * @param string $dirname
-     * @param int $mode
-     * @return bool
-     */
-    private function makeActualDirectory(string $dirname, int $mode): bool
-    {
-        $listing = glob($this->current_working_dir . '/*', GLOB_ONLYDIR) ?: [];
-
-        $directories = array_map(function ($value) {
-            return pathinfo($value, PATHINFO_BASENAME);
-        }, $listing);
-
-        // Skip directory creation if it already exists
-        if (in_array($dirname, $directories, true)) {
-            return true;
-        }
-
-        return @mkdir($dirname, $mode);
+        return $result;
     }
 
     /**
@@ -289,34 +261,20 @@ class DiskFilesystemService implements FilesystemInterface
     }
 
     /**
-     * Check the existence of a file
+     * Check the existence of a file or directory
      *
      * @param string $filename
-     *
      * @return bool
      */
     public function exists(string $filename): bool
     {
-        $filename = $this->path($filename);
-
-        if (!$this->isDirectory($filename)) {
-            return file_exists($filename);
-        }
-
-        $tmp = getcwd();
-
-        $r = chdir($filename);
-
-        chdir($tmp);
-
-        return $r;
+        return $this->isFile($filename) || $this->isDirectory($filename);
     }
 
     /**
      * The file extension
      *
      * @param string $filename
-     *
      * @return string
      */
     public function extension(string $filename): ?string
@@ -332,7 +290,6 @@ class DiskFilesystemService implements FilesystemInterface
      * isFile alias of is_file.
      *
      * @param string $filename
-     *
      * @return bool
      */
     public function isFile(string $filename): bool
@@ -344,7 +301,6 @@ class DiskFilesystemService implements FilesystemInterface
      * isDirectory alias of is_dir.
      *
      * @param string $dirname
-     *
      * @return bool
      */
     public function isDirectory(string $dirname): bool
@@ -357,7 +313,6 @@ class DiskFilesystemService implements FilesystemInterface
      * Give the absolute path of a path
      *
      * @param string $filename
-     *
      * @return string
      */
     public function path(string $filename): string

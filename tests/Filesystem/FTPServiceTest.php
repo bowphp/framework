@@ -180,7 +180,10 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     private function createFile(FTPService $ftp_service, $filename, $content = '')
     {
-        $uploadedFile = $this->createMock(\Bow\Http\UploadFile::class, [], [[]]);
+        $uploadedFile = $this->getMockBuilder(\Bow\Http\UploadFile::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $uploadedFile->method('getContent')->willReturn($content);
         $uploadedFile->method('getFilename')->willReturn($filename);
 
