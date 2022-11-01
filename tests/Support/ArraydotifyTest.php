@@ -2,17 +2,19 @@
 
 namespace Bow\Tests\Support;
 
+use Bow\Support\Arraydotify;
+
 class ArraydotifyTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Bow\Support\Arraydotify
      */
-    protected $dot;
+    protected Arraydotify $dot;
 
     /**
      * @var array
      */
-    protected $collection = [
+    protected array $collection = [
         'name' => 'bow',
         'lastname' => 'framework',
         'bio' => 'The php micro framework',
