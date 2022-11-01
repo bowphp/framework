@@ -10,7 +10,7 @@ interface MailDriverInterface
      * Send mail by any driver
      *
      * @param Message $message
-     * @return mixed
+     * @return bool
      */
-    public function send(Message $message);
+    public function send(Message $message): bool;
 }

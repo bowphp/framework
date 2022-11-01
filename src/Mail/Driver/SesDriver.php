@@ -27,6 +27,7 @@ class SesDriver implements MailDriverInterface
     {
         $this->config_set = $config["config_set"] ?? false;
         unset($config["config_set"]);
+
         $this->ses = new SesClient($config);
     }
 

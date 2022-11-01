@@ -53,21 +53,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
+      - name: Copy the php ini config
+        run: cp php.dist.ini php.ini
+
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction
 
       - name: Create test cache directory
-        run: if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
+        run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Check code standard
         run: ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
 
       - name: Run test suite
         run: composer run-script test
-
-      # - name: Upload artifacts
-      #   uses: actions/upload-artifact@master
-      #   if: failure()
-      #   with:
-      #     name: Logs
-      #     path: ./.github
