@@ -2,7 +2,7 @@
 
 namespace Bow\Validation\Rules;
 
-trait RegexRule 
+trait RegexRule
 {
     /**
      * Compile Regex Rule
