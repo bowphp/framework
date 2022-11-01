@@ -6,6 +6,11 @@ use Bow\Router\Route;
 
 class RouteTest extends \PHPUnit\Framework\TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        \Bow\Container\Action::configure([], []);
+    }
+
     public function test_route_instance()
     {
         $route = new Route('/', function () {
