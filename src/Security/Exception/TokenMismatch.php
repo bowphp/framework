@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Security\Exception;
 
 use Bow\Http\Exception\HttpException;

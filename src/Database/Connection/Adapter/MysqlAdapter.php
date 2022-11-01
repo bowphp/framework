@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Connection\Adapter;
 
-use Bow\Database\Connection\AbstractConnection;
-use Bow\Support\Str;
 use PDO;
+use Bow\Support\Str;
+use InvalidArgumentException;
+use Bow\Database\Connection\AbstractConnection;
 
 class MysqlAdapter extends AbstractConnection
 {
@@ -44,7 +47,6 @@ class MysqlAdapter extends AbstractConnection
         // Build of the mysql dsn
         if (isset($this->config['socket']) && !is_null($this->config['socket']) && !empty($this->config['socket'])) {
             $hostname = $this->config['socket'];
-            $connection_type = 'socket';
             $port = '';
         } else {
             $hostname = $this->config['hostname'] ?? null;

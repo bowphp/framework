@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Container;
 
 use ArrayAccess;
 use Closure;
 use InvalidArgumentException;
 use ReflectionClass;
-use ReflectionException;
-use ReflectionFunction;
 
 class Capsule implements ArrayAccess
 {
@@ -221,7 +221,7 @@ class Capsule implements ArrayAccess
     /**
     * @inheritDoc
     */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return isset($this->key[$offset]);
     }
@@ -229,7 +229,7 @@ class Capsule implements ArrayAccess
     /**
     * @inheritDoc
     */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset)
     {
         return $this->make($offset);
     }
@@ -237,7 +237,7 @@ class Capsule implements ArrayAccess
     /**
     * @inheritDoc
     */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->registers[$offset] = $value;
     }
@@ -245,7 +245,7 @@ class Capsule implements ArrayAccess
     /**
     * @inheritDoc
     */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->registers[$offset]);
     }

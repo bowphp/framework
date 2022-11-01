@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Configuration;
 
 use Bow\Application\Exception\ApplicationException;
@@ -96,7 +98,7 @@ class Loader implements \ArrayAccess
      * @return Loader
      * @throws
      */
-    public static function configure($base_path)
+    public static function configure($base_path): Loader
     {
         if (!static::$instance instanceof Loader) {
             static::$instance = new static($base_path);
@@ -170,6 +172,18 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Load events
+     *
+     * @return array
+     */
+    public function events(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    /**
      * Alias of singleton
      *
      * @return Loader
@@ -216,16 +230,17 @@ class Loader implements \ArrayAccess
 
         // Configuration of services
         foreach ($services as $service) {
-            if ($this->without_session && $service == \Bow\Session\SessionConfiguration::class) {
+            if ($this->without_session && $service === \Bow\Session\SessionConfiguration::class) {
                 continue;
             }
 
-            if (class_exists($service, true)) {
-                $class = new $service($container);
-
-                $class->create($this);
-                $service_collection[] = $class;
+            if (!class_exists($service, true)) {
+                continue;
             }
+
+            $service_instance = new $service($container);
+            $service_instance->create($this);
+            $service_collection[] = $service_instance;
         }
 
         // Start of services or initial code
@@ -233,6 +248,15 @@ class Loader implements \ArrayAccess
             $service->run();
         }
 
+        // Bind the define events
+        foreach ($this->events as $name => $handlers) {
+            $handlers = (array) $handlers;
+            foreach ($handlers as $handler) {
+                $container->make('event')->on($name, $handler);
+            }
+        }
+
+        // Set the load as booted
         $this->booted = true;
 
         return $this;
@@ -265,7 +289,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet(mixed $offset):mixed
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->config[$offset] ?? null;
     }

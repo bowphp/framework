@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Testing;
 
 use Bow\Http\Client\HttpClient;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Event;
 
 abstract class EventListener
@@ -10,5 +12,5 @@ abstract class EventListener
      * @param array $payload
      * @return mixed
      */
-    abstract public function process(array $payload);
+    abstract public function process(array $payload): void;
 }

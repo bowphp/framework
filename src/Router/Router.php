@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Router;
 
 use Bow\Router\Exception\RouterException;

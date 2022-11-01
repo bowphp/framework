@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Configuration;
 
 use Bow\Container\Capsule as Container;
@@ -26,7 +28,7 @@ abstract class Configuration
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return get_called_class();
     }
@@ -37,12 +39,12 @@ abstract class Configuration
      * @param Loader $config
      * @return void
      */
-    abstract public function create(Loader $config);
+    abstract public function create(Loader $config): void;
 
     /**
      * Start the configured package
      *
      * @return void
      */
-    abstract public function run();
+    abstract public function run(): void;
 }

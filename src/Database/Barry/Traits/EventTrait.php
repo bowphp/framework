@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Barry\Traits;
 
 trait EventTrait

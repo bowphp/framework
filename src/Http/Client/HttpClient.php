@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http\Client;
 
 class HttpClient
@@ -14,16 +16,16 @@ class HttpClient
     /**
      * The curl instance
      *
-     * @var Resource
+     * @var resource
      */
-    private $ch;
+    private \resource $ch;
 
     /**
      * The base url
      *
      * @var string
      */
-    private $url;
+    private string $url;
 
     /**
      * HttpClient Constructor.
@@ -38,9 +40,8 @@ class HttpClient
         }
 
         if (is_string($url)) {
-            $this->ch = curl_init($url);
-
             $this->url = $url;
+            $this->ch = curl_init($url);
         }
     }
 
@@ -49,10 +50,9 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     *
      * @return Parser
      */
-    public function get($url, array $data = [])
+    public function get(string $url, array $data = [])
     {
         $this->resetAndAssociateUrl($url);
 

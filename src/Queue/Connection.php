@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Queue;
 
 use Bow\Queue\Adapters\QueueAdapter;
