@@ -31,11 +31,9 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
     public function testAddSql()
     {
-        $this->markTestSkipped('Error: Call to undefined method Bow\Database\Connection\Adapter\SqliteAdapter::bind()');
         ob_start();
 
         $this->migration->addSql('drop table if exists `bow_testing`;');
-
         $this->migration->addSql('create table if not exists `bow_testing` (name varchar(255));');
 
         $result = Database::insert('INSERT INTO `bow_testing`(name) VALUES("Bow Framework")');
