@@ -6,5 +6,5 @@ namespace Bow\Testing\Features;
 
 trait Migration
 {
-
+    // Do something
 }

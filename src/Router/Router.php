@@ -86,8 +86,12 @@ class Router
      * @param string $base_route
      * @param array $middlewares
      */
-    protected function __construct(string $method, ?string $magic_method = null, string $base_route = '', array $middlewares = [])
-    {
+    protected function __construct(
+        string $method,
+        ?string $magic_method = null,
+        string $base_route = '',
+        array $middlewares = []
+    ) {
         $this->method = $method;
         $this->magic_method = $magic_method;
         $this->middlewares = $middlewares;

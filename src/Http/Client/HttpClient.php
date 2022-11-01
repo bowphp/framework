@@ -103,11 +103,11 @@ class HttpClient
      * Attach new file
      *
      * @param string $attach
-     * @return string
+     * @return array
      */
-    public function addAttach(string $attach): string
+    public function addAttach(string|array $attach): array
     {
-        return $this->attach = $attach;
+        return $this->attach = (array) $attach;
     }
 
     /**

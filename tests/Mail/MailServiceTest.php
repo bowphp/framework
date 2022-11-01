@@ -10,11 +10,6 @@ use Bow\Tests\Config\TestingConfiguration;
 use Bow\View\Exception\ViewException;
 use Bow\View\View;
 
-function mail()
-{
-    return true;
-}
-
 class MailServiceTest extends \PHPUnit\Framework\TestCase
 {
     private ConfigurationLoader $config;
