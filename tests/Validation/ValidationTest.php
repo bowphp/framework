@@ -145,12 +145,15 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
     {
         Database::insert("insert into pets values(3, 'Couli');");
 
-        $pets = Database::select('select * from pets');
-
         $first_validation = Validator::make(['name' => 'Couli'], ['name' => 'required|unique:pets,name']);
         $second_validation = Validator::make(['name' => 'Milou'], ['name' => 'required|unique:pets']);
 
         $this->assertFalse($first_validation->fails());
         $this->assertTrue($second_validation->fails());
+
+        Database::insert("insert into pets values(4, 'Couli');");
+
+        $thrid_validation = Validator::make(['name' => 'Couli'], ['name' => 'required|unique:pets,name']);
+        $this->assertTrue($thrid_validation->fails());
     }
 }
