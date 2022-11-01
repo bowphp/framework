@@ -45,11 +45,11 @@ class Console
     private bool $booted;
 
     /**
-     * The ArgOption instance
+     * The Argument instance
      *
-     * @return ArgOption
+     * @return Argument
      */
-    private ArgOption $arg;
+    private Argument $arg;
 
     /**
      * The command list
@@ -80,7 +80,7 @@ class Console
      */
     public function __construct(Setting $setting)
     {
-        $this->arg = new ArgOption;
+        $this->arg = new Argument;
 
         if ($this->arg->getParameter('trash')) {
             $this->throwFailsCommand('Bad command usage', 'help');

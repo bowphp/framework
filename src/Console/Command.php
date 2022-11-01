@@ -52,7 +52,11 @@ class Command extends AbstractCommand
      */
     public function call(string $command, string $action, array ...$rest): mixed
     {
-        $class = $this->command[$command];
+        $class = $this->command[$command] ?? null;
+
+        if (is_null($class)) {
+            $this->throwFailsCommand("The command $command not found !");
+        }
 
         if ($command == "add" || $command == "generator") {
             $method = "generate";

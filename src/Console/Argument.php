@@ -4,7 +4,7 @@ namespace Bow\Console;
 
 use Bow\Support\Collection;
 
-class ArgOption
+class Argument
 {
     /**
      * The args collection
@@ -45,7 +45,7 @@ class ArgOption
     private ?string $action = null;
 
     /**
-     * ArgOption Constructor
+     * Argument Constructor
      *
      * @return void
      */

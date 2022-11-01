@@ -3,7 +3,7 @@
 namespace Bow\Console\Command;
 
 use Bow\Console\Setting;
-use Bow\Console\ArgOption;
+use Bow\Console\Argument;
 use Bow\Console\Traits\ConsoleTrait;
 
 abstract class AbstractCommand
@@ -27,18 +27,18 @@ abstract class AbstractCommand
      /**
      * The Arg Option instance
      *
-     * @var ArgOption
+     * @var Argument
      */
-    protected ArgOption $arg;
+    protected Argument $arg;
 
     /**
      * AbstractCommand constructor
      *
      * @param Setting $setting
-     * @param ArgOption $arg
+     * @param Argument $arg
      * @return void
      */
-    public function __construct(Setting $setting, ArgOption $arg)
+    public function __construct(Setting $setting, Argument $arg)
     {
         $this->setting = $setting;
         $this->arg = $arg;

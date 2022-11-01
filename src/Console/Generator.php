@@ -39,7 +39,7 @@ class Generator
      *
      * @param string $filename
      */
-    public function filenameIsValide(?string $filename)
+    public function filenameIsValide(?string $filename): void
     {
         if (is_null($filename)) {
             echo Color::red('The file name is invalid.');
@@ -94,7 +94,7 @@ class Generator
         $dirname = dirname($this->name);
 
         if (!is_dir($this->base_directory)) {
-            @mkdir($this->base_directory);
+            @mkdir($this->base_directory, 0777, true);
         }
 
         if ($dirname != '.') {
@@ -105,11 +105,13 @@ class Generator
             $namespace = '';
         }
 
+        // Transform class to match the PSR-2 standard
         $classname = ucfirst(
             \Bow\Support\Str::camel(basename($this->name))
         );
 
-        $template = $this->makeStub($type, array_merge([
+        // Create the stub parsed content
+        $template = $this->makeStubContent($type, array_merge([
             'namespace' => $namespace,
             'className' => $classname
         ], $data));
@@ -124,7 +126,7 @@ class Generator
      * @param array $data
      * @return string
      */
-    public function makeStub(string $type, array $data = []): string
+    public function makeStubContent(string $type, array $data = []): string
     {
         $content = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
 
@@ -140,7 +142,7 @@ class Generator
      *
      * @param string $name
      */
-    public function setName($name)
+    public function setName($name): void
     {
         $this->name = $name;
     }

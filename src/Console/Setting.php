@@ -16,11 +16,11 @@ class Setting
     private string $dirname;
 
     /**
-     * The ArgOption instance
+     * The Argument instance
      *
-     * @var ArgOption
+     * @var Argument
      */
-    private ArgOption $arg;
+    private Argument $arg;
 
     /**
      * The bootstrap file
