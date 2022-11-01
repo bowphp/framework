@@ -12,6 +12,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
+        \Bow\Container\Action::configure([], []);
         Database::statement('create table if not exists pets (id int primary key, name varchar(255))');
     }
 
