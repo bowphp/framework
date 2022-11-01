@@ -2,49 +2,46 @@
 
 namespace Bow\Console\Command;
 
-use Bow\Console\ArgOption;
-use Bow\Console\ConsoleInformation;
 use Bow\Console\Setting;
+use Bow\Console\Argument;
+use Bow\Console\Traits\ConsoleTrait;
 
-class AbstractCommand
+abstract class AbstractCommand
 {
-    use ConsoleInformation;
+    use ConsoleTrait;
 
      /**
      * Store dirname
      *
      * @var Setting
      */
-    protected $setting;
+    protected Setting $setting;
 
     /**
      * The application namespace
      *
      * @var array
      */
-    protected $namespaces;
+    protected array $namespaces;
 
      /**
      * The Arg Option instance
      *
-     * @var ArgOption
+     * @var Argument
      */
-    protected $arg;
+    protected Argument $arg;
 
     /**
      * AbstractCommand constructor
      *
      * @param Setting $setting
-     * @param ArgOption $arg
-     *
+     * @param Argument $arg
      * @return void
      */
-    public function __construct(Setting $setting, ArgOption $arg)
+    public function __construct(Setting $setting, Argument $arg)
     {
         $this->setting = $setting;
-
         $this->arg = $arg;
-
         $this->namespaces = $setting->getNamespaces();
     }
 }

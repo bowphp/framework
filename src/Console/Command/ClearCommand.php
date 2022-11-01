@@ -3,20 +3,16 @@
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
-use Bow\Console\ConsoleInformation;
 
 class ClearCommand extends AbstractCommand
 {
-    use ConsoleInformation;
-    
     /**
      * Clear cache
      *
      * @param string $action
-     *
      * @return void
      */
-    public function make($action)
+    public function make(string $action): void
     {
         if (!in_array($action, ['view', 'cache', 'session', 'log', 'all'])) {
             $this->throwFailsCommand('Clear target not valid', 'clear help');

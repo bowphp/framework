@@ -2,22 +2,22 @@
 
 namespace Bow\Console\Command;
 
+use Bow\Support\Str;
 use Bow\Console\Color;
-use Bow\Console\ConsoleInformation;
 use Bow\Console\Generator;
 use Bow\Database\Database;
-use Bow\Support\Str;
+use Bow\Console\Traits\ConsoleTrait;
 
 class SeederCommand extends AbstractCommand
 {
-    use ConsoleInformation;
+    use ConsoleTrait;
     
     /**
      * Create a seeder
      *
      * @param string $seeder
      */
-    public function generate($seeder)
+    public function generate(string $seeder): void
     {
         $generator = new Generator(
             $this->setting->getSeederDirectory(),
@@ -30,7 +30,8 @@ class SeederCommand extends AbstractCommand
             exit(1);
         }
 
-        $num = (int)  $this->arg->options()->get('--seed', 5);
+        // Get the number of execution
+        $num = (int) $this->arg->getParameters()->get('--seed', 5);
 
         $generator->write('seed', [
             'num' => $num,
@@ -47,7 +48,7 @@ class SeederCommand extends AbstractCommand
      *
      * @return void
      */
-    public function all()
+    public function all(): void
     {
         $seeds_filenames = glob($this->setting->getSeederDirectory().'/*_seeder.php');
 
@@ -58,10 +59,9 @@ class SeederCommand extends AbstractCommand
      * Launch targeted seeding
      *
      * @param string $table_name
-     *
      * @return void
      */
-    public function table($table_name)
+    public function table(string $table_name): void
     {
         $table_name = trim($table_name);
 
@@ -83,9 +83,10 @@ class SeederCommand extends AbstractCommand
     /**
      * Make Seeder
      *
+     * @param array $seeds_filenames
      * @return void
      */
-    private function make($seeds_filenames)
+    private function make(array $seeds_filenames): void
     {
         $seed_collection = [];
 
@@ -95,13 +96,14 @@ class SeederCommand extends AbstractCommand
             $seed_collection = array_merge($seeds, $seed_collection);
         }
 
-        $connection = $this->arg->options()->get('--connection', config("database.default"));
+        // Get the database connexion
+        $connection = $this->arg->getParameters()->get('--connection', config("database.default"));
 
         try {
             foreach ($seed_collection as $table => $seed) {
-                $n = Database::connection($connection)->table($table)->insert($seed);
+                $result = Database::connection($connection)->table($table)->insert($seed);
 
-                echo Color::green("$n seed".($n > 1 ? 's' : '')." on $table table\n");
+                echo Color::green("$result seed".($result > 1 ? 's' : '')." on $table table\n");
             }
         } catch (\Exception $e) {
             echo Color::red($e->getMessage());

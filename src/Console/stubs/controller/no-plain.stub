@@ -12,7 +12,7 @@ class {className} extends Controller
      *
      * @return void
      */
-    public function index()
+    public function index(): void
     {
         // Code Here
     }
@@ -23,7 +23,7 @@ class {className} extends Controller
      * @param Request $request
      * @return void
      */
-    public function create()
+    public function create(): void
     {
         // Code Here
     }
@@ -34,7 +34,7 @@ class {className} extends Controller
      * @param Request $request
      * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request): void
     {
         // Code Here
     }
@@ -45,7 +45,7 @@ class {className} extends Controller
      * @param  mixed $id
      * @return void
      */
-    public function show($id)
+    public function show(mixed $id): void
     {
         // Code Here
     }
@@ -56,7 +56,7 @@ class {className} extends Controller
      * @param  mixed $id
      * @return void
      */
-    public function edit($id)
+    public function edit(mixed $id): void
     {
         // Code Here
     }
@@ -68,7 +68,7 @@ class {className} extends Controller
      * @param  mixed $id
      * @return void
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, mixed $id): void
     {
         // Code Here
     }
@@ -79,7 +79,7 @@ class {className} extends Controller
      * @param mixed $id
      * @return void
      */
-    public function destroy($id)
+    public function destroy(mixed $id): void
     {
         // Code Here
     }

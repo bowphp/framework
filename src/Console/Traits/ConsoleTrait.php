@@ -1,10 +1,10 @@
 <?php
 
-namespace Bow\Console;
+namespace Bow\Console\Traits;
 
 use Bow\Console\Color;
 
-trait ConsoleInformation
+trait ConsoleTrait
 {
     /**
      * Throw fails command
@@ -13,7 +13,7 @@ trait ConsoleInformation
      * @param string $command
      * @throws \ErrorException
      */
-    protected function throwFailsCommand($message, $command = null)
+    protected function throwFailsCommand(string $message, ?string $command = null)
     {
         echo Color::red($message)."\n";
 

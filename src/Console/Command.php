@@ -12,7 +12,7 @@ class Command extends AbstractCommand
      *
      * @var array
      */
-    private $command = [
+    private array $command = [
         "migration" => \Bow\Console\Command\MigrationCommand::class,
         "clear" => \Bow\Console\Command\ClearCommand::class,
         "seeder" => \Bow\Console\Command\SeederCommand::class,
@@ -48,12 +48,15 @@ class Command extends AbstractCommand
      * @param string $action
      * @param string $command
      * @param array $rest
-     *
      * @return mixed
      */
-    public function call($command, $action, ...$rest)
+    public function call(string $command, string $action, array ...$rest): mixed
     {
-        $class = $this->command[$command];
+        $class = $this->command[$command] ?? null;
+
+        if (is_null($class)) {
+            $this->throwFailsCommand("The command $command not found !");
+        }
 
         if ($command == "add" || $command == "generator") {
             $method = "generate";

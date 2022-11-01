@@ -15,7 +15,7 @@ class {className}
      * 
      * @return mixed
      */
-    public function process(Request $request, callable $next, array $args = [])
+    public function process(Request $request, callable $next, array $args = []): void
     {
         // Code Here
         

@@ -80,6 +80,16 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Get the base path
+     *
+     * @return string
+     */
+    public function getBasePath(): string
+    {
+        return $this->base_path;
+    }
+
+    /**
      * Configuration Loader
      *
      * @param string $base_path

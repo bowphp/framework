@@ -19,9 +19,9 @@ class {className} extends ProducerService
 	/**
 	 * Handle producer
 	 * 
-	 * @return mixed
+	 * @return void
 	 */
-    public function process()
+    public function process(): void
     {
 	    // Do Something
     }

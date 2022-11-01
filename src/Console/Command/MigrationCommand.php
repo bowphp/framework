@@ -11,45 +11,38 @@ use Bow\Support\Str;
 
 class MigrationCommand extends AbstractCommand
 {
-    use ConsoleInformation;
-    
     /**
      * Make a migration command
      *
      * @param  string $model
-     *
      * @return void
-     * @throws mixed
+     * @throws \Exception
      */
-    public function migrate($model)
+    public function migrate(): void
     {
-        $this->factory($model, 'up');
+        $this->factory('up');
     }
 
     /**
      * Rollback migration command
      *
-     * @param  string $model
-     *
      * @return void
-     * @throws mixed
+     * @throws \Exception
      */
-    public function rollback($model)
+    public function rollback(): void
     {
-        $this->factory($model, 'rollback');
+        $this->factory('rollback');
     }
 
     /**
      * Reset migration command
      *
-     * @param  string $model
-     *
      * @return void
-     * @throws mixed
+     * @throws \Exception
      */
-    public function reset($model)
+    public function reset(): void
     {
-        $this->factory($model, 'reset');
+        $this->factory('reset');
     }
 
     /**
@@ -59,9 +52,9 @@ class MigrationCommand extends AbstractCommand
      * @param string $type
      *
      * @return void
-     * @throws mixed
+     * @throws \Exception
      */
-    private function factory($model, $type)
+    private function factory(string $type)
     {
         $migrations = [];
 
@@ -75,7 +68,7 @@ class MigrationCommand extends AbstractCommand
 
         // We get current migration status
         $current_migrations = $this->getMigrationTable()
-        ->whereIn('migration', array_values($migrations))->get();
+            ->whereIn('migration', array_values($migrations))->get();
 
         try {
             $action = 'make'.strtoupper($type);
@@ -91,14 +84,13 @@ class MigrationCommand extends AbstractCommand
      *
      * @param array $current_migration
      * @param array $migrations
-     *
      * @return void
      */
-    private function makeUp($current_migrations, $migrations)
+    private function makeUp(array $current_migrations, array $migrations): void
     {
         if (count($current_migrations) == count($migrations)) {
             echo Color::green('Nothing to migrate.');
-            
+
             return;
         }
 
@@ -134,10 +126,9 @@ class MigrationCommand extends AbstractCommand
      *
      * @param array $current_migration
      * @param array $migrations
-     *
      * @return void
      */
-    private function makeRollback($current_migrations, $migrations)
+    private function makeRollback(array $current_migrations, array $migrations): void
     {
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to rollback.');
@@ -195,7 +186,7 @@ class MigrationCommand extends AbstractCommand
      * @param array $migrations
      * @return void
      */
-    private function makeReset($current_migrations, $migrations)
+    private function makeReset(array $current_migrations, array $migrations): void
     {
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to reset.');
@@ -243,7 +234,7 @@ class MigrationCommand extends AbstractCommand
      * @param string $migration
      * @return void
      */
-    private function printExceptionMessage($message, $migration)
+    private function printExceptionMessage(string $message, string $migration)
     {
         $message = Color::red($message);
         $migration = Color::yellow($migration);
@@ -257,7 +248,7 @@ class MigrationCommand extends AbstractCommand
      * @param \Exception $exception
      * @param string $migration
      */
-    private function throwMigrationException(\Exception $exception, $migration)
+    private function throwMigrationException(\Exception $exception, string $migration)
     {
         $this->printExceptionMessage(
             $exception->getMessage(),
@@ -272,8 +263,8 @@ class MigrationCommand extends AbstractCommand
      */
     private function createMigrationTable()
     {
-        $options = $this->arg->options();
-        $connection = $options->get("--connection", config("database.default"));
+        $parameters = $this->arg->getParameters();
+        $connection = $parameters->get("--connection", config("database.default"));
 
         Database::connection($connection);
         $adapter = Database::getAdapterConnection();
@@ -395,28 +386,28 @@ class MigrationCommand extends AbstractCommand
             $filename
         );
 
-        $options = $this->arg->options();
+        $parameters = $this->arg->getParameters();
 
-        if ($options->has('--create') && $options->has('--table')) {
+        if ($parameters->has('--create') && $parameters->has('--table')) {
             $this->throwFailsCommand('bad command', 'add help');
         }
 
         $type = "model/standard";
 
-        if ($options->has('--table')) {
-            if ($options->get('--table') === true) {
+        if ($parameters->has('--table')) {
+            if ($parameters->get('--table') === true) {
                 $this->throwFailsCommand('bad command option [--table=table]', 'add help');
             }
 
-            $table = $options->get('--table');
+            $table = $parameters->get('--table');
 
             $type = 'model/table';
-        } elseif ($options->has('--create')) {
-            if ($options->get('--create') === true) {
+        } elseif ($parameters->has('--create')) {
+            if ($parameters->get('--create') === true) {
                 $this->throwFailsCommand('bad command option [--create=table]', 'add help');
             }
 
-            $table = $options->get('--create');
+            $table = $parameters->get('--create');
 
             $type = 'model/create';
         }
