@@ -137,7 +137,7 @@ class Database
      *
      * @return AbstractConnection
      */
-    public static function getConnectionAdapter(): AbstractConnection
+    public static function getAdapterConnection(): AbstractConnection
     {
         static::verifyConnection();
 

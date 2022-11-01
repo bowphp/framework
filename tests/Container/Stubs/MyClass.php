@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Container;
+namespace Bow\Tests\Stubs\Container;
 
 use Bow\Support\Collection;
 

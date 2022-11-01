@@ -276,7 +276,7 @@ class MigrationCommand extends AbstractCommand
         $connection = $options->get("--connection", config("database.default"));
 
         Database::connection($connection);
-        $adapter = Database::getConnectionAdapter();
+        $adapter = Database::getAdapterConnection();
 
         $table = $adapter->getTablePrefix().config('database.migration');
         $generator = new SQLGenerator(

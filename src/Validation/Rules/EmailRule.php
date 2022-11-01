@@ -4,7 +4,7 @@ namespace Bow\Validation\Rules;
 
 use Bow\Support\Str;
 
-trait Email
+trait EmailRule
 {
     /**
      * Compile Email Rule
@@ -13,7 +13,7 @@ trait Email
      *
      * @param string $key
      * @param string $masque
-     * @return array
+     * @return void
      */
     protected function compileEmail($key, $masque)
     {
@@ -29,7 +29,7 @@ trait Email
 
         $this->fails = true;
 
-        return [
+        $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
         ];

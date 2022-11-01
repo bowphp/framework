@@ -10,7 +10,7 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
     {
         parent::setUp();
 
-        Cache::confirgure(sprintf("%s/bowphp_testing", sys_get_temp_dir()));
+        Cache::confirgure(sprintf("%s/bowphp_cache_testing", sys_get_temp_dir()));
     }
 
 
@@ -28,13 +28,8 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_AddWithCallbackCache()
     {
-        $result = Cache::add('lastname', function () {
-            return 'Franck';
-        });
-
-        $result = $result && Cache::add('age', function () {
-                return 25;
-        }, 20000);
+        $result = Cache::add('lastname', fn () => 'Franck');
+        $result = $result && Cache::add('age', fn () => 25, 20000);
 
         $this->assertEquals($result, true);
     }

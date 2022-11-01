@@ -406,7 +406,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (isset($properties['prefix']) && !is_null($properties['prefix'])) {
             $prefix = $properties['prefix'];
         } else {
-            $prefix = DB::getConnectionAdapter()->getTablePrefix();
+            $prefix = DB::getAdapterConnection()->getTablePrefix();
         }
 
         // Set the table prefix

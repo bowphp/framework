@@ -9,10 +9,9 @@ trait FieldLexical
      *
      * @param string       $key
      * @param string|array $attributes
-     *
-     * @return mixed
+     * @return ?string
      */
-    private function lexical($key, $attributes)
+    private function lexical($key, $attributes): ?string
     {
         if (is_string($attributes) && isset($this->messages[$attributes])) {
             return $this->messages[$attributes][$key] ?? $this->messages[$attributes];
@@ -32,8 +31,7 @@ trait FieldLexical
         $lexical = trans('validation.' . $key, $attributes);
 
         if (is_null($lexical)) {
-            $lexical = $this->lexical[$key];
-            $lexical = $this->parseAttribute($attributes, $lexical);
+            $lexical = $this->parseAttribute($attributes, $this->lexical[$key]);
         }
 
         return $lexical;
@@ -44,9 +42,9 @@ trait FieldLexical
      *
      * @param array $attributes
      * @param string $lexical
-     * @return array
+     * @return string
      */
-    private function parseAttribute(array $attributes, string $lexical)
+    private function parseAttribute(array $attributes, string $lexical): ?string
     {
         foreach ($attributes as $key => $value) {
             $lexical = str_replace('{' . $key . '}', $value, $lexical);

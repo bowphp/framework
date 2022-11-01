@@ -22,7 +22,7 @@ abstract class Migration
      */
     public function __construct()
     {
-        $this->adapter = Database::getConnectionAdapter();
+        $this->adapter = Database::getAdapterConnection();
     }
 
     /**
@@ -49,7 +49,7 @@ abstract class Migration
     {
         Database::connection($name);
 
-        $this->adapter = Database::getConnectionAdapter();
+        $this->adapter = Database::getAdapterConnection();
 
         return $this;
     }

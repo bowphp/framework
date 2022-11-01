@@ -100,7 +100,7 @@ class Loader implements \ArrayAccess
      *
      * @param array $middlewares
      */
-    public function pushMiddleware(array $middlewares): array
+    public function pushMiddleware(array $middlewares): void
     {
         foreach ($middlewares as $key => $middleware) {
             $this->middlewares[$key] = $middleware;
@@ -198,7 +198,6 @@ class Loader implements \ArrayAccess
         }
 
         $services = $this->configurations();
-
         $services[] = \Bow\Container\ContainerConfiguration::class;
 
         $service_collection = [];
@@ -232,7 +231,7 @@ class Loader implements \ArrayAccess
     /**
      * __invoke
      *
-     * @param  $key
+     * @param string $key
      * @param  mixed $value
      * @return mixed
      */
@@ -248,7 +247,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return $this->config->offsetExists($offset);
     }
@@ -256,15 +255,15 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset):mixed
+    public function offsetGet(mixed $offset):mixed
     {
-        return $this->config->offsetExists($offset) ? $this->config[$offset] : null;
+        return $this->config[$offset] ?? null;
     }
 
     /**
      * @inheritDoc
      */
-    public function offsetSet($offset, $value): vod
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->config->offsetSet($offset, $value);
     }
@@ -272,7 +271,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         $this->config->offsetUnset($offset);
     }
