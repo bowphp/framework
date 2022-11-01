@@ -16,23 +16,23 @@ class Request
     /**
      * The Request instance
      *
-     * @static self
+     * @static Request
      */
-    private static $instance;
+    private static ?Request $instance = null;
 
     /**
      * All request input
      *
      * @var array
      */
-    private $input = [];
+    private array $input = [];
 
     /**
      * Define the bag instance
      *
      * @var array
      */
-    private $bag = [];
+    private array $bag = [];
 
     /**
      * Request constructor
@@ -70,7 +70,7 @@ class Request
      *
      * @return Request
      */
-    public static function getInstance()
+    public static function getInstance(): Request
     {
         if (static::$instance === null) {
             static::$instance = new Request();
@@ -83,9 +83,9 @@ class Request
      * Check if key is exists
      *
      * @param string $key
-     * @return mixed
+     * @return bool
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         return isset($this->input[$key]);
     }
@@ -95,7 +95,7 @@ class Request
      *
      * @return array
      */
-    public function all()
+    public function all(): array
     {
         return $this->input;
     }
@@ -105,7 +105,7 @@ class Request
      *
      * @return string
      */
-    public function path()
+    public function path(): string
     {
         $position = strpos($_SERVER['REQUEST_URI'], '?');
 
@@ -123,7 +123,7 @@ class Request
      *
      * @return string
      */
-    public function hostname()
+    public function hostname(): string
     {
         return $_SERVER['HTTP_HOST'];
     }
@@ -133,7 +133,7 @@ class Request
      *
      * @return string
      */
-    public function url()
+    public function url(): string
     {
         return $this->origin().$this->path();
     }
@@ -143,7 +143,7 @@ class Request
      *
      * @return string
      */
-    public function origin()
+    public function origin(): string
     {
         return $this->scheme().'://'.$this->hostname();
     }
@@ -153,7 +153,7 @@ class Request
      *
      * @return string
      */
-    private function scheme()
+    private function scheme(): string
     {
         return strtolower($_SERVER['REQUEST_SCHEME'] ?? 'http');
     }
@@ -163,7 +163,7 @@ class Request
      *
      * @return string
      */
-    public function time()
+    public function time(): string
     {
         return $_SESSION['REQUEST_TIME'];
     }
@@ -173,7 +173,7 @@ class Request
      *
      * @return string
      */
-    public function method()
+    public function method(): ?string
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? null;
 
@@ -195,7 +195,7 @@ class Request
      *
      * @return bool
      */
-    public function isPost()
+    public function isPost(): bool
     {
         return $this->method() == 'POST';
     }
@@ -205,7 +205,7 @@ class Request
      *
      * @return bool
      */
-    public function isGet()
+    public function isGet(): bool
     {
         return $this->method() == 'GET';
     }
@@ -215,7 +215,7 @@ class Request
      *
      * @return bool
      */
-    public function isPut()
+    public function isPut(): bool
     {
         return $this->method() == 'PUT' || $this->get('_method') == 'PUT';
     }
@@ -225,7 +225,7 @@ class Request
      *
      * @return bool
      */
-    public function isDelete()
+    public function isDelete(): bool
     {
         return $this->method() == 'DELETE' || $this->get('_method') == 'DELETE';
     }
@@ -234,9 +234,9 @@ class Request
      * Load the factory for FILES
      *
      * @param string $key
-     * @return UploadFile|Collection
+     * @return UploadFile|Collection|null
      */
-    public function file($key)
+    public function file(string $key): UploadFile|Collection|null
     {
         if (!isset($_FILES[$key])) {
             return null;
@@ -268,7 +268,7 @@ class Request
      * @param mixed $file
      * @return bool
      */
-    public static function hasFile($file)
+    public static function hasFile($file): bool
     {
         return isset($_FILES[$file]);
     }
@@ -279,7 +279,7 @@ class Request
      * @param  mixed $key
      * @return mixed
      */
-    public function old($key)
+    public function old(string $key): mixed
     {
         $old = Session::getInstance()->get('__bow.old', []);
 
@@ -289,9 +289,9 @@ class Request
     /**
      * Check if we are in the case of an AJAX request.
      *
-     * @return boolean
+     * @return bool
      */
-    public function isAjax()
+    public function isAjax(): bool
     {
         if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
             return false;
@@ -309,22 +309,22 @@ class Request
     /**
      * Check if a url matches with the pattern
      *
-     * @param  string $match Un regex
-     * @return int
+     * @param  string $match
+     * @return bool
      */
-    public function is($match)
+    public function is($match): bool
     {
-        return preg_match('@'.$match.'@', $this->path());
+        return (bool) preg_match('@'.$match.'@', $this->path());
     }
 
     /**
      * Get client address
      *
-     * @return string
+     * @return ?string
      */
-    public function ip()
+    public function ip(): ?string
     {
-        return $_SERVER['REMOTE_ADDR'];
+        return $_SERVER['REMOTE_ADDR'] ?? null;
     }
 
     /**
@@ -332,9 +332,9 @@ class Request
      *
      * @return string
      */
-    public function port()
+    public function port(): ?string
     {
-        return $_SERVER['REMOTE_PORT'];
+        return $_SERVER['REMOTE_PORT'] ?? null;
     }
 
     /**
@@ -342,7 +342,7 @@ class Request
      *
      * @return string
      */
-    public function referer()
+    public function referer(): string
     {
         return $_SERVER['HTTP_REFERER'] ?? '/';
     }
@@ -356,7 +356,7 @@ class Request
      *
      * @return string|null
      */
-    public function locale()
+    public function locale(): ?string
     {
         $accept_language = $this->getHeader('accept_language');
 
@@ -372,7 +372,7 @@ class Request
      *
      * @return string
      */
-    public function lang()
+    public function lang(): ?string
     {
         $accept_language = $this->getHeader('accept_language');
 
@@ -388,7 +388,7 @@ class Request
      *
      * @return mixed
      */
-    public function protocol()
+    public function protocol(): string
     {
         return $this->scheme();
     }
@@ -399,7 +399,7 @@ class Request
      * @param string $protocol
      * @return mixed
      */
-    public function isProtocol($protocol)
+    public function isProtocol($protocol): bool
     {
         return $this->scheme() == $protocol;
     }
@@ -409,7 +409,7 @@ class Request
      *
      * @return mixed
      */
-    public function isSecure()
+    public function isSecure(): bool
     {
         return $this->isProtocol('https');
     }
@@ -420,7 +420,7 @@ class Request
      * @param  string $key
      * @return bool|string
      */
-    public function getHeader($key)
+    public function getHeader($key): ?string
     {
         $key = str_replace('-', '_', strtoupper($key));
 
@@ -441,7 +441,7 @@ class Request
      * @param  string $key
      * @return bool
      */
-    public function hasHeader($key)
+    public function hasHeader($key): bool
     {
         return isset($_SERVER[strtoupper($key)]);
     }
@@ -451,7 +451,7 @@ class Request
      *
      * @return Session
      */
-    public function session()
+    public function session(): Session
     {
         return session();
     }
@@ -462,7 +462,7 @@ class Request
      * @param string|null $guard
      * @return Authentication|null
      */
-    public function user($guard = null)
+    public function user(?string $guard = null): ?Authentication
     {
         return auth($guard)->user();
     }

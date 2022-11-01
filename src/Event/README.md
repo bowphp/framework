@@ -8,14 +8,13 @@ Let's show a little exemple:
 use Bow\Event\Event;
 
 // Add listener on send.mail event
-Event::on("send.email", function ($payload) {
+Event::on("email.sent", function (array $payload) {
     $name = $payload["name"];
     echo "An email was sent to $name";
-    doSomething();
 });
 
 // Emit the send.mail event
-Event::emit("send.email", ["name" => "Franck DAKIA"]);
+Event::emit("email.sent", ["name" => "Franck DAKIA"]);
 ```
 
 NB: Is recommanded to write all event listener into simple class and define the event to the app Kernel file in boot method.

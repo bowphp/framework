@@ -42,7 +42,7 @@ class MysqlAdapter extends AbstractConnection
      *
      * @return void
      */
-    public function connection()
+    public function connection(): void
     {
         // Build of the mysql dsn
         if (isset($this->config['socket']) && !is_null($this->config['socket']) && !empty($this->config['socket'])) {

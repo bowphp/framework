@@ -14,10 +14,10 @@ class CsrfMiddleware
      *
      * @param  Request $request
      * @param  Callable $next
-     * @return boolean
+     * @return bool
      * @throws
      */
-    public function process(Request $request, callable $next)
+    public function process(Request $request, callable $next): mixed
     {
         foreach ($this->preventOn() as $url) {
             if ($request->is($url)) {
@@ -47,7 +47,7 @@ class CsrfMiddleware
      *
      * @return array
      */
-    public function preventOn()
+    public function preventOn(): array
     {
         return [
 

@@ -32,14 +32,14 @@ abstract class Migration
      *
      * @return void
      */
-    abstract public function up();
+    abstract public function up(): void;
 
     /**
      * Rollback migration
      *
      * @return void
      */
-    abstract public function rollback();
+    abstract public function rollback(): void;
 
     /**
      * Switch connection

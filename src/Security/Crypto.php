@@ -13,14 +13,14 @@ class Crypto
      *
      * @var string
      */
-    private static $key;
+    private static string $key;
 
     /**
      * The security cipher
      *
      * @var string
      */
-    private static $cipher = 'AES-256-CBC';
+    private static string $cipher = 'AES-256-CBC';
 
     /**
      * Set the key
@@ -28,7 +28,7 @@ class Crypto
      * @param string $key
      * @param string $cipher
      */
-    public static function setKey($key, $cipher = null)
+    public static function setKey(string $key, ?string $cipher = null)
     {
         static::$key = $key;
 
@@ -41,10 +41,9 @@ class Crypto
      * Encrypt data
      *
      * @param  string $data
-     *
-     * @return string
+     * @return string|bool
      */
-    public static function encrypt($data)
+    public static function encrypt(string $data): string|bool
     {
         $iv_size = openssl_cipher_iv_length(static::$cipher);
 
@@ -60,7 +59,7 @@ class Crypto
      *
      * @return string
      */
-    public static function decrypt($data)
+    public static function decrypt(string $data): string|bool
     {
         $iv_size = openssl_cipher_iv_length(static::$cipher);
         

@@ -74,7 +74,7 @@ class Action
      *
      * @return static
      */
-    public static function configure(array $namespaces, array $middlewares)
+    public static function configure(array $namespaces, array $middlewares): Action
     {
         if (is_null(static::$instance)) {
             static::$instance = new Action($namespaces, $middlewares);

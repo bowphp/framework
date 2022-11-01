@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Configuration;
 
-use Bow\Application\Exception\ApplicationException;
+use Bow\Event\Event;
+use Bow\Support\Env;
 use Bow\Container\Capsule;
 use Bow\Support\Arraydotify;
-use Bow\Support\Env;
+use Bow\Application\Exception\ApplicationException;
 
 class Loader implements \ArrayAccess
 {
@@ -120,6 +121,18 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Push namespaces
+     *
+     * @param array $namespaces
+     */
+    public function pushNamespaces(array $namespaces): void
+    {
+        foreach ($namespaces as $key => $namespace) {
+            $this->namespaces[$key] = $namespace;
+        }
+    }
+
+    /**
      * Middleware collection
      *
      * @return array
@@ -133,6 +146,22 @@ class Loader implements \ArrayAccess
         }
 
         return $this->middlewares;
+    }
+
+    /**
+     * Namespaces collection
+     *
+     * @return array
+     */
+    public function getNamespaces(): array
+    {
+        $namespaces = $this->namespaces();
+
+        foreach ($namespaces as $key => $namespace) {
+            $this->namespaces[$key] = $namespace;
+        }
+
+        return $this->namespaces;
     }
 
     /**
@@ -252,7 +281,7 @@ class Loader implements \ArrayAccess
         foreach ($this->events as $name => $handlers) {
             $handlers = (array) $handlers;
             foreach ($handlers as $handler) {
-                $container->make('event')->on($name, $handler);
+                Event::on($name, $handler);
             }
         }
 

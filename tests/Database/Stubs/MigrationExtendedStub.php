@@ -6,11 +6,13 @@ use Bow\Database\Migration\Migration;
 
 class MigrationExtendedStub extends Migration
 {
-    public function up()
+    public function up(): void
     {
+        // Empty
     }
 
-    public function rollback()
+    public function rollback(): void
     {
+        // Empty
     }
 }

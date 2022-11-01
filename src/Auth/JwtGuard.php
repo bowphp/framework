@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Auth;
 
-use Bow\Auth\Exception\AuthenticationException;
-use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
+use Bow\Auth\Traits\LoginUserTrait;
+use Bow\Auth\Exception\AuthenticationException;
 use Policier\Policier;
 
 class JwtGuard extends GuardContract
@@ -18,14 +18,14 @@ class JwtGuard extends GuardContract
      *
      * @var array
      */
-    private $provider;
+    private array $provider = [];
 
     /**
      * Defines token data
      *
      * @var string
      */
-    private $token;
+    private ?string $token = null;
 
     /**
      * JwtGuard constructor.
@@ -49,7 +49,7 @@ class JwtGuard extends GuardContract
      * @param array $credentials
      * @return bool
      */
-    public function attempts(array $credentials)
+    public function attempts(array $credentials): bool
     {
         $user = $this->makeLogin($credentials);
         $fields = $this->provider['credentials'];
@@ -85,8 +85,8 @@ class JwtGuard extends GuardContract
         }
 
         $config = (array) config('policier');
-        
-        if (is_null($config['keychain']['private']) || is_null($config['keychain']['publlic'])) {
+
+        if (count($config) > 0 && (is_null($config['keychain']['private']) || is_null($config['keychain']['public']))) {
             if (is_null($config['signkey'])) {
                 $policier->setConfig(['signkey' => file_get_contents(config('security.key'))]);
             }
@@ -100,7 +100,7 @@ class JwtGuard extends GuardContract
      *
      * @return bool
      */
-    public function check()
+    public function check(): bool
     {
         $policier = $this->getPolicier();
 
@@ -126,7 +126,7 @@ class JwtGuard extends GuardContract
      *
      * @return bool
      */
-    public function guest()
+    public function guest(): bool
     {
         return !$this->check();
     }
@@ -136,7 +136,7 @@ class JwtGuard extends GuardContract
      *
      * @return bool
      */
-    public function user()
+    public function user(): Authentication
     {
         if (is_null($this->token)) {
             if (!$this->check()) {
@@ -160,9 +160,9 @@ class JwtGuard extends GuardContract
     /**
      * Get the generated token
      *
-     * @return \Policier\Token
+     * @return ?string
      */
-    public function getToken()
+    public function getToken(): ?string
     {
         return $this->token;
     }
@@ -172,7 +172,7 @@ class JwtGuard extends GuardContract
      *
      * @return string
      */
-    public function getTokenString()
+    public function getTokenString(): string
     {
         return (string) $this->token;
     }
@@ -181,16 +181,14 @@ class JwtGuard extends GuardContract
      * Make direct login
      *
      * @param mixed $user
-     * @return bool
+     * @return string
      */
-    public function login(Authentication $user)
+    public function login(Authentication $user): string
     {
-        $claims = [
+        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), [
             "id" => $user->getAuthenticateUserId(),
             "logged" => true
-        ];
-
-        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), $claims);
+        ]);
 
         return $this->token;
     }
@@ -200,9 +198,9 @@ class JwtGuard extends GuardContract
      *
      * @return bool
      */
-    public function logout()
+    public function logout(): bool
     {
-        //
+        return true;
     }
 
     /**
@@ -210,7 +208,7 @@ class JwtGuard extends GuardContract
      *
      * @return bool
      */
-    public function id()
+    public function id(): mixed
     {
         $result = $this->getPolicier()->decode($this->token);
 

@@ -10,16 +10,16 @@ interface CollectionInterface
      * Check for existence of a key in the session collection
      *
      * @param  string $key
-     * @return boolean
+     * @return bool
      */
-    public function has($key);
+    public function has($key): bool;
 
     /**
      * Check if a collection is empty.
      *
-     * @return boolean
+     * @return bool
      */
-    public function isEmpty();
+    public function isEmpty(): bool;
 
     /**
      * Allows to recover a value or value collection.
@@ -28,47 +28,47 @@ interface CollectionInterface
      * @param  mixed  $default
      * @return mixed
      */
-    public function get($key, $default = null);
+    public function get(mixed $key, mixed $default = null): mixed;
 
     /**
      * Add an entry to the collection
      *
      * @param  string $key
-     * @param  $data
-     * @param  bool   $next
-     * @return self
+     * @param  mixed $data
+     * @param  bool  $next
+     * @return CollectionInterface
      */
-    public function add($key, $data, $next = false);
+    public function add(string $key, mixed $data, bool $next = false);
 
 
     /**
      * Delete an entry in the collection
      *
      * @param  string $key
-     * @return self
+     * @return CollectionInterface
      */
-    public function remove($key);
+    public function remove(string $key): CollectionInterface;
 
     /**
      * Modify an entry in the collection
      *
      * @param  string $key
      * @param  mixed  $value
-     * @return self
+     * @return CollectionInterface
      */
-    public function set($key, $value);
+    public function set(string $key, mixed $value): CollectionInterface;
 
     /**
      * Return all the entries of the collection as an array
      *
      * @return array
      */
-    public function toArray();
+    public function toArray(): array;
 
     /**
      * Return all entries of the collection as an object
      *
      * @return array
      */
-    public function toObject();
+    public function toObject(): array;
 }

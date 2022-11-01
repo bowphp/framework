@@ -12,7 +12,7 @@ class CryptoConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('security', function () use ($config) {
             Crypto::setkey($config['security.key'], $config['security.cipher']);
@@ -24,7 +24,7 @@ class CryptoConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('security');
     }

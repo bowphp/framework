@@ -8,7 +8,7 @@ class {className} extends Migration
     /**
      * Up Migration
      */
-    public function up()
+    public function up(): void
     {
         $this->create("sessions", function (SQLGenerator $table) {
             $table->addColumn('id', 'string', ['primary' => true]);
@@ -21,7 +21,7 @@ class {className} extends Migration
     /**
      * Rollback migration
      */
-    public function rollback()
+    public function rollback(): void
     {
         $this->dropIfExists("{table}");
     }

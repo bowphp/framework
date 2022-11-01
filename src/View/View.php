@@ -225,7 +225,7 @@ class View implements ResponseInterface
      *
      * @return mixed
      */
-    public function sendContent()
+    public function sendContent(): void
     {
         echo static::$content;
 

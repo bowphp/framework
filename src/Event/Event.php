@@ -53,8 +53,8 @@ class Event
 
         static::$events[$event][] = new Listener($fn, $priority);
 
-        uasort(static::$events[$event], function (Listener $a, Listener $b) {
-            return $a->getPriority() < $b->getPriority();
+        uasort(static::$events[$event], function (Listener $first_listener, Listener $second_listener) {
+            return $first_listener->getPriority() < $second_listener->getPriority();
         });
     }
 
@@ -158,8 +158,8 @@ class Event
      */
     public static function bound(string $event): bool
     {
-        $onces = isset(static::$events['__bow.once.event']) ? static::$events['__bow.once.event'] : [];
-        $translations = isset(static::$events['__bow.transmission.event']) ? static::$events['__bow.transmission.event'] : []; // phpcs:ignore
+        $onces = static::$events['__bow.once.event'] ?? [];
+        $translations = static::$events['__bow.transmission.event'] ?? [];
 
         return array_key_exists($event, $onces)
             || array_key_exists($event, static::$events)

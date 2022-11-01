@@ -61,9 +61,9 @@ abstract class ProducerService
     /**
      * Get the producer queue
      *
-     * @return int
+     * @return string
      */
-    final public function getQueue()
+    final public function getQueue(): string
     {
         return $this->queue;
     }
@@ -73,7 +73,7 @@ abstract class ProducerService
      *
      * @return int
      */
-    final public function getDelay()
+    final public function getDelay(): int
     {
         return $this->delay;
     }
@@ -83,5 +83,5 @@ abstract class ProducerService
      *
      * @return mixed
      */
-    abstract public function process();
+    abstract public function process(): void;
 }

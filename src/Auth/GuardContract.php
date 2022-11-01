@@ -28,21 +28,21 @@ abstract class GuardContract
      *
      * @return bool
      */
-    abstract public function guest();
+    abstract public function guest(): bool;
 
     /**
      * Logout
      *
      * @return bool
      */
-    abstract public function logout();
+    abstract public function logout(): bool;
 
     /**
      * Get authenticated user
      *
-     * @return Authenticate
+     * @return Authentication
      */
-    abstract public function user();
+    abstract public function user(): ?Authentication;
 
     /**
      * Check if user is authenticate
@@ -50,7 +50,7 @@ abstract class GuardContract
      * @param array $credentials
      * @return bool
      */
-    abstract public function attempts(array $credentials);
+    abstract public function attempts(array $credentials): bool;
 
     /**
      * Load the a guard
@@ -58,7 +58,7 @@ abstract class GuardContract
      * @param string $guard
      * @return GuardContract
      */
-    public function guard($guard = null)
+    public function guard($guard = null): GuardContract
     {
         if ($guard) {
             $this->guard = $guard;

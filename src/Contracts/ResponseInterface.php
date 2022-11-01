@@ -9,7 +9,7 @@ interface ResponseInterface
     /**
      * Send Response to client
      *
-     * @return string
+     * @return void
      */
-    public function sendContent();
+    public function sendContent(): void;
 }

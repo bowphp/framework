@@ -385,7 +385,7 @@ class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function sendContent()
+    public function sendContent(): void
     {
         echo $this->buildHttpResponse();
 

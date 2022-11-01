@@ -42,7 +42,7 @@ abstract class AbstractConnection
      *
      * @return void
      */
-    abstract public function connection();
+    abstract public function connection(): void;
 
     /**
      * Retrieves the connection
@@ -59,7 +59,7 @@ abstract class AbstractConnection
      *
      * @param PDO $pdo
      */
-    public function setConnection(PDO $pdo)
+    public function setConnection(PDO $pdo): void
     {
         $this->pdo = $pdo;
     }
@@ -78,8 +78,9 @@ abstract class AbstractConnection
      * Sets the data recovery mode.
      *
      * @param int $fetch
+     * @return void
      */
-    public function setFetchMode(int $fetch)
+    public function setFetchMode(int $fetch): void
     {
         $this->fetch = $fetch;
 
@@ -106,9 +107,7 @@ abstract class AbstractConnection
      */
     public function getTablePrefix(): string
     {
-        return isset($this->config['prefix'])
-            ? $this->config['prefix']
-            : '';
+        return $this->config['prefix'] ?? '';
     }
 
     /**
@@ -118,9 +117,7 @@ abstract class AbstractConnection
      */
     public function getCharset(): string
     {
-        return isset($this->config['charset'])
-            ? $this->config['charset']
-            : 'utf8';
+        return $this->config['charset'] ?? 'utf8';
     }
 
     /**
@@ -130,9 +127,7 @@ abstract class AbstractConnection
      */
     public function getCollation(): string
     {
-        return isset($this->config['collation'])
-            ? $this->config['collation']
-            : 'utf8_unicode_ci';
+        return $this->config['collation'] ?? 'utf8_unicode_ci';
     }
 
     /**

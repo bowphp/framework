@@ -28,7 +28,7 @@ class MiddlewareDispatcher
      *
      * @param string|callable $middleware
      * @param array $params
-     * @return $this
+     * @return MiddlewareDispatcher
      */
     public function pipe(string|callable $middleware, array $params = []): MiddlewareDispatcher
     {

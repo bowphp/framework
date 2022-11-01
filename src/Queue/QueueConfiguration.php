@@ -13,7 +13,7 @@ class QueueConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('queue', function () use ($config) {
             return new QueueConnection($config["worker"]);
@@ -23,7 +23,7 @@ class QueueConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('queue');
     }

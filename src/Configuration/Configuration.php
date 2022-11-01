@@ -11,7 +11,7 @@ abstract class Configuration
     /**
      * @var Container
      */
-    protected $container;
+    protected Container $container;
 
     /**
      * Service constructor.
