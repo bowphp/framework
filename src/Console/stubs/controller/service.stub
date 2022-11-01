@@ -13,7 +13,7 @@ class {className} extends Controller
 	 * 
 	 * @var {serviceClassName}
 	 */
-	private ${serviceName};
+	private {serviceClassName} ${serviceName};
 
 	/**
 	 * {className} constructor

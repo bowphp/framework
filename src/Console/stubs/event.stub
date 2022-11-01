@@ -12,7 +12,7 @@ class {className} extends EventListener
 	 * @param array $payload
 	 * @return mixed
 	 */
-	public function process(array $payload = [])
+	public function process(array $payload = []): void
 	{
 	    // Do Something
 	}

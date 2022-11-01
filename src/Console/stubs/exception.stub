@@ -6,5 +6,5 @@ use Exception;
 
 class {className} extends Exception
 {
-    //
+    // do something here
 }
