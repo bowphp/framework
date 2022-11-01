@@ -140,7 +140,7 @@ class ArgOption
     }
 
     /**
-     * Retrieves the command action 
+     * Retrieves the command action
      *
      * @return string
      */

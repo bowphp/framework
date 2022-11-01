@@ -41,8 +41,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
 
         // We check if --with-view exists. If that exists,
         // we launch the question
-        if (
-            $parameters->has('--with-view')
+        if ($parameters->has('--with-view')
             && $this->arg->readline("Do you want me to create the associated views? ")
         ) {
             $model = preg_replace("/controller/i", "", strtolower($controller));
