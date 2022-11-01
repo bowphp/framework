@@ -2,166 +2,165 @@
 
 namespace Bow\Console;
 
-use Bow\Support\Collection;
-use Bow\Support\Str;
+use Bow\Console\Traits\ConsoleTrait;
 
 class Setting
 {
-    use ConsoleInformation;
+    use ConsoleTrait;
 
     /**
      * The base directory name
      *
      * @var string
      */
-    private $dirname;
+    private string $dirname;
 
     /**
      * The ArgOption instance
      *
-     * @var array
+     * @var ArgOption
      */
-    private $arg;
+    private ArgOption $arg;
 
     /**
      * The bootstrap file
      *
      * @var array
      */
-    private $bootstrap = [];
+    private array $bootstrap = [];
 
     /**
      * The the public directory
      *
      * @var string
      */
-    private $public_directory;
+    private string $public_directory;
 
     /**
      * The the storage directory
      *
      * @var string
      */
-    private $var_directory;
+    private string $var_directory;
 
     /**
      * The seeder directory
      *
      * @var string
      */
-    private $seeder_directory;
+    private string $seeder_directory;
 
     /**
      * The migration directory
      *
      * @var string
      */
-    private $migration_directory;
+    private string $migration_directory;
 
     /**
      * The controller directory
      *
      * @var string
      */
-    private $controller_directory;
+    private string $controller_directory;
 
     /**
      * The middleware directory
      *
      * @var string
      */
-    private $middleware_directory;
+    private string $middleware_directory;
 
     /**
      * The configuration directory
      *
      * @var string
      */
-    private $configuration_directory;
+    private string $configuration_directory;
 
     /**
      * The validation directory
      *
      * @var string
      */
-    private $validation_directory;
+    private string $validation_directory;
 
     /**
      * The application directory
      *
      * @var string
      */
-    private $app_directory;
+    private string $app_directory;
 
     /**
      * The model directory
      *
      * @var string
      */
-    private $model_directory;
+    private string $model_directory;
 
     /**
      * The component directory
      *
      * @var string
      */
-    private $component_directory;
+    private string $component_directory;
 
     /**
      * The config directory
      *
      * @var string
      */
-    private $config_directory;
+    private string $config_directory;
 
     /**
      * The server filename
      *
      * @var string
      */
-    private $serve_filename;
+    private string $serve_filename;
 
     /**
      * The exception directory
      *
      * @var string
      */
-    private $exception_directory;
+    private string $exception_directory;
 
     /**
      * The service directory
      *
      * @var string
      */
-    private $service_directory;
+    private string $service_directory;
 
     /**
      * The producer directory
      *
      * @var string
      */
-    private $producer_directory;
- 
+    private string $producer_directory;
+
     /**
      * The command directory
      *
      * @var string
      */
-    private $command_directory;
+    private string $command_directory;
 
     /**
      * The event directory
      *
      * @var string
      */
-    private $event_directory;
+    private string $event_directory;
 
     /**
      * The namesapces directory
      *
      * @var array
      */
-    private $namespaces = [];
+    private array $namespaces = [];
 
     /**
      * Command constructor.
@@ -169,18 +168,9 @@ class Setting
      * @param string $dirname
      * @return void
      */
-    public function __construct($dirname)
+    public function __construct(string $dirname)
     {
         $this->dirname = rtrim($dirname, '/');
-    }
-
-    /**
-     * The arg option
-     * @return ArgOption
-     */
-    public function getArgOption()
-    {
-        return $this->arg;
     }
 
     /**
@@ -189,7 +179,7 @@ class Setting
      * @param  array $bootstrap
      * @return void
      */
-    public function setBootstrap(array $bootstrap)
+    public function setBootstrap(array $bootstrap): void
     {
         $this->bootstrap = $bootstrap;
     }
@@ -200,7 +190,7 @@ class Setting
      * @param string $serve_filename
      * @return void
      */
-    public function setServerFilename($serve_filename)
+    public function setServerFilename(string $serve_filename): void
     {
         $this->serve_filename = $serve_filename;
     }
@@ -211,7 +201,7 @@ class Setting
      * @param string $public_directory
      * @return void
      */
-    public function setPublicDirectory($public_directory)
+    public function setPublicDirectory(string $public_directory): void
     {
         $this->public_directory = $public_directory;
     }
@@ -222,7 +212,7 @@ class Setting
      * @param string $config_directory
      * @return void
      */
-    public function setConfigDirectory($config_directory)
+    public function setConfigDirectory(string $config_directory): void
     {
         $this->config_directory = $config_directory;
     }
@@ -233,7 +223,7 @@ class Setting
      * @param string $configuration_directory
      * @return void
      */
-    public function setPackageDirectory($configuration_directory)
+    public function setPackageDirectory(string $configuration_directory): void
     {
         $this->configuration_directory = $configuration_directory;
     }
@@ -244,7 +234,7 @@ class Setting
      * @param string $component_directory
      * @return void
      */
-    public function setComponentDirectory($component_directory)
+    public function setComponentDirectory(string $component_directory): void
     {
         $this->component_directory = $component_directory;
     }
@@ -255,7 +245,7 @@ class Setting
      * @param string $migration_directory
      * @return void
      */
-    public function setMigrationDirectory($migration_directory)
+    public function setMigrationDirectory(string $migration_directory): void
     {
         $this->migration_directory = $migration_directory;
     }
@@ -266,7 +256,7 @@ class Setting
      * @param string $seeder_directory
      * @return void
      */
-    public function setSeederDirectory($seeder_directory)
+    public function setSeederDirectory(string $seeder_directory): void
     {
         $this->seeder_directory = $seeder_directory;
     }
@@ -277,7 +267,7 @@ class Setting
      * @param string $controller_directory
      * @return void
      */
-    public function setControllerDirectory($controller_directory)
+    public function setControllerDirectory(string $controller_directory): void
     {
         $this->controller_directory = $controller_directory;
     }
@@ -288,7 +278,7 @@ class Setting
      * @param string $validation_directory
      * @return void
      */
-    public function setValidationDirectory($validation_directory)
+    public function setValidationDirectory(string $validation_directory): void
     {
         $this->validation_directory = $validation_directory;
     }
@@ -299,7 +289,7 @@ class Setting
      * @param string $middleware_directory
      * @return void
      */
-    public function setMiddlewareDirectory($middleware_directory)
+    public function setMiddlewareDirectory(string $middleware_directory): void
     {
         $this->middleware_directory = $middleware_directory;
     }
@@ -310,7 +300,7 @@ class Setting
      * @param string $app_directory
      * @return void
      */
-    public function setApplicationDirectory($app_directory)
+    public function setApplicationDirectory(string $app_directory): void
     {
         $this->app_directory = $app_directory;
     }
@@ -321,7 +311,7 @@ class Setting
      * @param string $model_directory
      * @return void
      */
-    public function setModelDirectory($model_directory)
+    public function setModelDirectory(string $model_directory): void
     {
         $this->model_directory = $model_directory;
     }
@@ -332,7 +322,7 @@ class Setting
      * @param string $var_directory
      * @return void
      */
-    public function setVarDirectory($var_directory)
+    public function setVarDirectory(string $var_directory): void
     {
         $this->var_directory = $var_directory;
     }
@@ -343,7 +333,7 @@ class Setting
      * @param string $exception_directory
      * @return void
      */
-    public function setExceptionDirectory($exception_directory)
+    public function setExceptionDirectory(string $exception_directory): void
     {
         $this->exception_directory = $exception_directory;
     }
@@ -354,7 +344,7 @@ class Setting
      * @param string $service_directory
      * @return void
      */
-    public function setServiceDirectory($service_directory)
+    public function setServiceDirectory(string $service_directory): void
     {
         $this->service_directory = $service_directory;
     }
@@ -365,7 +355,7 @@ class Setting
      * @param string $producer_directory
      * @return void
      */
-    public function setProducerDirectory($producer_directory)
+    public function setProducerDirectory(string $producer_directory): void
     {
         $this->producer_directory = $producer_directory;
     }
@@ -376,7 +366,7 @@ class Setting
      * @param string $command_directory
      * @return void
      */
-    public function setCommandDirectory($command_directory)
+    public function setCommandDirectory(string $command_directory): void
     {
         $this->command_directory = $command_directory;
     }
@@ -387,7 +377,7 @@ class Setting
      * @param string $event_directory
      * @return void
      */
-    public function setEventDirectory($event_directory)
+    public function setEventDirectory(string $event_directory): void
     {
         $this->event_directory = $event_directory;
     }
@@ -398,7 +388,7 @@ class Setting
      * @param array $namespaces
      * @return void
      */
-    public function setNamespaces(array $namespaces)
+    public function setNamespaces(array $namespaces): void
     {
         foreach ($namespaces as $key => $namespace) {
             $this->namespaces[$key] = $namespace;
@@ -410,7 +400,7 @@ class Setting
      *
      * @return array
      */
-    public function getNamespaces()
+    public function getNamespaces(): array
     {
         return $this->namespaces;
     }
@@ -420,7 +410,7 @@ class Setting
      *
      * @return string
      */
-    public function getVarDirectory()
+    public function getVarDirectory(): string
     {
         return $this->var_directory;
     }
@@ -430,7 +420,7 @@ class Setting
      *
      * @return string
      */
-    public function getComponentDirectory()
+    public function getComponentDirectory(): string
     {
         return $this->component_directory;
     }
@@ -440,7 +430,7 @@ class Setting
      *
      * @return string
      */
-    public function getConfigDirectory()
+    public function getConfigDirectory(): string
     {
         return $this->config_directory;
     }
@@ -450,7 +440,7 @@ class Setting
      *
      * @return string
      */
-    public function getPackageDirectory()
+    public function getPackageDirectory(): string
     {
         return $this->configuration_directory;
     }
@@ -460,7 +450,7 @@ class Setting
      *
      * @return string
      */
-    public function getMigrationDirectory()
+    public function getMigrationDirectory(): string
     {
         return $this->migration_directory;
     }
@@ -470,7 +460,7 @@ class Setting
      *
      * @return string
      */
-    public function getSeederDirectory()
+    public function getSeederDirectory(): string
     {
         return $this->seeder_directory;
     }
@@ -480,7 +470,7 @@ class Setting
      *
      * @return string
      */
-    public function getValidationDirectory()
+    public function getValidationDirectory(): string
     {
         return $this->validation_directory;
     }
@@ -490,7 +480,7 @@ class Setting
      *
      * @return string
      */
-    public function getServiceDirectory()
+    public function getServiceDirectory(): string
     {
         return $this->service_directory;
     }
@@ -500,7 +490,7 @@ class Setting
      *
      * @return string
      */
-    public function getProducerDirectory()
+    public function getProducerDirectory(): string
     {
         return $this->producer_directory;
     }
@@ -510,7 +500,7 @@ class Setting
      *
      * @return string
      */
-    public function getCommandDirectory()
+    public function getCommandDirectory(): string
     {
         return $this->command_directory;
     }
@@ -520,7 +510,7 @@ class Setting
      *
      * @return string
      */
-    public function getEventDirectory()
+    public function getEventDirectory(): string
     {
         return $this->event_directory;
     }
@@ -530,7 +520,7 @@ class Setting
      *
      * @return string
      */
-    public function getMiddlewareDirectory()
+    public function getMiddlewareDirectory(): string
     {
         return $this->middleware_directory;
     }
@@ -540,7 +530,7 @@ class Setting
      *
      * @return string
      */
-    public function getModelDirectory()
+    public function getModelDirectory(): string
     {
         return $this->model_directory;
     }
@@ -550,7 +540,7 @@ class Setting
      *
      * @return string
      */
-    public function getControllerDirectory()
+    public function getControllerDirectory(): string
     {
         return $this->controller_directory;
     }
@@ -560,7 +550,7 @@ class Setting
      *
      * @return string
      */
-    public function getApplicationDirectory()
+    public function getApplicationDirectory(): string
     {
         return $this->app_directory;
     }
@@ -570,7 +560,7 @@ class Setting
      *
      * @return string
      */
-    public function getBaseDirectory()
+    public function getBaseDirectory(): string
     {
         return $this->dirname;
     }
@@ -580,7 +570,7 @@ class Setting
      *
      * @return array
      */
-    public function getBootstrap()
+    public function getBootstrap(): array
     {
         return $this->bootstrap;
     }
@@ -588,9 +578,9 @@ class Setting
     /**
      * Get the local server file
      *
-     * @return void
+     * @return string
      */
-    public function getServerFilename()
+    public function getServerFilename(): string
     {
         return $this->serve_filename;
     }
@@ -598,9 +588,9 @@ class Setting
     /**
      * Get the public base directory
      *
-     * @return void
+     * @return string
      */
-    public function getPublicDirectory()
+    public function getPublicDirectory(): string
     {
         return $this->public_directory;
     }
@@ -610,7 +600,7 @@ class Setting
      *
      * @return string
      */
-    public function getExceptionDirectory()
+    public function getExceptionDirectory(): string
     {
         return $this->exception_directory;
     }

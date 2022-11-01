@@ -9,9 +9,40 @@ class ArgOption
     /**
      * The args collection
      *
-     * @var Collection
+     * @var array
      */
-    private $options;
+    private array $parameters;
+
+    /**
+     * The invalid parameter
+     *
+     * @var array
+     */
+    private array $trash;
+
+    /**
+     * The command first argument
+     * php bow add:constroller [target]
+     *
+     * @var string
+     */
+    private ?string $target = null;
+
+    /**
+     * The command first argument
+     * php bow [command]:action
+     *
+     * @var string
+     */
+    private ?string $command = null;
+
+    /**
+     * The command first argument
+     * php bow command:[action]
+     *
+     * @var string
+     */
+    private ?string $action = null;
 
     /**
      * ArgOption Constructor
@@ -24,11 +55,11 @@ class ArgOption
     }
 
     /**
-     * Format the options
+     * Format the parameters
      *
      * @return void
      */
-    private function formatParameters()
+    private function formatParameters(): void
     {
         foreach ($GLOBALS['argv'] as $key => $param) {
             if ($key == 0) {
@@ -41,21 +72,28 @@ class ArgOption
             }
 
             if ($key == 2 && preg_match('/^[a-z0-9_\/-]+$/i', $param)) {
-                $this->options['target'] = $param;
-            } elseif (preg_match('/^--[a-z-]+$/', $param)) {
-                $this->options['options'][$param] = true;
-            } elseif (count($part = explode('=', $param)) == 2) {
-                $this->options['options'][$part[0]] = $part[1];
-            } elseif (count($part = explode('=', $param)) > 2) {
-                $tmp = $part[0];
-                $this->options['options'][$tmp] = implode("=", array_slice($part, 1));
-            } else {
-                $this->options['trash'][] = $param;
+                $this->target = $param;
+                continue;
             }
-        }
 
-        if (isset($this->options['options'])) {
-            $this->options['options'] = new Collection($this->options['options']);
+            $param_part = explode('=', $param);
+            if (preg_match('/^--[a-z-]+$/', $param)) {
+                $this->parameters[$param] = true;
+                continue;
+            }
+
+            if (count($param_part) == 2) {
+                $this->parameters[$param_part[0]] = $param_part[1];
+                continue;
+            }
+
+            if (count($param_part) > 2) {
+                $tmp = $param_part[0];
+                $this->parameters[$tmp] = implode("=", array_slice($param_part, 1));
+                continue;
+            }
+
+            $this->trash[] = $param;
         }
     }
 
@@ -64,53 +102,67 @@ class ArgOption
      *
      * @param  string $key
      * @param  mixed  $default
-     *
-     * @return mixed|Collection|null
+     * @return ?string
      */
-    public function getParameter($key, $default = null)
+    public function getParameter(string $key, mixed $default = null): ?string
     {
-        return isset($this->options[$key]) ? $this->options[$key] : $default;
+        return $this->parameters[$key] ?? $default;
     }
 
     /**
-     * Retrieves the options of the command
+     * Get the collection of parameter
      *
-     * @param  string $key
-     * @param  string $default
-     *
-     * @return Collection|mixed|null
+     * @return Collection
      */
-    public function options($key = null, $default = null)
+    public function getParameters(): Collection
     {
-        $option = $this->getParameter('options', new Collection());
+        return new Collection($this->parameters);
+    }
 
-        if ($key == null) {
-            return $option;
-        }
+    /**
+     * Retrieves the target value
+     *
+     * @return string
+     */
+    public function getTarget(): ?string
+    {
+        return $this->target ?? null;
+    }
 
-        return $option->get($key, $default);
+    /**
+     * Retrieves the command value
+     *
+     * @return string
+     */
+    public function getCommand(): ?string
+    {
+        return $this->command;
+    }
+
+    /**
+     * Retrieves the command action 
+     *
+     * @return string
+     */
+    public function getAction(): ?string
+    {
+        return $this->action;
     }
 
     /**
      * Initialize main command
      *
      * @param string $param
-     *
      * @return void
      */
-    private function initCommand($param)
+    private function initCommand(string $param): void
     {
         if (!preg_match('/^[a-z]+:[a-z]+$/', $param)) {
-            $this->options['command'] = $param;
-
-            return;
+            $this->command = $param;
+            $this->action = null;
+        } else {
+            [$this->command, $this->action] = explode(':', $param);
         }
-        
-        $part = explode(':', $param);
-
-        $this->options['command'] = $part[0];
-
-        $this->options['action'] = $part[1];
     }
 
     /**
@@ -119,7 +171,7 @@ class ArgOption
      * @param  string $message
      * @return bool
      */
-    private function readline($message)
+    public function readline(string $message): bool
     {
         echo Color::green("$message y/N >>> ");
 
@@ -135,10 +187,6 @@ class ArgOption
             return $this->readline($message);
         }
 
-        if (strtolower($input) == "y") {
-            return true;
-        }
-
-        return false;
+        return strtolower($input) == "y";
     }
 }

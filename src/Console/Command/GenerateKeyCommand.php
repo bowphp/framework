@@ -9,7 +9,7 @@ class GenerateKeyCommand extends AbstractCommand
      *
      * @return void
      */
-    public function generate()
+    public function generate(): void
     {
         $key = base64_encode(openssl_random_pseudo_bytes(12).date('Y-m-d H:i:s').microtime(true));
 

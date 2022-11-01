@@ -2,7 +2,6 @@
 
 namespace Bow\Console\Command;
 
-use Bow\Queue\Adapters\Connection as QueueConnection;
 use Bow\Queue\WorkerService;
 
 class WorkerCommand extends AbstractCommand
@@ -13,10 +12,10 @@ class WorkerCommand extends AbstractCommand
      * @param string $connection
      * @return void
      */
-    public function run(string $connection = null)
+    public function run(?string $connection = null): void
     {
-        $retry = (int) $this->arg->options('--retry', 3);
-        $default = $this->arg->options('--queue', "default");
+        $retry = (int) $this->arg->getParameter('--retry', 3);
+        $default = $this->arg->getParameter('--queue', "default");
 
         $queue = app("queue");
 

@@ -11,7 +11,7 @@ class ReplCommand extends AbstractCommand
      *
      * @return mixed
      */
-    public function run()
+    public function run(): void
     {
         $include = $this->arg->getParameter('--include');
 
@@ -35,7 +35,7 @@ class ReplCommand extends AbstractCommand
         $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
 
         // Load the custum prompt
-        $prompt = $this->arg->options('--prompt');
+        $prompt = $this->arg->getParameter('--prompt');
 
         if (is_null($prompt)) {
             $prompt = '(bow) >>';
@@ -48,7 +48,6 @@ class ReplCommand extends AbstractCommand
         $shell = new \Psy\Shell($config);
 
         $shell->setIncludes($this->setting->getBootstrap());
-
-        return $shell->run();
+        $shell->run();
     }
 }

@@ -10,10 +10,9 @@ class ControllerCommand extends AbstractCommand
      * The add controller command
      *
      * @param string $controller
-     *
      * @return void
      */
-    public function generate($controller)
+    public function generate(string $controller): void
     {
         $generator = new Generator(
             $this->setting->getControllerDirectory(),
@@ -26,7 +25,7 @@ class ControllerCommand extends AbstractCommand
             exit(1);
         }
 
-        if ($this->arg->options('--no-plain')) {
+        if ($this->arg->getParameter('--no-plain')) {
             $generator->write('controller/no-plain', [
                 'baseNamespace' => $this->namespaces['controller']
             ]);

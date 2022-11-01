@@ -2,7 +2,6 @@
 
 namespace Bow\Console\Command;
 
-use Bow\Console\Color;
 use Bow\Console\Generator;
 
 class EventCommand extends AbstractCommand
@@ -13,7 +12,7 @@ class EventCommand extends AbstractCommand
      * @param string $event
      * @return void
      */
-    public function generate(string $event)
+    public function generate(string $event): void
     {
         $generator = new Generator(
             $this->setting->getEventDirectory(),

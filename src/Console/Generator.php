@@ -2,43 +2,44 @@
 
 namespace Bow\Console;
 
+use Bow\Console\Traits\ConsoleTrait;
+
 class Generator
 {
-    use ConsoleInformation;
-    
+    use ConsoleTrait;
+
     /**
      * The base directory where that are going to generate
      *
      * @var string
      */
-    private $base_dir;
+    private string $base_directory;
 
     /**
      * The generate name
      *
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * GeneratorCommand constructor
      *
-     * @param string $base_dir
+     * @param string $base_directory
      * @param string $name
      */
-    public function __construct($base_dir, $name)
+    public function __construct(string $base_directory, string $name)
     {
-        $this->base_dir = $base_dir;
-
+        $this->base_directory = $base_directory;
         $this->name = $name;
     }
 
     /**
      * Check if filename is valide
      *
-     * @param $filename
+     * @param string $filename
      */
-    public function filenameIsValide($filename)
+    public function filenameIsValide(?string $filename)
     {
         if (is_null($filename)) {
             echo Color::red('The file name is invalid.');
@@ -52,11 +53,11 @@ class Generator
      *
      * @return bool
      */
-    public function fileExists()
+    public function fileExists(): bool
     {
         $this->filenameIsValide($this->name);
 
-        return file_exists($this->getPath()) || is_dir($this->base_dir."/".$this->name);
+        return file_exists($this->getPath()) || is_dir($this->base_directory . "/" . $this->name);
     }
 
     /**
@@ -64,9 +65,9 @@ class Generator
      *
      * @return string
      */
-    public function getPath()
+    public function getPath(): string
     {
-        return $this->base_dir."/".$this->name.".php";
+        return $this->base_directory . "/" . $this->name . ".php";
     }
 
     /**
@@ -74,15 +75,11 @@ class Generator
      *
      * @return bool
      */
-    public function exists()
+    public function exists(): bool
     {
         $this->filenameIsValide($this->name);
 
-        if (file_exists($this->getPath())) {
-            return true;
-        }
-
-        return false;
+        return file_exists($this->getPath());
     }
 
     /**
@@ -92,19 +89,18 @@ class Generator
      * @param array $data
      * @return bool
      */
-    public function write($type, array $data = [])
+    public function write(string $type, array $data = []): bool
     {
         $dirname = dirname($this->name);
 
-        if (!is_dir($this->base_dir)) {
-            @mkdir($this->base_dir);
+        if (!is_dir($this->base_directory)) {
+            @mkdir($this->base_directory);
         }
 
-
         if ($dirname != '.') {
-            @mkdir($this->base_dir.'/'.trim($dirname, '/'), 0777, true);
+            @mkdir($this->base_directory . '/' . trim($dirname, '/'), 0777, true);
 
-            $namespace = '\\'.str_replace('/', '\\', ucfirst(trim($dirname, '/')));
+            $namespace = '\\' . str_replace('/', '\\', ucfirst(trim($dirname, '/')));
         } else {
             $namespace = '';
         }
@@ -126,14 +122,14 @@ class Generator
      *
      * @param string $type
      * @param array $data
-     * @return bool|mixed|string
+     * @return string
      */
-    public function makeStub($type, $data = [])
+    public function makeStub(string $type, array $data = []): string
     {
-        $content = file_get_contents(__DIR__.'/stub/'.$type.'.stub');
+        $content = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
 
         foreach ($data as $key => $value) {
-            $content = str_replace('{'.$key.'}', $value, $content);
+            $content = str_replace('{' . $key . '}', $value, $content);
         }
 
         return $content;
@@ -152,10 +148,10 @@ class Generator
     /**
      * Get the base directory
      *
-     * @param string $base_dir
+     * @param string $base_directory
      */
-    public function setBaseDirectory($base_dir)
+    public function setBaseDirectory(string $base_directory): void
     {
-        $this->base_dir = $base_dir;
+        $this->base_directory = $base_directory;
     }
 }

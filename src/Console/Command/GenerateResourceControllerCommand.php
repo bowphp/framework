@@ -15,7 +15,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
      * @return void
      * @throws
      */
-    public function generate($controller)
+    public function generate(string $controller): void
     {
         // We create command generator instance
         $generator = new Generator(
@@ -37,11 +37,12 @@ class GenerateResourceControllerCommand extends AbstractCommand
 
         $model_namespace = '';
 
-        $options = $this->arg->options();
+        $parameters = $this->arg->getParameters();
 
         // We check if --with-view exists. If that exists,
         // we launch the question
-        if ($options->has('--with-view')
+        if (
+            $parameters->has('--with-view')
             && $this->arg->readline("Do you want me to create the associated views? ")
         ) {
             $model = preg_replace("/controller/i", "", strtolower($controller));

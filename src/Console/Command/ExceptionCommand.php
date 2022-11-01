@@ -11,10 +11,9 @@ class ExceptionCommand extends AbstractCommand
      * Add middleware
      *
      * @param string $middleware
-     *
      * @return void
      */
-    public function generate(string $exception)
+    public function generate(string $exception): void
     {
         $generator = new Generator(
             $this->setting->getExceptionDirectory(),

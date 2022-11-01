@@ -9,13 +9,11 @@ class ServerCommand extends AbstractCommand
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
-        $port = (int) $this->arg->options('--port', 5000);
-
-        $hostname = $this->arg->options('--host', 'localhost');
-
-        $settings = $this->arg->options('--php-settings', false);
+        $port = (int) $this->arg->getParameter('--port', 5000);
+        $hostname = $this->arg->getParameter('--host', 'localhost');
+        $settings = $this->arg->getParameter('--php-settings', false);
 
         if (is_bool($settings)) {
             $settings = '';

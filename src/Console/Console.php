@@ -3,52 +3,53 @@
 namespace Bow\Console;
 
 use Bow\Configuration\Loader;
+use Bow\Console\Traits\ConsoleTrait;
 
 class Console
 {
-    use ConsoleInformation;
+    use ConsoleTrait;
 
     /**
      * The Setting instance
      *
      * @var Setting
      */
-    private $setting;
+    private Setting $setting;
 
     /**
      * The COMMAND instance
      *
      * @var Command
      */
-    private $command;
+    private Command $command;
 
     /**
      * The Loader instance
      *
      * @var Loader
      */
-    private $kernel;
+    private Loader $kernel;
 
     /**
      * The custom command registers
      *
      * @var array
      */
-    private $registers = [];
+    private array $registers = [];
 
     /**
      * Defines if console booted
      *
      * @var bool
      */
-    private $booted;
+    private bool $booted;
 
     /**
      * The ArgOption instance
      *
      * @return ArgOption
      */
-    private $arg;
+    private ArgOption $arg;
 
     /**
      * The command list
@@ -94,10 +95,9 @@ class Console
      * Bind kernel
      *
      * @param Loader $kernel
-     *
      * @return void
      */
-    public function bind(Loader $kernel)
+    public function bind(Loader $kernel): void
     {
         $this->kernel = $kernel;
     }
@@ -108,10 +108,10 @@ class Console
      * @return void
      * @throws
      */
-    public function run()
+    public function run(): mixed
     {
         if ($this->booted) {
-            return;
+            return false;
         }
 
         // Boot kernel and console
@@ -175,11 +175,10 @@ class Console
      * Calls a command
      *
      * @param  string $command
-     *
      * @return void
      * @throws
      */
-    private function call($command)
+    private function call(string $command): void
     {
         if (!in_array($command, static::COMMAND)) {
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
@@ -212,10 +211,9 @@ class Console
      *
      * @param string $command
      * @param callable $cb
-     *
-     * @return Bow
+     * @return Console
      */
-    public function addCommand($command, $cb)
+    public function addCommand($command, $cb): Console
     {
         $this->registers[$command] = $cb;
 
@@ -229,7 +227,7 @@ class Console
      *
      * @throws \ErrorException
      */
-    private function migration()
+    private function migration(): void
     {
         $action = $this->arg->getParameter('action');
 
@@ -246,10 +244,9 @@ class Console
      * Launch a migration
      *
      * @return void
-     *
      * @throws \ErrorException
      */
-    private function migrate()
+    private function migrate(): void
     {
         $action = $this->arg->getParameter('action');
 
@@ -264,10 +261,9 @@ class Console
      * Create files
      *
      * @return void
-     *
      * @throws \ErrorException
      */
-    private function add()
+    private function add(): void
     {
         $action = $this->arg->getParameter('action');
 
@@ -290,7 +286,7 @@ class Console
      * @return void
      * @throws
      */
-    private function seed()
+    private function seed(): void
     {
         $action = $this->arg->getParameter('action');
 
@@ -317,7 +313,7 @@ class Console
      *
      * @throws \ErrorException
      */
-    private function launch()
+    private function launch(): void
     {
         $action = $this->arg->getParameter('action');
 
@@ -335,7 +331,7 @@ class Console
      *
      * @return void
      */
-    private function generate()
+    private function generate(): void
     {
         $action = $this->arg->getParameter('action');
 
@@ -353,7 +349,7 @@ class Console
      *
      * @return void
      */
-    private function gen()
+    private function gen(): void
     {
         $this->generate();
     }
@@ -362,10 +358,9 @@ class Console
      * Remove the caches
      *
      * @return void
-     *
      * @throws \ErrorException
      */
-    private function clear()
+    private function clear(): void
     {
         $action = $this->arg->getParameter('action');
 
@@ -378,7 +373,7 @@ class Console
      * @param  string|null $command
      * @return int
      */
-    private function help($command = null)
+    private function help(?string $command = null): int
     {
         if ($command === null) {
             $usage = <<<USAGE
