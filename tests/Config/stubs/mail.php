@@ -1,4 +1,5 @@
 <?php
+
 return [
     'driver' => 'smtp',
     'charset'  => 'utf8',
@@ -10,7 +11,7 @@ return [
         'port'     => 1025,
         'tls'      => false,
         'ssl'      => false,
-        'timeout'  => 50,
+        'timeout'  => 150,
     ],
 
     'mail' => [
