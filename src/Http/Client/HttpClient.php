@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http\Client;
+
+use CurlHandle;
 
 class HttpClient
 {
@@ -14,16 +18,9 @@ class HttpClient
     /**
      * The curl instance
      *
-     * @var Resource
+     * @var CurlHandle
      */
-    private $ch;
-
-    /**
-     * The base url
-     *
-     * @var string
-     */
-    private $url;
+    private CurlHandle $ch;
 
     /**
      * HttpClient Constructor.
@@ -31,7 +28,7 @@ class HttpClient
      * @param string $url
      * @return void
      */
-    public function __construct($url = null)
+    public function __construct(?string $url = null)
     {
         if (!function_exists('curl_init')) {
             throw new \BadFunctionCallException('cURL php is require.');
@@ -39,8 +36,6 @@ class HttpClient
 
         if (is_string($url)) {
             $this->ch = curl_init($url);
-
-            $this->url = $url;
         }
     }
 
@@ -49,10 +44,9 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     *
      * @return Parser
      */
-    public function get($url, array $data = [])
+    public function get(string $url, array $data = []): Parser
     {
         $this->resetAndAssociateUrl($url);
 
@@ -68,7 +62,7 @@ class HttpClient
      * @param array $data
      * @return Parser
      */
-    public function post($url, array $data = [])
+    public function post(string $url, array $data = []): Parser
     {
         $this->resetAndAssociateUrl($url);
 
@@ -92,10 +86,9 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     *
      * @return Parser
      */
-    public function put($url, array $data = [])
+    public function put(string $url, array $data = []): Parser
     {
         $this->resetAndAssociateUrl($url);
 
@@ -110,11 +103,11 @@ class HttpClient
      * Attach new file
      *
      * @param string $attach
-     * @return mixed
+     * @return array
      */
-    public function addAttach($attach)
+    public function addAttach(string|array $attach): array
     {
-        return $this->attach = $attach;
+        return $this->attach = (array) $attach;
     }
 
     /**
@@ -123,7 +116,7 @@ class HttpClient
      * @param array $headers
      * @return HttpClient
      */
-    public function addHeaders(array $headers)
+    public function addHeaders(array $headers): HttpClient
     {
         if (is_resource($this->ch)) {
             $data = [];
@@ -144,7 +137,7 @@ class HttpClient
      * @param string $url
      * @return void
      */
-    private function resetAndAssociateUrl($url)
+    private function resetAndAssociateUrl(string $url): void
     {
         if (!is_resource($this->ch)) {
             $this->ch = curl_init(urlencode($url));
@@ -157,7 +150,7 @@ class HttpClient
      * @param array $data
      * @return void
      */
-    private function addFields(array $data)
+    private function addFields(array $data): void
     {
         curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
     }

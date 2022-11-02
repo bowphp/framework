@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail\Driver;
 
 use Aws\Ses\SesClient;
@@ -13,9 +15,14 @@ class SesDriver implements MailDriverInterface
     *
     * @var SesClient
     */
-    private $ses;
+    private SesClient $ses;
 
-    private $config_set = false;
+    /**
+     * Ses internal config
+     *
+     * @var bool
+     */
+    private bool $config_set = false;
 
     /**
     * SesDriver constructor
@@ -32,12 +39,12 @@ class SesDriver implements MailDriverInterface
     }
 
     /**
-    * Send message
-    *
-    * @param Message $message
-    * @return mixed
-    */
-    public function send(Message $message)
+     * Send message
+     *
+     * @param Message $message
+     * @return bool
+     */
+    public function send(Message $message): bool
     {
         $body = [];
 
@@ -74,6 +81,6 @@ class SesDriver implements MailDriverInterface
 
         $result = $this->ses->sendEmail($email);
 
-        return $result;
+        return (bool) $result;
     }
 }

@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http\Client;
+
+use CurlHandle;
 
 class Parser
 {
@@ -9,49 +13,49 @@ class Parser
      *
      * @var string
      */
-    private $error;
+    private ?string $error = null;
 
     /**
      * The error number
      *
      * @var int
      */
-    private $errno;
+    private int $errno;
 
     /**
      * Curl instance
      *
-     * @var Resource
+     * @var CurlHandle
      */
-    private $ch;
+    private CurlHandle $ch;
 
     /**
      * The header
      *
      * @var array
      */
-    private $header;
+    private array $header = [];
 
     /**
      * Flag
      *
      * @var bool
      */
-    private $executed;
+    private bool $executed = false;
 
     /**
      * The attachment collection
      *
      * @var array
      */
-    private $attach = [];
+    private array $attach = [];
 
     /**
      * Parser constructor.
      *
-     * @param $ch
+     * @param CurlHandle $ch
      */
-    public function __construct(&$ch)
+    public function __construct(CurlHandle &$ch)
     {
         $this->ch = $ch;
     }
@@ -59,10 +63,10 @@ class Parser
     /**
      * Get raw content
      *
-     * @return mixed|null
+     * @return mixed
      * @throws
      */
-    public function raw()
+    public function raw(): string
     {
         if (!$this->returnTransfertToRaw()) {
             return null;
@@ -74,10 +78,10 @@ class Parser
     /**
      * Get response content
      *
-     * @return mixed|null
+     * @return mixed
      * @throws
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         if (!$this->returnTransfertToPlain()) {
             return null;
@@ -90,10 +94,10 @@ class Parser
      * Get response content as json
      *
      * @param  array $default
-     * @return string
+     * @return bool|string
      * @throws
      */
-    public function toJson(array $default = null)
+    public function toJson(?array $default = null): bool|string
     {
         if (!$this->returnTransfertToPlain()) {
             if (is_array($default)) {
@@ -111,10 +115,10 @@ class Parser
     /**
      * Get response content as array
      *
-     * @return array|mixed
+     * @return mixed
      * @throws
      */
-    public function toArray()
+    public function toArray(): mixed
     {
         if (!$this->returnTransfert()) {
             $this->close();
@@ -180,10 +184,10 @@ class Parser
     /**
      * Execute request
      *
-     * @return mixed
+     * @return string
      * @throws \Exception
      */
-    private function execute()
+    private function execute(): string
     {
         $data = curl_exec($this->ch);
 
@@ -209,7 +213,7 @@ class Parser
      * @return array
      * @throws
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         if (!$this->executed) {
             $this->execute();
@@ -221,106 +225,106 @@ class Parser
     /**
      * Get the response code
      *
-     * @return string
+     * @return ?int
      * @throws
      */
-    public function getCode()
+    public function getCode(): ?int
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['http_code'];
+        return $this->header['http_code'] ?? null;
     }
 
     /**
      * Get the response executing time
      *
-     * @return string
+     * @return ?int
      * @throws
      */
-    public function getExecutionTime()
+    public function getExecutionTime(): ?int
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['total_time'];
+        return $this->header['total_time'] ?? null;
     }
 
     /**
      * Get the request connexion time
      *
-     * @return string
+     * @return ?float
      * @throws
      */
-    public function getConnexionTime()
+    public function getConnexionTime(): ?float
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['connect_time'];
+        return $this->header['connect_time'] ?? null;
     }
 
     /**
      * Get the response upload size
      *
-     * @return string
+     * @return ?float
      * @throws
      */
-    public function getUploadSize()
+    public function getUploadSize(): ?float
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['size_upload'];
+        return $this->header['size_upload'] ?? null;
     }
 
     /**
      * Get the request upload speed
      *
-     * @return string
+     * @return ?float
      * @throws
      */
-    public function getUploadSpeed()
+    public function getUploadSpeed(): ?float
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['speed_upload'];
+        return $this->header['speed_upload'] ?? null;
     }
 
     /**
      * Get the download size
      *
-     * @return string
+     * @return ?float
      * @throws
      */
-    public function getDownloadSize()
+    public function getDownloadSize(): ?float
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['size_download'];
+        return $this->header['size_download'] ?? null;
     }
 
     /**
      * Get the downlad speed
      *
-     * @return string
+     * @return ?float
      * @throws
      */
-    public function getDownloadSpeed()
+    public function getDownloadSpeed(): ?float
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['speed_download'];
+        return $this->header['speed_download'] ?? null;
     }
 
     /**
@@ -329,7 +333,7 @@ class Parser
      * @return string
      * @throws
      */
-    public function getErrorMessage()
+    public function getErrorMessage(): string
     {
         if (!$this->executed) {
             $this->execute();
@@ -344,7 +348,7 @@ class Parser
      * @return int
      * @throws
      */
-    public function getErrorNumber()
+    public function getErrorNumber(): int
     {
         if (!$this->executed) {
             $this->execute();
@@ -356,16 +360,16 @@ class Parser
     /**
      * Get the response content type
      *
-     * @return string
+     * @return ?string
      * @throws
      */
-    public function getContentType()
+    public function getContentType(): ?string
     {
         if (!$this->executed) {
             $this->execute();
         }
 
-        return $this->header['content_type'];
+        return $this->header['content_type'] ?? null;
     }
 
     /**
@@ -380,11 +384,11 @@ class Parser
     }
 
     /**
-     * Get attach files
+     * Get attached files
      *
      * @return array
      */
-    public function getAttach()
+    public function getAttach(): array
     {
         return $this->attach;
     }
@@ -395,7 +399,7 @@ class Parser
      * @param array $attachs
      * @return void
      */
-    public function setAttach(array $attachs)
+    public function setAttach(array $attachs): void
     {
         $this->attach = $attachs;
     }
@@ -405,7 +409,7 @@ class Parser
      *
      * @return void
      */
-    private function close()
+    private function close(): void
     {
         curl_close($this->ch);
     }

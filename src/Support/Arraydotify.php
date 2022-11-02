@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Support;
 
 class Arraydotify implements \ArrayAccess

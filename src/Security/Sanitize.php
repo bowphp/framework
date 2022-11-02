@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Security;
 
 class Sanitize
@@ -9,10 +11,9 @@ class Sanitize
      *
      * @param mixed $data
      * @param bool  $secure
-     *
      * @return mixed
      */
-    public static function make($data, bool $secure = false)
+    public static function make(mixed $data, bool $secure = false): mixed
     {
         // Recovery of the function at the lance.
         $method = $secure === true ? 'secure' : 'data';
@@ -63,7 +64,7 @@ class Sanitize
      * @param  string $data
      * @return string
      */
-    public static function data($data)
+    public static function data(string $data): string
     {
         return stripslashes(stripslashes(trim($data)));
     }
@@ -74,7 +75,7 @@ class Sanitize
      * @param  string $data
      * @return string
      */
-    public static function secure($data)
+    public static function secure(string $data): string
     {
         return htmlspecialchars(addslashes(trim($data)));
     }

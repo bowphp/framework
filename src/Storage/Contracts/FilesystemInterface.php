@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Storage\Contracts;
 
 use Bow\Http\UploadFile;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
@@ -15,14 +17,14 @@ class NativeDriver implements MailDriverInterface
      *
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * The from configuration
      *
      * @var array
      */
-    private $from = [];
+    private array $from = [];
 
     /**
      * SimpleMail Constructor
@@ -45,7 +47,7 @@ class NativeDriver implements MailDriverInterface
      * @param string $from
      * @return NativeDriver
      */
-    public function on(string $from)
+    public function on(string $from): NativeDriver
     {
         if (!isset($this->config["froms"][$from])) {
             throw new MailException(

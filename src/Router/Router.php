@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Router;
 
 use Bow\Router\Exception\RouterException;
@@ -12,61 +14,61 @@ class Router
      *
      * @var array
      */
-    protected $error_code = [];
+    protected array $error_code = [];
 
     /**
      * Define the global middleware
      *
      * @var array
      */
-    protected $middlewares = [];
+    protected array $middlewares = [];
 
     /**
      * Define the routing prefix
      *
      * @var string
      */
-    protected $prefix;
+    protected string $prefix;
 
     /**
      * @var string
      */
-    protected $special_method;
+    protected string $special_method;
 
     /**
      * Method Http current.
      *
      * @var array
      */
-    protected $current = [];
+    protected array $current = [];
 
     /**
      * Define the auto csrf check status.
      *
      * @var bool
      */
-    protected $auto_csrf = true;
+    protected bool $auto_csrf = true;
 
     /**
      * Route collection.
      *
      * @var array
      */
-    protected static $routes = [];
+    protected static array $routes = [];
 
     /**
      * Define the base route
      *
      * @var string
      */
-    private $base_route;
+    private string $base_route;
 
     /**
      * Define the request method
      *
      * @var string
      */
-    private $method;
+    private string $method;
 
     /**
      * Define the request _method parse to form
@@ -74,15 +76,22 @@ class Router
      *
      * @var string
      */
-    private $magic_method;
+    private string $magic_method;
 
     /**
      * Router constructor
      *
-     * @return void
+     * @param string $method
+     * @param ?string $magic_method
+     * @param string $base_route
+     * @param array $middlewares
      */
-    protected function __construct($method, $magic_method = null, $base_route = '', array $middlewares = [])
-    {
+    protected function __construct(
+        string $method,
+        ?string $magic_method = null,
+        string $base_route = '',
+        array $middlewares = []
+    ) {
         $this->method = $method;
         $this->magic_method = $magic_method;
         $this->middlewares = $middlewares;
@@ -94,7 +103,7 @@ class Router
      *
      * @param string $base_route
      */
-    public function setBaseRoute(string $base_route)
+    public function setBaseRoute(string $base_route): void
     {
         $this->base_route = $base_route;
     }
@@ -105,7 +114,7 @@ class Router
      *
      * @param bool $auto_csrf
      */
-    public function setAutoCsrf(bool $auto_csrf)
+    public function setAutoCsrf(bool $auto_csrf): void
     {
         $this->auto_csrf = $auto_csrf;
     }
@@ -118,7 +127,7 @@ class Router
      * @return Router
      * @throws
      */
-    public function prefix($prefix, callable $cb)
+    public function prefix(string $prefix, callable $cb): Router
     {
         $prefix = rtrim($prefix, '/');
 
@@ -145,7 +154,7 @@ class Router
      * @param array $middlewares
      * @return Router
      */
-    public function middleware($middlewares)
+    public function middleware(array $middlewares): Router
     {
         $middlewares = (array) $middlewares;
 
@@ -168,7 +177,7 @@ class Router
      * @param array $definition
      * @throws RouterException
      */
-    public function route(array $definition)
+    public function route(array $definition): void
     {
         if (!isset($definition['path'])) {
             throw new RouterException('The undefined path');
@@ -217,7 +226,7 @@ class Router
      * @return Router
      * @throws
      */
-    public function any($path, $cb)
+    public function any(string $path, callable|string|array $cb): Router
     {
         foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
             $this->$method($path, $cb);
@@ -233,7 +242,7 @@ class Router
      * @param callable|string|array $cb
      * @return Route
      */
-    public function get($path, $cb)
+    public function get(string $path, callable|string|array $cb): Route
     {
         return $this->routeLoader('GET', $path, $cb);
     }
@@ -245,7 +254,7 @@ class Router
      * @param callable|string|array $cb
      * @return Route
      */
-    public function post($path, $cb)
+    public function post(string $path, callable|string|array $cb): Route
     {
         if (!$this->magic_method) {
             return $this->routeLoader('POST', $path, $cb);
@@ -267,7 +276,7 @@ class Router
      * @param callable|string|array $cb
      * @return Route
      */
-    public function delete($path, $cb)
+    public function delete(string $path, callable|string|array $cb): Route
     {
         return $this->pushHttpVerb('DELETE', $path, $cb);
     }
@@ -279,7 +288,7 @@ class Router
      * @param callable|string|array $cb
      * @return Route
      */
-    public function put($path, $cb)
+    public function put(string $path, callable|string|array $cb): Route
     {
         return $this->pushHttpVerb('PUT', $path, $cb);
     }
@@ -291,7 +300,7 @@ class Router
      * @param callable|string|array $cb
      * @return Route
      */
-    public function patch($path, $cb)
+    public function patch(string $path, callable|string|array $cb): Route
     {
         return $this->pushHttpVerb('PATCH', $path, $cb);
     }
@@ -303,7 +312,7 @@ class Router
      * @param callable $cb
      * @return Route
      */
-    public function options($path, callable $cb)
+    public function options(string $path, callable|string|array $cb): Route
     {
         return $this->pushHttpVerb('OPTIONS', $path, $cb);
     }
@@ -316,7 +325,7 @@ class Router
      * @param callable $cb
      * @return Router
      */
-    public function code($code, callable $cb)
+    public function code(int $code, callable|array|string $cb): Router
     {
         $this->error_code[$code] = $cb;
 
@@ -331,7 +340,7 @@ class Router
      * @param callable|string|array $cb
      * @return Router
      */
-    public function match(array $methods, $path, $cb)
+    public function match(array $methods, string $path, callable|string|array $cb): Router
     {
         foreach ($methods as $method) {
             if ($this->method == strtoupper($method)) {
@@ -350,7 +359,7 @@ class Router
      * @param callable|array|string $cb
      * @return Route
      */
-    private function pushHttpVerb($method, $path, $cb)
+    private function pushHttpVerb(string $method, string $path, callable|string|array $cb): Route
     {
         if ($this->magic_method) {
             if ($this->magic_method === $method) {
@@ -369,7 +378,7 @@ class Router
      * @param Callable|string|array $cb
      * @return Route
      */
-    private function routeLoader($method, $path, $cb)
+    private function routeLoader(string $method, string $path, callable|string|array $cb): Route
     {
         $path = '/' . trim($path, '/');
 
@@ -400,7 +409,7 @@ class Router
      *
      * @return string
      */
-    protected function getSpecialMethod()
+    protected function getSpecialMethod(): string
     {
         return $this->special_method;
     }
@@ -410,7 +419,7 @@ class Router
      *
      * @return bool
      */
-    protected function hasSpecialMethod()
+    protected function hasSpecialMethod(): bool
     {
         return !is_null($this->special_method);
     }
@@ -420,7 +429,7 @@ class Router
      *
      * @return array
      */
-    public function getRoutes()
+    public function getRoutes(): array
     {
         return static::$routes;
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Container;
 
 use Bow\Container\Action;
@@ -11,14 +13,14 @@ class ContainerConfiguration extends Configuration
     /**
      * @var array
      */
-    private $middlewares = [
+    private array $middlewares = [
         //
     ];
     
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('action', function () use ($config) {
             $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
@@ -30,7 +32,7 @@ class ContainerConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('action');
     }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Bow\Database;
 
@@ -696,9 +698,9 @@ class QueryBuilder implements \JsonSerializable
      * Max
      *
      * @param string $column
-     * @return QueryBuilder|number|array|object
+     * @return int|float
      */
-    public function max(string $column): QueryBuilder
+    public function max(string $column): int|float
     {
         return $this->aggregate('max', $column);
     }
@@ -707,9 +709,9 @@ class QueryBuilder implements \JsonSerializable
      * Min
      *
      * @param string $column
-     * @return QueryBuilder|number|object
+     * @return int|float
      */
-    public function min($column)
+    public function min($column): int|float
     {
         return $this->aggregate('min', $column);
     }
@@ -718,9 +720,9 @@ class QueryBuilder implements \JsonSerializable
      * Avg
      *
      * @param string $column
-     * @return QueryBuilder|number|object
+     * @return int|float
      */
-    public function avg($column)
+    public function avg($column): int|float
     {
         return $this->aggregate('avg', $column);
     }
@@ -729,9 +731,9 @@ class QueryBuilder implements \JsonSerializable
      * Sum
      *
      * @param string $column
-     * @return QueryBuilder|number|object
+     * @return int|float
      */
-    public function sum($column)
+    public function sum($column): int|float
     {
         return $this->aggregate('sum', $column);
     }
@@ -944,11 +946,11 @@ class QueryBuilder implements \JsonSerializable
      * @return int
      * @throws QueryBuilderException
      */
-    public function remove(string $column, mixed $comparator = '=', $value = null): QueryBuilder
+    public function remove(string $column, mixed $comparator = '=', $value = null): int
     {
         $this->where = null;
 
-        return $this->where($column, $comp, $value)->delete();
+        return $this->where($column, $comparator, $value)->delete();
     }
 
     /**
@@ -1100,15 +1102,15 @@ class QueryBuilder implements \JsonSerializable
      * InsertAndGetLastId action launches the insert and lastInsertId actions
      *
      * @param array $values
-     * @return int
+     * @return string|int|bool
      */
-    public function insertAndGetLastId(array $values): int
+    public function insertAndGetLastId(array $values): string|int|bool
     {
         $this->insert($values);
 
         $result = $this->connection->lastInsertId();
 
-        return $result;
+        return is_numeric($result) ? (int) $result : $result;
     }
 
     /**
@@ -1339,8 +1341,9 @@ class QueryBuilder implements \JsonSerializable
      * Define the data to associate
      *
      * @param array $data_binding
+     * @return void
      */
-    public function setWhereDataBinding(array $data_binding): where
+    public function setWhereDataBinding(array $data_binding): void
     {
         $this->where_data_binding = $data_binding;
     }

@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http;
 
 use Bow\Contracts\ResponseInterface;
-use Bow\Session\Session;
 
 class Redirect implements ResponseInterface
 {
@@ -12,28 +13,28 @@ class Redirect implements ResponseInterface
      *
      * @var Request
      */
-    private $request;
+    private Request $request;
 
     /**
      * The redirect targets
      *
      * @var string
      */
-    private $to;
+    private string $to;
 
     /**
      * The Response instance
      *
      * @var Response
      */
-    private $response;
+    private Response $response;
 
     /**
      * The Redirect instance
      *
-     * @var Redirect
+     * @var ?Redirect
      */
-    private static $instance;
+    private static ?Redirect $instance = null;
 
     /**
      * Redirect constructor.
@@ -52,7 +53,7 @@ class Redirect implements ResponseInterface
      *
      * @return Redirect
      */
-    public static function getInstance()
+    public static function getInstance(): Redirect
     {
         if (!static::$instance) {
             static::$instance = new Redirect();
@@ -67,7 +68,7 @@ class Redirect implements ResponseInterface
      * @param array $data
      * @return Redirect
      */
-    public function withInput(array $data = [])
+    public function withInput(array $data = []): Redirect
     {
         if (count($data) == 0) {
             $this->request->session()->add('__bow.old', $this->request->all());
@@ -85,7 +86,7 @@ class Redirect implements ResponseInterface
      * @param mixed $value
      * @return Redirect
      */
-    public function withFlash($key, $value)
+    public function withFlash(string $key, mixed $value): Redirect
     {
         $this->request->session()->flash($key, $value);
 
@@ -99,7 +100,7 @@ class Redirect implements ResponseInterface
      * @param int $status
      * @return Redirect
      */
-    public function to($path, $status = 302)
+    public function to(string $path, int $status = 302): Redirect
     {
         $this->to = $path;
 
@@ -116,7 +117,7 @@ class Redirect implements ResponseInterface
      * @param  bool  $absolute
      * @return Redirect
      */
-    public function route($name, $data = [], $absolute = false)
+    public function route(string $name, array $data = [], bool $absolute = false)
     {
         $this->to = route($name, $data, $absolute);
 
@@ -139,11 +140,11 @@ class Redirect implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function sendContent()
+    public function sendContent(): void
     {
         $this->response->addHeader('Location', $this->to);
 
-        return $this->response->sendContent();
+        $this->response->sendContent();
     }
 
     /**
@@ -151,7 +152,7 @@ class Redirect implements ResponseInterface
      *
      * @return mixed
      */
-    public function __invoke()
+    public function __invoke(): mixed
     {
         return call_user_func_array([$this, 'to'], func_get_args());
     }
@@ -161,7 +162,7 @@ class Redirect implements ResponseInterface
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->to;
     }

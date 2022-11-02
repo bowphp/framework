@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
@@ -103,7 +105,7 @@ abstract class Relation
      */
     public function __call(string $method, array $args)
     {
-        $result = call_user_func_array([$this->query, $method], $args);
+        $result = call_user_func_array([$this->query, $method], (array) $args);
 
         if ($result === $this->query) {
             return $this->query;

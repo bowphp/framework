@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http;
 
 use Bow\Contracts\ResponseInterface;
@@ -383,7 +385,7 @@ class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function sendContent()
+    public function sendContent(): void
     {
         echo $this->buildHttpResponse();
 

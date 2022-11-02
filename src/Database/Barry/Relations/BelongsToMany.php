@@ -1,9 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Database\Barry\Relation;
+use Bow\Database\Collection;
 use Bow\Database\Barry\Model;
+use Bow\Database\Barry\Relation;
 
 class BelongsToMany extends Relation
 {
@@ -53,7 +56,7 @@ class BelongsToMany extends Relation
      *
      * @return void
      */
-    public function addConstraints()
+    public function addConstraints(): void
     {
         if (static::$has_constraints) {
             // Todo

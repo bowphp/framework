@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Cache;
 
 use Bow\Configuration\Configuration;
@@ -11,7 +13,7 @@ class CacheConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('cache', function () use ($config) {
             Cache::confirgure($config['storage.cache']);
@@ -23,7 +25,7 @@ class CacheConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('cache');
     }

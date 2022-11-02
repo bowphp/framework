@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\ProducerService;
@@ -49,8 +51,9 @@ abstract class QueueAdapter
      * Get the queue size
      *
      * @param string $queue
+     * @return int
      */
-    abstract public function size(string $queue);
+    abstract public function size(string $queue): int;
 
     /**
      * Delete a message from the queue.
@@ -59,20 +62,20 @@ abstract class QueueAdapter
      * @param  string|int  $id
      * @return void
      */
-    abstract public function deleteJob($queue, $id);
+    abstract public function deleteJob(string $queue, string|int $id): void;
 
     /**
      * Get the queue or return the default.
      *
-     * @param  string|null $queue
+     * @param  ?string $queue
      * @return string
      */
-    abstract public function getQueue(string $queue = null);
+    abstract public function getQueue(string $queue = null): string;
 
     /**
      * Start the worker server
      *
-     * @param string|null $queue
+     * @param ?string $queue
      */
-    abstract public function run(string $queue = null);
+    abstract public function run(?string $queue = null): void;
 }

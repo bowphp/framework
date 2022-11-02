@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail;
 
 use Bow\Mail\Contracts\MailDriverInterface;
@@ -111,7 +113,7 @@ class Mail
 
         $message = new Message();
 
-        $data = View::parse($view, $bind);
+        $data = View::parse($view, $bind)->getContent();
 
         $message->setMessage($data);
 

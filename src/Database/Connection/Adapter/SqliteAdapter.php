@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Bow\Database\Connection\Adapter;
 
@@ -30,7 +32,7 @@ class SqliteAdapter extends AbstractConnection
     /**
      * @inheritDoc
      */
-    public function connection()
+    public function connection(): void
     {
         if (!isset($this->config['driver'])) {
             throw new InvalidArgumentException("Please select the right sqlite driver");

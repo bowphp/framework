@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console;
 
 use Bow\Console\Traits\ConsoleTrait;
@@ -116,7 +118,7 @@ class Generator
             'className' => $classname
         ], $data));
 
-        return file_put_contents($this->getPath(), $template);
+        return (bool) file_put_contents($this->getPath(), $template);
     }
 
     /**

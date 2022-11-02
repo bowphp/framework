@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Session\Driver;
 
 class FilesystemDriver implements \SessionHandlerInterface

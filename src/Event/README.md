@@ -5,15 +5,16 @@ Bow Framework's event driver system is very simple event subscription and interp
 Let's show a little exemple:
 
 ```php
-listen_event("send.email", function ($payload) {
+use Bow\Event\Event;
+
+// Add listener on send.mail event
+Event::on("email.sent", function (array $payload) {
     $name = $payload["name"];
     echo "An email was sent to $name";
-    doSomething();
 });
 
-// Send email action
-
-emit_event("send.email", ["name" => "Franck DAKIA"]);
+// Emit the send.mail event
+Event::emit("email.sent", ["name" => "Franck DAKIA"]);
 ```
 
 NB: Is recommanded to write all event listener into simple class and define the event to the app Kernel file in boot method.
@@ -41,10 +42,12 @@ class ActivityEvent extends EventListener
 Into Kernel file
 
 ```php
-public function boot()
+public function events()
 {
-    parent::boot();
-
-    listen_event("user.activity", ActivityEvent::class);
+    return [
+        "user.activity" => [
+            ActivityEvent::class
+        ]
+    ]
 }
 ```

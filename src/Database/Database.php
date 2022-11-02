@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Bow\Database;
 
@@ -9,14 +11,13 @@ use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Security\Sanitize;
 use PDO;
-use StdClass;
 
 class Database
 {
     /**
      * The adapter instance
      *
-     * @var AbstractConnection;
+     * @var ?AbstractConnection;
      */
     private static ?AbstractConnection $adapter = null;
 
@@ -135,9 +136,9 @@ class Database
     /**
      * Get adapter connexion instance
      *
-     * @return AbstractConnection
+     * @return ?AbstractConnection
      */
-    public static function getAdapterConnection(): AbstractConnection
+    public static function getAdapterConnection(): ?AbstractConnection
     {
         static::verifyConnection();
 

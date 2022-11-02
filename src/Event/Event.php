@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Event;
 
 use Bow\Container\Action;
@@ -51,8 +53,8 @@ class Event
 
         static::$events[$event][] = new Listener($fn, $priority);
 
-        uasort(static::$events[$event], function (Listener $a, Listener $b) {
-            return $a->getPriority() < $b->getPriority();
+        uasort(static::$events[$event], function (Listener $first_listener, Listener $second_listener) {
+            return $first_listener->getPriority() < $second_listener->getPriority();
         });
     }
 
@@ -60,11 +62,11 @@ class Event
      * Send an event page to page
      *
      * @param string $event
-     * @param array|string $fn
+     * @param callable|array|string $fn
      * @param int $priority
      * @throws EventException
      */
-    public static function onTransmission($event, $fn, $priority = 0)
+    public static function onTransmission(string $event, callable|array|string $fn, int $priority = 0)
     {
         if (!static::bound($event)) {
             static::$events['__bow.transmission.event'][$event] = [];
@@ -86,18 +88,18 @@ class Event
      * @param callable|array|string $fn
      * @param int $priority
      */
-    public static function once($event, $fn, $priority = 0)
+    public static function once(string $event, callable|array|string $fn, int $priority = 0): void
     {
         static::$events['__bow.once.event'][$event] = new Listener($fn, $priority);
     }
 
     /**
-     * Emit dispatchEvent
+     * Dispatch event
      *
-     * @param  string $event Le nom de l'évènement
+     * @param  string $event
      * @return bool
      */
-    public static function emit($event)
+    public static function emit(string $event): ?bool
     {
         $data = array_slice(func_get_args(), 1);
         
@@ -137,7 +139,7 @@ class Event
      *
      * @param string $event
      */
-    public static function off($event)
+    public static function off(string $event): void
     {
         if (static::bound($event)) {
             unset(
@@ -154,10 +156,10 @@ class Event
      * @param  string $event
      * @return bool
      */
-    public static function bound($event)
+    public static function bound(string $event): bool
     {
-        $onces = isset(static::$events['__bow.once.event']) ? static::$events['__bow.once.event'] : [];
-        $translations = isset(static::$events['__bow.transmission.event']) ? static::$events['__bow.transmission.event'] : []; // phpcs:ignore
+        $onces = static::$events['__bow.once.event'] ?? [];
+        $translations = static::$events['__bow.transmission.event'] ?? [];
 
         return array_key_exists($event, $onces)
             || array_key_exists($event, static::$events)
@@ -171,7 +173,7 @@ class Event
      * @param  array  $arguments
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if (method_exists(static::$instance, $name)) {
             return call_user_func_array([static::$instance, $name], $arguments);

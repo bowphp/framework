@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Configuration;
 
 use Bow\Contracts\ResponseInterface;
@@ -17,7 +19,7 @@ class LoggerConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('logger', function () use ($config) {
             $monolog = $this->loadFileLogger(
@@ -36,7 +38,7 @@ class LoggerConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('logger');
     }

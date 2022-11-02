@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
@@ -231,7 +233,7 @@ class SmtpDriver implements MailDriverInterface
         $s = null;
 
         for (; !feof($this->sock);) {
-            if (($line = fgets($this->sock, 1e3)) == null) {
+            if (($line = fgets($this->sock, 1000)) == null) {
                 continue;
             }
 

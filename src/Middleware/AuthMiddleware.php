@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Middleware;
 
 use Bow\Auth\Auth;
@@ -12,9 +14,9 @@ class AuthMiddleware
      *
      * @param  Request $request
      * @param  Callable  $next
-     * @return boolean
+     * @return \Bow\Http\Redirect
      */
-    public function process(Request $request, callable $next, array $guard = [])
+    public function process(Request $request, callable $next, array $guard = []): mixed
     {
         $guard = current($guard);
 
@@ -34,7 +36,7 @@ class AuthMiddleware
      *
      * @return string
      */
-    public function redirectTo()
+    public function redirectTo(): string
     {
         return '/';
     }

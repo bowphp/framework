@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Contracts;
 
 interface ResponseInterface
@@ -7,7 +9,7 @@ interface ResponseInterface
     /**
      * Send Response to client
      *
-     * @return string
+     * @return void
      */
-    public function sendContent();
+    public function sendContent(): void;
 }

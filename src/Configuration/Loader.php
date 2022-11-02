@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Configuration;
 
-use Bow\Application\Exception\ApplicationException;
+use Bow\Event\Event;
+use Bow\Support\Env;
 use Bow\Container\Capsule;
 use Bow\Support\Arraydotify;
-use Bow\Support\Env;
+use Bow\Application\Exception\ApplicationException;
 
 class Loader implements \ArrayAccess
 {
@@ -96,7 +99,7 @@ class Loader implements \ArrayAccess
      * @return Loader
      * @throws
      */
-    public static function configure($base_path)
+    public static function configure($base_path): Loader
     {
         if (!static::$instance instanceof Loader) {
             static::$instance = new static($base_path);
@@ -118,6 +121,18 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Push namespaces
+     *
+     * @param array $namespaces
+     */
+    public function pushNamespaces(array $namespaces): void
+    {
+        foreach ($namespaces as $key => $namespace) {
+            $this->namespaces[$key] = $namespace;
+        }
+    }
+
+    /**
      * Middleware collection
      *
      * @return array
@@ -131,6 +146,22 @@ class Loader implements \ArrayAccess
         }
 
         return $this->middlewares;
+    }
+
+    /**
+     * Namespaces collection
+     *
+     * @return array
+     */
+    public function getNamespaces(): array
+    {
+        $namespaces = $this->namespaces();
+
+        foreach ($namespaces as $key => $namespace) {
+            $this->namespaces[$key] = $namespace;
+        }
+
+        return $this->namespaces;
     }
 
     /**
@@ -163,6 +194,18 @@ class Loader implements \ArrayAccess
      * @return array
      */
     public function configurations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    /**
+     * Load events
+     *
+     * @return array
+     */
+    public function events(): array
     {
         return [
             //
@@ -216,16 +259,17 @@ class Loader implements \ArrayAccess
 
         // Configuration of services
         foreach ($services as $service) {
-            if ($this->without_session && $service == \Bow\Session\SessionConfiguration::class) {
+            if ($this->without_session && $service === \Bow\Session\SessionConfiguration::class) {
                 continue;
             }
 
-            if (class_exists($service, true)) {
-                $class = new $service($container);
-
-                $class->create($this);
-                $service_collection[] = $class;
+            if (!class_exists($service, true)) {
+                continue;
             }
+
+            $service_instance = new $service($container);
+            $service_instance->create($this);
+            $service_collection[] = $service_instance;
         }
 
         // Start of services or initial code
@@ -233,6 +277,15 @@ class Loader implements \ArrayAccess
             $service->run();
         }
 
+        // Bind the define events
+        foreach ($this->events as $name => $handlers) {
+            $handlers = (array) $handlers;
+            foreach ($handlers as $handler) {
+                Event::on($name, $handler);
+            }
+        }
+
+        // Set the load as booted
         $this->booted = true;
 
         return $this;
@@ -265,7 +318,7 @@ class Loader implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet(mixed $offset):mixed
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->config[$offset] ?? null;
     }

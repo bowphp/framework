@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Auth;
 
 use Bow\Auth\Traits\LoginUserTrait;
@@ -36,7 +38,7 @@ class SessionGuard extends GuardContract
      * @param array $credentials
      * @return bool
      */
-    public function attempts(array $credentials)
+    public function attempts(array $credentials): bool
     {
         $user = $this->makeLogin($credentials);
         $fields = $this->provider['credentials'];
@@ -59,7 +61,7 @@ class SessionGuard extends GuardContract
      *
      * @return Session
      */
-    private function getSession()
+    private function getSession(): Session
     {
         return Session::getInstance();
     }
@@ -69,7 +71,7 @@ class SessionGuard extends GuardContract
      *
      * @return bool
      */
-    public function check()
+    public function check(): bool
     {
         return $this->getSession()->exists($this->session_key);
     }
@@ -79,7 +81,7 @@ class SessionGuard extends GuardContract
      *
      * @return bool
      */
-    public function guest()
+    public function guest(): bool
     {
         return !$this->getSession()->exists($this->session_key);
     }
@@ -87,9 +89,9 @@ class SessionGuard extends GuardContract
     /**
      * Check if user is authenticate
      *
-     * @return bool
+     * @return ?Authentication
      */
-    public function user()
+    public function user(): ?Authentication
     {
         return $this->getSession()->get($this->session_key);
     }
@@ -112,7 +114,7 @@ class SessionGuard extends GuardContract
      *
      * @return bool
      */
-    public function logout()
+    public function logout(): bool
     {
         $this->getSession()->remove($this->session_key);
 
@@ -122,9 +124,9 @@ class SessionGuard extends GuardContract
     /**
      * Get the user id
      *
-     * @return bool
+     * @return mixed
      */
-    public function id()
+    public function id(): mixed
     {
         return $this->getSession()->get($this->session_key)->getAuthenticateUserId();
     }

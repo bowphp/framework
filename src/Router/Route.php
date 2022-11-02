@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Router;
 
 use Bow\Container\Action;
@@ -13,56 +15,56 @@ class Route
      *
      * @var callable
      */
-    private $cb;
+    private mixed $cb;
 
     /**
      * The road on the road set by the user
      *
      * @var string
      */
-    private $path;
+    private string $path;
 
     /**
      * The route name
      *
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * key
      *
      * @var array
      */
-    private $keys = [];
+    private array $keys = [];
 
     /**
      * The route parameter
      *
      * @var array
      */
-    private $params = [];
+    private array $params = [];
 
     /**
      * List of parameters that we match
      *
      * @var array
      */
-    private $match = [];
+    private array $match = [];
 
     /**
      * Additional URL validation rule
      *
      * @var array
      */
-    private $with = [];
+    private array $with = [];
 
     /**
      * Application configuration
      *
      * @var Loader
      */
-    private $config;
+    private Loader $config;
 
     /**
      * Route constructor
@@ -72,7 +74,7 @@ class Route
      *
      * @throws
      */
-    public function __construct($path, $cb)
+    public function __construct(string $path, mixed $cb)
     {
         $this->config = Loader::getInstance();
 
@@ -88,7 +90,7 @@ class Route
      *
      * @return string
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
@@ -98,7 +100,7 @@ class Route
      *
      * @return mixed
      */
-    public function getAction()
+    public function getAction(): mixed
     {
         return $this->cb;
     }
@@ -109,7 +111,7 @@ class Route
      * @param  array|string $middleware
      * @return Route
      */
-    public function middleware($middleware)
+    public function middleware(array|string $middleware): Route
     {
         $middleware = (array) $middleware;
 
@@ -135,11 +137,10 @@ class Route
      * Add the url rules
      *
      * @param array|string $where
-     * @param string   $regex_constraint
-     *
+     * @param string  $regex_constraint
      * @return Route
      */
-    public function where($where, $regex_constraint = null)
+    public function where(array|string $where, $regex_constraint = null): Route
     {
         if (is_array($where)) {
             $other_rule = $where;
@@ -158,7 +159,7 @@ class Route
      * @return mixed
      * @throws
      */
-    public function call()
+    public function call(): mixed
     {
         // Association of parameters at the request
         foreach ($this->keys as $key => $value) {
@@ -187,7 +188,7 @@ class Route
      *
      * @param string $name
      */
-    public function name($name)
+    public function name(string $name): Route
     {
         $this->name = $name;
 
@@ -206,7 +207,7 @@ class Route
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -216,7 +217,7 @@ class Route
      *
      * @return array
      */
-    public function getParameters()
+    public function getParameters(): array
     {
         return $this->params;
     }
@@ -225,11 +226,11 @@ class Route
      * Get a parameter element
      *
      * @param string $key
-     * @return string|null
+     * @return ?string
      */
-    public function getParameter($key)
+    public function getParameter(string $key): ?string
     {
-        return isset($this->params[$key]) ? $this->params[$key] : null;
+        return $this->params[$key] ?? null;
     }
     
     /**
@@ -239,7 +240,7 @@ class Route
      * @param  string $uri
      * @return bool
      */
-    public function match($uri)
+    public function match(string $uri): bool
     {
         // Normalization of the url of the navigator.
         if (preg_match('~(.*)/$~', $uri, $match)) {
@@ -288,7 +289,7 @@ class Route
 
         $tmp_path = $this->path;
 
-        $this->keys = end($match);
+        $this->keys = (array) end($match);
 
         // Association of criteria personalized.
         foreach ($this->keys as $key) {
@@ -314,10 +315,9 @@ class Route
      *
      * @param string $path
      * @param string $uri
-     *
      * @return bool
      */
-    private function checkRequestUri($path, $uri)
+    private function checkRequestUri(string $path, string $uri): bool
     {
         if (strstr($path, '?') == '?') {
             $uri = rtrim($uri, '/').'/';
@@ -326,14 +326,14 @@ class Route
         // Url check and path PARSER
         $path = str_replace('~', '\\~', $path);
 
-        if (preg_match('~^'. $path . '$~', $uri, $match)) {
-            array_shift($match);
-
-            $this->match = str_replace('/', '', $match);
-
-            return true;
+        if (!preg_match('~^'. $path . '$~', $uri, $match)) {
+            return false;
         }
 
-        return false;
+        array_shift($match);
+
+        $this->match = str_replace('/', '', $match);
+
+        return true;
     }
 }

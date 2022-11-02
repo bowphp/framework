@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Event;
 
 class Listener
@@ -9,22 +11,22 @@ class Listener
      *
      * @var callable
      */
-    private $callable;
+    private mixed $callable;
 
     /**
      * The priority index
      *
      * @var int
      */
-    private $priority = 0;
+    private int $priority = 0;
 
     /**
      * Listener constructor.
      *
      * @param callable|string $callable
-     * @param int             $priority
+     * @param int $priority
      */
-    public function __construct($callable, int $priority)
+    public function __construct(callable|string $callable, int $priority)
     {
         $this->callable = $callable;
 
@@ -35,9 +37,9 @@ class Listener
      * Launch the listener function
      *
      * @param  array $data
-     * @return mixed
+     * @return bool
      */
-    public function call(array $data = [])
+    public function call(array $data = []): bool
     {
         $callable = $this->callable;
 
@@ -48,7 +50,7 @@ class Listener
             }
         }
 
-        return call_user_func_array($callable, $data);
+        return (bool) call_user_func_array($callable, $data);
     }
 
     /**
@@ -56,7 +58,7 @@ class Listener
      *
      * @return string
      */
-    public function getActionType()
+    public function getActionType(): string
     {
         return gettype($this->callable);
     }
@@ -66,7 +68,7 @@ class Listener
      *
      * @return mixed
      */
-    public function getAction()
+    public function getAction(): mixed
     {
         return $this->callable;
     }
@@ -74,9 +76,9 @@ class Listener
     /**
      * Retrieves the priority of the listener
      *
-     * @return mixed
+     * @return int
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         return $this->priority;
     }

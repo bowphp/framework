@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Traits;
 
 use Bow\Console\Color;
@@ -11,9 +13,10 @@ trait ConsoleTrait
      *
      * @param string $message
      * @param string $command
+     * @return void
      * @throws \ErrorException
      */
-    protected function throwFailsCommand(string $message, ?string $command = null)
+    protected function throwFailsCommand(string $message, ?string $command = null): void
     {
         echo Color::red($message)."\n";
 

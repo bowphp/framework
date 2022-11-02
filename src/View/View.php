@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\View;
 
 use BadMethodCallException;
@@ -223,7 +225,7 @@ class View implements ResponseInterface
      *
      * @return mixed
      */
-    public function sendContent()
+    public function sendContent(): void
     {
         echo static::$content;
 

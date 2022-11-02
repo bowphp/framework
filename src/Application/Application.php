@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Application;
 
 use Bow\Application\Exception\ApplicationException;

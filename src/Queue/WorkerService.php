@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Queue;
 
 use Bow\Queue\Adapters\QueueAdapter;
@@ -11,7 +13,7 @@ class WorkerService
      *
      * @var QueueAdapter
      */
-    private $connection;
+    private QueueAdapter $connection;
 
     /**
      * Make connection base on default name
@@ -31,7 +33,7 @@ class WorkerService
      * @param integer $retry
      * @return void
      */
-    public function run(string $queue = "default", int $retry = 60)
+    public function run(string $queue = "default", int $retry = 60): void
     {
         $this->connection->setWatch($queue);
         $this->connection->setRetry($retry);
