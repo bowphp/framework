@@ -400,7 +400,7 @@ class FTPService implements ServiceInterface
             return true;
         }
 
-        return ftp_mkdir($connection, $directory);
+        return (bool) ftp_mkdir($connection, $directory);
     }
 
     /**
