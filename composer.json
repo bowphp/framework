@@ -33,7 +33,8 @@
         "aws/aws-sdk-php": "^3.87",
         "phpstan/phpstan": "^0.12.87",
         "php-amqplib/php-amqplib": "^3.0",
-        "bowphp/policier": "^2.1"
+        "bowphp/policier": "^2.1",
+        "mockery/mockery": "^1.5"
     },
     "authors": [
         {
