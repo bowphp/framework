@@ -45,28 +45,28 @@ class Application extends Router
      *
      * @var Request
      */
-    private $request;
+    private Request $request;
 
     /**
      * The HTTP Response
      *
      * @var Response
      */
-    private $response;
+    private Response $response;
 
     /**
      * The Configuration Loader instance
      *
      * @var Loader
      */
-    private $config;
+    private Loader $config;
 
     /**
      * This define if the X-powered-By header must be put in response
      *
      * @var bool
      */
-    private $disable_powered_by = false;
+    private bool $disable_powered_by = false;
 
     /**
      * Application constructor
@@ -94,7 +94,7 @@ class Application extends Router
      *
      * @return Capsule
      */
-    public function getContainer()
+    public function getContainer(): Capsule
     {
         return $this->capsule;
     }
@@ -105,7 +105,7 @@ class Application extends Router
      * @param Loader $config
      * @return void
      */
-    public function bind(Loader $config)
+    public function bind(Loader $config): void
     {
         $this->config = $config;
 
@@ -126,7 +126,7 @@ class Application extends Router
      *
      * @return void
      */
-    private function boot()
+    private function boot(): void
     {
         if ($this->booted) {
             return;
@@ -144,7 +144,7 @@ class Application extends Router
      * @param Response $response
      * @return Application
      */
-    public static function make(Request $request, Response $response)
+    public static function make(Request $request, Response $response): Application
     {
         if (is_null(static::$instance)) {
             static::$instance = new Application($request, $response);
@@ -154,14 +154,24 @@ class Application extends Router
     }
 
     /**
+     * Check if is running on php cli
+     *
+     * @return bool
+     */
+    public function isRunningOnCli(): bool
+    {
+        return php_sapi_name() == 'cli';
+    }
+
+    /**
      * Launcher of the application
      *
-     * @return mixed
+     * @return ?bool
      * @throws RouterException
      */
-    public function send()
+    public function send(): ?bool
     {
-        if (php_sapi_name() == 'cli') {
+        if ($this->isRunningOnCli()) {
             return true;
         }
 
@@ -201,7 +211,7 @@ class Application extends Router
         $response = null;
         $resolved = false;
 
-        foreach ($routes[$method] as $key => $route) {
+        foreach ($routes[$method] as $route) {
             // The route must be an instance of Route
             if (!($route instanceof Route)) {
                 continue;
@@ -255,7 +265,7 @@ class Application extends Router
      * @param int $code
      * @return null
      */
-    private function sendResponse($response, $code = 200)
+    private function sendResponse(mixed $response, int $code = 200): void
     {
         if ($response instanceof ResponseInterface) {
             $response->sendContent();
@@ -270,7 +280,7 @@ class Application extends Router
      *
      * @return void
      */
-    public function disablePoweredByMention()
+    public function disablePoweredByMention(): void
     {
         $this->disable_powered_by = true;
     }
@@ -285,7 +295,7 @@ class Application extends Router
      *
      * @throws ApplicationException
      */
-    public function rest($url, $controller_name, array $where = [])
+    public function rest(string $url, string|array $controller_name, array $where = []): Application
     {
         if (!is_string($controller_name) && !is_array($controller_name)) {
             throw new ApplicationException(
@@ -332,14 +342,14 @@ class Application extends Router
     /**
      * Abort application
      *
-     * @param $code
-     * @param $message
+     * @param int $code
+     * @param string $message
      * @param array $headers
      * @return void
      *
      * @throws HttpException
      */
-    public function abort($code = 500, $message = '', array $headers = [])
+    public function abort(int $code = 500, string $message = '', array $headers = []): void
     {
         $this->response->status($code);
 
@@ -357,12 +367,12 @@ class Application extends Router
     /**
      * Build dependance
      *
-     * @param null $name
-     * @param callable|null $callable
-     * @return Capsule|mixed
+     * @param ?string $name
+     * @param ?callable $callable
+     * @return mixed
      * @throws ApplicationException
      */
-    public function container($name = null, callable $callable = null)
+    public function container(?string $name = null, ?callable $callable = null): mixed
     {
         if (is_null($name)) {
             return $this->capsule;
@@ -390,7 +400,7 @@ class Application extends Router
      * @return Capsule
      * @throws ApplicationException
      */
-    public function __invoke(...$params)
+    public function __invoke(...$params): mixed
     {
         if (count($params)) {
             return $this->capsule;

@@ -278,7 +278,7 @@ class Loader implements \ArrayAccess
         }
 
         // Bind the define events
-        foreach ($this->events as $name => $handlers) {
+        foreach ($this->events() as $name => $handlers) {
             $handlers = (array) $handlers;
             foreach ($handlers as $handler) {
                 Event::on($name, $handler);
