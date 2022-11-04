@@ -1,15 +1,15 @@
 <?php
 
-namespace {baseNamespace}{namespace};
+namespace App\Events;
 
 use Bow\Event\Contracts\ApplicationEvent;
 use Bow\Packages\Trait\SerializationTrait;
 
-class {className} implements ApplicationEvent
+class FakeEvent implements ApplicationEvent
 {
 	use SerializationTrait;
 
-    public string $name = "{className}";
+    public string $name = "FakeEvent";
 
     public function __construct() 
     {

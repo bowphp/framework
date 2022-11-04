@@ -1,0 +1,19 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Event\Contracts\EventListener;
+
+class {className} implements EventListener
+{
+	/**
+	 * Process the event
+	 * 
+	 * @param array $payload
+	 * @return mixed
+	 */
+	public function process(array $payload = []): void
+	{
+	    // Do Something
+	}
+}

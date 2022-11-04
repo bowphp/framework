@@ -44,7 +44,7 @@ class Console
      *
      * @var bool
      */
-    private bool $booted;
+    private bool $booted = false;
 
     /**
      * The Argument instance
@@ -397,10 +397,11 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:exception\033[00m       Create new exception
    \033[0;33madd:controller\033[00m      Create new controller
    \033[0;33madd:model\033[00m           Create new model
-   \033[0;33madd:validation\033[00m       Create new validation
+   \033[0;33madd:validation\033[00m      Create new validation
    \033[0;33madd:seeder\033[00m          Create new table fake seeder
    \033[0;33madd:migration\033[00m       Create a new migration
-   \033[0;33madd:event\033[00m           Create a new event listener
+   \033[0;33madd:event\033[00m           Create a new event
+   \033[0;33madd:listener\033[00m        Create a new event listener
    \033[0;33madd:producer\033[00m        Create a new producer
    \033[0;33madd:command\033[00m         Create a new bow console command
 

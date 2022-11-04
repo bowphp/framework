@@ -34,7 +34,7 @@ abstract class Configuration
     }
 
     /**
-     * Create the service
+     * Create and configure the server or package
      *
      * @param Loader $config
      * @return void

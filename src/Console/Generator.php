@@ -133,7 +133,7 @@ class Generator
         $content = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
 
         foreach ($data as $key => $value) {
-            $content = str_replace('{' . $key . '}', $value, $content);
+            $content = str_replace('{' . $key . '}', (string) $value, $content);
         }
 
         return $content;

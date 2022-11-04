@@ -6,7 +6,7 @@ namespace Bow\Console\Command;
 
 use Bow\Console\Generator;
 
-class EventCommand extends AbstractCommand
+class ApplicationEventCommand extends AbstractCommand
 {
     /**
      * Add event

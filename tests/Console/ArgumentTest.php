@@ -74,4 +74,14 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($arg->getParameters()->has("--not-found"));
         $this->assertEquals($arg->getParameters()->get("--name"), "papac");
     }
+
+    public function test_the_bad_parameter_collected()
+    {
+        $GLOBALS["argv"] = ["bow", "command:action", "target", "---target=500", "name"];
+        $arg = new Argument;
+
+        $this->assertTrue($arg->hasTrash());
+        $this->assertTrue(in_array("---target=500", $arg->getTrash()));
+        $this->assertTrue(in_array("name", $arg->getTrash()));
+    }
 }

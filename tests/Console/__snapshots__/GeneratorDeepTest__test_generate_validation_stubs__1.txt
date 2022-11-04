@@ -1,10 +1,10 @@
 <?php
 
-namespace {baseNamespace}{namespace};
+namespace App\Validations;
 
 use Bow\Validation\RequestValidation;
 
-class {className} extends RequestValidation
+class FakeValidationRequest extends RequestValidation
 {
 	/**
 	 * Validation rules

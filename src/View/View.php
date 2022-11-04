@@ -53,22 +53,21 @@ class View implements ResponseInterface
      * @var array
      */
     private static array $engines = [
+        'tintin' => \Tintin\Bow\TintinEngine::class,
         'twig' => \Bow\View\Engine\TwigEngine::class,
         'php' => \Bow\View\Engine\PHPEngine::class,
-        'tintin' => \Tintin\Bow\TintinEngine::class
     ];
 
     /**
      * View constructor.
      *
-     * @param  Loader $config
-     *
+     * @param  array $config
      * @return  void
      * @throws ViewException
      */
     public function __construct(array $config)
     {
-        $engine = $config['engine'];
+        $engine = $config['engine'] ?? null;
 
         if (is_null($engine)) {
             throw new ViewException(
@@ -93,10 +92,9 @@ class View implements ResponseInterface
      * Load view configuration
      *
      * @param array $config
-     *
      * @return void
      */
-    public static function configure(array $config)
+    public static function configure(array $config): void
     {
         static::$config = $config;
     }
@@ -107,7 +105,7 @@ class View implements ResponseInterface
      * @return View
      * @throws
      */
-    public static function getInstance()
+    public static function getInstance(): View
     {
         if (!static::$instance instanceof View) {
             static::$instance = new View(static::$config);
@@ -121,10 +119,9 @@ class View implements ResponseInterface
      *
      * @param  string $viewname
      * @param  array  $data
-     *
      * @return View
      */
-    public static function parse(string $view, array $data = [])
+    public static function parse(string $view, array $data = []): View
     {
         static::$content = static::getInstance()
             ->getTemplate()
@@ -147,10 +144,9 @@ class View implements ResponseInterface
      * Set Engine
      *
      * @param string $engine
-     *
      * @return View
      */
-    public function setEngine($engine)
+    public function setEngine(string $engine): View
     {
         static::$instance = null;
 
@@ -163,10 +159,9 @@ class View implements ResponseInterface
      * Set the availability of caching system
      *
      * @param bool $cachabled
-     *
      * @return void
      */
-    public function cachable($cachabled)
+    public function cachable(bool $cachabled): void
     {
         $this->cachabled = $cachabled;
     }
@@ -175,7 +170,7 @@ class View implements ResponseInterface
      * @param string $extension
      * @return View
      */
-    public function setExtension($extension)
+    public function setExtension(string $extension): View
     {
         static::$instance = null;
 
@@ -193,7 +188,7 @@ class View implements ResponseInterface
      * @return bool
      * @throws ViewException
      */
-    public static function pushEngine($name, $engine)
+    public static function pushEngine(string $name, string $engine): bool
     {
         if (array_key_exists($name, static::$engines)) {
             return true;
@@ -215,7 +210,7 @@ class View implements ResponseInterface
      *
      * @return string
      */
-    public function getContent()
+    public function getContent(): string
     {
         return static::$content;
     }

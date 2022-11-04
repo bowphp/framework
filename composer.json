@@ -34,7 +34,8 @@
         "phpstan/phpstan": "^0.12.87",
         "php-amqplib/php-amqplib": "^3.0",
         "bowphp/policier": "^2.1",
-        "mockery/mockery": "^1.5"
+        "mockery/mockery": "^1.5",
+        "spatie/phpunit-snapshot-assertions": "^4.2"
     },
     "authors": [
         {

@@ -72,10 +72,11 @@ class Loader implements \ArrayAccess
         foreach ($glob as $file) {
             $key = str_replace('.php', '', basename($file));
 
-            if ($key == 'helper' || !file_exists($file)) {
+            if ($key == 'helper' || $key == 'helpers' || !file_exists($file)) {
                 continue;
             }
 
+            // Laad the configuration file content
             $config[$key] = include $file;
         }
 

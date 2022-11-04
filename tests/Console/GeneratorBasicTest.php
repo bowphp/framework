@@ -1,9 +1,8 @@
 <?php
 
 use Bow\Console\Generator;
-use Bow\Tests\Config\TestingConfiguration;
 
-class GeneratorTest extends \PHPUnit\Framework\TestCase
+class GeneratorBasicTest extends \PHPUnit\Framework\TestCase
 {
     public function test_generate_stubs()
     {

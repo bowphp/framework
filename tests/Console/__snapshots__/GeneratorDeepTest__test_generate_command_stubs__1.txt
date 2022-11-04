@@ -1,10 +1,10 @@
 <?php
 
-namespace {baseNamespace}{namespace};
+namespace App\Commands;
 
 use Bow\Console\Command\AbstractCommand as ConsoleCommand;
 
-class {className} extends ConsoleCommand
+class FakeCommand extends ConsoleCommand
 {
     /**
      * Handle console action
