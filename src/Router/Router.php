@@ -28,7 +28,7 @@ class Router
      *
      * @var string
      */
-    protected string $prefix;
+    protected string $prefix = '';
 
     /**
      * @var string

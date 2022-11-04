@@ -85,26 +85,21 @@ abstract class EngineAbstract
      */
     protected function checkParseFile(string $filename, bool $extended = true): string
     {
-        $tmp_filename = preg_replace('/@|\./', '/', $filename) . $this->config['extension'];
+        $normalized_filename = $this->normalizeFilename($filename);
 
         // Vérification de l'existance du fichier
-        if ($this->config['path'] !== null && !file_exists($this->config['path'].'/'.$tmp_filename)) {
+        if ($this->config['path'] !== null && !file_exists($this->config['path'].'/'. $normalized_filename)) {
             throw new ViewException(
                 sprintf(
                     'The view [%s] does not exists. %s/%s',
-                    $tmp_filename,
+                    $normalized_filename,
                     $this->config['path'],
                     $filename
-                ),
-                E_ERROR
+                )
             );
         }
 
-        if ($extended) {
-            $filename = $tmp_filename;
-        }
-
-        return $filename;
+        return $extended ? $normalized_filename : $filename;
     }
 
     /**
@@ -115,5 +110,29 @@ abstract class EngineAbstract
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Check if the define file exists
+     *
+     * @param string $filename
+     * @return bool
+     */
+    public function fileExists(string $filename): bool
+    {
+        $normalized_filename = $this->normalizeFilename($filename);
+
+        return file_exists($this->config['path'] . '/' . $normalized_filename);
+    }
+
+    /**
+     * Normalize the file
+     *
+     * @param string $filename
+     * @return string
+     */
+    private function normalizeFilename(string $filename): string
+    {
+        return preg_replace('/@|\./', '/', $filename) . $this->config['extension'];
     }
 }

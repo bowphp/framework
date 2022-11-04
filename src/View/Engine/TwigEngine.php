@@ -12,9 +12,9 @@ class TwigEngine extends EngineAbstract
     /**
      * The template engine instance
      *
-     * @var \Twig_Environment
+     * @var \Twig\Environment
      */
-    private \Twig_Environment $template;
+    private \Twig\Environment $template;
 
     /**
      * The engine name
@@ -34,7 +34,7 @@ class TwigEngine extends EngineAbstract
     {
         $this->config = $config;
 
-        $loader = new \Twig_Loader_Filesystem($config['path']);
+        $loader = new \Twig\Loader\FilesystemLoader($config['path']);
 
         $aditionnals = $config['aditionnal_options'] ?? [];
 
@@ -50,7 +50,7 @@ class TwigEngine extends EngineAbstract
             }
         }
 
-        $this->template = new \Twig_Environment($loader, $env);
+        $this->template = new \Twig\Environment($loader, $env);
 
         // Add variable in global scope in the Twig use case
         $configuration_loader = ConfigurationLoader::getInstance();
@@ -60,7 +60,7 @@ class TwigEngine extends EngineAbstract
         // Add function in global scope in Twig use case
         foreach (EngineAbstract::HELPERS as $helper) {
             $this->template->addFunction(
-                new \Twig_SimpleFunction($helper, $helper)
+                new \Twig\TwigFunction($helper, $helper)
             );
         }
 
@@ -80,9 +80,9 @@ class TwigEngine extends EngineAbstract
     /**
      * The get engine instance
      *
-     * @return Twig_Environment
+     * @return \Twig\Environment
      */
-    public function getTemplate(): Twig_Environment
+    public function getTemplate(): \Twig\Environment
     {
         return $this->template;
     }

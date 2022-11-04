@@ -75,7 +75,7 @@ class Application extends Router
      * @param Response $response
      * @return void
      */
-    protected function __construct(Request $request, Response $response)
+    public function __construct(Request $request, Response $response)
     {
         $this->request = $request;
         $this->response = $response;
@@ -171,7 +171,7 @@ class Application extends Router
      */
     public function send(): ?bool
     {
-        if ($this->isRunningOnCli()) {
+        if ($this->config->isCli()) {
             return true;
         }
 
@@ -242,13 +242,6 @@ class Application extends Router
 
         if (array_key_exists(404, $this->error_code)) {
             $response = Action::getInstance()->execute($this->error_code[404], []);
-
-            return $this->sendResponse($response, 404);
-        }
-
-        if (is_string($this->config['view.404']) && file_exists($this->config['view.404'])) {
-            $view = $this->container('view');
-            $response = $this->container('view')->parse($this->config['view.404']);
 
             return $this->sendResponse($response, 404);
         }

@@ -18,7 +18,6 @@ class TestingKernel extends ConfigurationLoader
 
     public function events(): array
     {
-        return [
-        ];
+        return [];
     }
 }
