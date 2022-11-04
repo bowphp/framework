@@ -1,0 +1,14 @@
+<?php
+/**
+ * The fakes seeder
+ * @see https://fakerphp.github.io for all documentation
+ */
+$faker = \Faker\Factory::create();
+
+$seeder = [
+    'name' => $faker->name(),
+    'created_at' => date('Y-m-d H:i:s'),
+    'updated_at' => date('Y-m-d H:i:s')
+];
+
+return ['fakes' => $seeder];

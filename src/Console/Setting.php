@@ -158,6 +158,13 @@ class Setting
     private string $event_directory;
 
     /**
+     * The event listener directory
+     *
+     * @var string
+     */
+    private string $event_listener_directory;
+
+    /**
      * The namesapces directory
      *
      * @var array
@@ -385,6 +392,17 @@ class Setting
     }
 
     /**
+     * Set the event listener directory
+     *
+     * @param string $event_listener_directory
+     * @return void
+     */
+    public function setEventListenerDirectory(string $event_listener_directory): void
+    {
+        $this->event_listener_directory = $event_listener_directory;
+    }
+
+    /**
      * Set the namespaces
      *
      * @param array $namespaces
@@ -515,6 +533,16 @@ class Setting
     public function getEventDirectory(): string
     {
         return $this->event_directory;
+    }
+
+    /**
+     * Get the event listener directory
+     *
+     * @return string
+     */
+    public function getEventListenerDirectory(): string
+    {
+        return $this->event_listener_directory;
     }
 
     /**

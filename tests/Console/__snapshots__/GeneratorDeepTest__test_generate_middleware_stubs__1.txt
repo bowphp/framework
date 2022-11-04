@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Middlewares;
+
+use Bow\Http\Request;
+
+class FakeMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param Request $request
+     * @param callable $next
+     * @param array $args
+     * 
+     * @return mixed
+     */
+    public function process(Request $request, callable $next, array $args = []): void
+    {
+        // Code Here
+        
+        return $next($request);
+    }
+}

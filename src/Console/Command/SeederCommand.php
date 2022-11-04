@@ -35,7 +35,7 @@ class SeederCommand extends AbstractCommand
         // Get the number of execution
         $num = (int) $this->arg->getParameters()->get('--seed', 5);
 
-        $generator->write('seed', [
+        $generator->write('seeder', [
             'num' => $num,
             'name' => Str::plurial($seeder)
         ]);

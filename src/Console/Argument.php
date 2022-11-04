@@ -20,7 +20,7 @@ class Argument
      *
      * @var array
      */
-    private array $trash;
+    private array $trash = [];
 
     /**
      * The command first argument
@@ -78,21 +78,18 @@ class Argument
                 continue;
             }
 
-            $param_part = explode('=', $param);
-            if (preg_match('/^--[a-z-]+$/', $param)) {
+            if (preg_match('/^-{2}[a-z]+[a-z-]+$/', $param)) {
                 $this->parameters[$param] = true;
                 continue;
             }
 
-            if (count($param_part) == 2) {
-                $this->parameters[$param_part[0]] = $param_part[1];
-                continue;
-            }
+            $param_part = explode('=', $param);
 
-            if (count($param_part) > 2) {
-                $tmp = $param_part[0];
-                $this->parameters[$tmp] = implode("=", array_slice($param_part, 1));
-                continue;
+            if (count($param_part) == 2) {
+                if (preg_match('/^-{2}[a-z]+[a-z-]+$/', $param_part[0])) {
+                    $this->parameters[$param_part[0]] = $param_part[1];
+                    continue;
+                }
             }
 
             $this->trash[] = $param;
@@ -149,6 +146,26 @@ class Argument
     public function getAction(): ?string
     {
         return $this->action;
+    }
+
+    /**
+     * Get the trash content
+     *
+     * @return array
+     */
+    public function getTrash(): array
+    {
+        return $this->trash;
+    }
+
+    /**
+     * Check if bad parameter have been input
+     *
+     * @return bool
+     */
+    public function hasTrash(): bool
+    {
+        return count($this->trash) > 0;
     }
 
     /**
