@@ -11,7 +11,7 @@ class FakeCommand extends ConsoleCommand
      * 
      * @return void
      */
-    public function process()
+    public function process(): void
     {
         //
     }
