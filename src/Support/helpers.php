@@ -70,23 +70,11 @@ if (!function_exists('response')) {
     /**
      * Response object instance
      *
-     * @param  string $content
-     * @param  int    $code
      * @return \Bow\Http\Response
      */
-    function response($content = '', $code = 200)
+    function response()
     {
-        $response = app('response');
-
-        $response->status($code);
-
-        if (is_null($content)) {
-            return $response;
-        }
-
-        $response->setContent($content);
-
-        return $response;
+        return app('response');
     }
 }
 

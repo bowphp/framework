@@ -14,51 +14,49 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         View::configure($config["view"]);
     }
 
+    public static function tearDownAfterClass(): void
+    {
+        foreach (glob(TESTING_RESOURCE_BASE_DIRECTORY . '/cache/*.php') as $value) {
+            @unlink($value);
+        }
+
+        foreach (glob(TESTING_RESOURCE_BASE_DIRECTORY . '/cache/**/*.php') as $value) {
+            @unlink($value);
+            @rmdir(dirname($value));
+        }
+    }
+
     public function test_twig_compilation()
     {
         View::getInstance()->cachable(false);
 
-        $resultat = View::parse('twig', ['name' => 'bow', 'engine' => 'twig']);
+        $result = View::parse('twig', ['name' => 'bow', 'engine' => 'twig']);
 
-        $this->assertEquals(trim($resultat), '<p>bow see hello world by twig</p>');
+        $this->assertEquals(trim($result), '<p>bow see hello world by twig</p>');
     }
 
     public function test_tintin_compilation()
     {
         View::getInstance()->setEngine('tintin')->setExtension('.tintin.php')->cachable(false);
 
-        $resultat = View::parse('tintin', ['name' => 'bow', 'engine' => 'tintin']);
+        $result = View::parse('tintin', ['name' => 'bow', 'engine' => 'tintin']);
 
-        $this->assertEquals(trim($resultat), '<p>bow see hello world by tintin</p>');
+        $this->assertEquals(trim($result), '<p>bow see hello world by tintin</p>');
     }
 
     public function test_php_compilation()
     {
         View::getInstance()->setEngine('php')->setExtension('.php')->cachable(false);
 
-        $resultat = View::parse('php', ['name' => 'bow', 'engine' => 'php']);
+        $result = View::parse('php', ['name' => 'bow', 'engine' => 'php']);
 
-        $this->assertEquals(trim($resultat), '<p>bow see hello world by php</p>');
+        $this->assertEquals(trim($result), '<p>bow see hello world by php</p>');
     }
 
-    public function __destruct()
+    public function test_file_exists()
     {
-        foreach (glob(__DIR__.'/data/cache/view/*.php') as $value) {
-            @unlink($value);
-        }
+        View::getInstance()->fileExists('php');
 
-        foreach (glob(__DIR__.'/data/cache/*.php') as $value) {
-            // @unlink($value);
-        }
-
-        foreach (glob(__DIR__.'/data/cache/view/*/*.php') as $value) {
-            @unlink($value);
-            @rmdir(dirname($value));
-        }
-
-        foreach (glob(__DIR__.'/data/cache/*/*.php') as $value) {
-            @unlink($value);
-            @rmdir(dirname($value));
-        }
+        $this->assertTrue(View::getInstance()->fileExists('php'));
     }
 }

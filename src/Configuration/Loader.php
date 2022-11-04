@@ -84,6 +84,16 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Check if php running env is cli
+     *
+     * @return bool
+     */
+    public function isCli(): bool
+    {
+        return php_sapi_name() == 'cli';
+    }
+
+    /**
      * Get the base path
      *
      * @return string

@@ -228,6 +228,17 @@ class View implements ResponseInterface
     }
 
     /**
+     * Check if the define file exists
+     *
+     * @param string $filename
+     * @return bool
+     */
+    public function fileExists(string $filename): bool
+    {
+        return static::$template->fileExists($filename);
+    }
+
+    /**
      * __toString
      *
      * @return string
