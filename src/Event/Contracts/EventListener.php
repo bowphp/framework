@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Bow\Event;
+namespace Bow\Event\Contracts;
 
-abstract class EventListener
+interface EventListener
 {
     /**
      * Process the event
@@ -12,5 +12,5 @@ abstract class EventListener
      * @param array $payload
      * @return mixed
      */
-    abstract public function process(array $payload): void;
+    public function process(array $payload): void;
 }
