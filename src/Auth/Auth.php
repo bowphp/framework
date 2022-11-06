@@ -30,7 +30,7 @@ class Auth
      *
      * @var string
      */
-    private static string $guard;
+    private static ?string $guard = null;
 
     /**
      * Configure Auth system
@@ -68,7 +68,7 @@ class Auth
      */
     public static function guard(?string $guard = null): GuardContract
     {
-        if (is_null($guard)) {
+        if (is_null($guard) || static::$guard === $guard) {
             return static::$instance;
         }
 
@@ -79,29 +79,20 @@ class Auth
             );
         }
 
+        if (!is_null(static::$instance) && static::$instance->getName() === $guard) {
+            return static::$instance;
+        }
+
         $provider = static::$config[$guard];
 
         // Load the session provider
         if ($provider['type'] == 'session') {
-            if (static::$instance instanceof SessionGuard) {
-                if (static::$guard == $guard) {
-                    return static::$instance;
-                }
-            }
-
-            static::$guard = $guard;
-            return static::$instance = new SessionGuard($provider, $guard);
+            static::$instance = new SessionGuard($provider, $guard);
+        } else {
+            static::$instance = new JwtGuard($provider, $guard);
         }
 
-        // Load the jwt session provider
-        if (static::$instance instanceof JwtGuard) {
-            if (static::$guard == $guard) {
-                return static::$instance;
-            }
-        }
-
-        static::$guard = $guard;
-        return static::$instance = new JwtGuard($provider, $guard);
+        return static::$instance;
     }
 
     /**
