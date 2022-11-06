@@ -20,11 +20,18 @@ abstract class GuardContract
     protected string $guard;
 
     /**
+     * Check the user id
+     *
+     * @return mixed
+     */
+    abstract public function id(): mixed;
+
+    /**
      * Check if user is authenticate
      *
      * @return bool
      */
-    abstract public function check();
+    abstract public function check(): bool;
 
     /**
      * Check if user is guest

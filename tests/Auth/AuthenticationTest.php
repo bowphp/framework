@@ -63,22 +63,35 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public function test_it_should_be_session_guard_instance()
     {
-        $auth = Auth::getInstance();
+        $auth = Auth::guard('web');
 
-        $this->assertInstanceOf(SessionGuard::class, $auth->guard('web'));
+        $this->assertInstanceOf(SessionGuard::class, $auth);
     }
 
     public function test_it_should_be_session_jwt_instance()
     {
-        $auth = Auth::getInstance();
+        $auth = Auth::guard('api');
 
-        $this->assertInstanceOf(JwtGuard::class, $auth->guard('api'));
+        $this->assertInstanceOf(JwtGuard::class, $auth);
+    }
+
+    public function test_fail_get_user_id_with_jwt()
+    {
+        $this->expectException(AuthenticationException::class);
+        $auth = Auth::guard('api');
+        $auth->id();
+    }
+
+    public function test_fail_get_user_id_with_session()
+    {
+        $this->expectException(AuthenticationException::class);
+        $auth = Auth::guard("web");
+        $auth->id();
     }
 
     public function test_attempt_login_with_jwt_provider()
     {
-        $auth = Auth::getInstance();
-        $auth->guard('api');
+        $auth = Auth::guard('api');
 
         $result = $auth->attempts([
             "username" => "papac",
@@ -89,29 +102,29 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $user = $auth->user();
 
         $this->assertTrue($result);
-        $this->assertTrue($auth->check());
         $this->assertInstanceOf(Authentication::class, $user);
+        $this->assertTrue($auth->check());
+        $this->assertEquals($auth->id(), $user->id);
         $this->assertRegExp("/^([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+$/", $token);
     }
 
     public function test_direct_login_with_jwt_provider()
     {
-        $auth = Auth::getInstance();
-        $auth->guard('api');
+        $auth = Auth::guard('api');
         $auth->login(UserModelStub::first());
 
         $token = $auth->getToken();
         $user = $auth->user();
 
-        $this->assertInstanceOf(Authentication::class, $user);
         $this->assertTrue($auth->check());
+        $this->assertInstanceOf(Authentication::class, $user);
+        $this->assertEquals($auth->id(), $user->id);
         $this->assertRegExp("/^([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+$/", $token);
     }
 
     public function test_attempt_login_with_jwt_provider_fail()
     {
-        $auth = Auth::getInstance();
-        $auth->guard('api');
+        $auth = Auth::guard('api');
 
         $result = $auth->attempts([
             "username" => "papac",
@@ -120,13 +133,13 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertFalse($result);
         $this->assertFalse($auth->check());
+        $this->assertFalse($auth->check());
         $this->assertNull($auth->getToken());
     }
 
     public function test_direct_login_with_jwt_provider_fail()
     {
-        $auth = Auth::getInstance();
-        $auth->guard('api');
+        $auth = Auth::guard('api');
 
         $result = $auth->attempts([
             "username" => "papac",
@@ -140,41 +153,20 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public function test_attempt_login_with_session_provider()
     {
-        $auth = Auth::getInstance();
-        $auth->guard('web');
+        $this->expectException(AuthenticationException::class);
+        $auth = Auth::guard('web');
 
-        $result = $auth->attempts([
+        $auth->attempts([
             "username" => "papac",
             "password" => "password"
         ]);
-
-        $user = $auth->user();
-
-        $this->assertTrue($result);
-        $this->assertInstanceOf(Authentication::class, $user);
-        $this->assertEquals($user->name, 'Franck');
-    }
-
-    public function test_attempt_login_with_session_provider_fail()
-    {
-        $this->expectException(AuthenticationException::class);
-        $auth = Auth::getInstance();
-        $auth->guard('web');
-
-        $result = $auth->attempts([
-            "username" => "papac",
-            "password" => "passwor"
-        ]);
-
-        $this->assertFalse($result);
-        $this->assertNull($auth->user());
     }
 
     public function test_direct_login_with_session_provider()
     {
         $this->expectException(AuthenticationException::class);
-        $auth = Auth::getInstance();
-        $auth->guard('web');
+        $auth = Auth::guard('web');
+
         $auth->login(UserModelStub::first());
 
         $user = $auth->user();

@@ -35,7 +35,7 @@ class JwtGuard extends GuardContract
      * @param array $provider
      * @param string $guard
      */
-    public function __construct(array $provider, string $guard = null)
+    public function __construct(array $provider, string $guard)
     {
         if (!class_exists(Policier::class)) {
             throw new AuthenticationException('Please install bowphp/policier package.');
