@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bow\Auth;
+namespace Bow\Auth\Guards;
+
+use Bow\Auth\Auth;
+use Bow\Auth\Authentication;
 
 /**
- * @method \Policier\Token getToken()
+ * @method ?string getToken()
  */
 abstract class GuardContract
 {
@@ -14,7 +17,7 @@ abstract class GuardContract
      *
      * @var string
      */
-    protected $guard;
+    protected string $guard;
 
     /**
      * Check if user is authenticate
@@ -38,6 +41,14 @@ abstract class GuardContract
     abstract public function logout(): bool;
 
     /**
+     * Logout
+     *
+     * @param Authentication $user
+     * @return bool
+     */
+    abstract public function login(Authentication $user): bool;
+
+    /**
      * Get authenticated user
      *
      * @return Authentication
@@ -51,6 +62,16 @@ abstract class GuardContract
      * @return bool
      */
     abstract public function attempts(array $credentials): bool;
+
+    /**
+     * Get the guard name
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->guard;
+    }
 
     /**
      * Load the a guard

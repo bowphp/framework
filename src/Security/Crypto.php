@@ -13,7 +13,7 @@ class Crypto
      *
      * @var string
      */
-    private static string $key;
+    private static ?string $key = null;
 
     /**
      * The security cipher

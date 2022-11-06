@@ -392,7 +392,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         $properties = $reflection->getDefaultProperties();
 
-        if ($properties['table'] == null) {
+        if (!isset($properties['table']) || $properties['table'] == null) {
             $parts = explode('\\', static::class);
             $table = Str::snake(end($parts)).'s';
         } else {
