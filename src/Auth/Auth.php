@@ -74,7 +74,8 @@ class Auth
 
         if (!isset(static::$config[$guard]) || !is_array(static::$config[$guard])) {
             throw new AuthenticationException(
-                "Configuration not found for [$guard] guard.", E_ERROR
+                "Configuration not found for [$guard] guard.",
+                E_ERROR
             );
         }
 
