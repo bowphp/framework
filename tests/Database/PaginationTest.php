@@ -13,7 +13,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         Database::configure($config["database"]);
         Database::statement('create table if not exists pets (id int primary key, name varchar(255))');
         Database::table("pets")->truncate();
-        foreach(range(1, 30) as $key) {
+        foreach (range(1, 30) as $key) {
             Database::insert('insert into pets values(:id, :name)', ['id' => $key, 'name' => 'Pet ' . $key]);
         }
     }
