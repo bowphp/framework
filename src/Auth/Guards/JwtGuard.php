@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bow\Auth;
+namespace Bow\Auth\Guards;
 
 use Bow\Security\Hash;
+use Policier\Policier;
+use Bow\Auth\Authentication;
+use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Auth\Exception\AuthenticationException;
-use Policier\Policier;
 
 class JwtGuard extends GuardContract
 {
@@ -52,12 +54,15 @@ class JwtGuard extends GuardContract
     public function attempts(array $credentials): bool
     {
         $user = $this->makeLogin($credentials);
-        $fields = $this->provider['credentials'];
-        $password = $credentials[$fields['password']];
+        $this->token = null;
+        $this->user = null;
 
         if (is_null($user)) {
             return false;
         }
+
+        $fields = $this->provider['credentials'];
+        $password = $credentials[$fields['password']];
 
         if (Hash::check($password, $user->{$fields['password']})) {
             $this->login($user);
@@ -68,53 +73,25 @@ class JwtGuard extends GuardContract
     }
 
     /**
-     * Get the Policier instance
-     *
-     * @return Policier
-     */
-    public function getPolicier()
-    {
-        if (!class_exists(Policier::class)) {
-            throw new \Exception('Please install: composer require bowphp/policier');
-        }
-
-        $policier = Policier::getInstance();
-
-        if (is_null($policier)) {
-            throw new \Exception('Please load the \Policier\Bow\PolicierConfiguration::class configuration.');
-        }
-
-        $config = (array) config('policier');
-
-        if (count($config) > 0 && (is_null($config['keychain']['private']) || is_null($config['keychain']['public']))) {
-            if (is_null($config['signkey'])) {
-                $policier->setConfig(['signkey' => file_get_contents(config('security.key'))]);
-            }
-        }
-
-        return $policier;
-    }
-
-    /**
      * Check if user is authenticate
      *
      * @return bool
      */
     public function check(): bool
     {
+        if (is_null($this->token)) {
+            return false;
+        }
+
         $policier = $this->getPolicier();
 
-        $token = $policier->getToken();
-
-        if (!$policier->verify($token)) {
+        if (!$policier->verify($this->token)) {
             return false;
         }
 
-        if ($policier->isExpired($token)) {
+        if ($policier->isExpired($this->token)) {
             return false;
         }
-
-        $this->token = $token;
 
         $user = $this->user();
 
@@ -180,17 +157,17 @@ class JwtGuard extends GuardContract
     /**
      * Make direct login
      *
-     * @param mixed $user
+     * @param Authentication $user
      * @return string
      */
-    public function login(Authentication $user): string
+    public function login(Authentication $user): bool
     {
-        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), [
+        $this->token = (string) $this->getPolicier()->encode($user->getAuthenticateUserId(), [
             "id" => $user->getAuthenticateUserId(),
             "logged" => true
         ]);
 
-        return $this->token;
+        return true;
     }
 
     /**
@@ -213,5 +190,33 @@ class JwtGuard extends GuardContract
         $result = $this->getPolicier()->decode($this->token);
 
         return $result['claims']['id'];
+    }
+
+    /**
+     * Get the Policier instance
+     *
+     * @return Policier
+     */
+    private function getPolicier()
+    {
+        if (!class_exists(Policier::class)) {
+            throw new \Exception('Please install: composer require bowphp/policier');
+        }
+
+        $policier = Policier::getInstance();
+
+        if (is_null($policier)) {
+            throw new \Exception('Please load the \Policier\Bow\PolicierConfiguration::class configuration.');
+        }
+
+        $config = (array) config('policier');
+
+        if (count($config) > 0 && (is_null($config['keychain']['private']) || is_null($config['keychain']['public']))) {
+            if (is_null($config['signkey'])) {
+                $policier->setConfig(['signkey' => file_get_contents(config('security.key'))]);
+            }
+        }
+
+        return $policier;
     }
 }

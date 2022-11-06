@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bow\Auth;
+namespace Bow\Auth\Guards;
 
-use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
 use Bow\Session\Session;
+use Bow\Auth\Authentication;
+use Bow\Auth\Exception\AuthenticationException;
+use Bow\Auth\Guards\GuardContract;
+use Bow\Auth\Traits\LoginUserTrait;
 
 class SessionGuard extends GuardContract
 {
@@ -17,7 +20,7 @@ class SessionGuard extends GuardContract
      *
      * @var array
      */
-    private $provider;
+    private array $provider;
 
     /**
      * SessionGuard constructor.
@@ -41,12 +44,13 @@ class SessionGuard extends GuardContract
     public function attempts(array $credentials): bool
     {
         $user = $this->makeLogin($credentials);
-        $fields = $this->provider['credentials'];
-        $password = $credentials[$fields['password']];
 
         if (is_null($user)) {
             return false;
         }
+
+        $fields = $this->provider['credentials'];
+        $password = $credentials[$fields['password']];
 
         if (Hash::check($password, $user->{$fields['password']})) {
             $this->getSession()->put($this->session_key, $user);
@@ -63,7 +67,13 @@ class SessionGuard extends GuardContract
      */
     private function getSession(): Session
     {
-        return Session::getInstance();
+        $session = Session::getInstance();
+
+        if (is_null($session)) {
+            throw new AuthenticationException("Please the session configuration is not load");
+        }
+
+        return $session;
     }
 
     /**
@@ -83,7 +93,7 @@ class SessionGuard extends GuardContract
      */
     public function guest(): bool
     {
-        return !$this->getSession()->exists($this->session_key);
+        return !$this->check();
     }
 
     /**
@@ -102,7 +112,7 @@ class SessionGuard extends GuardContract
      * @param mixed $user
      * @return bool
      */
-    public function login(Authentication $user)
+    public function login(Authentication $user): bool
     {
         $this->getSession()->add($this->session_key, $user);
 

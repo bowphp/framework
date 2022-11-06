@@ -30,7 +30,7 @@ class Session implements CollectionInterface
      *
      * @var array
      */
-    private $driver = [
+    private array $driver = [
         'database' => \Bow\Session\Driver\DatabaseDriver::class,
         'array' => \Bow\Session\Driver\ArrayDriver::class,
         'file' => \Bow\Session\Driver\FilesystemDriver::class,
@@ -41,14 +41,14 @@ class Session implements CollectionInterface
      *
      * @var Session
      */
-    private static $instance;
+    private static ?Session $instance = null;
 
     /**
      * The session configuration
      *
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * Session constructor.
@@ -80,9 +80,9 @@ class Session implements CollectionInterface
      * Configure session instance
      *
      * @param array $config
-     * @return mixed
+     * @return Session
      */
-    public static function configure($config)
+    public static function configure(array $config): Session
     {
         if (static::$instance == null) {
             static::$instance = new Session($config);
@@ -94,9 +94,9 @@ class Session implements CollectionInterface
     /**
      * Get session singleton
      *
-     * @return mixed
+     * @return ?Session
      */
-    public static function getInstance()
+    public static function getInstance(): ?Session
     {
         return static::$instance;
     }
@@ -104,9 +104,9 @@ class Session implements CollectionInterface
     /**
      * Session starter.
      *
-     * @return boolean
+     * @return bool
      */
-    public function start()
+    public function start(): bool
     {
         if (PHP_SESSION_ACTIVE == session_status()) {
             return true;
@@ -122,7 +122,7 @@ class Session implements CollectionInterface
         $started = $this->boot();
 
         // Init interne session manager
-        $this->initializeInterneSessionStorage();
+        $this->initializeInternalSessionStorage();
 
         return $started;
     }
@@ -132,12 +132,12 @@ class Session implements CollectionInterface
      *
      * @return bool
      */
-    private function boot()
+    private function boot(): bool
     {
         if (!headers_sent()) {
             return @session_start();
         }
-        
+
         throw new SessionException('Headers already sent. Cannot start session.');
     }
 
@@ -146,22 +146,25 @@ class Session implements CollectionInterface
      *
      * @return void
      */
-    private function initializeDriver()
+    private function initializeDriver(): void
     {
         // We Apply session cookie name
-        session_name($this->config['name']);
+        @session_name($this->config['name']);
 
         if (!isset($_COOKIE[$this->config['name']])) {
-            session_id(hash("sha256", $this->generateId()));
+            @session_id(hash("sha256", $this->generateId()));
         }
 
-        session_save_path(realpath($this->config['save_path']));
-
         // We create get driver
-        $driver = $this->driver[$this->config['driver']];
+        $driver = $this->driver[$this->config['driver']] ?? null;
+
+        if (is_null($driver)) {
+            throw new SessionException('The driver ' . $this->config['driver'] . ' is not valid');
+        }
 
         switch ($this->config['driver']) {
             case 'file':
+                @session_save_path(realpath($this->config['save_path']));
                 $handler = new $driver(realpath($this->config['save_path']));
                 break;
             case 'database':
@@ -171,13 +174,13 @@ class Session implements CollectionInterface
                 $handler = new $driver();
                 break;
             default:
-                throw new SessionException('Can not set the session driver');
+                throw new SessionException('Cannot set the session driver');
                 break;
         }
 
         // Set the session driver
-        if (!session_set_save_handler($handler, true)) {
-            throw new SessionException('Can not set the session driver');
+        if (!@session_set_save_handler($handler, true)) {
+            throw new SessionException('Cannot set the session driver');
         }
     }
 
@@ -186,7 +189,7 @@ class Session implements CollectionInterface
      *
      * @return void
      */
-    private function initializeInterneSessionStorage()
+    private function initializeInternalSessionStorage(): void
     {
         if (!isset($_SESSION[static::CORE_SESSION_KEY['csrf']])) {
             $_SESSION[static::CORE_SESSION_KEY['csrf']] = new \stdClass();
@@ -241,7 +244,6 @@ class Session implements CollectionInterface
     public function regenerate()
     {
         $this->flush();
-
         $this->start();
     }
 
@@ -269,16 +271,15 @@ class Session implements CollectionInterface
     /**
      * Allows checking for the existence of a key in the session collection
      *
-     * @param string $key
-     * @param bool   $strict
-     * @return boolean
+     * @param string|int $key
+     * @param bool $strict
+     * @return bool
      */
-    public function has($key, $strict = false)
+    public function has(string|int $key, bool $strict = false): bool
     {
         $this->start();
 
         $cache = $_SESSION[static::CORE_SESSION_KEY['cache']];
-
         $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
         if (!$strict) {
@@ -316,9 +317,9 @@ class Session implements CollectionInterface
      * Allows checking for the existence of a key in the session collection
      *
      * @param string $key
-     * @return boolean
+     * @return bool
      */
-    public function exists($key)
+    public function exists($key): bool
     {
         return $this->has($key, true);
     }
@@ -326,9 +327,9 @@ class Session implements CollectionInterface
     /**
      * Check whether a collection is empty.
      *
-     * @return boolean
+     * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($this->filter());
     }
@@ -338,10 +339,9 @@ class Session implements CollectionInterface
      *
      * @param string $key
      * @param mixed  $default
-     *
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(mixed $key, mixed $default = null): mixed
     {
         $content = $this->flash($key);
 
@@ -369,7 +369,7 @@ class Session implements CollectionInterface
      * @throws InvalidArgumentException
      * @return mixed
      */
-    public function add($key, $value, $next = false)
+    public function add(string|int $key, mixed $value, $next = false): mixed
     {
         $this->start();
 
@@ -397,7 +397,7 @@ class Session implements CollectionInterface
      *
      * @see \Bow\Session\Session::add
      */
-    public function put($key, $value, $next = false)
+    public function put(string|int $key, mixed $value, $next = false): mixed
     {
         return $this->add($key, $value, $next);
     }
@@ -407,7 +407,7 @@ class Session implements CollectionInterface
      *
      * @return array
      */
-    public function all()
+    public function all(): array
     {
         return $this->filter();
     }
@@ -419,7 +419,7 @@ class Session implements CollectionInterface
      *
      * @return mixed
      */
-    public function remove($key)
+    public function remove(string|int $key): mixed
     {
         $this->start();
 
@@ -444,7 +444,7 @@ class Session implements CollectionInterface
      *
      * @return mixed
      */
-    public function set($key, $value)
+    public function set(string|int $key, mixed $value): mixed
     {
         $this->start();
 
@@ -469,11 +469,11 @@ class Session implements CollectionInterface
      * Add flash data
      * After the data recovery is automatic deleted
      *
-     * @param  mixed $key
+     * @param  string|int $key
      * @param  mixed $message
      * @return mixed
      */
-    public function flash($key, $message = null)
+    public function flash(string|int $key, ?string $message = null): mixed
     {
         $this->start();
 
@@ -504,7 +504,7 @@ class Session implements CollectionInterface
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->filter();
     }
@@ -512,7 +512,7 @@ class Session implements CollectionInterface
     /**
      * Empty the flash system.
      */
-    public function clearFash()
+    public function clearFash(): void
     {
         $this->start();
 
@@ -522,7 +522,7 @@ class Session implements CollectionInterface
     /**
      * Allows to clear the cache except csrf and __bow.flash
      */
-    public function clear()
+    public function clear(): void
     {
         $this->start();
 
@@ -536,7 +536,7 @@ class Session implements CollectionInterface
     /**
      * Allows you to empty the session
      */
-    public function flush()
+    public function flush(): void
     {
         session_destroy();
     }
@@ -546,7 +546,7 @@ class Session implements CollectionInterface
      *
      * @return array|void
      */
-    public function toObject()
+    public function toObject(): array
     {
         throw new \BadMethodCallException("Bad method called");
     }
@@ -556,7 +556,7 @@ class Session implements CollectionInterface
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         $this->start();
 

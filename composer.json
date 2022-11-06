@@ -33,7 +33,7 @@
         "aws/aws-sdk-php": "^3.87",
         "phpstan/phpstan": "^0.12.87",
         "php-amqplib/php-amqplib": "^3.0",
-        "bowphp/policier": "^2.1",
+        "bowphp/policier": "dev-master",
         "mockery/mockery": "^1.5",
         "spatie/phpunit-snapshot-assertions": "^4.2"
     },

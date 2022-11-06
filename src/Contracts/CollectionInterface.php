@@ -9,10 +9,10 @@ interface CollectionInterface
     /**
      * Check for existence of a key in the session collection
      *
-     * @param  string $key
+     * @param  string|int $key
      * @return bool
      */
-    public function has($key): bool;
+    public function has(string|int $key): bool;
 
     /**
      * Check if a collection is empty.
@@ -33,12 +33,12 @@ interface CollectionInterface
     /**
      * Add an entry to the collection
      *
-     * @param  string $key
+     * @param  string|int $key
      * @param  mixed $data
      * @param  bool  $next
      * @return CollectionInterface
      */
-    public function add(string $key, mixed $data, bool $next = false);
+    public function add(string|int $key, mixed $data, bool $next = false): mixed;
 
 
     /**
@@ -47,7 +47,7 @@ interface CollectionInterface
      * @param  string $key
      * @return CollectionInterface
      */
-    public function remove(string $key): CollectionInterface;
+    public function remove(string|int $key): mixed;
 
     /**
      * Modify an entry in the collection
@@ -56,7 +56,7 @@ interface CollectionInterface
      * @param  mixed  $value
      * @return CollectionInterface
      */
-    public function set(string $key, mixed $value): CollectionInterface;
+    public function set(string $key, mixed $value): mixed;
 
     /**
      * Return all the entries of the collection as an array
