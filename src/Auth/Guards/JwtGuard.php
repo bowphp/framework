@@ -145,16 +145,6 @@ class JwtGuard extends GuardContract
     }
 
     /**
-     * Get the token string
-     *
-     * @return string
-     */
-    public function getTokenString(): string
-    {
-        return (string) $this->token;
-    }
-
-    /**
      * Make direct login
      *
      * @param Authentication $user
@@ -187,6 +177,10 @@ class JwtGuard extends GuardContract
      */
     public function id(): mixed
     {
+        if (is_null($this->token)) {
+            throw new AuthenticationException("No user is logged in for get his id");
+        }
+    
         $result = $this->getPolicier()->decode($this->token);
 
         return $result['claims']['id'];

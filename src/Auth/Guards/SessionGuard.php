@@ -138,6 +138,12 @@ class SessionGuard extends GuardContract
      */
     public function id(): mixed
     {
-        return $this->getSession()->get($this->session_key)->getAuthenticateUserId();
+        $user = $this->user();
+
+        if (is_null($user)) {
+            throw new AuthenticationException("No user is logged in for get his id");
+        }
+
+        return $user->getAuthenticateUserId();
     }
 }
