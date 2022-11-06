@@ -21,7 +21,7 @@ class WorkerService
      * @param string $name
      * @return QueueAdapter
      */
-    public function setConnection(QueueAdapter $connection)
+    public function setConnection(QueueAdapter $connection): void
     {
         $this->connection = $connection;
     }

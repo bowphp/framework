@@ -82,6 +82,7 @@ class Connection
     public function getAdapter(): QueueAdapter
     {
         $driver = $this->connection ?: $this->config["default"];
+
         $connection = $this->config["connections"][$driver];
         $queue = new static::$connections[$driver];
 

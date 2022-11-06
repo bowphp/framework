@@ -44,7 +44,7 @@ class BeanstalkdAdapter extends QueueAdapter
      * @param string $name
      * @return Pheanstalk
      */
-    public function setWatch(string $name)
+    public function setWatch(string $name): void
     {
         $this->default = $name;
     }
@@ -55,7 +55,7 @@ class BeanstalkdAdapter extends QueueAdapter
      * @param int $retry
      * @return Pheanstalk
      */
-    public function setRetry(int $retry)
+    public function setRetry(int $retry): void
     {
         $this->retry = $retry;
     }
@@ -120,14 +120,15 @@ class BeanstalkdAdapter extends QueueAdapter
     public function run(string $queue = null): void
     {
         // we want jobs from 'testtube' only.
-        $this->pheanstalk->watch($this->getQueue($queue));
+        $queue = $this->getQueue($queue);
+        $this->pheanstalk->watch($queue);
 
         // This hangs until a Job is produced.
         $job = $this->pheanstalk->reserve();
 
         try {
             $payload = $job->getData();
-            $producer = unserialize($payload);
+            $producer = $this->unserializeProducer($payload);
             call_user_func_array([$producer, "process"], []);
             $this->pheanstalk->touch($job);
             $this->deleteJob($queue, $job->getId());

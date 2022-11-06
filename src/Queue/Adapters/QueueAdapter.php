@@ -14,9 +14,20 @@ abstract class QueueAdapter
      * @param ProducerService $producer
      * @return string
      */
-    public function serializeProducer(ProducerService $producer)
+    public function serializeProducer(ProducerService $producer): string
     {
         return serialize($producer);
+    }
+
+    /**
+     * Create producer unserialize
+     *
+     * @param string $producer
+     * @return string
+     */
+    public function unserializeProducer(string $producer): ProducerService
+    {
+        return unserialize($producer);
     }
 
     /**
