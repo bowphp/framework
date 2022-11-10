@@ -18,7 +18,7 @@ abstract class QueueAdapter
     public function serializeProducer(ProducerService $producer): string
     {
         $instance = new ReflectionClass($producer);
-        $properties = $instance->getProperties(); 
+        $properties = $instance->getProperties();
         var_dump($properties);
 
         return serialize($producer);

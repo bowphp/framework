@@ -157,7 +157,7 @@ class S3Service implements ServiceInterface
 
         $success = true;
 
-        foreach($paths as $path) {
+        foreach ($paths as $path) {
             try {
                 $this->client->deleteObject([
                     'Bucket' => $this->config['bucket'],

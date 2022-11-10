@@ -70,7 +70,7 @@ class Console
     const ADD_ACTION = [
         'middleware', 'controller', 'model', 'validation',
         'seeder', 'migration', 'configuration', 'service',
-        'exception', 'event', 'producer', 'command'
+        'exception', 'event', 'producer', 'command', 'listener'
     ];
 
     /**
@@ -84,7 +84,7 @@ class Console
     {
         $this->arg = new Argument;
 
-        if ($this->arg->getParameter('trash')) {
+        if ($this->arg->hasTrash()) {
             $this->throwFailsCommand('Bad command usage', 'help');
         }
 
@@ -134,7 +134,7 @@ class Console
             require $item;
         }
         
-        $command = $this->arg->getParameter('command');
+        $command = $this->arg->getCommand();
 
         if (array_key_exists($command, $this->registers)) {
             try {
@@ -186,9 +186,9 @@ class Console
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
-        if (!$this->arg->getParameter('action')) {
+        if (!$this->arg->getAction()) {
             if ($target == 'help') {
                 $this->help($command);
 
@@ -231,13 +231,13 @@ class Console
      */
     private function migration(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['migrate', 'rollback', 'reset'])) {
             $this->throwFailsCommand('This action is not exists!', 'help migration');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         $this->command->call('migration', $action, $target);
     }
@@ -250,7 +250,7 @@ class Console
      */
     private function migrate(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!is_null($action)) {
             $this->throwFailsCommand('This action is not allow!', 'help migration');
@@ -267,13 +267,13 @@ class Console
      */
     private function add(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, static::ADD_ACTION)) {
             $this->throwFailsCommand('This action is not exists', 'help add');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         if (is_null($target)) {
             $this->throwFailsCommand('Please provide the filename', 'help add');
@@ -290,13 +290,13 @@ class Console
      */
     private function seed(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['all', 'table'])) {
             $this->throwFailsCommand('This action is not exists', 'help seed');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         if ($action == 'all') {
             if ($target != null) {
@@ -317,13 +317,13 @@ class Console
      */
     private function launch(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['server', 'console', 'worker'])) {
             $this->throwFailsCommand('Bad command usage', 'help run');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         $this->command->call('runner', $action, $target);
     }
@@ -335,13 +335,13 @@ class Console
      */
     private function generate(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['key', 'resource', 'session'])) {
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         $this->command->call('generator', $action, $target);
     }
@@ -364,7 +364,7 @@ class Console
      */
     private function clear(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         $this->command->call('clear', "make", $action);
     }
