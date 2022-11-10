@@ -180,7 +180,7 @@ class Console
      * @return void
      * @throws
      */
-    private function call(string $command): void
+    public function call(string $command): void
     {
         if (!in_array($command, static::COMMAND)) {
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
@@ -191,19 +191,14 @@ class Console
         if (!$this->arg->getAction()) {
             if ($target == 'help') {
                 $this->help($command);
-
                 exit(0);
             }
         }
 
         try {
-            call_user_func_array(
-                [$this, $command],
-                [$target]
-            );
+            call_user_func_array([$this, $command], [$target]);
         } catch (\Exception $e) {
             echo $e->getMessage();
-
             exit(1);
         }
     }
