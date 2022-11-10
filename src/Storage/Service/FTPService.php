@@ -512,8 +512,10 @@ class FTPService implements ServiceInterface
     public function path(string $filename): string
     {
         if ($this->exists($filename)) {
-            // TODO: Return the path
+            return $filename;
         }
+
+        return $filename;
     }
 
     /**
@@ -524,7 +526,18 @@ class FTPService implements ServiceInterface
      */
     public function delete(string $file): bool
     {
-        return ftp_delete($this->getConnection(), $file);
+        $paths = is_array($file) ? $file : func_get_args();
+
+        $success = true;
+
+        foreach ($paths as $path) {
+            if (!ftp_delete($this->getConnection(), $path)) {
+                $success = false;
+                break;
+            }
+        }
+
+        return $success;
     }
 
     /**

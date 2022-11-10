@@ -33,11 +33,11 @@ return [
          */
         's3' => [
             'credentials' => [
-                'key'    => '',
-                'secret' => '',
+                'key'    => app_env('AWS_S3_KEY'),
+                'secret' => app_env('AWS_S3_SECRET'),
             ],
-            'bucket' => '',
-            'region' => '',
+            'bucket' => app_env('AWS_S3_BUCKET'),
+            'region' => 'us-east-1',
             'version' => 'latest'
         ]
     ],

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\ProducerService;
+use ReflectionClass;
 
 abstract class QueueAdapter
 {
@@ -16,6 +17,10 @@ abstract class QueueAdapter
      */
     public function serializeProducer(ProducerService $producer): string
     {
+        $instance = new ReflectionClass($producer);
+        $properties = $instance->getProperties(); 
+        var_dump($properties);
+
         return serialize($producer);
     }
 
@@ -23,7 +28,7 @@ abstract class QueueAdapter
      * Create producer unserialize
      *
      * @param string $producer
-     * @return string
+     * @return ProducerService
      */
     public function unserializeProducer(string $producer): ProducerService
     {

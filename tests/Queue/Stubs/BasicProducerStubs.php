@@ -4,7 +4,7 @@ namespace Bow\Tests\Queue\Stubs;
 
 use Bow\Queue\ProducerService;
 
-class ProducerStubs extends ProducerService
+class BasicProducerStubs extends ProducerService
 {
     private ?string $name = null;
 

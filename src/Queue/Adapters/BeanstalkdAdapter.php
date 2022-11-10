@@ -133,6 +133,7 @@ class BeanstalkdAdapter extends QueueAdapter
             $this->pheanstalk->touch($job);
             $this->deleteJob($queue, $job->getId());
         } catch (\Exception $e) {
+            cache($job->getId(), $job->getData());
             $this->pheanstalk->release($job);
         }
     }
