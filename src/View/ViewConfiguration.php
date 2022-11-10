@@ -12,7 +12,7 @@ class ViewConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         /**
          * Configuration of view
@@ -27,7 +27,7 @@ class ViewConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('view');
     }
