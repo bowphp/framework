@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Queue;
 
-use Bow\Packages\Traits\SerializationTrait;
+use Bow\Queue\Traits\SerializableTrait;
 
 abstract class ProducerService
 {
-    use SerializationTrait;
+    use SerializableTrait;
 
     /**
      * Define the delay

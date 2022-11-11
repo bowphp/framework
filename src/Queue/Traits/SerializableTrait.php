@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Bow\Packages\Traits;
+namespace Bow\Queue\Traits;
 
-trait SerializationTrait
+trait SerializableTrait
 {
     // TODO: Write the serialization process
 }
