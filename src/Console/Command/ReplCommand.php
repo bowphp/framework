@@ -33,18 +33,12 @@ class ReplCommand extends AbstractCommand
         }
 
         $config = new \Psy\Configuration();
-
         $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
 
         // Load the custum prompt
-        $prompt = $this->arg->getParameter('--prompt');
-
-        if (is_null($prompt)) {
-            $prompt = '(bow) >>';
-        }
-
+        $prompt = $this->arg->getParameter('--prompt', '(bow) >>');
         $prompt = trim($prompt).' ';
-        
+
         $config->setPrompt($prompt);
 
         $shell = new \Psy\Shell($config);

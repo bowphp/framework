@@ -33,7 +33,7 @@ class Router
     /**
      * @var string
      */
-    protected string $special_method;
+    protected ?string $special_method = null;
 
     /**
      * Method Http current.
@@ -76,7 +76,7 @@ class Router
      *
      * @var string
      */
-    private string $magic_method;
+    private ?string $magic_method;
 
     /**
      * Router constructor

@@ -21,7 +21,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     /**
      * Test Add column action
      */
-    public function testAddColumnSqlStatement()
+    public function test_add_column_sql_statement()
     {
         $this->generator->addColumn('name', 'int');
         $sql = $this->generator->make();
@@ -43,7 +43,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     /**
      * Test Add column action
      */
-    public function testShouldCreateDropColumnSqlStatement()
+    public function test_should_create_drop_column_sql_statement()
     {
         $this->generator->dropColumn('name');
         $sql = $this->generator->make();
@@ -54,7 +54,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, 'DROP COLUMN `name`');
     }
 
-    public function testShouldCreateCorrectDatetimeSqlStatement()
+    public function test_should_create_correct_datetime_sql_statement()
     {
         $this->generator->setAdapter('sqlite');
         $this->generator->addDatetime('created_at', ['default' => 'CURRENT_TIMESTAMP']);
@@ -64,7 +64,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 
-    public function testShouldCreateNotCorrectDatetimeSqlStatement()
+    public function test_should_create_not_correct_datetime_sql_statement()
     {
         $this->generator->setAdapter('sqlite');
 
@@ -75,7 +75,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 
-    public function testShouldCreateCorrectTimestampsSqlStatement()
+    public function test_should_create_correct_timestamps_sql_statement()
     {
         $this->generator->setAdapter('sqlite');
 

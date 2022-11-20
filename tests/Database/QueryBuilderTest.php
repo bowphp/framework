@@ -70,7 +70,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testSelectRows(Database $database)
+    public function test_select_rows(Database $database)
     {
         $table = $database->table('pets');
 
@@ -85,7 +85,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testSelectChainRows(Database $database)
+    public function test_select_chain_rows(Database $database)
     {
         $table = $database->table('pets');
         $pets = $table->select(['name'])->get();
@@ -97,7 +97,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testSelectFirstChainRows(Database $database)
+    public function test_select_first_chain_rows(Database $database)
     {
         $table = $database->table('pets');
         $pet = $table->select(['name'])->first();
@@ -109,7 +109,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testWhereInChainRows(Database $database)
+    public function test_where_in_chain_rows(Database $database)
     {
         $table = $database->table('pets');
         $pets = $table->whereIn('id', [1, 3])->get();
@@ -121,7 +121,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testWhereNullChainRows(Database $database)
+    public function test_where_null_chain_rows(Database $database)
     {
         $table = $database->table('pets');
         $pets = $table->whereNull('name')->get();
@@ -133,7 +133,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testWhereBetweenChainRows(Database $database)
+    public function test_where_between_chain_rows(Database $database)
     {
         $table = $database->table('pets');
         $pets = $table->whereBetween('id', [1, 3])->get();
@@ -145,7 +145,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testWhereNotBetweenChainRows(Database $database)
+    public function test_where_not_between_chain_rows(Database $database)
     {
         $table = $database->table('pets');
         $pets = $table->whereNotBetween('id', [1, 3])->get();
@@ -157,7 +157,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testWhereNotNullChainRows(Database $database)
+    public function test_where_not_null_chain_rows(Database $database)
     {
         $table = $database->table('pets');
         $pets = $table->whereNotIn('id', [1, 3])->get();
@@ -169,7 +169,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
      * @depends test_get_database_connection
      * @param Database $database
      */
-    public function testWhereChainRows(Database $database)
+    public function test_where_chain_rows(Database $database)
     {
         $table = $database->table('pets');
 

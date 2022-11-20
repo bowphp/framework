@@ -29,7 +29,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         $this->migration = new MigrationExtendedStub;
     }
 
-    public function testAddSql()
+    public function test_add_sql()
     {
         ob_start();
 
@@ -49,7 +49,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         ob_get_clean();
     }
 
-    public function testCreateMethod()
+    public function test_create_method()
     {
         ob_start();
 

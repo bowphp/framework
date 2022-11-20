@@ -15,9 +15,6 @@ class Command extends AbstractCommand
      * @var array
      */
     private array $command = [
-        "migration" => \Bow\Console\Command\MigrationCommand::class,
-        "clear" => \Bow\Console\Command\ClearCommand::class,
-        "seeder" => \Bow\Console\Command\SeederCommand::class,
         "add" => [
             "controller" => \Bow\Console\Command\ControllerCommand::class,
             "configuration" => \Bow\Console\Command\ConfigurationCommand::class,
@@ -33,15 +30,18 @@ class Command extends AbstractCommand
             "producer" => \Bow\Console\Command\ProducerCommand::class,
             "command" => \Bow\Console\Command\ConsoleCommand::class,
         ],
-        "runner" => [
-            "console" => \Bow\Console\Command\ReplCommand::class,
-            "server" => \Bow\Console\Command\ServerCommand::class,
-            "worker" => \Bow\Console\Command\WorkerCommand::class,
-        ],
+        "clear" => \Bow\Console\Command\ClearCommand::class,
         "generator" => [
             "key" => \Bow\Console\Command\GenerateKeyCommand::class,
             "resource" => \Bow\Console\Command\GenerateResourceControllerCommand::class,
             "session" => \Bow\Console\Command\GenerateSessionCommand::class,
+        ],
+        "migration" => \Bow\Console\Command\MigrationCommand::class,
+        "seeder" => \Bow\Console\Command\SeederCommand::class,
+        "runner" => [
+            "console" => \Bow\Console\Command\ReplCommand::class,
+            "server" => \Bow\Console\Command\ServerCommand::class,
+            "worker" => \Bow\Console\Command\WorkerCommand::class,
         ],
     ];
 

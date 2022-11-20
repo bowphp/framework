@@ -13,7 +13,7 @@ class Argument
      *
      * @var array
      */
-    private array $parameters;
+    private array $parameters = [];
 
     /**
      * The invalid parameter
@@ -101,9 +101,9 @@ class Argument
      *
      * @param  string $key
      * @param  mixed  $default
-     * @return ?string
+     * @return bool|string|null
      */
-    public function getParameter(string $key, mixed $default = null): ?string
+    public function getParameter(string $key, mixed $default = null): mixed
     {
         return $this->parameters[$key] ?? $default;
     }
@@ -125,7 +125,7 @@ class Argument
      */
     public function getTarget(): ?string
     {
-        return $this->target ?? null;
+        return $this->target;
     }
 
     /**

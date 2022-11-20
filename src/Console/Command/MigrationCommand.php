@@ -88,7 +88,7 @@ class MigrationCommand extends AbstractCommand
      * @param array $migrations
      * @return void
      */
-    private function makeUp(array $current_migrations, array $migrations): void
+    protected function makeUp(array $current_migrations, array $migrations): void
     {
         if (count($current_migrations) == count($migrations)) {
             echo Color::green('Nothing to migrate.');
@@ -130,7 +130,7 @@ class MigrationCommand extends AbstractCommand
      * @param array $migrations
      * @return void
      */
-    private function makeRollback(array $current_migrations, array $migrations): void
+    protected function makeRollback(array $current_migrations, array $migrations): void
     {
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to rollback.');
@@ -188,7 +188,7 @@ class MigrationCommand extends AbstractCommand
      * @param array $migrations
      * @return void
      */
-    private function makeReset(array $current_migrations, array $migrations): void
+    protected function makeReset(array $current_migrations, array $migrations): void
     {
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to reset.');
@@ -265,13 +265,12 @@ class MigrationCommand extends AbstractCommand
      */
     private function createMigrationTable()
     {
-        $parameters = $this->arg->getParameters();
-        $connection = $parameters->get("--connection", config("database.default"));
+        $connection = $this->arg->getParameter("--connection", config("database.default"));
 
         Database::connection($connection);
         $adapter = Database::getAdapterConnection();
 
-        $table = $adapter->getTablePrefix().config('database.migration');
+        $table = $adapter->getTablePrefix().config('database.migration', 'migrations');
         $generator = new SQLGenerator(
             $table,
             $adapter->getName(),
@@ -353,7 +352,7 @@ class MigrationCommand extends AbstractCommand
      */
     private function getMigrationTable()
     {
-        $migration_status_table = config('database.migration');
+        $migration_status_table = config('database.migration', 'migrations');
 
         return table($migration_status_table);
     }
@@ -418,7 +417,7 @@ class MigrationCommand extends AbstractCommand
             'table' => $table ?? 'table_name',
             'className' => $filename
         ]);
-        
+
         // Print console information
         echo Color::green('The migration file has been successfully created')."\n";
     }

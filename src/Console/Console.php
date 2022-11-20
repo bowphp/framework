@@ -460,6 +460,8 @@ U;
 
                 break;
             case 'generate':
+            case 'gen':
+            case 'generator':
                 echo <<<U
     \n\033[0;32mgenerate\033[00m create a resource and app key
     [option]
@@ -519,6 +521,11 @@ U;
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:table\033[00m table_name  Make seeding for one table
 
 U;
+                break;
+
+            default:
+                $this->throwFailsCommand("Please make php bow help for show whole docs !");
+                exit(1);
                 break;
         }
 
