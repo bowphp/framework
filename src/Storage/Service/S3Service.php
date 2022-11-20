@@ -230,8 +230,6 @@ class S3Service implements ServiceInterface
             'Key' => $filename
         ]);
 
-        var_dump($result["Body"]);
-
         return $result["Body"];
     }
 

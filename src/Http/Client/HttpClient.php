@@ -42,8 +42,6 @@ class HttpClient
         }
 
         $this->base_url = rtrim($base_url, "/");
-
-        var_dump($base_url);
     }
 
     /**
