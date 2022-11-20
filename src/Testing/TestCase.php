@@ -39,10 +39,12 @@ class TestCase extends PHPUnitTestCase
     private function formatUrl(string $url): string
     {
         if (!$this->url) {
-            $this->url = app_env('APP_URL', 'http://localhost:5000');
+            $this->url = app_env('APP_URL', 'http://127.0.0.1:5000');
         }
 
-        return rtrim($this->url, '/').$url;
+        $url = rtrim($this->url, '/') . $url;
+
+        return trim($url, '/');
     }
 
     /**
