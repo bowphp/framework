@@ -53,7 +53,7 @@ class Command extends AbstractCommand
      * @param array $rest
      * @return mixed
      */
-    public function call(string $command, string $action, array ...$rest): mixed
+    public function call(string $command, string $action, ...$rest): mixed
     {
         $class = $this->command[$command] ?? null;
 
