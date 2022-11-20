@@ -20,23 +20,30 @@ class HttpClient
      *
      * @var CurlHandle
      */
-    private CurlHandle $ch;
+    private ?CurlHandle $ch = null;
+
+    /**
+     * The base url
+     *
+     * @var string|null
+     */
+    private ?string $base_url = null;
 
     /**
      * HttpClient Constructor.
      *
-     * @param string $url
+     * @param string $base_url
      * @return void
      */
-    public function __construct(?string $url = null)
+    public function __construct(?string $base_url = null)
     {
         if (!function_exists('curl_init')) {
             throw new \BadFunctionCallException('cURL php is require.');
         }
 
-        if (is_string($url)) {
-            $this->ch = curl_init($url);
-        }
+        $this->base_url = rtrim($base_url, "/");
+
+        var_dump($base_url);
     }
 
     /**
@@ -48,7 +55,7 @@ class HttpClient
      */
     public function get(string $url, array $data = []): Parser
     {
-        $this->resetAndAssociateUrl($url);
+        $this->initCurl($url);
 
         $this->addFields($data);
 
@@ -64,13 +71,13 @@ class HttpClient
      */
     public function post(string $url, array $data = []): Parser
     {
-        $this->resetAndAssociateUrl($url);
+        $this->initCurl($url);
 
         if (!empty($this->attach)) {
             curl_setopt($this->ch, CURLOPT_UPLOAD, true);
 
             foreach ($this->attach as $key => $attach) {
-                $this->attach[$key] = '@'.ltrim('@', $attach);
+                $this->attach[$key] = '@' . ltrim('@', $attach);
             }
 
             $data = array_merge($this->attach, $data);
@@ -90,7 +97,7 @@ class HttpClient
      */
     public function put(string $url, array $data = []): Parser
     {
-        $this->resetAndAssociateUrl($url);
+        $this->initCurl($url);
 
         if (!curl_setopt($this->ch, CURLOPT_PUT, true)) {
             $this->addFields($data);
@@ -122,7 +129,7 @@ class HttpClient
             $data = [];
 
             foreach ($headers as $key => $value) {
-                $data[] = $key.': '.$value;
+                $data[] = $key . ': ' . $value;
             }
 
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, $data);
@@ -137,11 +144,10 @@ class HttpClient
      * @param string $url
      * @return void
      */
-    private function resetAndAssociateUrl(string $url): void
+    private function initCurl(string $url): void
     {
-        if (!is_resource($this->ch)) {
-            $this->ch = curl_init(urlencode($url));
-        }
+        $url = $this->base_url . "/" . trim($url, "/");
+        $this->ch = curl_init($url);
     }
 
     /**

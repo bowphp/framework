@@ -199,9 +199,7 @@ class Parser
         $this->close();
 
         if ($data === false) {
-            throw new \Exception(
-                sprintf("PASS ERROR: %s.", $this->error)
-            );
+            throw new \Exception(curl_strerror($this->errno));
         }
 
         return $data;

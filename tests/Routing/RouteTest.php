@@ -38,13 +38,9 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         });
 
         $this->assertTrue($route->match('/bow'));
-
         $this->assertTrue($route->call());
-
         $this->assertTrue($route->match('/dakia'));
-
         $this->assertFalse($route->call());
-
         $this->assertFalse($route->match('/'));
     }
 
@@ -55,13 +51,9 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         });
 
         $this->assertTrue($route->match('/bow/1'));
-
         $this->assertTrue($route->call());
-
         $this->assertTrue($route->match('/dakia/1'));
-
         $this->assertFalse($route->call());
-
         $this->assertFalse($route->match('/'));
     }
 
@@ -74,13 +66,11 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $route->where(['name' => '[a-z0-9_-]+', 'id' => '\d+']);
 
         $this->assertTrue($route->match('/bow/1'));
-
         $this->assertTrue($route->call());
 
         $route->where(['name' => '[a-z0-9_-]+', 'id' => '\d+']);
 
         $this->assertFalse($route->match('/bow/framework'));
-
         $this->assertFalse($route->match('/'));
     }
 }

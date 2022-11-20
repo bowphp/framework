@@ -84,4 +84,23 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(in_array("---target=500", $arg->getTrash()));
         $this->assertTrue(in_array("name", $arg->getTrash()));
     }
+
+    public function test_the_boolean_parameters()
+    {
+        $GLOBALS["argv"] = ["bow", "command:action", "target", "--target"];
+        $arg = new Argument;
+
+        $this->assertFalse($arg->hasTrash());
+        $this->assertTrue($arg->getParameter('--target'));
+    }
+
+    public function test_the_mixed_parameters()
+    {
+        $GLOBALS["argv"] = ["bow", "command:action", "target", "--target", "--name=papac"];
+        $arg = new Argument;
+
+        $this->assertFalse($arg->hasTrash());
+        $this->assertTrue($arg->getParameter('--target'));
+        $this->assertEquals($arg->getParameter('--name'), "papac");
+    }
 }

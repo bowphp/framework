@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\ProducerService;
+use ReflectionClass;
 
 abstract class QueueAdapter
 {
@@ -23,7 +24,7 @@ abstract class QueueAdapter
      * Create producer unserialize
      *
      * @param string $producer
-     * @return string
+     * @return ProducerService
      */
     public function unserializeProducer(string $producer): ProducerService
     {
@@ -34,29 +35,30 @@ abstract class QueueAdapter
      * Make adapter configuration
      *
      * @param array $config
+     * @return QueueAdapter
      */
-    abstract public function configure(array $config);
+    abstract public function configure(array $config): QueueAdapter;
 
     /**
      * Watch the the queue name
      *
      * @param string $queue
      */
-    abstract public function setWatch(string $queue);
+    abstract public function setWatch(string $queue): void;
 
     /**
      * Set the retry value
      *
      * @param int $retry
      */
-    abstract public function setRetry(int $retry);
+    abstract public function setRetry(int $retry): void;
 
     /**
      * Push new producer
      *
      * @param ProducerService $producer
      */
-    abstract public function push(ProducerService $producer);
+    abstract public function push(ProducerService $producer): void;
 
     /**
      * Get the queue size

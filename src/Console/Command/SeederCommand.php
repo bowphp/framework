@@ -102,8 +102,10 @@ class SeederCommand extends AbstractCommand
         $connection = $this->arg->getParameters()->get('--connection', config("database.default"));
 
         try {
+            $connection = Database::connection($connection);
+
             foreach ($seed_collection as $table => $seed) {
-                $result = Database::connection($connection)->table($table)->insert($seed);
+                $result = $connection->table($table)->insert($seed);
 
                 echo Color::green("$result seed".($result > 1 ? 's' : '')." on $table table\n");
             }

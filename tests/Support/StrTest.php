@@ -6,91 +6,89 @@ use Bow\Support\Str;
 
 class StrText extends \PHPUnit\Framework\TestCase
 {
-    public function testUpper()
+    public function test_upper()
     {
         $this->assertEquals(Str::upper('papac'), 'PAPAC');
     }
 
-    public function testLower()
+    public function test_lower()
     {
         $this->assertEquals(Str::lower('PAPAC'), 'papac');
     }
 
-    public function testLen()
+    public function test_len()
     {
         $this->assertEquals(Str::len('PAPAC'), 5);
     }
 
-    public function testIsLower()
+    public function test_is_lower()
     {
         $this->assertTrue(Str::isLower('papac'));
     }
 
-    public function testIsUpper()
+    public function test_is_upper()
     {
         $this->assertTrue(Str::isUpper('PAPAC'));
     }
 
-    public function testIsNumeric()
+    public function test_is_numeric()
     {
         $this->assertTrue(Str::isNumeric('10'));
     }
 
-    public function testIsDomain()
+    public function test_is_domain()
     {
         $this->assertTrue(Str::isDomain('https://www.github.com'));
-
         $this->assertFalse(Str::isDomain('httpsgithub.'));
     }
 
-    public function testIsAlpha()
+    public function test_is_alpha()
     {
         $this->assertEquals(Str::isAlpha('12340papac'), false);
     }
 
-    public function testIsAlphaNumeric()
+    public function test_is_alpha_numeric()
     {
         $this->assertTrue(Str::isAlphaNum('12340papac'));
     }
 
-    public function testIsEmail()
+    public function test_is_email()
     {
         $this->assertTrue(Str::isMail('john@doe.com'));
-
         $this->assertFalse(Str::isMail('john@doe'));
     }
 
-    public function testIsSlug()
+    public function test_is_slug()
     {
         $this->assertTrue(Str::isSlug('comment-faire-un-site-web-avec-php'));
     }
 
-    public function testToSlug()
+    public function test_to_slug()
     {
         $this->assertEquals(Str::slugify('comment faire un site web avec php'), 'comment-faire-un-site-web-avec-php');
     }
 
-    public function testToCamel()
+    public function test_to_camel()
     {
         $this->assertEquals(Str::camel('comment faire un site web avec php'), 'commentFaireUnSiteWebAvecPhp');
     }
 
-    public function testToCapitatize()
+    public function test_to_capitatize()
     {
         $this->assertEquals(Str::capitalize('comment faire un site web avec php'), 'Comment Faire Un Site Web Avec Php');
     }
 
-    public function testRandomize()
+    public function test_randomize()
     {
         $this->assertEquals(strlen(Str::randomize(10)), 10);
     }
 
-    public function testGetWords()
+    public function test_get_words()
     {
         $this->assertEquals(Str::getWords('comment faire un site web avce php', 2), 'comment faire');
     }
 
-    public function testContains()
+    public function test_contains()
     {
         $this->assertEquals(Str::contains('comment', 'comment faire un site web avce php'), 0);
     }

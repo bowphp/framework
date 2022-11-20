@@ -15,7 +15,7 @@ class S3Service implements ServiceInterface
      *
      * @var S3Service
      */
-    private static S3Service $instance;
+    private static ?S3Service $instance = null;
 
     /**
      * The attribute define the service configuration
@@ -80,9 +80,9 @@ class S3Service implements ServiceInterface
      * @return mixed
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, string $location = null, array $option = [])
+    public function store(UploadFile $file, ?string $location = null, array $option = []): array|bool
     {
-        $result = $this->get($filename);
+        $result = $this->put($file->getHashName(), $file->getContent());
 
         return $result["Location"];
     }
@@ -94,11 +94,13 @@ class S3Service implements ServiceInterface
      * @param  string $content
      * @return bool
      */
-    public function append(string $file, string $content): bool
+    public function append(string $filename, string $content): bool
     {
         $result = $this->get($filename);
+        $new_content = $result . PHP_EOL . $content;
+        $this->put($filename, $new_content);
 
-        return $result["Location"];
+        return isset($result["Location"]);
     }
 
     /**
@@ -109,11 +111,13 @@ class S3Service implements ServiceInterface
      * @return bool
      * @throws
      */
-    public function prepend(string $file, string $content): bool
+    public function prepend(string $filename, string $content): bool
     {
         $result = $this->get($filename);
+        $new_content = $content.PHP_EOL.$result;
+        $this->put($filename, $new_content);
 
-        return $result["Location"];
+        return true;
     }
 
     /**
@@ -121,23 +125,24 @@ class S3Service implements ServiceInterface
      *
      * @param string $file
      * @param string $content
-     * @param array $option
+     * @param array $options
      *
      * @return bool
      */
-    public function put(string $file, string $content, array $option = []): bool
+    public function put(string $file, string $content, array $options = []): bool
     {
-        if (isset($option['bucket'])) {
-            $bucket = $option['bucket'];
-        } else {
-            $bucket = $this->config['bucket'];
-        }
+        $options = is_string($options)
+            ? ['visibility' => $options]
+            : (array) $options;
 
         $this->client->putObject([
-            'Bucket' => $bucket,
+            'Bucket' => $this->config['bucket'],
             'Key'    => $file,
-            'Body'   => $content
+            'Body'   => $content,
+            "Visibility" => $options["visibility"] ?? 'public'
         ]);
+
+        return true;
     }
 
     /**
@@ -146,14 +151,24 @@ class S3Service implements ServiceInterface
      * @param  string $filename
      * @return bool
      */
-    public function delete(string $filename): bool
+    public function delete(string|array $filename): bool
     {
-        $result = $this->client->deleteObject([
-            'Bucket' => $this->config['bucket'],
-            'Key' => $filename
-        ]);
+        $paths = is_array($filename) ? $filename : func_get_args();
 
-        return $result["DeleteMarker"];
+        $success = true;
+
+        foreach ($paths as $path) {
+            try {
+                $this->client->deleteObject([
+                    'Bucket' => $this->config['bucket'],
+                    'Key' => $path
+                ]);
+            } catch (\Exception $e) {
+                $success = false;
+            }
+        }
+
+        return $success;
     }
 
     /**
@@ -168,7 +183,7 @@ class S3Service implements ServiceInterface
             "Bucket" => $dirname
         ]);
 
-        return array_map(fn($file) => $file["Key"], $result["Contents"]);
+        return array_map(fn($file) => $file["Key"], $results["Contents"]);
     }
 
     /**
@@ -179,7 +194,7 @@ class S3Service implements ServiceInterface
      */
     public function directories(string $dirname): array
     {
-        $buckets = $this->client->listBuckets();
+        $buckets = (array) $this->client->listBuckets();
 
         return array_map(fn($bucket) => $bucket["Name"], $buckets);
     }
@@ -187,16 +202,16 @@ class S3Service implements ServiceInterface
     /**
      * Create a directory
      *
-     * @param  string $dirname
+     * @param  string $bucket
      * @param  int    $mode
      * @param  bool   $recursive
      * @param  array  $option
      * @return bool
      */
-    public function makeDirectory(string $dirname, array $option = []): bool
+    public function makeDirectory(string $bucket, int $mode = 0777, array $option = []): bool
     {
         $result = $this->client->createBucket([
-            "Bucket" => $dirname
+            "Bucket" => $bucket
         ]);
 
         return isset($result["Location"]);
@@ -212,8 +227,10 @@ class S3Service implements ServiceInterface
     {
         $result = $this->client->getObject([
             'Bucket' => $this->config['bucket'],
-            'Key'    => $filename
+            'Key' => $filename
         ]);
+
+        var_dump($result["Body"]);
 
         return $result["Body"];
     }
@@ -227,12 +244,9 @@ class S3Service implements ServiceInterface
      */
     public function copy(string $source, string $target): bool
     {
-        $result = $this->client->getObject([
-            'Bucket' => $this->config['bucket'],
-            'Key'    => $source
-        ]);
+        $result = $this->get($source);
 
-        $this->put($target, $result);
+        $this->put($target, $result["Body"]);
 
         return true;
     }
@@ -286,9 +300,9 @@ class S3Service implements ServiceInterface
      */
     public function isDirectory(string $dirname): bool
     {
-        $result = $this->get($filename);
+        $result = $this->get($dirname);
 
-        return $result["Location"];
+        return isset($result["Location"]);
     }
 
     /**
@@ -300,11 +314,8 @@ class S3Service implements ServiceInterface
      */
     public function path(string $filename): string
     {
-        $result = $this->client->getObject([
-            "Bucket" => $this->config["bucket"],
-            "Key" => $filename
-        ]);
+        $result = $this->client->getObjectUrl($this->config["bucket"], $filename);
 
-        return $result["Location"];
+        return $result;
     }
 }

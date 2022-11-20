@@ -78,14 +78,14 @@ class Response implements ResponseInterface
      *
      * @var Response
      */
-    private static Response $instance;
+    private static ?Response $instance = null;
 
     /**
      * The Response content
      *
      * @var string
      */
-    private string $content;
+    private ?string $content = '';
 
     /**
      * The Response code
@@ -113,7 +113,7 @@ class Response implements ResponseInterface
      *
      * @var string
      */
-    private string $download_filename;
+    private ?string $download_filename = null;
 
     /**
      * The override the respons
@@ -154,11 +154,11 @@ class Response implements ResponseInterface
     /**
      * Get response message
      *
-     * @return string
+     * @return ?string
      */
-    public function getContent(): string
+    public function getContent(): ?string
     {
-        return $this->content;
+        return (string) $this->content;
     }
 
     /**

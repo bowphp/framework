@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
+use Carbon\Carbon;
+use Bow\Support\Str;
 use Bow\Database\Collection;
 use Bow\Database\Database as DB;
-use Bow\Database\Exception\NotFoundException;
-use Bow\Database\Barry\Concerns\Relationship;
 use Bow\Database\Barry\Traits\EventTrait;
+use Bow\Database\Barry\Concerns\Relationship;
+use Bow\Database\Exception\NotFoundException;
 use Bow\Database\Barry\Traits\ArrayAccessTrait;
-use Bow\Support\Str;
-use Carbon\Carbon;
+use Bow\Database\Barry\Traits\SerializableTrait;
 
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
-    use Relationship, EventTrait, ArrayAccessTrait;
+    use Relationship, EventTrait, ArrayAccessTrait, SerializableTrait;
 
     /**
      * The hidden field

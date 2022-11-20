@@ -12,7 +12,7 @@ class TranslatorConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('translate', function () use ($config) {
             $auto_detected = is_null($config['translate.auto_detected'])
@@ -30,7 +30,7 @@ class TranslatorConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('translate');
     }

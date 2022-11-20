@@ -63,9 +63,9 @@ class Tokenize
      * Get a csrf token generate
      *
      * @param  int $time
-     * @return mixed
+     * @return ?array
      */
-    public static function csrf(int $time = null): ?string
+    public static function csrf(int $time = null): ?array
     {
         static::makeCsrfToken($time);
 
