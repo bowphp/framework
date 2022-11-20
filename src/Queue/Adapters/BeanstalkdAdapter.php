@@ -129,7 +129,7 @@ class BeanstalkdAdapter extends QueueAdapter
         try {
             $payload = $job->getData();
             $producer = $this->unserializeProducer($payload);
-            call_user_func_array([$producer, "process"], []);
+            call_user_func([$producer, "process"]);
             $this->pheanstalk->touch($job);
             $this->deleteJob($queue, $job->getId());
         } catch (\Exception $e) {
