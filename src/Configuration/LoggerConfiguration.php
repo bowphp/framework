@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Bow\Configuration;
 
-use Bow\Contracts\ResponseInterface;
-use Bow\Database\Barry\Model;
-use Bow\Support\Collection;
-use Bow\Configuration\Configuration;
-use Bow\Configuration\Loader;
-use Bow\Http\Redirect;
-use Monolog\Handler\FirePHPHandler;
-use Monolog\Handler\StreamHandler;
+use Bow\View\View;
 use Monolog\Logger;
+use Bow\Http\Redirect;
+use Bow\Support\Collection;
+use Bow\Configuration\Loader;
+use Bow\Database\Barry\Model;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Bow\Configuration\Configuration;
+use Bow\Contracts\ResponseInterface;
 
 class LoggerConfiguration extends Configuration
 {
@@ -70,18 +71,18 @@ class LoggerConfiguration extends Configuration
                     );
 
                     switch (true) {
+                        case $result instanceof View:
+                            return $result->getContent();
+                        case $result instanceof ResponseInterface || $result instanceof Redirect:
+                            $result->sendContent();
+                        case $result instanceof Model || $result instanceof Collection:
+                            return $result->toArray();
                         case is_null($result):
                         case is_string($result):
                         case is_array($result):
                         case is_object($result):
                         case $result instanceof \Iterable:
                             return $result;
-                        case $result instanceof ResponseInterface || $result instanceof Redirect:
-                            $result->sendContent();
-                            // no break
-                        case $result instanceof Model || $result instanceof Collection:
-                            return $result->toArray();
-                            // no break
                     }
                     exit(1);
                 }
