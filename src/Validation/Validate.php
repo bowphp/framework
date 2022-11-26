@@ -47,12 +47,12 @@ class Validate
      * Validate constructor.
      *
      * @param bool   $fails
-     * @param string $message
+     * @param ?string $message
      * @param array  $corrupted_fields
      *
      * @return void
      */
-    public function __construct(bool $fails, string $message, array $corrupted_fields)
+    public function __construct(bool $fails, ?string $message = null, array $corrupted_fields = [])
     {
         $this->fails = $fails;
         $this->last_message = $message;
