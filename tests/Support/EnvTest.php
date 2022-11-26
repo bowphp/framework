@@ -12,7 +12,7 @@ class EnvTest extends \PHPUnit\Framework\TestCase
         $env_filename = __DIR__.'/stubs/env.json';
 
         if (!file_exists($env_filename)) {
-            file_put_contents($env_filename, json_encode(['NAME' => 'papac']));
+            file_put_contents($env_filename, json_encode(['APP_NAME' => 'papac']));
         }
 
         Env::load($env_filename);
@@ -25,16 +25,16 @@ class EnvTest extends \PHPUnit\Framework\TestCase
 
     public function test_get()
     {
-        $this->assertEquals(Env::get('NAME'), 'papac');
-        $this->assertNull(Env::get('LASTNAME'));
+        $this->assertEquals(Env::get('APP_NAME'), 'papac');
+        $this->assertNull(Env::get('LAST_NAME'));
         $this->assertEquals(Env::get('SINCE', date('Y')), date('Y'));
     }
 
     public function test_set()
     {
-        Env::set('NAME', 'bow framework');
+        Env::set('APP_NAME', 'bow framework');
 
-        $this->assertNotEquals(Env::get('NAME'), 'papac');
-        $this->assertEquals(Env::get('NAME'), 'bow framework');
+        $this->assertNotEquals(Env::get('APP_NAME'), 'papac');
+        $this->assertEquals(Env::get('APP_NAME'), 'bow framework');
     }
 }

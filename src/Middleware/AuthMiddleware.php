@@ -6,25 +6,22 @@ namespace Bow\Middleware;
 
 use Bow\Auth\Auth;
 use Bow\Http\Request;
+use Bow\Http\Redirect;
+use Bow\Middleware\BaseMiddleware;
 
-class AuthMiddleware
+class AuthMiddleware implements BaseMiddleware
 {
     /**
      * Handle an incoming request.
      *
      * @param  Request $request
      * @param  Callable  $next
-     * @return \Bow\Http\Redirect
+     * @param  array $args
+     * @return Redirect
      */
-    public function process(Request $request, callable $next, array $guard = []): mixed
+    public function process(Request $request, callable $next, array $args = []): mixed
     {
-        $guard = current($guard);
-
-        if (!$guard) {
-            $guard = null;
-        }
-
-        if (Auth::getInstance()->guard($guard)->check()) {
+        if (Auth::getInstance()->check()) {
             return $next($request);
         }
 

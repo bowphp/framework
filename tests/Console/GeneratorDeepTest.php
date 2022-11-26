@@ -95,7 +95,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
         $this->assertRegExp("@\nnamespace\sApp\\\Middlewares;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeMiddleware\n@", $content);
+        $this->assertRegExp("@\nclass\sFakeMiddleware\simplements\sBaseMiddleware\n@", $content);
     }
 
     public function test_generate_producer_stubs()

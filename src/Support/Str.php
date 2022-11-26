@@ -15,11 +15,9 @@ class Str
      * @param  string $str
      * @return array|string
      */
-    public static function upper($str)
+    public static function upper(string $str): string
     {
-        if (is_string($str)) {
-            $str = mb_strtoupper($str, 'UTF-8');
-        }
+        $str = mb_strtoupper($str, 'UTF-8');
 
         return $str;
     }
@@ -30,11 +28,9 @@ class Str
      * @param  string $str
      * @return array|string
      */
-    public static function lower($str)
+    public static function lower(string $str): string
     {
-        if (is_string($str)) {
-            $str = mb_strtolower($str, 'UTF-8');
-        }
+        $str = mb_strtolower($str, 'UTF-8');
 
         return $str;
     }
@@ -45,7 +41,7 @@ class Str
      * @param  string $str
      * @return string
      */
-    public static function camel($str)
+    public static function camel(string $str): string
     {
         $parts = preg_split('/(_|-|\s)+/', $str);
 
@@ -54,7 +50,6 @@ class Str
         foreach ($parts as $key => $value) {
             if ($key == 0) {
                 $camel .= $value;
-
                 continue;
             }
 
@@ -71,7 +66,7 @@ class Str
      * @param  string $delimiter
      * @return mixed
      */
-    public static function snake($str, $delimiter = '_')
+    public static function snake(string $str, string $delimiter = '_')
     {
         $str = preg_replace('/\s+/u', $delimiter, $str);
 
@@ -88,7 +83,7 @@ class Str
      * @param string $str
      * @return string
      */
-    public static function plurial($str)
+    public static function plurial(string $str): string
     {
         if (preg_match('/y$/', $str)) {
             $str = static::slice($str, 0, static::len($str) - 1);
@@ -109,7 +104,7 @@ class Str
      * @param  string|null $end
      * @return string
      */
-    public static function slice($str, $start, $end = null)
+    public static function slice(string $str, int $start, ?int $end = null)
     {
         $sliceStr = '';
 
@@ -134,7 +129,7 @@ class Str
      * @param int|null $limit
      * @return array
      */
-    public static function split($pattern, $str, $limit = null)
+    public static function split(string $pattern, string $str, ?string $limit = null): array
     {
         return mb_split($pattern, $str, $limit);
     }
@@ -147,7 +142,7 @@ class Str
      * @param int $offset
      * @return int
      */
-    public static function pos($search, $string, $offset = 0)
+    public static function pos(string $search, string $string, int $offset = 0): int
     {
         return mb_strpos($string, $search, $offset, 'UTF-8');
     }
@@ -159,13 +154,13 @@ class Str
      * @param string $str
      * @return bool
      */
-    public static function contains($search, $str)
+    public static function contains(string $search, string $str): bool
     {
         if ($search === $str) {
             return true;
         }
 
-        return static::pos($search, $str);
+        return (bool) static::pos($search, $str);
     }
 
     /**
@@ -176,7 +171,7 @@ class Str
      * @param string $str
      * @return string
      */
-    public static function replace($pattern, $replaceBy, $str)
+    public static function replace(string $pattern, string $replaceBy, string $str): string
     {
         return str_replace($pattern, $replaceBy, $str);
     }
@@ -187,7 +182,7 @@ class Str
      * @param string $str
      * @return string
      */
-    public static function capitalize($str)
+    public static function capitalize(string $str): string
     {
         return ucwords($str);
     }
@@ -198,7 +193,7 @@ class Str
      * @param string $str
      * @return int
      */
-    public static function len($str)
+    public static function len(string $str): int
     {
         return mb_strlen($str, 'UTF-8');
     }
@@ -210,7 +205,7 @@ class Str
      * @param string $sep
      * @return array
      */
-    public static function wordify($str, $sep = ' ')
+    public static function wordify(string $str, string $sep = ' '): array
     {
         return static::split($sep, $str, static::count($sep, $str));
     }
@@ -219,10 +214,10 @@ class Str
      * Lists the string of characters in a specified number
      *
      * @param string $str
-     * @param string $number
+     * @param int $number
      * @return string
      */
-    public static function repeat($str, $number)
+    public static function repeat(string $str, int $number): string
     {
         return str_repeat($str, $number);
     }
@@ -233,7 +228,7 @@ class Str
      * @param int $size
      * @return string
      */
-    public static function randomize($size = 16)
+    public static function randomize(int $size = 16): string
     {
         return static::slice(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, $size);
     }
@@ -246,7 +241,7 @@ class Str
      * @param string $delimiter
      * @return string
      */
-    public static function slugify($str, $delimiter = '-')
+    public static function slugify(string $str, string $delimiter = '-'): string
     {
         $temp = preg_replace(
             '/[^a-z0-9]/',
@@ -263,7 +258,7 @@ class Str
      * @param string $str
      * @return string
      */
-    public static function unSlugify($str)
+    public static function unSlugify(string $str): string
     {
         return preg_replace('/[^a-z0-9]/', ' ', strtolower(trim(strip_tags($str))));
     }
@@ -276,7 +271,7 @@ class Str
      * @param string $email
      * @return bool
      */
-    public static function isMail($email)
+    public static function isMail(string $email): bool
     {
         $parts = explode('@', $email);
 
@@ -297,13 +292,13 @@ class Str
      * @return bool
      * @throws ErrorException
      */
-    public static function isDomain($domain)
+    public static function isDomain(string $domain): bool
     {
         if (!is_string($domain)) {
             throw new ErrorException('Accept string ' . gettype($domain) . ' given');
         }
 
-        return  (bool) preg_match(
+        return (bool) preg_match(
             '/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/',
             $domain
         );
@@ -316,7 +311,7 @@ class Str
      * @return bool
      * @throws ErrorException
      */
-    public static function isAlphaNum($str)
+    public static function isAlphaNum(string $str): bool
     {
         if (!is_string($str)) {
             throw new ErrorException('Accept string ' . gettype($str) . ' given');
@@ -332,13 +327,13 @@ class Str
      * @return bool
      * @throws ErrorException
      */
-    public static function isNumeric($str)
+    public static function isNumeric(string $str): bool
     {
         if (!is_string($str)) {
             throw new ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return  (bool) preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
+        return (bool) preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
     }
 
     /**
@@ -348,7 +343,7 @@ class Str
      * @return bool
      * @throws ErrorException
      */
-    public static function isAlpha($str)
+    public static function isAlpha(string $str): bool
     {
         if (!is_string($str)) {
             throw new ErrorException('Accept string ' . gettype($str) . ' given');
@@ -364,13 +359,13 @@ class Str
      * @return bool
      * @throws ErrorException
      */
-    public static function isSlug($str)
+    public static function isSlug(string $str): bool
     {
         if (!is_string($str)) {
             throw new ErrorException('Accept string ' . gettype($str) . ' given');
         }
 
-        return  (bool) preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
+        return (bool) preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
     }
 
     /**
@@ -379,7 +374,7 @@ class Str
      * @param  string $str
      * @return bool
      */
-    public static function isUpper($str)
+    public static function isUpper(string $str): bool
     {
         return static::upper($str) === $str;
     }
@@ -390,7 +385,7 @@ class Str
      * @param  string $str
      * @return bool
      */
-    public static function isLower($str)
+    public static function isLower(string $str): bool
     {
         return static::lower($str) === $str;
     }
@@ -402,7 +397,7 @@ class Str
      * @param string $str
      * @return int
      */
-    public static function count($pattern, $str)
+    public static function count(string $pattern, string $str): int
     {
         return count(explode($pattern, $str)) - 1;
     }
@@ -414,7 +409,7 @@ class Str
      * @param int $len
      * @return string
      */
-    public static function getWords($words, $len)
+    public static function getWords(string $words, int $len): string
     {
         $wordParts = explode(' ', $words);
 
@@ -433,7 +428,7 @@ class Str
      * @param string $words
      * @return string
      */
-    public static function shuffleWords($words)
+    public static function shuffleWords(string $words): string
     {
         $wordParts = explode(' ', trim($words));
 
@@ -463,7 +458,7 @@ class Str
      *
      * @return void
      */
-    public static function forceInUTF8()
+    public static function forceInUTF8(): void
     {
         mb_internal_encoding('UTF-8');
 
@@ -476,7 +471,7 @@ class Str
      * @param string $garbled_utf8_string
      * @return string
      */
-    public static function fixUTF8($garbled_utf8_string)
+    public static function fixUTF8(string $garbled_utf8_string): string
     {
         $utf8_string = Encoding::fixUTF8($garbled_utf8_string);
 

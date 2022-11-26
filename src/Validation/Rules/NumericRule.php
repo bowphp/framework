@@ -13,7 +13,7 @@ trait NumericRule
      * @param string $masque
      * @return void
      */
-    protected function compileNumber($key, $masque)
+    protected function compileNumber(string $key, string $masque): void
     {
         if (!preg_match("/^number$/", $masque, $match)) {
             return;
@@ -42,7 +42,7 @@ trait NumericRule
      * @param string $masque
      * @return void
      */
-    protected function compileInt($key, $masque)
+    protected function compileInt(string $key, string $masque): void
     {
         if (!preg_match("/^int$/", $masque, $match)) {
             return;
@@ -71,7 +71,7 @@ trait NumericRule
      * @param string $masque
      * @return void
      */
-    protected function compileFloat($key, $masque)
+    protected function compileFloat(string $key, string $masque): void
     {
         if (!preg_match("/^float$/", $masque, $match)) {
             return;

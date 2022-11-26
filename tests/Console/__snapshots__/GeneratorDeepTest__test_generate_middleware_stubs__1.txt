@@ -3,8 +3,9 @@
 namespace App\Middlewares;
 
 use Bow\Http\Request;
+use Bow\Middleware\BaseMiddleware;
 
-class FakeMiddleware
+class FakeMiddleware implements BaseMiddleware
 {
     /**
      * Handle an incoming request.
@@ -12,13 +13,12 @@ class FakeMiddleware
      * @param Request $request
      * @param callable $next
      * @param array $args
-     * 
      * @return mixed
      */
     public function process(Request $request, callable $next, array $args = []): void
     {
         // Code Here
-        
+
         return $next($request);
     }
 }

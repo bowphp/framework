@@ -1420,6 +1420,10 @@ class QueryBuilder implements \JsonSerializable
      */
     private static function isComparisonOperator(mixed $comparator): bool
     {
+        if (!is_string($comparator)) {
+            return false;
+        }
+
         return in_array(Str::upper($comparator), [
             '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN"
         ], true);

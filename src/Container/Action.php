@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Bow\Container;
 
-use Bow\Contracts\ResponseInterface;
-use Bow\Database\Barry\Model;
-use Bow\Http\Request;
-use Bow\Router\Exception\RouterException;
-use Bow\Support\Collection;
 use Closure;
-use InvalidArgumentException;
 use ReflectionClass;
-use ReflectionException;
+use Bow\Http\Request;
 use ReflectionFunction;
+use ReflectionException;
+use Bow\Support\Collection;
+use Bow\Database\Barry\Model;
+use InvalidArgumentException;
+use Bow\Middleware\BaseMiddleware;
+use Bow\Contracts\ResponseInterface;
+use Bow\Router\Exception\RouterException;
 
 class Action
 {
@@ -128,7 +129,7 @@ class Action
      * Callback launcher
      *
      * @param callable|string|array $actions
-     * @param mixed $param
+     * @param ?array $param
      * @return mixed
      * @throws RouterException
      * @throws ReflectionException
@@ -230,6 +231,7 @@ class Action
             if (is_string($middleware)) {
                 $parts = explode(':', $middleware, 2);
 
+                // We redefine the middleware name
                 $middleware = $parts[0];
             }
 
@@ -275,7 +277,6 @@ class Action
      *
      * @param array $functions
      * @param array $params
-     *
      * @return mixed
      */
     private function dispatchControllers(array $functions, array $params): mixed
@@ -414,7 +415,7 @@ class Action
      * @return array
      * @throws ReflectionException
      */
-    public function injector(string $classname, string $method = null): array
+    public function injector(string $classname, ?string $method = null): array
     {
         $reflection = new ReflectionClass($classname);
 

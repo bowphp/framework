@@ -15,7 +15,7 @@ trait DatabaseRule
      * @param string $masque
      * @return void
      */
-    protected function compileExists($key, $masque)
+    protected function compileExists(string $key, string $masque): void
     {
         if (!preg_match("/^exists:(.+)$/", $masque, $match)) {
             return;
@@ -53,7 +53,7 @@ trait DatabaseRule
      * @param string $masque
      * @return void
      */
-    protected function compileNotExists($key, $masque)
+    protected function compileNotExists(string $key, string $masque): void
     {
         if (!preg_match("/^!exists:(.+)$/", $masque, $match)) {
             return;

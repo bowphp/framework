@@ -27,7 +27,7 @@ class Validator
      *
      * @var bool
      */
-    protected $fails = false;
+    protected bool $fails = false;
 
     /**
      * The last name
