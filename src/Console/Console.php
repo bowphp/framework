@@ -164,7 +164,7 @@ class Console
         }
 
         try {
-            $this->call($command);
+            return $this->call($command);
         } catch (\Exception $exception) {
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
