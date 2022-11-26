@@ -148,7 +148,7 @@ class TestCase extends PHPUnitTestCase
      * @param array $param
      * @return Response
      */
-    public function patch($url, array $param = [])
+    public function patch(string $url, array $param = [])
     {
         $param = array_merge([
             '_method' => 'PATCH'
@@ -165,7 +165,7 @@ class TestCase extends PHPUnitTestCase
      * @param array  $params
      * @return Response
      */
-    public function visit($method, $url, array $params = [])
+    public function visit(string $method, string $url, array $params = []): Response
     {
         $method = strtolower($method);
 

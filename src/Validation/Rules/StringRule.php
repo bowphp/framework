@@ -13,7 +13,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileRequired($key, $masque): void
+    protected function compileRequired(string $key, string $masque): void
     {
         $error = false;
 
@@ -44,7 +44,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileEmpty($key, $masque): void
+    protected function compileEmpty(string $key, string $masque): void
     {
         if (isset($this->inputs[$key]) && !(is_null($this->inputs[$key]) || $this->inputs[$key] === '')) {
             $this->fails = true;
@@ -67,7 +67,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileAlphaNum($key, $masque)
+    protected function compileAlphaNum(string $key, string $masque): void
     {
         if (!preg_match("/^alphanum$/", $masque)) {
             return;
@@ -96,7 +96,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileIn($key, $masque)
+    protected function compileIn(string $key, string $masque): void
     {
         if (!preg_match("/^in:(.+)$/", $masque, $match)) {
             return;
@@ -135,7 +135,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileSize($key, $masque)
+    protected function compileSize(string $key, string $masque): void
     {
         if (!preg_match("/^size:(\d+)$/", $masque, $match)) {
             return;
@@ -169,7 +169,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileLower($key, $masque)
+    protected function compileLower(string $key, string $masque): void
     {
         if (!preg_match("/^lower/", $masque)) {
             return;
@@ -198,7 +198,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileUpper($key, $masque)
+    protected function compileUpper(string $key, string $masque): void
     {
         if (!preg_match("/^upper/", $masque)) {
             return;
@@ -227,7 +227,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileAlpha($key, $masque)
+    protected function compileAlpha(string $key, string $masque): void
     {
         if (!preg_match("/^alpha$/", $masque)) {
             return;
@@ -292,7 +292,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileMax($key, $masque)
+    protected function compileMax(string $key, string $masque): void
     {
         if (!preg_match("/^max:(\d+)$/", $masque, $match)) {
             return;
@@ -326,7 +326,7 @@ trait StringRule
      * @param string $masque
      * @return void
      */
-    protected function compileSame($key, $masque)
+    protected function compileSame(string $key, string $masque): void
     {
         if (!preg_match("/^same:(.+)$/", $masque, $match)) {
             return;

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Session\Driver;
 
-use Bow\Database\Database as DB;
 use Bow\Support\Capsule;
+use Bow\Database\QueryBuilder;
+use Bow\Database\Database as DB;
 
 class DatabaseDriver implements \SessionHandlerInterface
 {
@@ -16,29 +17,29 @@ class DatabaseDriver implements \SessionHandlerInterface
      *
      * @var string
      */
-    private $table;
+    private string $table;
 
     /**
      * The current session session_id
      *
      * @var string
      */
-    private $session_id;
+    private string $session_id;
 
     /**
      * The current user ip
      *
      * @var string
      */
-    private $ip;
+    private string $ip;
 
     /**
      * Database constructor
      *
-     * @param string $ip
      * @param array $options
+     * @param string $ip
      */
-    public function __construct(array $options, $ip)
+    public function __construct(array $options, string $ip)
     {
         $this->table = $options['table'] ?? 'sessions';
 
@@ -50,7 +51,7 @@ class DatabaseDriver implements \SessionHandlerInterface
      *
      * @return bool
      */
-    public function close()
+    public function close(): bool
     {
         return true;
     }
@@ -59,9 +60,9 @@ class DatabaseDriver implements \SessionHandlerInterface
      * Destroy session information
      *
      * @param string $session_id
-     * @return bool|void
+     * @return bool
      */
-    public function destroy($session_id)
+    public function destroy(string $session_id): bool
     {
         $this->sessions()
             ->where('id', $session_id)->delete();
@@ -73,9 +74,9 @@ class DatabaseDriver implements \SessionHandlerInterface
      * Garbage collector for cleans old sessions
      *
      * @param int $max_lifetime
-     * @return bool|void
+     * @return bool
      */
-    public function gc($max_lifetime)
+    public function gc(int $max_lifetime): bool
     {
         $this->sessions()
             ->where('time', '<', $this->createTimestamp())
@@ -89,9 +90,9 @@ class DatabaseDriver implements \SessionHandlerInterface
      *
      * @param string $save_path
      * @param string $name
-     * @return bool|void
+     * @return bool
      */
-    public function open($save_path, $name)
+    public function open(string $save_path, string $name): bool
     {
         return true;
     }
@@ -100,9 +101,9 @@ class DatabaseDriver implements \SessionHandlerInterface
      * Read the session information
      *
      * @param string $session_id
-     * @return string|void
+     * @return string
      */
-    public function read($session_id)
+    public function read(string $session_id): string
     {
         $session = $this->sessions()
             ->where('id', $session_id)->first();
@@ -121,7 +122,7 @@ class DatabaseDriver implements \SessionHandlerInterface
      * @param string $session_data
      * @return bool
      */
-    public function write($session_id, $session_data)
+    public function write(string $session_id, string $session_data): bool
     {
         // When create the new session record
         if (! $this->sessions()->where('id', $session_id)->exists()) {
@@ -143,9 +144,11 @@ class DatabaseDriver implements \SessionHandlerInterface
     /**
      * Get the insert data
      *
+     * @param string $session_id
+     * @param string $session_data
      * @return array
      */
-    private function data($session_id, $session_data)
+    private function data(string $session_id, string $session_data): array
     {
         return [
             'id' => $session_id,
@@ -158,9 +161,9 @@ class DatabaseDriver implements \SessionHandlerInterface
     /**
      * Get session QueryBuilder instance
      *
-     * @return \Bow\Database\QueryBuilder
+     * @return QueryBuilder
      */
-    private function sessions()
+    private function sessions(): QueryBuilder
     {
         return DB::table($this->table);
     }

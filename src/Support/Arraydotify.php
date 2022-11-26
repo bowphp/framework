@@ -59,11 +59,11 @@ class Arraydotify implements \ArrayAccess
     /**
      * Dotify action
      *
-     * @param array  $array
+     * @param array  $items
      * @param string $prepend
      * @return array
      */
-    private function dotify(array $items, $prepend = ''): array
+    private function dotify(array $items, string $prepend = ''): array
     {
         $dot = [];
 
@@ -90,9 +90,9 @@ class Arraydotify implements \ArrayAccess
      * @param mixed  $array
      * @param string $key
      * @param mixed  $value
-     * @return mixed
+     * @return array
      */
-    private function dataSet(mixed &$array, string $key, mixed $value)
+    private function dataSet(mixed &$array, string $key, mixed $value): array
     {
         $keys = explode('.', $key);
 

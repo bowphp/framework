@@ -17,4 +17,18 @@ We can set value with key `name`.
 session(["name", "value"]);
 ```
 
-NB: You can add your custom session support
+# Bow Cookie
+
+Get the cookie content:
+
+```php
+cookie('name');
+```
+
+Set the cookie:
+
+```php
+cookie('name', 'value');
+```
+
+NB: You can add your custom session support like redis or mongodb

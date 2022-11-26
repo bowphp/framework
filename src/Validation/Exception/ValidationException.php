@@ -29,7 +29,6 @@ class ValidationException extends HttpException
     ) {
         parent::__construct($message, 400);
         $this->errors = $errors;
-
         $this->status = $status;
     }
 

@@ -13,7 +13,7 @@ trait FieldLexical
      * @param string|array $attributes
      * @return ?string
      */
-    private function lexical($key, $attributes): ?string
+    private function lexical(string $key, string|array $attributes): ?string
     {
         if (is_string($attributes) && isset($this->messages[$attributes])) {
             return $this->messages[$attributes][$key] ?? $this->messages[$attributes];

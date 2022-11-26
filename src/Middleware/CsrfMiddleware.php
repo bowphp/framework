@@ -6,18 +6,19 @@ namespace Bow\Middleware;
 
 use Bow\Http\Request;
 use Bow\Security\Exception\TokenMismatch;
+use Bow\Middleware\BaseMiddleware;
 
-class CsrfMiddleware
+class CsrfMiddleware implements BaseMiddleware
 {
     /**
      * Handle an incoming request.
      *
      * @param  Request $request
      * @param  Callable $next
-     * @return bool
+     * @param  array $args
      * @throws
      */
-    public function process(Request $request, callable $next): mixed
+    public function process(Request $request, callable $next, array $args = []): mixed
     {
         foreach ($this->preventOn() as $url) {
             if ($request->is($url)) {

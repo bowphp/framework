@@ -17,7 +17,7 @@ trait EmailRule
      * @param string $masque
      * @return void
      */
-    protected function compileEmail($key, $masque)
+    protected function compileEmail(string $key, string $masque)
     {
         if (!preg_match("/^email$/", $masque, $match)) {
             return;

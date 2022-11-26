@@ -9,9 +9,9 @@ class Env
     /**
      * The env collection
      *
-     * @var object
+     * @var array
      */
-    private static $env;
+    private static ?array $env = null;
 
     /**
      * Check if env is load
@@ -27,11 +27,10 @@ class Env
      * Load env file
      *
      * @param string $filename
-     *
      * @return void
      * @throws
      */
-    public static function load($filename)
+    public static function load(string $filename)
     {
         if (static::$env != null) {
             return;
@@ -65,11 +64,10 @@ class Env
      * Retrieve information from the environment
      *
      * @param  string $key
-     * @param  null   $default
-     *
+     * @param  mixed $default
      * @return mixed
      */
-    public static function get($key, $default = null)
+    public static function get(string $key, mixed $default = null)
     {
         $value = getenv(Str::upper($key));
 
@@ -84,14 +82,14 @@ class Env
      * Allows you to modify the information of the environment
      *
      * @param string $key
-     * @param null   $value
-     *
+     * @param mixed   $value
      * @return mixed
      */
-    public static function set($key, $value)
+    public static function set(string $key, mixed $value): bool
     {
-        if (isset(static::$env->$key)) {
-            return static::$env->$key = $value;
+        if (isset(static::$env[$key])) {
+            static::$env[$key] = $value;
+            return true;
         }
 
         return putenv(Str::upper($key) . '=' . $value);
