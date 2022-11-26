@@ -102,7 +102,7 @@ class Event
     public static function emit(string $event): ?bool
     {
         $data = array_slice(func_get_args(), 1);
-        
+
         if (isset(static::$events['__bow.once.event'][$event])) {
             $listener = static::$events['__bow.once.event'][$event];
 
@@ -179,6 +179,6 @@ class Event
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \RuntimeException('The method '.$name.' There is no');
+        throw new \RuntimeException('The method ' . $name . ' There is no');
     }
 }

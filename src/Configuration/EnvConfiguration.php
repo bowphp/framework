@@ -21,7 +21,7 @@ class EnvConfiguration extends Configuration
             if ($path === false) {
                 throw new InvalidArgumentException(
                     "The application environment file [.env.json] is not exists. "
-                    ."Copy the .env.example.json file to .env.json"
+                    . "Copy the .env.example.json file to .env.json"
                 );
             }
             Env::load($config['app.env_file']);

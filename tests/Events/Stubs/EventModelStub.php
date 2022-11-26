@@ -11,7 +11,7 @@ class EventModelStub extends \Bow\Database\Barry\Model
     public function __construct(array $data = [])
     {
         parent::__construct($data);
-        $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY.'/event.txt';
+        $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
 
         file_put_contents($cache_filename, '');
 

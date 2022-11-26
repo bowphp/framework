@@ -17,21 +17,21 @@ class Capsule implements ArrayAccess
     * @var array
     */
     private array $registers = [];
-    
+
     /**
     * The container register for instance
     *
     * @var array
     */
     private array $instances = [];
-    
+
     /**
     * The container factory maker
     *
     * @var array
     */
     private array $factories = [];
-    
+
     /**
     * Represents a cache collector
     *
@@ -63,10 +63,10 @@ class Capsule implements ArrayAccess
         if (is_null(static::$instance)) {
             static::$instance = new Capsule();
         }
-        
+
         return static::$instance;
     }
-    
+
     /**
     * Make the
     *
@@ -82,30 +82,30 @@ class Capsule implements ArrayAccess
                 array_merge([$this], $this->parameters)
             );
         }
-        
+
         if (isset($this->instances[$key])) {
             return $this->instances[$key];
         }
-        
+
         if (!isset($this->registers[$key])) {
             return $this->resolve($key);
         }
-        
+
         if (is_callable($this->registers[$key])) {
             return $this->instances[$key] = call_user_func_array(
                 $this->registers[$key],
                 array_merge([$this], $this->parameters)
             );
         }
-        
+
         if (!is_object($this->registers[$key])) {
             return $this->instances[$key] = $this->resolve($key);
         }
-        
+
         if (method_exists($this->registers[$key], '__invoke')) {
             return  $this->instances[$key] = $this->registers[$key]();
         }
-        
+
         return null;
     }
 
@@ -120,11 +120,11 @@ class Capsule implements ArrayAccess
     public function makeWith(string $key, array $parameters = []): mixed
     {
         $this->parameters = $parameters;
-        
+
         $resolved = $this->resolve($key);
-        
+
         $this->parameters = [];
-        
+
         return $resolved;
     }
 
@@ -137,10 +137,10 @@ class Capsule implements ArrayAccess
     public function bind(string $key, callable $value)
     {
         $this->key[$key] = true;
-        
+
         $this[$key] = $value;
     }
-    
+
     /**
     * Register the instance of a class
     *
@@ -153,7 +153,7 @@ class Capsule implements ArrayAccess
     {
         $this->factories[$key] = $value;
     }
-    
+
     /**
     * Saves the instance of a class
     *
@@ -167,10 +167,10 @@ class Capsule implements ArrayAccess
         if (!is_object($instance)) {
             throw new InvalidArgumentException('Parameter [2] is invalid');
         }
-        
+
         $this->instances[$key] = $instance;
     }
-    
+
     /**
     * Instantiate a class by its key
     *
@@ -186,17 +186,17 @@ class Capsule implements ArrayAccess
         if (!$reflection->isInstantiable()) {
             return $key;
         }
-        
+
         $constructor = $reflection->getConstructor();
-        
+
         if (!$constructor) {
             return $reflection->newInstance();
         }
 
         $parameters = $constructor->getParameters();
-        
+
         $parameters_lists = [];
-        
+
         foreach ($parameters as $parameter) {
             if ($parameter->isDefaultValueAvailable()) {
                 $parameters_lists[] = $parameter->getDefaultValue();
@@ -209,13 +209,13 @@ class Capsule implements ArrayAccess
 
         if (!empty($this->parameters)) {
             $parameters_lists = $this->parameters;
-            
+
             $this->parameters = [];
         }
-        
+
         return $reflection->newInstanceArgs($parameters_lists);
     }
-    
+
     /**
     * @inheritDoc
     */
@@ -223,7 +223,7 @@ class Capsule implements ArrayAccess
     {
         return isset($this->key[$offset]);
     }
-    
+
     /**
     * @inheritDoc
     */
@@ -231,7 +231,7 @@ class Capsule implements ArrayAccess
     {
         return $this->make($offset);
     }
-    
+
     /**
     * @inheritDoc
     */
@@ -239,7 +239,7 @@ class Capsule implements ArrayAccess
     {
         $this->registers[$offset] = $value;
     }
-    
+
     /**
     * @inheritDoc
     */

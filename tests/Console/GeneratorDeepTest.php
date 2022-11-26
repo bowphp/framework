@@ -7,7 +7,7 @@ use Spatie\Snapshots\MatchesSnapshots;
 class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 {
     use MatchesSnapshots;
-    
+
     public function test_generate_command_stubs()
     {
         $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeCommand');

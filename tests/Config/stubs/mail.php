@@ -3,7 +3,7 @@
 return [
     'driver' => 'smtp',
     'charset'  => 'utf8',
-    
+
     'smtp' => [
         'hostname' => 'localhost',
         'username' => 'test@test.dev',

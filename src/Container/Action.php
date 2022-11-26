@@ -64,7 +64,7 @@ class Action
 
         $this->middlewares = $middlewares;
 
-        $this->dispatcher = new MiddlewareDispatcher;
+        $this->dispatcher = new MiddlewareDispatcher();
     }
 
     /**

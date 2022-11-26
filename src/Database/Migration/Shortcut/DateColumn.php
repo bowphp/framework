@@ -20,7 +20,7 @@ trait DateColumn
         if ($this->adapter == 'sqlite') {
             return $this->addColumn($column, 'text', $attribute);
         }
-        
+
         return $this->addColumn($column, 'datetime', $attribute);
     }
 

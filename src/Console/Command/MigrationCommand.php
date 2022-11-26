@@ -73,7 +73,7 @@ class MigrationCommand extends AbstractCommand
             ->whereIn('migration', array_values($migrations))->get();
 
         try {
-            $action = 'make'.strtoupper($type);
+            $action = 'make' . strtoupper($type);
 
             return $this->$action($current_migrations, $migrations);
         } catch (\Exception $exception) {
@@ -106,7 +106,7 @@ class MigrationCommand extends AbstractCommand
 
             try {
                 // Up migration
-                (new $migration)->up();
+                (new $migration())->up();
             } catch (\Exception $exception) {
                 $this->throwMigrationException($exception, $migration);
             }
@@ -145,7 +145,8 @@ class MigrationCommand extends AbstractCommand
 
         foreach ($current_migrations as $value) {
             foreach ($migrations as $file => $migration) {
-                if (!($value->batch == 1
+                if (
+                    !($value->batch == 1
                     && $migration == $value->migration)
                 ) {
                     continue;
@@ -156,7 +157,7 @@ class MigrationCommand extends AbstractCommand
 
                 // Rollback migration
                 try {
-                    (new $migration)->rollback();
+                    (new $migration())->rollback();
                 } catch (\Exception $exception) {
                     $this->throwMigrationException($exception, $migration);
                 }
@@ -192,7 +193,7 @@ class MigrationCommand extends AbstractCommand
     {
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to reset.');
-            
+
             return;
         }
 
@@ -210,13 +211,13 @@ class MigrationCommand extends AbstractCommand
                 if ($value->migration != $migration) {
                     continue;
                 }
-                
+
                 // Include the migration file
                 require $file;
 
                 // Rollback migration
                 try {
-                    (new $migration)->rollback();
+                    (new $migration())->rollback();
                 } catch (\Exception $exception) {
                     $this->throwMigrationException($exception, $migration);
                 }
@@ -270,7 +271,7 @@ class MigrationCommand extends AbstractCommand
         Database::connection($connection);
         $adapter = Database::getAdapterConnection();
 
-        $table = $adapter->getTablePrefix().config('database.migration', 'migrations');
+        $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
         $generator = new SQLGenerator(
             $table,
             $adapter->getName(),
@@ -364,7 +365,7 @@ class MigrationCommand extends AbstractCommand
      */
     private function getMigrationFiles()
     {
-        $file_pattern = $this->setting->getMigrationDirectory().strtolower("/*.php");
+        $file_pattern = $this->setting->getMigrationDirectory() . strtolower("/*.php");
 
         return glob($file_pattern);
     }
@@ -419,6 +420,6 @@ class MigrationCommand extends AbstractCommand
         ]);
 
         // Print console information
-        echo Color::green('The migration file has been successfully created')."\n";
+        echo Color::green('The migration file has been successfully created') . "\n";
     }
 }

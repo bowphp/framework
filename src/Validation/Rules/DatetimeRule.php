@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Bow\Validation\Rules;
 
@@ -48,10 +50,12 @@ trait DatetimeRule
             return;
         }
 
-        if (!preg_match(
-            '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
-            $this->inputs[$key]
-        )) {
+        if (
+            !preg_match(
+                '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
+                $this->inputs[$key]
+            )
+        ) {
             return;
         }
 

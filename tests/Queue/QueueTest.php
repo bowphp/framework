@@ -36,8 +36,8 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         $adapter->push(new BasicProducerStubs("running"));
         $adapter->run();
 
-        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY. '/producer.txt'));
-        $this->assertEquals(file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY. '/producer.txt'), 'running');
+        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'));
+        $this->assertEquals(file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'), 'running');
     }
 
     public function test_push_service_adapter_with_model()
@@ -49,8 +49,8 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         $adapter->push($producer);
         $adapter->run();
 
-        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY.'/producer.txt'));
-        $this->assertEquals(file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY.'/producer.txt'), 'running');
+        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'));
+        $this->assertEquals(file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'), 'running');
 
         $pet = PetModelStub::first();
         $this->assertNotNull($pet);

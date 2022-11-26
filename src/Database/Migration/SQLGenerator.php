@@ -15,7 +15,7 @@ class SQLGenerator
     use Shortcut\TextColumn;
     use Shortcut\DateColumn;
     use Shortcut\ConstraintColumn;
-    
+
     /**
      * The managed table name
      *
@@ -176,7 +176,7 @@ class SQLGenerator
         $statement = $pdo->query(sprintf('PRAGMA table_info(%s);', $this->table));
 
         $statement->execute();
-        
+
         $select = [];
 
         foreach ($statement->fetchAll() as $column) {
@@ -311,7 +311,7 @@ class SQLGenerator
         // Wrap default value
         if (in_array($type, ['VARCHAR', 'CHAR'])) {
             if (!is_null($default)) {
-                $default = "'".$default."'";
+                $default = "'" . $default . "'";
             }
         }
 
@@ -397,6 +397,6 @@ class SQLGenerator
      */
     private function prefixColumn(string $name, string $by): string
     {
-        return $this->table.'_'.$name.'_'.$by;
+        return $this->table . '_' . $name . '_' . $by;
     }
 }

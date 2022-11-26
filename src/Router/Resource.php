@@ -81,7 +81,7 @@ class Resource
      */
     private static function bind(string $url, mixed $controller, array $definition, array $where): void
     {
-        $path = '/'.trim($url.$definition['url'], '/');
+        $path = '/' . trim($url . $definition['url'], '/');
 
         // Launch of the route mapping method.
         $route = static::$application->{$definition['method']}(
@@ -90,7 +90,7 @@ class Resource
         );
 
         // Add name on the road
-        $name = str_replace('/', '.', $url).'.'.$definition['call'];
+        $name = str_replace('/', '.', $url) . '.' . $definition['call'];
 
         $route->name($name);
 

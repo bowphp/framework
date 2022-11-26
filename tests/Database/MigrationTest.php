@@ -26,7 +26,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->migration = new MigrationExtendedStub;
+        $this->migration = new MigrationExtendedStub();
     }
 
     public function test_add_sql()

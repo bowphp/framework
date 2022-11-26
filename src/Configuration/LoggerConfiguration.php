@@ -52,11 +52,11 @@ class LoggerConfiguration extends Configuration
      */
     private function loadFrontLogger(Logger $monolog, $error_handler)
     {
-        $whoops = new \Whoops\Run;
+        $whoops = new \Whoops\Run();
 
         if (app_env('APP_ENV') == 'development') {
             $whoops->pushHandler(
-                new \Whoops\Handler\PrettyPageHandler
+                new \Whoops\Handler\PrettyPageHandler()
             );
         }
 
@@ -66,7 +66,7 @@ class LoggerConfiguration extends Configuration
                     $monolog->error($exception->getMessage(), $exception->getTrace());
 
                     $result = call_user_func_array(
-                        [new $error_handler, 'handle'],
+                        [new $error_handler(), 'handle'],
                         [$exception]
                     );
 
@@ -108,7 +108,7 @@ class LoggerConfiguration extends Configuration
         $monolog = new Logger($name);
 
         $monolog->pushHandler(
-            new StreamHandler($log_dir . '/bow-'.date('Y-m-d').'.log', Logger::DEBUG)
+            new StreamHandler($log_dir . '/bow-' . date('Y-m-d') . '.log', Logger::DEBUG)
         );
 
         $monolog->pushHandler(

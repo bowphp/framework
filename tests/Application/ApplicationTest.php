@@ -111,7 +111,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         $app = new Application($request, $response);
         $app->bind($config);
-    
+
         $app->get('/', function () {
             return "work";
         });
@@ -143,7 +143,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         $app = new Application($request, $response);
         $app->bind($config);
-    
+
         $app->get('/', function () {
             return "not work";
         });

@@ -88,7 +88,7 @@ abstract class EngineAbstract
         $normalized_filename = $this->normalizeFilename($filename);
 
         // Vérification de l'existance du fichier
-        if ($this->config['path'] !== null && !file_exists($this->config['path'].'/'. $normalized_filename)) {
+        if ($this->config['path'] !== null && !file_exists($this->config['path'] . '/' . $normalized_filename)) {
             throw new ViewException(
                 sprintf(
                     'The view [%s] does not exists. %s/%s',

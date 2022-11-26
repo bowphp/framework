@@ -59,7 +59,7 @@ class Storage
         }
 
         if (!isset(static::$config['disk']['path'][$disk])) {
-            throw new DiskNotFoundException('The '.$disk.' disk is not define.');
+            throw new DiskNotFoundException('The ' . $disk . ' disk is not define.');
         }
 
         $config = static::$config['disk']['path'][$disk];

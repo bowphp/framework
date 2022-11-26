@@ -37,7 +37,7 @@ class DiskFilesystemService implements FilesystemInterface
         // Set the root folder
         chdir($this->base_directory);
     }
-    
+
     /**
      * Get the base directory
      *

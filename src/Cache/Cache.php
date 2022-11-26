@@ -84,7 +84,7 @@ class Cache
      * @param array $data
      * @return bool
      */
-    public static function addMany(array $data) : bool
+    public static function addMany(array $data): bool
     {
         $return = true;
 
@@ -168,7 +168,7 @@ class Cache
             if (is_callable($default)) {
                 return $default();
             }
-            
+
             return $default;
         }
 
@@ -328,17 +328,17 @@ class Cache
      */
     private static function makeHashFilename(string $key, bool $make_group_directory = false): string
     {
-        $hash = hash('sha256', '/bow_'.$key);
+        $hash = hash('sha256', '/bow_' . $key);
 
         $group = Str::slice($hash, 0, 2);
 
         if ($make_group_directory) {
-            if (!is_dir(static::$directory.'/'.$group)) {
-                @mkdir(static::$directory.'/'.$group);
+            if (!is_dir(static::$directory . '/' . $group)) {
+                @mkdir(static::$directory . '/' . $group);
             }
         }
 
-        return static::$directory.'/'.$group.'/'.$hash;
+        return static::$directory . '/' . $group . '/' . $hash;
     }
 
     /**

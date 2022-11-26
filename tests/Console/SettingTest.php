@@ -24,7 +24,7 @@ class SettingTest extends \PHPUnit\Framework\TestCase
     public function test_set_the_model_directory(string $method, string $directory)
     {
         $model_directory = TESTING_RESOURCE_BASE_DIRECTORY . $directory;
-    
+
         $set_method = 'set' . ucfirst($method) . 'Directory';
         $get_method = 'get' . ucfirst($method) . 'Directory';
 

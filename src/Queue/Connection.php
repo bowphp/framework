@@ -84,7 +84,7 @@ class Connection
         $driver = $this->connection ?: $this->config["default"];
 
         $connection = $this->config["connections"][$driver];
-        $queue = new static::$connections[$driver];
+        $queue = new static::$connections[$driver]();
 
         return $queue->configure($connection);
     }

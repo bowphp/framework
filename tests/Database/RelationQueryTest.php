@@ -47,7 +47,7 @@ class RelationQueryTest extends \PHPUnit\Framework\TestCase
     public function test_get_the_relationship()
     {
         $pet = PetWithMasterModelStub::find(1);
-     
+
         $master = $pet->master;
 
         $this->assertInstanceOf(PetMasterModelStub::class, $master);

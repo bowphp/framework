@@ -14,7 +14,7 @@ trait EventTrait
      */
     private static function formatEventName(string $event): string
     {
-        return str_replace('\\', '.', strtolower(static::class)).'.'.$event;
+        return str_replace('\\', '.', strtolower(static::class)) . '.' . $event;
     }
 
     /**

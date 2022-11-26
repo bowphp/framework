@@ -26,7 +26,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         static::$sendmail_command = TESTING_RESOURCE_BASE_DIRECTORY . '/sendmail';
 
         if (function_exists('shell_exec') && !file_exists(static::$sendmail_command)) {
-            shell_exec("echo 'exit 0;' > " . static::$sendmail_command ." && chmod +x " . static::$sendmail_command);
+            shell_exec("echo 'exit 0;' > " . static::$sendmail_command . " && chmod +x " . static::$sendmail_command);
         }
     }
 
@@ -66,7 +66,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
     {
         View::configure($this->config["view"]);
         Mail::configure($this->config["mail"]);
-        
+
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');
 

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Bow\Validation\Rules;
 
@@ -78,9 +80,9 @@ trait StringRule
         }
 
         $this->last_message = $this->lexical('alphanum', $key);
-        
+
         $this->fails = true;
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -142,7 +144,7 @@ trait StringRule
         }
 
         $length = (int) end($match);
-    
+
         if (Str::len($this->inputs[$key]) == $length) {
             return;
         }
@@ -153,7 +155,7 @@ trait StringRule
             'attribute' => $key,
             'length' => $length
         ]);
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -180,7 +182,7 @@ trait StringRule
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('lower', $key);
 
         $this->errors[$key][] = [
@@ -209,9 +211,9 @@ trait StringRule
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('upper', $key);
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -238,9 +240,9 @@ trait StringRule
         }
 
         $this->last_message = $this->lexical('alpha', $key);
-        
+
         $this->fails = true;
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message

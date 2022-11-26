@@ -10,7 +10,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
 
     public function setUp(): void
     {
-        $this->config = ConfigurationLoader::configure(__DIR__.'/stubs');
+        $this->config = ConfigurationLoader::configure(__DIR__ . '/stubs');
     }
 
     public function test_instance_of_loader()

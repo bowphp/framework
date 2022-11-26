@@ -114,7 +114,7 @@ class S3Service implements ServiceInterface
     public function prepend(string $filename, string $content): bool
     {
         $result = $this->get($filename);
-        $new_content = $content.PHP_EOL.$result;
+        $new_content = $content . PHP_EOL . $result;
         $this->put($filename, $new_content);
 
         return true;

@@ -347,7 +347,7 @@ if (!function_exists('method_field')) {
     {
         $method = strtoupper($method);
 
-        return '<input type="hidden" name="_method" value="'.$method.'">';
+        return '<input type="hidden" name="_method" value="' . $method . '">';
     }
 }
 
@@ -593,7 +593,7 @@ if (!function_exists('url')) {
         }
 
         if (is_string($url)) {
-            $current .= '/'.trim($url, '/');
+            $current .= '/' . trim($url, '/');
         }
 
         if (count($parameters) > 0) {
@@ -1552,10 +1552,10 @@ if (!function_exists('db_seed')) {
      */
     function db_seed($entry, array $data = [])
     {
-        $filename = rtrim(config('app.seeder_path'), '/').'/'.$entry.'_seeder.php';
+        $filename = rtrim(config('app.seeder_path'), '/') . '/' . $entry . '_seeder.php';
 
         if (!file_exists($filename)) {
-            throw new \ErrorException('['.$entry.'] seeder file not found');
+            throw new \ErrorException('[' . $entry . '] seeder file not found');
         }
 
         $seeds = require $filename;

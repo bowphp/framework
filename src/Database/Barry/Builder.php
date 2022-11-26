@@ -61,7 +61,7 @@ class Builder extends QueryBuilder
         if (!is_null($column) and is_null($value)) {
             $value = $column;
 
-            $column = (new $this->model)->getKey();
+            $column = (new $this->model())->getKey();
         }
 
         return $this->whereIn($column, (array) $value)->count() > 0;

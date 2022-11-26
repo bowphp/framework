@@ -3,7 +3,6 @@
 namespace Bow\Tests\Support;
 
 use Bow\Support\Collection;
-
 use Generator as PHPGenerator;
 
 class CollectionTest extends \PHPUnit\Framework\TestCase

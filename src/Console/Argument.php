@@ -201,7 +201,7 @@ class Argument
         }
 
         if (!in_array($input, ['y', 'n'])) {
-            echo Color::red('Invalid choice')."\n";
+            echo Color::red('Invalid choice') . "\n";
 
             return $this->readline($message);
         }

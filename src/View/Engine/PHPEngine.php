@@ -41,9 +41,9 @@ class PHPEngine extends EngineAbstract
             $filename = $this->config['path'] . '/' . $filename;
         }
 
-        $cache_hash_filename = '_PHP_'.md5($hash_filename).'.php';
+        $cache_hash_filename = '_PHP_' . md5($hash_filename) . '.php';
 
-        $cache_hash_filename = $this->config['cache'].'/'.$cache_hash_filename;
+        $cache_hash_filename = $this->config['cache'] . '/' . $cache_hash_filename;
 
         extract($data);
 
