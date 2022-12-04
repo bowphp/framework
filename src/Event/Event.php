@@ -100,10 +100,7 @@ class Event
         $events = (array) static::$events[$event_name];
 
         // Execute each listener
-        collect($events)->each(fn (Listener $listener) =>
-            $listener->getActionType() === 'string'
-            ? Action::getInstance()->execute($listener->getAction(), $data)
-            : $listener->call($data));
+        collect($events)->each(fn (Listener $listener) => $listener->call($data));
 
         return true;
     }

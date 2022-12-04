@@ -11,8 +11,6 @@ class UserEventListenerStub implements EventListener
     public function __construct()
     {
         $this->cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
-
-        file_put_contents($this->cache_filename, '');
     }
 
     /**
@@ -21,8 +19,10 @@ class UserEventListenerStub implements EventListener
      * @param mixed $event
      * @return void
      */
-    public function process($payload): void
+    public function process($payload = null): void
     {
-        file_put_contents($this->cache_filename, $event->getName());
+        dd($payload);
+        file_put_contents($this->cache_filename, '');
+        file_put_contents($this->cache_filename, 'dispatched');
     }
 }

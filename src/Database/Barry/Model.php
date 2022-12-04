@@ -346,9 +346,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function deleted(callable $cb): void
     {
-        $env = static::formatEventName('ondeleted');
+        $env = static::formatEventName('onDeleted');
 
-        listen_event_once($env, $cb);
+        event()->once($env, $cb);
     }
 
     /**
@@ -359,9 +359,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function created(callable $cb): void
     {
-        $env = static::formatEventName('oncreated');
+        $env = static::formatEventName('onCreated');
 
-        listen_event_once($env, $cb);
+        event()->once($env, $cb);
     }
 
     /**
@@ -372,9 +372,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function updated(callable $cb): void
     {
-        $env = static::formatEventName('onupdated');
+        $env = static::formatEventName('onUpdated');
 
-        listen_event_once($env, $cb);
+        event()->once($env, $cb);
     }
 
     /**

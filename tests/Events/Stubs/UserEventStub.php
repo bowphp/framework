@@ -11,7 +11,7 @@ class UserEventStub implements AppEvent
 
     private string $name;
 
-    public function construct(string $name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }

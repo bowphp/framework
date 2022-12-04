@@ -14,6 +14,6 @@ class FakeListener implements EventListener
 	 */
 	public function process(array $payload = []): void
 	{
-	    // Do Something
+        // do something here
 	}
 }

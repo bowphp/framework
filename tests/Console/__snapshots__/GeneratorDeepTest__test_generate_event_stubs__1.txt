@@ -3,15 +3,17 @@
 namespace App\Events;
 
 use Bow\Event\Contracts\AppEvent;
-use Bow\Packages\Trait\SerializationTrait;
+use Bow\Event\Dispatchable;
+use Bow\Queue\Traits\SerializesModels;
 
 class FakeEvent implements AppEvent
 {
-	use SerializationTrait;
+	use Dispatchable, SerializesModels;
 
-    public string $name = "FakeEvent";
-
-    public function __construct() 
+    /**
+     * Create a new event instance.
+     */
+    public function __construct()
     {
         // Do something here
     }
