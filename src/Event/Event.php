@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Event;
 
-use Bow\Container\Action;
 use Bow\Session\Session;
+use Bow\Container\Action;
 use Bow\Support\Collection;
+use Bow\Event\Contracts\ApplicationEvent;
 
 class Event
 {
@@ -96,27 +97,33 @@ class Event
     /**
      * Dispatch event
      *
-     * @param  string $event
+     * @param  string|ApplicationEvent $event
      * @return bool
      */
-    public static function emit(string $event): ?bool
+    public static function emit(string|ApplicationEvent $event): ?bool
     {
         $data = array_slice(func_get_args(), 1);
 
-        if (isset(static::$events['__bow.once.event'][$event])) {
-            $listener = static::$events['__bow.once.event'][$event];
+        if ($event instanceof ApplicationEvent) {
+            $event_name = get_class($event);
+        } else {
+            $event_name = $event;
+        }
+
+        if (isset(static::$events['__bow.once.event'][$event_name])) {
+            $listener = static::$events['__bow.once.event'][$event_name];
 
             return $listener->call($data);
         }
 
-        if (!static::bound($event)) {
+        if (!static::bound($event_name)) {
             return false;
         }
 
-        if (isset(static::$events[$event])) {
-            $events = static::$events[$event];
+        if (isset(static::$events[$event_name])) {
+            $events = (array) static::$events[$event_name];
         } else {
-            $events = static::$events['__bow.transmission.event'][$event];
+            $events = (array) static::$events['__bow.transmission.event'][$event_name];
         }
 
         $listeners = new Collection($events);
