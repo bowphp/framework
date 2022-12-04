@@ -58,7 +58,7 @@ class Console
      *
      * @var array
      */
-    const COMMAND = [
+    private const COMMAND = [
         'add', 'migration', 'migrate', 'run', 'generate', 'gen', 'seed', 'help', 'launch', 'clear'
     ];
 
@@ -67,7 +67,7 @@ class Console
      *
      * @var array
      */
-    const ADD_ACTION = [
+    private const ADD_ACTION = [
         'middleware', 'controller', 'model', 'validation',
         'seeder', 'migration', 'configuration', 'service',
         'exception', 'event', 'producer', 'command', 'listener'

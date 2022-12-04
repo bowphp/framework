@@ -14,7 +14,7 @@ class Message
      *
      * @var string
      */
-    const END = "\r\n";
+    public const END = "\r\n";
 
     /**
      * List of headers

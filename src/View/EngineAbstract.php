@@ -14,7 +14,7 @@ abstract class EngineAbstract
      *
      * @var array
      */
-    const HELPERS = [
+    protected const HELPERS = [
         'secure' => 'secure',
         'route' => 'route',
         'bow_hash' => 'bow_hash',

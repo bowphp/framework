@@ -18,7 +18,7 @@ use Bow\Router\Exception\RouterException;
 
 class Action
 {
-    const INJECTION_EXCEPTION_TYPE = [
+    private const INJECTION_EXCEPTION_TYPE = [
         'string', 'array', 'bool', 'int',
         'integer', 'double', 'float', 'callable',
         'object', 'stdclass', '\closure', 'closure'

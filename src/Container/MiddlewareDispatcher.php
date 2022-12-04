@@ -16,7 +16,7 @@ class MiddlewareDispatcher
     /**
      * @var int
      */
-    const PIPE_EMPTY = 1;
+    private const PIPE_EMPTY = 1;
 
     /**
      * @var int

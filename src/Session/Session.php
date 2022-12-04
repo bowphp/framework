@@ -16,7 +16,7 @@ class Session implements CollectionInterface
      *
      * @var array
      */
-    const CORE_SESSION_KEY = [
+    public const CORE_SESSION_KEY = [
         "flash" => "__bow.flash",
         "old" => "__bow.old",
         "listener" => "__bow.event.listener",
