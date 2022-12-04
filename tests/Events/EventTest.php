@@ -2,9 +2,10 @@
 
 namespace Bow\Tests\Events;
 
-use Bow\Database\Database;
 use Bow\Event\Event;
+use Bow\Database\Database;
 use Bow\Tests\Events\EventModelStub;
+use Bow\Tests\Events\Stubs\UserEventStub;
 
 class EventTest extends \PHPUnit\Framework\TestCase
 {
@@ -24,10 +25,9 @@ class EventTest extends \PHPUnit\Framework\TestCase
     public function setUp(): void
     {
         $this->cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
-    }
 
-    public function test_event_binding_and_email()
-    {
+        Event::on(UserEventStub::class, UserEventListenerStub::class);
+
         Event::on('user.destroy', function (string $name) {
             $this->assertEquals($name, 'destroy');
         });
@@ -38,6 +38,14 @@ class EventTest extends \PHPUnit\Framework\TestCase
 
         Event::emit('user.created', 'created');
         Event::emit('user.destroy', 'destroy');
+    }
+
+    public function test_event_binding_and_email()
+    {
+        $this->assertTrue(Event::bound('user.destroy'));
+        $this->assertTrue(Event::bound('user.created'));
+        $this->assertTrue(Event::bound(UserEventStub::class));
+        $this->assertFalse(Event::bound('user.updated'));
     }
 
     public function test_model_created_event_emited()
@@ -69,5 +77,12 @@ class EventTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals($pet->delete(), 1);
         $this->assertEquals('deleted', file_get_contents($this->cache_filename));
+    }
+
+    public function test_directly_from_event()
+    {
+        $pet = UserEventStub::dispatch("Franck");
+
+        $this->assertEquals("Franck", file_get_contents($this->cache_filename));
     }
 }

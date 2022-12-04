@@ -16,15 +16,15 @@ class EventModelStub extends \Bow\Database\Barry\Model
         file_put_contents($cache_filename, '');
 
         EventModelStub::created(function () use ($cache_filename) {
-            file_put_contents($cache_filename, 'created', FILE_APPEND);
+            file_put_contents($cache_filename, 'created');
         });
 
         EventModelStub::deleted(function () use ($cache_filename) {
-            file_put_contents($cache_filename, 'deleted', FILE_APPEND);
+            file_put_contents($cache_filename, 'deleted');
         });
 
         EventModelStub::updated(function () use ($cache_filename) {
-            file_put_contents($cache_filename, 'updated', FILE_APPEND);
+            file_put_contents($cache_filename, 'updated');
         });
     }
 }

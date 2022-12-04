@@ -50,7 +50,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
         $this->assertRegExp("@\nnamespace\sApp\\\Events;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeEvent\simplements\sApplicationEvent\n@", $content);
+        $this->assertRegExp("@\nclass\sFakeEvent\simplements\sAppEvent\n@", $content);
     }
 
     public function test_generate_exception_stubs()

@@ -19,10 +19,13 @@ services:
       USER: bob
       PASS: "12345"
     volumes:
-      - "./:/ftp/$USER"
+      - "ftp_storage:/ftp/$USER"
   mail:
     container_name: mail
     image: maildev/maildev
     ports:
       - "1025:25"
       - "1080:80"
+
+volumes:
+  ftp_storage:

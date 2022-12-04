@@ -2,10 +2,10 @@
 
 namespace App\Events;
 
-use Bow\Event\Contracts\ApplicationEvent;
+use Bow\Event\Contracts\AppEvent;
 use Bow\Packages\Trait\SerializationTrait;
 
-class FakeEvent implements ApplicationEvent
+class FakeEvent implements AppEvent
 {
 	use SerializationTrait;
 

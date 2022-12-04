@@ -2,18 +2,18 @@
 
 namespace {baseNamespace}{namespace};
 
-use Bow\Event\Contracts\ApplicationEvent;
+use Bow\Event\Contracts\AppEvent;
 use Bow\Event\Dispatchable;
 use Bow\Queue\Traits\SerializesModels;
 
-class {className} implements ApplicationEvent
+class {className} implements AppEvent
 {
 	use Dispatchable, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct() 
+    public function __construct()
     {
         // Do something here
     }

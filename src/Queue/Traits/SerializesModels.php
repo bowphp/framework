@@ -83,7 +83,8 @@ trait SerializesModels
             $property->setAccessible(true);
 
             $property->setValue(
-                $this, $values[$name]
+                $this,
+                $values[$name]
             );
         }
     }
