@@ -46,7 +46,7 @@ class Event
      * @param callable|array|string $fn
      * @param int $priority
      */
-    public static function on(string $event, callable $fn, int $priority = 0)
+    public static function on(string $event, callable|string $fn, int $priority = 0)
     {
         if (!static::bound($event)) {
             static::$events[$event] = [];

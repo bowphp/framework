@@ -26,8 +26,8 @@ trait EventTrait
     {
         $env = $this->formatEventName($event);
 
-        if (emitter()->bound($env)) {
-            emitter()->emit($env, $this);
+        if (event()->bound($env)) {
+            event()->emit($env, $this);
         }
     }
 }
