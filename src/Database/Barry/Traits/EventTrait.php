@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Traits;
 
+use Bow\Support\Str;
+
 trait EventTrait
 {
     /**
@@ -14,7 +16,7 @@ trait EventTrait
      */
     private static function formatEventName(string $event): string
     {
-        return str_replace('\\', '.', strtolower(static::class)).'.'.$event;
+        return str_replace('\\', '', strtolower(Str::snake(static::class))) . '.' . Str::snake($event);
     }
 
     /**
@@ -26,8 +28,8 @@ trait EventTrait
     {
         $env = $this->formatEventName($event);
 
-        if (emitter()->bound($env)) {
-            emitter()->emit($env, $this);
+        if (event()->bound($env)) {
+            event()->emit($env, $this);
         }
     }
 }

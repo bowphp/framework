@@ -171,7 +171,7 @@ abstract class Migration
      */
     final public function getTablePrefixed(string $table): string
     {
-        $table = $this->adapter->getTablePrefix().$table;
+        $table = $this->adapter->getTablePrefix() . $table;
 
         return $table;
     }

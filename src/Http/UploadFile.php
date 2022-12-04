@@ -129,7 +129,7 @@ class UploadFile
      */
     public function getHashName(): string
     {
-        return strtolower(hash('sha256', $this->getBasename())).'.'.$this->getExtension();
+        return strtolower(hash('sha256', $this->getBasename())) . '.' . $this->getExtension();
     }
 
     /**
@@ -154,7 +154,7 @@ class UploadFile
             @mkdir($to, 0777, true);
         }
 
-        $resolve = rtrim($to, '/').'/'.$filename;
+        $resolve = rtrim($to, '/') . '/' . $filename;
 
         return (bool) move_uploaded_file($this->file['tmp_name'], $resolve);
     }

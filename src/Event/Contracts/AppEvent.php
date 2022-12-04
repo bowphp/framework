@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Event\Contracts;
 
-interface ApplicationEvent
+interface AppEvent
 {
 }

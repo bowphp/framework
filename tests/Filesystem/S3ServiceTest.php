@@ -11,7 +11,7 @@ class S3ServiceTest extends \PHPUnit\Framework\TestCase
     public static function setUpBeforeClass(): void
     {
         $config = TestingConfiguration::getConfig();
-        
+
         Storage::configure($config["resource"]);
     }
 

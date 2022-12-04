@@ -18,7 +18,7 @@ trait ConsoleTrait
      */
     protected function throwFailsCommand(string $message, ?string $command = null): void
     {
-        echo Color::red($message)."\n";
+        echo Color::red($message) . "\n";
 
         if (!is_null($command)) {
             echo Color::green(sprintf('Type "php bow %s" for more information', $command));

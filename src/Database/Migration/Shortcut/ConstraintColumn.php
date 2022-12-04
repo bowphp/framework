@@ -28,7 +28,7 @@ trait ConstraintColumn
         $target = sprintf("%s_%s_foreign", $this->getTable(), $name);
 
         if (isset($attributes['on'])) {
-            $on = strtoupper(' ON ' .$attributes['on']);
+            $on = strtoupper(' ON ' . $attributes['on']);
         }
 
         if (isset($attributes['references'], $attributes['table'])) {

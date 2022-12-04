@@ -20,7 +20,7 @@ class ServerCommand extends AbstractCommand
         if (is_bool($settings)) {
             $settings = '';
         } else {
-            $settings = '-d '.$settings;
+            $settings = '-d ' . $settings;
         }
 
         // resource.
@@ -43,7 +43,7 @@ class ServerCommand extends AbstractCommand
 
         // Launch the dev server.
         shell_exec(
-            "php -S $hostname:$port -t {$public_directory} ".$filename." $settings"
+            "php -S $hostname:$port -t {$public_directory} " . $filename . " $settings"
         );
     }
 }

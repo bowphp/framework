@@ -14,7 +14,7 @@ class ServerAccessControl
      * @var Response
      */
     private Response $response;
-    
+
     /**
      * AccessControl constructor.
      *

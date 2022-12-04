@@ -1,12 +1,14 @@
 <?php
+
 /**
  * Fichier de configuration de la classe réssource
  */
+
 return [
     /**
      * Store location
      */
-    'disk' =>[
+    'disk' => [
         'mount' => 'storage',
         'path' => [
             'storage' => TESTING_RESOURCE_BASE_DIRECTORY,

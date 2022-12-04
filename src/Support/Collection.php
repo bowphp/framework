@@ -103,7 +103,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
         if (is_null($key)) {
             return $this->storage;
         }
-        
+
         if ($this->has($key)) {
             return $this->storage[$key] == null
                 ? $default

@@ -16,7 +16,10 @@ use Bow\Database\Barry\Traits\SerializableTrait;
 
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
-    use Relationship, EventTrait, ArrayAccessTrait, SerializableTrait;
+    use Relationship;
+    use EventTrait;
+    use ArrayAccessTrait;
+    use SerializableTrait;
 
     /**
      * The hidden field
@@ -186,7 +189,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function latest(): ?Model
     {
-        $query = new static;
+        $query = new static();
 
         return $query->orderBy($query->latest, 'desc')->first();
     }
@@ -204,7 +207,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     ): Collection|Model|null {
         $id = (array) $id;
 
-        $model = new static;
+        $model = new static();
         $model->select($select);
         $model->whereIn($model->primary_key, $id);
 
@@ -226,7 +229,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function findBy(string $column, mixed $value): Collection
     {
-        $model = new static;
+        $model = new static();
         $model->where($column, $value);
 
         return $model->get();
@@ -289,7 +292,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function create(array $data): Model
     {
-        $model = new static;
+        $model = new static();
 
         if ($model->timestamps) {
             $data = array_merge($data, [
@@ -316,7 +319,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if ($model->save() == 1) {
             // Throw the onCreated event
-            $model->fireEvent('oncreated');
+            $model->fireEvent('onCreated');
         }
 
         return $model;
@@ -343,9 +346,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function deleted(callable $cb): void
     {
-        $env = static::formatEventName('ondeleted');
+        $env = static::formatEventName('onDeleted');
 
-        listen_event_once($env, $cb);
+        event()->once($env, $cb);
     }
 
     /**
@@ -356,9 +359,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function created(callable $cb): void
     {
-        $env = static::formatEventName('oncreated');
+        $env = static::formatEventName('onCreated');
 
-        listen_event_once($env, $cb);
+        event()->once($env, $cb);
     }
 
     /**
@@ -369,9 +372,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function updated(callable $cb): void
     {
-        $env = static::formatEventName('onupdated');
+        $env = static::formatEventName('onUpdated');
 
-        listen_event_once($env, $cb);
+        event()->once($env, $cb);
     }
 
     /**
@@ -395,7 +398,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if (!isset($properties['table']) || $properties['table'] == null) {
             $parts = explode('\\', static::class);
-            $table = Str::snake(end($parts)).'s';
+            $table = Str::snake(end($parts)) . 's';
         } else {
             $table = $properties['table'];
         }
@@ -470,7 +473,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $this->original = $this->attributes;
 
             if ($row_affected == 1) {
-                $this->fireEvent('oncreated');
+                $this->fireEvent('onCreated');
             }
 
             return $row_affected;
@@ -503,7 +506,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Fire the updated event if there are affected row
         if ($updated) {
-            $this->fireEvent('onupdated');
+            $this->fireEvent('onUpdated');
         }
 
         return $updated;
@@ -564,7 +567,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // When the data for updating list is empty, we load the original data
         if (count($data_for_updating) == 0) {
-            $this->fireEvent('onupdated');
+            $this->fireEvent('onUpdated');
             return true;
         }
 
@@ -573,7 +576,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Fire the updated event if there are affected row
         if ($updated) {
-            $this->fireEvent('onupdated');
+            $this->fireEvent('onUpdated');
         }
 
         return $updated;
@@ -604,7 +607,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Fire the deleted event if there are affected row
         if ($deleted) {
-            $this->fireEvent('ondeleted');
+            $this->fireEvent('onDeleted');
         }
 
         return $deleted;

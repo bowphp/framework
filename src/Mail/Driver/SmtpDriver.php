@@ -13,7 +13,6 @@ use resource;
 
 class SmtpDriver implements MailDriverInterface
 {
-
     /**
      * Socket connection
      *

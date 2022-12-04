@@ -17,7 +17,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     {
         $this->generator = new SQLGenerator('bow_tests');
     }
-    
+
     /**
      * Test Add column action
      */
@@ -39,7 +39,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $sql = $this->generator->make();
         $this->assertEquals($sql, "`name` VARCHAR(100) NOT NULL DEFAULT 'bow'");
     }
-    
+
     /**
      * Test Add column action
      */

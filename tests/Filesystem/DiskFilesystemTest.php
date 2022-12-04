@@ -104,7 +104,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
     public function test_is_file()
     {
         file_put_contents($this->storage->getBaseDirectory() . "/tmp_file.txt", "some content");
-    
+
         $this->assertTrue($this->storage->isFile("tmp_file.txt"));
         $this->assertFalse($this->storage->isFile("is_not_a_right_file.txt"));
     }
@@ -113,7 +113,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
     {
         $filename = $this->storage->getBaseDirectory() . "/tmp_file.txt";
         file_put_contents($filename, "some content");
-    
+
         $this->assertEquals($this->storage->extension($filename), "txt");
         $this->assertNull($this->storage->extension("is_not_a_right_file.txt"));
     }

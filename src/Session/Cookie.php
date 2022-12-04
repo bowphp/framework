@@ -16,15 +16,6 @@ class Cookie
     private static array $is_decrypt = [];
 
     /**
-     * __clone
-     *
-     * @access private
-     */
-    final private function __clone()
-    {
-    }
-
-    /**
      * Check for existence of a key in the session collection
      *
      * @param string $key

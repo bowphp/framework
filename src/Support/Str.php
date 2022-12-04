@@ -71,10 +71,10 @@ class Str
         $str = preg_replace('/\s+/u', $delimiter, $str);
 
         $str = static::lower(preg_replace_callback('/([A-Z])/u', function ($math) use ($delimiter) {
-            return $delimiter.static::lower($math[1]);
+            return $delimiter . static::lower($math[1]);
         }, $str));
 
-        return trim(preg_replace('/'.$delimiter.'{2,}/', $delimiter, $str), $delimiter);
+        return trim(preg_replace('/' . $delimiter . '{2,}/', $delimiter, $str), $delimiter);
     }
 
     /**
@@ -88,10 +88,10 @@ class Str
         if (preg_match('/y$/', $str)) {
             $str = static::slice($str, 0, static::len($str) - 1);
 
-            return $str.'ies';
+            return $str . 'ies';
         }
 
-        preg_match('/s$/', $str) ?: $str = $str.'s';
+        preg_match('/s$/', $str) ?: $str = $str . 's';
 
         return $str;
     }

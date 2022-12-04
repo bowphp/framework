@@ -145,7 +145,7 @@ class QueryBuilder implements \JsonSerializable
         // Transaction Query builder to SQL for subquery
         foreach ($select as $key => $value) {
             if ($value instanceof QueryBuilder) {
-                $select[$key] = '('.$value->toSql().')';
+                $select[$key] = '(' . $value->toSql() . ')';
             }
         }
 
@@ -191,7 +191,7 @@ class QueryBuilder implements \JsonSerializable
         mixed $value = null,
         string $boolean = 'and'
     ): QueryBuilder {
-    
+
     // We check here the applied comparator
         if (!static::isComparisonOperator($comparator) || is_null($value)) {
             $value = $comparator;
@@ -211,16 +211,16 @@ class QueryBuilder implements \JsonSerializable
         }
 
         if ($value instanceof QueryBuilder) {
-            $indicator = "(".$value->toSql().")";
+            $indicator = "(" . $value->toSql() . ")";
         } else {
             $indicator = "?";
             $this->where_data_binding[] = $value;
         }
 
         if ($this->where == null) {
-            $this->where = $column . ' ' . $comparator . ' '.$indicator;
+            $this->where = $column . ' ' . $comparator . ' ' . $indicator;
         } else {
-            $this->where .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' '.$indicator;
+            $this->where .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' ' . $indicator;
         }
 
         return $this;
@@ -239,7 +239,7 @@ class QueryBuilder implements \JsonSerializable
         if ($this->where == null) {
             $this->where = $where;
         } else {
-            $this->where .= ' and '.$where;
+            $this->where .= ' and ' . $where;
         }
 
         return $this;
@@ -367,7 +367,7 @@ class QueryBuilder implements \JsonSerializable
     public function whereIn(string $column, array $range, string $boolean = 'and'): QueryBuilder
     {
         if ($range instanceof QueryBuilder) {
-            $range = "(".$range->toSql().")";
+            $range = "(" . $range->toSql() . ")";
         }
 
         if (is_array($range)) {
@@ -434,7 +434,7 @@ class QueryBuilder implements \JsonSerializable
         } else {
             $this->join .= ' ';
         }
-        
+
         // We check here the applied comparator
         if (!$this->isComparisonOperator($comparator)) {
             $second = $comparator;
@@ -470,7 +470,7 @@ class QueryBuilder implements \JsonSerializable
         } else {
             $this->join .= ' ';
         }
-        
+
         // We check here the applied comparator
         if (!$this->isComparisonOperator($comparator)) {
             $second = $comparator;
@@ -536,7 +536,7 @@ class QueryBuilder implements \JsonSerializable
                 E_ERROR
             );
         }
-        
+
         // We check here the applied comparator
         if (!$this->isComparisonOperator($comparator)) {
             $second = $comparator;
@@ -566,7 +566,7 @@ class QueryBuilder implements \JsonSerializable
                 E_ERROR
             );
         }
-        
+
         // We check here the applied comparator
         if (!$this->isComparisonOperator($comparator)) {
             $second = $comparator;
@@ -1245,7 +1245,7 @@ class QueryBuilder implements \JsonSerializable
         }
 
         if (!is_null($this->as)) {
-            $sql .= ' as '.$this->as;
+            $sql .= ' as ' . $this->as;
 
             $this->as = null;
         }

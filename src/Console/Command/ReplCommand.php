@@ -37,7 +37,7 @@ class ReplCommand extends AbstractCommand
 
         // Load the custum prompt
         $prompt = $this->arg->getParameter('--prompt', '(bow) >>');
-        $prompt = trim($prompt).' ';
+        $prompt = trim($prompt) . ' ';
 
         $config->setPrompt($prompt);
 

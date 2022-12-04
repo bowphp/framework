@@ -17,7 +17,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     {
         Database::statement('drop table pets');
     }
-    
+
     public function setUp(): void
     {
         Database::statement(
@@ -187,7 +187,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     public function test_rollback_table(Database $database)
     {
         $result = 0;
-        
+
         $database->startTransaction();
 
         $result = $database->delete("delete from pets where id = 3");

@@ -39,7 +39,7 @@ class Translator
     public function __construct(string $lang, string $directory, bool $auto_detected = false)
     {
         static::$lang = $lang;
-        
+
         if ($auto_detected) {
             static::$lang = strtolower(client_locale());
 
@@ -115,20 +115,20 @@ class Translator
         }
 
         // Formatage du path de fichier de la translation
-        $translation_filename = static::$directory.'/'.static::$lang.'/'.current($map).'.php';
+        $translation_filename = static::$directory . '/' . static::$lang . '/' . current($map) . '.php';
 
         if (!file_exists($translation_filename)) {
             return $key;
         }
 
         $contents = require $translation_filename;
-        
+
         if (!is_array($contents)) {
             return $key;
         }
 
         array_shift($map);
-        
+
         $key = implode('.', $map);
 
         $translations = Arraydotify::make($contents);
@@ -188,7 +188,7 @@ class Translator
     private static function format(string $str, array $values = []): string
     {
         foreach ($values as $key => $value) {
-            $str = preg_replace('/{\s*'.$key.'\s*\}/', $value, $str);
+            $str = preg_replace('/{\s*' . $key . '\s*\}/', $value, $str);
         }
 
         return $str;
@@ -227,6 +227,6 @@ class Translator
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \BadMethodCallException('Undefined method '.$name);
+        throw new \BadMethodCallException('Undefined method ' . $name);
     }
 }

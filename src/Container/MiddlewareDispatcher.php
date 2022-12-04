@@ -16,7 +16,7 @@ class MiddlewareDispatcher
     /**
      * @var int
      */
-    const PIPE_EMPTY = 1;
+    private const PIPE_EMPTY = 1;
 
     /**
      * @var int
@@ -66,7 +66,7 @@ class MiddlewareDispatcher
             }
 
             if (isset($middleware['class'])) {
-                $middleware = [new $middleware['class'], 'process'];
+                $middleware = [new $middleware['class'](), 'process'];
             }
         }
 

@@ -23,7 +23,7 @@ class MysqlAdapter extends AbstractConnection
      *
      * @var int
      */
-    const PORT = 3306;
+    public const PORT = 3306;
 
     /**
      * MysqlAdapter constructor.

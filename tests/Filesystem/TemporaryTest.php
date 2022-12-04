@@ -8,7 +8,7 @@ class TemporaryTest extends \PHPUnit\Framework\TestCase
 {
     public function testOpenAndClose()
     {
-        $temp = new Temporary;
+        $temp = new Temporary();
 
         $this->assertTrue($temp->isOpen());
 
@@ -18,7 +18,7 @@ class TemporaryTest extends \PHPUnit\Framework\TestCase
 
     public function test_write()
     {
-        $temp = new Temporary(sys_get_temp_dir().'/temp');
+        $temp = new Temporary(sys_get_temp_dir() . '/temp');
 
         $temp->write('hello bow');
 

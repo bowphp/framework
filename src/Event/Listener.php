@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Event;
 
+use Bow\Event\Contracts\EventListener;
+
 class Listener
 {
     /**
@@ -37,20 +39,20 @@ class Listener
      * Launch the listener function
      *
      * @param  array $data
-     * @return bool
+     * @return mixed
      */
-    public function call(array $data = []): bool
+    public function call(array $data = []): mixed
     {
         $callable = $this->callable;
 
-        if (is_string($this->callable) && class_exists($this->callable, true)) {
-            $instance = app($this->callable);
+        if (is_string($callable) && class_exists($callable, true)) {
+            $instance = app($callable);
             if ($instance instanceof EventListener) {
                 $callable = [$instance, 'process'];
             }
         }
 
-        return (bool) call_user_func_array($callable, $data);
+        return call_user_func_array($callable, $data);
     }
 
     /**

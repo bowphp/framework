@@ -16,7 +16,7 @@ class Session implements CollectionInterface
      *
      * @var array
      */
-    const CORE_SESSION_KEY = [
+    public const CORE_SESSION_KEY = [
         "flash" => "__bow.flash",
         "old" => "__bow.old",
         "listener" => "__bow.event.listener",
@@ -286,7 +286,7 @@ class Session implements CollectionInterface
             if (isset($cache[$key])) {
                 return true;
             }
-            
+
             if (isset($flash[$key])) {
                 return true;
             }
@@ -301,7 +301,7 @@ class Session implements CollectionInterface
         }
 
         $value = $flash[$key] ?? null;
-        
+
         if (!is_null($value)) {
             return count((array) $value) > 0;
         }
@@ -309,7 +309,7 @@ class Session implements CollectionInterface
         if (isset($_SESSION[$key]) && !is_null($_SESSION[$key])) {
             return count((array) $_SESSION[$key]) > 0;
         }
-        
+
         return false;
     }
 

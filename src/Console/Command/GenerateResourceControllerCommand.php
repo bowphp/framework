@@ -33,7 +33,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
 
         // We create the resource url prefix
         $prefix = preg_replace("/controller/i", "", strtolower($controller));
-        $prefix = '/'.trim($prefix, '/');
+        $prefix = '/' . trim($prefix, '/');
         $prefix = Str::plurial(Str::snake($prefix));
 
         $parameters = $this->arg->getParameters();
@@ -42,7 +42,8 @@ class GenerateResourceControllerCommand extends AbstractCommand
 
         // We check if --with-view exists. If that exists,
         // we launch the question
-        if ($parameters->has('--with-view')
+        if (
+            $parameters->has('--with-view')
             && $this->arg->readline("Do you want me to create the associated views? ")
         ) {
             $view_base_directory = preg_replace("/controller/i", "", strtolower($controller));
@@ -95,13 +96,13 @@ class GenerateResourceControllerCommand extends AbstractCommand
      */
     private function createDefaultView(string $base_directory): void
     {
-        @mkdir(config('view.path')."/". $base_directory, 0766);
+        @mkdir(config('view.path') . "/" . $base_directory, 0766);
 
         // We create the default CRUD view
         foreach (["create", "edit", "show", "index"] as $value) {
-            $filename = "$base_directory/$value".config('view.extension');
+            $filename = "$base_directory/$value" . config('view.extension');
 
-            touch(config('view.path').'/'.$filename);
+            touch(config('view.path') . '/' . $filename);
 
             echo "$filename added\n";
         }

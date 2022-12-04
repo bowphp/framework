@@ -129,7 +129,7 @@ class JwtGuard extends GuardContract
             throw new AuthenticationException('The token payload malformed.');
         }
 
-        $user = new $this->provider['model'];
+        $user = new $this->provider['model']();
 
         return $this->getUserBy($user->getKey(), $result['claims']['id']);
     }
@@ -180,7 +180,7 @@ class JwtGuard extends GuardContract
         if (is_null($this->token)) {
             throw new AuthenticationException("No user is logged in for get his id");
         }
-    
+
         $result = $this->getPolicier()->decode($this->token);
 
         return $result['claims']['id'];

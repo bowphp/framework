@@ -9,7 +9,7 @@ class SecurityTest extends \PHPUnit\Framework\TestCase
 {
     public function test_should_decrypt_data()
     {
-        Crypto::setkey(file_get_contents(__DIR__.'/stubs/.key'), 'AES-256-CBC');
+        Crypto::setkey(file_get_contents(__DIR__ . '/stubs/.key'), 'AES-256-CBC');
         $encrypted = Crypto::encrypt('bow');
 
         $this->assertEquals(Crypto::decrypt($encrypted), 'bow');

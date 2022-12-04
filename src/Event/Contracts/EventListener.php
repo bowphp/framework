@@ -9,8 +9,8 @@ interface EventListener
     /**
      * Process the event
      *
-     * @param array $payload
+     * @param mixed $payload
      * @return mixed
      */
-    public function process(array $payload): void;
+    public function process($payload): void;
 }

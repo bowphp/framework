@@ -242,7 +242,7 @@ class Response implements ResponseInterface
             $filename = basename($file);
         }
 
-        $this->addHeader('Content-Disposition', $disposition.'; filename='.$filename);
+        $this->addHeader('Content-Disposition', $disposition . '; filename=' . $filename);
         $this->addHeader('Content-Type', $type);
 
         $file_size = filesize($file);
@@ -270,7 +270,7 @@ class Response implements ResponseInterface
     {
         if (in_array((int) $code, array_keys(self::$header), true)) {
             $this->code = $code;
-            @header('HTTP/1.1 '. $code .' '. self::$header[$code], $this->override, $code);
+            @header('HTTP/1.1 ' . $code . ' ' . self::$header[$code], $this->override, $code);
         }
 
         return $this;
@@ -284,7 +284,7 @@ class Response implements ResponseInterface
     private function buildHttpResponse(): string
     {
         $status_text = static::$header[$this->code] ?? 'Unkdown';
-        @header('HTTP/1.1 '. $this->code .' '. $status_text, $this->override, $this->code);
+        @header('HTTP/1.1 ' . $this->code . ' ' . $status_text, $this->override, $this->code);
 
         foreach ($this->getHeaders() as $key => $header) {
             header(sprintf('%s: %s', $key, $header));

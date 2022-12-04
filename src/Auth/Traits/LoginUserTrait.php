@@ -23,17 +23,17 @@ trait LoginUserTrait
         if (!isset($credentials[$fields['username']])) {
             throw new AuthenticationException(
                 "Please check your passed variable for make attemps login."
-                ."The 'credentials.{$fields['username']}' key not found."
+                . "The 'credentials.{$fields['username']}' key not found."
             );
         }
 
         if (!isset($credentials[$fields['password']])) {
             throw new AuthenticationException(
                 "Please check your passed variable for make attemps login."
-                ."The 'credentials.{$fields['password']}' key not found."
+                . "The 'credentials.{$fields['password']}' key not found."
             );
         }
-    
+
         $column = $fields['username'];
         $value = $credentials[$fields['username']];
 

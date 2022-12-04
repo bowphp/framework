@@ -13,7 +13,7 @@ use Bow\Console\Traits\ConsoleTrait;
 class SeederCommand extends AbstractCommand
 {
     use ConsoleTrait;
-    
+
     /**
      * Create a seeder
      *
@@ -52,7 +52,7 @@ class SeederCommand extends AbstractCommand
      */
     public function all(): void
     {
-        $seeds_filenames = glob($this->setting->getSeederDirectory().'/*_seeder.php');
+        $seeds_filenames = glob($this->setting->getSeederDirectory() . '/*_seeder.php');
 
         $this->make($seeds_filenames);
     }
@@ -71,14 +71,14 @@ class SeederCommand extends AbstractCommand
             $this->throwFailsCommand('Specify the seeder table name', 'help seed');
         }
 
-        if (!file_exists($this->setting->getSeederDirectory()."/{$table_name}_seeder.php")) {
+        if (!file_exists($this->setting->getSeederDirectory() . "/{$table_name}_seeder.php")) {
             echo Color::red("Seeder $table_name not exists.");
 
             exit(1);
         }
 
         $this->make([
-            $this->setting->getSeederDirectory()."/{$table_name}_seeder.php"
+            $this->setting->getSeederDirectory() . "/{$table_name}_seeder.php"
         ]);
     }
 
@@ -107,7 +107,7 @@ class SeederCommand extends AbstractCommand
             foreach ($seed_collection as $table => $seed) {
                 $result = $connection->table($table)->insert($seed);
 
-                echo Color::green("$result seed".($result > 1 ? 's' : '')." on $table table\n");
+                echo Color::green("$result seed" . ($result > 1 ? 's' : '') . " on $table table\n");
             }
         } catch (\Exception $e) {
             echo Color::red($e->getMessage());

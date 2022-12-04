@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Event;
 
-use Bow\Container\Action;
 use Bow\Session\Session;
+use Bow\Container\Action;
 use Bow\Support\Collection;
+use Bow\Event\Contracts\AppEvent;
 
 class Event
 {
@@ -45,7 +46,7 @@ class Event
      * @param callable|array|string $fn
      * @param int $priority
      */
-    public static function on($event, $fn, $priority = 0)
+    public static function on(string $event, callable|string $fn, int $priority = 0)
     {
         if (!static::bound($event)) {
             static::$events[$event] = [];
@@ -56,29 +57,6 @@ class Event
         uasort(static::$events[$event], function (Listener $first_listener, Listener $second_listener) {
             return $first_listener->getPriority() < $second_listener->getPriority();
         });
-    }
-
-    /**
-     * Send an event page to page
-     *
-     * @param string $event
-     * @param callable|array|string $fn
-     * @param int $priority
-     * @throws EventException
-     */
-    public static function onTransmission(string $event, callable|array|string $fn, int $priority = 0)
-    {
-        if (!static::bound($event)) {
-            static::$events['__bow.transmission.event'][$event] = [];
-        }
-
-        if (!is_string($fn) || !is_array($fn)) {
-            throw new EventException('The transmission event must be a string function name');
-        }
-
-        static::$events['__bow.transmission.event'][$event][] = new Listener($fn, $priority);
-
-        Session::getInstance()->add("__bow.event.listener", static::$events['__bow.transmission.event']);
     }
 
     /**
@@ -96,40 +74,33 @@ class Event
     /**
      * Dispatch event
      *
-     * @param  string $event
+     * @param  string|AppEvent $event
      * @return bool
      */
-    public static function emit(string $event): ?bool
+    public static function emit(string|AppEvent $event): ?bool
     {
         $data = array_slice(func_get_args(), 1);
-        
-        if (isset(static::$events['__bow.once.event'][$event])) {
-            $listener = static::$events['__bow.once.event'][$event];
+        $event_name = $event;
+
+        if ($event instanceof AppEvent) {
+            $event_name = get_class($event);
+            $data = [$event];
+        }
+
+        if (!static::bound($event_name)) {
+            throw new EventException("The $event_name not found");
+        }
+
+        if (isset(static::$events['__bow.once.event'][$event_name])) {
+            $listener = static::$events['__bow.once.event'][$event_name];
 
             return $listener->call($data);
         }
 
-        if (!static::bound($event)) {
-            return false;
-        }
+        $events = (array) static::$events[$event_name];
 
-        if (isset(static::$events[$event])) {
-            $events = static::$events[$event];
-        } else {
-            $events = static::$events['__bow.transmission.event'][$event];
-        }
-
-        $listeners = new Collection($events);
-
-        $listeners->each(function (Listener $listener) use ($data) {
-            if ($listener->getActionType() === 'string') {
-                $callable = $listener->getAction();
-            } else {
-                $callable = [$listener, 'call'];
-            }
-
-            return Action::getInstance()->execute($callable, [$data]);
-        });
+        // Execute each listener
+        collect($events)->each(fn (Listener $listener) => $listener->call($data));
 
         return true;
     }
@@ -144,7 +115,6 @@ class Event
         if (static::bound($event)) {
             unset(
                 static::$events[$event],
-                static::$events['__bow.transmission.event'][$event],
                 static::$events['__bow.once.event'][$event]
             );
         }
@@ -159,11 +129,8 @@ class Event
     public static function bound(string $event): bool
     {
         $onces = static::$events['__bow.once.event'] ?? [];
-        $translations = static::$events['__bow.transmission.event'] ?? [];
 
-        return array_key_exists($event, $onces)
-            || array_key_exists($event, static::$events)
-            || array_key_exists($event, $translations);
+        return array_key_exists($event, $onces) || array_key_exists($event, static::$events);
     }
 
     /**
@@ -179,6 +146,6 @@ class Event
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \RuntimeException('The method '.$name.' There is no');
+        throw new \RuntimeException('The method ' . $name . ' There is no');
     }
 }

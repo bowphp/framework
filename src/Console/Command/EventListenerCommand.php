@@ -17,7 +17,7 @@ class EventListenerCommand extends AbstractCommand
     public function generate(string $event): void
     {
         $generator = new Generator(
-            $this->setting->getEventDirectory(),
+            $this->setting->getEventListenerDirectory(),
             $event
         );
 

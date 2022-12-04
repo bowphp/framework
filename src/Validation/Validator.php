@@ -99,7 +99,7 @@ class Validator
      */
     public function __construct()
     {
-        $this->lexical = require __DIR__.'/stubs/lexical.php';
+        $this->lexical = require __DIR__ . '/stubs/lexical.php';
     }
 
     /**
@@ -155,7 +155,7 @@ class Validator
 
                 // Mask on the required rule
                 foreach ($this->rules as $rule) {
-                    $this->{'compile'.$rule}($key, $masque);
+                    $this->{'compile' . $rule}($key, $masque);
                     if ($rule == 'Required' && $this->fails) {
                         break;
                     }

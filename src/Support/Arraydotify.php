@@ -69,7 +69,7 @@ class Arraydotify implements \ArrayAccess
 
         foreach ($items as $key => $value) {
             if (!(is_array($value) || is_object($value))) {
-                $dot[$prepend.$key] = $value;
+                $dot[$prepend . $key] = $value;
                 continue;
             }
 
@@ -77,7 +77,7 @@ class Arraydotify implements \ArrayAccess
 
             $dot = array_merge($dot, $this->dotify(
                 $value,
-                $prepend.$key.'.'
+                $prepend . $key . '.'
             ));
         }
 
@@ -174,7 +174,7 @@ class Arraydotify implements \ArrayAccess
             ? $this->items[$offset]
             : $this->find($this->origin, $offset);
     }
-    
+
     /**
      * @inheritDoc
      */

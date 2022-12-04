@@ -6,7 +6,7 @@ class TranslationTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        Translator::configure('fr', __DIR__.'/stubs');
+        Translator::configure('fr', __DIR__ . '/stubs');
     }
 
     public function test_fr_welcome_message()

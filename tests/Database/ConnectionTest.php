@@ -4,8 +4,8 @@ namespace Bow\Tests\Database;
 
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Database\Connection\AbstractConnection;
-use \Bow\Database\Connection\Adapter\MysqlAdapter;
-use \Bow\Database\Connection\Adapter\SqliteAdapter;
+use Bow\Database\Connection\Adapter\MysqlAdapter;
+use Bow\Database\Connection\Adapter\SqliteAdapter;
 use Bow\Configuration\Loader as ConfigurationLoader;
 
 class ConnectionTest extends \PHPUnit\Framework\TestCase

@@ -43,7 +43,7 @@ class SqliteAdapter extends AbstractConnection
         }
 
         // Build the PDO connection
-        $this->pdo = new PDO('sqlite:'.$this->config['database']);
+        $this->pdo = new PDO('sqlite:' . $this->config['database']);
 
         // Set the PDO attributes that we want
         $this->pdo->setAttribute(
