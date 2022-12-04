@@ -319,7 +319,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if ($model->save() == 1) {
             // Throw the onCreated event
-            $model->fireEvent('oncreated');
+            $model->fireEvent('onCreated');
         }
 
         return $model;
@@ -473,7 +473,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $this->original = $this->attributes;
 
             if ($row_affected == 1) {
-                $this->fireEvent('oncreated');
+                $this->fireEvent('onCreated');
             }
 
             return $row_affected;
@@ -506,7 +506,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Fire the updated event if there are affected row
         if ($updated) {
-            $this->fireEvent('onupdated');
+            $this->fireEvent('onUpdated');
         }
 
         return $updated;
@@ -567,7 +567,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // When the data for updating list is empty, we load the original data
         if (count($data_for_updating) == 0) {
-            $this->fireEvent('onupdated');
+            $this->fireEvent('onUpdated');
             return true;
         }
 
@@ -576,7 +576,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Fire the updated event if there are affected row
         if ($updated) {
-            $this->fireEvent('onupdated');
+            $this->fireEvent('onUpdated');
         }
 
         return $updated;
@@ -607,7 +607,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Fire the deleted event if there are affected row
         if ($deleted) {
-            $this->fireEvent('ondeleted');
+            $this->fireEvent('onDeleted');
         }
 
         return $deleted;

@@ -19,10 +19,9 @@ class UserEventListenerStub implements EventListener
      * @param mixed $event
      * @return void
      */
-    public function process($payload = null): void
+    public function process($event): void
     {
-        dd($payload);
         file_put_contents($this->cache_filename, '');
-        file_put_contents($this->cache_filename, 'dispatched');
+        file_put_contents($this->cache_filename, $event->getName());
     }
 }

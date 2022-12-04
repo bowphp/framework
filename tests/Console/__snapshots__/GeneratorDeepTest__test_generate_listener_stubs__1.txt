@@ -9,10 +9,10 @@ class FakeListener implements EventListener
 	/**
 	 * Process the event
 	 * 
-	 * @param array $payload
-	 * @return mixed
+	 * @param mixed $event
+	 * @return void
 	 */
-	public function process(array $payload = []): void
+	public function process($event): void
 	{
         // do something here
 	}

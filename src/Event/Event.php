@@ -84,7 +84,7 @@ class Event
 
         if ($event instanceof AppEvent) {
             $event_name = get_class($event);
-            $data = (array) $event;
+            $data = [$event];
         }
 
         if (!static::bound($event_name)) {
