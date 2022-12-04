@@ -3,14 +3,16 @@
 namespace {baseNamespace}{namespace};
 
 use Bow\Event\Contracts\ApplicationEvent;
-use Bow\Packages\Trait\SerializationTrait;
+use Bow\Event\Dispatchable;
+use Bow\Packages\Trait\SerializesModels;
 
-class {className} implements ApplicationEvent
+class {className} extends ApplicationEvent
 {
-	use SerializationTrait;
+	use Dispatchable, SerializesModels,;
 
-    public string $name = "{className}";
-
+    /**
+     * Create a new event instance.
+     */
     public function __construct() 
     {
         // Do something here

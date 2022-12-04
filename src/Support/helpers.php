@@ -719,87 +719,23 @@ if (!function_exists('db_commit')) {
     }
 }
 
-if (!function_exists('listen_event')) {
+if (!function_exists('event')) {
     /**
-     * Add event
+     * Event event
      *
-     * @param  string  $event
-     * @param  callable|array|string $fn
-     * @return Event
-     *
-     * @throws \Bow\Event\EventException
+     * @return mixed
      */
-    function listen_event($event, $fn)
+    function event(): mixed
     {
-        if (!is_string($event)) {
-            throw new \Bow\Event\EventException(
-                'The first parameter must be a string.'
-            );
+        $args = func_get_args();
+
+        $event = Event::getInstance();
+
+        if (count($args) === 0) {
+            return $event;
         }
 
-        return call_user_func_array(
-            [emitter(), 'on'],
-            [$event, $fn]
-        );
-    }
-}
-
-if (!function_exists('listen_event_once')) {
-    /**
-     * Add once event
-     *
-     * @param  string                $event
-     * @param  callable|array|string $fn
-     * @return Event
-     * @throws \Bow\Event\EventException
-     */
-    function listen_event_once($event, $fn)
-    {
-        if (!is_string($event)) {
-            throw new \Bow\Event\EventException(
-                'The first parameter must be a string.'
-            );
-        }
-
-        return call_user_func_array(
-            [emitter(), 'once'],
-            [$event, $fn]
-        );
-    }
-}
-
-if (!function_exists('emitter')) {
-    /**
-     * Event emitter
-     *
-     * @return Event
-     */
-    function emitter()
-    {
-        return Event::getInstance();
-    }
-}
-
-if (!function_exists('emit_event')) {
-    /**
-     * Fire event
-     *
-     * @param  string $event
-     * @return void
-     * @throws \Bow\Event\EventException
-     */
-    function emit_event($event)
-    {
-        if (!is_string($event)) {
-            throw new \Bow\Event\EventException(
-                'The first parameter must be a string.'
-            );
-        }
-
-        call_user_func_array(
-            [emitter(), 'emit'],
-            func_get_args()
-        );
+        return call_user_func_array([$event, "emit"], $args);
     }
 }
 
