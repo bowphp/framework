@@ -63,7 +63,7 @@ jobs:
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Check code standard
-        run: ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
+        run: ./vendor/bin/phpcs --standard=psr12 --severity=4 --tab-width=4 src --ignore="tests"
 
       - name: Run test suite
         run: composer run-script test
