@@ -108,7 +108,7 @@ class BeanstalkdAdapter extends QueueAdapter
     {
         $this->pheanstalk
             ->useTube($producer->getQueue())
-            ->put($this->serializeProducer($producer), $producer->getDelay(), $producer->getRetry());
+            ->put(serialize($producer), $producer->getDelay(), $producer->getRetry());
     }
 
     /**
@@ -128,7 +128,7 @@ class BeanstalkdAdapter extends QueueAdapter
 
         try {
             $payload = $job->getData();
-            $producer = $this->unserializeProducer($payload);
+            $producer = unserialize($payload);
             call_user_func([$producer, "process"]);
             $this->pheanstalk->touch($job);
             $this->deleteJob($queue, $job->getId());
