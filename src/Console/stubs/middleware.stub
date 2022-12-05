@@ -1,0 +1,24 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Http\Request;
+use Bow\Middleware\BaseMiddleware;
+
+class {className} implements BaseMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param Request $request
+     * @param callable $next
+     * @param array $args
+     * @return mixed
+     */
+    public function process(Request $request, callable $next, array $args = []): void
+    {
+        // Code Here
+
+        return $next($request);
+    }
+}

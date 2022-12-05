@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Container;
 
 use ArrayAccess;
 use Closure;
 use InvalidArgumentException;
 use ReflectionClass;
-use ReflectionException;
-use ReflectionFunction;
 
 class Capsule implements ArrayAccess
 {
@@ -16,66 +16,65 @@ class Capsule implements ArrayAccess
     *
     * @var array
     */
-    private $registers = [];
-    
+    private array $registers = [];
+
     /**
     * The container register for instance
     *
     * @var array
     */
-    private $instances = [];
-    
+    private array $instances = [];
+
     /**
     * The container factory maker
     *
     * @var array
     */
-    private $factories = [];
-    
+    private array $factories = [];
+
     /**
     * Represents a cache collector
     *
     * @var array
     */
-    private $key = [];
-    
+    private array $key = [];
+
     /**
     * Represents the compilation parameters
     *
     * @var array
     */
-    private $parameters = [];
-    
+    private array $parameters = [];
+
     /**
     * Represents the instance of Capsule
     *
     * @var Capsule
     */
-    private static $instance;
-    
+    private static ?Capsule $instance = null;
+
     /**
     * Get instance of Capsule
     *
     * @return Capsule
     */
-    public static function getInstance()
+    public static function getInstance(): Capsule
     {
         if (is_null(static::$instance)) {
             static::$instance = new Capsule();
         }
-        
+
         return static::$instance;
     }
-    
+
     /**
     * Make the
     *
     * @param string $key
-    *
     * @return mixed
     * @throws
     */
-    public function make($key)
+    public function make(string $key): mixed
     {
         if (isset($this->factories[$key])) {
             return call_user_func_array(
@@ -83,66 +82,65 @@ class Capsule implements ArrayAccess
                 array_merge([$this], $this->parameters)
             );
         }
-        
+
         if (isset($this->instances[$key])) {
             return $this->instances[$key];
         }
-        
+
         if (!isset($this->registers[$key])) {
             return $this->resolve($key);
         }
-        
+
         if (is_callable($this->registers[$key])) {
             return $this->instances[$key] = call_user_func_array(
                 $this->registers[$key],
                 array_merge([$this], $this->parameters)
             );
         }
-        
+
         if (!is_object($this->registers[$key])) {
             return $this->instances[$key] = $this->resolve($key);
         }
-        
+
         if (method_exists($this->registers[$key], '__invoke')) {
             return  $this->instances[$key] = $this->registers[$key]();
         }
-        
+
         return null;
     }
-    
+
     /**
-    * Compilation with parameter
-    *
-    * @param mixed $key
-    * @param array $parameters
-    * @return mixed
-    * @throws
-    */
-    public function makeWith($key, $parameters = [])
+     * Compilation with parameter
+     *
+     * @param string $key
+     * @param array $parameters
+     * @return mixed
+     * @throws
+     */
+    public function makeWith(string $key, array $parameters = []): mixed
     {
         $this->parameters = $parameters;
-        
+
         $resolved = $this->resolve($key);
-        
+
         $this->parameters = [];
-        
+
         return $resolved;
     }
-    
+
     /**
-    * Add to register
-    *
-    * @param string $key
-    *
-    * @param mixed  $value
-    */
-    public function bind($key, $value)
+     * Add to register
+     *
+     * @param string $key
+     * @param callable  $value
+     */
+    public function bind(string $key, callable $value)
     {
         $this->key[$key] = true;
-        
+
         $this[$key] = $value;
     }
-    
+
     /**
     * Register the instance of a class
     *
@@ -155,7 +153,7 @@ class Capsule implements ArrayAccess
     {
         $this->factories[$key] = $value;
     }
-    
+
     /**
     * Saves the instance of a class
     *
@@ -169,10 +167,10 @@ class Capsule implements ArrayAccess
         if (!is_object($instance)) {
             throw new InvalidArgumentException('Parameter [2] is invalid');
         }
-        
+
         $this->instances[$key] = $instance;
     }
-    
+
     /**
     * Instantiate a class by its key
     *
@@ -188,17 +186,17 @@ class Capsule implements ArrayAccess
         if (!$reflection->isInstantiable()) {
             return $key;
         }
-        
+
         $constructor = $reflection->getConstructor();
-        
+
         if (!$constructor) {
             return $reflection->newInstance();
         }
 
         $parameters = $constructor->getParameters();
-        
+
         $parameters_lists = [];
-        
+
         foreach ($parameters as $parameter) {
             if ($parameter->isDefaultValueAvailable()) {
                 $parameters_lists[] = $parameter->getDefaultValue();
@@ -211,41 +209,41 @@ class Capsule implements ArrayAccess
 
         if (!empty($this->parameters)) {
             $parameters_lists = $this->parameters;
-            
+
             $this->parameters = [];
         }
-        
+
         return $reflection->newInstanceArgs($parameters_lists);
     }
-    
+
     /**
     * @inheritDoc
     */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return isset($this->key[$offset]);
     }
-    
+
     /**
     * @inheritDoc
     */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset)
     {
         return $this->make($offset);
     }
-    
+
     /**
     * @inheritDoc
     */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->registers[$offset] = $value;
     }
-    
+
     /**
     * @inheritDoc
     */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->registers[$offset]);
     }

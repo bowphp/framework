@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Migration\Shortcut;
+
+use Bow\Database\Migration\SQLGenerator;
 
 trait ConstraintColumn
 {
@@ -11,7 +15,7 @@ trait ConstraintColumn
      * @param array $attributes
      * @return SQLGenerator
      */
-    public function addForeign($name, array $attributes = [])
+    public function addForeign(string $name, array $attributes = []): SQLGenerator
     {
         if ($this->scope == 'alter') {
             $command = 'ADD CONSTRAINT';
@@ -24,7 +28,7 @@ trait ConstraintColumn
         $target = sprintf("%s_%s_foreign", $this->getTable(), $name);
 
         if (isset($attributes['on'])) {
-            $on = strtoupper(' ON ' .$attributes['on']);
+            $on = strtoupper(' ON ' . $attributes['on']);
         }
 
         if (isset($attributes['references'], $attributes['table'])) {
@@ -55,7 +59,7 @@ trait ConstraintColumn
      * @param string $name
      * @return SQLGenerator
      */
-    public function dropForeign($name)
+    public function dropForeign(string $name): SQLGenerator
     {
         $names = (array) $name;
 
@@ -73,7 +77,7 @@ trait ConstraintColumn
      * @param string $name
      * @return SQLGenerator
      */
-    public function addIndex($name)
+    public function addIndex(string $name): SQLGenerator
     {
         if ($this->scope == 'alter') {
             $command = 'ADD INDEX';
@@ -92,7 +96,7 @@ trait ConstraintColumn
      * @param string $name
      * @return SQLGenerator
      */
-    public function dropIndex($name)
+    public function dropIndex(string $name): SQLGenerator
     {
         $names = (array) $name;
 
@@ -108,7 +112,7 @@ trait ConstraintColumn
      *
      * @return SQLGenerator
      */
-    public function dropPrimary()
+    public function dropPrimary(): SQLGenerator
     {
         $this->sqls[] = 'DROP PRIMARY KEY';
 
@@ -121,7 +125,7 @@ trait ConstraintColumn
      * @param string $name
      * @return SQLGenerator
      */
-    public function addUnique($name)
+    public function addUnique(string $name): SQLGenerator
     {
         if ($this->scope == 'alter') {
             $command = 'ADD UNIQUE';
@@ -140,7 +144,7 @@ trait ConstraintColumn
      * @param string $name
      * @return SQLGenerator
      */
-    public function dropUnique($name)
+    public function dropUnique(string $name): SQLGenerator
     {
         $names = (array) $name;
 

@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Migration\Shortcut;
+
+use Bow\Database\Migration\SQLGenerator;
 
 trait MixedColumn
 {
@@ -11,11 +15,11 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addBoolean($column, array $attribute = [])
+    public function addBoolean(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'boolean', $attribute);
     }
-    
+
     /**
     * Add UUID column
     *
@@ -23,11 +27,11 @@ trait MixedColumn
     * @param array $attribute
     * @return SQLGenerator
     */
-    public function addUuid($column, array $attribute = [])
+    public function addUuid(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'uuid', $attribute);
     }
-    
+
    /**
     * Add BLOB column
     *
@@ -35,11 +39,11 @@ trait MixedColumn
     * @param array $attribute
     * @return SQLGenerator
     */
-    public function addBinary($column, array $attribute = [])
+    public function addBinary(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'blob', $attribute);
     }
-    
+
     /**
      * Add ip column
      *
@@ -47,7 +51,7 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addIpAddress($column, array $attribute = [])
+    public function addIpAddress(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'ip', $attribute);
     }
@@ -59,7 +63,7 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addMacAddress($column, array $attribute = [])
+    public function addMacAddress(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'mac', $attribute);
     }

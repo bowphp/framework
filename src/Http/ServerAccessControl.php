@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http;
 
 use Bow\Http\Exception\ServerAccessControlException;
@@ -11,8 +13,8 @@ class ServerAccessControl
      *
      * @var Response
      */
-    private $response;
-    
+    private Response $response;
+
     /**
      * AccessControl constructor.
      *
@@ -30,7 +32,7 @@ class ServerAccessControl
      * @param string $excepted
      * @return $this
      */
-    private function push($allow, $excepted)
+    private function push(string $allow, string $excepted): ServerAccessControl
     {
         if ($excepted === null) {
             $excepted = '*';
@@ -44,11 +46,11 @@ class ServerAccessControl
     /**
      * Active Access-control-Allow-Origin
      *
-     * @param  array $excepted [optional]
-     * @return AccessControl
+     * @param  array $excepted
+     * @return ServerAccessControl
      * @throws
      */
-    public function allowOrigin(array $excepted)
+    public function allowOrigin(array $excepted): ServerAccessControl
     {
         if (count($excepted) == 0) {
             throw new ServerAccessControlException(
@@ -64,10 +66,10 @@ class ServerAccessControl
      * Active Access-control-Allow-Methods
      *
      * @param  array $excepted
-     * @return AccessControl
+     * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
-    public function allowMethods(array $excepted)
+    public function allowMethods(array $excepted): ServerAccessControl
     {
         if (count($excepted) == 0) {
             throw new ServerAccessControlException(
@@ -83,10 +85,10 @@ class ServerAccessControl
      * Active Access-control-Allow-Headers
      *
      * @param  array $excepted
-     * @return AccessControl
+     * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
-    public function allowHeaders(array $excepted)
+    public function allowHeaders(array $excepted): ServerAccessControl
     {
         if (count($excepted) == 0) {
             throw new ServerAccessControlException('The list is empty.', E_USER_ERROR);
@@ -98,9 +100,9 @@ class ServerAccessControl
     /**
      * Active Access-control-Allow-Credentials
      *
-     * @return AccessControl
+     * @return ServerAccessControl
      */
-    public function allowCredentials()
+    public function allowCredentials(): ServerAccessControl
     {
         return $this->push('Access-Control-Allow-Credentials', 'true');
     }
@@ -109,10 +111,10 @@ class ServerAccessControl
      * Active Access-control-Max-Age
      *
      * @param  string $excepted
-     * @return AccessControl
+     * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
-    public function maxAge($excepted)
+    public function maxAge(string $excepted): ServerAccessControl
     {
         if (!is_numeric($excepted)) {
             throw new ServerAccessControlException(
@@ -128,10 +130,10 @@ class ServerAccessControl
      * Active Access-control-Expose-Headers
      *
      * @param  array $excepted
-     * @return AccessControl
+     * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
-    public function exposeHeaders(array $excepted)
+    public function exposeHeaders(array $excepted): ServerAccessControl
     {
         if (count($excepted) == 0) {
             throw new ServerAccessControlException(

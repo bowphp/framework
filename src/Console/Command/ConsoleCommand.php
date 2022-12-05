@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
@@ -13,7 +15,7 @@ class ConsoleCommand extends AbstractCommand
      * @param string $service
      * @return void
      */
-    public function generate(string $service)
+    public function generate(string $service): void
     {
         $generator = new Generator(
             $this->setting->getCommandDirectory(),

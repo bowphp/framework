@@ -1,10 +1,6 @@
 name: Bow Framework CI
 
-on:
-  push:
-  pull_request:
-  schedule:
-    - cron: '0 0 * * 0'
+on: [ push, pull_request ]
 
 env:
   FTP_HOST: localhost
@@ -15,26 +11,27 @@ env:
 jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
-    name: PHP-${{ matrix.php }} - ${{ matrix.os }}
-
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_DATABASE: test_db
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-        ports:
-          - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     strategy:
       matrix:
-        php: [7.4, 7.3, 7.2]
+        php: [8.1, 8.2]
         os: [ubuntu-latest]
+
+    name: PHP-${{ matrix.php }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          host port: 3306
+          container port: 3306
+          character set server: 'utf8mb4'
+          collation server: 'utf8mb4_general_ci'
+          mysql version: '5.7'
+          mysql database: 'test_db'
+          mysql root password: 'secret'
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -44,11 +41,8 @@ jobs:
           coverage: none
 
       - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
-
-      - run: docker run -p 1025:25 -p 1080:80 -d --name maildev maildev/maildev
-
-      - name: Validate composer.json and composer.lock
-        run: composer validate --strict
+      - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
+      - run: docker run -d -p 11301:11300 schickling/beanstalkd
 
       - name: Cache Composer packages
         id: composer-cache
@@ -59,21 +53,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
+      - name: Copy the php ini config
+        run: cp php.dist.ini php.ini
+
       - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
+        run: composer update --prefer-dist --no-interaction
 
       - name: Create test cache directory
-        run: if [ ! -d ./tests/data/cache ]; then mkdir -p ./tests/data/cache; fi;
+        run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Check code standard
-        run: ./vendor/bin/phpcs --standard=psr2 --severity=4 --tab-width=4 src --ignore="tests"
+        run: ./vendor/bin/phpcs --standard=psr12 --severity=4 --tab-width=4 src --ignore="tests"
 
       - name: Run test suite
         run: composer run-script test
-
-      # - name: Upload artifacts
-      #   uses: actions/upload-artifact@master
-      #   if: failure()
-      #   with:
-      #     name: Logs
-      #     path: ./.github

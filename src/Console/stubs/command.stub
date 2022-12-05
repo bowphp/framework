@@ -1,0 +1,18 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Console\Command\AbstractCommand as ConsoleCommand;
+
+class {className} extends ConsoleCommand
+{
+    /**
+     * Handle console action
+     * 
+     * @return void
+     */
+    public function process(): void
+    {
+        //
+    }
+}

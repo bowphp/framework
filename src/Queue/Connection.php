@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Queue;
 
 use Bow\Queue\Adapters\QueueAdapter;
@@ -13,21 +15,21 @@ class Connection
      *
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * The configuration array
      *
      * @var string
      */
-    private $connection = "beanstalkd";
+    private string $connection = "beanstalkd";
 
     /**
      * The supported connection
      *
      * @param array
      */
-    private static $connections = [
+    private static array $connections = [
         "beanstalkd" => BeanstalkdAdapter::class,
     ];
 
@@ -35,7 +37,6 @@ class Connection
      * Configuration of worker connection
      *
      * @param array $config
-     * @return QueueAdapter
      */
     public function __construct(array $config)
     {
@@ -47,8 +48,9 @@ class Connection
      *
      * @param string $name
      * @param string $name
+     * @return bool
      */
-    public static function pushConnection(string $name, string $classname)
+    public static function pushConnection(string $name, string $classname): bool
     {
         if (!array_key_exists($name, static::$connections)) {
             static::$connections[$name] = $classname;
@@ -65,8 +67,9 @@ class Connection
      * Set connection
      *
      * @param string $connection
+     * @return void
      */
-    public function setConnection(string $connection)
+    public function setConnection(string $connection): void
     {
         $this->connection = $connection;
     }
@@ -76,11 +79,12 @@ class Connection
      *
      * @return QueueAdapter
      */
-    public function getAdapter()
+    public function getAdapter(): QueueAdapter
     {
         $driver = $this->connection ?: $this->config["default"];
+
         $connection = $this->config["connections"][$driver];
-        $queue = new static::$connections[$driver];
+        $queue = new static::$connections[$driver]();
 
         return $queue->configure($connection);
     }

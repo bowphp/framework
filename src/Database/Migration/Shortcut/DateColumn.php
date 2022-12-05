@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Migration\Shortcut;
+
+use Bow\Database\Migration\SQLGenerator;
 
 trait DateColumn
 {
@@ -11,12 +15,12 @@ trait DateColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addDatetime(string $column, array $attribute = [])
+    public function addDatetime(string $column, array $attribute = []): SQLGenerator
     {
         if ($this->adapter == 'sqlite') {
             return $this->addColumn($column, 'text', $attribute);
         }
-        
+
         return $this->addColumn($column, 'datetime', $attribute);
     }
 
@@ -27,7 +31,7 @@ trait DateColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addDate(string $column, array $attribute = [])
+    public function addDate(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'date', $attribute);
     }
@@ -39,7 +43,7 @@ trait DateColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addTime(string $column, array $attribute = [])
+    public function addTime(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'time', $attribute);
     }
@@ -51,7 +55,7 @@ trait DateColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addYear(string $column, array $attribute = [])
+    public function addYear(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'year', $attribute);
     }
@@ -63,7 +67,7 @@ trait DateColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addTimestamp(string $column, array $attribute = [])
+    public function addTimestamp(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'timestamp', $attribute);
     }
@@ -73,7 +77,7 @@ trait DateColumn
      *
      * @return SQLGenerator
      */
-    public function addTimestamps()
+    public function addTimestamps(): SQLGenerator
     {
         if ($this->adapter == 'sqlite') {
             $this->addColumn('created_at', 'text', ['default' => 'CURRENT_TIMESTAMP']);

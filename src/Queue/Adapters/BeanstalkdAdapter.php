@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Queue\Adapters;
 
 use Pheanstalk\Pheanstalk;
@@ -14,14 +16,14 @@ class BeanstalkdAdapter extends QueueAdapter
      *
      * @var Pheanstalk
      */
-    private $pheanstalk;
+    private Pheanstalk $pheanstalk;
 
     /**
      * Determine the default watch name
      *
      * @var string
      */
-    private $default = "default";
+    private string $default = "default";
 
     /**
      * Configure Beanstalkd driver
@@ -29,7 +31,7 @@ class BeanstalkdAdapter extends QueueAdapter
      * @param array $queue
      * @return mixed
      */
-    public function configure(array $queue)
+    public function configure(array $queue): BeanstalkdAdapter
     {
         $this->pheanstalk = Pheanstalk::create($queue["hostname"], $queue["port"], $queue["timeout"]);
 
@@ -40,10 +42,9 @@ class BeanstalkdAdapter extends QueueAdapter
      * Get connexion
      *
      * @param string $name
-     *
      * @return Pheanstalk
      */
-    public function setWatch(string $name)
+    public function setWatch(string $name): void
     {
         $this->default = $name;
     }
@@ -54,7 +55,7 @@ class BeanstalkdAdapter extends QueueAdapter
      * @param int $retry
      * @return Pheanstalk
      */
-    public function setRetry(int $retry)
+    public function setRetry(int $retry): void
     {
         $this->retry = $retry;
     }
@@ -66,7 +67,7 @@ class BeanstalkdAdapter extends QueueAdapter
      * @param  string|int  $id
      * @return void
      */
-    public function deleteJob($queue, $id)
+    public function deleteJob(string $queue, string|int $id): void
     {
         $queue = $this->getQueue($queue);
 
@@ -76,10 +77,10 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Get the queue or return the default.
      *
-     * @param  string|null $queue
+     * @param  ?string $queue
      * @return string
      */
-    public function getQueue(string $queue = null)
+    public function getQueue(?string $queue = null): string
     {
         return $queue ?: $this->default;
     }
@@ -87,10 +88,10 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Get the size of the queue.
      *
-     * @param  string|null  $queue
+     * @param string $queue
      * @return int
      */
-    public function size($queue = null)
+    public function size(?string $queue = null): int
     {
         $queue = $this->getQueue($queue);
 
@@ -103,11 +104,11 @@ class BeanstalkdAdapter extends QueueAdapter
      * @param ProducerService $producer
      * @return QueueAdapter
      */
-    public function push(ProducerService $producer)
+    public function push(ProducerService $producer): void
     {
         $this->pheanstalk
             ->useTube($producer->getQueue())
-            ->put($this->serializeProducer($producer), $producer->getDelay(), $producer->getRetry());
+            ->put(serialize($producer), $producer->getDelay(), $producer->getRetry());
     }
 
     /**
@@ -116,10 +117,11 @@ class BeanstalkdAdapter extends QueueAdapter
      * @param string|null $queue
      * @return mixed
      */
-    public function run(string $queue = null)
+    public function run(string $queue = null): void
     {
         // we want jobs from 'testtube' only.
-        $this->pheanstalk->watch($this->getQueue($queue));
+        $queue = $this->getQueue($queue);
+        $this->pheanstalk->watch($queue);
 
         // This hangs until a Job is produced.
         $job = $this->pheanstalk->reserve();
@@ -127,10 +129,11 @@ class BeanstalkdAdapter extends QueueAdapter
         try {
             $payload = $job->getData();
             $producer = unserialize($payload);
-            call_user_func_array([$producer, "process"], []);
+            call_user_func([$producer, "process"]);
             $this->pheanstalk->touch($job);
             $this->deleteJob($queue, $job->getId());
         } catch (\Exception $e) {
+            cache($job->getId(), $job->getData());
             $this->pheanstalk->release($job);
         }
     }

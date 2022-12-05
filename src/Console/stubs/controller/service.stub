@@ -1,0 +1,28 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use {baseNamespace}\Controller;
+use Bow\Http\Request;
+use {serviceNamespace}\{serviceClassName};
+
+class {className} extends Controller
+{
+	/**
+	 * Instance of {serviceClassName}
+	 * 
+	 * @var {serviceClassName}
+	 */
+	private {serviceClassName} ${serviceName};
+
+	/**
+	 * {className} constructor
+	 * 
+	 * @param {serviceClassName} ${serviceName}
+	 * @return mixed
+	 */
+    public function __construct({serviceClassName} ${serviceName})
+    {
+    	$this->{serviceName} = ${serviceName};
+    }
+}

@@ -5,6 +5,7 @@ Bow Framework's container system is very simple and powerful class dependences b
 Let's show a little exemple:
 
 ```php
+use App\Application;
 use Bow\Containers\Capsule;
 
 $capsule = Capsule::getInstance();

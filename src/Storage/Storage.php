@@ -1,11 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Storage;
 
 use BadMethodCallException;
-use Bow\Storage\Exception\MountDiskNotFoundException;
+use InvalidArgumentException;
+use Bow\Storage\Exception\DiskNotFoundException;
 use Bow\Storage\Exception\ServiceConfigurationNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
+use Bow\Storage\Service\DiskFilesystemService;
+use Bow\Storage\Service\FTPService;
+use Bow\Storage\Service\S3Service;
 
 class Storage
 {
@@ -14,48 +20,51 @@ class Storage
      *
      * @var array
      */
-    private static $config = [];
+    private static array $config = [];
 
     /**
      * The disk mounting
      *
-     * @var MountFilesystem
+     * @var DiskFilesystemService
      */
-    private static $mounted;
+    private static ?DiskFilesystemService $disk = null;
 
     /**
      * The service lists
      *
      * @var array
      */
-    private static $available_services = [];
+    private static array $available_services = [
+        'ftp' => FTPService::class,
+        's3' => S3Service::class,
+    ];
 
     /**
      * Mount disk
      *
-     * @param string $mount
+     * @param string $disk
      *
-     * @return MountFilesystem
-     * @throws MountDiskNotFoundException
+     * @return DiskFilesystemService
+     * @throws DiskNotFoundException
      */
-    public static function mount($mount = null)
+    public static function disk(?string $disk = null)
     {
         // Use the default disk as fallback
-        if (is_null($mount)) {
-            if (! is_null(static::$mounted)) {
-                return static::$mounted;
+        if (is_null($disk)) {
+            if (! is_null(static::$disk)) {
+                return static::$disk;
             }
 
-            $mount = static::$config['disk']['mount'];
+            $disk = static::$config['disk']['mount'];
         }
 
-        if (! isset(static::$config['disk']['path'][$mount])) {
-            throw new MountDiskNotFoundException('The '.$mount.' disk is not define.');
+        if (!isset(static::$config['disk']['path'][$disk])) {
+            throw new DiskNotFoundException('The ' . $disk . ' disk is not define.');
         }
 
-        $config = static::$config['disk']['path'][$mount];
+        $config = static::$config['disk']['path'][$disk];
 
-        return static::$mounted = new MountFilesystem($config);
+        return static::$disk = new DiskFilesystemService($config);
     }
 
     /**
@@ -97,6 +106,10 @@ class Storage
     public static function pushService(array $services)
     {
         foreach ($services as $service => $hanlder) {
+            if (isset(static::$available_services[$service])) {
+                throw new InvalidArgumentException("The $service is already define");
+            }
+
             static::$available_services[$service] = $hanlder;
         }
     }
@@ -112,11 +125,11 @@ class Storage
     {
         static::$config = $config;
 
-        if (is_null(static::$mounted)) {
-            static::$mounted = static::mount($config['disk']['mount']);
+        if (is_null(static::$disk)) {
+            static::$disk = static::disk($config['disk']['mount']);
         }
 
-        return static::$mounted;
+        return static::$disk;
     }
 
     /**
@@ -128,8 +141,8 @@ class Storage
      */
     public function __call($name, array $arguments)
     {
-        if (method_exists(static::$mounted, $name)) {
-            return call_user_func_array([static::$mounted, $name], $arguments);
+        if (method_exists(static::$disk, $name)) {
+            return call_user_func_array([static::$disk, $name], $arguments);
         }
 
         throw new BadMethodCallException("unkdown $name method");
@@ -144,8 +157,8 @@ class Storage
      */
     public static function __callStatic($name, array $arguments)
     {
-        if (method_exists(static::$mounted, $name)) {
-            return call_user_func_array([static::$mounted, $name], $arguments);
+        if (method_exists(static::$disk, $name)) {
+            return call_user_func_array([static::$disk, $name], $arguments);
         }
 
         throw new BadMethodCallException("unkdown $name method");

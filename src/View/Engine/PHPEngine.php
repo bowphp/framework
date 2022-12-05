@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\View\Engine;
 
 use Bow\Configuration\Loader;
@@ -12,16 +14,16 @@ class PHPEngine extends EngineAbstract
      *
      * @var string
      */
-    protected $name = 'php';
+    protected string $name = 'php';
 
     /**
      * PHPEngine constructor.
      *
-     * @param Loader $config
+     * @param array $config
      *
      * @return void
      */
-    public function __construct(Loader $config)
+    public function __construct(array $config)
     {
         $this->config = $config;
     }
@@ -29,19 +31,19 @@ class PHPEngine extends EngineAbstract
     /**
      * {@inheritdoc}
      */
-    public function render($filename, array $data = [])
+    public function render(string $filename, array $data = []): string
     {
         $hash_filename = $filename;
 
         $filename = $this->checkParseFile($filename);
 
-        if ($this->config['view.path'] !== null) {
-            $filename = $this->config['view.path'] . '/' . $filename;
+        if ($this->config['path'] !== null) {
+            $filename = $this->config['path'] . '/' . $filename;
         }
 
-        $cache_hash_filename = '_PHP_'.md5($hash_filename).'.php';
+        $cache_hash_filename = '_PHP_' . md5($hash_filename) . '.php';
 
-        $cache_hash_filename = $this->config['view.cache'].'/'.$cache_hash_filename;
+        $cache_hash_filename = $this->config['cache'] . '/' . $cache_hash_filename;
 
         extract($data);
 

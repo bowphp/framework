@@ -1,0 +1,86 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use {baseNamespace}\Controller;
+use Bow\Http\Request;
+
+class {className} extends Controller
+{
+    /**
+     * Application entry point
+     *
+     * @return void
+     */
+    public function index(): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Displays the view for creating a resource.
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function create(): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Add a new resource in the information base
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function store(Request $request): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Allows you to retrieve precise information with an identifier.
+     *
+     * @param  mixed $id
+     * @return void
+     */
+    public function show(mixed $id): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Show updating form using GET
+     *
+     * @param  mixed $id
+     * @return void
+     */
+    public function edit(mixed $id): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Update a resource
+     *
+     * @param Request $request
+     * @param  mixed $id
+     * @return void
+     */
+    public function update(Request $request, mixed $id): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Delete a resource
+     *
+     * @param mixed $id
+     * @return void
+     */
+    public function destroy(mixed $id): void
+    {
+        // Code Here
+    }
+}

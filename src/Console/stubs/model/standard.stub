@@ -1,0 +1,25 @@
+<?php
+
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\SQLGenerator;
+
+class {className} extends Migration
+{
+    /**
+     * Up Migration
+     */
+    public function up(): void
+    {
+        $this->create("{table}", function (SQLGenerator $table) {
+            //
+        });
+    }
+
+    /**
+     * Rollback migration
+     */
+    public function rollback(): void
+    {
+        $this->dropIfExists("{table}");
+    }
+}

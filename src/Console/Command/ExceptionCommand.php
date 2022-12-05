@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
@@ -11,10 +13,9 @@ class ExceptionCommand extends AbstractCommand
      * Add middleware
      *
      * @param string $middleware
-     *
      * @return void
      */
-    public function generate(string $exception)
+    public function generate(string $exception): void
     {
         $generator = new Generator(
             $this->setting->getExceptionDirectory(),

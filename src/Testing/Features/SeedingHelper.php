@@ -1,16 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Testing\Features;
 
 trait SeedingHelper
 {
-    /**
-     * Enable auto seeding
-     *
-     * @var bool
-     */
-    protected $seeding = false;
-
     /**
      * Seed alias
      *
@@ -18,7 +13,7 @@ trait SeedingHelper
      * @param array $data
      * @return int
      */
-    public function seed($seeder, array $data = [])
+    public function seed(string $seeder, array $data = []): int
     {
         return seed($seeder, $data);
     }

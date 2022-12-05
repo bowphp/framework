@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Validation;
 
 use BadMethodCallException;
@@ -13,21 +15,21 @@ abstract class RequestValidation
      *
      * @var Validate
      */
-    private $validate;
+    private Validate $validate;
 
     /**
      * The request data
      *
      * @var array
      */
-    private $data;
+    private array $data;
 
     /**
      * The Request instance
      *
      * @var Request
      */
-    private $request;
+    private Request $request;
 
     /**
      * TodoValidation constructor.
@@ -194,7 +196,7 @@ abstract class RequestValidation
 
     /**
      * Get the current request
-     * 
+     *
      * @return Request
      */
     protected function getRequest()

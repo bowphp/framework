@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Validation;
 
 use Bow\Validation\Exception\ValidationException;
@@ -11,46 +13,46 @@ class Validate
      *
      * @var bool
      */
-    private $fails;
+    private bool $fails;
 
     /**
      * The last message
      *
      * @var string
      */
-    private $last_message = null;
+    private ?string $last_message = null;
 
     /**
      * The error messages list
      *
      * @var array
      */
-    private $messages = [];
+    private array $messages = [];
 
     /**
      * The corrupted fields list
      *
      * @var array
      */
-    private $corrupted_fields = [];
+    private array $corrupted_fields = [];
 
     /**
      * The corrupted rule list
      *
      * @var array
      */
-    private $corrupted_rules = [];
+    private array $corrupted_rules = [];
 
     /**
      * Validate constructor.
      *
      * @param bool   $fails
-     * @param string $message
+     * @param ?string $message
      * @param array  $corrupted_fields
      *
      * @return void
      */
-    public function __construct($fails, $message, array $corrupted_fields)
+    public function __construct(bool $fails, ?string $message = null, array $corrupted_fields = [])
     {
         $this->fails = $fails;
         $this->last_message = $message;
@@ -71,7 +73,7 @@ class Validate
      *
      * @return bool
      */
-    public function fails()
+    public function fails(): bool
     {
         return $this->fails;
     }
@@ -81,7 +83,7 @@ class Validate
      *
      * @return array
      */
-    public function getCorruptedFields()
+    public function getCorruptedFields(): array
     {
         return $this->corrupted_fields;
     }
@@ -91,7 +93,7 @@ class Validate
      *
      * @return array
      */
-    public function getFailsRules()
+    public function getFailsRules(): array
     {
         return $this->corrupted_rules;
     }
@@ -101,7 +103,7 @@ class Validate
      *
      * @return string
      */
-    public function getLastMessage()
+    public function getLastMessage(): string
     {
         return $this->last_message;
     }
@@ -111,7 +113,7 @@ class Validate
      *
      * @return array
      */
-    public function getMessages()
+    public function getMessages(): array
     {
         return $this->messages;
     }
@@ -121,7 +123,7 @@ class Validate
      *
      * @throws ValidationException
      */
-    public function throwError()
+    public function throwError(): void
     {
         response()->status(400);
 

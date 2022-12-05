@@ -10,6 +10,7 @@ Make database connexion is very simple
 ```php
 use Bow\Database\Database;
 
+// Configure the database
 Database::configure([
     "fetch" => PDO::FETCH_OBJ,
     "default" => "mysql",
@@ -29,17 +30,26 @@ Database::configure([
             "driver" => "sqlite",
             "database" => ":memory:",
             "prefix" => "table_prefix"
-        ]
+        ],
+        // TODO: Build the pgsql support for v5.0
     ]
 ]);
 ```
 
-Let's show a little exemple:
+Let's show a little example:
 
 ```php
 use Bow\Database\Database;
 
 $users = Database::select("select * from users");
+```
+
+From model example:
+
+```php
+use App\Models\User as UserModel;
+
+$users = UserModel::all();
 ```
 
 Is very enjoyful api

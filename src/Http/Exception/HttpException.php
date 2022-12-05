@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http\Exception;
 
 use Exception;
@@ -19,10 +21,10 @@ class HttpException extends Exception
      * @param string $message
      * @param string $code
      */
-    public function __construct(string $message, $code = 200)
+    public function __construct(string $message, int $code = 200)
     {
         response()->status($code);
-        
+
         parent::__construct($message, $code);
     }
 

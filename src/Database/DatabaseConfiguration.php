@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database;
 
 use Bow\Configuration\Configuration;
@@ -10,7 +12,7 @@ class DatabaseConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('db', function () use ($config) {
             return Database::configure($config['database'] ?? $config['db']);
@@ -20,7 +22,7 @@ class DatabaseConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('db');
     }

@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\View;
 
 use BadMethodCallException;
-use Bow\Configuration\Loader;
+use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\Contracts\ResponseInterface;
+use Bow\View\EngineAbstract;
 use Bow\View\Exception\ViewException;
 
 class View implements ResponseInterface
@@ -12,60 +15,59 @@ class View implements ResponseInterface
     /**
      * The application loader
      *
-     * @var Loader
+     * @var array
      */
-    private static $config;
+    private static array $config;
 
     /**
      * The View singleton instance
      *
      * @var View
      */
-    private static $instance;
+    private static ?View $instance = null;
 
     /**
      * The template Engine extension
      *
      * @var EngineAbstract
      */
-    private static $template;
+    private static EngineAbstract $template;
 
     /**
      * The view rendering content
      *
      * @var string
      */
-    private static $content;
+    private static string $content;
 
     /**
      * The enable view caching
      *
      * @var bool
      */
-    private $cachabled = true;
+    private bool $cachabled = true;
 
     /**
      * The build-in template engine
      *
      * @var array
      */
-    private static $engines = [
+    private static array $engines = [
+        'tintin' => \Tintin\Bow\TintinEngine::class,
         'twig' => \Bow\View\Engine\TwigEngine::class,
         'php' => \Bow\View\Engine\PHPEngine::class,
-        'tintin' => \Tintin\Bow\TintinEngine::class
     ];
 
     /**
      * View constructor.
      *
-     * @param  Loader $config
-     *
+     * @param  array $config
      * @return  void
      * @throws ViewException
      */
-    public function __construct(Loader $config)
+    public function __construct(array $config)
     {
-        $engine = $config['view.engine'];
+        $engine = $config['engine'] ?? null;
 
         if (is_null($engine)) {
             throw new ViewException(
@@ -89,11 +91,10 @@ class View implements ResponseInterface
     /**
      * Load view configuration
      *
-     * @param Loader $config
-     *
+     * @param array $config
      * @return void
      */
-    public static function configure($config)
+    public static function configure(array $config): void
     {
         static::$config = $config;
     }
@@ -104,7 +105,7 @@ class View implements ResponseInterface
      * @return View
      * @throws
      */
-    public static function getInstance()
+    public static function getInstance(): View
     {
         if (!static::$instance instanceof View) {
             static::$instance = new View(static::$config);
@@ -118,10 +119,9 @@ class View implements ResponseInterface
      *
      * @param  string $viewname
      * @param  array  $data
-     *
      * @return View
      */
-    public static function parse(string $view, array $data = [])
+    public static function parse(string $view, array $data = []): View
     {
         static::$content = static::getInstance()
             ->getTemplate()
@@ -144,14 +144,13 @@ class View implements ResponseInterface
      * Set Engine
      *
      * @param string $engine
-     *
      * @return View
      */
-    public function setEngine($engine)
+    public function setEngine(string $engine): View
     {
         static::$instance = null;
 
-        static::$config['view.engine'] = $engine;
+        static::$config['engine'] = $engine;
 
         return static::getInstance();
     }
@@ -160,10 +159,9 @@ class View implements ResponseInterface
      * Set the availability of caching system
      *
      * @param bool $cachabled
-     *
      * @return void
      */
-    public function cachable($cachabled)
+    public function cachable(bool $cachabled): void
     {
         $this->cachabled = $cachabled;
     }
@@ -172,11 +170,11 @@ class View implements ResponseInterface
      * @param string $extension
      * @return View
      */
-    public function setExtension($extension)
+    public function setExtension(string $extension): View
     {
         static::$instance = null;
 
-        static::$config['view.extension'] = $extension;
+        static::$config['extension'] = $extension;
 
         return static::getInstance();
     }
@@ -190,7 +188,7 @@ class View implements ResponseInterface
      * @return bool
      * @throws ViewException
      */
-    public static function pushEngine($name, $engine)
+    public static function pushEngine(string $name, string $engine): bool
     {
         if (array_key_exists($name, static::$engines)) {
             return true;
@@ -212,7 +210,7 @@ class View implements ResponseInterface
      *
      * @return string
      */
-    public function getContent()
+    public function getContent(): string
     {
         return static::$content;
     }
@@ -222,11 +220,22 @@ class View implements ResponseInterface
      *
      * @return mixed
      */
-    public function sendContent()
+    public function sendContent(): void
     {
         echo static::$content;
 
         return;
+    }
+
+    /**
+     * Check if the define file exists
+     *
+     * @param string $filename
+     * @return bool
+     */
+    public function fileExists(string $filename): bool
+    {
+        return static::$template->fileExists($filename);
     }
 
     /**

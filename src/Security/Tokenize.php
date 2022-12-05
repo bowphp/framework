@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Security;
 
 use Bow\Session\Session;
@@ -12,7 +14,7 @@ class Tokenize
      *
      * @static int
      */
-    private static $expire_at;
+    private static int $expire_at;
 
     /**
      * Csrf token creator
@@ -20,7 +22,7 @@ class Tokenize
      * @param  int $time
      * @return bool
      */
-    public static function makeCsrfToken($time = null)
+    public static function makeCsrfToken(?int $time = null): bool
     {
         if (Session::getInstance()->has('__bow.csrf', true)) {
             return true;
@@ -35,7 +37,7 @@ class Tokenize
         Session::getInstance()->add('__bow.csrf', [
             'token' => $token,
             'expire_at' => time() + static::$expire_at,
-            'field' => '<input type="hidden" name="_token" value="' . $token .'"/>'
+            'field' => '<input type="hidden" name="_token" value="' . $token . '"/>'
         ]);
 
         Session::getInstance()->add('_token', $token);
@@ -48,9 +50,9 @@ class Tokenize
      *
      * @return string
      */
-    public static function make()
+    public static function make(): string
     {
-        $salt = date('Y-m-d H:i:s', time() - 10000) . uniqid(rand(), true);
+        $salt = date('Y-m-d H:i:s', time() - 10000) . uniqid((string) rand(), true);
 
         $token = base64_encode(base64_encode(openssl_random_pseudo_bytes(6)) . $salt);
 
@@ -61,10 +63,9 @@ class Tokenize
      * Get a csrf token generate
      *
      * @param  int $time
-     *
-     * @return mixed
+     * @return ?array
      */
-    public static function csrf($time = null)
+    public static function csrf(int $time = null): ?array
     {
         static::makeCsrfToken($time);
 
@@ -75,10 +76,9 @@ class Tokenize
      * Check if the token expires
      *
      * @param int $time
-     *
-     * @return boolean
+     * @return bool
      */
-    public static function csrfExpired($time = null)
+    public static function csrfExpired(int $time = null): bool
     {
         if (Session::getInstance()->has('__bow.csrf')) {
             return false;
@@ -101,13 +101,11 @@ class Tokenize
      * Check if csrf token is valid
      *
      * @param string $token
-     * @param bool   $strict
-     *
-     * @return boolean
+     * @param bool $strict
+     * @return bool
      */
-    public static function verify($token, $strict = false)
+    public static function verify(string $token, bool $strict = false): bool
     {
-
         if (!Session::getInstance()->has('__bow.csrf')) {
             return false;
         }
@@ -132,7 +130,7 @@ class Tokenize
      *
      * @return void
      */
-    public static function clear()
+    public static function clear(): void
     {
         Session::getInstance()->remove('__bow.csrf');
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http;
 
 use Bow\Contracts\ResponseInterface;
@@ -12,7 +14,7 @@ class Response implements ResponseInterface
      * the user can himself redefine these codes
      * if it uses the `header` function of php
      */
-    private static $header = [
+    private static array $header = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -76,49 +78,49 @@ class Response implements ResponseInterface
      *
      * @var Response
      */
-    private static $instance;
+    private static ?Response $instance = null;
 
     /**
      * The Response content
      *
      * @var string
      */
-    private $content;
+    private ?string $content = '';
 
     /**
      * The Response code
      *
      * @var int
      */
-    private $code;
+    private int $code;
 
     /**
      * The added headers
      *
      * @var array
      */
-    private $headers = [];
+    private array $headers = [];
 
     /**
      * Downloadable flag
      *
      * @var bool
      */
-    private $download = false;
+    private bool $download = false;
 
     /**
      * The downloadable filenme
      *
      * @var string
      */
-    private $download_filename;
+    private ?string $download_filename = null;
 
     /**
      * The override the respons
      *
      * @var bool
      */
-    private $override = false;
+    private bool $override = false;
 
     /**
      * Response constructor.
@@ -127,14 +129,11 @@ class Response implements ResponseInterface
      * @param int $code
      * @param array $headers
      */
-    private function __construct($content = '', $code = 200, array $headers = [])
+    private function __construct(string $content = '', int $code = 200, array $headers = [])
     {
         $this->content = $content;
-
         $this->code = $code;
-
         $this->headers = $headers;
-
         $this->override = false;
     }
 
@@ -143,7 +142,7 @@ class Response implements ResponseInterface
      *
      * @return Response
      */
-    public static function getInstance()
+    public static function getInstance(): Response
     {
         if (is_null(static::$instance)) {
             static::$instance = new Response();
@@ -155,11 +154,11 @@ class Response implements ResponseInterface
     /**
      * Get response message
      *
-     * @return string
+     * @return ?string
      */
-    public function getContent()
+    public function getContent(): ?string
     {
-        return $this->content;
+        return (string) $this->content;
     }
 
     /**
@@ -167,7 +166,7 @@ class Response implements ResponseInterface
      *
      * @return int
      */
-    public function getCode()
+    public function getCode(): int
     {
         return $this->code;
     }
@@ -177,7 +176,7 @@ class Response implements ResponseInterface
      *
      * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }
@@ -188,7 +187,7 @@ class Response implements ResponseInterface
      * @param string $content
      * @return Response
      */
-    public function setContent($content)
+    public function setContent($content): Response
     {
         $this->content = $content;
 
@@ -201,7 +200,7 @@ class Response implements ResponseInterface
      * @param array $headers
      * @return Response
      */
-    public function withHeaders(array $headers)
+    public function withHeaders(array $headers): Response
     {
         $this->headers = $headers;
 
@@ -213,9 +212,9 @@ class Response implements ResponseInterface
      *
      * @param  string $key
      * @param  string $value
-     * @return self
+     * @return Response
      */
-    public function addHeader($key, $value)
+    public function addHeader(string $key, string $value): Response
     {
         $this->headers[$key] = $value;
 
@@ -231,20 +230,23 @@ class Response implements ResponseInterface
      * @param array  $headers
      * @return string
      */
-    public function download($file, $filename = null, $disposition = 'attachment', array $headers = [])
-    {
+    public function download(
+        string $file,
+        ?string $filename = null,
+        string $disposition = 'attachment',
+        array $headers = []
+    ): string {
         $type = mime_content_type($file);
 
         if (is_null($filename)) {
             $filename = basename($file);
         }
 
-        $this->addHeader('Content-Disposition', $disposition.'; filename='.$filename);
-
+        $this->addHeader('Content-Disposition', $disposition . '; filename=' . $filename);
         $this->addHeader('Content-Type', $type);
 
-        $this->addHeader('Content-Length', filesize($file));
-
+        $file_size = filesize($file);
+        $this->addHeader('Content-Length', (string) (is_int($file_size) ? $file_size : ''));
         $this->addHeader('Content-Encoding', 'base64');
 
         foreach ($headers as $key => $value) {
@@ -264,12 +266,11 @@ class Response implements ResponseInterface
      * @param  int $code
      * @return mixed
      */
-    public function status($code)
+    public function status($code): Response
     {
         if (in_array((int) $code, array_keys(self::$header), true)) {
             $this->code = $code;
-
-            @header('HTTP/1.1 '. $code .' '. self::$header[$code], $this->override, $code);
+            @header('HTTP/1.1 ' . $code . ' ' . self::$header[$code], $this->override, $code);
         }
 
         return $this;
@@ -280,11 +281,10 @@ class Response implements ResponseInterface
      *
      * @return string
      */
-    private function buildHttpResponse()
+    private function buildHttpResponse(): string
     {
         $status_text = static::$header[$this->code] ?? 'Unkdown';
-
-        @header('HTTP/1.1 '. $this->code .' '. $status_text, $this->override, $this->code);
+        @header('HTTP/1.1 ' . $this->code . ' ' . $status_text, $this->override, $this->code);
 
         foreach ($this->getHeaders() as $key => $header) {
             header(sprintf('%s: %s', $key, $header));
@@ -292,7 +292,6 @@ class Response implements ResponseInterface
 
         if ($this->download) {
             readfile($this->download_filename);
-
             die;
         }
 
@@ -307,7 +306,7 @@ class Response implements ResponseInterface
      * @param  array $headers
      * @return string
      */
-    public function json($data, $code = 200, array $headers = [])
+    public function json($data, $code = 200, array $headers = []): string
     {
         $this->addHeader('Content-Type', 'application/json; charset=UTF-8');
 
@@ -316,7 +315,6 @@ class Response implements ResponseInterface
         }
 
         $this->content = json_encode($data);
-
         $this->code = $code;
 
         return $this->buildHttpResponse();
@@ -325,12 +323,12 @@ class Response implements ResponseInterface
     /**
      * Equivalent to an echo, except that it ends the application
      *
-     * @param  string|array|\stdClass $data
+     * @param  mixed $data
      * @param  int  $code
      * @param  array  $headers
      * @return string
      */
-    public function send($data, $code = 200, array $headers = [])
+    public function send(mixed $data, int $code = 200, array $headers = []): string
     {
         if (is_array($data) || $data instanceof \stdClass || is_object($data)) {
             return $this->json($data, $code, $headers);
@@ -350,14 +348,14 @@ class Response implements ResponseInterface
     /**
      * Make view rendering
      *
-     * @param  $template
+     * @param  string $template
      * @param  array $data
      * @param  int $code
      * @param  array $headers
      * @return string
      * @throws
      */
-    public function render($template, $data = [], $code = 200, array $headers = [])
+    public function render(string $template, array $data = [], int $code = 200, array $headers = []): string
     {
         $this->code = $code;
 
@@ -373,9 +371,9 @@ class Response implements ResponseInterface
     /**
      * Get accessControl instance
      *
-     * @return AccessControl
+     * @return ServerAccessControl
      */
-    public function serverAccessControl()
+    public function serverAccessControl(): ServerAccessControl
     {
         return new ServerAccessControl($this);
     }
@@ -383,7 +381,7 @@ class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function sendContent()
+    public function sendContent(): void
     {
         echo $this->buildHttpResponse();
 

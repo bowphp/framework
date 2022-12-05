@@ -14,9 +14,7 @@ use Bow\Http\Request;
 
 $app->post('/', function (Request $request) {
     $name = $request->get('name');
-
     response()->addHeader("X-Custom-Header", "Bow Framework");
-
     return response()->json(["data" => "Hello $name!"]);
 });
 ```

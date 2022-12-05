@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
@@ -11,10 +13,9 @@ class ValidationCommand extends AbstractCommand
      * Add validation
      *
      * @param string $validation
-     *
-     * @return int
+     * @return void
      */
-    public function generate(string $validation)
+    public function generate(string $validation): void
     {
         $generator = new Generator(
             $this->setting->getValidationDirectory(),

@@ -1,22 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
-use Bow\Console\ConsoleInformation;
 
 class ClearCommand extends AbstractCommand
 {
-    use ConsoleInformation;
-    
     /**
      * Clear cache
      *
      * @param string $action
-     *
      * @return void
      */
-    public function make($action)
+    public function make(string $action): void
     {
         if (!in_array($action, ['view', 'cache', 'session', 'log', 'all'])) {
             $this->throwFailsCommand('Clear target not valid', 'clear help');
@@ -37,22 +35,22 @@ class ClearCommand extends AbstractCommand
     private function clear($action)
     {
         if ($action == 'all') {
-            $this->unlinks($this->setting->getVarDirectory().'/view/*/*');
-            foreach (glob($this->setting->getVarDirectory().'/view/*') as $dirname) {
+            $this->unlinks($this->setting->getVarDirectory() . '/view/*/*');
+            foreach (glob($this->setting->getVarDirectory() . '/view/*') as $dirname) {
                 @rmdir($dirname);
             }
 
-            $this->unlinks($this->setting->getVarDirectory().'/cache/*');
-            $this->unlinks($this->setting->getVarDirectory().'/session/*');
-            $this->unlinks($this->setting->getVarDirectory().'/logs/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/cache/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/session/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/logs/*');
 
             return;
         }
 
         if ($action == 'view') {
-            $this->unlinks($this->setting->getVarDirectory().'/view/*/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/view/*/*');
 
-            foreach (glob($this->setting->getVarDirectory().'/view/*') as $dirname) {
+            foreach (glob($this->setting->getVarDirectory() . '/view/*') as $dirname) {
                 @rmdir($dirname);
             }
 
@@ -60,19 +58,19 @@ class ClearCommand extends AbstractCommand
         }
 
         if ($action == 'cache') {
-            $this->unlinks($this->setting->getVarDirectory().'/cache/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/cache/*');
 
             return;
         }
 
         if ($action == 'session') {
-            $this->unlinks($this->setting->getVarDirectory().'/session/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/session/*');
 
             return;
         }
 
         if ($action == 'log') {
-            $this->unlinks($this->setting->getVarDirectory().'/logs/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/logs/*');
 
             return;
         }

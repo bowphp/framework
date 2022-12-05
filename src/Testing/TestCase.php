@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Testing;
 
 use Bow\Http\Client\HttpClient;
-use Bow\Http\Client\Parser;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 class TestCase extends PHPUnitTestCase
@@ -13,21 +14,21 @@ class TestCase extends PHPUnitTestCase
      *
      * @var array
      */
-    private $attach = [];
+    private array $attach = [];
 
     /**
      * The base url
      *
      * @var string
      */
-    protected $url;
+    protected ?string $url = null;
 
     /**
      * The list of additionnal header
      *
      * @var array
      */
-    private $headers = [];
+    private array $headers = [];
 
     /**
      * Format url
@@ -35,12 +36,15 @@ class TestCase extends PHPUnitTestCase
      * @param  $url
      * @return string
      */
-    private function formatUrl($url)
+    private function formatUrl(string $url): string
     {
         if (!$this->url) {
-            $this->url = app_env('APP_URL', 'http://localhost:5000');
+            $this->url = app_env('APP_URL', 'http://127.0.0.1:5000');
         }
-        return rtrim($this->url, '/').$url;
+
+        $url = rtrim($this->url, '/') . $url;
+
+        return trim($url, '/');
     }
 
     /**
@@ -49,7 +53,7 @@ class TestCase extends PHPUnitTestCase
      * @param array $attach
      * @return Response
      */
-    public function attach(array $attach)
+    public function attach(array $attach): TestCase
     {
         $this->attach = $attach;
 
@@ -62,7 +66,7 @@ class TestCase extends PHPUnitTestCase
      * @param array $headers
      * @return TestCase
      */
-    public function withHeader(array $headers)
+    public function withHeader(array $headers): TestCase
     {
         $this->headers = $headers;
 
@@ -76,7 +80,7 @@ class TestCase extends PHPUnitTestCase
      * @param array $param
      * @return Response
      */
-    public function get($url, array $param = [])
+    public function get(string $url, array $param = []): Response
     {
         $http = new HttpClient($this->formatUrl($url));
 
@@ -92,7 +96,7 @@ class TestCase extends PHPUnitTestCase
      * @param array $param
      * @return Response
      */
-    public function post($url, array $param = [])
+    public function post(string $url, array $param = []): Response
     {
         $http = new HttpClient($this->formatUrl($url));
 
@@ -112,7 +116,7 @@ class TestCase extends PHPUnitTestCase
      * @param array $param
      * @return Response
      */
-    public function put($url, array $param = [])
+    public function put(string $url, array $param = []): Response
     {
         $http = new HttpClient($this->formatUrl($url));
 
@@ -128,13 +132,13 @@ class TestCase extends PHPUnitTestCase
      * @param array $param
      * @return Response
      */
-    public function delete($url, array $param = [])
+    public function delete(string $url, array $param = []): Response
     {
         $param = array_merge([
             '_method' => 'DELETE'
         ], $param);
 
-        return new Response($this->put($url, $param));
+        return $this->put($url, $param);
     }
 
     /**
@@ -144,13 +148,13 @@ class TestCase extends PHPUnitTestCase
      * @param array $param
      * @return Response
      */
-    public function patch($url, array $param = [])
+    public function patch(string $url, array $param = [])
     {
         $param = array_merge([
             '_method' => 'PATCH'
         ], $param);
 
-        return new Response($this->put($url, $param));
+        return $this->put($url, $param);
     }
 
     /**
@@ -161,7 +165,7 @@ class TestCase extends PHPUnitTestCase
      * @param array  $params
      * @return Response
      */
-    public function visit($method, $url, array $params = [])
+    public function visit(string $method, string $url, array $params = []): Response
     {
         $method = strtolower($method);
 

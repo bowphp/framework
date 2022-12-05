@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Database\Barry\Relation;
+use Bow\Database\Collection;
 use Bow\Database\Barry\Model;
+use Bow\Database\Barry\Relation;
 
 class HasMany extends Relation
 {
@@ -12,14 +15,14 @@ class HasMany extends Relation
      *
      * @var string
      */
-    protected $foreign_key;
+    protected string $foreign_key;
 
     /**
      * The associated key on the parent model.
      *
      * @var string
      */
-    protected $local_key;
+    protected string $local_key;
 
     /**
      * Create a new belongs to relationship instance.
@@ -43,9 +46,9 @@ class HasMany extends Relation
     /**
      * Get the results of the relationship.
      *
-     * @return Model
+     * @return Collection
      */
-    public function getResults()
+    public function getResults(): Collection
     {
         // TODO: Cache the result
         return $this->query->get();
@@ -56,7 +59,7 @@ class HasMany extends Relation
      *
      * @return void
      */
-    public function addConstraints()
+    public function addConstraints(): void
     {
         if (static::$has_constraints) {
             // Todo

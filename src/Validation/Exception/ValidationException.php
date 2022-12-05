@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Validation\Exception;
 
 use Bow\Http\Exception\HttpException;
@@ -27,7 +29,6 @@ class ValidationException extends HttpException
     ) {
         parent::__construct($message, 400);
         $this->errors = $errors;
-
         $this->status = $status;
     }
 

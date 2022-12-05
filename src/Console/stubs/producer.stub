@@ -1,0 +1,28 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Queue\ProducerService;
+
+class {className} extends ProducerService
+{
+    /**
+     * {className} constructor
+     * 
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+	/**
+	 * Handle producer
+	 * 
+	 * @return void
+	 */
+    public function process(): void
+    {
+	    // Do Something
+    }
+}

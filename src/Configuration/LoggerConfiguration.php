@@ -1,23 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Configuration;
 
-use Bow\Contracts\ResponseInterface;
-use Bow\Database\Barry\Model;
-use Bow\Support\Collection;
-use Bow\Configuration\Configuration;
-use Bow\Configuration\Loader;
-use Bow\Http\Redirect;
-use Monolog\Handler\FirePHPHandler;
-use Monolog\Handler\StreamHandler;
+use Bow\View\View;
 use Monolog\Logger;
+use Bow\Http\Redirect;
+use Bow\Support\Collection;
+use Bow\Configuration\Loader;
+use Bow\Database\Barry\Model;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Bow\Configuration\Configuration;
+use Bow\Contracts\ResponseInterface;
 
 class LoggerConfiguration extends Configuration
 {
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('logger', function () use ($config) {
             $monolog = $this->loadFileLogger(
@@ -36,7 +39,7 @@ class LoggerConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('logger');
     }
@@ -49,11 +52,11 @@ class LoggerConfiguration extends Configuration
      */
     private function loadFrontLogger(Logger $monolog, $error_handler)
     {
-        $whoops = new \Whoops\Run;
+        $whoops = new \Whoops\Run();
 
         if (app_env('APP_ENV') == 'development') {
             $whoops->pushHandler(
-                new \Whoops\Handler\PrettyPageHandler
+                new \Whoops\Handler\PrettyPageHandler()
             );
         }
 
@@ -63,21 +66,24 @@ class LoggerConfiguration extends Configuration
                     $monolog->error($exception->getMessage(), $exception->getTrace());
 
                     $result = call_user_func_array(
-                        [new $error_handler, 'handle'],
+                        [new $error_handler(), 'handle'],
                         [$exception]
                     );
 
                     switch (true) {
+                        case $result instanceof View:
+                            return $result->getContent();
+                        case $result instanceof ResponseInterface || $result instanceof Redirect:
+                            $result->sendContent();
+                            break;
+                        case $result instanceof Model || $result instanceof Collection:
+                            return $result->toArray();
                         case is_null($result):
                         case is_string($result):
                         case is_array($result):
                         case is_object($result):
                         case $result instanceof \Iterable:
                             return $result;
-                        case $result instanceof ResponseInterface || $result instanceof Redirect:
-                            $result->sendContent();
-                        case $result instanceof Model || $result instanceof Collection:
-                            return $result->toArray();
                     }
                     exit(1);
                 }
@@ -102,7 +108,7 @@ class LoggerConfiguration extends Configuration
         $monolog = new Logger($name);
 
         $monolog->pushHandler(
-            new StreamHandler($log_dir . '/bow-'.date('Y-m-d').'.log', Logger::DEBUG)
+            new StreamHandler($log_dir . '/bow-' . date('Y-m-d') . '.log', Logger::DEBUG)
         );
 
         $monolog->pushHandler(

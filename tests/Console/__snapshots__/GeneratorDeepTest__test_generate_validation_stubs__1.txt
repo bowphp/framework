@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Validations;
+
+use Bow\Validation\RequestValidation;
+
+class FakeValidationRequest extends RequestValidation
+{
+	/**
+	 * Validation rules
+	 *
+	 * @return array
+	 */
+    protected function rules()
+    {
+	    return [
+            // Your roles here
+        ];
+    }
+}

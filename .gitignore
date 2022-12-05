@@ -5,3 +5,6 @@ phpunit.xml
 .idea
 .DS_Store
 .env.json
+composer.lock
+.phpunit.result.cache
+bob

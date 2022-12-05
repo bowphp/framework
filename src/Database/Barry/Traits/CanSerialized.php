@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Barry\Traits;
 
 use Bow\Database\Barry\Model;
@@ -17,7 +19,7 @@ trait CanSerialized
             return ['attributes' => $this->attributes];
         }
 
-        return $this->toArray();
+        return ['attributes' => $this->toArray()];
     }
 
     /**

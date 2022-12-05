@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail;
 
 use Bow\Mail\Exception\MailException;
@@ -12,77 +14,77 @@ class Message
      *
      * @var string
      */
-    const END = "\r\n";
+    public const END = "\r\n";
 
     /**
      * List of headers
      *
      * @var array
      */
-    private $headers = [];
+    private array $headers = [];
 
     /**
      * Define the recipient
      *
      * @var array
      */
-    private $to = [];
+    private array $to = [];
 
     /**
      * Define the recipient
      *
      * @var string
      */
-    private $subject = null;
+    private ?string $subject = null;
 
     /**
      * The mail attachment list
      *
      * @var array
      */
-    private $attachment = [];
+    private array $attachment = [];
 
     /**
      * Define the mail sender
      *
      * @var string
      */
-    private $from = null;
+    private ?string $from = null;
 
     /**
      * The mail message
      *
      * @var string
      */
-    private $message = null;
+    private ?string $message = null;
 
     /**
      * Define the boundary between the contents.
      *
      * @var string
      */
-    private $boundary;
+    private ?string $boundary;
 
     /**
      * The mail charset
      *
      * @var string
      */
-    private $charset = "utf-8";
+    private string $charset = "utf-8";
 
     /**
      * The mail message content-type
      *
      * @var string
      */
-    private $type = "text/html";
+    private string $type = "text/html";
 
     /**
      * The flag allows to enable sender
      *
-     * @var boolean
+     * @var bool
      */
-    private $fromDefined = false;
+    private bool $fromDefined = false;
 
     /**
      * Message Constructor.
@@ -103,11 +105,11 @@ class Message
      *
      * @return void
      */
-    public function setDefaultHeader()
+    public function setDefaultHeader(): void
     {
         $this->headers[] = "Mime-Version: 1.0";
         $this->headers[] = "Date: " . date("r");
-        $this->headers[] = "X-Mailer: PHP/".phpversion();
+        $this->headers[] = "X-Mailer: PHP/" . phpversion();
 
         if ($this->subject) {
             $this->headers[] = "Subject: " . $this->subject;
@@ -120,7 +122,7 @@ class Message
      * @param string $key
      * @param string $value
      */
-    public function addHeader($key, $value)
+    public function addHeader($key, $value): void
     {
         $this->headers[] = "$key: $value";
     }
@@ -129,11 +131,11 @@ class Message
      * Define the receiver
      *
      * @param string $to
-     * @param null $name
+     * @param ?string $name
      *
      * @return Message
      */
-    public function to($to, $name = null)
+    public function to(string $to, ?string $name = null): Message
     {
         $this->to[] = $this->formatEmail($to, $name);
 
@@ -144,10 +146,9 @@ class Message
      * Define the receiver in list
      *
      * @param array $sendTo
-     *
      * @return $this
      */
-    public function toList(array $sendTo)
+    public function toList(array $sendTo): Message
     {
         foreach ($sendTo as $name => $to) {
             $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
@@ -160,11 +161,10 @@ class Message
      * Format the email receiver
      *
      * @param string $email
-     * @param null $name
-     *
+     * @param ?string $name
      * @return array
      */
-    private function formatEmail($email, $name = null)
+    private function formatEmail(string $email, ?string $name = null): array
     {
         /**
          * Organization of the list of senders
@@ -186,12 +186,10 @@ class Message
      * Add an attachment file
      *
      * @param string $file
-     *
      * @return Message
-     *
      * @throws MailException
      */
-    public function addFile($file)
+    public function addFile(string $file): Message
     {
         if (!is_file($file)) {
             throw new MailException("The $file file was not found.", E_USER_ERROR);
@@ -207,7 +205,7 @@ class Message
      *
      * @return string
      */
-    public function compileHeaders()
+    public function compileHeaders(): string
     {
         if (count($this->attachment) > 0) {
             $this->headers[] = "Content-type: multipart/mixed; boundary=\"{$this->boundary}\"" . self::END;
@@ -224,17 +222,16 @@ class Message
             $this->headers[] = "--" . $this->boundary;
         }
 
-        return implode(self::END, $this->headers).self::END;
+        return implode(self::END, $this->headers) . self::END;
     }
 
     /**
      * Define the subject of the mail
      *
      * @param string $subject
-     *
      * @return Message
      */
-    public function subject($subject)
+    public function subject(string $subject): Message
     {
         $this->subject = $subject;
 
@@ -245,11 +242,10 @@ class Message
      * Define the sender of the mail
      *
      * @param string $from
-     * @param null $name
-     *
+     * @param ?string $name
      * @return Message
      */
-    public function from($from, $name = null)
+    public function from(string $from, ?string $name = null): Message
     {
         $this->from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
 
@@ -262,7 +258,7 @@ class Message
      * @param  string $html
      * @return Message
      */
-    public function html($html)
+    public function html(string $html): Message
     {
         return $this->type($html, "text/html");
     }
@@ -271,10 +267,9 @@ class Message
      * Add message body
      *
      * @param string $text
-     *
      * @return Message
      */
-    public function text($text)
+    public function text(string $text): Message
     {
         $this->type($text, "text/plain");
 
@@ -288,7 +283,7 @@ class Message
      * @param string $type
      * @return Message
      */
-    private function type($message, $type)
+    private function type(string $message, string $type): Message
     {
         $this->type = $type;
 
@@ -301,11 +296,11 @@ class Message
      * Adds blind carbon copy
      *
      * @param string $mail
-     * @param null $name [optional]
+     * @param ?string $name [optional]
      *
      * @return Message
      */
-    public function addBcc($mail, $name = null)
+    public function addBcc(string $mail, ?string $name = null): Message
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -318,11 +313,11 @@ class Message
      * Add carbon copy
      *
      * @param string $mail
-     * @param null $name [optional]
+     * @param ?string $name [optional]
      *
      * @return Message
      */
-    public function addCc($mail, $name = null)
+    public function addCc(string $mail, ?string $name = null): Message
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -335,11 +330,11 @@ class Message
      * Add Reply-To
      *
      * @param string $mail
-     * @param null $name
+     * @param ?string $name
      *
      * @return Message
      */
-    public function addReplyTo($mail, $name = null)
+    public function addReplyTo(string $mail, ?string $name = null)
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -351,9 +346,9 @@ class Message
     /**
      * Change the value of the boundary
      *
-     * @param $boundary
+     * @param string $boundary
      */
-    protected function setBoundary($boundary)
+    protected function setBoundary(string $boundary): void
     {
         $this->boundary = $boundary;
     }
@@ -362,11 +357,11 @@ class Message
      * Add Return-Path
      *
      * @param string $mail
-     * @param null $name = null
+     * @param ?string $name = null
      *
      * @return Message
      */
-    public function addReturnPath($mail, $name = null)
+    public function addReturnPath(string $mail, ?string $name = null): Message
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -382,7 +377,7 @@ class Message
      *
      * @return Message
      */
-    public function addPriority($priority)
+    public function addPriority(int $priority): Message
     {
         $this->headers[] = "X-Priority: " . (int) $priority;
 
@@ -392,10 +387,10 @@ class Message
     /**
      * Edit the mail message
      *
-     * @param $message
+     * @param string $message
      * @param string $type
      */
-    public function setMessage($message, $type = 'text/html')
+    public function setMessage(string $message, string $type = 'text/html')
     {
         $this->type = $type;
 
@@ -407,7 +402,7 @@ class Message
      *
      * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }
@@ -417,7 +412,7 @@ class Message
      *
      * @return array
      */
-    public function getTo()
+    public function getTo(): array
     {
         return $this->to;
     }
@@ -425,9 +420,9 @@ class Message
     /**
      * Get the subject of the email
      *
-     * @return string
+     * @return ?string
      */
-    public function getSubject()
+    public function getSubject(): ?string
     {
         return $this->subject;
     }
@@ -437,7 +432,7 @@ class Message
      *
      * @return string
      */
-    public function getFrom()
+    public function getFrom(): string
     {
         return $this->from;
     }
@@ -447,7 +442,7 @@ class Message
      *
      * @return string
      */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
@@ -457,7 +452,7 @@ class Message
      *
      * @return string
      */
-    public function getCharset()
+    public function getCharset(): string
     {
         return $this->charset;
     }
@@ -467,7 +462,7 @@ class Message
      *
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -475,9 +470,9 @@ class Message
     /**
      * Get the value of a variable that verifies that a sender is registered
      *
-     * @return boolean
+     * @return bool
      */
-    public function fromIsDefined()
+    public function fromIsDefined(): bool
     {
         return $this->fromDefined;
     }

@@ -1,0 +1,10 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Exception;
+
+class {className} extends Exception
+{
+    // do something here
+}

@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Event;
+
+use Bow\Event\Contracts\EventListener;
 
 class Listener
 {
@@ -9,22 +13,22 @@ class Listener
      *
      * @var callable
      */
-    private $callable;
+    private mixed $callable;
 
     /**
      * The priority index
      *
      * @var int
      */
-    private $priority = 0;
+    private int $priority = 0;
 
     /**
      * Listener constructor.
      *
      * @param callable|string $callable
-     * @param int             $priority
+     * @param int $priority
      */
-    public function __construct($callable, int $priority)
+    public function __construct(callable|string $callable, int $priority)
     {
         $this->callable = $callable;
 
@@ -37,12 +41,12 @@ class Listener
      * @param  array $data
      * @return mixed
      */
-    public function call(array $data = [])
+    public function call(array $data = []): mixed
     {
         $callable = $this->callable;
 
-        if (is_string($this->callable) && class_exists($this->callable, true)) {
-            $instance = app($this->callable);
+        if (is_string($callable) && class_exists($callable, true)) {
+            $instance = app($callable);
             if ($instance instanceof EventListener) {
                 $callable = [$instance, 'process'];
             }
@@ -56,7 +60,7 @@ class Listener
      *
      * @return string
      */
-    public function getActionType()
+    public function getActionType(): string
     {
         return gettype($this->callable);
     }
@@ -66,7 +70,7 @@ class Listener
      *
      * @return mixed
      */
-    public function getAction()
+    public function getAction(): mixed
     {
         return $this->callable;
     }
@@ -74,9 +78,9 @@ class Listener
     /**
      * Retrieves the priority of the listener
      *
-     * @return mixed
+     * @return int
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         return $this->priority;
     }

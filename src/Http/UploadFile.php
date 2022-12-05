@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Http;
 
 class UploadFile
@@ -7,7 +9,7 @@ class UploadFile
     /**
      * @var array
      */
-    private $file;
+    private array $file;
 
     /**
      * UploadFile constructor.
@@ -24,7 +26,7 @@ class UploadFile
      *
      * @return string
      */
-    public function getExtension()
+    public function getExtension(): string
     {
         if (!isset($this->file['name'])) {
             return null;
@@ -43,7 +45,7 @@ class UploadFile
      *
      * @return string
      */
-    public function extension()
+    public function extension(): string
     {
         return $this->getExtension();
     }
@@ -51,29 +53,21 @@ class UploadFile
     /**
      * Get the file extension
      *
-     * @return string
+     * @return ?string
      */
-    public function getTypeMime()
+    public function getTypeMime(): ?string
     {
-        if (isset($this->file['type'])) {
-            return $this->file['type'];
-        }
-
-        return null;
+        return $this->file['type'] ?? null;
     }
 
     /**
      * Get the size of the file
      *
-     * @return mixed
+     * @return ?int
      */
-    public function getFilesize()
+    public function getFilesize(): ?int
     {
-        if (isset($this->file['size'])) {
-            return $this->file['size'];
-        }
-
-        return null;
+        return $this->file['size'] ?? null;
     }
 
     /**
@@ -81,7 +75,7 @@ class UploadFile
      *
      * @return bool
      */
-    public function isUploaded()
+    public function isUploaded(): bool
     {
         if (!isset($this->file['tmp_name'], $this->file['error'])) {
             return false;
@@ -93,9 +87,9 @@ class UploadFile
     /**
      * Get the main name of the file
      *
-     * @return string
+     * @return ?string
      */
-    public function getBasename()
+    public function getBasename(): ?string
     {
         if (!isset($this->file['name'])) {
             return null;
@@ -107,15 +101,11 @@ class UploadFile
     /**
      * Get the filename
      *
-     * @return mixed
+     * @return ?string
      */
-    public function getFilename()
+    public function getFilename(): ?string
     {
-        if (!isset($this->file['name'])) {
-            return null;
-        }
-
-        return $this->file['name'];
+        return $this->file['name'] ?? null;
     }
 
     /**
@@ -123,7 +113,7 @@ class UploadFile
      *
      * @return string
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         if (!isset($this->file['tmp_name'])) {
             return null;
@@ -137,20 +127,20 @@ class UploadFile
      *
      * @return string
      */
-    public function getHashName()
+    public function getHashName(): string
     {
-        return strtolower(hash('sha256', $this->getBasename())).'.'.$this->getExtension();
+        return strtolower(hash('sha256', $this->getBasename())) . '.' . $this->getExtension();
     }
 
     /**
      * Move the uploader file to a directory.
      *
      * @param  string $to
-     * @param  string|null $filename
+     * @param  ?string $filename
      * @return bool
      * @throws
      */
-    public function moveTo($to, $filename = null)
+    public function moveTo(string $to, ?string $filename = null): bool
     {
         if (!isset($this->file['tmp_name'])) {
             return false;
@@ -164,7 +154,7 @@ class UploadFile
             @mkdir($to, 0777, true);
         }
 
-        $resolve = rtrim($to, '/').'/'.$filename;
+        $resolve = rtrim($to, '/') . '/' . $filename;
 
         return (bool) move_uploaded_file($this->file['tmp_name'], $resolve);
     }

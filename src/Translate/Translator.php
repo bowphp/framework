@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Translate;
 
 use Bow\Support\Arraydotify;
@@ -11,21 +13,21 @@ class Translator
      *
      * @var string
      */
-    private static $lang;
+    private static string $lang;
 
     /**
      * The lang directory
      *
      * @var string
      */
-    private static $directory;
+    private static string $directory;
 
     /**
      * The Translator instance
      *
      * @var Translator
      */
-    private static $instance;
+    private static ?Translator $instance = null;
 
     /**
      * Translator constructor.
@@ -34,10 +36,10 @@ class Translator
      * @param string $directory
      * @param bool $auto_detected
      */
-    public function __construct($lang, $directory, $auto_detected = false)
+    public function __construct(string $lang, string $directory, bool $auto_detected = false)
     {
         static::$lang = $lang;
-        
+
         if ($auto_detected) {
             static::$lang = strtolower(client_locale());
 
@@ -57,7 +59,7 @@ class Translator
      *
      * @return Translator
      */
-    public static function configure($lang, $directory)
+    public static function configure(string $lang, string $directory): Translator
     {
         if (static::$instance === null) {
             static::$instance = new self($lang, $directory);
@@ -71,7 +73,7 @@ class Translator
      *
      * @return Translator
      */
-    public static function getInstance()
+    public static function getInstance(): Translator
     {
         return static::$instance;
     }
@@ -83,7 +85,7 @@ class Translator
      *
      * @return bool
      */
-    public static function isLocale($locale)
+    public static function isLocale(string $locale): bool
     {
         return static::$lang == $locale;
     }
@@ -97,7 +99,7 @@ class Translator
      *
      * @return string
      */
-    public static function translate($key, array $data = [], $plurial = false)
+    public static function translate(string $key, array $data = [], bool $plurial = false): string
     {
         if (!is_string($key)) {
             throw new \InvalidArgumentException(
@@ -113,20 +115,20 @@ class Translator
         }
 
         // Formatage du path de fichier de la translation
-        $translation_filename = static::$directory.'/'.static::$lang.'/'.current($map).'.php';
+        $translation_filename = static::$directory . '/' . static::$lang . '/' . current($map) . '.php';
 
         if (!file_exists($translation_filename)) {
             return $key;
         }
 
         $contents = require $translation_filename;
-        
+
         if (!is_array($contents)) {
             return $key;
         }
 
         array_shift($map);
-        
+
         $key = implode('.', $map);
 
         $translations = Arraydotify::make($contents);
@@ -159,7 +161,7 @@ class Translator
      *
      * @return string
      */
-    public static function single($key, array $data = [])
+    public static function single(string $key, array $data = []): string
     {
         return static::translate($key, $data);
     }
@@ -171,7 +173,7 @@ class Translator
      * @param array $data
      * @return string
      */
-    public static function plurial($key, array $data = [])
+    public static function plurial(string $key, array $data = []): string
     {
         return static::translate($key, $data, true);
     }
@@ -179,14 +181,14 @@ class Translator
     /**
      * Permet de formater
      *
-     * @param  $str
+     * @param  string $str
      * @param  array $values
      * @return string
      */
-    private static function format($str, array $values = [])
+    private static function format(string $str, array $values = []): string
     {
         foreach ($values as $key => $value) {
-            $str = preg_replace('/{\s*'.$key.'\s*\}/', $value, $str);
+            $str = preg_replace('/{\s*' . $key . '\s*\}/', $value, $str);
         }
 
         return $str;
@@ -195,9 +197,9 @@ class Translator
     /**
      * Update locale
      *
-     * @param $locale
+     * @param string $locale
      */
-    public static function setLocale($locale)
+    public static function setLocale(string $locale): void
     {
         static::$lang = $locale;
     }
@@ -207,7 +209,7 @@ class Translator
      *
      * @return string
      */
-    public static function getLocale()
+    public static function getLocale(): string
     {
         return static::$lang;
     }
@@ -215,16 +217,16 @@ class Translator
     /**
      * __call
      *
-     * @param  $name
-     * @param  $arguments
+     * @param  string $name
+     * @param  array $arguments
      * @return string
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if (method_exists(static::$instance, $name)) {
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \BadMethodCallException('Undefined method '.$name);
+        throw new \BadMethodCallException('Undefined method ' . $name);
     }
 }

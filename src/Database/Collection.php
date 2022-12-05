@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database;
 
 use Bow\Database\Barry\Model;
@@ -9,15 +11,27 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function __construct(array $arr = [])
+    public function __construct(array $storage = [])
     {
-        parent::__construct($arr);
+        parent::__construct($storage);
+    }
+
+    /**
+     * Get the first item of starage
+     *
+     * @return ?Model
+     */
+    public function first(): ?Model
+    {
+        $result = parent::first();
+
+        return $result !== false ? $result : null;
     }
 
     /**
      * @inheritdoc
      */
-    public function toArray()
+    public function toArray(): array
     {
         $arr = [];
 
@@ -31,7 +45,7 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function toJson($option = 0)
+    public function toJson(int $option = 0): string
     {
         return json_encode($this->toArray(), $option = 0);
     }
@@ -41,7 +55,7 @@ class Collection extends \Bow\Support\Collection
      *
      * @return void
      */
-    public function dropAll()
+    public function dropAll(): void
     {
         $this->each(function (Model $model) {
             $model->delete();
@@ -51,7 +65,7 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function __toString()
+    public function __toString(): string
     {
         return json_encode($this->toArray());
     }
@@ -59,7 +73,7 @@ class Collection extends \Bow\Support\Collection
     /**
      * @inheritdoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

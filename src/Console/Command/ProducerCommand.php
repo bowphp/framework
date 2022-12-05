@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
@@ -13,7 +15,7 @@ class ProducerCommand extends AbstractCommand
      * @param string $producer
      * @return void
      */
-    public function generate(string $producer)
+    public function generate(string $producer): void
     {
         $generator = new Generator(
             $this->setting->getProducerDirectory(),
@@ -21,8 +23,7 @@ class ProducerCommand extends AbstractCommand
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mThe producer already exists.\033[00m\n";
-
+            echo Color::red("The producer already exists");
             exit(1);
         }
 
@@ -30,8 +31,7 @@ class ProducerCommand extends AbstractCommand
             'baseNamespace' => $this->namespaces['producer'] ?? 'App\\Producers'
         ]);
 
-        echo "\033[0;32mThe producer has been well created.\033[00m\n";
-
+        echo Color::green("The producer has been well created.");
         exit(0);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Router;
 
 use Bow\Application\Application;
@@ -12,14 +14,14 @@ class Resource
      *
      * @var Application
      */
-    private static $application;
+    private static Application $application;
 
     /**
      * The define routing list
      *
      * @var array
      */
-    private static $routes = [
+    private static array $routes = [
         [
             'url'    => '/',
             'call'   => 'index',
@@ -55,7 +57,7 @@ class Resource
      * @param array $where
      * @param array $ignore_method
      */
-    public static function make($url, $controller, array $where = [], array $ignore_method = [])
+    public static function make(string $url, mixed $controller, array $where = [], array $ignore_method = []): void
     {
         static::$application = Capsule::getInstance()->make('app');
 
@@ -77,9 +79,9 @@ class Resource
      * @param array $where
      * @throws
      */
-    private static function bind($url, $controller, array $definition, array $where)
+    private static function bind(string $url, mixed $controller, array $definition, array $where): void
     {
-        $path = '/'.trim($url.$definition['url'], '/');
+        $path = '/' . trim($url . $definition['url'], '/');
 
         // Launch of the route mapping method.
         $route = static::$application->{$definition['method']}(
@@ -88,7 +90,7 @@ class Resource
         );
 
         // Add name on the road
-        $name = str_replace('/', '.', $url).'.'.$definition['call'];
+        $name = str_replace('/', '.', $url) . '.' . $definition['call'];
 
         $route->name($name);
 

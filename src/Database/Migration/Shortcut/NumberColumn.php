@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Migration\Shortcut;
+
+use Bow\Database\Migration\SQLGenerator;
 
 trait NumberColumn
 {
@@ -11,7 +15,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addFloat($column, array $attribute = [])
+    public function addFloat(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'float', $attribute);
     }
@@ -23,7 +27,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addDouble($column, array $attribute = [])
+    public function addDouble(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'double', $attribute);
     }
@@ -34,7 +38,7 @@ trait NumberColumn
      * @param string $column
      * @return SQLGenerator
      */
-    public function addDoublePrimary($column)
+    public function addDoublePrimary(string $column): SQLGenerator
     {
         return $this->addColumn($column, 'double', ['primary' => true]);
     }
@@ -45,7 +49,7 @@ trait NumberColumn
      * @param string $column
      * @return SQLGenerator
      */
-    public function addFloatPrimary($column)
+    public function addFloatPrimary(string $column): SQLGenerator
     {
         return $this->addColumn($column, 'float', ['primary' => true]);
     }
@@ -56,7 +60,7 @@ trait NumberColumn
      * @param string $column
      * @return SQLGenerator
      */
-    public function addIncrement($column)
+    public function addIncrement(string $column): SQLGenerator
     {
         return $this->addColumn($column, 'int', ['primary' => true, 'increment' => true]);
     }
@@ -68,7 +72,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addInteger($column, array $attribute = [])
+    public function addInteger(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'int', $attribute);
     }
@@ -79,7 +83,7 @@ trait NumberColumn
      * @param string $column
      * @return SQLGenerator
      */
-    public function addIntegerPrimary($column)
+    public function addIntegerPrimary(string $column): SQLGenerator
     {
         return $this->addColumn($column, 'int', ['primary' => true]);
     }
@@ -90,7 +94,7 @@ trait NumberColumn
      * @param string $column
      * @return SQLGenerator
      */
-    public function addBigIncrement($column)
+    public function addBigIncrement(string $column): SQLGenerator
     {
         return $this->addColumn($column, 'bigint', ['primary' => true, 'increment' => true]);
     }
@@ -102,7 +106,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addTinyInteger($column, array $attribute = [])
+    public function addTinyInteger(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'tinyint', $attribute);
     }
@@ -114,7 +118,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addBigInteger($column, array $attribute = [])
+    public function addBigInteger(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'bigint', $attribute);
     }
@@ -126,7 +130,7 @@ trait NumberColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addMediumInteger($column, array $attribute = [])
+    public function addMediumInteger(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'mediumint', $attribute);
     }
@@ -137,7 +141,7 @@ trait NumberColumn
      * @param string $column
      * @return SQLGenerator
      */
-    public function addMediumIncrement($column)
+    public function addMediumIncrement(string $column): SQLGenerator
     {
         return $this->addColumn($column, 'mediumint', ['primary' => true, 'increment' => true]);
     }

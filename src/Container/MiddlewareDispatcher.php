@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Container;
 
 use Bow\Http\Request;
@@ -9,26 +11,26 @@ class MiddlewareDispatcher
     /**
      * @var array
      */
-    private $middlewares = [];
+    private array $middlewares = [];
 
     /**
      * @var int
      */
-    const PIPE_EMPTY = 1;
+    private const PIPE_EMPTY = 1;
 
     /**
      * @var int
      */
-    private $index = 0;
+    private int $index = 0;
 
     /**
      * Add a middleware to the runtime collection
      *
-     * @param string $middleware
+     * @param string|callable $middleware
      * @param array $params
-     * @return $this
+     * @return MiddlewareDispatcher
      */
-    public function pipe($middleware, array $params = [])
+    public function pipe(string|callable $middleware, array $params = []): MiddlewareDispatcher
     {
         if (is_callable($middleware)) {
             $this->middlewares[] = $middleware;
@@ -46,7 +48,7 @@ class MiddlewareDispatcher
      * @param array $args
      * @return mixed
      */
-    public function process(Request $request, ...$args)
+    public function process(Request $request, array ...$args): mixed
     {
         if (!isset($this->middlewares[$this->index]) || empty($this->middlewares)) {
             return MiddlewareDispatcher::PIPE_EMPTY;
@@ -64,7 +66,7 @@ class MiddlewareDispatcher
             }
 
             if (isset($middleware['class'])) {
-                $middleware = [new $middleware['class'], 'process'];
+                $middleware = [new $middleware['class'](), 'process'];
             }
         }
 

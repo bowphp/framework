@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
@@ -7,10 +9,10 @@ use Bow\Mail\Exception\SmtpException;
 use Bow\Mail\Exception\SocketException;
 use Bow\Mail\Message;
 use ErrorException;
+use resource;
 
-class SmtpDriver extends MailDriverInterface
+class SmtpDriver implements MailDriverInterface
 {
-
     /**
      * Socket connection
      *
@@ -23,49 +25,49 @@ class SmtpDriver extends MailDriverInterface
      *
      * @var string
      */
-    private $username;
+    private ?string $username;
 
     /**
      * The password
      *
      * @var string
      */
-    private $password;
+    private ?string $password;
 
     /**
      * The SMTP server
      *
      * @var string
      */
-    private $url;
+    private ?string $url;
 
     /**
      * Define the security
      *
      * @var bool
      */
-    private $secure;
+    private ?bool $secure;
 
     /**
      * Enable TLS
      *
      * @var bool
      */
-    private $tls = false;
+    private bool $tls = false;
 
     /**
      * Connexion time out
      *
      * @var int
      */
-    private $timeout;
+    private int $timeout;
 
     /**
      * The SMTP server
      *
      * @var int
      */
-    private $port = 25;
+    private int $port = 25;
 
     /**
      * Smtp Constructor
@@ -99,7 +101,7 @@ class SmtpDriver extends MailDriverInterface
      * @throws SocketException
      * @throws ErrorException
      */
-    public function send(Message $message)
+    public function send(Message $message): bool
     {
         $this->connection();
 
@@ -135,7 +137,7 @@ class SmtpDriver extends MailDriverInterface
         try {
             $this->write('.', 250);
         } catch (SmtpException $e) {
-            echo $e->getMessage();
+            error_log($e->getMessage());
         }
 
         $status = $this->disconnect();
@@ -162,22 +164,27 @@ class SmtpDriver extends MailDriverInterface
             $url = 'ssl://' . $this->url;
         }
 
-        $this->sock = fsockopen($url, $this->port, $errno, $errstr, $this->timeout);
+        $sock = fsockopen($url, $this->port, $errno, $errstr, $this->timeout);
 
-        if ($this->sock == null) {
+        if ($sock == null) {
             throw new SocketException('Impossible to get connected to ' . $this->url . ':' . $this->port, E_USER_ERROR);
         }
 
+        $this->sock = $sock;
         stream_set_timeout($this->sock, $this->timeout, 0);
         $code = $this->read();
 
-        $host = isset($_SERVER['HTTP_HOST']) &&
+        // The client sends this command to the SMTP server to identify
+        // itself and initiate the SMTP conversation.
+        // The domain name or IP address of the SMTP client is usually sent as an argument
+        // together with the command (e.g. “EHLO client.example.com”).
+        $client_host = isset($_SERVER['HTTP_HOST']) &&
         preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
         if ($code == 220) {
-            $code = $this->write('EHLO ' . $host, 250, 'HELO');
+            $code = $this->write('EHLO ' . $client_host, 250, 'HELO');
             if ($code != 250) {
-                $this->write('EHLO ' . $host, 250, 'HELO');
+                $this->write('EHLO ' . $client_host, 250, 'HELO');
             }
         }
 
@@ -225,7 +232,7 @@ class SmtpDriver extends MailDriverInterface
         $s = null;
 
         for (; !feof($this->sock);) {
-            if (($line = fgets($this->sock, 1e3)) == null) {
+            if (($line = fgets($this->sock, 1000)) == null) {
                 continue;
             }
 
@@ -243,13 +250,13 @@ class SmtpDriver extends MailDriverInterface
      * Start an SMTP command
      *
      * @param string $command
-     * @param int    $code
-     * @param null   $message
+     * @param ?int    $code
+     * @param ?string   $message
      *
      * @throws SmtpException
      * @return string
      */
-    private function write($command, $code = null, $message = null)
+    private function write(string $command, ?int $code = null, ?string $message = null)
     {
         if ($message == null) {
             $message = $command;

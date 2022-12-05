@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Testing;
 
 use InvalidArgumentException;
@@ -12,14 +14,14 @@ class Response
      *
      * @var Parser
      */
-    private $parser;
+    private Parser $parser;
 
     /**
      * The parser content
      *
      * @var string
      */
-    private $content;
+    private string $content;
 
     /**
      * Behovior constructor.
@@ -37,10 +39,9 @@ class Response
      * Check if the content is json format
      *
      * @param string $message
-     *
-     * @return Behavior
+     * @return Response
      */
-    public function assertJson($message = '')
+    public function assertJson(string $message = ''): Response
     {
         Assert::assertJson(json_encode($this->content), $message);
 
@@ -51,12 +52,11 @@ class Response
      * Check if the content is json format and the parsed data is
      * some to the content
      *
-     * @param $data
+     * @param array $data
      * @param string $message
-     *
-     * @return Behavior
+     * @return Response
      */
-    public function assertExactJson($data, $message = '')
+    public function assertExactJson(array $data, string $message = ''): Response
     {
         Assert::assertArraySubset($data, json_decode($this->content), $message);
 
@@ -69,9 +69,9 @@ class Response
      * @param string $data
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertContainsExactText($data, $message = '')
+    public function assertContainsExactText(string $data, string $message = ''): Response
     {
         Assert::assertEquals($this->content, $data, $message);
 
@@ -84,9 +84,9 @@ class Response
      * @param string $header
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertHeader($header, $message = '')
+    public function assertHeader(string $header, string $message = ''): Response
     {
         Assert::assertArrayHasKey($header, $this->parser->getHeaders(), $message);
 
@@ -98,9 +98,9 @@ class Response
      *
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertArray($message = '')
+    public function assertArray(string $message = ''): Response
     {
         Assert::assertTrue(is_array($this->parser->toArray()), $message);
 
@@ -110,12 +110,12 @@ class Response
     /**
      * Check the content type
      *
-     * @param $content_type
+     * @param string $content_type
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertContentType($content_type, $message = '')
+    public function assertContentType(string $content_type, string $message = ''): Response
     {
         $type = $this->parser->getContentType();
 
@@ -133,9 +133,9 @@ class Response
      *
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertContentTypeJson($message = '')
+    public function assertContentTypeJson(string $message = ''): Response
     {
         $this->assertContentType('application/json', $message);
 
@@ -147,9 +147,9 @@ class Response
      *
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertContentTypeText($message = '')
+    public function assertContentTypeText(string $message = ''): Response
     {
         $this->assertContentType('text/plain', $message);
 
@@ -161,9 +161,9 @@ class Response
      *
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertContentTypeHtml($message = '')
+    public function assertContentTypeHtml(string $message = ''): Response
     {
         $this->assertContentType('text/html', $message);
 
@@ -175,9 +175,9 @@ class Response
      *
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertContentTypeXml($message = '')
+    public function assertContentTypeXml(string $message = ''): Response
     {
         $this->assertContentType('text/xml', $message);
 
@@ -189,10 +189,9 @@ class Response
      *
      * @param int $code
      * @param string $message
-     *
-     * @return Behavior
+     * @return Response
      */
-    public function assertStatus($code, $message = '')
+    public function assertStatus(int $code, string $message = ''): Response
     {
         Assert::assertEquals($this->parser->getCode(), $code, $message);
 
@@ -200,12 +199,11 @@ class Response
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param string $message
-     *
-     * @return Behavior
+     * @return Response
      */
-    public function assertKeyExists($key, $message = '')
+    public function assertKeyExists(string $key, string $message = ''): Response
     {
         $data = $this->parser->toArray();
 
@@ -215,13 +213,13 @@ class Response
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param string $value
      * @param string $message
      *
-     * @return Behavior
+     * @return Response
      */
-    public function assertKeyMatchValue($key, $value, $message = '')
+    public function assertKeyMatchValue(string|int $key, mixed $value, string $message = ''): Response
     {
         $data = json_encode($this->content);
 
@@ -238,10 +236,9 @@ class Response
      * Check if the content contains the parsed text
      *
      * @param string $text
-     *
-     * @return Behavior
+     * @return Response
      */
-    public function assertContains($text)
+    public function assertContains(string $text): Response
     {
         Assert::assertContains($text, $this->content);
 
@@ -253,7 +250,7 @@ class Response
      *
      * @return string
      */
-    public function getContent()
+    public function getContent(): string
     {
         return $this->content;
     }

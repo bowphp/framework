@@ -1,9 +1,5 @@
 <?php
 
-require __DIR__."/../vendor/autoload.php";
+define('TESTING_RESOURCE_BASE_DIRECTORY', sprintf('%s/bowphp_testing', sys_get_temp_dir()));
 
-Bow\Configuration\Loader::configure(__DIR__.'/config');
-
-Bow\Container\Action::configure([], []);
-
-Bow\Database\Database::configure(require __DIR__.'/config/database.php');
+require __DIR__ . "/../vendor/autoload.php";

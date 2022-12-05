@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
@@ -11,10 +13,9 @@ class ConfigurationCommand extends AbstractCommand
      * Add configuration
      *
      * @param string $configuration
-     *
      * @return void
      */
-    public function generate($configuration)
+    public function generate(string $configuration): void
     {
         $generator = new Generator(
             $this->setting->getPackageDirectory(),

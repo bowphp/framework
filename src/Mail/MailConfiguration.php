@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail;
 
 use Bow\Configuration\Configuration;
@@ -10,7 +12,7 @@ class MailConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function create(Loader $config)
+    public function create(Loader $config): void
     {
         $this->container->bind('mail', function () use ($config) {
             return Mail::configure($config['mail']);
@@ -20,7 +22,7 @@ class MailConfiguration extends Configuration
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         $this->container->make('mail');
     }

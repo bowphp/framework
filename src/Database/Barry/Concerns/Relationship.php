@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database\Barry\Concerns;
 
 use Bow\Database\Barry\Relations\BelongsTo;
@@ -24,14 +26,19 @@ trait Relationship
      * @param string $local_key
      * @return BelongsTo
      */
-    public function belongsTo(string $related, string $foreign_key = null, string $local_key = null)
-    {
+    public function belongsTo(
+        string $related,
+        ?string $foreign_key = null,
+        ?string $local_key = null
+    ): BelongsTo {
+        // Create the new instance of model from container
         $related_model = app()->make($related);
 
         if (is_null($local_key)) {
             $local_key = $this->getKey();
         }
 
+        // We build here the foreign key name
         if (is_null($foreign_key)) {
             $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
@@ -47,14 +54,18 @@ trait Relationship
      * @param string $foreign_key
      * @return BelongsToMany
      */
-    public function belongsToMany(string $related, string $primary_key = null, string $foreign_key = null)
-    {
+    public function belongsToMany(
+        string $related,
+        ?string $primary_key = null,
+        ?string $foreign_key = null
+    ): BelongsToMany {
         $related_model = app()->make($related);
 
         if (is_null($primary_key)) {
             $primary_key = $this->getKey();
         }
 
+        // We build the foreign key name
         if (is_null($foreign_key)) {
             $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
@@ -70,14 +81,18 @@ trait Relationship
      * @param string $foreign_key
      * @return HasMany
      */
-    public function hasMany(string $related, string $primary_key = null, string $foreign_key = null)
-    {
+    public function hasMany(
+        string $related,
+        ?string $primary_key = null,
+        ?string $foreign_key = null
+    ): HasMany {
         $related_model = app()->make($related);
 
         if (is_null($primary_key)) {
             $primary_key = $this->getKey();
         }
 
+        // We build the foreign key name
         if (is_null($foreign_key)) {
             $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
@@ -93,14 +108,18 @@ trait Relationship
      * @param string $foreign_key
      * @return HasOne
      */
-    public function hasOne(string $related, string $primary_key = null, string $foreign_key = null)
-    {
+    public function hasOne(
+        string $related,
+        ?string $primary_key = null,
+        ?string $foreign_key = null
+    ): HasOne {
         $related_model = app()->make($related);
 
         if (is_null($primary_key)) {
             $primary_key = $this->getKey();
         }
 
+        // We build the foreign key name
         if (is_null($foreign_key)) {
             $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }

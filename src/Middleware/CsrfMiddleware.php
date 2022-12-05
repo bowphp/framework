@@ -1,21 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Middleware;
 
 use Bow\Http\Request;
 use Bow\Security\Exception\TokenMismatch;
+use Bow\Middleware\BaseMiddleware;
 
-class CsrfMiddleware
+class CsrfMiddleware implements BaseMiddleware
 {
     /**
      * Handle an incoming request.
      *
      * @param  Request $request
      * @param  Callable $next
-     * @return boolean
+     * @param  array $args
      * @throws
      */
-    public function process(Request $request, callable $next)
+    public function process(Request $request, callable $next, array $args = []): mixed
     {
         foreach ($this->preventOn() as $url) {
             if ($request->is($url)) {
@@ -45,7 +48,7 @@ class CsrfMiddleware
      *
      * @return array
      */
-    public function preventOn()
+    public function preventOn(): array
     {
         return [
 

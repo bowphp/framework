@@ -1,47 +1,49 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Queue;
 
-use Bow\Packages\Traits\SerializationService;
+use Bow\Queue\Traits\SerializesModels;
 
 abstract class ProducerService
 {
-    use SerializationService;
+    use SerializesModels;
 
     /**
      * Define the delay
      *
-     * @var integer
+     * @var int
      */
-    protected $delay = 30;
+    protected int $delay = 30;
 
     /**
      * Define the queue
      *
      * @var string
      */
-    protected $queue = "default";
+    protected string $queue = "default";
 
     /**
      * Define the time of retry
      *
-     * @var integer
+     * @var int
      */
-    protected $retry = 60;
+    protected int $retry = 60;
 
     /**
      * Define the priority
      *
      * @var int
      */
-    protected $priority = 1;
+    protected int $priority = 1;
 
     /**
      * Get the producer priority
      *
      * @return int
      */
-    final public function getPriority()
+    final public function getPriority(): int
     {
         return $this->priority;
     }
@@ -51,7 +53,7 @@ abstract class ProducerService
      *
      * @return int
      */
-    final public function getRetry()
+    final public function getRetry(): int
     {
         return $this->retry;
     }
@@ -59,9 +61,9 @@ abstract class ProducerService
     /**
      * Get the producer queue
      *
-     * @return int
+     * @return string
      */
-    final public function getQueue()
+    final public function getQueue(): string
     {
         return $this->queue;
     }
@@ -71,7 +73,7 @@ abstract class ProducerService
      *
      * @return int
      */
-    final public function getDelay()
+    final public function getDelay(): int
     {
         return $this->delay;
     }
@@ -81,5 +83,5 @@ abstract class ProducerService
      *
      * @return mixed
      */
-    abstract public function process();
+    abstract public function process(): void;
 }

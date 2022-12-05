@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Database;
 
 use Bow\Database\Connection\AbstractConnection;
@@ -9,37 +11,36 @@ use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Security\Sanitize;
 use PDO;
-use StdClass;
 
 class Database
 {
     /**
      * The adapter instance
      *
-     * @var AbstractConnection;
+     * @var ?AbstractConnection;
      */
-    private static $adapter;
+    private static ?AbstractConnection $adapter = null;
 
     /**
      * The singleton Database instance
      *
      * @var Database
      */
-    private static $instance;
+    private static ?Database $instance = null;
 
     /**
      * Configuration
      *
-     * @var StdClass
+     * @var array
      */
-    private static $config;
+    private static array $config;
 
     /**
      * Configuration
      *
      * @var string
      */
-    private static $name;
+    private static string $name;
 
     /**
      * Load configuration
@@ -48,7 +49,7 @@ class Database
      *
      * @return Database
      */
-    public static function configure($config)
+    public static function configure(array $config): Database
     {
         if (is_null(static::$instance)) {
             static::$instance = new self();
@@ -66,7 +67,7 @@ class Database
      *
      * @return Database
      */
-    public static function getInstance()
+    public static function getInstance(): Database
     {
         static::verifyConnection();
 
@@ -81,7 +82,7 @@ class Database
      *
      * @throws ConnectionException
      */
-    public static function connection($name = null)
+    public static function connection(?string $name = null): ?Database
     {
         if (is_null($name) || strlen($name) == 0) {
             if (is_null(static::$name)) {
@@ -127,7 +128,7 @@ class Database
      *
      * @return string|null
      */
-    public static function getConnectionName()
+    public static function getConnectionName(): ?string
     {
         return static::$name;
     }
@@ -135,9 +136,9 @@ class Database
     /**
      * Get adapter connexion instance
      *
-     * @return AbstractConnection
+     * @return ?AbstractConnection
      */
-    public static function getConnectionAdapter()
+    public static function getAdapterConnection(): ?AbstractConnection
     {
         static::verifyConnection();
 
@@ -149,9 +150,9 @@ class Database
      *
      * @param  string $sql_statement
      * @param  array  $data
-     * @return bool
+     * @return int
      */
-    public static function update($sql_statement, array $data = [])
+    public static function update(string $sql_statement, array $data = []): int
     {
         static::verifyConnection();
 
@@ -159,7 +160,7 @@ class Database
             return static::executePrepareQuery($sql_statement, $data);
         }
 
-        return false;
+        return 0;
     }
 
     /**
@@ -169,14 +170,16 @@ class Database
      * @param  array        $data
      * @return mixed|null
      */
-    public static function select($sql_statement, array $data = [])
+    public static function select(string $sql_statement, array $data = []): mixed
     {
         static::verifyConnection();
 
-        if (!preg_match(
-            "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
-            $sql_statement
-        )) {
+        if (
+            !preg_match(
+                "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
+                $sql_statement
+            )
+        ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -204,7 +207,7 @@ class Database
      * @param  array  $data
      * @return mixed|null
      */
-    public static function selectOne($sql_statement, array $data = [])
+    public static function selectOne(string $sql_statement, array $data = [])
     {
         static::verifyConnection();
 
@@ -234,16 +237,18 @@ class Database
      *
      * @param  $sql_statement
      * @param  array        $data
-     * @return null
+     * @return int
      */
-    public static function insert($sql_statement, array $data = [])
+    public static function insert(string $sql_statement, array $data = []): int
     {
         static::verifyConnection();
 
-        if (!preg_match(
-            "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
-            $sql_statement
-        )) {
+        if (
+            !preg_match(
+                "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
+                $sql_statement
+            )
+        ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -258,25 +263,25 @@ class Database
             return $pdo_statement->rowCount();
         }
 
-        $collector = [];
-        
-        $r = 0;
+        $collection = [];
+
+        $result = 0;
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $r += static::executePrepareQuery($sql_statement, $value);
+                $result += static::executePrepareQuery($sql_statement, $value);
 
                 continue;
             }
 
-            $collector[$key] = $value;
+            $collection[$key] = $value;
         }
 
-        if (!empty($collector)) {
-            return static::executePrepareQuery($sql_statement, $collector);
+        if (!empty($collection)) {
+            return static::executePrepareQuery($sql_statement, $collection);
         }
 
-        return $r;
+        return $result;
     }
 
     /**
@@ -285,19 +290,9 @@ class Database
      * @param string $sql_statement
      * @return bool
      */
-    public static function statement($sql_statement)
+    public static function statement(string $sql_statement): bool
     {
         static::verifyConnection();
-
-        if (!preg_match(
-            "/^(((drop|alter|create)\s+)?(?:(?:temp|temporary)\s+)?table|truncate|call|database)(\s+)?(.+?);?$/i",
-            $sql_statement
-        )) {
-            throw new DatabaseException(
-                'Syntax Error on the Request',
-                E_USER_ERROR
-            );
-        }
 
         return static::$adapter
             ->getConnection()
@@ -309,16 +304,18 @@ class Database
      *
      * @param  $sql_statement
      * @param  array        $data
-     * @return bool
+     * @return int
      */
-    public static function delete($sql_statement, array $data = [])
+    public static function delete(string $sql_statement, array $data = []): int
     {
         static::verifyConnection();
 
-        if (!preg_match(
-            "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
-            $sql_statement
-        )) {
+        if (
+            !preg_match(
+                "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
+                $sql_statement
+            )
+        ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -334,11 +331,11 @@ class Database
      * @param string $table
      * @return QueryBuilder
      */
-    public static function table($table)
+    public static function table(string $table): QueryBuilder
     {
         static::verifyConnection();
 
-        $table = static::$adapter->getTablePrefix().$table;
+        $table = static::$adapter->getTablePrefix() . $table;
 
         return new QueryBuilder(
             $table,
@@ -350,8 +347,9 @@ class Database
      * Starting the start of a transaction
      *
      * @param callable $callback
+     * @return void
      */
-    public static function startTransaction(callable $callback = null)
+    public static function startTransaction(?callable $callback = null): void
     {
         static::verifyConnection();
 
@@ -375,7 +373,7 @@ class Database
      *
      * @return bool
      */
-    public static function inTransaction()
+    public static function inTransaction(): bool
     {
         static::verifyConnection();
 
@@ -385,7 +383,7 @@ class Database
     /**
      * Validate a transaction
      */
-    public static function commit()
+    public static function commit(): void
     {
         static::verifyConnection();
 
@@ -395,7 +393,7 @@ class Database
     /**
      * Cancel a transaction
      */
-    public static function rollback()
+    public static function rollback(): void
     {
         static::verifyConnection();
 
@@ -407,20 +405,20 @@ class Database
      *
      * @throws
      */
-    private static function verifyConnection()
+    private static function verifyConnection(): void
     {
         if (is_null(static::$adapter)) {
             static::connection(static::$name);
         }
     }
-    
+
     /**
      * Retrieves the identifier of the last record.
      *
      * @param  string $name
      * @return int
      */
-    public static function lastInsertId($name = null)
+    public static function lastInsertId(?string $name = null): int|string
     {
         static::verifyConnection();
 
@@ -434,9 +432,9 @@ class Database
      *
      * @param string $sql_statement
      * @param array $data
-     * @return mixed
+     * @return int
      */
-    private static function executePrepareQuery($sql_statement, array $data = [])
+    private static function executePrepareQuery(string $sql_statement, array $data = []): int
     {
         $pdo_statement = static::$adapter
             ->getConnection()
@@ -459,7 +457,7 @@ class Database
      *
      * @return PDO
      */
-    public static function getPdo()
+    public static function getPdo(): PDO
     {
         static::verifyConnection();
 
@@ -486,7 +484,7 @@ class Database
      *
      * @return mixed
      */
-    public function __call($method, array $arguments)
+    public function __call(string $method, array $arguments)
     {
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array(

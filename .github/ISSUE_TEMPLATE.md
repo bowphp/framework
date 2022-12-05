@@ -7,6 +7,6 @@ If you would like to propose new Bow features, please make a pull request, or op
 - PHP Version: #.#.#
 - Database Driver & Version: Mysql|Sqlite
 
-### Description:
+### Description
 
-### Steps To Reproduce:
+### Steps To Reproduce

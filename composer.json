@@ -8,23 +8,34 @@
         "source": "https://github.com/bowphp/framework"
     },
     "require": {
-        "php": "^7.2|^8.0",
-        "bowphp/tintin": "^1.3",
+        "php": "^8.1",
+        "bowphp/tintin": "^2.0",
         "filp/whoops": "^2.1",
         "nesbot/carbon": "^2.16",
         "psy/psysh": "v0.10.*",
-        "fzaninotto/faker": "^1.8",
+        "fakerphp/faker": "^1.20",
         "pda/pheanstalk": "^4.0",
-        "neitanod/forceutf8": "^2.0"
+        "neitanod/forceutf8": "^2.0",
+        "ext-openssl": "*",
+        "ext-intl": "*",
+        "ext-pdo": "*",
+        "ext-mbstring": "*",
+        "ext-xml": "*",
+        "ext-json": "*",
+        "ext-pdo_mysql": "*",
+        "ext-pdo_sqlite": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8",
+        "phpunit/phpunit": "^8",
         "monolog/monolog": "^1.22",
         "twig/twig": "^2.5",
         "squizlabs/php_codesniffer": "3.*",
         "aws/aws-sdk-php": "^3.87",
         "phpstan/phpstan": "^0.12.87",
-        "php-amqplib/php-amqplib": "^3.0"
+        "php-amqplib/php-amqplib": "^3.0",
+        "bowphp/policier": "dev-master",
+        "mockery/mockery": "^1.5",
+        "spatie/phpunit-snapshot-assertions": "^4.2"
     },
     "authors": [
         {
@@ -35,19 +46,24 @@
     ],
     "autoload": {
         "files": [
-            "src/Support/helper.php"
+            "src/Support/helpers.php"
         ],
         "psr-4": {
             "Bow\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Bow\\Tests\\": "tests/"
+        }
+    },
     "suggest": {
-        "twig/twig": "For the use of template engine 'Twig'",
-        "papac/bow-blade": "For the use of template engine 'Blade'"
+        "twig/twig": "For using Twig template engine",
+        "papac/bow-blade": "For using Blade template engine"
     },
     "scripts": {
-        "fix-sniffer": "phpcbf --standard=psr2 --severity=4 --tab-width=4 src tests",
-        "sniffer": "phpcs --standard=psr2 --severity=4 --tab-width=4 src tests",
+        "phpcbf": "phpcbf --standard=psr12 --severity=4 --tab-width=4 src tests",
+        "phpcs": "phpcs --standard=psr12 --severity=4 --tab-width=4 src",
         "test": "phpunit --configuration phpunit.dist.xml"
     }
 }

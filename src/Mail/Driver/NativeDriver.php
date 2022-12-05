@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
@@ -8,21 +10,21 @@ use Bow\Support\Str;
 use Bow\Mail\Exception\MailException;
 use InvalidArgumentException;
 
-class NativeDriver extends MailDriverInterface
+class NativeDriver implements MailDriverInterface
 {
     /**
      * The configuration
      *
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * The from configuration
      *
      * @var array
      */
-    private $from = [];
+    private array $from = [];
 
     /**
      * SimpleMail Constructor
@@ -45,7 +47,7 @@ class NativeDriver extends MailDriverInterface
      * @param string $from
      * @return NativeDriver
      */
-    public function on(string $from)
+    public function on(string $from): NativeDriver
     {
         if (!isset($this->config["froms"][$from])) {
             throw new MailException(
@@ -66,7 +68,7 @@ class NativeDriver extends MailDriverInterface
      * @throws InvalidArgumentException
      * @return bool
      */
-    public function send(Message $message)
+    public function send(Message $message): bool
     {
         if (empty($message->getTo()) || empty($message->getSubject()) || empty($message->getMessage())) {
             throw new InvalidArgumentException(
@@ -96,7 +98,6 @@ class NativeDriver extends MailDriverInterface
         $headers = $message->compileHeaders();
 
         $headers .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
-
         $headers .= 'Content-Transfer-Encoding: 8bit' . Message::END;
 
         // Send email use the php native function

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Session;
 
 use Bow\Security\Crypto;
@@ -11,24 +13,14 @@ class Cookie
      *
      * @var array
      */
-    private static $is_decrypt = [];
-
-    /**
-     * __clone
-     *
-     * @access private
-     */
-    final private function __clone()
-    {
-    }
+    private static array $is_decrypt = [];
 
     /**
      * Check for existence of a key in the session collection
      *
      * @param string $key
-     * @param bool   $strict
-     *
-     * @return boolean
+     * @param bool $strict
+     * @return bool
      */
     public static function has($key, $strict = false)
     {
@@ -48,9 +40,9 @@ class Cookie
     /**
      * Check if a collection is empty.
      *
-     * @return boolean
+     * @return bool
      */
-    public static function isEmpty()
+    public static function isEmpty(): bool
     {
         return empty($_COOKIE);
     }
@@ -60,10 +52,9 @@ class Cookie
      *
      * @param string $key
      * @param mixed  $default
-     *
      * @return mixed
      */
-    public static function get($key, $default = null)
+    public static function get(string $key, mixed $default = null): mixed
     {
         if (static::has($key)) {
             return Crypto::decrypt($_COOKIE[$key]);
@@ -73,15 +64,15 @@ class Cookie
             return $default();
         }
 
-        return  $default;
+        return $default;
     }
 
     /**
      * Return all values of COOKIE
      *
-     * @return mixed
+     * @return array
      */
-    public static function all()
+    public static function all(): array
     {
         foreach ($_COOKIE as $key => $value) {
             $_COOKIE[$key] = Crypto::decrypt($value);
@@ -129,10 +120,9 @@ class Cookie
      * Delete an entry in the table
      *
      * @param string $key
-     *
      * @return mixed
      */
-    public static function remove($key)
+    public static function remove(string $key): mixed
     {
         $old = null;
 
@@ -142,7 +132,6 @@ class Cookie
 
         if (!static::$is_decrypt[$key]) {
             $old = Crypto::decrypt($_COOKIE[$key]);
-
             unset(static::$is_decrypt[$key]);
         }
 

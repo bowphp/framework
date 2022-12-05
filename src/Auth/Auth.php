@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Auth;
 
+use Bow\Auth\Guards\JwtGuard;
+use Bow\Auth\Guards\SessionGuard;
+use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Exception\AuthenticationException;
 
 class Auth
@@ -9,23 +14,23 @@ class Auth
     /**
      * The Auth instance
      *
-     * @var Auth
+     * @var GuardContract
      */
-    private static $instance;
+    private static ?GuardContract $instance = null;
 
     /**
      * The Auth configuration
      *
      * @var array
      */
-    private static $config;
+    private static array $config;
 
     /**
      * The current guard
      *
      * @var string
      */
-    private static $guard;
+    private static ?string $guard = null;
 
     /**
      * Configure Auth system
@@ -47,9 +52,9 @@ class Auth
     /**
      * Get Auth Instance
      *
-     * @return GuardContract
+     * @return ?GuardContract
      */
-    public static function getInstance()
+    public static function getInstance(): ?GuardContract
     {
         return static::$instance;
     }
@@ -59,40 +64,35 @@ class Auth
      *
      * @param null|string $guard
      * @return GuardContract
-     *
      * @throws AuthenticationException
      */
-    public static function guard($guard = null)
+    public static function guard(?string $guard = null): GuardContract
     {
-        if (is_null($guard)) {
+        if (is_null($guard) || static::$guard === $guard) {
             return static::$instance;
         }
 
         if (!isset(static::$config[$guard]) || !is_array(static::$config[$guard])) {
-            throw new AuthenticationException("Configuration not found for [$guard] guard.", E_ERROR);
+            throw new AuthenticationException(
+                "Configuration not found for [$guard] guard.",
+                E_ERROR
+            );
+        }
+
+        if (!is_null(static::$instance) && static::$instance->getName() === $guard) {
+            return static::$instance;
         }
 
         $provider = static::$config[$guard];
 
+        // Load the session provider
         if ($provider['type'] == 'session') {
-            if (static::$instance instanceof SessionGuard) {
-                if (static::$guard == $guard) {
-                    return static::$instance;
-                }
-            }
-
-            static::$guard = $guard;
-            return static::$instance = new SessionGuard($provider, $guard);
+            static::$instance = new SessionGuard($provider, $guard);
+        } else {
+            static::$instance = new JwtGuard($provider, $guard);
         }
 
-        if (static::$instance instanceof JwtGuard) {
-            if (static::$guard == $guard) {
-                return static::$instance;
-            }
-        }
-
-        static::$guard = $guard;
-        return static::$instance = new JwtGuard($provider, $guard);
+        return static::$instance;
     }
 
     /**

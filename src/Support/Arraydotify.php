@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Support;
 
 class Arraydotify implements \ArrayAccess
@@ -9,27 +11,26 @@ class Arraydotify implements \ArrayAccess
      *
      * @var array
      */
-    private $array = [];
+    private array $items = [];
 
     /**
      * The origin array
      *
      * @var array
      */
-    private $origin = [];
+    private array $origin = [];
 
     /**
      * Arraydotify constructor.
      *
-     * @param array $array
-     *
+     * @param array $items
      * @return void
      */
-    public function __construct(array $array = [])
+    public function __construct(array $items = [])
     {
-        $this->array = $this->dotify($array);
+        $this->items = $this->dotify($items);
 
-        $this->origin = $array;
+        $this->origin = $items;
     }
 
     /**
@@ -37,9 +38,9 @@ class Arraydotify implements \ArrayAccess
      *
      * @return void
      */
-    private function updateOrigin()
+    private function updateOrigin(): void
     {
-        foreach ($this->array as $key => $value) {
+        foreach ($this->items as $key => $value) {
             $this->dataSet($this->origin, $key, $value);
         }
     }
@@ -47,30 +48,28 @@ class Arraydotify implements \ArrayAccess
     /**
      * Make array dotify
      *
-     * @param array $array
-     *
+     * @param array $items
      * @return Arraydotify
      */
-    public static function make(array $array = [])
+    public static function make(array $items = []): Arraydotify
     {
-        return new Arraydotify($array);
+        return new Arraydotify($items);
     }
 
     /**
      * Dotify action
      *
-     * @param array  $array
+     * @param array  $items
      * @param string $prepend
-     *
      * @return array
      */
-    private function dotify(array $array, $prepend = '')
+    private function dotify(array $items, string $prepend = ''): array
     {
         $dot = [];
 
-        foreach ($array as $key => $value) {
+        foreach ($items as $key => $value) {
             if (!(is_array($value) || is_object($value))) {
-                $dot[$prepend.$key] = $value;
+                $dot[$prepend . $key] = $value;
                 continue;
             }
 
@@ -78,7 +77,7 @@ class Arraydotify implements \ArrayAccess
 
             $dot = array_merge($dot, $this->dotify(
                 $value,
-                $prepend.$key.'.'
+                $prepend . $key . '.'
             ));
         }
 
@@ -88,13 +87,12 @@ class Arraydotify implements \ArrayAccess
     /**
      * Transform the dot access to array access
      *
-     * @param array  $array
+     * @param mixed  $array
      * @param string $key
      * @param mixed  $value
-     *
-     * @return mixed
+     * @return array
      */
-    private function dataSet(&$array, $key, $value)
+    private function dataSet(mixed &$array, string $key, mixed $value): array
     {
         $keys = explode('.', $key);
 
@@ -118,10 +116,9 @@ class Arraydotify implements \ArrayAccess
      *
      * @param array $origin
      * @param string $segment
-     *
-     * @return array|mixed|null
+     * @return ?array
      */
-    private function find($origin, $segment)
+    private function find(array $origin, string $segment): ?array
     {
         $parts = explode('.', $segment);
 
@@ -153,9 +150,9 @@ class Arraydotify implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
-        if (isset($this->array[$offset])) {
+        if (isset($this->items[$offset])) {
             return true;
         }
 
@@ -167,23 +164,23 @@ class Arraydotify implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         if (!$this->offsetExists($offset)) {
             return null;
         }
 
-        return isset($this->array[$offset])
-            ? $this->array[$offset]
+        return isset($this->items[$offset])
+            ? $this->items[$offset]
             : $this->find($this->origin, $offset);
     }
-    
+
     /**
      * @inheritDoc
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
-        $this->array[$offset] = $value;
+        $this->items[$offset] = $value;
 
         $this->updateOrigin();
     }
@@ -191,9 +188,9 @@ class Arraydotify implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
-        unset($this->array[$offset]);
+        unset($this->items[$offset]);
 
         $this->updateOrigin();
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Storage\Contracts;
 
 use Bow\Http\UploadFile;
@@ -13,10 +15,10 @@ interface FilesystemInterface
      * @param  UploadFile $file
      * @param  string  $location
      * @param  array $option
-     * @return mixed
+     * @return bool
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, $location = null, array $option = []);
+    public function store(UploadFile $file, ?string $location = null, array $option = []): array|bool;
 
     /**
      * Write following a file specify
@@ -25,7 +27,7 @@ interface FilesystemInterface
      * @param  string $content
      * @return bool
      */
-    public function append($file, $content);
+    public function append(string $file, string $content): bool;
 
     /**
      * Write to the beginning of a file specify
@@ -35,7 +37,7 @@ interface FilesystemInterface
      * @return bool
      * @throws
      */
-    public function prepend($file, $content);
+    public function prepend(string $file, string $content);
 
     /**
      * Put other file content in given file
@@ -44,15 +46,15 @@ interface FilesystemInterface
      * @param  string $content
      * @return bool
      */
-    public function put($file, $content);
+    public function put(string $file, string $content);
 
     /**
      * Delete file
      *
      * @param  string $file
-     * @return boolean
+     * @return bool
      */
-    public function delete($file);
+    public function delete(string $file): bool;
 
     /**
      * Alias sur readInDir
@@ -60,7 +62,7 @@ interface FilesystemInterface
      * @param  string $dirname
      * @return array
      */
-    public function files($dirname);
+    public function files(string $dirname): array;
 
     /**
      * Read the contents of the file
@@ -68,24 +70,24 @@ interface FilesystemInterface
      * @param  string $dirname
      * @return array
      */
-    public function directories($dirname);
+    public function directories(string $dirname): array;
 
     /**
      * Create a directory
      *
      * @param  string $dirname
      * @param  int    $mode
-     * @return boolean
+     * @return bool
      */
-    public function makeDirectory($dirname, $mode = 0777);
+    public function makeDirectory(string $dirname, int $mode = 0777): bool;
 
     /**
      * Get file content
      *
      * @param  string $filename
-     * @return null|string
+     * @return ?string
      */
-    public function get($filename);
+    public function get(string $filename): ?string;
 
     /**
      * Copy the contents of a source file to a target file.
@@ -94,15 +96,16 @@ interface FilesystemInterface
      * @param  string $source
      * @return bool
      */
-    public function copy($target, $source);
+    public function copy(string $target, string $source): bool;
 
     /**
      * Rénme or move a source file to a target file.
      *
      * @param string $target
      * @param string $source
+     * @return bool
      */
-    public function move($target, $source);
+    public function move(string $target, string $source): bool;
 
     /**
      * Check the existence of a file
@@ -110,7 +113,7 @@ interface FilesystemInterface
      * @param string $filename
      * @return bool
      */
-    public function exists($filename);
+    public function exists(string $filename): bool;
 
     /**
      * isFile alias of is_file.
@@ -118,7 +121,7 @@ interface FilesystemInterface
      * @param string $filename
      * @return bool
      */
-    public function isFile($filename);
+    public function isFile(string $filename): bool;
 
     /**
      * isDirectory alias of is_dir.
@@ -126,7 +129,7 @@ interface FilesystemInterface
      * @param string $dirname
      * @return bool
      */
-    public function isDirectory($dirname);
+    public function isDirectory(string $dirname): bool;
 
     /**
      * Resolves a path.
@@ -135,5 +138,5 @@ interface FilesystemInterface
      * @param string $filename
      * @return string
      */
-    public function path($filename);
+    public function path(string $filename): string;
 }

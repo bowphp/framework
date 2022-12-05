@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console;
 
 class Color
@@ -10,7 +12,7 @@ class Color
      * @param string $message
      * @return string
      */
-    public static function red($message)
+    public static function red(string $message): string
     {
         return "\033[0;31m$message\033[00m";
     }
@@ -21,7 +23,7 @@ class Color
      * @param string $message
      * @return string
      */
-    public static function blue($message)
+    public static function blue(string $message): string
     {
         return "\033[0;30m$message\033[00m";
     }
@@ -32,7 +34,7 @@ class Color
      * @param string $message
      * @return string
      */
-    public static function yellow($message)
+    public static function yellow(string $message): string
     {
         return "\033[0;33m$message\033[00m";
     }
@@ -43,7 +45,7 @@ class Color
      * @param string $message
      * @return string
      */
-    public static function green($message)
+    public static function green(string $message): string
     {
         return "\033[0;32m$message\033[00m";
     }
@@ -54,9 +56,9 @@ class Color
      * @param string $message
      * @return string
      */
-    public static function danger($message)
+    public static function danger(string $message): string
     {
-        return static::red('[danger]').' '.$message;
+        return static::red('[danger]') . ' ' . $message;
     }
 
     /**
@@ -65,9 +67,9 @@ class Color
      * @param  $message
      * @return string
      */
-    public static function info($message)
+    public static function info(string $message): string
     {
-        return static::blue('[info]').' '.$message;
+        return static::blue('[info]') . ' ' . $message;
     }
 
     /**
@@ -76,9 +78,9 @@ class Color
      * @param string $message
      * @return string
      */
-    public static function warning($message)
+    public static function warning(string $message): string
     {
-        return static::yellow('[warning]').' '.$message;
+        return static::yellow('[warning]') . ' ' . $message;
     }
 
     /**
@@ -87,8 +89,8 @@ class Color
      * @param string $message
      * @return string
      */
-    public static function success($message)
+    public static function success(string $message): string
     {
-        return static::green('[success]').' '.$message;
+        return static::green('[success]') . ' ' . $message;
     }
 }

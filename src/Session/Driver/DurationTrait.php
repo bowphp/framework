@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Session\Driver;
 
 trait DurationTrait
@@ -10,7 +12,7 @@ trait DurationTrait
      * @param int max_lifetime
      * @return string
      */
-    private function createTimestamp($max_lifetime = null)
+    private function createTimestamp(?int $max_lifetime = null): string
     {
         $lifetime = !is_null($max_lifetime) ? $max_lifetime : (config('session.lifetime') * 60);
 

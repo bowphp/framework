@@ -1,0 +1,30 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Configuration\Loader;
+use Bow\Configuration\Configuration;
+
+class {className} extends Configuration
+{
+    /**
+     * Launch configuration
+     *
+     * @param Loader $config
+     * @return void
+     */
+    public function create(Loader $config): void
+    {
+        //
+    }
+
+    /**
+     * Start the configured package
+     *
+     * @return void
+     */
+    public function run(): void
+    {
+        //
+    }
+}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 class ServerCommand extends AbstractCommand
@@ -9,18 +11,16 @@ class ServerCommand extends AbstractCommand
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
-        $port = (int) $this->arg->options('--port', 5000);
-
-        $hostname = $this->arg->options('--host', 'localhost');
-
-        $settings = $this->arg->options('--php-settings', false);
+        $port = (int) $this->arg->getParameter('--port', 5000);
+        $hostname = $this->arg->getParameter('--host', 'localhost');
+        $settings = $this->arg->getParameter('--php-settings', false);
 
         if (is_bool($settings)) {
             $settings = '';
         } else {
-            $settings = '-d '.$settings;
+            $settings = '-d ' . $settings;
         }
 
         // resource.
@@ -43,7 +43,7 @@ class ServerCommand extends AbstractCommand
 
         // Launch the dev server.
         shell_exec(
-            "php -S $hostname:$port -t {$public_directory} ".$filename." $settings"
+            "php -S $hostname:$port -t {$public_directory} " . $filename . " $settings"
         );
     }
 }

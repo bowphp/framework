@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
@@ -11,7 +13,7 @@ class ReplCommand extends AbstractCommand
      *
      * @return mixed
      */
-    public function run()
+    public function run(): void
     {
         $include = $this->arg->getParameter('--include');
 
@@ -31,24 +33,17 @@ class ReplCommand extends AbstractCommand
         }
 
         $config = new \Psy\Configuration();
-
         $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
 
         // Load the custum prompt
-        $prompt = $this->arg->options('--prompt');
+        $prompt = $this->arg->getParameter('--prompt', '(bow) >>');
+        $prompt = trim($prompt) . ' ';
 
-        if (is_null($prompt)) {
-            $prompt = '(bow) >>';
-        }
-
-        $prompt = trim($prompt).' ';
-        
         $config->setPrompt($prompt);
 
         $shell = new \Psy\Shell($config);
 
         $shell->setIncludes($this->setting->getBootstrap());
-
-        return $shell->run();
+        $shell->run();
     }
 }

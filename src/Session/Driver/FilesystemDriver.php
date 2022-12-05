@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Session\Driver;
 
 class FilesystemDriver implements \SessionHandlerInterface
@@ -11,14 +13,14 @@ class FilesystemDriver implements \SessionHandlerInterface
      *
      * @var string
      */
-    private $save_path;
+    private string $save_path;
 
     /**
      * Filesystem constructor
      *
      * @param string $save_path
      */
-    public function __construct($save_path)
+    public function __construct(string $save_path)
     {
         $this->save_path = $save_path;
     }
@@ -28,7 +30,7 @@ class FilesystemDriver implements \SessionHandlerInterface
      *
      * @return bool
      */
-    public function close()
+    public function close(): bool
     {
         return true;
     }
@@ -37,9 +39,9 @@ class FilesystemDriver implements \SessionHandlerInterface
      * Destroy session information
      *
      * @param string $session_id
-     * @return bool|void
+     * @return bool
      */
-    public function destroy($session_id)
+    public function destroy(string $session_id): bool
     {
         $file = $this->sessionFile($session_id);
 
@@ -52,11 +54,11 @@ class FilesystemDriver implements \SessionHandlerInterface
      * Garbage collector
      *
      * @param int $maxlifetime
-     * @return bool|void
+     * @return bool
      */
-    public function gc($maxlifetime)
+    public function gc(int $maxlifetime): bool
     {
-        foreach (glob($this->save_path."/*") as $file) {
+        foreach (glob($this->save_path . "/*") as $file) {
             if (filemtime($file) + $maxlifetime < $this->createTimestamp() && file_exists($file)) {
                 @unlink($file);
             }
@@ -70,9 +72,9 @@ class FilesystemDriver implements \SessionHandlerInterface
      *
      * @param string $save_path
      * @param string $name
-     * @return bool|void
+     * @return bool
      */
-    public function open($save_path, $name)
+    public function open(string $save_path, string $name): bool
     {
         if (!is_dir($this->save_path)) {
             mkdir($this->save_path, 0777);
@@ -85,9 +87,9 @@ class FilesystemDriver implements \SessionHandlerInterface
      * Read the session information
      *
      * @param string $session_id
-     * @return string|void
+     * @return string
      */
-    public function read($session_id)
+    public function read(string $session_id): string
     {
         return (string) @file_get_contents($this->sessionFile($session_id));
     }
@@ -97,9 +99,9 @@ class FilesystemDriver implements \SessionHandlerInterface
      *
      * @param string $session_id
      * @param string $session_data
-     * @return bool|void
+     * @return bool
      */
-    public function write($session_id, $session_data)
+    public function write(string $session_id, string $session_data): bool
     {
         $saved = @file_put_contents($this->sessionFile($session_id), $session_data);
 
@@ -112,8 +114,8 @@ class FilesystemDriver implements \SessionHandlerInterface
      * @param string $session_id
      * @return string
      */
-    private function sessionFile($session_id)
+    private function sessionFile(string $session_id): string
     {
-        return $this->save_path.'/'.basename($session_id);
+        return $this->save_path . '/' . basename($session_id);
     }
 }

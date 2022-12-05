@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console;
 
 use Bow\Console\Command\AbstractCommand;
@@ -12,10 +14,7 @@ class Command extends AbstractCommand
      *
      * @var array
      */
-    private $command = [
-        "migration" => \Bow\Console\Command\MigrationCommand::class,
-        "clear" => \Bow\Console\Command\ClearCommand::class,
-        "seeder" => \Bow\Console\Command\SeederCommand::class,
+    private array $command = [
         "add" => [
             "controller" => \Bow\Console\Command\ControllerCommand::class,
             "configuration" => \Bow\Console\Command\ConfigurationCommand::class,
@@ -26,19 +25,23 @@ class Command extends AbstractCommand
             "seeder" => \Bow\Console\Command\SeederCommand::class,
             "service" => \Bow\Console\Command\ServiceCommand::class,
             "validation" => \Bow\Console\Command\ValidationCommand::class,
-            "event" => \Bow\Console\Command\EventCommand::class,
+            "event" => \Bow\Console\Command\AppEventCommand::class,
+            "listener" => \Bow\Console\Command\EventListenerCommand::class,
             "producer" => \Bow\Console\Command\ProducerCommand::class,
             "command" => \Bow\Console\Command\ConsoleCommand::class,
         ],
-        "runner" => [
-            "console" => \Bow\Console\Command\ReplCommand::class,
-            "server" => \Bow\Console\Command\ServerCommand::class,
-            "worker" => \Bow\Console\Command\WorkerCommand::class,
-        ],
+        "clear" => \Bow\Console\Command\ClearCommand::class,
         "generator" => [
             "key" => \Bow\Console\Command\GenerateKeyCommand::class,
             "resource" => \Bow\Console\Command\GenerateResourceControllerCommand::class,
             "session" => \Bow\Console\Command\GenerateSessionCommand::class,
+        ],
+        "migration" => \Bow\Console\Command\MigrationCommand::class,
+        "seeder" => \Bow\Console\Command\SeederCommand::class,
+        "runner" => [
+            "console" => \Bow\Console\Command\ReplCommand::class,
+            "server" => \Bow\Console\Command\ServerCommand::class,
+            "worker" => \Bow\Console\Command\WorkerCommand::class,
         ],
     ];
 
@@ -48,12 +51,15 @@ class Command extends AbstractCommand
      * @param string $action
      * @param string $command
      * @param array $rest
-     *
      * @return mixed
      */
-    public function call($command, $action, ...$rest)
+    public function call(string $command, string $action, ...$rest): mixed
     {
-        $class = $this->command[$command];
+        $class = $this->command[$command] ?? null;
+
+        if (is_null($class)) {
+            $this->throwFailsCommand("The command $command not found !");
+        }
 
         if ($command == "add" || $command == "generator") {
             $method = "generate";

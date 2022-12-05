@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Listeners;
+
+use Bow\Event\Contracts\EventListener;
+
+class FakeListener implements EventListener
+{
+	/**
+	 * Process the event
+	 * 
+	 * @param mixed $event
+	 * @return void
+	 */
+	public function process($event): void
+	{
+        // do something here
+	}
+}

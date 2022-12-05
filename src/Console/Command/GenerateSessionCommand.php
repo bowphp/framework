@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
@@ -13,7 +15,7 @@ class GenerateSessionCommand extends AbstractCommand
      *
      * @return void
      */
-    public function generate()
+    public function generate(): void
     {
         $create_at = date("YmdHis");
         $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('sessions')));

@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\View;
 
-use Bow\Configuration\Loader;
+use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\View\Exception\ViewException;
 
 abstract class EngineAbstract
@@ -12,7 +14,7 @@ abstract class EngineAbstract
      *
      * @var array
      */
-    const HELPERS = [
+    protected const HELPERS = [
         'secure' => 'secure',
         'route' => 'route',
         'bow_hash' => 'bow_hash',
@@ -53,14 +55,14 @@ abstract class EngineAbstract
      *
      * @var string
      */
-    protected $name;
+    protected string $name;
 
     /**
      * The configuration loader
      *
-     * @var Loader
+     * @var array
      */
-    protected $config;
+    protected array $config;
 
     /**
      * Make template rendering
@@ -68,9 +70,9 @@ abstract class EngineAbstract
      * @param  string $filename
      * @param  array  $data
      *
-     * @return mixed
+     * @return string
      */
-    abstract public function render($filename, array $data = []);
+    abstract public function render(string $filename, array $data = []): string;
 
     /**
      * Check the parsed file
@@ -81,46 +83,56 @@ abstract class EngineAbstract
      * @return string
      * @throws ViewException
      */
-    protected function checkParseFile($filename, $extended = true)
+    protected function checkParseFile(string $filename, bool $extended = true): string
     {
-        $tmp_filename = preg_replace('/@|\./', '/', $filename) . $this->config['view.extension'];
+        $normalized_filename = $this->normalizeFilename($filename);
 
         // Vérification de l'existance du fichier
-        if ($this->config['view.path'] !== null) {
-            if (!file_exists($this->config['view.path'].'/'.$tmp_filename)) {
-                throw new ViewException(
-                    sprintf(
-                        'The view [%s] does not exists. %s/%s',
-                        $tmp_filename,
-                        $this->config['view.path'],
-                        $filename
-                    ),
-                    E_ERROR
-                );
-            }
-        } else {
-            if (!file_exists($tmp_filename)) {
-                throw new ViewException(
-                    sprintf('The view [%s] does not exists.', $tmp_filename),
-                    E_ERROR
-                );
-            }
+        if ($this->config['path'] !== null && !file_exists($this->config['path'] . '/' . $normalized_filename)) {
+            throw new ViewException(
+                sprintf(
+                    'The view [%s] does not exists. %s/%s',
+                    $normalized_filename,
+                    $this->config['path'],
+                    $filename
+                )
+            );
         }
 
-        if ($extended) {
-            $filename = $tmp_filename;
-        }
-
-        return $filename;
+        return $extended ? $normalized_filename : $filename;
     }
 
     /**
      * Get the engine name
      *
-     * @return mixed
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Check if the define file exists
+     *
+     * @param string $filename
+     * @return bool
+     */
+    public function fileExists(string $filename): bool
+    {
+        $normalized_filename = $this->normalizeFilename($filename);
+
+        return file_exists($this->config['path'] . '/' . $normalized_filename);
+    }
+
+    /**
+     * Normalize the file
+     *
+     * @param string $filename
+     * @return string
+     */
+    private function normalizeFilename(string $filename): string
+    {
+        return preg_replace('/@|\./', '/', $filename) . $this->config['extension'];
     }
 }

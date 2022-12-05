@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Cache;
 
 use BadMethodCallException;
 use Bow\Support\Str;
-use DirectoryIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -15,14 +16,14 @@ class Cache
      *
      * @var string
      */
-    private static $directory;
+    private static ?string $directory = null;
 
     /**
      * The meta data
      *
      * @var bool
      */
-    private static $with_meta = false;
+    private static bool $with_meta = false;
 
     /**
      * Cache constructor.
@@ -30,7 +31,7 @@ class Cache
      * @param string $base_directory
      * @return mixed
      */
-    public function __construct($base_directory)
+    public function __construct(string $base_directory)
     {
         static::confirgure($base_directory);
     }
@@ -40,7 +41,7 @@ class Cache
      *
      * @param string $base_directory
      */
-    public static function confirgure($base_directory)
+    public static function confirgure(string $base_directory)
     {
         if (static::$directory === null || static::$directory !== $base_directory) {
             static::$directory = $base_directory;
@@ -56,11 +57,10 @@ class Cache
      *
      * @param string $key
      * @param mixed $data
-     * @param int $time
-     *
+     * @param ?int $time
      * @return bool
      */
-    public static function add($key, $data, $time = null)
+    public static function add(string $key, mixed $data, ?int $time = null): bool
     {
         if (is_callable($data)) {
             $content = $data();
@@ -84,7 +84,7 @@ class Cache
      * @param array $data
      * @return bool
      */
-    public static function addMany(array $data) : bool
+    public static function addMany(array $data): bool
     {
         $return = true;
 
@@ -102,7 +102,7 @@ class Cache
      * @param  mixed  $data
      * @return bool
      */
-    public static function forever($key, $data)
+    public static function forever(string $key, mixed $data): bool
     {
         if (is_callable($data)) {
             $content = $data();
@@ -127,7 +127,7 @@ class Cache
      * @param  mixed  $data
      * @return bool
      */
-    public static function push($key, $data)
+    public static function push(string $key, array $data): bool
     {
         if (is_callable($data)) {
             $content = $data();
@@ -160,7 +160,7 @@ class Cache
      * @param  mixed  $default
      * @return mixed
      */
-    public static function get($key, $default = null)
+    public static function get(string $key, mixed $default = null): mixed
     {
         if (!static::has($key)) {
             static::$with_meta = false;
@@ -168,7 +168,7 @@ class Cache
             if (is_callable($default)) {
                 return $default();
             }
-            
+
             return $default;
         }
 
@@ -190,7 +190,7 @@ class Cache
      * @param  int    $time
      * @return bool
      */
-    public static function addTime($key, $time)
+    public static function addTime(string $key, int $time): bool
     {
         static::$with_meta = true;
 
@@ -218,9 +218,9 @@ class Cache
      * Retrieves the cache expiration time
      *
      * @param  string $key
-     * @return bool|string|int
+     * @return int|bool|string
      */
-    public static function timeOf($key)
+    public static function timeOf(string $key): int|bool|string
     {
         static::$with_meta = true;
 
@@ -241,7 +241,7 @@ class Cache
      * @param  string $key
      * @return bool
      */
-    public static function forget($key)
+    public static function forget(string $key): bool
     {
         $filename = static::makeHashFilename($key);
 
@@ -249,7 +249,7 @@ class Cache
             return false;
         }
 
-        $r = (bool) @unlink($filename);
+        $result = (bool) @unlink($filename);
 
         $parts = explode('/', $filename);
 
@@ -261,7 +261,7 @@ class Cache
             @rmdir($dirname);
         }
 
-        return $r;
+        return $result;
     }
 
     /**
@@ -270,7 +270,7 @@ class Cache
      * @param  string $key
      * @return bool
      */
-    public static function has($key)
+    public static function has(string $key): bool
     {
         $filename = static::makeHashFilename($key);
 
@@ -283,7 +283,7 @@ class Cache
      * @param  string $key
      * @return bool
      */
-    public static function expired($key)
+    public static function expired(string $key): bool
     {
         static::$with_meta = true;
 
@@ -305,7 +305,7 @@ class Cache
      *
      * @return void
      */
-    public static function clear()
+    public static function clear(): void
     {
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(static::$directory),
@@ -323,32 +323,33 @@ class Cache
      * Format the file
      *
      * @param  string $key
-     * @param  bool   $make_group_directory
+     * @param  bool  $make_group_directory
      * @return string
      */
-    private static function makeHashFilename($key, $make_group_directory = false)
+    private static function makeHashFilename(string $key, bool $make_group_directory = false): string
     {
-        $hash = hash('sha256', '/bow_'.$key);
+        $hash = hash('sha256', '/bow_' . $key);
 
         $group = Str::slice($hash, 0, 2);
 
         if ($make_group_directory) {
-            if (!is_dir(static::$directory.'/'.$group)) {
-                @mkdir(static::$directory.'/'.$group);
+            if (!is_dir(static::$directory . '/' . $group)) {
+                @mkdir(static::$directory . '/' . $group);
             }
         }
 
-        return static::$directory.'/'.$group.'/'.$hash;
+        return static::$directory . '/' . $group . '/' . $hash;
     }
 
     /**
      * __call
      *
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param array $arguments
      * @return mixed
+     * @throws BadMethodCallException
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if (method_exists(static::class, $name)) {
             return call_user_func_array([static::class, $name], $arguments);

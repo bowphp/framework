@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Testing\Features;
 
 trait FeatureHelper
@@ -10,7 +12,7 @@ trait FeatureHelper
      * @see https://github.com/fzaninotto/Faker for all documentation
      * @return \Faker\Generator
      */
-    public function faker()
+    public function faker(): \Faker\Generator
     {
         static $faker;
 
@@ -19,17 +21,5 @@ trait FeatureHelper
         }
 
         return $faker;
-    }
-
-    /**
-     * Seed alias
-     *
-     * @param string $seeder
-     * @param array $data
-     * @return int
-     */
-    public function seed($seeder, array $data = [])
-    {
-        return seed($seeder, $data);
     }
 }

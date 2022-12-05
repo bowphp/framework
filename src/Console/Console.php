@@ -1,61 +1,64 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Console;
 
 use Bow\Configuration\Loader;
+use Bow\Console\Traits\ConsoleTrait;
 
 class Console
 {
-    use ConsoleInformation;
+    use ConsoleTrait;
 
     /**
      * The Setting instance
      *
      * @var Setting
      */
-    private $setting;
+    private Setting $setting;
 
     /**
      * The COMMAND instance
      *
      * @var Command
      */
-    private $command;
+    private Command $command;
 
     /**
      * The Loader instance
      *
      * @var Loader
      */
-    private $kernel;
+    private Loader $kernel;
 
     /**
      * The custom command registers
      *
      * @var array
      */
-    private $registers = [];
+    private array $registers = [];
 
     /**
      * Defines if console booted
      *
      * @var bool
      */
-    private $booted;
+    private bool $booted = false;
 
     /**
-     * The ArgOption instance
+     * The Argument instance
      *
-     * @return ArgOption
+     * @return Argument
      */
-    private $arg;
+    private Argument $arg;
 
     /**
      * The command list
      *
      * @var array
      */
-    const COMMAND = [
+    private const COMMAND = [
         'add', 'migration', 'migrate', 'run', 'generate', 'gen', 'seed', 'help', 'launch', 'clear'
     ];
 
@@ -64,10 +67,10 @@ class Console
      *
      * @var array
      */
-    const ADD_ACTION = [
+    private const ADD_ACTION = [
         'middleware', 'controller', 'model', 'validation',
         'seeder', 'migration', 'configuration', 'service',
-        'exception', 'event', 'producer', 'command'
+        'exception', 'event', 'producer', 'command', 'listener'
     ];
 
     /**
@@ -79,9 +82,9 @@ class Console
      */
     public function __construct(Setting $setting)
     {
-        $this->arg = new ArgOption;
+        $this->arg = new Argument();
 
-        if ($this->arg->getParameter('trash')) {
+        if ($this->arg->hasTrash()) {
             $this->throwFailsCommand('Bad command usage', 'help');
         }
 
@@ -94,10 +97,9 @@ class Console
      * Bind kernel
      *
      * @param Loader $kernel
-     *
      * @return void
      */
-    public function bind(Loader $kernel)
+    public function bind(Loader $kernel): void
     {
         $this->kernel = $kernel;
     }
@@ -108,10 +110,10 @@ class Console
      * @return void
      * @throws
      */
-    public function run()
+    public function run(): mixed
     {
         if ($this->booted) {
-            return;
+            return false;
         }
 
         // Boot kernel and console
@@ -122,17 +124,17 @@ class Console
         } catch (\Exception $exception) {
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
-            
+
             exit(1);
         }
-        
+
         $this->booted = true;
 
         foreach ($this->setting->getBootstrap() as $item) {
             require $item;
         }
-        
-        $command = $this->arg->getParameter('command');
+
+        $command = $this->arg->getCommand();
 
         if (array_key_exists($command, $this->registers)) {
             try {
@@ -141,9 +143,9 @@ class Console
                 if (is_callable($classname)) {
                     return $classname($this->arg);
                 }
-                
+
                 $instance = new $classname($this->setting, $this->arg);
-                
+
                 return call_user_func_array([$instance, "process"], []);
             } catch (\Exception $exception) {
                 echo Color::red($exception->getMessage());
@@ -162,7 +164,7 @@ class Console
         }
 
         try {
-            $this->call($command);
+            return $this->call($command);
         } catch (\Exception $exception) {
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
@@ -175,34 +177,28 @@ class Console
      * Calls a command
      *
      * @param  string $command
-     *
      * @return void
      * @throws
      */
-    private function call($command)
+    public function call(string $command): void
     {
         if (!in_array($command, static::COMMAND)) {
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
-        if (!$this->arg->getParameter('action')) {
+        if (!$this->arg->getAction()) {
             if ($target == 'help') {
                 $this->help($command);
-
                 exit(0);
             }
         }
 
         try {
-            call_user_func_array(
-                [$this, $command],
-                [$target]
-            );
+            call_user_func_array([$this, $command], [$target]);
         } catch (\Exception $e) {
             echo $e->getMessage();
-
             exit(1);
         }
     }
@@ -212,10 +208,9 @@ class Console
      *
      * @param string $command
      * @param callable $cb
-     *
-     * @return Bow
+     * @return Console
      */
-    public function addCommand($command, $cb)
+    public function addCommand($command, $cb): Console
     {
         $this->registers[$command] = $cb;
 
@@ -229,15 +224,15 @@ class Console
      *
      * @throws \ErrorException
      */
-    private function migration()
+    private function migration(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['migrate', 'rollback', 'reset'])) {
             $this->throwFailsCommand('This action is not exists!', 'help migration');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         $this->command->call('migration', $action, $target);
     }
@@ -246,12 +241,11 @@ class Console
      * Launch a migration
      *
      * @return void
-     *
      * @throws \ErrorException
      */
-    private function migrate()
+    private function migrate(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!is_null($action)) {
             $this->throwFailsCommand('This action is not allow!', 'help migration');
@@ -264,18 +258,17 @@ class Console
      * Create files
      *
      * @return void
-     *
      * @throws \ErrorException
      */
-    private function add()
+    private function add(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, static::ADD_ACTION)) {
             $this->throwFailsCommand('This action is not exists', 'help add');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         if (is_null($target)) {
             $this->throwFailsCommand('Please provide the filename', 'help add');
@@ -290,15 +283,15 @@ class Console
      * @return void
      * @throws
      */
-    private function seed()
+    private function seed(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['all', 'table'])) {
             $this->throwFailsCommand('This action is not exists', 'help seed');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         if ($action == 'all') {
             if ($target != null) {
@@ -317,15 +310,15 @@ class Console
      *
      * @throws \ErrorException
      */
-    private function launch()
+    private function launch(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['server', 'console', 'worker'])) {
             $this->throwFailsCommand('Bad command usage', 'help run');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         $this->command->call('runner', $action, $target);
     }
@@ -335,15 +328,15 @@ class Console
      *
      * @return void
      */
-    private function generate()
+    private function generate(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         if (!in_array($action, ['key', 'resource', 'session'])) {
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
-        $target = $this->arg->getParameter('target');
+        $target = $this->arg->getTarget();
 
         $this->command->call('generator', $action, $target);
     }
@@ -353,7 +346,7 @@ class Console
      *
      * @return void
      */
-    private function gen()
+    private function gen(): void
     {
         $this->generate();
     }
@@ -362,12 +355,11 @@ class Console
      * Remove the caches
      *
      * @return void
-     *
      * @throws \ErrorException
      */
-    private function clear()
+    private function clear(): void
     {
-        $action = $this->arg->getParameter('action');
+        $action = $this->arg->getAction();
 
         $this->command->call('clear', "make", $action);
     }
@@ -378,7 +370,7 @@ class Console
      * @param  string|null $command
      * @return int
      */
-    private function help($command = null)
+    private function help(?string $command = null): int
     {
         if ($command === null) {
             $usage = <<<USAGE
@@ -400,10 +392,11 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:exception\033[00m       Create new exception
    \033[0;33madd:controller\033[00m      Create new controller
    \033[0;33madd:model\033[00m           Create new model
-   \033[0;33madd:validation\033[00m       Create new validation
+   \033[0;33madd:validation\033[00m      Create new validation
    \033[0;33madd:seeder\033[00m          Create new table fake seeder
    \033[0;33madd:migration\033[00m       Create a new migration
-   \033[0;33madd:event\033[00m           Create a new event listener
+   \033[0;33madd:event\033[00m           Create a new event
+   \033[0;33madd:listener\033[00m        Create a new event listener
    \033[0;33madd:producer\033[00m        Create a new producer
    \033[0;33madd:command\033[00m         Create a new bow console command
 
@@ -467,6 +460,8 @@ U;
 
                 break;
             case 'generate':
+            case 'gen':
+            case 'generator':
                 echo <<<U
     \n\033[0;32mgenerate\033[00m create a resource and app key
     [option]
@@ -492,7 +487,7 @@ U;
 U;
                 break;
 
-            case 'run':
+            case 'run': // phpcs:disable
                 echo <<<U
 \n\033[0;32mrun\033[00m for launch repl and local server\n
     [option]
@@ -504,7 +499,7 @@ U;
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker\033[00m [option]  Start worker/consumer for handle the producer
 
-U;
+U; // phpcs:enable
                 break;
 
             case 'clear':
@@ -526,6 +521,11 @@ U;
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:table\033[00m table_name  Make seeding for one table
 
 U;
+                break;
+
+            default:
+                $this->throwFailsCommand("Please make php bow help for show whole docs !");
+                exit(1);
                 break;
         }
 

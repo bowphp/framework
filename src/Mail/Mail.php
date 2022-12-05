@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail;
 
+use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 
@@ -12,7 +15,7 @@ class Mail
      *
      * @var array
      */
-    private static $drivers = [
+    private static array $drivers = [
         'smtp' => \Bow\Mail\Driver\SmtpDriver::class,
         'mail' => \Bow\Mail\Driver\NativeDriver::class,
         'ses' => \Bow\Mail\Driver\SesDriver::class,
@@ -21,16 +24,16 @@ class Mail
     /**
      * The mail driver instance
      *
-     * @var SimpleMail|Smtp
+     * @var MailDriverInterface
      */
-    private static $instance;
+    private static ?MailDriverInterface $instance = null;
 
     /**
      * The mail configuration
      *
      * @var array
      */
-    private static $config;
+    private static array $config;
 
     /**
      * Mail constructor
@@ -48,9 +51,9 @@ class Mail
      *
      * @param  array $config
      * @throws MailException
-     * @return SimpleMail|Smtp
+     * @return MailDriverInterface
      */
-    public static function configure($config = [])
+    public static function configure(array $config = []): MailDriverInterface
     {
         if (empty(static::$config)) {
             static::$config = $config;
@@ -77,7 +80,7 @@ class Mail
      * @param strinb $class_name
      * @return bool
      */
-    public function pushDriver(string $name, string $class_name)
+    public function pushDriver(string $name, string $class_name): bool
     {
         if (array_key_exists($name, static::$drivers)) {
             return false;
@@ -91,9 +94,9 @@ class Mail
     /**
      * Get mail instance
      *
-     * @return Smtp|SimpleMail
+     * @return MailDriverInterface
      */
-    public static function getInstance()
+    public static function getInstance(): MailDriverInterface
     {
         return static::$instance;
     }
@@ -110,7 +113,7 @@ class Mail
 
         $message = new Message();
 
-        $data = View::parse($view, $bind);
+        $data = View::parse($view, $bind)->getContent();
 
         $message->setMessage($data);
 

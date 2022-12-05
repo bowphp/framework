@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Support;
 
 use Symfony\Component\VarDumper\Cloner\VarCloner;
@@ -61,11 +63,11 @@ class Util
     /**
      * Run a var_dump on the variables passed in parameter.
      *
-     * @param  string $var
+     * @param mixed $var
      *
      * @return void
      */
-    public static function dd($var)
+    public static function dd(mixed $var)
     {
         call_user_func_array([static::class, 'debug'], func_get_args());
 
@@ -106,7 +108,7 @@ class Util
         $i = 0;
 
         foreach ($data as $key => $value) {
-            $field .= ($i > 0 ? ', ' : '') . '`'.$key . '` = ' . $value;
+            $field .= ($i > 0 ? ', ' : '') . '`' . $key . '` = ' . $value;
 
             $i++;
         }
@@ -119,27 +121,27 @@ class Util
      *
      * @param array $data
      * @param bool  $byKey
-     *
-     * @return array $resultat
+     * @return array
      */
-    public static function add2points(array $data, $byKey = false)
+    public static function add2points(array $data, bool $byKey = false): array
     {
-        $resultat = [];
+        $result = [];
 
-        if ($byKey == true) {
+        if (!$byKey) {
             foreach ($data as $key => $value) {
-                if (is_string($value)) {
-                    $resultat[$key] = ':' . $value;
-                } else {
-                    $resultat[$key] = '?';
-                }
+                $result[$value] = ':' . $value;
             }
-        } else {
-            foreach ($data as $key => $value) {
-                $resultat[$value] = ':' . $value;
+            return $result;
+        }
+
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $result[$key] = ':' . $value;
+            } else {
+                $result[$key] = '?';
             }
         }
-        
-        return $resultat;
+
+        return $result;
     }
 }

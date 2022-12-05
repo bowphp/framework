@@ -1,21 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bow\Mail\Driver;
 
 use Aws\Ses\SesClient;
 use Bow\Mail\Message;
 use Bow\Mail\Contracts\MailDriverInterface;
 
-class SesDriver extends MailDriverInterface
+class SesDriver implements MailDriverInterface
 {
     /**
     * The SES Instance
     *
     * @var SesClient
     */
-    private $ses;
+    private SesClient $ses;
 
-    private $config_set = false;
+    /**
+     * Ses internal config
+     *
+     * @var bool
+     */
+    private bool $config_set = false;
 
     /**
     * SesDriver constructor
@@ -27,16 +34,17 @@ class SesDriver extends MailDriverInterface
     {
         $this->config_set = $config["config_set"] ?? false;
         unset($config["config_set"]);
+
         $this->ses = new SesClient($config);
     }
 
     /**
-    * Send message
-    *
-    * @param Message $message
-    * @return mixed
-    */
-    public function send(Message $message)
+     * Send message
+     *
+     * @param Message $message
+     * @return bool
+     */
+    public function send(Message $message): bool
     {
         $body = [];
 
@@ -73,6 +81,6 @@ class SesDriver extends MailDriverInterface
 
         $result = $this->ses->sendEmail($email);
 
-        return $result;
+        return (bool) $result;
     }
 }
