@@ -28,7 +28,7 @@ class EventListenerCommand extends AbstractCommand
         }
 
         $generator->write('listener', [
-            'baseNamespace' => $this->namespaces['event'] ?? 'App\\EventListeners'
+            'baseNamespace' => $this->namespaces['listener'] ?? 'App\\Listeners'
         ]);
 
         echo "\033[0;32mThe event has been well created.\033[00m\n";
