@@ -16,7 +16,7 @@ class TokenMismatch extends HttpException
      */
     public function __construct(string $message, $status = 'TOKEN_NOT_VALID')
     {
-        parent::__construct($message, 500);
+        parent::__construct($message, 401);
 
         $this->status = $status;
     }
