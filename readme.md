@@ -19,6 +19,7 @@ For use this package, please create an application from this package [bowphp/app
 - Small and Robust Routing
 - File Uploading Class
 - Pagination
+- CQRS helpful implementation
 - File System Management with many driver like S3 and FTP
 - Extensible with External package which can plug-in
 - Application logs Management
