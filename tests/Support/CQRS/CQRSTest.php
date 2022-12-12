@@ -4,12 +4,13 @@ namespace Bow\Tests\Support\CQRS;
 
 use FetchPetQueryHandler;
 use PHPUnit\Framework\TestCase;
-use Bow\Support\CQRS\Registration as CQRSRegistration;
 use Bow\Support\CQRS\CQRSException;
+use Bow\Support\CQRS\Query\QueryBus;
 use Bow\Tests\Database\Stubs\PetModelStub;
 use Bow\Tests\Support\CQRS\Queries\FetchPetQuery;
 use Bow\Tests\Support\CQRS\Queries\FetchAllPetQuery;
 use Bow\Tests\Support\CQRS\Commands\CreatePetCommand;
+use Bow\Support\CQRS\Registration as CQRSRegistration;
 use Bow\Tests\Support\CQRS\Commands\CreatePetCommandHandler;
 
 class CQRSTest extends TestCase
@@ -44,6 +45,6 @@ class CQRSTest extends TestCase
         $pet = $query_bus->execute(new FetchPetQuery(1));
 
         $this->assertInstanceOf(PetModelStub::class, $pet);
-        $this->assertEquals($pet->name, 'Milou');
+        $this->assertEquals($pet->name, 'Filou');
     }
 }
