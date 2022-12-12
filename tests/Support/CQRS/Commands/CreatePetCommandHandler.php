@@ -15,6 +15,6 @@ class CreatePetCommandHandler implements CommandHandlerInterface
             "name" => $command->name,
         ]);
 
-        return $pet->id;
+        return true;
     }
 }
