@@ -60,7 +60,7 @@ final class Registration
         $cq_class = get_class($cq);
 
         if ($cq instanceof QueryInterface) {
-            $handler = static::$queres[$cq_class] ?? null;
+            $handler = static::$queries[$cq_class] ?? null;
         } else {
             $handler = static::$commands[$cq_class] ?? null;
         }

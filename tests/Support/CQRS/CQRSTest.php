@@ -4,7 +4,8 @@ namespace Bow\Tests\Support\CQRS;
 
 use FetchPetQueryHandler;
 use PHPUnit\Framework\TestCase;
-use Bow\Support\CQRS\Registration;
+use Bow\Support\CQRS\Registration as CQRSRegistration;
+use Bow\Support\CQRS\CQRSException;
 use Bow\Tests\Database\Stubs\PetModelStub;
 use Bow\Tests\Support\CQRS\Queries\FetchPetQuery;
 use Bow\Tests\Support\CQRS\Queries\FetchAllPetQuery;
@@ -15,26 +16,26 @@ class CQRSTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        Registration::commands([
+        CQRSRegistration::commands([
             CreatePetCommand::class => CreatePetCommandHandler::class
         ]);
 
-        Registration::queries([
+        CQRSRegistration::queries([
             FetchPetQuery::class => FetchPetQueryHandler::class
         ]);
     }
 
     public function test_get_handler_should_return_the_right_handler()
     {
-        $query_handler = Registration::getHandler(new FetchPetQuery(1));
+        $query_handler = CQRSRegistration::getHandler(new FetchPetQuery(1));
 
         $this->assertInstanceOf(FetchPetQueryHandler::class, $query_handler);
     }
 
     public function test_get_handler_should_throw_error()
     {
-        $this->expectException("The query FetchAllPetQuery::class hanlder is not found on the CQ register");
-        $query_handler = Registration::getHandler(new FetchAllPetQuery());
+        $this->expectException(CQRSException::class);
+        $query_handler = CQRSRegistration::getHandler(new FetchAllPetQuery());
     }
 
     public function test_query_bus()
