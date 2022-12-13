@@ -13,9 +13,9 @@ class CommandBus
      * Execute the passed command
      *
      * @param CommandInterface $command
-     * @return void
+     * @return mixed
      */
-    public function execute(CommandInterface $command)
+    public function execute(CommandInterface $command): mixed
     {
         $command_handler = Registration::getHandler($command);
 

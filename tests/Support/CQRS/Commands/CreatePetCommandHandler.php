@@ -7,14 +7,14 @@ use Bow\Support\CQRS\Command\CommandInterface;
 use Bow\Support\CQRS\Command\CommandHandlerInterface;
 use Bow\Tests\Support\CQRS\Commands\CreatePetCommand;
 
-class CreatePetQueryHaCommand implements CommandHandlerInterface
+class CreatePetCommandHandler implements CommandHandlerInterface
 {
-    public function process(CommandInterface $command)
+    public function process(CommandInterface $command): mixed
     {
         $pet = PetModelStub::create([
             "name" => $command->name,
         ]);
 
-        return true;
+        return $pet->id;
     }
 }
