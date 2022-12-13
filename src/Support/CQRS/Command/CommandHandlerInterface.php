@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bow\Support\CQRS\Command;
 
 use Bow\Support\CQRS\Command\CommandInterface;
@@ -12,7 +10,7 @@ interface CommandHandlerInterface
      * Handle the command
      *
      * @param CommandInterface $command
-     * @return void
+     * @return mixed
      */
-    public function process(CommandInterface $command);
+    public function process(CommandInterface $command): mixed;
 }

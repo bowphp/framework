@@ -467,6 +467,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
             // We get a last insertion id value
             $primary_key_value = $model->getLastInsertId();
+            $primary_key_value = !is_numeric($primary_key_value) ? $primary_key_value : (int) $primary_key_value;
 
             // Set the primary key value
             $this->attributes[$this->primary_key] = $primary_key_value;

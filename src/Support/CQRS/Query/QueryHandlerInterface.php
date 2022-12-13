@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bow\Support\CQRS\Query;
 
 use Bow\Support\CQRS\Query\QueryInterface;
