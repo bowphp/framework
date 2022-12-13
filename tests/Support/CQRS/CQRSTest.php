@@ -7,6 +7,7 @@ use Bow\Database\Database;
 use PHPUnit\Framework\TestCase;
 use Bow\Support\CQRS\CQRSException;
 use Bow\Support\CQRS\Query\QueryBus;
+use Bow\Support\CQRS\Command\CommandBus;
 use Bow\Tests\Database\Stubs\PetModelStub;
 use Bow\Tests\Support\CQRS\Queries\FetchPetQuery;
 use Bow\Tests\Support\CQRS\Queries\FetchAllPetQuery;
