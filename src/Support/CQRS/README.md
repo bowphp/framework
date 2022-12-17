@@ -7,6 +7,8 @@ CQRS (Command Query Responsibility Segregation). It's a pattern that I first hea
 Create the example command:
 
 ```php
+use Bow\Support\CQRS\Command\CommandInterface;
+
 class CreateUserCommand implements CommandInterface
 {
     public function __construct(public string $username, public string $email) {}
@@ -16,6 +18,8 @@ class CreateUserCommand implements CommandInterface
 Create the handler here:
 
 ```php
+use Bow\Support\CQRS\Command\CommandHandlerInterface;
+
 class CreateUserCommandHandler implements CommandHandlerInterface
 {
     public function __construct(public UserService $userService) {}
@@ -37,10 +41,11 @@ class CreateUserCommandHandler implements CommandHandlerInterface
 Add command to the register in `App\Configurations\ApplicationConfiguration::class`:
 
 ```php
-...
+use Bow\Support\CQRS\Registration as CQRSRegistration;
+
 public function run()
 {
-    Registration::commands([
+    CQRSRegistration::commands([
         CreateUserCommand::class => CreateUserCommandHandler::class
     ]);
 }
@@ -49,7 +54,12 @@ public function run()
 Execute the command in controller:
 
 ```php
-class UserController extends BaseController
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+use App\Commands\CreateUserCommand;
+
+class UserController extends Controller
 {
     public function __construct(private CommandBus $commandBus) {}
 
@@ -67,5 +77,5 @@ class UserController extends BaseController
 Put a new route:
 
 ```php
-$app->post("/create-user", UserController::class);
+$app->post("/users/create", UserController::class);
 ```
