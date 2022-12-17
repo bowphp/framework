@@ -34,6 +34,18 @@ class CreateUserCommandHandler implements CommandHandlerInterface
 }
 ```
 
+Add command to the register in `App\Configurations\ApplicationConfiguration::class`:
+
+```php
+...
+public function run()
+{
+    Registration::commands([
+        CreateUserCommand::class => CreateUserCommandHandler::class
+    ]);
+}
+```
+
 Execute the command in controller:
 
 ```php
