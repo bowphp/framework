@@ -14,7 +14,7 @@ class Response implements ResponseInterface
      * the user can himself redefine these codes
      * if it uses the `header` function of php
      */
-    private static array $header = [
+    private static array $status_codes = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -249,12 +249,12 @@ class Response implements ResponseInterface
         $this->addHeader('Content-Length', (string) (is_int($file_size) ? $file_size : ''));
         $this->addHeader('Content-Encoding', 'base64');
 
+        // We put the new headers
         foreach ($headers as $key => $value) {
             $this->addHeader($key, $value);
         }
 
         $this->download_filename = $file;
-
         $this->download = true;
 
         return $this->buildHttpResponse();
@@ -266,11 +266,11 @@ class Response implements ResponseInterface
      * @param  int $code
      * @return mixed
      */
-    public function status($code): Response
+    public function status(int $code): Response
     {
-        if (in_array((int) $code, array_keys(self::$header), true)) {
+        if (in_array($code, array_keys(static::$status_codes), true)) {
             $this->code = $code;
-            @header('HTTP/1.1 ' . $code . ' ' . self::$header[$code], $this->override, $code);
+            @header('HTTP/1.1 ' . $code . ' ' . static::$status_codes[$code], $this->override, $code);
         }
 
         return $this;
@@ -283,7 +283,7 @@ class Response implements ResponseInterface
      */
     private function buildHttpResponse(): string
     {
-        $status_text = static::$header[$this->code] ?? 'Unkdown';
+        $status_text = static::$status_codes[$this->code] ?? 'Unkdown';
         @header('HTTP/1.1 ' . $this->code . ' ' . $status_text, $this->override, $this->code);
 
         foreach ($this->getHeaders() as $key => $header) {
