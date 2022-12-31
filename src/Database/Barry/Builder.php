@@ -6,6 +6,7 @@ namespace Bow\Database\Barry;
 
 use Bow\Database\Collection;
 use Bow\Database\QueryBuilder;
+use Bow\Database\Exception\ModelException;
 
 class Builder extends QueryBuilder
 {
@@ -14,7 +15,7 @@ class Builder extends QueryBuilder
      *
      * @var string
      */
-    protected string $model;
+    protected ?string $model = null;
 
     /**
      * Get informations
@@ -87,6 +88,10 @@ class Builder extends QueryBuilder
      */
     public function getModel(): string
     {
-        return $this->model;
+        if (is_null($this->model)) {
+            throw new ModelException("The model is not define");
+        }
+
+        return (string) $this->model;
     }
 }
