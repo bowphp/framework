@@ -1321,8 +1321,6 @@ class QueryBuilder implements \JsonSerializable
     {
         $this->prefix = $prefix;
 
-        $this->table = $this->getPrefix() . $table;
-
         return $this;
     }
 
