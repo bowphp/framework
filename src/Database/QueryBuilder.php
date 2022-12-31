@@ -1237,9 +1237,9 @@ class QueryBuilder implements \JsonSerializable
 
         // Adding the select clause
         if (is_null($this->select)) {
-            $sql .= '* from ' . $this->table;
+            $sql .= '* from ' . $this->getTable();
         } else {
-            $sql .= $this->select . ' from ' . $this->table;
+            $sql .= $this->select . ' from ' . $this->getTable();
 
             $this->select = null;
         }
@@ -1299,7 +1299,7 @@ class QueryBuilder implements \JsonSerializable
      */
     public function getTable(): string
     {
-        return $this->table;
+        return $this->prefix . $this->table;
     }
 
     /**
@@ -1321,8 +1321,6 @@ class QueryBuilder implements \JsonSerializable
     {
         $this->prefix = $prefix;
 
-        $this->table = $this->getPrefix() . $table;
-
         return $this;
     }
 
@@ -1334,7 +1332,7 @@ class QueryBuilder implements \JsonSerializable
      */
     public function setTable(string $table): QueryBuilder
     {
-        $this->table = $this->getPrefix() . $table;
+        $this->table = $table;
 
         return $this;
     }

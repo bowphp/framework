@@ -40,7 +40,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var string
      */
-    protected string $prefix;
+    protected string $prefix = '';
 
     /**
      * Enable the autoincrement support
