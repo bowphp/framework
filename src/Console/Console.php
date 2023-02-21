@@ -180,7 +180,7 @@ class Console
      * @return void
      * @throws
      */
-    public function call(string $command): void
+    public function call(?string $command): void
     {
         if (!in_array($command, static::COMMAND)) {
             $this->throwFailsCommand("The command '$command' not exists.", 'help');

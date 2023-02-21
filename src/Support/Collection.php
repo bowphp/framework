@@ -701,7 +701,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @return string
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->storage;
     }
@@ -711,7 +711,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @return \ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->storage);
     }
@@ -722,7 +722,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $offset
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return $this->has($offset);
     }
@@ -733,7 +733,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $offset
      * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed 
     {
         return $this->get($offset);
     }
@@ -745,7 +745,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $value
      * @return void
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void 
     {
         $this->set($offset, $value);
     }
@@ -756,7 +756,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $offset
      * @return void
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void 
     {
         unset($this->storage[$offset]);
     }
