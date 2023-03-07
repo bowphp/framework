@@ -548,6 +548,6 @@ U;
 \033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
 
 USAGE;
-        echo sprintf($version, PHP_VERSION, $this->setting->getBowFrameworkVersion());        
+        echo sprintf($version, $this->setting->getBowFrameworkVersion(), PHP_VERSION);       
     }    
 }
