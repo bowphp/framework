@@ -23,6 +23,14 @@ class SessionGuard extends GuardContract
     private array $provider;
 
     /**
+     * Defines the session_key
+     *
+     * @var array
+     */
+    private string $session_key;
+
+
+    /**
      * SessionGuard constructor.
      *
      * @param array $provider

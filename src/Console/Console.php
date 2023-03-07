@@ -180,9 +180,13 @@ class Console
      * @return void
      * @throws
      */
-    public function call(string $command): void
+    public function call(?string $command): void
     {
-        if (!in_array($command, static::COMMAND)) {
+        // Display of the help menu if no command defined.
+        if (!isset($command)) {
+            $this->help();
+            exit(0);
+        } elseif (!in_array($command, static::COMMAND)) {
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
         }
 

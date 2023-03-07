@@ -26,6 +26,11 @@ class BeanstalkdAdapter extends QueueAdapter
     private string $default = "default";
 
     /**
+     * @var int
+     */
+    private int $retry;
+
+    /**
      * Configure Beanstalkd driver
      *
      * @param array $queue

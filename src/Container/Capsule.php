@@ -227,7 +227,7 @@ class Capsule implements ArrayAccess
     /**
     * @inheritDoc
     */
-    public function offsetGet(mixed $offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->make($offset);
     }

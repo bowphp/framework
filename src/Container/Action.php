@@ -456,7 +456,7 @@ class Action
         $params = [];
 
         foreach ($parameters as $parameter) {
-            $class = $parameter->getClass();
+            $class = $parameter->getType();
 
             if (is_null($class)) {
                 continue;
@@ -480,7 +480,7 @@ class Action
      * @param ReflectionClass $class
      * @return ?object
      */
-    private function getInjectParameter(ReflectionClass $class): ?object
+    private function getInjectParameter($class): ?object
     {
         $class_name = $class->getName();
 
