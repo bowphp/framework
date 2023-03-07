@@ -11,6 +11,13 @@ class Setting
     use ConsoleTrait;
 
     /**
+     * Define Bow Framework version.
+     * 
+     * @var string
+     */
+    private const BOW_VERSION = '5.0';
+
+    /**
      * The base directory name
      *
      * @var string
@@ -633,5 +640,15 @@ class Setting
     public function getExceptionDirectory(): string
     {
         return $this->exception_directory;
+    }
+
+    /**
+     * Get the Bow Framework Version.
+     *
+     * @return string
+     */
+    public function getBowFrameworkVersion(): string
+    {
+        return $this::BOW_VERSION;
     }
 }
