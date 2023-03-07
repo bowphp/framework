@@ -545,13 +545,9 @@ U;
     private function bowFrameworkVersion()
     {
         $version = <<<USAGE
-\033[0;33mConsole running for \033[00mBow Framework: \033[0;32mBOW_VERSION\033[00m - PHP Version: \033[0;32mPHP_VERSION\033[0;33m
+\033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32mPHP_VERSION\033[0;33m
 
 USAGE;
-        echo str_replace(
-            ['PHP_VERSION', 'BOW_VERSION'], 
-            [PHP_VERSION, $this->setting->getBowFrameworkVersion()], 
-            $version
-        );        
+        echo sprintf($version, PHP_VERSION, $this->setting->getBowFrameworkVersion());        
     }    
 }
