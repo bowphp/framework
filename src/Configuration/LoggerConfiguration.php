@@ -63,23 +63,24 @@ class LoggerConfiguration extends Configuration
                     $monolog->error($exception->getMessage(), $exception->getTrace());
 
                     $result = call_user_func_array(
-                        [new $error_handler, 'handle'],
+                        [new $error_handler(), 'handle'],
                         [$exception]
                     );
 
                     switch (true) {
+                        case $result instanceof View:
+                            return $result->getContent();
+                        case $result instanceof ResponseInterface || $result instanceof Redirect:
+                            $result->sendContent();
+                            break;
+                        case $result instanceof Model || $result instanceof Collection:
+                            return $result->toArray();
                         case is_null($result):
                         case is_string($result):
                         case is_array($result):
                         case is_object($result):
                         case $result instanceof \Iterable:
                             return $result;
-                        case $result instanceof ResponseInterface || $result instanceof Redirect:
-                            $result->sendContent();
-                            // no break
-                        case $result instanceof Model || $result instanceof Collection:
-                            return $result->toArray();
-                            // no break
                     }
                     exit(1);
                 }
