@@ -12,6 +12,13 @@ class Console
     use ConsoleTrait;
 
     /**
+     * Define Bow Framework version.
+     * 
+     * @var string
+     */
+    private const VERSION = '5.0';
+
+    /**
      * The Setting instance
      *
      * @var Setting
@@ -377,10 +384,11 @@ class Console
     private function help(?string $command = null): int
     {
         // bow framework and php version display
-        $this->bowFrameworkVersion();        
+        $this->getVersion();        
         
         if ($command === null) {
             $usage = <<<USAGE
+
 Bow task runner usage: php bow command:action [name] --option
 
 \033[0;32mCOMMAND\033[00m:
@@ -542,12 +550,12 @@ U;
     /*
      * bow framework and php version display
      */
-    private function bowFrameworkVersion()
+    private function getVersion()
     {
         $version = <<<USAGE
 \033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
 
 USAGE;
-        echo sprintf($version, $this->setting->getBowFrameworkVersion(), PHP_VERSION);       
+        echo sprintf($version, Console::VERSION, PHP_VERSION);       
     }    
 }
