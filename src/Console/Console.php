@@ -548,7 +548,9 @@ U;
     }
     
     /*
-     * bow framework and php version display
+     * Show bow framework version and current php version in console
+     *
+     * @return string
      */
     private function getVersion()
     {
