@@ -13,7 +13,7 @@ class Console
 
     /**
      * Define Bow Framework version.
-     * 
+     *
      * @var string
      */
     private const VERSION = '5.0';
@@ -384,8 +384,8 @@ class Console
     private function help(?string $command = null): int
     {
         // bow framework and php version display
-        $this->getVersion();        
-        
+        $this->getVersion();
+
         if ($command === null) {
             $usage = <<<USAGE
 
@@ -546,7 +546,7 @@ U;
 
         exit(0);
     }
-    
+
     /*
      * Show bow framework version and current php version in console
      *
@@ -558,6 +558,6 @@ U;
 \033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
 
 USAGE;
-        echo sprintf($version, Console::VERSION, PHP_VERSION);       
-    }    
+        echo sprintf($version, Console::VERSION, PHP_VERSION);
+    }
 }
