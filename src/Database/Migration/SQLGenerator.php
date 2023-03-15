@@ -341,7 +341,10 @@ class SQLGenerator
         }
 
         // Add default value
-        if ($default) {
+        if (!is_null($default)) {
+            if (is_bool($default)) {
+                $default = $default ? 'true' : 'false';
+            }
             $type = sprintf('%s DEFAULT %s', $type, $default);
         }
 
