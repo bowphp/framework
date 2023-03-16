@@ -143,7 +143,7 @@ class QueryBuilder implements \JsonSerializable
         // Transaction Query builder to SQL for subquery
         foreach ($select as $key => $value) {
             if ($value instanceof QueryBuilder) {
-                $select[$key] = '('.$value->toSql().')';
+                $select[$key] = '(' . $value->toSql() . ')';
             }
         }
 
@@ -203,16 +203,16 @@ class QueryBuilder implements \JsonSerializable
         }
 
         if ($value instanceof QueryBuilder) {
-            $indicator = "(".$value->toSql().")";
+            $indicator = "(" . $value->toSql() . ")";
         } else {
             $indicator = "?";
             $this->where_data_binding[] = $value;
         }
 
         if ($this->where == null) {
-            $this->where = $column . ' ' . $comp . ' '.$indicator;
+            $this->where = $column . ' ' . $comp . ' ' . $indicator;
         } else {
-            $this->where .= ' ' . $boolean . ' ' . $column . ' ' . $comp . ' '.$indicator;
+            $this->where .= ' ' . $boolean . ' ' . $column . ' ' . $comp . ' ' . $indicator;
         }
 
         return $this;
@@ -231,7 +231,7 @@ class QueryBuilder implements \JsonSerializable
         if ($this->where == null) {
             $this->where = $where;
         } else {
-            $this->where .= ' and '.$where;
+            $this->where .= ' and ' . $where;
         }
 
         return $this;
@@ -359,7 +359,7 @@ class QueryBuilder implements \JsonSerializable
     public function whereIn($column, $range, $boolean = 'and')
     {
         if ($range instanceof QueryBuilder) {
-            $range = "(".$range->toSql().")";
+            $range = "(" . $range->toSql() . ")";
         }
 
         if (is_array($range)) {
@@ -1204,7 +1204,7 @@ class QueryBuilder implements \JsonSerializable
         }
 
         if (!is_null($this->as)) {
-            $sql .= ' as '.$this->as;
+            $sql .= ' as ' . $this->as;
 
             $this->as = null;
         }

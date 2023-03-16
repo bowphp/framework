@@ -231,7 +231,7 @@ class Route
     {
         return isset($this->params[$key]) ? $this->params[$key] : null;
     }
-    
+
     /**
      * Lets check if the url of the query is
      * conform to that defined by the router
@@ -320,13 +320,13 @@ class Route
     private function checkRequestUri($path, $uri)
     {
         if (strstr($path, '?') == '?') {
-            $uri = rtrim($uri, '/').'/';
+            $uri = rtrim($uri, '/') . '/';
         }
 
         // Url check and path PARSER
         $path = str_replace('~', '\\~', $path);
 
-        if (preg_match('~^'. $path . '$~', $uri, $match)) {
+        if (preg_match('~^' . $path . '$~', $uri, $match)) {
             array_shift($match);
 
             $this->match = str_replace('/', '', $match);

@@ -26,7 +26,7 @@ class Hash
     public static function make($value)
     {
         [$hash_method, $options] = static::getHashConfig();
-        
+
         return password_hash($value, $hash_method, $options);
     }
 

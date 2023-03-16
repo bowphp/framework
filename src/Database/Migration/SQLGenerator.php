@@ -13,7 +13,7 @@ class SQLGenerator
     use Shortcut\TextColumn;
     use Shortcut\DateColumn;
     use Shortcut\ConstraintColumn;
-    
+
     /**
      * The managed table name
      *
@@ -174,7 +174,7 @@ class SQLGenerator
         $statement = $pdo->query(sprintf('PRAGMA table_info(%s);', $this->table));
 
         $statement->execute();
-        
+
         $select = [];
 
         foreach ($statement->fetchAll() as $column) {
@@ -284,7 +284,8 @@ class SQLGenerator
      */
     private function composeAddColumn($name, array $description)
     {
-        $type = strtoupper($description['type']);
+        $raw_type = strtoupper($description['type']);
+        $type = $raw_type;
         $attributes = $description['attributes'];
 
         // Transform attributes
@@ -306,15 +307,12 @@ class SQLGenerator
             }
         }
 
-        // Wrap default value
-        if (in_array($type, ['VARCHAR', 'CHAR'])) {
-            if (!is_null($default)) {
-                $default = "'".$default."'";
-            }
-        }
-
         // Add column size
         if ($size) {
+            if ($raw_type === 'ENUM') {
+                $size = (array) $size;
+                $size = "'" . implode("', '", $size) . "'";
+            }
             $type = sprintf('%s(%s)', $type, $size);
         }
 
@@ -342,7 +340,9 @@ class SQLGenerator
 
         // Add default value
         if (!is_null($default)) {
-            if (is_bool($default)) {
+            if (in_array($raw_type, ['VARCHAR', 'STRING', 'CHAR', 'ENUM'])) {
+                $default = "'" . $default . "'";
+            } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';
             }
             $type = sprintf('%s DEFAULT %s', $type, $default);
@@ -398,6 +398,6 @@ class SQLGenerator
      */
     private function prefixColumn($name, $by)
     {
-        return $this->table.'_'.$name.'_'.$by;
+        return $this->table . '_' . $name . '_' . $by;
     }
 }

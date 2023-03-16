@@ -33,7 +33,7 @@ class Builder extends QueryBuilder
 
             return new $model((array) $data);
         }
-        
+
         foreach ($data as $key => $value) {
             $data[$key] = new $model((array) $value);
         }
@@ -58,7 +58,7 @@ class Builder extends QueryBuilder
         if ($value == null) {
             $value = $column;
 
-            $column = (new $this->model)->getKey();
+            $column = (new $this->model())->getKey();
         }
 
         return $this->where($column, $value)->count() > 0;

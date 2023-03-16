@@ -64,7 +64,7 @@ class MiddlewareDispatcher
             }
 
             if (isset($middleware['class'])) {
-                $middleware = [new $middleware['class'], 'process'];
+                $middleware = [new $middleware['class'](), 'process'];
             }
         }
 

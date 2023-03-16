@@ -79,7 +79,7 @@ class Console
      */
     public function __construct(Setting $setting)
     {
-        $this->arg = new ArgOption;
+        $this->arg = new ArgOption();
 
         if ($this->arg->getParameter('trash')) {
             $this->throwFailsCommand('Bad command usage', 'help');
@@ -122,16 +122,16 @@ class Console
         } catch (\Exception $exception) {
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
-            
+
             exit(1);
         }
-        
+
         $this->booted = true;
 
         foreach ($this->setting->getBootstrap() as $item) {
             require $item;
         }
-        
+
         $command = $this->arg->getParameter('command');
 
         if (array_key_exists($command, $this->registers)) {
@@ -141,9 +141,9 @@ class Console
                 if (is_callable($classname)) {
                     return $classname($this->arg);
                 }
-                
+
                 $instance = new $classname($this->setting, $this->arg);
-                
+
                 return call_user_func_array([$instance, "process"], []);
             } catch (\Exception $exception) {
                 echo Color::red($exception->getMessage());

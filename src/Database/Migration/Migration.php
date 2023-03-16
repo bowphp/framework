@@ -169,7 +169,7 @@ abstract class Migration
      */
     final public function getTablePrefixed($table)
     {
-        $table = $this->adapter->getTablePrefix().$table;
+        $table = $this->adapter->getTablePrefix() . $table;
 
         return $table;
     }
@@ -185,11 +185,11 @@ abstract class Migration
         try {
             $result = (bool) Database::statement($sql);
         } catch (\Exception $exception) {
-            echo Color::red("▶")."$sql\n";
+            echo Color::red("▶") . "$sql\n";
             throw $exception;
         }
 
-        echo Color::green("▶")."$sql\n";
+        echo Color::green("▶") . "$sql\n";
 
         return $this;
     }

@@ -153,7 +153,7 @@ class Router
 
         foreach ($middlewares as $middleware) {
             if (class_exists($middleware, true)) {
-                $collection[] = [new $middleware, 'process'];
+                $collection[] = [new $middleware(), 'process'];
             } else {
                 $collection[] = $middleware;
             }

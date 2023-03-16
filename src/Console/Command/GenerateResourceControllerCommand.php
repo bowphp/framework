@@ -33,7 +33,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
         // We create the resource url prefix
         $prefix = preg_replace("/controller/i", "", strtolower($controller));
         $model = ucfirst($prefix);
-        $prefix = '/'.trim($prefix, '/');
+        $prefix = '/' . trim($prefix, '/');
 
         $model_namespace = '';
 
@@ -96,13 +96,13 @@ class GenerateResourceControllerCommand extends AbstractCommand
      */
     private function createDefaultView($model)
     {
-        @mkdir(config('view.path')."/".$model, 0766);
+        @mkdir(config('view.path') . "/" . $model, 0766);
 
         // We create the default CRUD view
         foreach (["create", "edit", "show", "index"] as $value) {
-            $filename = "$model/$value".config('view.extension');
+            $filename = "$model/$value" . config('view.extension');
 
-            touch(config('view.path').'/'.$filename);
+            touch(config('view.path') . '/' . $filename);
 
             echo "$filename added\n";
         }

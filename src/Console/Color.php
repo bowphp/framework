@@ -56,7 +56,7 @@ class Color
      */
     public static function danger($message)
     {
-        return static::red('[danger]').' '.$message;
+        return static::red('[danger]') . ' ' . $message;
     }
 
     /**
@@ -67,7 +67,7 @@ class Color
      */
     public static function info($message)
     {
-        return static::blue('[info]').' '.$message;
+        return static::blue('[info]') . ' ' . $message;
     }
 
     /**
@@ -78,7 +78,7 @@ class Color
      */
     public static function warning($message)
     {
-        return static::yellow('[warning]').' '.$message;
+        return static::yellow('[warning]') . ' ' . $message;
     }
 
     /**
@@ -89,6 +89,6 @@ class Color
      */
     public static function success($message)
     {
-        return static::green('[success]').' '.$message;
+        return static::green('[success]') . ' ' . $message;
     }
 }

@@ -61,7 +61,7 @@ class Action
 
         $this->middlewares = $middlewares;
 
-        $this->dispatcher = new MiddlewareDispatcher;
+        $this->dispatcher = new MiddlewareDispatcher();
     }
 
     /**
@@ -418,16 +418,16 @@ class Action
     public function injector(string $classname, string $method = null)
     {
         $reflection = new ReflectionClass($classname);
-        
+
         if (is_null($method)) {
             $method = "__invoke";
         }
-        
+
         $parameters = $reflection->getMethod($method)->getParameters();
-        
+
         return $this->getInjectParameters($parameters);
     }
-    
+
     /**
     * Injection for closure
     *
@@ -438,12 +438,12 @@ class Action
     public function injectorForClosure(callable $closure)
     {
         $reflection = new ReflectionFunction($closure);
-        
+
         $parameters = $reflection->getParameters();
-        
+
         return $this->getInjectParameters($parameters);
     }
-    
+
     /**
     * Get all parameters define by user in method injectable
     *
@@ -455,14 +455,14 @@ class Action
     private function getInjectParameters(array $parameters)
     {
         $params = [];
-        
+
         foreach ($parameters as $parameter) {
             $class = $parameter->getClass();
-            
+
             if (is_null($class)) {
                 continue;
             }
-            
+
             $param = $this->getInjectParameter($class);
 
             if (is_null($param)) {
@@ -471,7 +471,7 @@ class Action
 
             $params[] = $param;
         }
-        
+
         return $params;
     }
 
@@ -484,13 +484,13 @@ class Action
     private function getInjectParameter($class)
     {
         $class_name = $class->getName();
-            
+
         if (! class_exists($class_name, true)) {
             throw new InvalidArgumentException(
                 sprintf('class %s not exists', $class_name)
             );
         }
-        
+
         if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
             return null;
         }
@@ -500,12 +500,12 @@ class Action
         }
 
         $reflection = new ReflectionClass($class_name);
-        
+
         $args = [];
         if ($reflection->isInstantiable() && $reflection->getConstructor()) {
             $args = $this->injector($class_name, '__construct');
         }
-        
+
         return (new ReflectionClass($class_name))->newInstanceArgs($args);
     }
 }

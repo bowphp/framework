@@ -176,7 +176,8 @@ class Database
         if (!preg_match(
             "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
             $sql_statement
-        )) {
+        )
+        ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -243,7 +244,8 @@ class Database
         if (!preg_match(
             "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
             $sql_statement
-        )) {
+        )
+        ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -259,7 +261,7 @@ class Database
         }
 
         $collector = [];
-        
+
         $r = 0;
 
         foreach ($data as $key => $value) {
@@ -292,7 +294,8 @@ class Database
         if (!preg_match(
             "/^(((drop|alter|create)\s+)?(?:(?:temp|temporary)\s+)?table|truncate|call|database)(\s+)?(.+?);?$/i",
             $sql_statement
-        )) {
+        )
+        ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -318,7 +321,8 @@ class Database
         if (!preg_match(
             "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
             $sql_statement
-        )) {
+        )
+        ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -338,7 +342,7 @@ class Database
     {
         static::verifyConnection();
 
-        $table = static::$adapter->getTablePrefix().$table;
+        $table = static::$adapter->getTablePrefix() . $table;
 
         return new QueryBuilder(
             $table,
@@ -413,7 +417,7 @@ class Database
             static::connection(static::$name);
         }
     }
-    
+
     /**
      * Retrieves the identifier of the last record.
      *

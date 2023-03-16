@@ -87,7 +87,7 @@ abstract class EngineAbstract
 
         // Vérification de l'existance du fichier
         if ($this->config['view.path'] !== null) {
-            if (!file_exists($this->config['view.path'].'/'.$tmp_filename)) {
+            if (!file_exists($this->config['view.path'] . '/' . $tmp_filename)) {
                 throw new ViewException(
                     sprintf(
                         'The view [%s] does not exists. %s/%s',

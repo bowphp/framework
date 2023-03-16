@@ -13,7 +13,9 @@ use Carbon\Carbon;
 
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
-    use Relationship, EventTrait, ArrayAccessTrait;
+    use Relationship;
+    use EventTrait;
+    use ArrayAccessTrait;
 
     /**
      * The hidden field
@@ -169,7 +171,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function latest()
     {
-        $query = new static;
+        $query = new static();
 
         return $query->orderBy($query->latest, 'desc')->first();
     }
@@ -185,7 +187,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $id = (array) $id;
 
-        $model = new static;
+        $model = new static();
         $model->select($select);
         $model->whereIn($model->primary_key, $id);
 
@@ -207,7 +209,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function findBy($column, $value)
     {
-        $model = new static;
+        $model = new static();
         $model->where($column, $value);
 
         return $model->get();
@@ -268,7 +270,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function create(array $data)
     {
-        $model = new static;
+        $model = new static();
 
         if ($model->timestamps) {
             $data = array_merge($data, [
@@ -375,7 +377,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if ($properties['table'] == null) {
             $parts = explode('\\', static::class);
-            $table = Str::snake(end($parts)).'s';
+            $table = Str::snake(end($parts)) . 's';
         } else {
             $table = $properties['table'];
         }

@@ -31,7 +31,7 @@ class SqliteAdapter extends AbstractConnection
      */
     public function connection()
     {
-        $this->pdo = new PDO($this->config['driver'].':'.$this->config['database']);
+        $this->pdo = new PDO($this->config['driver'] . ':' . $this->config['database']);
 
         $this->pdo->setAttribute(
             PDO::ATTR_DEFAULT_FETCH_MODE,

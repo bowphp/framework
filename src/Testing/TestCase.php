@@ -40,7 +40,7 @@ class TestCase extends PHPUnitTestCase
         if (!$this->url) {
             $this->url = app_env('APP_URL', 'http://localhost:5000');
         }
-        return rtrim($this->url, '/').$url;
+        return rtrim($this->url, '/') . $url;
     }
 
     /**
