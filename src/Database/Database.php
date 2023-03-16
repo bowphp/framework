@@ -173,11 +173,10 @@ class Database
     {
         static::verifyConnection();
 
-        if (
-            !preg_match(
-                "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
-                $sql_statement
-            )
+        if (!preg_match(
+            "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
+            $sql_statement
+        )
         ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
@@ -242,11 +241,10 @@ class Database
     {
         static::verifyConnection();
 
-        if (
-            !preg_match(
-                "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
-                $sql_statement
-            )
+        if (!preg_match(
+            "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
+            $sql_statement
+        )
         ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
@@ -293,11 +291,10 @@ class Database
     {
         static::verifyConnection();
 
-        if (
-            !preg_match(
-                "/^(((drop|alter|create)\s+)?(?:(?:temp|temporary)\s+)?table|truncate|call|database)(\s+)?(.+?);?$/i",
-                $sql_statement
-            )
+        if (!preg_match(
+            "/^(((drop|alter|create)\s+)?(?:(?:temp|temporary)\s+)?table|truncate|call|database)(\s+)?(.+?);?$/i",
+            $sql_statement
+        )
         ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
@@ -321,11 +318,10 @@ class Database
     {
         static::verifyConnection();
 
-        if (
-            !preg_match(
-                "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
-                $sql_statement
-            )
+        if (!preg_match(
+            "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
+            $sql_statement
+        )
         ) {
             throw new DatabaseException(
                 'Syntax Error on the Request',

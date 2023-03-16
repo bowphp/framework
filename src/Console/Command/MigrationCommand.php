@@ -152,8 +152,7 @@ class MigrationCommand extends AbstractCommand
 
         foreach ($current_migrations as $value) {
             foreach ($migrations as $file => $migration) {
-                if (
-                    !($value->batch == 1
+                if (!($value->batch == 1
                     && $migration == $value->migration)
                 ) {
                     continue;

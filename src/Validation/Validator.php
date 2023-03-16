@@ -775,11 +775,10 @@ class Validator
             return;
         }
 
-        if (
-            !preg_match(
-                '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
-                $this->inputs[$key]
-            )
+        if (!preg_match(
+            '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
+            $this->inputs[$key]
+        )
         ) {
             return;
         }

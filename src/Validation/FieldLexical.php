@@ -18,8 +18,7 @@ trait FieldLexical
             return $this->messages[$attributes][$key] ?? $this->messages[$attributes];
         }
 
-        if (
-            is_array($attributes)
+        if (is_array($attributes)
             && isset($attributes['attribute'])
             && isset($this->messages[$attributes['attribute']])
         ) {
