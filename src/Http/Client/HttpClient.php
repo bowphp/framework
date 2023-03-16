@@ -76,7 +76,7 @@ class HttpClient
             curl_setopt($this->ch, CURLOPT_UPLOAD, true);
 
             foreach ($this->attach as $key => $attach) {
-                $this->attach[$key] = '@'.ltrim('@', $attach);
+                $this->attach[$key] = '@' . ltrim('@', $attach);
             }
 
             $data = array_merge($this->attach, $data);
@@ -129,7 +129,7 @@ class HttpClient
             $data = [];
 
             foreach ($headers as $key => $value) {
-                $data[] = $key.': '.$value;
+                $data[] = $key . ': ' . $value;
             }
 
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, $data);

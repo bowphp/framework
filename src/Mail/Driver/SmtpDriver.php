@@ -10,7 +10,6 @@ use ErrorException;
 
 class SmtpDriver extends MailDriverInterface
 {
-
     /**
      * Socket connection
      *

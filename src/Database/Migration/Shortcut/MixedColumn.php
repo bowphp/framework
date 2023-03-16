@@ -15,7 +15,7 @@ trait MixedColumn
     {
         return $this->addColumn($column, 'boolean', $attribute);
     }
-    
+
     /**
     * Add UUID column
     *
@@ -27,7 +27,7 @@ trait MixedColumn
     {
         return $this->addColumn($column, 'uuid', $attribute);
     }
-    
+
    /**
     * Add BLOB column
     *
@@ -39,7 +39,7 @@ trait MixedColumn
     {
         return $this->addColumn($column, 'blob', $attribute);
     }
-    
+
     /**
      * Add ip column
      *

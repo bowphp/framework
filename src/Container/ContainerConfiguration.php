@@ -14,7 +14,7 @@ class ContainerConfiguration extends Configuration
     private $middlewares = [
         //
     ];
-    
+
     /**
      * @inheritdoc
      */

@@ -44,7 +44,7 @@ class Request
             $this->input = array_merge((array) $data, $_GET);
         } else {
             $data = [];
-            
+
             if ($this->isPut()) {
                 parse_str(file_get_contents("php://input"), $data);
             } elseif ($this->isPost()) {
@@ -133,7 +133,7 @@ class Request
      */
     public function url()
     {
-        return $this->origin().$this->path();
+        return $this->origin() . $this->path();
     }
 
     /**
@@ -143,7 +143,7 @@ class Request
      */
     public function origin()
     {
-        return $this->scheme().'://'.$this->hostname();
+        return $this->scheme() . '://' . $this->hostname();
     }
 
     /**
@@ -312,7 +312,7 @@ class Request
      */
     public function is($match)
     {
-        return preg_match('@'.$match.'@', $this->path());
+        return preg_match('@' . $match . '@', $this->path());
     }
 
     /**
@@ -426,8 +426,8 @@ class Request
             return $_SERVER[$key];
         }
 
-        if ($this->hasHeader('HTTP_'.$key)) {
-            return $_SERVER['HTTP_'.$key];
+        if ($this->hasHeader('HTTP_' . $key)) {
+            return $_SERVER['HTTP_' . $key];
         }
 
         return null;

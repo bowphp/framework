@@ -41,8 +41,8 @@ class ReplCommand extends AbstractCommand
             $prompt = '(bow) >>';
         }
 
-        $prompt = trim($prompt).' ';
-        
+        $prompt = trim($prompt) . ' ';
+
         $config->setPrompt($prompt);
 
         $shell = new \Psy\Shell($config);

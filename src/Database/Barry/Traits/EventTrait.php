@@ -12,7 +12,7 @@ trait EventTrait
      */
     private static function formatEventName($event)
     {
-        return str_replace('\\', '.', strtolower(static::class)).'.'.$event;
+        return str_replace('\\', '.', strtolower(static::class)) . '.' . $event;
     }
 
     /**

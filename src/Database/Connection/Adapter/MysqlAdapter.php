@@ -62,9 +62,9 @@ class MysqlAdapter extends AbstractConnection
         }
 
         // Formatting connection parameters
-        $host  = "mysql:host=".$hostname.$port;
+        $host  = "mysql:host=" . $hostname . $port;
 
-        $database = "dbname=".$this->config['database'];
+        $database = "dbname=" . $this->config['database'];
 
         $username = $this->config["username"];
 
@@ -78,6 +78,6 @@ class MysqlAdapter extends AbstractConnection
             PDO::ATTR_ORACLE_NULLS => PDO::NULL_EMPTY_STRING
         ];
 
-        $this->pdo = new PDO($host.';'.$database, $username, $password, $options);
+        $this->pdo = new PDO($host . ';' . $database, $username, $password, $options);
     }
 }

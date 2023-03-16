@@ -107,7 +107,7 @@ class Message
     {
         $this->headers[] = "Mime-Version: 1.0";
         $this->headers[] = "Date: " . date("r");
-        $this->headers[] = "X-Mailer: PHP/".phpversion();
+        $this->headers[] = "X-Mailer: PHP/" . phpversion();
 
         if ($this->subject) {
             $this->headers[] = "Subject: " . $this->subject;
@@ -224,7 +224,7 @@ class Message
             $this->headers[] = "--" . $this->boundary;
         }
 
-        return implode(self::END, $this->headers).self::END;
+        return implode(self::END, $this->headers) . self::END;
     }
 
     /**

@@ -17,42 +17,42 @@ class Capsule implements ArrayAccess
     * @var array
     */
     private $registers = [];
-    
+
     /**
     * The container register for instance
     *
     * @var array
     */
     private $instances = [];
-    
+
     /**
     * The container factory maker
     *
     * @var array
     */
     private $factories = [];
-    
+
     /**
     * Represents a cache collector
     *
     * @var array
     */
     private $key = [];
-    
+
     /**
     * Represents the compilation parameters
     *
     * @var array
     */
     private $parameters = [];
-    
+
     /**
     * Represents the instance of Capsule
     *
     * @var Capsule
     */
     private static $instance;
-    
+
     /**
     * Get instance of Capsule
     *
@@ -63,10 +63,10 @@ class Capsule implements ArrayAccess
         if (is_null(static::$instance)) {
             static::$instance = new Capsule();
         }
-        
+
         return static::$instance;
     }
-    
+
     /**
     * Make the
     *
@@ -83,33 +83,33 @@ class Capsule implements ArrayAccess
                 array_merge([$this], $this->parameters)
             );
         }
-        
+
         if (isset($this->instances[$key])) {
             return $this->instances[$key];
         }
-        
+
         if (!isset($this->registers[$key])) {
             return $this->resolve($key);
         }
-        
+
         if (is_callable($this->registers[$key])) {
             return $this->instances[$key] = call_user_func_array(
                 $this->registers[$key],
                 array_merge([$this], $this->parameters)
             );
         }
-        
+
         if (!is_object($this->registers[$key])) {
             return $this->instances[$key] = $this->resolve($key);
         }
-        
+
         if (method_exists($this->registers[$key], '__invoke')) {
             return  $this->instances[$key] = $this->registers[$key]();
         }
-        
+
         return null;
     }
-    
+
     /**
     * Compilation with parameter
     *
@@ -121,14 +121,14 @@ class Capsule implements ArrayAccess
     public function makeWith($key, $parameters = [])
     {
         $this->parameters = $parameters;
-        
+
         $resolved = $this->resolve($key);
-        
+
         $this->parameters = [];
-        
+
         return $resolved;
     }
-    
+
     /**
     * Add to register
     *
@@ -139,10 +139,10 @@ class Capsule implements ArrayAccess
     public function bind($key, $value)
     {
         $this->key[$key] = true;
-        
+
         $this[$key] = $value;
     }
-    
+
     /**
     * Register the instance of a class
     *
@@ -155,7 +155,7 @@ class Capsule implements ArrayAccess
     {
         $this->factories[$key] = $value;
     }
-    
+
     /**
     * Saves the instance of a class
     *
@@ -169,10 +169,10 @@ class Capsule implements ArrayAccess
         if (!is_object($instance)) {
             throw new InvalidArgumentException('Parameter [2] is invalid');
         }
-        
+
         $this->instances[$key] = $instance;
     }
-    
+
     /**
     * Instantiate a class by its key
     *
@@ -188,17 +188,17 @@ class Capsule implements ArrayAccess
         if (!$reflection->isInstantiable()) {
             return $key;
         }
-        
+
         $constructor = $reflection->getConstructor();
-        
+
         if (!$constructor) {
             return $reflection->newInstance();
         }
 
         $parameters = $constructor->getParameters();
-        
+
         $parameters_lists = [];
-        
+
         foreach ($parameters as $parameter) {
             if ($parameter->isDefaultValueAvailable()) {
                 $parameters_lists[] = $parameter->getDefaultValue();
@@ -211,13 +211,13 @@ class Capsule implements ArrayAccess
 
         if (!empty($this->parameters)) {
             $parameters_lists = $this->parameters;
-            
+
             $this->parameters = [];
         }
-        
+
         return $reflection->newInstanceArgs($parameters_lists);
     }
-    
+
     /**
     * @inheritDoc
     */
@@ -225,7 +225,7 @@ class Capsule implements ArrayAccess
     {
         return isset($this->key[$offset]);
     }
-    
+
     /**
     * @inheritDoc
     */
@@ -233,7 +233,7 @@ class Capsule implements ArrayAccess
     {
         return $this->make($offset);
     }
-    
+
     /**
     * @inheritDoc
     */
@@ -241,7 +241,7 @@ class Capsule implements ArrayAccess
     {
         $this->registers[$offset] = $value;
     }
-    
+
     /**
     * @inheritDoc
     */

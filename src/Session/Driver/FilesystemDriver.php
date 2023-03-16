@@ -56,7 +56,7 @@ class FilesystemDriver implements \SessionHandlerInterface
      */
     public function gc($maxlifetime)
     {
-        foreach (glob($this->save_path."/*") as $file) {
+        foreach (glob($this->save_path . "/*") as $file) {
             if (filemtime($file) + $maxlifetime < $this->createTimestamp() && file_exists($file)) {
                 @unlink($file);
             }
@@ -114,6 +114,6 @@ class FilesystemDriver implements \SessionHandlerInterface
      */
     private function sessionFile($session_id)
     {
-        return $this->save_path.'/'.basename($session_id);
+        return $this->save_path . '/' . basename($session_id);
     }
 }

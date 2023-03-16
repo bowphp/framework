@@ -141,7 +141,7 @@ class Setting
      * @var string
      */
     private $producer_directory;
- 
+
     /**
      * The command directory
      *

@@ -22,7 +22,7 @@ class HttpException extends Exception
     public function __construct(string $message, $code = 200)
     {
         response()->status($code);
-        
+
         parent::__construct($message, $code);
     }
 

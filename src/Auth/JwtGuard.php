@@ -83,7 +83,7 @@ class JwtGuard extends GuardContract
         }
 
         $config = (array) config('policier');
-        
+
         if (is_null($config['keychain']['private']) || is_null($config['keychain']['publlic'])) {
             if (is_null($config['signkey'])) {
                 $policier->setConfig(['signkey' => file_get_contents(config('security.key'))]);
@@ -150,7 +150,7 @@ class JwtGuard extends GuardContract
             throw new AuthenticationException('The token payload malformed.');
         }
 
-        $user = new $this->provider['model'];
+        $user = new $this->provider['model']();
 
         return $this->getUserBy($user->getKey(), $result['claims']['id']);
     }

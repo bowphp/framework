@@ -5,7 +5,7 @@ namespace Bow\Console;
 class Generator
 {
     use ConsoleInformation;
-    
+
     /**
      * The base directory where that are going to generate
      *
@@ -56,7 +56,7 @@ class Generator
     {
         $this->filenameIsValide($this->name);
 
-        return file_exists($this->getPath()) || is_dir($this->base_dir."/".$this->name);
+        return file_exists($this->getPath()) || is_dir($this->base_dir . "/" . $this->name);
     }
 
     /**
@@ -66,7 +66,7 @@ class Generator
      */
     public function getPath()
     {
-        return $this->base_dir."/".$this->name.".php";
+        return $this->base_dir . "/" . $this->name . ".php";
     }
 
     /**
@@ -102,9 +102,9 @@ class Generator
 
 
         if ($dirname != '.') {
-            @mkdir($this->base_dir.'/'.trim($dirname, '/'), 0777, true);
+            @mkdir($this->base_dir . '/' . trim($dirname, '/'), 0777, true);
 
-            $namespace = '\\'.str_replace('/', '\\', ucfirst(trim($dirname, '/')));
+            $namespace = '\\' . str_replace('/', '\\', ucfirst(trim($dirname, '/')));
         } else {
             $namespace = '';
         }
@@ -130,10 +130,10 @@ class Generator
      */
     public function makeStub($type, $data = [])
     {
-        $content = file_get_contents(__DIR__.'/stub/'.$type.'.stub');
+        $content = file_get_contents(__DIR__ . '/stub/' . $type . '.stub');
 
         foreach ($data as $key => $value) {
-            $content = str_replace('{'.$key.'}', $value, $content);
+            $content = str_replace('{' . $key . '}', $value, $content);
         }
 
         return $content;

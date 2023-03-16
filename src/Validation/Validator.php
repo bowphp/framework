@@ -86,7 +86,7 @@ class Validator
      */
     public function __construct()
     {
-        $this->lexical = require __DIR__.'/stubs/lexical.php';
+        $this->lexical = require __DIR__ . '/stubs/lexical.php';
     }
 
     /**
@@ -142,7 +142,7 @@ class Validator
 
                 // Mask on the required rule
                 foreach ($this->rules as $rule) {
-                    $this->{'compile'.$rule}($key, $masque);
+                    $this->{'compile' . $rule}($key, $masque);
                     if ($rule == 'Required' && $this->fails) {
                         break;
                     }
@@ -232,7 +232,7 @@ class Validator
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('min', [
             'attribute' => $key,
             'length' => $length
@@ -267,12 +267,12 @@ class Validator
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('max', [
             'attribute' => $key,
             'length' => $length
         ]);
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -334,7 +334,7 @@ class Validator
         $this->last_message = $this->lexical('email', $key);
 
         $this->fails = true;
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -390,9 +390,9 @@ class Validator
         }
 
         $this->last_message = $this->lexical('int', $key);
-        
+
         $this->fails = true;
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -448,9 +448,9 @@ class Validator
         }
 
         $this->last_message = $this->lexical('alphanum', $key);
-        
+
         $this->fails = true;
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -512,7 +512,7 @@ class Validator
         }
 
         $length = (int) end($match);
-    
+
         if (Str::len($this->inputs[$key]) == $length) {
             return;
         }
@@ -523,7 +523,7 @@ class Validator
             'attribute' => $key,
             'length' => $length
         ]);
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -550,7 +550,7 @@ class Validator
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('lower', $key);
 
         $this->errors[$key][] = [
@@ -579,9 +579,9 @@ class Validator
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('upper', $key);
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -608,9 +608,9 @@ class Validator
         }
 
         $this->last_message = $this->lexical('alpha', $key);
-        
+
         $this->fails = true;
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -645,9 +645,9 @@ class Validator
 
         if (!$exists) {
             $this->last_message = $this->lexical('exists', $key);
-            
+
             $this->fails = true;
-            
+
             $this->errors[$key][] = [
                 "masque" => $masque,
                 "message" => $this->last_message
@@ -683,9 +683,9 @@ class Validator
 
         if ($exists) {
             $this->last_message = $this->lexical('not_exists', $key);
-            
+
             $this->fails = true;
-            
+
             $this->errors[$key][] = [
                 "masque" => $masque,
                 "message" => $this->last_message
@@ -721,9 +721,9 @@ class Validator
 
         if ($count >= 1) {
             $this->last_message = $this->lexical('unique', $key);
-            
+
             $this->fails = true;
-            
+
             $this->errors[$key][] = [
                 "masque" => $masque,
                 "message" => $this->last_message
@@ -751,9 +751,9 @@ class Validator
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('date', $key);
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -775,17 +775,19 @@ class Validator
             return;
         }
 
-        if (!preg_match(
-            '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
-            $this->inputs[$key]
-        )) {
+        if (
+            !preg_match(
+                '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
+                $this->inputs[$key]
+            )
+        ) {
             return;
         }
 
         $this->last_message = $this->lexical('datetime', $key);
-        
+
         $this->fails = true;
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message
@@ -807,16 +809,16 @@ class Validator
             return;
         }
 
-        $regex = '~^'.$match[1].'$~';
+        $regex = '~^' . $match[1] . '$~';
 
         if (preg_match($regex, $this->inputs[$key])) {
             return;
         }
 
         $this->fails = true;
-        
+
         $this->last_message = $this->lexical('regex', $key);
-        
+
         $this->errors[$key][] = [
             "masque" => $masque,
             "message" => $this->last_message

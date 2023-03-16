@@ -61,7 +61,7 @@ class Crypto
     public static function decrypt($data)
     {
         $iv_size = openssl_cipher_iv_length(static::$cipher);
-        
+
         $iv = Str::slice(sha1(static::$key), 0, $iv_size);
 
         return openssl_decrypt($data, static::$cipher, static::$key, 0, $iv);

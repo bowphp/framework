@@ -50,7 +50,7 @@ class Storage
         }
 
         if (! isset(static::$config['disk']['path'][$mount])) {
-            throw new MountDiskNotFoundException('The '.$mount.' disk is not define.');
+            throw new MountDiskNotFoundException('The ' . $mount . ' disk is not define.');
         }
 
         $config = static::$config['disk']['path'][$mount];

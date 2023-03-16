@@ -105,7 +105,7 @@ class ArgOption
 
             return;
         }
-        
+
         $part = explode(':', $param);
 
         $this->options['command'] = $part[0];
@@ -130,7 +130,7 @@ class ArgOption
         }
 
         if (!in_array($input, ['y', 'n'])) {
-            echo Color::red('Invalid choice')."\n";
+            echo Color::red('Invalid choice') . "\n";
 
             return $this->readline($message);
         }

@@ -8,7 +8,7 @@ use Bow\Console\ConsoleInformation;
 class ClearCommand extends AbstractCommand
 {
     use ConsoleInformation;
-    
+
     /**
      * Clear cache
      *
@@ -37,22 +37,22 @@ class ClearCommand extends AbstractCommand
     private function clear($action)
     {
         if ($action == 'all') {
-            $this->unlinks($this->setting->getVarDirectory().'/view/*/*');
-            foreach (glob($this->setting->getVarDirectory().'/view/*') as $dirname) {
+            $this->unlinks($this->setting->getVarDirectory() . '/view/*/*');
+            foreach (glob($this->setting->getVarDirectory() . '/view/*') as $dirname) {
                 @rmdir($dirname);
             }
 
-            $this->unlinks($this->setting->getVarDirectory().'/cache/*');
-            $this->unlinks($this->setting->getVarDirectory().'/session/*');
-            $this->unlinks($this->setting->getVarDirectory().'/logs/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/cache/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/session/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/logs/*');
 
             return;
         }
 
         if ($action == 'view') {
-            $this->unlinks($this->setting->getVarDirectory().'/view/*/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/view/*/*');
 
-            foreach (glob($this->setting->getVarDirectory().'/view/*') as $dirname) {
+            foreach (glob($this->setting->getVarDirectory() . '/view/*') as $dirname) {
                 @rmdir($dirname);
             }
 
@@ -60,19 +60,19 @@ class ClearCommand extends AbstractCommand
         }
 
         if ($action == 'cache') {
-            $this->unlinks($this->setting->getVarDirectory().'/cache/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/cache/*');
 
             return;
         }
 
         if ($action == 'session') {
-            $this->unlinks($this->setting->getVarDirectory().'/session/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/session/*');
 
             return;
         }
 
         if ($action == 'log') {
-            $this->unlinks($this->setting->getVarDirectory().'/logs/*');
+            $this->unlinks($this->setting->getVarDirectory() . '/logs/*');
 
             return;
         }
