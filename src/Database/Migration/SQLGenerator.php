@@ -344,7 +344,7 @@ class SQLGenerator
         if (!is_null($default)) {
             if (in_array($raw_type, ['VARCHAR', 'STRING', 'CHAR', 'ENUM'])) {
                 $default = "'" . $default . "'";
-            } else if (is_bool($default)) {
+            } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';
             }
             $type = sprintf('%s DEFAULT %s', $type, $default);
