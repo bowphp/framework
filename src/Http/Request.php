@@ -276,14 +276,15 @@ class Request
     /**
      * Get previous request data
      *
-     * @param  mixed $key
+     * @param  string $key
+     * @param  mixed $fullback
      * @return mixed
      */
-    public function old(string $key): mixed
+    public function old(string $key, mixed $fullback): mixed
     {
         $old = Session::getInstance()->get('__bow.old', []);
 
-        return $old[$key] ?? null;
+        return $old[$key] ?? $fullback;
     }
 
     /**
