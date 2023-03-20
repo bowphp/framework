@@ -1267,11 +1267,12 @@ if (!function_exists('old')) {
      * Get old request valude
      *
      * @param string $key
+     * @param mixed $fullback
      * @return mixed
      */
-    function old($key)
+    function old(string $key, mixed $fullback = null)
     {
-        return request()->old($key);
+        return request()->old($key, $fullback);
     }
 }
 
