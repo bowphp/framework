@@ -55,7 +55,6 @@ class JwtGuard extends GuardContract
     {
         $user = $this->makeLogin($credentials);
         $this->token = null;
-        $this->user = null;
 
         if (is_null($user)) {
             return false;
