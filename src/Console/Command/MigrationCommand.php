@@ -73,14 +73,10 @@ class MigrationCommand extends AbstractCommand
         // We create the migration database status
         $this->createMigrationTable();
 
-        // We get current migration status
-        $current_migrations = $this->getMigrationTable()
-        ->whereIn('migration', array_values($migrations))->get();
-
         try {
             $action = 'make' . strtoupper($type);
 
-            return $this->$action($current_migrations, $migrations);
+            return $this->$action($migrations);
         } catch (\Exception $exception) {
             throw $exception;
         }
@@ -89,13 +85,15 @@ class MigrationCommand extends AbstractCommand
     /**
      * Up migration
      *
-     * @param array $current_migration
      * @param array $migrations
-     *
      * @return void
      */
-    private function makeUp($current_migrations, $migrations)
+    private function makeUp(array $migrations)
     {
+        // We get current migration status
+        $current_migrations = $this->getMigrationTable()
+            ->whereIn('migration', array_values($migrations))->get();
+
         if (count($current_migrations) == count($migrations)) {
             echo Color::green('Nothing to migrate.');
 
@@ -132,29 +130,26 @@ class MigrationCommand extends AbstractCommand
     /**
      * Rollback migration
      *
-     * @param array $current_migration
      * @param array $migrations
-     *
      * @return void
      */
-    private function makeRollback($current_migrations, $migrations)
+    private function makeRollback(array $migrations)
     {
+        // We get current migration status
+        $current_migrations = $this->getMigrationTable()
+            ->whereIn('migration', array_values($migrations))
+            ->orderBy("created_at", "desc")->orderBy("migration", "desc")->get();
+
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to rollback.');
 
             return;
         }
 
-        // We sort current migration by created date value
-        usort($current_migrations, function ($first, $second) {
-            return strtotime($first->created_at) < strtotime($second->created_at);
-        });
-
         foreach ($current_migrations as $value) {
             foreach ($migrations as $file => $migration) {
                 if (!($value->batch == 1
-                    && $migration == $value->migration)
-                ) {
+                    && $migration == $value->migration)) {
                     continue;
                 }
 
@@ -191,12 +186,16 @@ class MigrationCommand extends AbstractCommand
     /**
      * Reset migration
      *
-     * @param array $current_migration
      * @param array $migrations
      * @return void
      */
-    private function makeReset($current_migrations, $migrations)
+    private function makeReset($migrations)
     {
+        // We get current migration status
+        $current_migrations = $this->getMigrationTable()
+            ->whereIn('migration', array_values($migrations))
+            ->orderBy("created_at", "desc")->orderBy("migration", "desc")->get();
+
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to reset.');
 
