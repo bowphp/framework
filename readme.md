@@ -20,7 +20,7 @@ For use this package, please create an application from this package [bowphp/app
 - File Uploading Class
 - Pagination
 - CQRS helpful implementation
-- File System Management with many driver like S3 and FTP
+- File System Management with many driver like S3 and FTP (Support connection switch)
 - Extensible with External package which can plug-in
 - Application logs Management
 - Database Connection (MySQL and SQLite)
