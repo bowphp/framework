@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Console\Command;
 
 use Bow\Console\Color;
-use Bow\Console\ConsoleInformation;
 use Bow\Console\Generator;
 use Bow\Database\Database;
 use Bow\Database\Migration\SQLGenerator;
@@ -68,14 +67,10 @@ class MigrationCommand extends AbstractCommand
         // We create the migration database status
         $this->createMigrationTable();
 
-        // We get current migration status
-        $current_migrations = $this->getMigrationTable()
-            ->whereIn('migration', array_values($migrations))->get();
-
         try {
             $action = 'make' . strtoupper($type);
 
-            return $this->$action($current_migrations, $migrations);
+            return $this->$action($migrations);
         } catch (\Exception $exception) {
             throw $exception;
         }
@@ -84,12 +79,15 @@ class MigrationCommand extends AbstractCommand
     /**
      * Up migration
      *
-     * @param array $current_migration
      * @param array $migrations
      * @return void
      */
-    protected function makeUp(array $current_migrations, array $migrations): void
+    protected function makeUp(array $migrations): void
     {
+        // We get migrations
+        $current_migrations = $this->getMigrationTable()
+            ->whereIn('migration', array_values($migrations))->get();
+
         if (count($current_migrations) == count($migrations)) {
             echo Color::green('Nothing to migrate.');
 
@@ -126,22 +124,23 @@ class MigrationCommand extends AbstractCommand
     /**
      * Rollback migration
      *
-     * @param array $current_migration
      * @param array $migrations
      * @return void
      */
-    protected function makeRollback(array $current_migrations, array $migrations): void
+    protected function makeRollback(array $migrations): void
     {
+        // We get current migration status
+        $current_migrations = $this->getMigrationTable()
+            ->whereIn('migration', array_values($migrations))
+            ->orderBy("created_at", "desc")
+            ->orderBy("migration", "desc")
+            ->get();
+
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to rollback.');
 
             return;
         }
-
-        // We sort current migration by created date value
-        usort($current_migrations, function ($first, $second) {
-            return strtotime($first->created_at) < strtotime($second->created_at);
-        });
 
         foreach ($current_migrations as $value) {
             foreach ($migrations as $file => $migration) {
@@ -185,26 +184,23 @@ class MigrationCommand extends AbstractCommand
     /**
      * Reset migration
      *
-     * @param array $current_migration
      * @param array $migrations
      * @return void
      */
-    protected function makeReset(array $current_migrations, array $migrations): void
+    protected function makeReset(array $migrations): void
     {
+        // We get current migration status
+        $current_migrations = $this->getMigrationTable()
+            ->whereIn('migration', array_values($migrations))
+            ->orderBy("created_at", "desc")
+            ->orderBy("migration", "desc")
+            ->get();
+
         if (count($current_migrations) == 0) {
             echo Color::green('Nothing to reset.');
 
             return;
         }
-
-        // We sort current migration by batch or created date value
-        usort($current_migrations, function ($first, $second) {
-            if ($first->batch == $second->batch) {
-                return strtotime($first->created_at) < strtotime($second->created_at);
-            }
-
-            return $first->batch > $second->batch;
-        });
 
         foreach ($current_migrations as $value) {
             foreach ($migrations as $file => $migration) {
@@ -298,11 +294,9 @@ class MigrationCommand extends AbstractCommand
      * Create migration status
      *
      * @param string $migration
-     * @param int $batch
-     *
-     * @return void
+     * @return int
      */
-    private function createMigrationStatus($migration)
+    private function createMigrationStatus(string $migration): int
     {
         $table = $this->getMigrationTable();
 
@@ -318,10 +312,9 @@ class MigrationCommand extends AbstractCommand
      *
      * @param string $migration
      * @param int $batch
-     *
-     * @return void
+     * @return int
      */
-    private function updateMigrationStatus($migration, $batch)
+    private function updateMigrationStatus(string $migration, int $batch): int
     {
         $table = $this->getMigrationTable();
 
@@ -337,7 +330,7 @@ class MigrationCommand extends AbstractCommand
      * @param string $migration
      * @return bool
      */
-    private function checkIfMigrationExist($migration)
+    private function checkIfMigrationExist(string $migration): bool
     {
         $result = $this->getMigrationTable()
             ->where('migration', $migration)
