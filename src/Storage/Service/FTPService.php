@@ -560,6 +560,7 @@ class FTPService implements ServiceInterface
         $normalizedListing = [];
 
         foreach ($listing as $child) {
+            $part = preg_split("/\s[0-9]{2}:[0-9]{2}\s/", $child);
             $chunks = preg_split("/\s+/", $child);
 
             list(
@@ -570,10 +571,10 @@ class FTPService implements ServiceInterface
                 $item['size'],
                 $item['month'],
                 $item['day'],
-                $item['time'],
-                $item['name']
+                $item['time']
             ) = $chunks;
 
+            $item["name"] = end($part);
             $item['type'] = $chunks[0][0] === 'd' ? 'directory' : 'file';
 
             array_splice($chunks, 0, 8);
