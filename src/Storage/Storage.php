@@ -6,6 +6,8 @@ use BadMethodCallException;
 use Bow\Storage\Exception\MountDiskNotFoundException;
 use Bow\Storage\Exception\ServiceConfigurationNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
+use Bow\Storage\Service\FTPService;
+use Bow\Storage\Service\S3Service;
 
 class Storage
 {
@@ -28,7 +30,10 @@ class Storage
      *
      * @var array
      */
-    private static $available_services = [];
+    private static $available_services = [
+        'ftp' => FTPService::class,
+        's3' => S3Service::class,
+    ];
 
     /**
      * Mount disk
@@ -71,7 +76,7 @@ class Storage
             throw (new ServiceNotFoundException(sprintf(
                 '"%s" is not registered as a service.',
                 $service
-            )))->setServiceName($service);
+            )))->setService($service);
         }
 
         $service_class = static::$available_services[$service];
@@ -82,7 +87,7 @@ class Storage
             throw (new ServiceConfigurationNotFoundException(sprintf(
                 '"%s" configuration not found.',
                 $service
-            )))->setServiceName($service);
+            )))->setService($service);
         }
 
         return $service_class::configure($config);
