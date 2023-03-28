@@ -20,7 +20,7 @@ class FTPService implements ServiceInterface
     /**
      * Ftp connection
      *
-     * @var resource
+     * @var \FTP\Connection
      */
     private $connection;
 
@@ -164,14 +164,15 @@ class FTPService implements ServiceInterface
     /**
      * Set the connection root.
      *
+     * @param string $path
      * @return void
      */
     public function setConnectionRoot($path = '')
     {
-        $basePath = $path ?: $this->config['root'];
+        $base_path = $path ?: $this->config['root'];
 
-        if ($basePath && (!ftp_chdir($this->connection, $basePath))) {
-            throw new RuntimeException('Root is invalid or does not exist: ' . $basePath);
+        if ($base_path && (!ftp_chdir($this->connection, $base_path))) {
+            throw new RuntimeException('Root is invalid or does not exist: ' . $base_path);
         }
 
         // Store absolute path for further reference.
@@ -181,7 +182,7 @@ class FTPService implements ServiceInterface
     /**
      * Get ftp connextion
      *
-     * @return mixed
+     * @return \FTP\Connection
      */
     public function getConnection()
     {
@@ -191,7 +192,7 @@ class FTPService implements ServiceInterface
     /**
      * Return the current working directory.
      *
-     * @return mixed
+     * @return string
      */
     public function getCurrentDirectory()
     {
@@ -491,7 +492,10 @@ class FTPService implements ServiceInterface
     public function path($filename)
     {
         if ($this->exists($filename)) {
+            return $filename;
         }
+
+        return $filename;
     }
 
 
