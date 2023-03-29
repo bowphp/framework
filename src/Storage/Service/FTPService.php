@@ -63,7 +63,7 @@ class FTPService implements ServiceInterface
      * @param array $config
      * @return void
      */
-    private function __construct(array $config)
+    public function __construct(array $config)
     {
         $this->config = $config;
 
