@@ -148,7 +148,7 @@ class SQLGenerator
     }
 
     /**
-     * Change a column in the table
+     * Rename a column in the table
      *
      * @param string $name
      * @param string $new
@@ -238,7 +238,7 @@ class SQLGenerator
     }
 
     /**
-     * Renom column action with sqlite
+     * Rename column with sqlite
      *
      * @param string $name
      * @param string $new
