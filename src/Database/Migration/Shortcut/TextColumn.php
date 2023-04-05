@@ -87,4 +87,88 @@ trait TextColumn
     {
         return $this->addColumn($column, 'blob', $attribute);
     }
+
+    /**
+     * Change string column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeString($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'string', $attribute);
+    }
+
+    /**
+     * Change string column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeLongString($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'long varchar', $attribute);
+    }
+
+    /**
+     * Change json column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeJson($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'json', $attribute);
+    }
+
+    /**
+     * Change character column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeChar($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'character', $attribute);
+    }
+
+    /**
+     * Change longtext column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeLongtext($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'longtext', $attribute);
+    }
+
+    /**
+     * Change text column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeText($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'text', $attribute);
+    }
+
+    /**
+     * Change blob column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeBlob($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'blob', $attribute);
+    }
 }
