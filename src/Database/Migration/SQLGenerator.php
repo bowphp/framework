@@ -137,12 +137,31 @@ class SQLGenerator
      */
     public function changeColumn($name, $type, array $attributes = [])
     {
-        $command = 'CHANGE COLUMN';
+        $command = 'MODIFY COLUMN';
 
         $this->sqls[] = $this->composeAddColumn(
             trim($name, '`'),
             compact('name', 'type', 'attributes', 'command')
         );
+
+        return $this;
+    }
+
+    /**
+     * Change a column in the table
+     *
+     * @param string $name
+     * @param string $new
+     *
+     * @return SQLGenerator
+     */
+    public function renameColumn($name, $new)
+    {
+        if ($this->adapter == 'mysql') {
+            $this->sqls[] = sprintf("RENAME COLUMN `%s` TO `%s`", $name, $new);
+        } else {
+            $this->renameColumnOnSqlite($name, $new);
+        }
 
         return $this;
     }
@@ -182,7 +201,7 @@ class SQLGenerator
     }
 
     /**
-     * Drop Column action with mysql
+     * Drop Column action with sqlite
      *
      * @param string $name
      */
@@ -195,7 +214,6 @@ class SQLGenerator
         $statement = $pdo->query(sprintf('PRAGMA table_info(%s);', $this->table));
 
         $statement->execute();
-
         $select = [];
 
         foreach ($statement->fetchAll() as $column) {
@@ -217,6 +235,57 @@ class SQLGenerator
         $pdo->exec(sprintf('ALTER TABLE __temp_sqlite_table RENAME TO %s;', $this->table));
 
         $pdo->exec('COMMIT;');
+    }
+
+    /**
+     * Renom column action with sqlite
+     *
+     * @param string $name
+     * @param string $new
+     */
+    private function renameColumnOnSqlite($old_name, $new_name)
+    {
+        $pdo = Database::getPdo();
+
+        $pdo->exec('PRAGMA foreign_keys=off');
+        $statement = $pdo->query(sprintf('PRAGMA table_info(%s);', $this->table));
+
+        $statement->execute();
+        $select = [];
+        $select_old = [];
+
+        foreach ($statement->fetchAll() as $key => $column) {
+            $select_old[$key] = $column->name;
+            if (property_exists($column, $old_name)) {
+                $select[$key] = $column->name;
+            } else {
+                $select[$key] = $new_name;
+            }
+        }
+
+        $pdo->exec('BEGIN TRANSACTION;');
+
+        $pdo->exec("ALTER TABLE " . $this->table . " RENAME TO __temp_rename_sqlite_table;");
+
+        $statement = $pdo->exec('PRAGMA foreign_keys=off');
+
+        $pdo->exec(sprintf(
+            'CREATE TABLE %s AS SELECT * FROM %s;',
+            $this->table,
+            '__temp_rename_sqlite_table'
+        ));
+
+        $pdo->exec(sprintf(
+            "INSERT INTO %s(%s) SELECT %s FROM %s",
+            $this->table,
+            implode(', ', $select),
+            implode(', ', $select_old),
+            '__temp_rename_sqlite_table'
+        ));
+
+        $pdo->exec("DROP TABLE __temp_rename_sqlite_table;");
+        $pdo->exec('COMMIT;');
+        $pdo->exec('PRAGMA foreign_keys=on');
     }
 
     /**
@@ -319,7 +388,7 @@ class SQLGenerator
         $check = $attributes['check'] ?? false;
         $unsigned = $attributes['unsigned'] ?? false;
         $after = $attributes['after'] ?? false;
-        $before = $attributes['before'] ?? false;
+        $first = isset($attributes['first']);
 
         // String to VARCHAR
         if ($type == 'STRING') {
@@ -385,8 +454,8 @@ class SQLGenerator
             $type = sprintf('%s AFTER %s', $type, $after);
         }
 
-        if (is_string($before)) {
-            $type = sprintf('%s BEFORE %s', $type, $before);
+        if ($first) {
+            $type = sprintf('%s FIRST', $type);
         }
 
         return trim(
