@@ -127,6 +127,27 @@ class SQLGenerator
     }
 
     /**
+     * Change a column in the table
+     *
+     * @param string $name
+     * @param string $type
+     * @param array $attributes
+     *
+     * @return SQLGenerator
+     */
+    public function changeColumn($name, $type, array $attributes = [])
+    {
+        $command = 'CHANGE COLUMN';
+
+        $this->sqls[] = $this->composeAddColumn(
+            trim($name, '`'),
+            compact('name', 'type', 'attributes', 'command')
+        );
+
+        return $this;
+    }
+
+    /**
      * Drop table column
      *
      * @param string $name
@@ -297,6 +318,8 @@ class SQLGenerator
         $unique = $attributes['unique'] ?? false;
         $check = $attributes['check'] ?? false;
         $unsigned = $attributes['unsigned'] ?? false;
+        $after = $attributes['after'] ?? false;
+        $before = $attributes['before'] ?? false;
 
         // String to VARCHAR
         if ($type == 'STRING') {
@@ -355,6 +378,15 @@ class SQLGenerator
         // Add unsigned mention
         if ($unsigned) {
             $type = sprintf('UNSIGNED %s', $type);
+        }
+
+        // Add the column position
+        if (is_string($after)) {
+            $type = sprintf('%s AFTER %s', $type, $after);
+        }
+
+        if (is_string($before)) {
+            $type = sprintf('%s BEFORE %s', $type, $before);
         }
 
         return trim(

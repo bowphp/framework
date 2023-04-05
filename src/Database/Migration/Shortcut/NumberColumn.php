@@ -141,4 +141,142 @@ trait NumberColumn
     {
         return $this->addColumn($column, 'mediumint', ['primary' => true, 'increment' => true]);
     }
+
+    /**
+     * Change float column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeFloat($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'float', $attribute);
+    }
+
+    /**
+     * Change double column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeDouble($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'double', $attribute);
+    }
+
+    /**
+     * Change double primary column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function changeDoublePrimary($column)
+    {
+        return $this->changeColumn($column, 'double', ['primary' => true]);
+    }
+
+    /**
+     * Change float primary column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function changeFloatPrimary($column)
+    {
+        return $this->changeColumn($column, 'float', ['primary' => true]);
+    }
+
+    /**
+     * Change increment primary column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function changeIncrement($column)
+    {
+        return $this->changeColumn($column, 'int', ['primary' => true, 'increment' => true]);
+    }
+
+    /**
+     * Change integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeInteger($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'int', $attribute);
+    }
+
+    /**
+     * Change integer primary column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function changeIntegerPrimary($column)
+    {
+        return $this->changeColumn($column, 'int', ['primary' => true]);
+    }
+
+    /**
+     * Change big increment primary column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function changeBigIncrement($column)
+    {
+        return $this->changeColumn($column, 'bigint', ['primary' => true, 'increment' => true]);
+    }
+
+    /**
+     * Change tiny integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeTinyInteger($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'tinyint', $attribute);
+    }
+
+    /**
+     * Change Big integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeBigInteger($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'bigint', $attribute);
+    }
+
+    /**
+     * Change Medium integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeMediumInteger($column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'mediumint', $attribute);
+    }
+
+    /**
+     * Change Medium integer column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function changeMediumIncrement($column)
+    {
+        return $this->changeColumn($column, 'mediumint', ['primary' => true, 'increment' => true]);
+    }
 }

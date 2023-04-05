@@ -53,14 +53,17 @@ trait ConstraintColumn
      * Drop constraintes column;
      *
      * @param string $name
+     * @param bool $as_raw
      * @return SQLGenerator
      */
-    public function dropForeign($name)
+    public function dropForeign($name, bool $as_raw = false)
     {
         $names = (array) $name;
 
         foreach ($names as $name) {
-            $name = sprintf("%s_%s_foreign", $this->getTable(), $name);
+            if (!$as_raw) {
+                $name = sprintf("%s_%s_foreign", $this->getTable(), $name);
+            }
             $this->sqls[] = sprintf('DROP FOREIGN KEY `%s`', $name);
         }
 

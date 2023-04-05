@@ -71,6 +71,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         try {
             $this->migration->alter('bow_tests', function (SQLGenerator $generator) {
                 $generator->dropColumn('name');
+                $generator->changeColumn('name', 'string', ['size' => 500, 'default' => 'franck']);
                 $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
             });
 
