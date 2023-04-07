@@ -181,7 +181,7 @@ class FTPService implements ServiceInterface
     {
         $base_path = $path ?: $this->config['root'];
 
-        if ($base_path && (!ftp_chdir($this->connection, $base_path))) {
+        if ($base_path && (!@ftp_chdir($this->connection, $base_path))) {
             throw new RuntimeException('Root is invalid or does not exist: ' . $base_path);
         }
 

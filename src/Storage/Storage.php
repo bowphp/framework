@@ -84,7 +84,7 @@ class Storage
             )))->setService($service);
         }
 
-        $driver = $config[$service]["drivier"] ?? null;
+        $driver = $config["driver"] ?? null;
 
         if (is_null($driver)) {
             throw (new ServiceNotFoundException(sprintf(
