@@ -926,27 +926,15 @@ if (!function_exists('e')) {
     }
 }
 
-if (!function_exists('ftp')) {
+if (!function_exists('storage_service')) {
     /**
-     * Ftp Service loader
+     * Service loader
      *
-     * @return \Bow\Storage\Service\FTPService
+     * @return \Bow\Storage\Service\FTPService|\Bow\Storage\Service\S3Service
      */
-    function ftp()
+    function storage_service(string $service)
     {
-        return Storage::service('ftp');
-    }
-}
-
-if (!function_exists('s3')) {
-    /**
-     * S3 Service loader
-     *
-     * @return \Bow\Storage\Service\S3Service
-     */
-    function s3()
-    {
-        return Storage::service('s3');
+        return Storage::service($service);
     }
 }
 
@@ -956,10 +944,9 @@ if (!function_exists('mount')) {
      *
      * @param string $mount
      * @return \Bow\Storage\MountFilesystem
-     *
      * @throws \Bow\Storage\Exception\ResourceException
      */
-    function mount($mount)
+    function mount(string $mount)
     {
         return Storage::mount($mount);
     }
@@ -971,10 +958,9 @@ if (!function_exists('file_system')) {
      *
      * @param string $mount
      * @return \Bow\Storage\MountFilesystem
-     *
      * @throws \Bow\Storage\Exception\ResourceException
      */
-    function file_system($mount)
+    function file_system(string $mount)
     {
         return mount($mount);
     }
@@ -1036,6 +1022,7 @@ if (!function_exists('bow_hash')) {
      *
      * @param  string $data
      * @param  mixed  $hash_value
+     * @deprecated
      * @return mixed
      */
     function bow_hash($data, $hash_value = null)
@@ -1153,7 +1140,7 @@ if (!function_exists('app_abort_if')) {
      * @param string $message
      * @return \Bow\Http\Response|null
      */
-    function app_abort_if($boolean, $code, $message = '')
+    function app_abort_if(bool $boolean, int $code, string $message = '')
     {
         if ($boolean) {
             return app_abort($code, $message);
@@ -1229,8 +1216,12 @@ if (!function_exists('logger')) {
      * @param array $context
      * @return Monolog
      */
-    function logger($level, $message, array $context = [])
+    function logger(?string $level, ?string $message, array $context = [])
     {
+        if (is_null($level)) {
+            return app('logger');
+        }
+
         if (!in_array($level, ['info', 'warning', 'error', 'critical', 'debug'])) {
             return false;
         }
@@ -1483,16 +1474,16 @@ if (!function_exists('db_seed')) {
     /**
      * Make programmatic seeding
      *
-     * @param string $entry
+     * @param string $name
      * @param array $data
      * @return void
      */
-    function db_seed($entry, array $data = [])
+    function db_seed($name, array $data = [])
     {
-        $filename = rtrim(config('app.seeder_path'), '/') . '/' . $entry . '_seeder.php';
+        $filename = rtrim(config('app.seeder_path'), '/') . '/' . $name . '_seeder.php';
 
         if (!file_exists($filename)) {
-            throw new \ErrorException('[' . $entry . '] seeder file not found');
+            throw new \ErrorException('[' . $name . '] seeder file not found');
         }
 
         $seeds = require $filename;
