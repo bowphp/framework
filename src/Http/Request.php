@@ -48,19 +48,17 @@ class Request
      */
     private function __construct()
     {
+        $data = [];
+
         if ($this->getHeader('content-type') == 'application/json') {
             $data = json_decode(file_get_contents("php://input"), true);
             $this->input = array_merge((array) $data, $_GET);
         } else {
-            $data = [];
-
+            $data = $_POST ?? [];
             if ($this->isPut()) {
                 parse_str(file_get_contents("php://input"), $data);
-            } elseif ($this->isPost()) {
-                $data = $_POST;
             }
-
-            $this->input = array_merge($data, $_GET);
+            $this->input = array_merge((array) $data, $_GET);
         }
 
         foreach ($this->input as $key => $value) {
@@ -86,10 +84,19 @@ class Request
     /**
      * Get the request ID
      *
-     * @param string|int $id
      * @return string|int
      */
     public function getId(): string|int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Alias of getId
+     *
+     * @return string|int
+     */
+    public function id(): string|int
     {
         return $this->id;
     }
