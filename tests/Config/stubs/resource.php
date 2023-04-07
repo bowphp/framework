@@ -21,9 +21,10 @@ return [
          * FTP configuration
          */
         'ftp' => [
+            "driver" => "ftp",
             'hostname' => app_env('FTP_HOST', 'localhost'),
-            'password' => app_env('FTP_PASSWORD', '12345'),
-            'username' => app_env('FTP_USERNAME', 'bob'),
+            'password' => app_env('FTP_PASSWORD', 'password'),
+            'username' => app_env('FTP_USERNAME', 'username'),
             'port'     => app_env('FTP_PORT', 21),
             'root' => app_env('FTP_ROOT', sys_get_temp_dir()), // Start directory
             'tls' => app_env('FTP_SSL', false), // `true` enable the secure connexion.
@@ -34,6 +35,7 @@ return [
          * S3 configuration
          */
         's3' => [
+            "driver" => "s3",
             'credentials' => [
                 'key'    => app_env('AWS_S3_KEY'),
                 'secret' => app_env('AWS_S3_SECRET'),

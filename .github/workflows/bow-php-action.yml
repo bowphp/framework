@@ -1,11 +1,11 @@
-name: Bow Framework CI
+name: bowphp-ci
 
 on: [ push, pull_request ]
 
 env:
   FTP_HOST: localhost
-  FTP_USER: bob
-  FTP_PASSWORD: 12345
+  FTP_USER: username
+  FTP_PASSWORD: password
   FTP_PORT: 21
 
 jobs:

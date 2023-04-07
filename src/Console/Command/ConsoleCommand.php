@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
-use Bow\Console\Color;
 use Bow\Console\Generator;
 
 class ConsoleCommand extends AbstractCommand
