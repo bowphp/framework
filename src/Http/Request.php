@@ -70,9 +70,6 @@ class Request
 
             $this->input[$key] = $value;
         }
-
-        // Reboot the old request values
-        Session::getInstance()->set('__bow.old', []);
     }
 
     /**
