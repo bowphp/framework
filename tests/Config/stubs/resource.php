@@ -21,6 +21,7 @@ return [
          * FTP configuration
          */
         'ftp' => [
+            "driver" => "ftp",
             'hostname' => app_env('FTP_HOST', 'localhost'),
             'password' => app_env('FTP_PASSWORD', '12345'),
             'username' => app_env('FTP_USERNAME', 'bob'),
@@ -34,6 +35,7 @@ return [
          * S3 configuration
          */
         's3' => [
+            "driver" => "s3",
             'credentials' => [
                 'key'    => app_env('AWS_S3_KEY'),
                 'secret' => app_env('AWS_S3_SECRET'),
