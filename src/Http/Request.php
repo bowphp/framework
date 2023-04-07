@@ -468,7 +468,7 @@ class Request
     {
         $headers = [];
 
-        foreach($_SERVER as $key => $value) {
+        foreach ($_SERVER as $key => $value) {
             if (preg_match('/^http_/i', $key)) {
                 $key = str_replace("http_", "", strtolower($key));
                 $headers[$key] = $value;
