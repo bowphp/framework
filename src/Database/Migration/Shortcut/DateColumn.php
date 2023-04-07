@@ -89,4 +89,86 @@ trait DateColumn
 
         return $this;
     }
+
+    /**
+     * Change datetime column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeDatetime(string $column, array $attribute = []): SQLGenerator
+    {
+        if ($this->adapter == 'sqlite') {
+            return $this->changeColumn($column, 'text', $attribute);
+        }
+
+        return $this->changeColumn($column, 'datetime', $attribute);
+    }
+
+    /**
+     * Change date column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeDate(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'date', $attribute);
+    }
+
+    /**
+     * Change time column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeTime(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'time', $attribute);
+    }
+
+    /**
+     * Change year column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeYear(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'year', $attribute);
+    }
+
+    /**
+     * Change timestamp column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeTimestamp(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'timestamp', $attribute);
+    }
+
+    /**
+     * Change default timestamps
+     *
+     * @return SQLGenerator
+     */
+    public function changeTimestamps()
+    {
+        if ($this->adapter == 'sqlite') {
+            $this->changeColumn('created_at', 'text', ['default' => 'CURRENT_TIMESTAMP']);
+            $this->changeColumn('updated_at', 'text', ['default' => 'CURRENT_TIMESTAMP']);
+        } else {
+            $this->changeColumn('created_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
+            $this->changeColumn('updated_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
+        }
+
+        return $this;
+    }
 }
