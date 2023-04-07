@@ -20,6 +20,9 @@ class SessionConfiguration extends Configuration
 
             Tokenize::makeCsrfToken($config['session.lifetime']);
 
+            // Reboot the old request values
+            Session::getInstance()->add('__bow.old', []);
+
             return $session;
         });
     }

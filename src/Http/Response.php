@@ -208,7 +208,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Modify http headers
+     * Add http header
      *
      * @param  string $key
      * @param  string $value
@@ -217,6 +217,19 @@ class Response implements ResponseInterface
     public function addHeader(string $key, string $value): Response
     {
         $this->headers[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Add http headers
+     *
+     * @param  array $headers
+     * @return Response
+     */
+    public function addHeaders(array $headers): Response
+    {
+        $this->headers = [...$this->headers, ...$headers];
 
         return $this;
     }
@@ -268,8 +281,9 @@ class Response implements ResponseInterface
      */
     public function status(int $code): Response
     {
+        $this->code = $code;
+
         if (in_array($code, array_keys(static::$status_codes), true)) {
-            $this->code = $code;
             @header('HTTP/1.1 ' . $code . ' ' . static::$status_codes[$code], $this->override, $code);
         }
 
@@ -369,11 +383,11 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Get accessControl instance
+     * Modify the service access control from ServerAccessControl instance
      *
      * @return ServerAccessControl
      */
-    public function serverAccessControl(): ServerAccessControl
+    public function getServerAccessControl(): ServerAccessControl
     {
         return new ServerAccessControl($this);
     }

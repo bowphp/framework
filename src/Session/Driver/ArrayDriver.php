@@ -13,7 +13,7 @@ class ArrayDriver implements \SessionHandlerInterface
      *
      * @var array
      */
-    private array $sessions;
+    private array $sessions = [];
 
     /**
      * Close the session handling
