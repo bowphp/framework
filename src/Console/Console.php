@@ -5,8 +5,14 @@ declare(strict_types=1);
 namespace Bow\Console;
 
 use Bow\Configuration\Loader;
+use Bow\Console\Exception\ConsoleException;
 use Bow\Console\Traits\ConsoleTrait;
+use Psy\Exception\FatalErrorException;
+use RuntimeException;
 
+/**
+ * @method static Console addCommand(string $command, callable $cb)
+ */
 class Console
 {
     use ConsoleTrait;
@@ -44,7 +50,7 @@ class Console
      *
      * @var array
      */
-    private array $registers = [];
+    private static array $registers = [];
 
     /**
      * Defines if console booted
@@ -59,6 +65,13 @@ class Console
      * @return Argument
      */
     private Argument $arg;
+
+    /**
+     * The console instance
+     *
+     * @var Console
+     */
+    private static ?Console $instance = null;
 
     /**
      * The command list
@@ -98,6 +111,23 @@ class Console
         $this->setting = $setting;
 
         $this->command = new Command($setting, $this->arg);
+
+        static::$instance = $this;
+    }
+
+    /**
+     * Get the console instance
+     *
+     * @return ?Console
+     * @throws ConsoleException
+     */
+    public static function getInstance(): ?Console
+    {
+        if (is_null(static::$instance)) {
+            throw new ConsoleException("The console is not instantiated");
+        }
+
+        return static::$instance;
     }
 
     /**
@@ -137,31 +167,15 @@ class Console
 
         $this->booted = true;
 
+        // Run all bootstraps files
         foreach ($this->setting->getBootstrap() as $item) {
             require $item;
         }
 
+        // Get the argument command
         $command = $this->arg->getCommand();
 
-        if (array_key_exists($command, $this->registers)) {
-            try {
-                $classname = $this->registers[$command];
-
-                if (is_callable($classname)) {
-                    return $classname($this->arg);
-                }
-
-                $instance = new $classname($this->setting, $this->arg);
-
-                return call_user_func_array([$instance, "process"], []);
-            } catch (\Exception $exception) {
-                echo Color::red($exception->getMessage());
-                echo Color::green($exception->getTraceAsString());
-
-                exit(1);
-            }
-        }
-
+        // Renaming the incomming command
         if ($command == 'launch') {
             $command = null;
         }
@@ -184,16 +198,23 @@ class Console
      * Calls a command
      *
      * @param  string $command
-     * @return void
+     * @return mixed
      * @throws
      */
-    public function call(?string $command): void
+    public function call(?string $command): mixed
     {
         // Display of the help menu if no command defined.
         if (!isset($command)) {
             $this->help();
             exit(0);
-        } elseif (!in_array($command, static::COMMAND)) {
+        }
+
+        // The built-in commands have priority
+        if (!in_array($command, static::COMMAND)) {
+            // Try to execute the custom command
+            if (array_key_exists($command, static::$registers)) {
+                return $this->executeCustomCommand($command);
+            }
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
         }
 
@@ -216,16 +237,56 @@ class Console
 
     /**
      * Add a custom order to the store
-     *
+     * The method work only on cli env
+     * 
      * @param string $command
-     * @param callable $cb
+     * @param callable|string $cb
      * @return Console
      */
-    public function addCommand($command, $cb): Console
+    public function addCommand(string $command, callable|string $cb): Console
     {
-        $this->registers[$command] = $cb;
+        static::$registers[$command] = $cb;
 
         return $this;
+    }
+
+    /**
+     * Add a custom order to the store from the web env
+     * This method work on web and cli env
+     *
+     * @param string $command
+     * @param callable|string $cb
+     * @return void
+     */
+    public static function register(string $command, callable|string $cb): void
+    {
+        static::$registers[$command] = $cb;
+    }
+
+    /**
+     * Execute the define custom command
+     *
+     * @param string $command
+     * @return mixed
+     */
+    private function executeCustomCommand(string $command)
+    {
+        try {
+            $classname = static::$registers[$command];
+
+            if (is_callable($classname)) {
+                return $classname($this->arg);
+            }
+
+            $instance = new $classname($this->setting, $this->arg);
+
+            return call_user_func_array([$instance, "process"], []);
+        } catch (\Exception $exception) {
+            echo Color::red($exception->getMessage());
+            echo Color::green($exception->getTraceAsString());
+
+            exit(1);
+        }
     }
 
     /**
@@ -383,7 +444,7 @@ class Console
      */
     private function help(?string $command = null): int
     {
-        // bow framework and php version display
+        // Display the framework and php version
         $this->getVersion();
 
         if ($command === null) {

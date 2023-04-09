@@ -1,6 +1,7 @@
 <?php
 
-use Bow\Support\Str;
+namespace Bow\Tests\Console;
+
 use Bow\Console\Generator;
 use Spatie\Snapshots\MatchesSnapshots;
 
