@@ -8,6 +8,7 @@ use Pheanstalk\Pheanstalk;
 use Bow\Queue\ProducerService;
 use Bow\Queue\Adapters\QueueAdapter;
 use Pheanstalk\Job as PheanstalkJob;
+use RuntimeException;
 
 class BeanstalkdAdapter extends QueueAdapter
 {
@@ -38,6 +39,10 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function configure(array $queue): BeanstalkdAdapter
     {
+        if (!class_exists(Pheanstalk::class)) {
+            throw new RuntimeException("Please install the pda/pheanstalk package");
+        }
+
         $this->pheanstalk = Pheanstalk::create($queue["hostname"], $queue["port"], $queue["timeout"]);
 
         return $this;
