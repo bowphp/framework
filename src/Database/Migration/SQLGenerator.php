@@ -454,7 +454,7 @@ class SQLGenerator
 
         // Add the column position
         if (is_string($after)) {
-            $type = sprintf('%s AFTER %s', $type, $after);
+            $type = sprintf('%s AFTER `%s`', $type, $after);
         }
 
         if ($first === true) {
