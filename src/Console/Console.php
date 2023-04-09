@@ -238,7 +238,7 @@ class Console
     /**
      * Add a custom order to the store
      * The method work only on cli env
-     * 
+     *
      * @param string $command
      * @param callable|string $cb
      * @return Console
