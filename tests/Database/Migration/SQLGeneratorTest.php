@@ -41,6 +41,38 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test Change column action
+     */
+    public function test_change_column_sql_statement()
+    {
+        $this->generator->changeColumn('name', 'int');
+        $sql = $this->generator->make();
+        $this->assertEquals($sql, 'MODIFY `name` INT NOT NULL');
+
+        $this->generator->changeColumn('name', 'string');
+        $sql = $this->generator->make();
+        $this->assertNotEquals($sql, 'MODIFY `name` STRING NOT NULL');
+
+        $this->generator->changeColumn('name', 'string');
+        $sql = $this->generator->make();
+        $this->assertEquals($sql, 'MODIFY `name` VARCHAR(255) NOT NULL');
+
+        $this->generator->changeColumn('name', 'string', ['default' => 'bow', 'size' => 100]);
+        $sql = $this->generator->make();
+        $this->assertEquals($sql, "MODIFY `name` VARCHAR(100) NOT NULL DEFAULT 'bow'");
+    }
+
+    /**
+     * Test Rename column action
+     */
+    public function test_rename_column_sql_statement_for_mysql()
+    {
+        $this->generator->renameColumn('name', 'fullname');
+        $sql = $this->generator->make();
+        $this->assertEquals($sql, 'RENAME COLUMN `name` TO `fullname`');
+    }
+
+    /**
      * Test Add column action
      */
     public function test_should_create_drop_column_sql_statement()
