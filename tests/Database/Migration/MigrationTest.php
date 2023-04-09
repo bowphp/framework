@@ -1,9 +1,8 @@
 <?php
 
-namespace Bow\Tests\Database;
+namespace Bow\Tests\Database\Migration;
 
 use Bow\Database\Database;
-use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Migration\Migration;
 use Bow\Database\Migration\SQLGenerator;
 use Bow\Tests\Config\TestingConfiguration;

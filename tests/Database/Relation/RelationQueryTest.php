@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Database;
+namespace Bow\Tests\Database\Relation;
 
 use Bow\Database\Database;
 use Bow\Tests\Database\Stubs\PetMasterModelStub;
@@ -13,6 +13,16 @@ class RelationQueryTest extends \PHPUnit\Framework\TestCase
      * @var Database
      */
     private Database $connection;
+
+    public function test_get_the_relationship()
+    {
+        $pet = PetWithMasterModelStub::find(1);
+
+        $master = $pet->master;
+
+        $this->assertInstanceOf(PetMasterModelStub::class, $master);
+        $this->assertEquals('didi', $master->name);
+    }
 
     public static function setUpBeforeClass(): void
     {
@@ -42,16 +52,6 @@ class RelationQueryTest extends \PHPUnit\Framework\TestCase
     {
         Database::statement('drop table if exists pet_with_masters');
         Database::statement('drop table if exists pet_masters');
-    }
-
-    public function test_get_the_relationship()
-    {
-        $pet = PetWithMasterModelStub::find(1);
-
-        $master = $pet->master;
-
-        $this->assertInstanceOf(PetMasterModelStub::class, $master);
-        $this->assertEquals('didi', $master->name);
     }
 
     private static function configureDatabase()

@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Database;
+namespace Bow\Tests\Database\Query;
 
 use Bow\Database\Database;
 use Bow\Database\QueryBuilder;
