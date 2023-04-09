@@ -2,9 +2,8 @@
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Cache\Cache;
-use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
+use Bow\Database\Barry\Model;
 
 class BelongsToMany extends Relation
 {
@@ -45,22 +44,8 @@ class BelongsToMany extends Relation
      */
     public function getResults()
     {
-        $key = $this->query->getTable() . "_" . $this->local_key;
-        $cache = Cache::get($key);
-
-        if (!is_null($cache)) {
-            $related = new $this->related;
-            $related->setAttributes($cache);
-            return $related;
-        }
-
-        $result = $this->query->first();
-
-        if (!is_null($result)) {
-            Cache::add($key, $result->toArray());
-        }
-
-        return $result;
+        // TODO: Cache the result
+        return $this->query->get();
     }
 
     /**
