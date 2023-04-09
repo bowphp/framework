@@ -73,6 +73,36 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test Rename column action
+     */
+    public function test_add_column_with_after_sql_statement()
+    {
+        $this->generator->addColumn('lastname', 'string', ['after' => 'firstname']);
+        $sql = $this->generator->make();
+        $this->assertEquals($sql, '`lastname` STRING NOT NULL AFTER `fullname`');
+    }
+
+    /**
+     * Test Rename column action
+     */
+    public function test_change_column_with_after_sql_statement()
+    {
+        $this->generator->addColumn('lastname', 'string', ['after' => 'firstname']);
+        $sql = $this->generator->make();
+        $this->assertEquals($sql, 'MODIFY `lastname` STRING NOT NULL AFTER `fullname`');
+    }
+
+    /**
+     * Test Rename column action
+     */
+    public function test_change_column_with_first_sql_statement()
+    {
+        $this->generator->addColumn('lastname', 'string', ['first' => true]);
+        $sql = $this->generator->make();
+        $this->assertEquals($sql, 'MODIFY `lastname` STRING NOT NULL AFTER `fullname`');
+    }
+
+    /**
      * Test Add column action
      */
     public function test_should_create_drop_column_sql_statement()

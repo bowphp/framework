@@ -391,7 +391,7 @@ class SQLGenerator
         $check = $attributes['check'] ?? false;
         $unsigned = $attributes['unsigned'] ?? false;
         $after = $attributes['after'] ?? false;
-        $first = isset($attributes['first']);
+        $first = $attributes['first'] ?? false;
 
         // String to VARCHAR
         if ($type == 'STRING') {
@@ -457,7 +457,7 @@ class SQLGenerator
             $type = sprintf('%s AFTER %s', $type, $after);
         }
 
-        if ($first) {
+        if ($first === true) {
             $type = sprintf('%s FIRST', $type);
         }
 
