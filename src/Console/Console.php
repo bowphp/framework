@@ -269,19 +269,24 @@ class Console
      * @param string $command
      * @return mixed
      */
-    private function executeCustomCommand(string $command)
+    private function executeCustomCommand(string $command): mixed
     {
         try {
             $classname = static::$registers[$command];
 
             if (is_callable($classname)) {
-                return $classname($this->arg);
+                return $classname($this->arg, $this->setting);
             }
 
+            // Create the command instance
             $instance = new $classname($this->setting, $this->arg);
 
             return call_user_func_array([$instance, "process"], []);
         } catch (\Exception $exception) {
+            if (php_sapi_name() !== "cli") {
+                throw $exception;
+            }
+
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
 
