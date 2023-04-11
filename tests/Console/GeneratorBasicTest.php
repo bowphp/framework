@@ -1,5 +1,7 @@
 <?php
 
+namespace Bow\Tests\Console;
+
 use Bow\Console\Generator;
 
 class GeneratorBasicTest extends \PHPUnit\Framework\TestCase
