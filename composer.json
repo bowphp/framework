@@ -9,7 +9,7 @@
     },
     "require": {
         "php": "^8.1",
-        "bowphp/tintin": "3.x-dev",
+        "bowphp/tintin": "^3.x-dev",
         "filp/whoops": "^2.1",
         "nesbot/carbon": "^2.16",
         "psy/psysh": "v0.10.*",
