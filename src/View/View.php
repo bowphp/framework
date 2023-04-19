@@ -51,6 +51,13 @@ class View implements ResponseInterface
     ];
 
     /**
+     * The cachabled flash for twig
+     *
+     * @var boolean
+     */
+    private bool $cachabled = false;
+
+    /**
      * View constructor.
      *
      * @param  array $config
