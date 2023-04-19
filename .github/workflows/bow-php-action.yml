@@ -1,4 +1,4 @@
-name: bowphp-ci
+name: bowphp
 
 on: [ push, pull_request ]
 

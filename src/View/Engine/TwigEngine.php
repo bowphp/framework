@@ -82,7 +82,7 @@ class TwigEngine extends EngineAbstract
      *
      * @return \Twig\Environment
      */
-    public function getTemplate(): \Twig\Environment
+    public function getEngine(): \Twig\Environment
     {
         return $this->template;
     }
