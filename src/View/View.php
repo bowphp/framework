@@ -158,6 +158,17 @@ class View implements ResponseInterface
     }
 
     /**
+     * Set the availability of caching system
+     *
+     * @param bool $cachabled
+     * @return void
+     */
+    public function cachable(bool $cachabled): void
+    {
+        $this->cachabled = $cachabled;
+    }
+
+    /**
      * @param string $extension
      * @return View
      */
