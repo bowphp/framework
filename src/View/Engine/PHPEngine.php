@@ -6,6 +6,7 @@ namespace Bow\View\Engine;
 
 use Bow\Configuration\Loader;
 use Bow\View\EngineAbstract;
+use RuntimeException;
 
 class PHPEngine extends EngineAbstract
 {
@@ -20,7 +21,6 @@ class PHPEngine extends EngineAbstract
      * PHPEngine constructor.
      *
      * @param array $config
-     *
      * @return void
      */
     public function __construct(array $config)
@@ -29,7 +29,15 @@ class PHPEngine extends EngineAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
+     */
+    public function getEngine(): mixed
+    {
+        throw new RuntimeException("This mothod cannot work for PHP native engine");
+    }
+
+    /**
+     * @inheritdoc
      */
     public function render(string $filename, array $data = []): string
     {
@@ -42,7 +50,6 @@ class PHPEngine extends EngineAbstract
         }
 
         $cache_hash_filename = '_PHP_' . md5($hash_filename) . '.php';
-
         $cache_hash_filename = $this->config['cache'] . '/' . $cache_hash_filename;
 
         extract($data);
