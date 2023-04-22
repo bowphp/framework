@@ -239,14 +239,12 @@ class Response implements ResponseInterface
      *
      * @param string $file
      * @param null   $filename
-     * @param string $disposition
      * @param array  $headers
      * @return string
      */
     public function download(
         string $file,
         ?string $filename = null,
-        string $disposition = 'attachment',
         array $headers = []
     ): string {
         $type = mime_content_type($file);
@@ -254,6 +252,8 @@ class Response implements ResponseInterface
         if (is_null($filename)) {
             $filename = basename($file);
         }
+
+        $disposition = $headers["disposition"] ?? 'attachment';
 
         $this->addHeader('Content-Disposition', $disposition . '; filename=' . $filename);
         $this->addHeader('Content-Type', $type);

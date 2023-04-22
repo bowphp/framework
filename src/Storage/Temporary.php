@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Storage;
 
 use Bow\Storage\Exception\ResourceException;
-use resource;
 
 class Temporary
 {

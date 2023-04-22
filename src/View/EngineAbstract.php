@@ -86,7 +86,6 @@ abstract class EngineAbstract
      *
      * @param  string $filename
      * @param  bool   $extended
-     *
      * @return string
      * @throws ViewException
      */

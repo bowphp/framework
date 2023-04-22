@@ -42,13 +42,6 @@ class FTPService implements ServiceInterface
     private bool $use_passive_mode = true;
 
     /**
-     * Root folder absolute path.
-     *
-     * @var string
-     */
-    private string $base_directory;
-
-    /**
      * The FTPService Instance
      *
      * @var FTPService

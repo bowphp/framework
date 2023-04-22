@@ -11,7 +11,7 @@ class Env
      *
      * @var array
      */
-    private static ?array $env = null;
+    private static bool $loaded = false;
 
     /**
      * Check if env is load
@@ -20,7 +20,7 @@ class Env
      */
     public static function isLoaded()
     {
-        return static::$env !== null;
+        return static::$loaded;
     }
 
     /**
@@ -32,7 +32,7 @@ class Env
      */
     public static function load(string $filename)
     {
-        if (static::$env != null) {
+        if (static::$loaded) {
             return;
         }
 
@@ -45,7 +45,12 @@ class Env
         // Get the env file content
         $content = file_get_contents($filename);
 
-        static::$env = json_decode(trim($content), true);
+        $envs = json_decode(trim($content), true);
+
+        foreach ($envs as $key => $value) {
+            $key = Str::upper(trim($key));
+            putenv($key . '=' . $value);
+        }
 
         if (json_last_error() == JSON_ERROR_SYNTAX) {
             throw new \ErrorException(json_last_error_msg());
@@ -58,6 +63,8 @@ class Env
         if (json_last_error() != JSON_ERROR_NONE) {
             throw new \ErrorException(json_last_error_msg());
         }
+
+        static::$loaded = true;
     }
 
     /**
@@ -67,15 +74,17 @@ class Env
      * @param  mixed $default
      * @return mixed
      */
-    public static function get(string $key, mixed $default = null)
+    public static function get(string $key, mixed $default = null): mixed
     {
-        $value = getenv(Str::upper($key));
+        $key = Str::upper(trim($key));
 
-        if (is_string($value)) {
-            return $value;
+        $value = getenv($key);
+
+        if ($value === false) {
+            return $default;
         }
 
-        return static::$env[$key] ?? $default;
+        return $value;
     }
 
     /**
@@ -87,11 +96,8 @@ class Env
      */
     public static function set(string $key, mixed $value): bool
     {
-        if (isset(static::$env[$key])) {
-            static::$env[$key] = $value;
-            return true;
-        }
+        $key = Str::upper(trim($key));
 
-        return putenv(Str::upper($key) . '=' . $value);
+        return putenv($key . '=' . $value);
     }
 }
