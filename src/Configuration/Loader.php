@@ -43,6 +43,11 @@ class Loader implements \ArrayAccess
     private array $namespaces = [];
 
     /**
+     * @var array
+     */
+    private array $events = [];
+
+    /**
      * @var bool
      */
     private bool $without_session = false;
@@ -261,8 +266,10 @@ class Loader implements \ArrayAccess
             return $this;
         }
 
-        $services = $this->configurations();
-        $services[] = \Bow\Container\ContainerConfiguration::class;
+        $services = array_merge(
+            [\Bow\Container\ContainerConfiguration::class],
+            $this->configurations(),
+        );
 
         $service_collection = [];
 
