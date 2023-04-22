@@ -21,6 +21,8 @@ class SeederCommand extends AbstractCommand
      */
     public function generate(string $seeder): void
     {
+        $seeder = Str::plurial($seeder);
+
         $generator = new Generator(
             $this->setting->getSeederDirectory(),
             "{$seeder}_seeder"
@@ -32,13 +34,7 @@ class SeederCommand extends AbstractCommand
             exit(1);
         }
 
-        // Get the number of execution
-        $num = (int) $this->arg->getParameters()->get('--seed', 5);
-
-        $generator->write('seeder', [
-            'num' => $num,
-            'name' => Str::plurial($seeder)
-        ]);
+        $generator->write('seeder', ['name' => $seeder]);
 
         echo "\033[0;32mThe seeder has been created.\033[00m\n";
 
@@ -105,6 +101,13 @@ class SeederCommand extends AbstractCommand
             $connection = Database::connection($connection);
 
             foreach ($seed_collection as $table => $seed) {
+                if (class_exists($table, true)) {
+                    $instance = app($table);
+                    if ($instance instanceof \Bow\Database\Barry\Model) {
+                        $table = $instance->getTable();
+                    }
+                }
+
                 $result = $connection->table($table)->insert($seed);
 
                 echo Color::green("$result seed" . ($result > 1 ? 's' : '') . " on $table table\n");

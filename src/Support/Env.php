@@ -11,7 +11,7 @@ class Env
      *
      * @var array
      */
-    private static ?array $env = null;
+    private static ?array $envs = null;
 
     /**
      * Check if env is load
@@ -20,7 +20,7 @@ class Env
      */
     public static function isLoaded()
     {
-        return static::$env !== null;
+        return static::$envs !== null;
     }
 
     /**
@@ -32,7 +32,7 @@ class Env
      */
     public static function load(string $filename)
     {
-        if (static::$env != null) {
+        if (static::$envs != null) {
             return;
         }
 
@@ -45,7 +45,11 @@ class Env
         // Get the env file content
         $content = file_get_contents($filename);
 
-        static::$env = json_decode(trim($content), true);
+        static::$envs = json_decode(trim($content), true);
+
+        foreach (static::$envs as $key => $value) {
+            putenv(Str::upper($key) . '=' . $value);
+        }
 
         if (json_last_error() == JSON_ERROR_SYNTAX) {
             throw new \ErrorException(json_last_error_msg());
@@ -67,7 +71,7 @@ class Env
      * @param  mixed $default
      * @return mixed
      */
-    public static function get(string $key, mixed $default = null)
+    public static function get(string $key, mixed $default = null): mixed
     {
         $value = getenv(Str::upper($key));
 
@@ -75,7 +79,7 @@ class Env
             return $value;
         }
 
-        return static::$env[$key] ?? $default;
+        return static::$envs[$key] ?? $default;
     }
 
     /**
@@ -87,11 +91,11 @@ class Env
      */
     public static function set(string $key, mixed $value): bool
     {
-        if (isset(static::$env[$key])) {
-            static::$env[$key] = $value;
+        if (isset(static::$envs[$key])) {
+            static::$envs[$key] = $value;
             return true;
         }
 
-        return putenv(Str::upper($key) . '=' . $value);
+        return putenv(Str::upper(trim($key)) . '=' . $value);
     }
 }
