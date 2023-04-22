@@ -43,11 +43,6 @@ class Loader implements \ArrayAccess
     private array $namespaces = [];
 
     /**
-     * @var array
-     */
-    private array $events = [];
-
-    /**
      * @var bool
      */
     private bool $without_session = false;
