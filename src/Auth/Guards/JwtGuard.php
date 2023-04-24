@@ -86,11 +86,11 @@ class JwtGuard extends GuardContract
 
         $policier = $this->getPolicier();
 
-        if (!$policier->verify($this->token)) {
+        if (!$policier->verify($this->token->getValue())) {
             return false;
         }
 
-        if ($policier->isExpired($this->token)) {
+        if ($policier->isExpired($this->token->getValue())) {
             return false;
         }
 
@@ -122,15 +122,13 @@ class JwtGuard extends GuardContract
             );
         }
 
-        $token = $this->getPolicier()->decode($this->token);
-
-        if (!($token->has('id') && $token->has('logged'))) {
+        if (!($this->token->has('id') && $this->token->has('logged'))) {
             throw new AuthenticationException('The token payload malformed.');
         }
 
         $user = new $this->provider['model']();
 
-        return $this->getUserBy($user->getKey(), $token->get("id"));
+        return $this->getUserBy($user->getKey(), $this->token->get("id"));
     }
 
     /**
@@ -151,7 +149,7 @@ class JwtGuard extends GuardContract
      */
     public function login(Authentication $user): bool
     {
-        $this->token = (string) $this->getPolicier()->encode($user->getAuthenticateUserId(), [
+        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), [
             "id" => $user->getAuthenticateUserId(),
             "logged" => true
         ]);

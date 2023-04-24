@@ -11,8 +11,6 @@ use Bow\Auth\Exception\AuthenticationException;
 use Bow\Auth\Guards\JwtGuard;
 use Bow\Auth\Guards\SessionGuard;
 use Bow\Auth\Guards\GuardContract;
-use Bow\Security\CryptoConfiguration;
-use Bow\Session\SessionConfiguration;
 use Bow\Tests\Auth\Stubs\UserModelStub;
 use Policier\Bow\PolicierConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -52,6 +50,18 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(GuardContract::class, $auth);
     }
 
+    public function test_it_should_be_session_guard_instance()
+    {
+        $auth = Auth::guard('web');
+        $this->assertInstanceOf(SessionGuard::class, $auth);
+    }
+
+    public function test_it_should_be_session_jwt_instance()
+    {
+        $auth = Auth::guard('api');
+        $this->assertInstanceOf(JwtGuard::class, $auth);
+    }
+
     public function test_it_should_be_a_default_guard()
     {
         $config = TestingConfiguration::getConfig();
@@ -59,20 +69,6 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals($auth->getName(), $config["auth"]["default"]);
         $this->assertEquals($auth->getName(), "web");
-    }
-
-    public function test_it_should_be_session_guard_instance()
-    {
-        $auth = Auth::guard('web');
-
-        $this->assertInstanceOf(SessionGuard::class, $auth);
-    }
-
-    public function test_it_should_be_session_jwt_instance()
-    {
-        $auth = Auth::guard('api');
-
-        $this->assertInstanceOf(JwtGuard::class, $auth);
     }
 
     public function test_fail_get_user_id_with_jwt()
@@ -92,13 +88,12 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     public function test_attempt_login_with_jwt_provider()
     {
         $auth = Auth::guard('api');
-
         $result = $auth->attempts([
             "username" => "papac",
             "password" => "password"
         ]);
 
-        $token = $auth->getToken();
+        $token = (string) $auth->getToken();
         $user = $auth->user();
 
         $this->assertTrue($result);
@@ -113,7 +108,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $auth = Auth::guard('api');
         $auth->login(UserModelStub::first());
 
-        $token = $auth->getToken();
+        $token = (string) $auth->getToken();
         $user = $auth->user();
 
         $this->assertTrue($auth->check());
@@ -125,22 +120,6 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     public function test_attempt_login_with_jwt_provider_fail()
     {
         $auth = Auth::guard('api');
-
-        $result = $auth->attempts([
-            "username" => "papac",
-            "password" => "passwor"
-        ]);
-
-        $this->assertFalse($result);
-        $this->assertFalse($auth->check());
-        $this->assertFalse($auth->check());
-        $this->assertNull($auth->getToken());
-    }
-
-    public function test_direct_login_with_jwt_provider_fail()
-    {
-        $auth = Auth::guard('api');
-
         $result = $auth->attempts([
             "username" => "papac",
             "password" => "passwor"
@@ -155,7 +134,6 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(AuthenticationException::class);
         $auth = Auth::guard('web');
-
         $auth->attempts([
             "username" => "papac",
             "password" => "password"
@@ -168,7 +146,6 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $auth = Auth::guard('web');
 
         $auth->login(UserModelStub::first());
-
         $user = $auth->user();
 
         $this->assertInstanceOf(Authentication::class, $user);
