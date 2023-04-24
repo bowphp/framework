@@ -17,6 +17,8 @@ class GenerateKeyCommand extends AbstractCommand
 
         file_put_contents($this->setting->getConfigDirectory() . "/.key", $key);
 
+        config('app.env');
+
         echo "Application key => \033[0;32m$key\033[00m\n";
 
         exit;

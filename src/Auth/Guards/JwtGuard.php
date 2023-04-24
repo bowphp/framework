@@ -10,6 +10,7 @@ use Bow\Auth\Authentication;
 use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Auth\Exception\AuthenticationException;
+use Policier\Token;
 
 class JwtGuard extends GuardContract
 {
@@ -25,9 +26,9 @@ class JwtGuard extends GuardContract
     /**
      * Defines token data
      *
-     * @var string
+     * @var Token
      */
-    private ?string $token = null;
+    private ?Token $token = null;
 
     /**
      * JwtGuard constructor.
@@ -63,12 +64,13 @@ class JwtGuard extends GuardContract
         $fields = $this->provider['credentials'];
         $password = $credentials[$fields['password']];
 
-        if (Hash::check($password, $user->{$fields['password']})) {
-            $this->login($user);
-            return true;
+        if (!Hash::check($password, $user->{$fields['password']})) {
+            return false;
         }
 
-        return false;
+        $this->login($user);
+
+        return true;
     }
 
     /**
@@ -114,31 +116,29 @@ class JwtGuard extends GuardContract
      */
     public function user(): Authentication
     {
-        if (is_null($this->token)) {
-            if (!$this->check()) {
-                throw new AuthenticationException(
-                    'The token is undefined please generate some one when your log user.'
-                );
-            }
+        if (!$this->check()) {
+            throw new AuthenticationException(
+                'Token is not set, please generate one when user is logged in.'
+            );
         }
 
-        $result = $this->getPolicier()->decode($this->token);
+        $token = $this->getPolicier()->decode($this->token);
 
-        if (!isset($result['claims']['id'], $result['claims']['logged'])) {
+        if (!($token->has('id') && $token->has('logged'))) {
             throw new AuthenticationException('The token payload malformed.');
         }
 
         $user = new $this->provider['model']();
 
-        return $this->getUserBy($user->getKey(), $result['claims']['id']);
+        return $this->getUserBy($user->getKey(), $token->get("id"));
     }
 
     /**
      * Get the generated token
      *
-     * @return ?string
+     * @return Token
      */
-    public function getToken(): ?string
+    public function getToken(): Token
     {
         return $this->token;
     }
@@ -180,9 +180,9 @@ class JwtGuard extends GuardContract
             throw new AuthenticationException("No user is logged in for get his id");
         }
 
-        $result = $this->getPolicier()->decode($this->token);
+        $token = $this->getPolicier()->decode($this->token);
 
-        return $result['claims']['id'];
+        return $token->get('id');
     }
 
     /**
@@ -193,7 +193,7 @@ class JwtGuard extends GuardContract
     private function getPolicier()
     {
         if (!class_exists(Policier::class)) {
-            throw new \Exception('Please install: composer require bowphp/policier');
+            throw new \Exception('Please install bowphp/policier: composer require bowphp/policier');
         }
 
         $policier = Policier::getInstance();
@@ -204,10 +204,8 @@ class JwtGuard extends GuardContract
 
         $config = (array) config('policier');
 
-        if (count($config) > 0 && (is_null($config['keychain']['private']) || is_null($config['keychain']['public']))) {
-            if (is_null($config['signkey'])) {
-                $policier->setConfig(['signkey' => file_get_contents(config('security.key'))]);
-            }
+        if (!isset($config['signkey']) || is_null($config['signkey'])) {
+            throw new \Exception('Please set the signkey.');
         }
 
         return $policier;
