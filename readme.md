@@ -4,7 +4,7 @@
 <a href="https://packagist.org/packages/bowphp/framework" title="version"><img src="https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square"/></a>
 <a href="https://github.com/bowphp/framework/blob/master/LICENSE" title="license"><img src="https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square"/></a>
 
-For use this package, please create an application from this package [bowphp/app](https://github.com/bowphp/app)
+To use this package, please create an application from this package [bowphp/app](https://github.com/bowphp/app)
 
 ## The Framework Main Feature
 
@@ -20,15 +20,15 @@ For use this package, please create an application from this package [bowphp/app
 - File Uploading Class
 - Pagination
 - CQRS helpful implementation
-- File System Management with many driver like S3 and FTP (Support connection switch)
-- Extensible with External package which can plug-in
+- File System Management with many drivers like S3 and FTP (Support connection switch)
+- Extensible with an external package that can plug-in
 - Application logs Management
 - Database Connection (MySQL and SQLite)
-- Simplest ORM which name Barry
+- Simplest ORM which names Barry
 - Cache support (Only filesystem caching)
 - Event Management (Interpage Event)
 - Emailing (SMTP, SES, Native PHP mail supports)
-- Task runner (Which help you to generate the controller and match more)
+- Task runner (Which helps you to generate the controller and match more)
 - Unit Testing Support
 - View Rendering with [bowphp/tintin](https://github.com/bowphp/tintin) package (Tintin is the very small php template)
 - Very easy Translate Management
