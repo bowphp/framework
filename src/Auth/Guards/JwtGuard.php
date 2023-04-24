@@ -136,9 +136,9 @@ class JwtGuard extends GuardContract
     /**
      * Get the generated token
      *
-     * @return Token
+     * @return ?Token
      */
-    public function getToken(): Token
+    public function getToken(): ?Token
     {
         return $this->token;
     }
