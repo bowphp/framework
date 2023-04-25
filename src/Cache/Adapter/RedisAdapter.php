@@ -33,13 +33,19 @@ class RedisAdapter implements CacheAdapterInterface
     {
         $options = [];
 
+        if (is_callable($data)) {
+            $content = $data();
+        } else {
+            $content = $data;
+        }
+
         if (!is_null($time)) {
             $options = [
                 'EX' => $time
             ];
         }
 
-        return $this->redis->set($key, serialize($data), $options);
+        return $this->redis->set($key, serialize($content), $options);
     }
 
     /**
