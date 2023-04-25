@@ -3,16 +3,16 @@
 namespace Bow\Tests\Cache;
 
 use Bow\Cache\Cache;
+use Bow\Tests\Config\TestingConfiguration;
 
 class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
-
-        Cache::confirgure(sprintf("%s/bowphp_cache_testing", sys_get_temp_dir()));
+        $config = TestingConfiguration::getConfig();
+        Cache::confirgure($config["cache"]);
     }
-
 
     public function test_create_cache()
     {

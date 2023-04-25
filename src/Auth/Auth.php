@@ -40,6 +40,10 @@ class Auth
      */
     public static function configure(array $config)
     {
+        if (!is_null(static::$instance)) {
+            return static::$instance;
+        }
+
         static::$config = $config;
 
         return static::guard($config['default']);
