@@ -24,17 +24,14 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
-        TestingConfiguration::withConfiguations([
-            AuthenticationConfiguration::class,
-            PolicierConfiguration::class,
-            DatabaseConfiguration::class
-        ]);
+        KernelTesting::$configurations = [AuthenticationConfiguration::class, PolicierConfiguration::class];
         $kernel = TestingConfiguration::getConfig();
         $kernel->boot();
-
+    
         Auth::configure($kernel["auth"]);
 
         // Configuration database
+        Database::configure($kernel['database']);
         Database::statement("create table if not exists users (id int primary key auto_increment, name varchar(255), password varchar(255), username varchar(255))");
         Database::table('users')->insert([
             'name' => 'Franck',
