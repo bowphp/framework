@@ -7,7 +7,7 @@ use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Container\Capsule;
 use Bow\Application\Application;
-use Bow\Tests\Config\KernelTesting;
+use Bow\Testing\KernelTesting;
 use Bow\Router\Exception\RouterException;
 use Bow\Tests\Config\TestingConfiguration;
 

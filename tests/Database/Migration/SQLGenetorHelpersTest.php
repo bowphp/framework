@@ -50,7 +50,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
     public function test_add_int_sql_statement(string $type, string $method, int|string $default = 1)
     {
         $type = strtoupper($type);
-    
+
         $sql = $this->generator->{"add$method"}('column')->make();
         $this->assertEquals($sql, "`column` {$type} NOT NULL");
 
