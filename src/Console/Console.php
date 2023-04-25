@@ -409,7 +409,7 @@ class Console
     {
         $action = $this->arg->getAction();
 
-        if (!in_array($action, ['key', 'resource', 'session'])) {
+        if (!in_array($action, ['key', 'resource', 'session', 'cache'])) {
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
@@ -464,6 +464,7 @@ Bow task runner usage: php bow command:action [name] --option
  \033[0;32mGENERATE\033[00m create a new app key and resources
    \033[0;33mgenerate:resource\033[00m   Create new REST controller
    \033[0;33mgenerate:session\033[00m    For generate session table
+   \033[0;33mgenerate:cache\033[00m      For generate cache table
    \033[0;33mgenerate:key\033[00m        Create new app key
 
  \033[0;32mADD\033[00m Create a user class

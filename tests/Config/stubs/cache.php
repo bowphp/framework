@@ -9,6 +9,12 @@ return [
             "path" => TESTING_RESOURCE_BASE_DIRECTORY
         ],
 
+        "database" => [
+            "driver" => "database",
+            "connection" => "mysql",
+            "table" => "caches",
+        ],
+
         "redis" => [
             'driver' => 'redis',
             'url' => app_env('REDIS_URL'),
