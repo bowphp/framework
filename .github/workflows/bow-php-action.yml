@@ -42,6 +42,7 @@ jobs:
 
       - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
       - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
+      - run: docker run -p 6379:6379 -d --name redis redis
       - run: docker run -d -p 11301:11300 schickling/beanstalkd
 
       - name: Cache Composer packages
