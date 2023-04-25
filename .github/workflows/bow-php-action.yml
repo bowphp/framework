@@ -31,7 +31,7 @@ jobs:
           collation server: 'utf8mb4_general_ci'
           mysql version: '5.7'
           mysql database: 'test_db'
-          mysql root password: 'secret'
+          mysql root password: 'password'
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

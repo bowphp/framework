@@ -7,10 +7,13 @@ use Bow\Security\Hash;
 use Bow\Container\Capsule;
 use Bow\Database\Database;
 use Bow\Auth\Authentication;
+use Bow\Auth\AuthenticationConfiguration;
 use Bow\Auth\Exception\AuthenticationException;
 use Bow\Auth\Guards\JwtGuard;
 use Bow\Auth\Guards\SessionGuard;
 use Bow\Auth\Guards\GuardContract;
+use Bow\Database\DatabaseConfiguration;
+use Bow\Testing\KernelTesting;
 use Bow\Tests\Auth\Stubs\UserModelStub;
 use Policier\Bow\PolicierConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -21,22 +24,19 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $config = TestingConfiguration::getConfig();
-        Auth::configure($config["auth"]);
+        KernelTesting::$configurations = [AuthenticationConfiguration::class, PolicierConfiguration::class, DatabaseConfiguration::class];
+        $kernel = TestingConfiguration::getConfig();
+        $kernel->boot();
+    
+        Auth::configure($kernel["auth"]);
 
         // Configuration database
-        Database::configure($config['database']);
         Database::statement("create table if not exists users (id int primary key auto_increment, name varchar(255), password varchar(255), username varchar(255))");
         Database::table('users')->insert([
             'name' => 'Franck',
             'password' => Hash::make("password"),
             'username' => 'papac'
         ]);
-
-        // Configuration of policier package
-        $policier = new PolicierConfiguration(Capsule::getInstance());
-        $policier->create($config);
-        $policier->run();
     }
 
     public static function tearDownAfterClass(): void
@@ -64,9 +64,11 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public function test_it_should_be_a_default_guard()
     {
+        KernelTesting::$configurations = [AuthenticationConfiguration::class,];
         $config = TestingConfiguration::getConfig();
-        $auth = Auth::getInstance();
+        $config->boot();
 
+        $auth = Auth::getInstance();
         $this->assertEquals($auth->getName(), $config["auth"]["default"]);
         $this->assertEquals($auth->getName(), "web");
     }
@@ -93,10 +95,11 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
             "password" => "password"
         ]);
 
+        $this->assertTrue($result);
+
         $token = (string) $auth->getToken();
         $user = $auth->user();
 
-        $this->assertTrue($result);
         $this->assertInstanceOf(Authentication::class, $user);
         $this->assertTrue($auth->check());
         $this->assertEquals($auth->id(), $user->id);

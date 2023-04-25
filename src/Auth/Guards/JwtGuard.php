@@ -94,9 +94,7 @@ class JwtGuard extends GuardContract
             return false;
         }
 
-        $user = $this->user();
-
-        return $user !== null;
+        return true;
     }
 
     /**
@@ -172,15 +170,13 @@ class JwtGuard extends GuardContract
      *
      * @return bool
      */
-    public function id(): mixed
+    public function id(): int|string
     {
         if (is_null($this->token)) {
             throw new AuthenticationException("No user is logged in for get his id");
         }
 
-        $token = $this->getPolicier()->decode($this->token);
-
-        return $token->get('id');
+        return $this->token->get('id');
     }
 
     /**
