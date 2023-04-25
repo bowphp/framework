@@ -23,21 +23,6 @@ class ServerCommand extends AbstractCommand
             $settings = '-d ' . $settings;
         }
 
-        // resource.
-        $writing_stream = fopen("php://stdout", "w");
-
-        $message = sprintf(
-            "[%s] Server start at http://%s:%s \033[0;31;7mCTRL-C for shutdown it\033[00m\n",
-            date('F d Y H:i:s a'),
-            $hostname,
-            $port
-        );
-
-        fwrite($writing_stream, $message);
-
-        // Close Open stream
-        fclose($writing_stream);
-
         $filename = $this->setting->getServerFilename();
         $public_directory = $this->setting->getPublicDirectory();
 

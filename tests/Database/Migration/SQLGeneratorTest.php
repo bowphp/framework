@@ -140,7 +140,6 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     public function test_should_create_correct_timestamps_sql_statement()
     {
         $this->generator->setAdapter('sqlite');
-
         $this->generator->addTimestamps();
 
         $sql = $this->generator->make();

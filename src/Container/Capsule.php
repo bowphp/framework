@@ -56,7 +56,7 @@ class Capsule implements ArrayAccess
     /**
      * Get instance of Capsule
      *
-     * @return Capsuleservice
+     * @return Capsule
      */
     public static function getInstance(): Capsule
     {

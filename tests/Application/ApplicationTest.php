@@ -3,13 +3,11 @@
 namespace Bow\Tests\Application;
 
 use Mockery;
-use Bow\View\View;
 use Bow\Http\Request;
-use Bow\Router\Route;
 use Bow\Http\Response;
 use Bow\Container\Capsule;
 use Bow\Application\Application;
-use Bow\Tests\Config\TestingKernel;
+use Bow\Testing\KernelTesting;
 use Bow\Router\Exception\RouterException;
 use Bow\Tests\Config\TestingConfiguration;
 
@@ -72,7 +70,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request->allows()->path()->andReturns("/");
         $request->allows()->get("_method")->andReturns("");
 
-        $config = Mockery::mock(TestingKernel::class);
+        $config = Mockery::mock(KernelTesting::class);
         $config->allows([
             "offsetGet" => ["root" => ""],
             "offsetExists" => true,
@@ -101,7 +99,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request->allows()->path()->andReturns("/");
         $request->allows()->get("_method")->andReturns("");
 
-        $config = Mockery::mock(TestingKernel::class);
+        $config = Mockery::mock(KernelTesting::class);
         $config->allows([
             "offsetGet" => ["root" => ""],
             "offsetExists" => true,
@@ -133,7 +131,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request->allows()->path()->andReturns("/name");
         $request->allows()->get("_method")->andReturns("");
 
-        $config = Mockery::mock(TestingKernel::class);
+        $config = Mockery::mock(KernelTesting::class);
         $config->allows([
             "offsetGet" => ["root" => ""],
             "offsetExists" => true,
