@@ -12,7 +12,7 @@ class S3ServiceTest extends \PHPUnit\Framework\TestCase
     {
         $config = TestingConfiguration::getConfig();
 
-        Storage::configure($config["resource"]);
+        Storage::configure($config["storage"]);
     }
 
     // TODO: Make test for s3 service

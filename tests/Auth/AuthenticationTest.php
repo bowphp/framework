@@ -5,17 +5,12 @@ namespace Bow\Tests\Auth;
 use Bow\Auth\Auth;
 use Bow\Security\Hash;
 use Policier\Policier;
-use Bow\Container\Capsule;
 use Bow\Database\Database;
 use Bow\Auth\Authentication;
 use Bow\Auth\Guards\JwtGuard;
-use Bow\Testing\KernelTesting;
 use Bow\Auth\Guards\SessionGuard;
 use Bow\Auth\Guards\GuardContract;
-use Bow\Database\DatabaseConfiguration;
 use Bow\Tests\Auth\Stubs\UserModelStub;
-use Policier\Bow\PolicierConfiguration;
-use Bow\Auth\AuthenticationConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Auth\Exception\AuthenticationException;
 

@@ -1,10 +1,11 @@
 <?php
 
-/**
- * Fichier de configuration de la classe réssource
- */
-
 return [
+    /**
+     * Repertoire de log
+     */
+    'log' => TESTING_RESOURCE_BASE_DIRECTORY,
+
     /**
      * Store location
      */
@@ -45,15 +46,4 @@ return [
             'version' => 'latest'
         ]
     ],
-
-
-    /**
-     * Repertoire de log
-     */
-    'log' => TESTING_RESOURCE_BASE_DIRECTORY,
-
-    /**
-     * Repertoure de cache
-     */
-    'cache' => TESTING_RESOURCE_BASE_DIRECTORY,
 ];

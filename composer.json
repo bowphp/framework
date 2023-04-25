@@ -22,7 +22,8 @@
         "ext-xml": "*",
         "ext-json": "*",
         "ext-pdo_mysql": "*",
-        "ext-pdo_sqlite": "*"
+        "ext-pdo_sqlite": "*",
+        "ext-redis": "*"
     },
     "require-dev": {
         "pda/pheanstalk": "^4.0",
@@ -35,7 +36,8 @@
         "php-amqplib/php-amqplib": "^3.0",
         "bowphp/policier": "dev-master",
         "mockery/mockery": "^1.5",
-        "spatie/phpunit-snapshot-assertions": "^4.2"
+        "spatie/phpunit-snapshot-assertions": "^4.2",
+        "predis/predis": "^2.1"
     },
     "authors": [
         {

@@ -5,13 +5,14 @@ namespace Bow\Tests\Cache;
 use Bow\Cache\Cache;
 use Bow\Tests\Config\TestingConfiguration;
 
-class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
+class CacheRedisTest extends \PHPUnit\Framework\TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
         $config = TestingConfiguration::getConfig();
         Cache::confirgure($config["cache"]);
+        Cache::cache("redis");
     }
 
     public function test_create_cache()
@@ -74,8 +75,6 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_forget()
     {
-        Cache::forget('address');
-
         $result = Cache::forget('name');
 
         $this->assertEquals(true, $result);
@@ -93,14 +92,14 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
     {
         $result = Cache::timeOf('lastname');
 
-        $this->assertEquals('+', $result);
+        $this->assertEquals($result, -1);
     }
 
     public function test_time_of_empty_2()
     {
         $result = Cache::timeOf('address');
 
-        $this->assertEquals(false, $result);
+        $this->assertEquals($result, -1);
     }
 
     public function test_time_of_empty_3()

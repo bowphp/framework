@@ -17,7 +17,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     {
         $config = TestingConfiguration::getConfig();
 
-        Storage::configure($config["resource"]);
+        Storage::configure($config["storage"]);
     }
 
     protected function setUp(): void
@@ -40,7 +40,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     {
         $config = TestingConfiguration::getConfig();
         $current_directory = $this->ftp_service->getCurrentDirectory();
-        $root_folder = $config['resource']['services']['ftp']['root'];
+        $root_folder = $config['storage']['services']['ftp']['root'];
 
         $this->assertEquals($current_directory, trim($root_folder, '/'));
     }

@@ -5,340 +5,91 @@ declare(strict_types=1);
 namespace Bow\Cache;
 
 use BadMethodCallException;
-use Bow\Support\Str;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use Bow\Cache\Adapter\RedisAdapter;
+use Bow\Cache\Adapter\FilesystemAdapter;
+use Bow\Cache\Adapter\CacheAdapterInterface;
+use ErrorException;
+use InvalidArgumentException;
 
 class Cache
 {
     /**
-     * The cache directory
-     *
-     * @var string
-     */
-    private static ?string $directory = null;
-
-    /**
      * The meta data
      *
-     * @var bool
+     * @var ?CacheAdapterInterface
      */
-    private static bool $with_meta = false;
+    private static ?CacheAdapterInterface $instance = null;
 
     /**
-     * Cache constructor.
+     * Define the config
      *
-     * @param string $base_directory
-     * @return mixed
+     * @var array
      */
-    public function __construct(string $base_directory)
-    {
-        static::confirgure($base_directory);
-    }
+    private static array $config;
+
+    /**
+     * Define the list of available drivers
+     *
+     * @var array
+     */
+    private static array $adapters = [
+        "file" => FilesystemAdapter::class,
+        "redis" => RedisAdapter::class,
+    ];
 
     /**
      * Cache configuration method
      *
      * @param string $base_directory
      */
-    public static function confirgure(string $base_directory)
+    public static function confirgure(array $config)
     {
-        if (static::$directory === null || static::$directory !== $base_directory) {
-            static::$directory = $base_directory;
+        if (!is_null(static::$instance)) {
+            return static::$instance;
         }
 
-        if (!is_dir($base_directory)) {
-            @mkdir($base_directory, 0777);
+        if (!isset($config["default"])) {
+            throw new InvalidArgumentException("Default store is not define");
         }
+
+        static::$config = $config;
+        $store = (array) $config["stores"][$config["default"]];
+
+        return static::cache($store["driver"]);
     }
 
     /**
-     * Add new enter in the cache system
+     * Get the cache instance
      *
-     * @param string $key
-     * @param mixed $data
-     * @param ?int $time
-     * @return bool
+     * @return CacheAdapterInterface
      */
-    public static function add(string $key, mixed $data, ?int $time = null): bool
+    public static function getInstance(): CacheAdapterInterface
     {
-        if (is_callable($data)) {
-            $content = $data();
-        } else {
-            $content = $data;
+        if (is_null(static::$instance)) {
+            throw new ErrorException("Unable to get cache instance before configuration");
         }
 
-        $meta['__bow_meta'] = ['expire_at' => $time == null ? '+' : $time];
-
-        $meta['content'] = $content;
-
-        return (bool) file_put_contents(
-            static::makeHashFilename($key, true),
-            serialize($meta)
-        );
+        return static::$instance;
     }
 
     /**
-     * Add many item
+     * Get the cache instance
      *
-     * @param array $data
-     * @return bool
+     * @param string $driver
+     * @return CacheAdapterInterface
      */
-    public static function addMany(array $data): bool
+    public static function cache(string $store): CacheAdapterInterface
     {
-        $return = true;
+        $stores = static::$config["stores"];
 
-        foreach ($data as $attribute => $value) {
-            $return = static::add($attribute, $value);
+        if (!isset($stores[$store])) {
+            throw new InvalidArgumentException("The $store store is not define");
         }
 
-        return $return;
-    }
+        $config = $stores[$store];
+        static::$instance = new static::$adapters[$config["driver"]]($config);
 
-    /**
-     * Adds a cache that will persist
-     *
-     * @param  string $key  The cache key
-     * @param  mixed  $data
-     * @return bool
-     */
-    public static function forever(string $key, mixed $data): bool
-    {
-        if (is_callable($data)) {
-            $content = $data();
-        } else {
-            $content = $data;
-        }
-
-        $meta['__bow_meta'] = ['expire_at' => '+'];
-
-        $meta['content'] = $content;
-
-        return (bool) file_put_contents(
-            static::makeHashFilename($key, true),
-            serialize($meta)
-        );
-    }
-
-    /**
-     * Add new enter in the cache system
-     *
-     * @param  string $key  The cache key
-     * @param  mixed  $data
-     * @return bool
-     */
-    public static function push(string $key, array $data): bool
-    {
-        if (is_callable($data)) {
-            $content = $data();
-        } else {
-            $content = $data;
-        }
-
-        static::$with_meta = true;
-
-        $cache = static::get($key);
-
-        static::$with_meta = false;
-
-        if (is_array($cache['content'])) {
-            array_push($cache['content'], $content);
-        } else {
-            $cache['content'] .= $content;
-        }
-
-        return (bool) file_put_contents(
-            static::makeHashFilename($key),
-            serialize($cache)
-        );
-    }
-
-    /**
-     * Retrieve an entry in the cache
-     *
-     * @param  string $key
-     * @param  mixed  $default
-     * @return mixed
-     */
-    public static function get(string $key, mixed $default = null): mixed
-    {
-        if (!static::has($key)) {
-            static::$with_meta = false;
-
-            if (is_callable($default)) {
-                return $default();
-            }
-
-            return $default;
-        }
-
-        $cache = unserialize(file_get_contents(static::makeHashFilename($key)));
-
-        if (!static::$with_meta) {
-            unset($cache['__bow_meta']);
-
-            $cache = $cache['content'];
-        }
-
-        return $cache;
-    }
-
-    /**
-     * Increase the cache expiration time
-     *
-     * @param  string $key
-     * @param  int    $time
-     * @return bool
-     */
-    public static function addTime(string $key, int $time): bool
-    {
-        static::$with_meta = true;
-
-        $cache = static::get($key);
-
-        static::$with_meta = false;
-
-        if ($cache == null) {
-            return false;
-        }
-
-        if ($cache['__bow_meta']['expire_at'] == '+') {
-            $cache['__bow_meta']['expire_at'] = time();
-        }
-
-        $cache['__bow_meta']['expire_at'] += $time;
-
-        return (bool) file_put_contents(
-            static::makeHashFilename($key),
-            serialize($cache)
-        );
-    }
-
-    /**
-     * Retrieves the cache expiration time
-     *
-     * @param  string $key
-     * @return int|bool|string
-     */
-    public static function timeOf(string $key): int|bool|string
-    {
-        static::$with_meta = true;
-
-        $cache = static::get($key);
-
-        static::$with_meta = false;
-
-        if ($cache == null) {
-            return false;
-        }
-
-        return $cache['__bow_meta']['expire_at'];
-    }
-
-    /**
-     * Delete an entry in the cache
-     *
-     * @param  string $key
-     * @return bool
-     */
-    public static function forget(string $key): bool
-    {
-        $filename = static::makeHashFilename($key);
-
-        if (!file_exists($filename)) {
-            return false;
-        }
-
-        $result = (bool) @unlink($filename);
-
-        $parts = explode('/', $filename);
-
-        array_pop($parts);
-
-        $dirname = implode('/', $parts);
-
-        if (is_dir($dirname)) {
-            @rmdir($dirname);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check for an entry in the cache.
-     *
-     * @param  string $key
-     * @return bool
-     */
-    public static function has(string $key): bool
-    {
-        $filename = static::makeHashFilename($key);
-
-        return (bool) @file_exists($filename);
-    }
-
-    /**
-     * Check if the cache has expired
-     *
-     * @param  string $key
-     * @return bool
-     */
-    public static function expired(string $key): bool
-    {
-        static::$with_meta = true;
-
-        $cache = static::get($key);
-
-        if ($cache == null) {
-            return false;
-        }
-
-        static::$with_meta = false;
-
-        return $cache['__bow_meta']['expire_at'] == '+'
-            ? false
-            : (time() > $cache['__bow_meta']['expire_at']);
-    }
-
-    /**
-     * Clear all cache
-     *
-     * @return void
-     */
-    public static function clear(): void
-    {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(static::$directory),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($iterator as $file) {
-            if (! $file->isDir()) {
-                unlink($file->getRealPath());
-            }
-        }
-    }
-
-    /**
-     * Format the file
-     *
-     * @param  string $key
-     * @param  bool  $make_group_directory
-     * @return string
-     */
-    private static function makeHashFilename(string $key, bool $make_group_directory = false): string
-    {
-        $hash = hash('sha256', '/bow_' . $key);
-
-        $group = Str::slice($hash, 0, 2);
-
-        if ($make_group_directory) {
-            if (!is_dir(static::$directory . '/' . $group)) {
-                @mkdir(static::$directory . '/' . $group);
-            }
-        }
-
-        return static::$directory . '/' . $group . '/' . $hash;
+        return static::$instance;
     }
 
     /**
@@ -349,10 +100,10 @@ class Cache
      * @return mixed
      * @throws BadMethodCallException
      */
-    public function __call(string $name, array $arguments)
+    public static function __callStatic(string $name, array $arguments)
     {
-        if (method_exists(static::class, $name)) {
-            return call_user_func_array([static::class, $name], $arguments);
+        if (method_exists(static::$instance, $name)) {
+            return call_user_func_array([static::$instance, $name], $arguments);
         }
 
         throw new BadMethodCallException("The $name method does not exist");
