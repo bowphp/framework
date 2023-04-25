@@ -62,13 +62,21 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     public function test_it_should_be_session_guard_instance()
     {
         $auth = Auth::guard('web');
+        $config = TestingConfiguration::getConfig();
+
         $this->assertInstanceOf(SessionGuard::class, $auth);
+        $this->assertEquals($auth->getName(), $config["auth"]["default"]);
+        $this->assertEquals($auth->getName(), "web");
     }
 
     public function test_it_should_be_session_jwt_instance()
     {
         $auth = Auth::guard('api');
+        $config = TestingConfiguration::getConfig();
+
         $this->assertInstanceOf(JwtGuard::class, $auth);
+        $this->assertNotEquals($auth->getName(), $config["auth"]["default"]);
+        $this->assertEquals($auth->getName(), "api");
     }
 
     public function test_fail_get_user_id_with_jwt()
