@@ -16,17 +16,6 @@ class TestingConfiguration
     }
 
     /**
-     * Set the loading configuration
-     *
-     * @param array $configurations
-     * @return void
-     */
-    public static function withConfiguations(array $configurations): void
-    {
-        KernelTesting::$configurations = $configurations;
-    }
-
-    /**
      * Get the configuration for testing
      *
      * @return ConfigurationLoader

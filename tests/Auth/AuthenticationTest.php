@@ -4,19 +4,20 @@ namespace Bow\Tests\Auth;
 
 use Bow\Auth\Auth;
 use Bow\Security\Hash;
+use Policier\Policier;
 use Bow\Container\Capsule;
 use Bow\Database\Database;
 use Bow\Auth\Authentication;
-use Bow\Auth\AuthenticationConfiguration;
-use Bow\Auth\Exception\AuthenticationException;
 use Bow\Auth\Guards\JwtGuard;
+use Bow\Testing\KernelTesting;
 use Bow\Auth\Guards\SessionGuard;
 use Bow\Auth\Guards\GuardContract;
 use Bow\Database\DatabaseConfiguration;
-use Bow\Testing\KernelTesting;
 use Bow\Tests\Auth\Stubs\UserModelStub;
 use Policier\Bow\PolicierConfiguration;
+use Bow\Auth\AuthenticationConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\Auth\Exception\AuthenticationException;
 
 class AuthenticationTest extends \PHPUnit\Framework\TestCase
 {
@@ -24,25 +25,32 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
-        KernelTesting::$configurations = [AuthenticationConfiguration::class, PolicierConfiguration::class];
-        $kernel = TestingConfiguration::getConfig();
-        $kernel->boot();
-    
-        Auth::configure($kernel["auth"]);
+        $config = TestingConfiguration::getConfig();
+
+        Auth::configure($config["auth"]);
 
         // Configuration database
-        Database::configure($kernel['database']);
+        Database::configure($config["database"]);
         Database::statement("create table if not exists users (id int primary key auto_increment, name varchar(255), password varchar(255), username varchar(255))");
         Database::table('users')->insert([
             'name' => 'Franck',
             'password' => Hash::make("password"),
             'username' => 'papac'
         ]);
+        Policier::configure($config["policier"]);
     }
 
     public static function tearDownAfterClass(): void
     {
         Database::statement("drop table if exists users;");
+    }
+
+    public function test_it_should_be_a_default_guard()
+    {
+        $config = TestingConfiguration::getConfig();
+        $auth = Auth::getInstance();
+        $this->assertEquals($auth->getName(), $config["auth"]["default"]);
+        $this->assertEquals($auth->getName(), "web");
     }
 
     public function test_it_auth_instance()
@@ -61,17 +69,6 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     {
         $auth = Auth::guard('api');
         $this->assertInstanceOf(JwtGuard::class, $auth);
-    }
-
-    public function test_it_should_be_a_default_guard()
-    {
-        KernelTesting::$configurations = [AuthenticationConfiguration::class,];
-        $config = TestingConfiguration::getConfig();
-        $config->boot();
-
-        $auth = Auth::getInstance();
-        $this->assertEquals($auth->getName(), $config["auth"]["default"]);
-        $this->assertEquals($auth->getName(), "web");
     }
 
     public function test_fail_get_user_id_with_jwt()
