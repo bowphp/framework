@@ -147,6 +147,29 @@ trait NumberColumn
     }
 
     /**
+     * Add small integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addSmallInteger(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->addColumn($column, 'smallint', $attribute);
+    }
+
+    /**
+     * Add Smallint integer column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function addSmallIntegerIncrement(string $column): SQLGenerator
+    {
+        return $this->addColumn($column, 'smallint', ['primary' => true, 'increment' => true]);
+    }
+
+    /**
      * Change float column
      *
      * @param string $column
