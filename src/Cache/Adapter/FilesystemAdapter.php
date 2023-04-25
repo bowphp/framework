@@ -208,9 +208,7 @@ class FilesystemAdapter implements CacheAdapterInterface
         }
 
         $result = (bool) @unlink($filename);
-
         $parts = explode('/', $filename);
-
         array_pop($parts);
 
         $dirname = implode('/', $parts);

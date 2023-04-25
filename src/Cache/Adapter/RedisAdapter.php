@@ -39,7 +39,7 @@ class RedisAdapter implements CacheAdapterInterface
             ];
         }
 
-        return $this->redis->set($key, $data, $options);
+        return $this->redis->set($key, serialize($data), $options);
     }
 
     /**
@@ -79,7 +79,11 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        $value = $this->redis->get($key);
+        if (!$this->has($key)) {
+            return is_callable($default) ? $default() : $default;
+        }
+
+        $value = unserialize($this->redis->get($key));
 
         return is_null($value) ? $default : $value;
     }
