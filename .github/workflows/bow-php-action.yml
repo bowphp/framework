@@ -37,7 +37,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
           coverage: none
 
       - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
