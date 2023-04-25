@@ -2,23 +2,17 @@
 
 namespace Bow\Cache\Adapter;
 
+use Redis;
 use Bow\Cache\Adapter\CacheAdapterInterface;
 
 class RedisAdapter implements CacheAdapterInterface
 {
     /**
-     * Define the cache config
+     * Define the php-redis instance
      *
-     * @var array
+     * @var Redis
      */
-    private array $config;
-
-    /**
-     * The meta data
-     *
-     * @var bool
-     */
-    private bool $with_meta = false;
+    private Redis $redis;
 
     /**
      * RedisAdapter constructor.
@@ -28,7 +22,8 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function __construct(array $config)
     {
-        $this->config = $config;
+        $this->redis = new Redis();
+        $this->redis->connect($config["host"], $config["port"]);
     }
 
     /**
@@ -36,7 +31,15 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function add(string $key, mixed $data, ?int $time = null): bool
     {
-        return true;
+        $options = [];
+
+        if (!is_null($time)) {
+            $options = [
+                'EX' => $time
+            ];
+        }
+
+        return $this->redis->set($key, $data, $options);
     }
 
     /**
@@ -44,7 +47,13 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function addMany(array $data): bool
     {
-        return true;
+        $return = true;
+
+        foreach ($data as $attribute => $value) {
+            $return = $this->add($attribute, $value);
+        }
+
+        return $return;
     }
 
     /**
@@ -52,7 +61,9 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function forever(string $key, mixed $data): bool
     {
-        return true;
+        $this->add($key, $data);
+
+        return $this->redis->persist($key);
     }
 
     /**
@@ -60,7 +71,7 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function push(string $key, array $data): bool
     {
-        return true;
+        return $this->redis->append($key, $data);
     }
 
     /**
@@ -68,6 +79,9 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
+        $value = $this->redis->get($key);
+
+        return is_null($value) ? $default : $value;
     }
 
     /**
@@ -75,7 +89,7 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function addTime(string $key, int $time): bool
     {
-        return true;
+        return $this->redis->expire($key, $time);
     }
 
     /**
@@ -83,7 +97,7 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function timeOf(string $key): int|bool|string
     {
-        return true;
+        return $this->redis->ttl($key);
     }
 
     /**
@@ -91,7 +105,7 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function forget(string $key): bool
     {
-        return true;
+        return $this->redis->del($key);
     }
 
     /**
@@ -99,7 +113,7 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function has(string $key): bool
     {
-        return true;
+        return $this->redis->exists($key);
     }
 
     /**
@@ -107,7 +121,7 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function expired(string $key): bool
     {
-        return true;
+        return $this->redis->expire($key);
     }
 
     /**
@@ -115,13 +129,6 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function clear(): void
     {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    private function makeHash(string $key): string
-    {
-        return hash('sha256', $key);
+        $this->redis->flushdb();
     }
 }
