@@ -15,6 +15,17 @@ return [
             'port' => 3306,
             'socket' => null
         ],
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'hostname' => "127.0.0.1",
+            'username' => "postgres",
+            'password' => "postgres",
+            'database' => "postgres",
+            'charset'  => "utf8",
+            'prefix' => app_env('DB_PREFIX', ''),
+            'port' => 5432,
+            'socket' => null
+        ],
         'sqlite' => [
             'driver' => 'sqlite',
             'database' => ':memory:',
