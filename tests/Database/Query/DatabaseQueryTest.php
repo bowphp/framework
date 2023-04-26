@@ -67,7 +67,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     {
         $database = Database::connection($name);
         $this->createTestingTable();
-    
+
         $result = $database->insert("insert into pets values(:id, :name);", [
             "id" => 1,
             'name' => 'Popy'

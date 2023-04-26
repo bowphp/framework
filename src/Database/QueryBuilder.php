@@ -106,6 +106,13 @@ class QueryBuilder implements \JsonSerializable
     protected string $prefix = '';
 
     /**
+     * The adapter name
+     *
+     * @var string
+     */
+    protected string $adapter = '';
+
+    /**
      * QueryBuilder Constructor
      *
      * @param string $table
@@ -114,7 +121,7 @@ class QueryBuilder implements \JsonSerializable
     public function __construct(string $table, PDO $connection)
     {
         $this->connection = $connection;
-
+        $this->adapter = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
         $this->table = $table;
     }
 
@@ -667,7 +674,11 @@ class QueryBuilder implements \JsonSerializable
     {
         // Check the limit value definition
         if (is_null($this->limit) || strlen(trim($this->limit)) === 0) {
-            $this->limit = $offset . ', ';
+            if ($this->adapter === "pgsql") {
+                $this->limit = 'offset ' . $offset;
+            } else {
+                $this->limit = $offset . ', ';
+            }
         }
 
         return $this;
@@ -687,8 +698,10 @@ class QueryBuilder implements \JsonSerializable
             return $this;
         }
 
-        if (preg_match('/^([\d]+),\s$/', $this->limit, $match)) {
-            $this->limit = end($match) . ', ' . $limit;
+        if ($this->adapter === 'pgsql') {
+            $this->limit = $this->limit . ' limit ' . $limit;
+        } elseif (preg_match('/^([\d]+),\s$/', $this->limit, $match)) {
+            $this->limit = 'limit ' . end($match) . ', ' . $limit;
         }
 
         return $this;
@@ -1031,12 +1044,12 @@ class QueryBuilder implements \JsonSerializable
     public function truncate(): bool
     {
         if ($this->connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-            $query = 'delete from `' . $this->table . '`;';
+            $query = 'delete from ' . $this->table . ';';
             if (!$this->connection->inTransaction()) {
                 $query .= ' VACUUM;';
             }
         } else {
-            $query = 'truncate table `' . $this->table . '`;';
+            $query = 'truncate table ' . $this->table . ';';
         }
 
         return (bool) $this->connection->exec($query);
@@ -1273,7 +1286,7 @@ class QueryBuilder implements \JsonSerializable
 
         // Adding the limit clause
         if (!is_null($this->limit)) {
-            $sql .= ' limit ' . $this->limit;
+            $sql .= ' ' . $this->limit;
 
             $this->limit = null;
         }

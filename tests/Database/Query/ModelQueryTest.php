@@ -3,12 +3,15 @@
 namespace Bow\Tests\Database\Query;
 
 use Bow\Database\Database;
+use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Database\Stubs\PetModelStub;
 
 class ModelQueryTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass(): void
     {
+        $config = TestingConfiguration::getConfig();
+        Database::statement($config["database"]);
         Database::statement('create table if not exists pets (id int primary key, name varchar(255))');
         Database::insert('insert into pets values(:id, :name)', ['id' => 1, 'name' => 'Couli']);
         Database::insert('insert into pets values(:id, :name)', ['id' => 2, 'name' => 'Bobi']);
@@ -29,10 +32,9 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param Database $database
      * @depends test_get_database_connection
      */
-    public function test_the_first_result_should_be_the_instance_of_same_model(Database $database)
+    public function test_the_first_result_should_be_the_instance_of_same_model()
     {
         $pet_model = new PetModelStub();
         $pet = $pet_model->first();
@@ -42,7 +44,6 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
     public function test_take_method_and_the_result_should_be_the_instance_of_the_same_model(
         Database $database
@@ -55,9 +56,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_instance_off_collection(Database $database)
+    public function test_instance_off_collection()
     {
         $pet_model = PetModelStub::all();
 
@@ -66,9 +66,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_chain_select(Database $database)
+    public function test_chain_select()
     {
         $pet_collection_model = PetModelStub::where('id', 1)->select(['name'])->get();
 
@@ -77,9 +76,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_count_simple(Database $database)
+    public function test_count_simple()
     {
         $pet_count = PetModelStub::count();
 
@@ -88,9 +86,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_count_selected(Database $database)
+    public function test_count_selected()
     {
         $pet_count_first = PetModelStub::count();
         $pet_count_second = PetModelStub::all()->count();
@@ -101,7 +98,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends test_get_database_connection
      */
-    public function test_count_selected_with_collection_count(Database $database)
+    public function test_count_selected_with_collection_count()
     {
         $pet_count_first = PetModelStub::where('id', 1)->count();
         $pet_count_second = PetModelStub::all()->count();
@@ -111,9 +108,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_insert_by_create_method(Database $database)
+    public function test_insert_by_create_method()
     {
         $id = PetModelStub::all()->count() + 1;
         $insert_result = PetModelStub::create(['id' => $id, 'name' => 'Tor']);
@@ -131,9 +127,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_save(Database $database)
+    public function test_save()
     {
         $pet = PetModelStub::first();
         $pet->name = "Lofi";
@@ -145,9 +140,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_find_should_not_be_empty(Database $database)
+    public function test_find_should_not_be_empty()
     {
         $pet = PetModelStub::find(1);
 
@@ -156,9 +150,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_find_result_should_be_empty(Database $database)
+    public function test_find_result_should_be_empty()
     {
         $pet = PetModelStub::find(100);
 
@@ -167,9 +160,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_findby_result_should_not_be_empty(Database $database)
+    public function test_findby_result_should_not_be_empty()
     {
         $result = PetModelStub::findBy('id', 1);
         $pet = $result->first();
@@ -181,9 +173,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @depends test_get_database_connection
-     * @param Database $database
      */
-    public function test_find_by_method_should_be_empty(Database $database)
+    public function test_find_by_method_should_be_empty()
     {
         $result = PetModelStub::findBy('id', 100);
         $pet = $result->first();

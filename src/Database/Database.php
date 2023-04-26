@@ -41,7 +41,7 @@ class Database
      *
      * @var string
      */
-    private static string $name;
+    private static ?string $name = null;
 
     /**
      * Load configuration
