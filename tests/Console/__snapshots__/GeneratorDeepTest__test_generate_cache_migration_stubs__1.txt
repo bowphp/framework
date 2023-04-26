@@ -3,7 +3,7 @@
 use Bow\Database\Migration\Migration;
 use Bow\Database\Migration\SQLGenerator;
 
-class {className} extends Migration
+class FakeCacheMigration extends Migration
 {
     /**
      * Up Migration

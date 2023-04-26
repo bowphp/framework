@@ -155,4 +155,136 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertRegExp("@\nnamespace\sApp\\\Validations;\n@", $content);
         $this->assertRegExp("@\nclass\sFakeValidationRequest\sextends\sRequestValidation\n@", $content);
     }
+
+    public function test_generate_cache_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeCacheMigration');
+        $content = $generator->makeStubContent('model/cache', [
+            "className" => "FakeCacheMigration",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sFakeCacheMigration\sextends\sMigration\n@", $content);
+    }
+
+    public function test_generate_session_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeSessionMigration');
+        $content = $generator->makeStubContent('model/session', [
+            "className" => "FakeSessionMigration",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sFakeSessionMigration\sextends\sMigration\n@", $content);
+    }
+
+    public function test_generate_table_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeTableMigration');
+        $content = $generator->makeStubContent('model/table', [
+            "className" => "FakeTableMigration",
+            "table" => "fakers",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sFakeTableMigration\sextends\sMigration\n@", $content);
+    }
+
+    public function test_generate_create_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeCreateTableMigration');
+        $content = $generator->makeStubContent('model/create', [
+            "className" => "FakeCreateTableMigration",
+            "table" => "fakers",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sFakeCreateTableMigration\sextends\sMigration\n@", $content);
+    }
+
+    public function test_generate_standard_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeStandardTableMigration');
+        $content = $generator->makeStubContent('model/standard', [
+            "className" => "FakeStandardTableMigration",
+            "table" => "fakers",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sFakeStandardTableMigration\sextends\sMigration\n@", $content);
+    }
+
+    public function test_generate_model_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'Example');
+        $content = $generator->makeStubContent('model/model', [
+            "className" => "Example",
+            "table" => "examples",
+            "baseNamespace" => "App\\",
+            "namespace" => "Models"
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sExample\sextends\sModel\n@", $content);
+    }
+
+    public function test_generate_controller_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'ExampleController');
+        $content = $generator->makeStubContent('controller/controller', [
+            "className" => "ExampleController",
+            "baseNamespace" => "App\\",
+            "namespace" => "Controllers"
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sExampleController\sextends\sController\n@", $content);
+    }
+
+    public function test_generate_controller_no_plain_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'ExampleController');
+        $content = $generator->makeStubContent('controller/no-plain', [
+            "className" => "ExampleController",
+            "baseNamespace" => "App\\",
+            "namespace" => "Controllers"
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp('@\nclass\sExampleController\sextends\sController\n@', $content);
+        $this->assertRegExp('@public\sfunction\sindex()@', $content);
+        $this->assertRegExp('@public\sfunction\screate()@', $content);
+        $this->assertRegExp('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
+        $this->assertRegExp('@public\sfunction\sshow\(mixed\s\$id\)@', $content);
+        $this->assertRegExp('@public\sfunction\sedit\(mixed\s\$id\)@', $content);
+        $this->assertRegExp('@public\sfunction\sstore\(Request\s\$request\)@', $content);
+        $this->assertRegExp('@public\sfunction\sdestroy\(mixed\s\$id\)@', $content);
+    }
+
+    public function test_generate_controller_rest_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'ExampleController');
+        $content = $generator->makeStubContent('controller/rest', [
+            "className" => "ExampleController",
+            "baseNamespace" => "App\\",
+            "namespace" => "Controllers"
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp('@\nclass\sExampleController\sextends\sController\n@', $content);
+        $this->assertRegExp('@public\sfunction\sindex()@', $content);
+        $this->assertRegExp('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
+        $this->assertRegExp('@public\sfunction\sshow\(Request\s\$request,\smixed\s\$id\)@', $content);
+        $this->assertRegExp('@public\sfunction\sstore\(Request\s\$request\)@', $content);
+        $this->assertRegExp('@public\sfunction\sdestroy\(Request\s\$request,\smixed\s\$id\)@', $content);
+    }
 }

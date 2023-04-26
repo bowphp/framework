@@ -1,11 +1,11 @@
 <?php
 
-namespace {baseNamespace}{namespace};
+namespace App\Controllers;
 
-{modelNamespace}use {baseNamespace}\Controller;
+{modelNamespace}use App\\Controller;
 use Bow\Http\Request;
 
-class {className} extends Controller
+class ExampleController extends Controller
 {
     /**
      * Start point
