@@ -3,15 +3,16 @@
 use Bow\Database\Migration\Migration;
 use Bow\Database\Migration\SQLGenerator;
 
-class {className} extends Migration
+class FakeCreateTableMigration extends Migration
 {
     /**
      * Up Migration
      */
     public function up(): void
     {
-        $this->create("{table}", function (SQLGenerator $table) {
-            //
+        $this->create("fakers", function (SQLGenerator $table) {
+            $table->addIncrement('id');
+            $table->addTimestamps();
         });
     }
 
@@ -20,6 +21,6 @@ class {className} extends Migration
      */
     public function rollback(): void
     {
-        $this->dropIfExists("{table}");
+        $this->dropIfExists("fakers");
     }
 }

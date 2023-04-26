@@ -1,0 +1,28 @@
+<?php
+
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\SQLGenerator;
+
+class FakeCacheMigration extends Migration
+{
+    /**
+     * Up Migration
+     */
+    public function up(): void
+    {
+        $this->create("caches", function (SQLGenerator $table) {
+            $table->addString('keyname', ['primary' => true, 'size' => 500]);
+            $table->addText('data');
+            $table->addDatetime('expire', ['nullable' => true]);
+            $table->addTimestamps();
+        });
+    }
+
+    /**
+     * Rollback migration
+     */
+    public function rollback(): void
+    {
+        $this->dropIfExists("caches");
+    }
+}

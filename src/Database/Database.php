@@ -33,7 +33,7 @@ class Database
      *
      * @var array
      */
-    private static array $config;
+    private static array $config = [];
 
     /**
      * Configuration
@@ -312,7 +312,7 @@ class Database
 
         if (
             !preg_match(
-                "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
+                "/^delete\s+from\s+[\w\d_`]+\swhere\s.+;?$/i",
                 $sql_statement
             )
         ) {

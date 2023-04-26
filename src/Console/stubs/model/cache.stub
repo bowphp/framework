@@ -10,8 +10,10 @@ class {className} extends Migration
      */
     public function up(): void
     {
-        $this->create("{table}", function (SQLGenerator $table) {
-            $table->addIncrement('id');
+        $this->create("caches", function (SQLGenerator $table) {
+            $table->addString('keyname', ['primary' => true, 'size' => 500]);
+            $table->addText('data');
+            $table->addDatetime('expire', ['nullable' => true]);
             $table->addTimestamps();
         });
     }
@@ -21,6 +23,6 @@ class {className} extends Migration
      */
     public function rollback(): void
     {
-        $this->dropIfExists("{table}");
+        $this->dropIfExists("caches");
     }
 }
