@@ -54,9 +54,7 @@ class Database
     {
         if (is_null(static::$instance)) {
             static::$instance = new self();
-
             static::$name = $config['default'];
-
             static::$config = $config;
         }
 
@@ -86,11 +84,7 @@ class Database
     public static function connection(?string $name = null): ?Database
     {
         if (is_null($name) || strlen($name) == 0) {
-            if (is_null(static::$name)) {
-                static::$name = static::$config['default'];
-            }
-
-            $name = static::$name;
+            $name = static::$name ?? static::$config['default'];
         }
 
         if (!isset(static::$config['connections'][$name])) {
@@ -141,7 +135,7 @@ class Database
      *
      * @return ?AbstractConnection
      */
-    public static function getAdapterConnection(): ?AbstractConnection
+    public static function getConnectionAdapter(): ?AbstractConnection
     {
         static::verifyConnection();
 
@@ -412,16 +406,14 @@ class Database
     /**
      * Retrieves the identifier of the last record.
      *
-     * @param  string $name
-     * @return int
+     * @param  ?string $name
+     * @return int|string
      */
     public static function lastInsertId(?string $name = null): int|string
     {
         static::verifyConnection();
 
-        return (int) static::$adapter
-            ->getConnection()
-            ->lastInsertId($name);
+        return static::$adapter->getConnection()->lastInsertId($name);
     }
 
     /**
@@ -444,9 +436,7 @@ class Database
 
         $pdo_statement->execute();
 
-        $r = $pdo_statement->rowCount();
-
-        return $r;
+        return $pdo_statement->rowCount();
     }
 
     /**

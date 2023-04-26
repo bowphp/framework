@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
+use Bow\Database\Connection\AbstractConnection;
 use PDO;
 use stdClass;
 use PDOStatement;
@@ -116,13 +117,39 @@ class QueryBuilder implements \JsonSerializable
      * QueryBuilder Constructor
      *
      * @param string $table
-     * @param PDO $connection
+     * @param AbstractConnection|PDO $connection
      */
-    public function __construct(string $table, PDO $connection)
+    public function __construct(string $table, AbstractConnection|PDO $connection)
     {
+        if ($connection instanceof AbstractConnection) {
+            $this->adapter = $connection->getName();
+            $connection = $connection->getConnection();
+        } else {
+            $this->adapter = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
+        }
+
         $this->connection = $connection;
-        $this->adapter = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
         $this->table = $table;
+    }
+
+    /**
+     * Get the connection adapter name
+     *
+     * @return string
+     */
+    public function getAdapterName(): string
+    {
+        return $this->adapter;
+    }
+
+    /**
+     * Get the connection
+     *
+     * @return PDO
+     */
+    public function getPdo(): PDO
+    {
+        return $this->connection;
     }
 
     /**
@@ -693,7 +720,7 @@ class QueryBuilder implements \JsonSerializable
     public function take(int $limit): QueryBuilder
     {
         if (is_null($this->limit)) {
-            $this->limit = (string) $limit;
+            $this->limit = 'limit ' . $limit;
 
             return $this;
         }

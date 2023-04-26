@@ -129,9 +129,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * The connection name
      *
-     * @var string
+     * @var ?string
      */
-    protected string $connection;
+    protected ?string $connection = null;
 
     /**
      * The query builder instance
@@ -303,9 +303,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Check if the primary key existe on updating data
         if (!array_key_exists($model->primary_key, $data)) {
-            if ($model->auto_increment) {
+            if ($model->auto_increment && static::$builder->getAdapterName() !== "pgsql") {
                 $id_value = [$model->primary_key => null];
-
                 $data = array_merge($id_value, $data);
             } elseif ($model->primary_key_type == 'string') {
                 $data = array_merge([
@@ -385,8 +384,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function query(): Builder
     {
-        if (static::$builder instanceof Builder) {
-            if (static::$builder->getModel() == static::class) {
+        if (
+            static::$builder instanceof Builder
+            && static::$builder->getModel() == static::class
+        ) {
+            if (DB::getConnectionName() == static::$builder->getAdapterName()) {
                 return static::$builder;
             }
         }
@@ -412,37 +414,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (isset($properties['prefix']) && !is_null($properties['prefix'])) {
             $prefix = $properties['prefix'];
         } else {
-            $prefix = DB::getAdapterConnection()->getTablePrefix();
+            $prefix = DB::getConnectionAdapter()->getTablePrefix();
         }
 
         // Set the table prefix
         $table = $prefix . $table;
 
-        static::$builder = new Builder($table, DB::getPdo());
+        static::$builder = new Builder($table, DB::getConnectionAdapter());
         static::$builder->setPrefix($prefix);
         static::$builder->setModel(static::class);
 
         return static::$builder;
-    }
-
-    /**
-     * Retrieves the primary key value
-     *
-     * @return mixed
-     */
-    public function getKeyValue(): mixed
-    {
-        return $this->original[$this->primary_key] ?? null;
-    }
-
-    /**
-     * Retrieves the primary key
-     *
-     * @return string
-     */
-    public function getKey(): string
-    {
-        return $this->primary_key;
     }
 
     /**
@@ -466,7 +448,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $row_affected = $model->insert($this->attributes);
 
             // We get a last insertion id value
-            $primary_key_value = $model->getLastInsertId();
+            if (static::$builder->getAdapterName() == 'pgsql') {
+                $sequence = $this->table . "_" . $this->primary_key . '_seq';
+                $primary_key_value = static::$builder->getPdo()->lastInsertId($sequence);
+            } else {
+                $primary_key_value = static::$builder->getPdo()->lastInsertId();
+            }
+
             $primary_key_value = !is_numeric($primary_key_value) ? $primary_key_value : (int) $primary_key_value;
 
             // Set the primary key value
@@ -628,6 +616,26 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $deleted = $model->where($column, $value)->delete();
 
         return $deleted;
+    }
+
+    /**
+     * Retrieves the primary key value
+     *
+     * @return mixed
+     */
+    public function getKeyValue(): mixed
+    {
+        return $this->original[$this->primary_key] ?? null;
+    }
+
+    /**
+     * Retrieves the primary key
+     *
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return $this->primary_key;
     }
 
     /**

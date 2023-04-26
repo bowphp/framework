@@ -41,7 +41,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     public function test_get_database_connection(string $name)
     {
         $instance = Database::connection($name);
-        $adapter = $instance->getAdapterConnection();
+        $adapter = $instance->getConnectionAdapter();
 
         $this->assertEquals($name, $adapter->getName());
         $this->assertInstanceOf(Database::class, $instance);
