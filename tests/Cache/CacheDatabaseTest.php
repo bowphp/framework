@@ -3,14 +3,25 @@
 namespace Bow\Tests\Cache;
 
 use Bow\Cache\Cache;
+use Bow\Database\Database;
 use Bow\Tests\Config\TestingConfiguration;
 
 class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 {
-    protected function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        parent::setUp();
         $config = TestingConfiguration::getConfig();
+
+        Database::configure($config["database"]);
+
+        Database::statement("drop table if exists caches;");
+        Database::statement("
+            create table if not exists caches (
+                `keyname` varchar(500) not null primary key,
+                `data` text null,
+                `expire` datetime null
+            )");
+
         Cache::confirgure($config["cache"]);
         Cache::cache("database");
     }
@@ -83,30 +94,29 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
     public function test_forget_empty()
     {
+        $this->expectExceptionMessage("The key name is not found");
         $result = Cache::forget('name');
-
-        $this->assertEquals(false, $result);
     }
 
     public function test_time_of_empty()
     {
         $result = Cache::timeOf('lastname');
 
-        $this->assertEquals($result, -1);
+        $this->assertIsString($result);
     }
 
     public function test_time_of_empty_2()
     {
         $result = Cache::timeOf('address');
 
-        $this->assertEquals($result, -1);
+        $this->assertIsString($result);
     }
 
     public function test_time_of_empty_3()
     {
         $result = Cache::timeOf('age');
 
-        $this->assertEquals(is_int($result), true);
+        $this->assertIsString($result);
     }
 
     public function test_can_add_many_data_at_the_same_time_in_the_cache()

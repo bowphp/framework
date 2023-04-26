@@ -11,9 +11,10 @@ class {className} extends Migration
     public function up(): void
     {
         $this->create("caches", function (SQLGenerator $table) {
-            $table->addText('key', ['unique' => true]);
+            $table->addText('keyname', ['unique' => true]);
             $table->addText('data');
             $table->addDatetime('expire', ['nullable' => true]);
+            $table->addTimestamps();
         });
     }
 

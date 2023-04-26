@@ -8,6 +8,7 @@ use BadMethodCallException;
 use Bow\Cache\Adapter\RedisAdapter;
 use Bow\Cache\Adapter\FilesystemAdapter;
 use Bow\Cache\Adapter\CacheAdapterInterface;
+use Bow\Cache\Adapter\DatabaseAdapter;
 use ErrorException;
 use InvalidArgumentException;
 
@@ -35,6 +36,7 @@ class Cache
     private static array $adapters = [
         "file" => FilesystemAdapter::class,
         "redis" => RedisAdapter::class,
+        "database" => DatabaseAdapter::class,
     ];
 
     /**
@@ -87,6 +89,7 @@ class Cache
         }
 
         $config = $stores[$store];
+
         static::$instance = new static::$adapters[$config["driver"]]($config);
 
         return static::$instance;
