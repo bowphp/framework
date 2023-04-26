@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
+use PDO;
+use Bow\Security\Sanitize;
+use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Connection\AbstractConnection;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
-use Bow\Database\Exception\ConnectionException;
-use Bow\Database\Exception\DatabaseException;
-use Bow\Security\Sanitize;
-use PDO;
+use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
 
 class Database
 {
@@ -109,6 +110,8 @@ class Database
                 static::$adapter = new MysqlAdapter($config);
             } elseif ($config['driver'] == 'sqlite') {
                 static::$adapter = new SqliteAdapter($config);
+            } elseif ($config['driver'] == 'pgsql') {
+                static::$adapter = new PostgreSQLAdapter($config);
             } else {
                 throw new ConnectionException('This driver is not praised');
             }
@@ -156,7 +159,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sql_statement)) {
+        if (preg_match("/^update\s[\w\d_`]+\s+\bset\b\s.+\s\bwhere\b\s+.+$/i", $sql_statement)) {
             return static::executePrepareQuery($sql_statement, $data);
         }
 
@@ -270,7 +273,6 @@ class Database
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $result += static::executePrepareQuery($sql_statement, $value);
-
                 continue;
             }
 
@@ -310,12 +312,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (
-            !preg_match(
-                "/^delete\s+from\s+[\w\d_`]+\swhere\s.+;?$/i",
-                $sql_statement
-            )
-        ) {
+        if (!preg_match("/^delete\s+from\s+[\w\d_`]+\s+where\s+.+;?$/i", $sql_statement)) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR

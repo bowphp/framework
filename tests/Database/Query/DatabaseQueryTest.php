@@ -13,16 +13,9 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         Database::configure($config["database"]);
     }
 
-    public static function tearDownAfterClass(): void
-    {
-        Database::statement('drop table pets');
-    }
-
     public function setUp(): void
     {
-        Database::statement(
-            'create table if not exists pets (id int primary key, name varchar(255))'
-        );
+        parent::setUp();
     }
 
     /**
@@ -30,16 +23,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
      */
     public function connectionNameProvider()
     {
-        return [['mysql'], ['sqlite']];
-    }
-
-    public function test_get_database_connection()
-    {
-        $instance = Database::getInstance();
-
-        $this->assertInstanceOf(\Bow\Database\Database::class, $instance);
-
-        return Database::getInstance();
+        return [['mysql'], ['sqlite'], ['pgsql']];
     }
 
     /**
@@ -48,26 +32,44 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
      */
     public function test_instance_of_database(string $name)
     {
-        $this->assertInstanceOf(Database::class, \Bow\Database\Database::connection($name));
+        $this->assertInstanceOf(Database::class, Database::connection($name));
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_simple_insert_table(Database $database)
+    public function test_get_database_connection(string $name)
     {
+        $instance = Database::connection($name);
+        $adapter = $instance->getAdapterConnection();
+
+        $this->assertEquals($name, $adapter->getName());
+        $this->assertInstanceOf(Database::class, $instance);
+    }
+
+    /**
+     * @dataProvider connectionNameProvider
+     */
+    public function test_simple_insert_table(string $name)
+    {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
         $result = $database->insert("insert into pets values(1, 'Bob'), (2, 'Milo');");
 
         $this->assertEquals($result, 2);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_array_insert_table(Database $database)
+    public function test_array_insert_table(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+    
         $result = $database->insert("insert into pets values(:id, :name);", [
-            "id" => 3,
+            "id" => 1,
             'name' => 'Popy'
         ]);
 
@@ -75,92 +77,126 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_array_multile_insert_table(Database $database)
+    public function test_array_multile_insert_table(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
         $result = $database->insert("insert into pets values(:id, :name);", [
-            [ "id" => 4, 'name' => 'Ploy'],
-            [ "id" => 5, 'name' => 'Cesar'],
-            [ "id" => 6, 'name' => 'Louis'],
+            [ "id" => 1, 'name' => 'Ploy'],
+            [ "id" => 2, 'name' => 'Cesar'],
+            [ "id" => 3, 'name' => 'Louis'],
         ]);
 
         $this->assertEquals($result, 3);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_select_table(Database $database)
+    public function test_select_table(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
         $pets = $database->select("select * from pets");
 
         $this->assertTrue(is_array($pets));
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_select_table_and_check_item_length(Database $database)
+    public function test_select_table_and_check_item_length(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
+        $database->insert("insert into pets values(:id, :name);", [
+            ["id" => 1, 'name' => 'Ploy'],
+            ["id" => 2, 'name' => 'Cesar'],
+            ["id" => 3, 'name' => 'Louis'],
+        ]);
+
         $pets = $database->select("select * from pets");
 
-        $this->assertEquals(count($pets), 6);
+        $this->assertEquals(count($pets), 3);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_select_with_get_one_element_table(Database $database)
+    public function test_select_with_get_one_element_table(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
+        $database->insert("insert into pets values(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
+
         $pets = $database->select("select * from pets where id = :id", ['id' => 1]);
 
         $this->assertTrue(is_array($pets));
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_select_with_not_get_element_table(Database $database)
+    public function test_select_with_not_get_element_table(string $name)
     {
-        $pets = $database->select("select * from pets where id = :id", [
-            'id' => 7
-        ]);
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
+        $pets = $database->select("select * from pets where id = :id", ['id' => 7]);
 
         $this->assertTrue(is_array($pets));
         $this->assertTrue(count($pets) == 0);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_select_one_table(Database $database)
+    public function test_select_one_table(string $name)
     {
-        $pet = $database->selectOne("select * from pets where id = :id", [
-            'id' => 1
-        ]);
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
+        $database->insert("insert into pets values(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
+
+        $pet = $database->selectOne("select * from pets where id = :id", ['id' => 1]);
 
         $this->assertTrue(!is_array($pet));
         $this->assertTrue(is_object($pet));
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_update_table($database)
+    public function test_update_table(string $name)
     {
-        $result = $database->update("update pets set name = 'Bob' where id = :id", [
-            'id' => 1
-        ]);
+        $database = Database::connection($name);
+        $this->createTestingTable();
 
+        $database->insert("insert into pets values(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
+
+        $result = $database->update("update pets set name = 'Bob' where id = :id", ['id' => 1]);
         $this->assertEquals($result, 1);
+
+        $pet = $database->selectOne("select * from pets where id = :id", ['id' => 1]);
+        $this->assertEquals($pet->name, 'Bob');
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_delete_table(Database $database)
+    public function test_delete_table(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
+        $database->insert("insert into pets values(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
+
         $result = $database->delete("delete from pets where id = :id", ['id' => 1]);
         $this->assertEquals($result, 1);
 
@@ -169,61 +205,84 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_transaction_table(Database $database)
+    public function test_transaction_table(string $name)
     {
-        $database->startTransaction(function () use ($database) {
-            $result = $database->delete("delete from pets where id = :id", ['id' => 2]);
+        $database = Database::connection($name);
+        $this->createTestingTable();
 
+        $database->insert("insert into pets values(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
+        $result = 0;
+        $database->startTransaction(function () use ($database, &$result) {
+            $result = $database->delete("delete from pets where id = :id", ['id' => 1]);
             $this->assertEquals($database->inTransaction(), true);
-            $this->assertEquals($result, 1);
         });
+
+        $this->assertEquals($result, 1);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_rollback_table(Database $database)
+    public function test_rollback_table(string $name)
     {
         $result = 0;
 
-        $database->startTransaction();
+        $database = Database::connection($name);
+        $this->createTestingTable();
 
-        $result = $database->delete("delete from pets where id = 3");
+        $database->insert("insert into pets values(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
+
+        $database->startTransaction();
+        $result = $database->delete("delete from pets where id = 1");
 
         $this->assertEquals($database->inTransaction(), true);
         $this->assertEquals($result, 1);
 
         $database->rollback();
 
-        $pet = $database->selectOne("select * from pets where id = 3");
+        $pet = $database->selectOne("select * from pets where id = 1");
 
         if (!$database->inTransaction()) {
             $result = 0;
         }
 
         $this->assertEquals($result, 0);
-        $this->assertEquals(is_object($pet), true);
+        $this->assertEquals($pet->name, "Ploy");
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_stement_table(Database $database)
+    public function test_stement_table(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
         $result = $database->statement("drop table pets");
 
         $this->assertEquals(is_bool($result), true);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @dataProvider connectionNameProvider
      */
-    public function test_stement_table_2(Database $database)
+    public function test_stement_table_2(string $name)
     {
+        $database = Database::connection($name);
+        $this->createTestingTable();
+
         $result = $database->statement('create table if not exists pets (id int primary key, name varchar(255))');
 
         $this->assertEquals(is_bool($result), true);
+    }
+
+    public function createTestingTable()
+    {
+        Database::statement('drop table if exists pets');
+        Database::statement(
+            'create table pets (id int primary key, name varchar(255))'
+        );
     }
 }
