@@ -17,26 +17,26 @@ trait MysqlCompose
 
         $raw_type = strtoupper($type);
         $type = $raw_type;
-        $attributes = $description['attributes'];
+        $attribute = $description['attribute'];
 
-        // Transform attributes
-        $default = $attributes['default'] ?? null;
-        $size = $attributes['size'] ?? false;
-        $primary = $attributes['primary'] ?? false;
-        $increment = $attributes['increment'] ?? false;
-        $nullable = $attributes['nullable'] ?? false;
-        $unique = $attributes['unique'] ?? false;
-        $unsigned = $attributes['unsigned'] ?? false;
-        $after = $attributes['after'] ?? false;
-        $first = $attributes['first'] ?? false;
+        // Transform attribute
+        $default = $attribute['default'] ?? null;
+        $size = $attribute['size'] ?? false;
+        $primary = $attribute['primary'] ?? false;
+        $increment = $attribute['increment'] ?? false;
+        $nullable = $attribute['nullable'] ?? false;
+        $unique = $attribute['unique'] ?? false;
+        $unsigned = $attribute['unsigned'] ?? false;
+        $after = $attribute['after'] ?? false;
+        $first = $attribute['first'] ?? false;
 
         // String to VARCHAR
         if ($raw_type == 'STRING') {
             $type = 'VARCHAR';
-            $raw_type = 'VARCHAR';
-            if (!$size) {
-                $size = 255;
-            }
+        }
+
+        if (!$size && in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR'])) {
+            $size = 255;
         }
 
         // Add column size
@@ -77,8 +77,8 @@ trait MysqlCompose
 
         // Add default value
         if (!is_null($default)) {
-            if (in_array($raw_type, ['VARCHAR', 'CHAR', 'ENUM', 'CHECK'])) {
-                $default = "'" . $default . "'";
+            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM'])) {
+                $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';
             }

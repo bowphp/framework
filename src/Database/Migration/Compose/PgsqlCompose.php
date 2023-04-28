@@ -2,6 +2,8 @@
 
 namespace Bow\Database\Migration\Compose;
 
+use Bow\Database\Exception\SQLGeneratorException;
+
 trait PgsqlCompose
 {
     /**
@@ -17,25 +19,30 @@ trait PgsqlCompose
 
         $raw_type = strtoupper($type);
         $type = $raw_type;
-        $attributes = $description['attributes'];
+        $attribute = $description['attribute'];
 
-        // Transform attributes
-        $default = $attributes['default'] ?? null;
-        $size = $attributes['size'] ?? false;
-        $primary = $attributes['primary'] ?? false;
-        $increment = $attributes['increment'] ?? false;
-        $nullable = $attributes['nullable'] ?? false;
-        $unique = $attributes['unique'] ?? false;
-        $unsigned = $attributes['unsigned'] ?? false;
-        $after = $attributes['after'] ?? false;
-        $first = $attributes['first'] ?? false;
+        // Transform attribute
+        $default = $attribute['default'] ?? null;
+        $size = $attribute['size'] ?? false;
+        $primary = $attribute['primary'] ?? false;
+        $increment = $attribute['increment'] ?? false;
+        $nullable = $attribute['nullable'] ?? false;
+        $unique = $attribute['unique'] ?? false;
+        $unsigned = $attribute['unsigned'] ?? false;
+        $after = $attribute['after'] ?? false;
+        $first = $attribute['first'] ?? false;
+
+        if ($after || $first) {
+            throw new SQLGeneratorException("The key first and after only work on mysql");
+        }
 
         // String to VARCHAR
         if ($raw_type == 'STRING') {
             $type = 'VARCHAR';
-            if (!$size) {
-                $size = 255;
-            }
+        }
+
+        if (!$size && in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR'])) {
+            $size = 255;
         }
 
         // Add column size
@@ -45,7 +52,7 @@ trait PgsqlCompose
                 $size = "'" . implode("', '", $size) . "'";
             }
 
-            if (in_array($raw_type, ['ENUM', 'CHECK', 'VARCHAR', 'STRING'])) {
+            if (in_array($raw_type, ['ENUM', 'CHECK', 'VARCHAR', 'LONG VARCHAR', 'STRING'])) {
                 $type = sprintf('%s(%s)', $type, $size);
             }
         }
@@ -74,8 +81,8 @@ trait PgsqlCompose
 
         // Add default value
         if (!is_null($default)) {
-            if (in_array($raw_type, ['VARCHAR', 'STRING', 'CHAR', 'ENUM'])) {
-                $default = "'" . $default . "'";
+            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM'])) {
+                $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';
             }
@@ -85,15 +92,6 @@ trait PgsqlCompose
         // Add unsigned mention
         if ($unsigned) {
             $type = sprintf('UNSIGNED %s', $type);
-        }
-
-        // Add the column position
-        if (is_string($after)) {
-            $type = sprintf('%s AFTER `%s`', $type, $after);
-        }
-
-        if ($first === true) {
-            $type = sprintf('%s FIRST', $type);
         }
 
         return trim(

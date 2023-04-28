@@ -3,6 +3,7 @@
 namespace Bow\Database\Migration\Compose;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\SQLGeneratorException;
 
 trait SqliteCompose
 {
@@ -16,34 +17,34 @@ trait SqliteCompose
     private function composeAddSqliteColumn(string $name, array $description): string
     {
         $type = $this->normalizeOfType($description['type']);
-
         $raw_type = strtoupper($type);
-        $type = $raw_type;
-        $attributes = $description['attributes'];
 
-        // Transform attributes
-        $default = $attributes['default'] ?? null;
-        $size = $attributes['size'] ?? false;
-        $primary = $attributes['primary'] ?? false;
-        $increment = $attributes['increment'] ?? false;
-        $nullable = $attributes['nullable'] ?? false;
-        $unique = $attributes['unique'] ?? false;
+        if (in_array($raw_type, ['ENUM', 'CHECK'])) {
+            throw new SQLGeneratorException("Cannot define $raw_type on SQLITE.");
+        }
+
+        $type = $raw_type;
+        $attribute = $description['attribute'];
+
+        // Transform attribute
+        $default = $attribute['default'] ?? null;
+        $size = $attribute['size'] ?? false;
+        $primary = $attribute['primary'] ?? false;
+        $increment = $attribute['increment'] ?? false;
+        $nullable = $attribute['nullable'] ?? false;
+        $unique = $attribute['unique'] ?? false;
 
         // String to VARCHAR
         if ($raw_type == 'STRING') {
             $type = 'VARCHAR';
-            if (!$size) {
-                $size = 255;
-            }
+        }
+
+        if (!$size && in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR'])) {
+            $size = 255;
         }
 
         // Add column size
         if ($size) {
-            if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-                $size = (array) $size;
-                $size = "'" . implode("', '", $size) . "'";
-                $type = sprintf('TEXT %s(%s)', $type, $size);
-            }
         }
 
         // Bind auto increment action
@@ -71,7 +72,7 @@ trait SqliteCompose
         // Add default value
         if (!is_null($default)) {
             if (in_array($raw_type, ['TEXT'])) {
-                $default = "'" . $default . "'";
+                $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';
             }

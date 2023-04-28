@@ -10,7 +10,7 @@ use Bow\Database\Exception\SQLGeneratorException;
 trait MixedColumn
 {
     /**
-     * Add boolean column
+     * Add BOOLEAN column
      *
      * @param string $column
      * @param array $attribute
@@ -22,12 +22,12 @@ trait MixedColumn
     }
 
     /**
-    * Add UUID column
-    *
-    * @param string $column
-    * @param array $attribute
-    * @return SQLGenerator
-    */
+     * Add UUID column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
     public function addUuid(string $column, array $attribute = []): SQLGenerator
     {
         if (isset($attribute['increment'])) {
@@ -55,12 +55,12 @@ trait MixedColumn
     }
 
     /**
-    * Add UUID column
-    *
-    * @param string $column
-    * @param array $attribute
-    * @return SQLGenerator
-    */
+     * Add UUID column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
     public function addUuidPrimary(string $column, array $attribute = []): SQLGenerator
     {
         $attribute['primary'] = true;
@@ -76,16 +76,28 @@ trait MixedColumn
         return $this->addUuid($column, $attribute);
     }
 
-   /**
-    * Add BLOB column
-    *
-    * @param string $column
-    * @param array $attribute
-    * @return SQLGenerator
-    */
+    /**
+     * Add BLOB column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
     public function addBinary(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'blob', $attribute);
+    }
+
+    /**
+     * Add TINYBLOB column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addTinyBinary(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->addColumn($column, 'tinyblob', $attribute);
     }
 
     /**

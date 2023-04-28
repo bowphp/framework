@@ -64,6 +64,9 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $sql = $this->generator->{"add$method"}('column', ['primary' => true, 'default' => $default, 'size' => 100, 'nullable' => true])->make();
         $this->assertEquals($sql, "`column` INTEGER PRIMARY KEY NULL DEFAULT $default");
 
+        $sql = $this->generator->{"add$method"}('column', ['primary' => true, 'increment' => true, 'size' => 100, 'nullable' => true])->make();
+        $this->assertEquals($sql, "`column` INTEGER AUTOINCREMENT PRIMARY KEY NULL");
+
         $sql = $this->generator->{"add$method"}('column', ['unique' => true])->make();
         $this->assertEquals($sql, "`column` INTEGER UNIQUE NOT NULL");
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Database\Migration;
 
+use Bow\Database\Exception\SQLGeneratorException;
+
 class SQLGenerator
 {
     use Shortcut\NumberColumn;
@@ -101,10 +103,10 @@ class SQLGenerator
      *
      * @param string $name
      * @param string $type
-     * @param array $attributes
+     * @param array $attribute
      * @return SQLGenerator
      */
-    public function addColumn(string $name, string $type, array $attributes = []): SQLGenerator
+    public function addColumn(string $name, string $type, array $attribute = []): SQLGenerator
     {
         if ($this->scope == 'alter') {
             $command = 'ADD COLUMN';
@@ -114,7 +116,7 @@ class SQLGenerator
 
         $this->sqls[] = $this->composeAddColumn(
             trim($name, '`'),
-            compact('name', 'type', 'attributes', 'command')
+            compact('name', 'type', 'attribute', 'command')
         );
 
         return $this;
@@ -128,13 +130,13 @@ class SQLGenerator
      * @param array $attributes
      * @return SQLGenerator
      */
-    public function changeColumn(string $name, string $type, array $attributes = []): SQLGenerator
+    public function changeColumn(string $name, string $type, array $attribute = []): SQLGenerator
     {
         $command = 'MODIFY COLUMN';
 
         $this->sqls[] = $this->composeAddColumn(
             trim($name, '`'),
-            compact('name', 'type', 'attributes', 'command')
+            compact('name', 'type', 'attribute', 'command')
         );
 
         return $this;
@@ -174,7 +176,7 @@ class SQLGenerator
     {
         if ($this->adapter === 'mysql') {
             $this->dropColumnForMysql($name);
-        } else if ($this->adapter === 'pgsql') {
+        } elseif ($this->adapter === 'pgsql') {
             $this->dropColumnForPgsql($name);
         } else {
             $this->dropColumnForSqlite($name);
@@ -278,6 +280,11 @@ class SQLGenerator
      */
     private function composeAddColumn(string $name, array $description): string
     {
+        if (isset($attribute['size']) && in_array($description["attribute"]["type"], ['blob', 'json', 'character'])) {
+            $type = strtoupper($description["attribute"]["type"]);
+            throw new SQLGeneratorException("Cannot define size for $type type");
+        }
+
         switch ($this->adapter) {
             case "sqlite":
                 return $this->composeAddSqliteColumn($name, $description);

@@ -82,10 +82,10 @@ trait DateColumn
         if ($this->adapter == 'pgsql') {
             $this->addTimestamp('created_at', ['default' => 'CURRENT_TIMESTAMP']);
             $this->addTimestamp('updated_at', ['default' => 'CURRENT_TIMESTAMP']);
-    
+
             return $this;
         }
-        
+
         $this->addColumn('created_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
         $this->addColumn('updated_at', 'datetime', ['default' => 'CURRENT_TIMESTAMP']);
 

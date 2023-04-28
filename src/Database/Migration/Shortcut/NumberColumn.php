@@ -306,4 +306,27 @@ trait NumberColumn
     {
         return $this->changeColumn($column, 'mediumint', ['primary' => true, 'increment' => true]);
     }
+
+    /**
+     * Change Small integer column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeSmallInteger(string $column, array $attribute = [])
+    {
+        return $this->changeColumn($column, 'smallint', $attribute);
+    }
+
+    /**
+     * Change Small integer column
+     *
+     * @param string $column
+     * @return SQLGenerator
+     */
+    public function changeSmallIntegerPrimary(string $column)
+    {
+        return $this->changeColumn($column, 'smallint', ['primary' => true, 'increment' => true]);
+    }
 }
