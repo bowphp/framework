@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Bow\Database\Migration;
 
 use Bow\Console\Color;
-use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Database;
+use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Connection\AbstractConnection;
 
 abstract class Migration
 {
@@ -97,7 +98,7 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        $generator = new SQLGenerator($table, $this->adapter->getName());
+        $generator = new SQLGenerator($table, $this->adapter->getName(), 'create');
 
         call_user_func_array($cb, [$generator]);
 
@@ -144,7 +145,7 @@ abstract class Migration
     }
 
     /**
-     * Add SQL query
+     * Rename table
      *
      * @param string $table
      * @param string $to
@@ -152,13 +153,21 @@ abstract class Migration
      */
     final public function renameTable(string $table, string $to): Migration
     {
-        if ($this->adapter->getName() == 'mysql') {
-            $command = 'RENAME';
-        } else {
-            $command = 'ALTER TABLE';
-        }
+        $sql = sprintf('ALTER TABLE %s RENAME TO %s', $table, $to);
 
-        $sql = sprintf('%s %s TO %s', $command, $table, $to);
+        return $this->executeSqlQuery($sql);
+    }
+
+    /**
+     * Rename table if exists
+     *
+     * @param string $table
+     * @param string $to
+     * @return Migration
+     */
+    final public function renameTableIfExists(string $table, string $to): Migration
+    {
+        $sql = sprintf('ALTER TABLE IF EXISTS %s RENAME TO %s', $table, $to);
 
         return $this->executeSqlQuery($sql);
     }
@@ -185,7 +194,7 @@ abstract class Migration
     private function executeSqlQuery(string $sql): Migration
     {
         try {
-            $result = (bool) Database::statement($sql);
+            Database::statement($sql);
         } catch (\Exception $exception) {
             echo sprintf("%s%s\n", Color::red("▶"), $sql);
             throw $exception;

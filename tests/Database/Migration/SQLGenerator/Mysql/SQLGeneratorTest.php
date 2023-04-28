@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Database\Migration;
+namespace Bow\Tests\Database\Migration\SQLGenerator\Mysql;
 
 use Bow\Database\Migration\SQLGenerator;
 
@@ -15,7 +15,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->generator = new SQLGenerator('bow_tests');
+        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
     }
 
     /**
@@ -118,32 +118,25 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
     public function test_should_create_correct_datetime_sql_statement()
     {
-        $this->generator->setAdapter('sqlite');
         $this->generator->addDatetime('created_at', ['default' => 'CURRENT_TIMESTAMP']);
-
         $sql = $this->generator->make();
 
-        $this->assertEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        $this->assertEquals($sql, '`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 
     public function test_should_create_not_correct_datetime_sql_statement()
     {
-        $this->generator->setAdapter('sqlite');
-
         $this->generator->addDatetime('created_at');
-
         $sql = $this->generator->make();
 
-        $this->assertNotEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        $this->assertNotEquals($sql, '`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 
     public function test_should_create_correct_timestamps_sql_statement()
     {
-        $this->generator->setAdapter('sqlite');
         $this->generator->addTimestamps();
-
         $sql = $this->generator->make();
 
-        $this->assertEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        $this->assertEquals($sql, '`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 }

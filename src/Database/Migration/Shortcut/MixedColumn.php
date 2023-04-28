@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Database\Migration\Shortcut;
 
 use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Exception\SQLGeneratorException;
 
 trait MixedColumn
 {
@@ -29,6 +30,28 @@ trait MixedColumn
     */
     public function addUuid(string $column, array $attribute = []): SQLGenerator
     {
+        if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
+            $attribute['default'] = 'uuid_generate_v4()';
+        }
+
+        return $this->addColumn($column, 'uuid', $attribute);
+    }
+
+    /**
+    * Add UUID column
+    *
+    * @param string $column
+    * @param array $attribute
+    * @return SQLGenerator
+    */
+    public function addUuidPrimary(string $column, array $attribute = []): SQLGenerator
+    {
+        $attribute['primary'] = true;
+
+        if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
+            $attribute['default'] = 'uuid_generate_v4()';
+        }
+
         return $this->addColumn($column, 'uuid', $attribute);
     }
 
@@ -75,9 +98,37 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addEnum($column, array $attribute = []): SQLGenerator
+    public function addEnum(string $column, array $attribute = []): SQLGenerator
     {
+        if (!isset($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be define!");
+        }
+
+        if (is_array($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be array");
+        }
+
         return $this->addColumn($column, 'enum', $attribute);
+    }
+
+    /**
+     * Add check column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addCheck(string $column, array $attribute = []): SQLGenerator
+    {
+        if (!isset($attribute['size'])) {
+            throw new SQLGeneratorException("The check values should be define!");
+        }
+
+        if (is_array($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be array");
+        }
+
+        return $this->addColumn($column, 'check', $attribute);
     }
 
     /**
@@ -87,7 +138,7 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function changeBoolean($column, array $attribute = []): SQLGenerator
+    public function changeBoolean(string $column, array $attribute = []): SQLGenerator
     {
         return $this->changeColumn($column, 'boolean', $attribute);
     }
@@ -99,7 +150,7 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function changeUuid($column, array $attribute = []): SQLGenerator
+    public function changeUuid(string $column, array $attribute = []): SQLGenerator
     {
         return $this->changeColumn($column, 'uuid', $attribute);
     }
@@ -111,7 +162,7 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function changeBinary($column, array $attribute = []): SQLGenerator
+    public function changeBinary(string $column, array $attribute = []): SQLGenerator
     {
         return $this->changeColumn($column, 'blob', $attribute);
     }
@@ -123,7 +174,7 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function changeIpAddress($column, array $attribute = []): SQLGenerator
+    public function changeIpAddress(string $column, array $attribute = []): SQLGenerator
     {
         return $this->changeColumn($column, 'ip', $attribute);
     }
@@ -135,7 +186,7 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function changeMacAddress($column, array $attribute = []): SQLGenerator
+    public function changeMacAddress(string $column, array $attribute = []): SQLGenerator
     {
         return $this->changeColumn($column, 'mac', $attribute);
     }
@@ -147,8 +198,20 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function changeEnum($column, array $attribute = []): SQLGenerator
+    public function changeEnum(string $column, array $attribute = []): SQLGenerator
     {
         return $this->changeColumn($column, 'enum', $attribute);
+    }
+
+    /**
+     * Change check column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeCheck(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'check', $attribute);
     }
 }

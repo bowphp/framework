@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Database\Migration;
+namespace Bow\Tests\Database\Migration\SQLGenerator\Mysql;
 
 use Bow\Database\Migration\SQLGenerator;
 
@@ -15,7 +15,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->generator = new SQLGenerator('bow_tests');
+        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
     }
 
     /**

@@ -242,7 +242,7 @@ class Database
 
         if (
             !preg_match(
-                "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
+                "/^insert\s+into\s+[\w\d_-`]+\s*(\(.+\))?\s+(values\s*(\(.+\),?)+|\s?set\s+(.+)+);?$/ism",
                 $sql_statement
             )
         ) {
