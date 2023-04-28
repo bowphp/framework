@@ -53,15 +53,7 @@ trait PgsqlCompose
 
         // Bind auto increment action
         if ($increment) {
-            if ($this->adapter === 'sqlite') {
-                $autoincrement = 'AUTOINCREMENT';
-            } elseif ($this->adapter === 'mysql') {
-                $autoincrement = 'AUTO_INCREMENT';
-            } else {
-                $autoincrement = '';
-                $type = 'serial';
-            }
-            $type = sprintf('%s %', $type, $autoincrement);
+            $type = sprintf('%s SERIAL', $type);
         }
 
         // Set column as primary key

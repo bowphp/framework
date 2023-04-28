@@ -30,6 +30,23 @@ trait MixedColumn
     */
     public function addUuid(string $column, array $attribute = []): SQLGenerator
     {
+        if (isset($attribute['increment'])) {
+            throw new SQLGeneratorException("Cannot define the increment for uuid. You can use addUuidPrimary() instead");
+        }
+
+        if (isset($attribute['size'])) {
+            throw new SQLGeneratorException("Cannot define size to uuid type");
+        }
+
+        if ($this->adapter === "mysql") {
+            $attribute['size'] = 36;
+            return $this->addColumn($column, 'varchar', $attribute);
+        }
+
+        if ($this->adapter === "sqlite") {
+            return $this->addColumn($column, 'varchar', $attribute);
+        }
+
         if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
             $attribute['default'] = 'uuid_generate_v4()';
         }
@@ -48,11 +65,15 @@ trait MixedColumn
     {
         $attribute['primary'] = true;
 
+        if (isset($attribute['increment'])) {
+            throw new SQLGeneratorException("Cannot define the increment for uuid.");
+        }
+
         if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
             $attribute['default'] = 'uuid_generate_v4()';
         }
 
-        return $this->addColumn($column, 'uuid', $attribute);
+        return $this->addUuid($column, $attribute);
     }
 
    /**
@@ -121,11 +142,15 @@ trait MixedColumn
     public function addCheck(string $column, array $attribute = []): SQLGenerator
     {
         if (!isset($attribute['size'])) {
-            throw new SQLGeneratorException("The check values should be define!");
+            throw new SQLGeneratorException("The check values should be define.");
         }
 
-        if (is_array($attribute['size'])) {
-            throw new SQLGeneratorException("The enum values should be array");
+        if (!is_array($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be array.");
+        }
+
+        if (count($attribute['size']) === 0) {
+            throw new SQLGeneratorException("The enum values cannot be empty.");
         }
 
         return $this->addColumn($column, 'check', $attribute);
@@ -152,6 +177,23 @@ trait MixedColumn
      */
     public function changeUuid(string $column, array $attribute = []): SQLGenerator
     {
+        if (isset($attribute['size'])) {
+            throw new SQLGeneratorException("Cannot define size to uuid type");
+        }
+
+        if ($this->adapter === "mysql") {
+            $attribute['size'] = 36;
+            return $this->changeColumn($column, 'varchar', $attribute);
+        }
+
+        if ($this->adapter === "sqlite") {
+            return $this->changeColumn($column, 'varchar', $attribute);
+        }
+
+        if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
+            $attribute['default'] = 'uuid_generate_v4()';
+        }
+
         return $this->changeColumn($column, 'uuid', $attribute);
     }
 
