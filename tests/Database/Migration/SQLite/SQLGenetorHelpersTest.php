@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Database\Migration\SQLGenerator\SQLite;
+namespace Bow\Tests\Database\Migration\SQLite;
 
 use Bow\Database\Migration\SQLGenerator;
 

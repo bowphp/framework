@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Database\Migration\SQLGenerator\Mysql;
+namespace Bow\Tests\Database\Migration\Mysql;
 
 use Bow\Database\Migration\SQLGenerator;
 

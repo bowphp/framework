@@ -1,8 +1,10 @@
 <?php
 
-namespace Bow\Tests\Database\Migration\SQLGenerator\Pgsql;
+namespace Bow\Tests\Database\Migration\SQLite;
 
+use Bow\Database\Database;
 use Bow\Database\Migration\SQLGenerator;
+use Bow\Tests\Config\TestingConfiguration;
 
 class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 {
@@ -15,7 +17,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->generator = new SQLGenerator('bow_tests', 'pgsql', 'create');
+        $this->generator = new SQLGenerator('bow_tests', 'sqlite', 'create');
     }
 
     /**
@@ -25,7 +27,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     {
         $this->generator->addColumn('name', 'int');
         $sql = $this->generator->make();
-        $this->assertEquals($sql, '`name` INT NOT NULL');
+        $this->assertEquals($sql, '`name` INTEGER NOT NULL');
 
         $this->generator->addColumn('name', 'string');
         $sql = $this->generator->make();
@@ -33,11 +35,11 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
         $this->generator->addColumn('name', 'string');
         $sql = $this->generator->make();
-        $this->assertEquals($sql, '`name` VARCHAR(255) NOT NULL');
+        $this->assertEquals($sql, '`name` TEXT NOT NULL');
 
         $this->generator->addColumn('name', 'string', ['default' => 'bow', 'size' => 100]);
         $sql = $this->generator->make();
-        $this->assertEquals($sql, "`name` VARCHAR(100) NOT NULL DEFAULT 'bow'");
+        $this->assertEquals($sql, "`name` TEXT NOT NULL DEFAULT 'bow'");
     }
 
     /**
@@ -47,7 +49,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     {
         $this->generator->changeColumn('name', 'int');
         $sql = $this->generator->make();
-        $this->assertEquals($sql, 'MODIFY COLUMN `name` INT NOT NULL');
+        $this->assertEquals($sql, 'MODIFY COLUMN `name` INTEGER NOT NULL');
 
         $this->generator->changeColumn('name', 'string');
         $sql = $this->generator->make();
@@ -55,21 +57,11 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 
         $this->generator->changeColumn('name', 'string');
         $sql = $this->generator->make();
-        $this->assertEquals($sql, 'MODIFY COLUMN `name` VARCHAR(255) NOT NULL');
+        $this->assertEquals($sql, 'MODIFY COLUMN `name` TEXT NOT NULL');
 
         $this->generator->changeColumn('name', 'string', ['default' => 'bow', 'size' => 100]);
         $sql = $this->generator->make();
-        $this->assertEquals($sql, "MODIFY COLUMN `name` VARCHAR(100) NOT NULL DEFAULT 'bow'");
-    }
-
-    /**
-     * Test Rename column action
-     */
-    public function test_rename_column_sql_statement_for_mysql()
-    {
-        $this->generator->renameColumn('name', 'fullname');
-        $sql = $this->generator->make();
-        $this->assertEquals($sql, 'RENAME COLUMN `name` TO `fullname`');
+        $this->assertEquals($sql, "MODIFY COLUMN `name` TEXT NOT NULL DEFAULT 'bow'");
     }
 
     /**
@@ -79,7 +71,9 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     {
         $this->generator->addColumn('lastname', 'string', ['after' => 'firstname']);
         $sql = $this->generator->make();
-        $this->assertEquals($sql, '`lastname` VARCHAR(255) NOT NULL AFTER `firstname`');
+
+        $this->assertNotEquals($sql, '`lastname` TEXT NOT NULL AFTER `firstname` FIRST');
+        $this->assertEquals($sql, '`lastname` TEXT NOT NULL');
     }
 
     /**
@@ -89,7 +83,9 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
     {
         $this->generator->changeColumn('lastname', 'string', ['after' => 'firstname']);
         $sql = $this->generator->make();
-        $this->assertEquals($sql, 'MODIFY COLUMN `lastname` VARCHAR(255) NOT NULL AFTER `firstname`');
+
+        $this->assertNotEquals($sql, 'MODIFY COLUMN `lastname` TEXT NOT NULL AFTER `firstname`');
+        $this->assertEquals($sql, 'MODIFY COLUMN `lastname` TEXT NOT NULL');
     }
 
     /**
@@ -97,9 +93,25 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
      */
     public function test_change_column_with_first_sql_statement()
     {
-        $this->generator->changeColumn('lastname', 'string', ['first' => true]);
+        $this->generator->changeColumn('lastname', 'string');
         $sql = $this->generator->make();
-        $this->assertEquals($sql, 'MODIFY COLUMN `lastname` VARCHAR(255) NOT NULL FIRST');
+
+        $this->assertEquals($sql, 'MODIFY COLUMN `lastname` TEXT NOT NULL');
+    }
+
+    /**
+     * Test Add column action
+     */
+    public function test_should_create_drop_column_sql_statement_as_empty()
+    {
+        $config = TestingConfiguration::getConfig();
+        Database::configure($config["database"]);
+        Database::connection("sqlite");
+
+        $this->generator->dropColumn('name');
+        $sql = $this->generator->make();
+
+        $this->assertEquals($sql, '');
     }
 
     /**
@@ -107,13 +119,19 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
      */
     public function test_should_create_drop_column_sql_statement()
     {
-        $this->generator->dropColumn('name');
-        $sql = $this->generator->make();
-        $this->assertEquals($sql, 'DROP COLUMN `name`');
+        $config = TestingConfiguration::getConfig();
+        Database::configure($config["database"]);
+        Database::connection("sqlite");
 
+        Database::statement('DROP TABLE IF EXISTS pets; CREATE TABLE pets(id integer primary key autoincrement, name text not null, age integer not null)');
+        Database::insert("insert into pets(name, age) values('Milou', 2)");
+        Database::insert("insert into pets(name, age) values('Jor', 1)");
+
+        $this->generator->setTable('pets');
         $this->generator->dropColumn('name');
-        $sql = $this->generator->make();
-        $this->assertEquals($sql, 'DROP COLUMN `name`');
+        $pet = Database::selectOne("select * from pets");
+
+        $this->assertFalse(isset($pet->name));
     }
 
     public function test_should_create_correct_datetime_sql_statement()
@@ -129,7 +147,7 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $this->generator->addDatetime('created_at');
         $sql = $this->generator->make();
 
-        $this->assertNotEquals($sql, '`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        $this->assertNotEquals($sql, '`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 
     public function test_should_create_correct_timestamps_sql_statement()

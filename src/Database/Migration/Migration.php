@@ -7,6 +7,7 @@ namespace Bow\Database\Migration;
 use Bow\Console\Color;
 use Bow\Database\Database;
 use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Exception\MigrationException;
 use Bow\Database\Connection\AbstractConnection;
 
 abstract class Migration
@@ -190,6 +191,7 @@ abstract class Migration
      *
      * @param string $sql
      * @return Migration
+     * @throws MigrationException
      */
     private function executeSqlQuery(string $sql): Migration
     {
@@ -197,11 +199,10 @@ abstract class Migration
             Database::statement($sql);
         } catch (\Exception $exception) {
             echo sprintf("%s%s\n", Color::red("▶"), $sql);
-            throw $exception;
+            throw new MigrationException($exception->getMessage(), $exception->getCode());
         }
 
         echo sprintf("%s%s\n", Color::green("▶"), $sql);
-
         return $this;
     }
 }

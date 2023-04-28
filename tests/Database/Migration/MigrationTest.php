@@ -3,10 +3,12 @@
 namespace Bow\Tests\Database\Migration;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\MigrationException;
 use Bow\Database\Migration\Migration;
 use Bow\Database\Migration\SQLGenerator;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Database\Stubs\MigrationExtendedStub;
+use Exception;
 
 class MigrationTest extends \PHPUnit\Framework\TestCase
 {
@@ -26,58 +28,91 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     protected function setUp(): void
     {
         $this->migration = new MigrationExtendedStub();
+        ob_start();
     }
 
-    public function test_add_sql()
+    protected function tearDown(): void
     {
-        ob_start();
+        ob_get_clean();
+    }
 
-        $this->migration->addSql('drop table if exists `bow_testing`;');
-        $this->migration->addSql('create table if not exists `bow_testing` (name varchar(255));');
+    /**
+     * @dataProvider connectionNames
+     */
+    public function test_addSql_method(string $name)
+    {
+        $this->migration->connection($name)->addSql('drop table if exists `bow_testing`;');
+        $this->migration->connection($name)->addSql('create table if not exists `bow_testing` (name varchar(255));');
 
-        $result = Database::insert('INSERT INTO `bow_testing`(name) VALUES("Bow Framework")');
-
+        $result = Database::connection($name)->insert('INSERT INTO `bow_testing`(name) VALUES("Bow Framework")');
         $this->assertEquals($result, 1);
 
-        $result = Database::select('select * from `bow_testing`');
-
+        $result = Database::connection($name)->select('select * from `bow_testing`');
         $this->assertTrue(is_array($result));
 
-        $this->migration->addSql('drop table if exists `bow_testing`;');
+        $this->migration->connection($name)->addSql('drop table if exists `bow_testing`;');
 
-        ob_get_clean();
+        $this->expectException(Exception::class);
+        $result = Database::connection($name)->insert('INSERT INTO `bow_testing`(name) VALUES("Bow Framework")');
     }
 
-    public function test_create_method()
+    /**
+     * @dataProvider connectionNames
+     */
+    public function test_create_success(string $name)
     {
-        ob_start();
+        $status = $this->migration->connection($name)->create('bow_testing', function (SQLGenerator $generator) {
+            $generator->addColumn('id', 'string', ['size' => 225, 'primary' => true]);
+            $generator->addColumn('name', 'string', ['size' => 225]);
+            $generator->addColumn('lastname', 'string', ['size' => 225]);
+            $generator->addColumn('created_at', 'datetime');
+        });
+        $this->assertInstanceOf(Migration::class, $status);
+    }
 
-        try {
-            $this->migration->create('bow_testing', function (SQLGenerator $generator) {
-                $generator->addColumn('id', 'string', ['size' => 225, 'primary' => true]);
-                $generator->addColumn('name', 'string', ['size' => 225]);
-                $generator->addColumn('lastname', 'string', ['size' => 225]);
-                $generator->addColumn('created_at', 'datetime');
-            });
+    /**
+     * @dataProvider connectionNames
+     */
+    public function test_create_fail(string $name)
+    {
+        $this->expectException(MigrationException::class);
+        $this->migration->connection($name)->create('bow_testing', function (SQLGenerator $generator) {
+            $generator->addColumn('id', 'string', ['size' => 225, 'primary' => true]);
+            $generator->addColumn('name', 'string', ['size' => 225]);
+            $generator->addColumn('lastname', 'string', ['size' => 225]);
+            $generator->addColumn('created_at', 'datetime');
+        });
+    }
 
-            $this->assertTrue(true, 'Migration ok');
-        } catch (\Exception $e) {
-            $this->assertFalse(false, $e->getMessage());
-        }
+    /**
+     * @dataProvider connectionNames
+     */
+    public function test_alter_success(string $name)
+    {
+        $status = $this->migration->connection($name)->alter('bow_testing', function (SQLGenerator $generator) {
+            $generator->dropColumn('name');
+            $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
+        });
 
-        try {
-            $this->migration->alter('bow_testing', function (SQLGenerator $generator) {
-                $generator->dropColumn('name');
-                $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
-            });
+        $this->assertInstanceOf(Migration::class, $status);
+    }
 
-             $this->assertTrue(true, 'Migration ok');
-        } catch (\Exception $e) {
-            $this->assertFalse(false, $e->getMessage());
-        }
+    /**
+     * @dataProvider connectionNames
+     */
+    public function test_alter_fail(string $name)
+    {
+        $this->expectException(MigrationException::class);
+        $status = $this->migration->connection($name)->alter('bow_testing', function (SQLGenerator $generator) {
+            $generator->dropColumn('name');
+            $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
+        });
+    }
 
-        $this->migration->drop('bow_testing');
-
-        ob_get_clean();
+    public function connectionNames()
+    {
+        return [
+            ['mysql'], ['sqlite'], ['pgsql']
+        ];
     }
 }

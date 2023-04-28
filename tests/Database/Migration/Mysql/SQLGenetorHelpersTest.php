@@ -1,8 +1,7 @@
 <?php
 
-namespace Bow\Tests\Database\Migration\SQLGenerator\Pgsql;
+namespace Bow\Tests\Database\Migration\Mysql;
 
-use Bow\Database\Exception\SQLGeneratorException;
 use Bow\Database\Migration\SQLGenerator;
 
 class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
@@ -16,7 +15,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->generator = new SQLGenerator('bow_tests', 'pgsql', 'create');
+        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
     }
 
     /**
@@ -73,34 +72,8 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $method = "add{$method}Increment";
         if (method_exists($this->generator, $method)) {
             $sql = $this->generator->{$method}('column')->make();
-            $this->assertEquals($sql, "`column` {$type} SERIAL PRIMARY KEY NOT NULL");
+            $this->assertEquals($sql, "`column` {$type} AUTO_INCREMENT PRIMARY KEY NOT NULL");
         }
-    }
-
-    public function test_uuid_statement()
-    {
-        $sql = $this->generator->addUuid('column', ['unique' => true])->make();
-        $this->assertEquals($sql, "`column` UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4()");
-
-        $sql = $this->generator->addUuid('column', ['primary' => true])->make();
-        $this->assertEquals($sql, "`column` UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4()");
-
-        $this->expectException(SQLGeneratorException::class);
-        $this->expectExceptionMessage("Cannot define the increment for uuid. You can use addUuidPrimary() instead");
-        $sql = $this->generator->addUuid('column', ['primary' => true, "increment" => true])->make();
-    }
-
-    public function test_uuid_primary_statement()
-    {
-        $sql = $this->generator->addUuidPrimary('column')->make();
-        $this->assertEquals($sql, "`column` UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4()");
-    }
-
-    public function test_uuid_should_throw_errors_with_increment_attribute()
-    {
-        $this->expectException(SQLGeneratorException::class);
-        $this->expectExceptionMessage("Cannot define the increment for uuid.");
-        $this->generator->addUuidPrimary('column', ["increment" => true])->make();
     }
 
     public function getNumberTypes()
