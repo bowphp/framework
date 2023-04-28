@@ -149,7 +149,7 @@ class SQLGenerator
      */
     public function renameColumn(string $name, string $new): SQLGenerator
     {
-        if ($this->adapter == 'mysql') {
+        if (in_array($this->adapter, ['mysql', 'pgsql'])) {
             $this->sqls[] = sprintf("RENAME COLUMN `%s` TO `%s`", $name, $new);
         } else {
             $this->renameColumnOnSqlite($name, $new);
