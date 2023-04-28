@@ -261,7 +261,6 @@ class Database
         }
 
         $collection = [];
-
         $result = 0;
 
         foreach ($data as $key => $value) {
@@ -269,7 +268,6 @@ class Database
                 $result += static::executePrepareQuery($sql_statement, $value);
                 continue;
             }
-
             $collection[$key] = $value;
         }
 

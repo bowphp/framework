@@ -105,7 +105,7 @@ trait MysqlCompose
      * @param string $name
      * @return void
      */
-    private function dropColumnOnMysql(string $name): void
+    private function dropColumnForMysql(string $name): void
     {
         $names = (array) $name;
 

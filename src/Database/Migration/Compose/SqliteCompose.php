@@ -138,7 +138,7 @@ trait SqliteCompose
      *
      * @param string|array $name
      */
-    private function dropColumnOnSqlite(string|array $name): void
+    private function dropColumnForSqlite(string|array $name): void
     {
         $pdo = Database::getPdo();
 

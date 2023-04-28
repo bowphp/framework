@@ -149,10 +149,16 @@ class SQLGenerator
      */
     public function renameColumn(string $name, string $new): SQLGenerator
     {
-        if (in_array($this->adapter, ['mysql', 'pgsql'])) {
-            $this->sqls[] = sprintf("RENAME COLUMN `%s` TO `%s`", $name, $new);
-        } else {
+        if (!in_array($this->adapter, ['mysql', 'pgsql'])) {
             $this->renameColumnOnSqlite($name, $new);
+
+            return $this;
+        }
+
+        if ($this->adapter === 'pgsql') {
+            $this->sqls[] = sprintf("RENAME COLUMN %s TO %s", $name, $new);
+        } else {
+            $this->sqls[] = sprintf("RENAME COLUMN `%s` TO `%s`", $name, $new);
         }
 
         return $this;
@@ -166,10 +172,12 @@ class SQLGenerator
      */
     public function dropColumn(string $name): SQLGenerator
     {
-        if (in_array($this->adapter, ['mysql', 'pgsql'])) {
-            $this->dropColumnOnMysql($name);
+        if ($this->adapter === 'mysql') {
+            $this->dropColumnForMysql($name);
+        } else if ($this->adapter === 'pgsql') {
+            $this->dropColumnForPgsql($name);
         } else {
-            $this->dropColumnOnSqlite($name);
+            $this->dropColumnForSqlite($name);
         }
 
         return $this;

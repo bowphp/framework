@@ -44,9 +44,8 @@ trait PgsqlCompose
                 $size = (array) $size;
                 $size = "'" . implode("', '", $size) . "'";
             }
-            if ($this->adapter === 'sqlite' && !in_array($raw_type, ['ENUM', 'CHECK'])) {
-                $type = sprintf('%s', $type, $size);
-            } else {
+
+            if (in_array($raw_type, ['ENUM', 'CHECK', 'VARCHAR', 'STRING'])) {
                 $type = sprintf('%s(%s)', $type, $size);
             }
         }
@@ -98,7 +97,22 @@ trait PgsqlCompose
         }
 
         return trim(
-            sprintf('%s `%s` %s', $description['command'], $name, $type)
+            sprintf('%s %s %s', $description['command'], $name, $type)
         );
+    }
+
+    /**
+     * Drop Column action with pgsql
+     *
+     * @param string $name
+     * @return void
+     */
+    private function dropColumnForPgsql(string $name): void
+    {
+        $names = (array) $name;
+
+        foreach ($names as $name) {
+            $this->sqls[] = trim(sprintf('DROP COLUMN %s', $name));
+        }
     }
 }

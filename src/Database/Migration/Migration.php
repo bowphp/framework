@@ -99,9 +99,9 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        $generator = new SQLGenerator($table, $this->adapter->getName(), 'create');
-
-        call_user_func_array($cb, [$generator]);
+        call_user_func_array($cb, [
+            $generator = new SQLGenerator($table, $this->adapter->getName(), 'create')
+        ]);
 
         if ($this->adapter->getName() == 'mysql') {
             $engine = sprintf('ENGINE=%s', strtoupper($generator->getEngine()));
@@ -109,7 +109,11 @@ abstract class Migration
             $engine = null;
         }
 
-        $sql = sprintf("CREATE TABLE `%s` (%s) %s;", $table, $generator->make(), $engine);
+        if ($this->adapter->getName() === 'pgsql') {
+            $sql = sprintf("CREATE TABLE %s (%s) %s;", $table, $generator->make(), $engine);
+        } else {
+            $sql = sprintf("CREATE TABLE `%s` (%s) %s;", $table, $generator->make(), $engine);
+        }
 
         return $this->executeSqlQuery($sql);
     }
@@ -129,7 +133,11 @@ abstract class Migration
             $generator = new SQLGenerator($table, $this->adapter->getName(), 'alter')
         ]);
 
-        $sql = sprintf('ALTER TABLE `%s` %s;', $table, $generator->make());
+        if ($this->adapter->getName() === 'pgsql') {
+            $sql = sprintf('ALTER TABLE %s %s;', $table, $generator->make());
+        } else {
+            $sql = sprintf('ALTER TABLE `%s` %s;', $table, $generator->make());
+        }
 
         return $this->executeSqlQuery($sql);
     }
@@ -199,7 +207,7 @@ abstract class Migration
             Database::statement($sql);
         } catch (\Exception $exception) {
             echo sprintf("%s%s\n", Color::red("▶"), $sql);
-            throw new MigrationException($exception->getMessage(), $exception->getCode());
+            throw new MigrationException($exception->getMessage(), (int) $exception->getCode());
         }
 
         echo sprintf("%s%s\n", Color::green("▶"), $sql);
