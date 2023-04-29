@@ -343,16 +343,4 @@ class SQLGenerator
 
         return $type;
     }
-
-    /**
-     * Prefix column name by an other pieces
-     *
-     * @param string $name
-     * @param string $by
-     * @return string
-     */
-    private function prefixColumn(string $name, string $by): string
-    {
-        return $this->table . '_' . $name . '_' . $by;
-    }
 }

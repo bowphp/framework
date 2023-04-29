@@ -31,7 +31,9 @@ trait MixedColumn
     public function addUuid(string $column, array $attribute = []): SQLGenerator
     {
         if (isset($attribute['increment'])) {
-            throw new SQLGeneratorException("Cannot define the increment for uuid. You can use addUuidPrimary() instead");
+            throw new SQLGeneratorException(
+                "Cannot define the increment for uuid. You can use addUuidPrimary() instead"
+            );
         }
 
         if (isset($attribute['size'])) {
