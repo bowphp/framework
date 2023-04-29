@@ -62,7 +62,7 @@ trait PgsqlCompose
 
         // Bind auto increment action
         if ($increment) {
-            $type = sprintf('%s SERIAL', $type);
+            $type = 'SERIAL';
         }
 
         // Set column as primary key

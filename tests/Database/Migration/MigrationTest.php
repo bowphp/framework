@@ -67,12 +67,16 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             $this->expectException(MigrationException::class);
         }
 
-        $this->migration->connection($name)->create('bow_testing', function (SQLGenerator $generator) {
+        $status = $this->migration->connection($name)->create('bow_testing', function (SQLGenerator $generator) {
             $generator->addColumn('id', 'string', ['size' => 225, 'primary' => true]);
             $generator->addColumn('name', 'typenotfound', ['size' => 225]); // Sqlite tranform the unknown type to NULL type
             $generator->addColumn('lastname', 'string', ['size' => 225]);
             $generator->addColumn('created_at', 'datetime');
         });
+
+        if ($name == 'sqlite') {
+            $this->assertInstanceOf(Migration::class, $status);
+        }
     }
 
     /**

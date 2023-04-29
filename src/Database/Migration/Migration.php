@@ -68,7 +68,7 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        $sql = sprintf('DROP TABLE `%s`;', $table);
+        $sql = sprintf('DROP TABLE %s;', $table);
 
         return $this->executeSqlQuery($sql);
     }
@@ -83,7 +83,11 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        $sql = sprintf('DROP TABLE IF EXISTS `%s`;', $table);
+        if ($this->adapter->getName() === 'pgsql') {
+            $sql = sprintf('DROP TABLE IF EXISTS %s CASCADE;', $table);
+        } else {
+            $sql = sprintf('DROP TABLE IF EXISTS %s;', $table);
+        }
 
         return $this->executeSqlQuery($sql);
     }
@@ -104,15 +108,15 @@ abstract class Migration
         ]);
 
         if ($this->adapter->getName() == 'mysql') {
-            $engine = sprintf('ENGINE=%s', strtoupper($generator->getEngine()));
+            $engine = sprintf(' ENGINE=%s', strtoupper($generator->getEngine()));
         } else {
             $engine = null;
         }
 
         if ($this->adapter->getName() === 'pgsql') {
-            $sql = sprintf("CREATE TABLE %s (%s) %s;", $table, $generator->make(), $engine);
+            $sql = sprintf("CREATE TABLE %s (%s)%s;", $table, $generator->make(), $engine);
         } else {
-            $sql = sprintf("CREATE TABLE `%s` (%s) %s;", $table, $generator->make(), $engine);
+            $sql = sprintf("CREATE TABLE `%s` (%s)%s;", $table, $generator->make(), $engine);
         }
 
         return $this->executeSqlQuery($sql);

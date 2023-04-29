@@ -47,14 +47,14 @@ trait SqliteCompose
         if ($size) {
         }
 
-        // Bind auto increment action
-        if ($increment) {
-            $type = sprintf('%s AUTOINCREMENT', $type);
-        }
-
         // Set column as primary key
         if ($primary) {
             $type = sprintf('%s PRIMARY KEY', $type);
+        }
+
+        // Bind auto increment action
+        if ($increment) {
+            $type = sprintf('%s AUTOINCREMENT', $type);
         }
 
         // Set column as unique

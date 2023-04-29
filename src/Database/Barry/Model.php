@@ -155,6 +155,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Set the connection
+     *
+     * @param string $name
+     * @return Model
+     */
+    public static function connection(string $name): Model
+    {
+        $model = new static();
+        $model->setConnection($name);
+
+        return $model;
+    }
+
+    /**
      * Get all records
      *
      * @param  array $columns
@@ -676,13 +690,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Set connection point
      *
-     * @param string $connection
+     * @param string $name
      * @return Builder
      */
-    public function setConnection(string $connection): Builder
+    public function setConnection(string $name): Builder
     {
-        $this->connection = $connection;
+        $this->connection = $name;
 
+        DB::connection($name);
         $builder = static::query();
 
         return $builder;
