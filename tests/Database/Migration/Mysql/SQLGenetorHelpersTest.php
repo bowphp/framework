@@ -2,6 +2,7 @@
 
 namespace Bow\Tests\Database\Migration\Mysql;
 
+use Bow\Database\Exception\SQLGeneratorException;
 use Bow\Database\Migration\SQLGenerator;
 
 class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
@@ -34,8 +35,16 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
             $this->assertEquals($sql, "`name` {$type} NOT NULL");
         }
 
+        if ($type === 'TEXT') {
+            $this->expectException(SQLGeneratorException::class);
+            $this->expectExceptionMessage("Cannot define default value for TEXT type");
+        }
+
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'size' => 100])->make();
-        $this->assertEquals($sql, "`name` {$type}(100) NOT NULL DEFAULT '$default'");
+
+        if ($type !== 'TEXT') {
+            $this->assertEquals($sql, "`name` {$type}(100) NOT NULL DEFAULT '$default'");
+        }
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'size' => 100, 'nullable' => true])->make();
         $this->assertEquals($sql, "`name` {$type}(100) NULL DEFAULT '$default'");
@@ -73,8 +82,14 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
             $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} NOT NULL");
         }
 
+        if ($type == "TEXT") {
+            $this->expectException(SQLGeneratorException::class);
+            $this->expectExceptionMessage("Cannot define default value for TEXT type");
+        }
         $sql = $this->generator->{"change$method"}('name', ['default' => $default, 'size' => 100])->make();
-        $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(100) NOT NULL DEFAULT '$default'");
+        if ($type != "TEXT") {
+            $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(100) NOT NULL DEFAULT '$default'");
+        }
 
         $sql = $this->generator->{"change$method"}('name', ['default' => $default, 'size' => 100, 'nullable' => true])->make();
         $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(100) NULL DEFAULT '$default'");

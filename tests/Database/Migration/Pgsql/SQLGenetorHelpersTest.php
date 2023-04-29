@@ -104,19 +104,35 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, "name {$type} NOT NULL");
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default])->make();
-        $this->assertEquals($sql, "name {$type} NOT NULL DEFAULT $default");
+        if ($type === "CHAR") {
+            $this->assertEquals($sql, "name {$type} NOT NULL DEFAULT '$default'");
+        } else {
+            $this->assertEquals($sql, "name {$type} NOT NULL DEFAULT $default");
+        }
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'size' => 100])->make();
-        $this->assertEquals($sql, "name {$type} NOT NULL DEFAULT $default");
+        if ($type === "CHAR") {
+            $this->assertEquals($sql, "name {$type} NOT NULL DEFAULT '$default'");
+        } else {
+            $this->assertEquals($sql, "name {$type} NOT NULL DEFAULT $default");
+        }
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'nullable' => true])->make();
-        $this->assertEquals($sql, "name {$type} NULL DEFAULT $default");
+        if ($type === "CHAR") {
+            $this->assertEquals($sql, "name {$type} NULL DEFAULT '$default'");
+        } else {
+            $this->assertEquals($sql, "name {$type} NULL DEFAULT $default");
+        }
 
         $sql = $this->generator->{"add$method"}('name', ['primary' => true])->make();
         $this->assertEquals($sql, "name {$type} PRIMARY KEY NOT NULL");
 
         $sql = $this->generator->{"add$method"}('name', ['primary' => true, 'default' => $default, 'nullable' => true])->make();
-        $this->assertEquals($sql, "name {$type} PRIMARY KEY NULL DEFAULT $default");
+        if ($type === "CHAR") {
+            $this->assertEquals($sql, "name {$type} PRIMARY KEY NULL DEFAULT '$default'");
+        } else {
+            $this->assertEquals($sql, "name {$type} PRIMARY KEY NULL DEFAULT $default");
+        }
 
         $sql = $this->generator->{"add$method"}('name', ['unique' => true])->make();
         $this->assertEquals($sql, "name {$type} UNIQUE NOT NULL");

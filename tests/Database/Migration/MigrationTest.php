@@ -62,9 +62,11 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_create_fail(string $name)
     {
         Database::connection($name)->statement("drop table if exists bow_testing;");
+
         if ($name != 'sqlite') {
             $this->expectException(MigrationException::class);
         }
+
         $this->migration->connection($name)->create('bow_testing', function (SQLGenerator $generator) {
             $generator->addColumn('id', 'string', ['size' => 225, 'primary' => true]);
             $generator->addColumn('name', 'typenotfound', ['size' => 225]); // Sqlite tranform the unknown type to NULL type
