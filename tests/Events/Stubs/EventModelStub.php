@@ -1,10 +1,10 @@
 <?php
 
-namespace Bow\Tests\Events;
+namespace Bow\Tests\Events\Stubs;
 
 class EventModelStub extends \Bow\Database\Barry\Model
 {
-    protected string $table = 'pets';
+    protected string $table = 'events';
 
     protected string $primarey_key = 'id';
 
