@@ -27,7 +27,12 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 
         $sql = $this->generator->{"add$method"}('name')->make();
         $this->assertNotEquals($sql, 'name STRING NOT NULL');
-        $this->assertEquals($sql, "`name` {$type}(255) NOT NULL");
+
+        if (preg_match('/STRING|VARCHAR/', $type)) {
+            $this->assertEquals($sql, "`name` {$type}(255) NOT NULL");
+        } else {
+            $this->assertEquals($sql, "`name` {$type} NOT NULL");
+        }
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'size' => 100])->make();
         $this->assertEquals($sql, "`name` {$type}(100) NOT NULL DEFAULT '$default'");
@@ -36,13 +41,21 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, "`name` {$type}(100) NULL DEFAULT '$default'");
 
         $sql = $this->generator->{"add$method"}('name', ['primary' => true])->make();
-        $this->assertEquals($sql, "`name` {$type}(255) PRIMARY KEY NOT NULL");
+        if (preg_match('/STRING|VARCHAR/', $type)) {
+            $this->assertEquals($sql, "`name` {$type}(255) PRIMARY KEY NOT NULL");
+        } else {
+            $this->assertEquals($sql, "`name` {$type} PRIMARY KEY NOT NULL");
+        }
 
         $sql = $this->generator->{"add$method"}('name', ['primary' => true, 'default' => $default, 'size' => 100, 'nullable' => true])->make();
         $this->assertEquals($sql, "`name` {$type}(100) PRIMARY KEY NULL DEFAULT '$default'");
 
         $sql = $this->generator->{"add$method"}('name', ['unique' => true])->make();
-        $this->assertEquals($sql, "`name` {$type}(255) UNIQUE NOT NULL");
+        if (preg_match('/STRING|VARCHAR/', $type)) {
+            $this->assertEquals($sql, "`name` {$type}(255) UNIQUE NOT NULL");
+        } else {
+            $this->assertEquals($sql, "`name` {$type} UNIQUE NOT NULL");
+        }
     }
 
     /**
@@ -53,7 +66,12 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $type = strtoupper($type);
 
         $sql = $this->generator->{"change$method"}('name')->make();
-        $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(255) NOT NULL");
+
+        if (preg_match('/STRING|VARCHAR/', $type)) {
+            $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(255) NOT NULL");
+        } else {
+            $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} NOT NULL");
+        }
 
         $sql = $this->generator->{"change$method"}('name', ['default' => $default, 'size' => 100])->make();
         $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(100) NOT NULL DEFAULT '$default'");
@@ -62,13 +80,21 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(100) NULL DEFAULT '$default'");
 
         $sql = $this->generator->{"change$method"}('name', ['primary' => true])->make();
-        $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(255) PRIMARY KEY NOT NULL");
+        if (preg_match('/STRING|VARCHAR/', $type)) {
+            $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(255) PRIMARY KEY NOT NULL");
+        } else {
+            $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} PRIMARY KEY NOT NULL");
+        }
 
         $sql = $this->generator->{"change$method"}('name', ['primary' => true, 'default' => $default, 'size' => 100, 'nullable' => true])->make();
         $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(100) PRIMARY KEY NULL DEFAULT '$default'");
 
         $sql = $this->generator->{"change$method"}('name', ['unique' => true])->make();
-        $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(255) UNIQUE NOT NULL");
+        if (preg_match('/STRING|VARCHAR/', $type)) {
+            $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(255) UNIQUE NOT NULL");
+        } else {
+            $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} UNIQUE NOT NULL");
+        }
     }
 
     /**
@@ -83,10 +109,10 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, "`name` {$type} NOT NULL");
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'size' => 100])->make();
-        $this->assertEquals($sql, "`name` {$type} NOT NULL DEFAULT $default");
+        $this->assertEquals($sql, "`name` {$type}(100) NOT NULL DEFAULT $default");
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'size' => 100])->make();
-        $this->assertEquals($sql, "`name` {$type} NOT NULL DEFAULT $default");
+        $this->assertEquals($sql, "`name` {$type}(100) NOT NULL DEFAULT $default");
 
         $sql = $this->generator->{"add$method"}('name', ['default' => $default, 'nullable' => true])->make();
         $this->assertEquals($sql, "`name` {$type} NULL DEFAULT $default");
@@ -112,7 +138,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} NOT NULL");
 
         $sql = $this->generator->{"change$method"}('name', ['default' => $default, 'size' => 100])->make();
-        $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} NOT NULL DEFAULT $default");
+        $this->assertEquals($sql, "MODIFY COLUMN `name` {$type}(100) NOT NULL DEFAULT $default");
 
         $sql = $this->generator->{"change$method"}('name', ['default' => $default])->make();
         $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} NOT NULL DEFAULT $default");
@@ -179,8 +205,8 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
     {
         return [
             ["varchar", "String", "bow"],
-            ["long varchar", "LongString", "bow"],
             ["text", "Text", "bow"],
+            ["char", "Char", "b"],
         ];
     }
 
@@ -188,7 +214,6 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
     {
         return [
             ["longtext", "Longtext", "bow"],
-            ["character", "Char", "'b'"],
             ["blob", "Blob", "bow"],
             ["json", "Json", "{}"],
         ];

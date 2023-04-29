@@ -2,6 +2,8 @@
 
 namespace Bow\Database\Migration\Compose;
 
+use Bow\Database\Exception\SQLGeneratorException;
+
 trait MysqlCompose
 {
     /**
@@ -18,6 +20,10 @@ trait MysqlCompose
         $raw_type = strtoupper($type);
         $type = $raw_type;
         $attribute = $description['attribute'];
+
+        if (in_array($type, ['TEXT']) && isset($attribute['default'])) {
+            throw new SQLGeneratorException("Cannot define default value for $type type");
+        }
 
         // Transform attribute
         $default = $attribute['default'] ?? null;
@@ -77,7 +83,7 @@ trait MysqlCompose
 
         // Add default value
         if (!is_null($default)) {
-            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM'])) {
+            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM', 'TEXT'])) {
                 $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';

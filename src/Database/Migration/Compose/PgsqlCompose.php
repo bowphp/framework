@@ -21,6 +21,10 @@ trait PgsqlCompose
         $type = $raw_type;
         $attribute = $description['attribute'];
 
+        if (in_array($type, ['TEXT']) && isset($attribute['default'])) {
+            throw new SQLGeneratorException("Cannot define default value for $type type");
+        }
+
         // Transform attribute
         $default = $attribute['default'] ?? null;
         $size = $attribute['size'] ?? false;
@@ -51,7 +55,6 @@ trait PgsqlCompose
                 $size = (array) $size;
                 $size = "'" . implode("', '", $size) . "'";
             }
-
             if (in_array($raw_type, ['ENUM', 'CHECK', 'VARCHAR', 'LONG VARCHAR', 'STRING'])) {
                 $type = sprintf('%s(%s)', $type, $size);
             }
@@ -81,7 +84,7 @@ trait PgsqlCompose
 
         // Add default value
         if (!is_null($default)) {
-            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM'])) {
+            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM', 'CHECK', 'TEXT'])) {
                 $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';

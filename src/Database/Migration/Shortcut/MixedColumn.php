@@ -77,7 +77,7 @@ trait MixedColumn
     }
 
     /**
-     * Add BLOB column
+     * Add BINARY column
      *
      * @param string $column
      * @param array $attribute
@@ -85,7 +85,7 @@ trait MixedColumn
      */
     public function addBinary(string $column, array $attribute = []): SQLGenerator
     {
-        return $this->addColumn($column, 'blob', $attribute);
+        return $this->addColumn($column, 'binary', $attribute);
     }
 
     /**
@@ -95,9 +95,33 @@ trait MixedColumn
      * @param array $attribute
      * @return SQLGenerator
      */
-    public function addTinyBinary(string $column, array $attribute = []): SQLGenerator
+    public function addTinyBlob(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'tinyblob', $attribute);
+    }
+
+    /**
+     * Add LONGBLOB column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addLongBlob(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->addColumn($column, 'longblob', $attribute);
+    }
+
+    /**
+     * Add MEDIUMBLOB column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function addMediumBlob(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->addColumn($column, 'mediumblob', $attribute);
     }
 
     /**
@@ -218,7 +242,43 @@ trait MixedColumn
      */
     public function changeBinary(string $column, array $attribute = []): SQLGenerator
     {
-        return $this->changeColumn($column, 'blob', $attribute);
+        return $this->changeColumn($column, 'binary', $attribute);
+    }
+
+    /**
+     * Change TINYBLOB column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeLongBlob(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'longblob', $attribute);
+    }
+
+    /**
+     * Change MEDIUMBLOB column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeMediumBlob(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'mediumblob', $attribute);
+    }
+
+    /**
+     * Change TINYBLOB column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     */
+    public function changeTinyBlob(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->changeColumn($column, 'tinyblob', $attribute);
     }
 
     /**
