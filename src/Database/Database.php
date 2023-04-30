@@ -411,6 +411,10 @@ class Database
     {
         static::verifyConnection();
 
+        if ($name === null) {
+            return static::$adapter->getConnection();
+        }
+
         return static::$adapter->getConnection()->lastInsertId($name);
     }
 

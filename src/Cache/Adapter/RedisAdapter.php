@@ -2,7 +2,7 @@
 
 namespace Bow\Cache\Adapter;
 
-use Redis;
+use \Redis;
 use Bow\Cache\Adapter\CacheAdapterInterface;
 
 class RedisAdapter implements CacheAdapterInterface
@@ -22,8 +22,57 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function __construct(array $config)
     {
+
+        $options = [];
+        $auth = [];
+        if (isset($config["password"])) {
+            $auth[] = $config["password"];
+        }
+
+        if (isset($config["username"]) && !is_null($config["username"])) {
+            array_unshift($auth, $config["username"]);
+        }
+
+        if (count($auth) > 0) {
+            $options = compact('auth');
+        }
+
+        $options['backoff'] = [
+            'algorithm' => Redis::BACKOFF_ALGORITHM_DECORRELATED_JITTER,
+            'base' => 500,
+            'cap' => 750,
+        ];
+    
         $this->redis = new Redis();
-        $this->redis->connect($config["host"], $config["port"]);
+        $this->redis->connect(
+            $config["host"],
+            $config["port"] ?? 6379,
+            $config["timeout"] ?? 2.5,
+            null,
+            0,
+            0,
+            $options
+        );
+
+        $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_JSON);
+
+        if (isset($config["prefix"])) {
+            $this->redis->setOption(Redis::OPT_PREFIX, $config["prefix"]);
+        }
+
+        $this->redis->select($config["database"] ?? 0);
+    }
+
+    /**
+     * Ping the redis service
+     *
+     * @param ?string $message
+     */
+    public function ping(?string $message = null)
+    {
+        $this->redis->ping($message);
+
+        return $this;
     }
 
     /**
@@ -45,7 +94,7 @@ class RedisAdapter implements CacheAdapterInterface
             ];
         }
 
-        return $this->redis->set($key, serialize($content), $options);
+        return $this->redis->set($key, $content, $options);
     }
 
     /**
@@ -89,7 +138,7 @@ class RedisAdapter implements CacheAdapterInterface
             return is_callable($default) ? $default() : $default;
         }
 
-        $value = unserialize($this->redis->get($key));
+        $value = $this->redis->get($key);
 
         return is_null($value) ? $default : $value;
     }
