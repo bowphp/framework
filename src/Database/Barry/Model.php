@@ -250,16 +250,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Returns the description of the table
-     *
-     * @return bool
-     */
-    public static function describe(): bool
-    {
-        return DB::statement('desc ' . static::query()->getTable());
-    }
-
-    /**
      * Find information and delete it
      *
      * @param mixed $id
@@ -310,8 +300,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if ($model->timestamps) {
             $data = array_merge($data, [
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                $model->created_at => date('Y-m-d H:i:s'),
+                $model->updated_at => date('Y-m-d H:i:s')
             ]);
         }
 
@@ -909,7 +899,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param  array  $arguments
      * @return mixed
      */
-    public static function __callStatic($name, $arguments)
+    public static function __callStatic(string $name, array $arguments)
     {
         $model = static::query();
 

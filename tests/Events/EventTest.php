@@ -18,8 +18,10 @@ class EventTest extends \PHPUnit\Framework\TestCase
     {
         $config = TestingConfiguration::getConfig();
         Database::configure($config["database"]);
-        Database::statement('create table if not exists events (id int primary key, name varchar(255))');
-        Database::statement("insert into events values (1, 'fluffy'), (2, 'dolly')");
+        Database::connection("mysql");
+        Database::connection("mysql")->statement('drop table if exists events');
+        Database::connection("mysql")->statement('create table if not exists events (id int primary key, name varchar(255))');
+        Database::connection("mysql")->statement("insert into events values (1, 'fluffy'), (2, 'dolly')");
         static::$cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
 
         Event::on(UserEventStub::class, UserEventListenerStub::class);
@@ -33,11 +35,6 @@ class EventTest extends \PHPUnit\Framework\TestCase
         Event::emit('user.destroy', 'destroy');
     }
 
-    public static function tearDownAfterClass(): void
-    {
-        Database::statement('drop table if exists events');
-    }
-
     public function test_event_binding_and_email()
     {
         $this->assertTrue(Event::bound('user.destroy'));
@@ -48,19 +45,18 @@ class EventTest extends \PHPUnit\Framework\TestCase
 
     public function test_model_created_event_emited()
     {
-        $pet_model = new EventModelStub();
-        $pet_model->truncate();
-        $pet_model->setAttributes([
-            'id' => 1,
+        $event = EventModelStub::connection("mysql");
+        $event->setAttributes([
+            'id' => 3,
             'name' => 'Filou'
         ]);
-        $this->assertEquals($pet_model->save(), 1);
+        $this->assertEquals($event->save(), 1);
         $this->assertEquals('created', file_get_contents(static::$cache_filename));
     }
 
     public function test_model_updated_event_emited()
     {
-        $pet = EventModelStub::find(1);
+        $pet = EventModelStub::connection("mysql")->first();
         $pet->name = 'Loulou';
         $this->assertEquals($pet->save(), 1);
         $this->assertEquals('updated', file_get_contents(static::$cache_filename));
@@ -68,7 +64,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
 
     public function test_model_deleted_event_emited()
     {
-        $pet = EventModelStub::find(1);
+        $pet = EventModelStub::connection("mysql")->first();
 
         $this->assertEquals($pet->delete(), 1);
         $this->assertEquals('deleted', file_get_contents(static::$cache_filename));
