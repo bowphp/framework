@@ -129,9 +129,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * The connection name
      *
-     * @var string
+     * @var ?string
      */
-    protected string $connection;
+    protected ?string $connection = null;
 
     /**
      * The query builder instance
@@ -152,6 +152,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->original = $attributes;
 
         $this->table = static::query()->getTable();
+    }
+
+    /**
+     * Set the connection
+     *
+     * @param string $name
+     * @return Model
+     */
+    public static function connection(string $name): Model
+    {
+        $model = new static();
+        $model->setConnection($name);
+
+        return $model;
     }
 
     /**
@@ -236,16 +250,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Returns the description of the table
-     *
-     * @return bool
-     */
-    public static function describe(): bool
-    {
-        return DB::statement('desc ' . static::query()->getTable());
-    }
-
-    /**
      * Find information and delete it
      *
      * @param mixed $id
@@ -296,16 +300,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if ($model->timestamps) {
             $data = array_merge($data, [
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                $model->created_at => date('Y-m-d H:i:s'),
+                $model->updated_at => date('Y-m-d H:i:s')
             ]);
         }
 
         // Check if the primary key existe on updating data
         if (!array_key_exists($model->primary_key, $data)) {
-            if ($model->auto_increment) {
+            if ($model->auto_increment && static::$builder->getAdapterName() !== "pgsql") {
                 $id_value = [$model->primary_key => null];
-
                 $data = array_merge($id_value, $data);
             } elseif ($model->primary_key_type == 'string') {
                 $data = array_merge([
@@ -385,8 +388,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public static function query(): Builder
     {
-        if (static::$builder instanceof Builder) {
-            if (static::$builder->getModel() == static::class) {
+        if (
+            static::$builder instanceof Builder
+            && static::$builder->getModel() == static::class
+        ) {
+            if (DB::getConnectionName() == static::$builder->getAdapterName()) {
                 return static::$builder;
             }
         }
@@ -412,37 +418,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (isset($properties['prefix']) && !is_null($properties['prefix'])) {
             $prefix = $properties['prefix'];
         } else {
-            $prefix = DB::getAdapterConnection()->getTablePrefix();
+            $prefix = DB::getConnectionAdapter()->getTablePrefix();
         }
 
         // Set the table prefix
         $table = $prefix . $table;
 
-        static::$builder = new Builder($table, DB::getPdo());
+        static::$builder = new Builder($table, DB::getConnectionAdapter());
         static::$builder->setPrefix($prefix);
         static::$builder->setModel(static::class);
 
         return static::$builder;
-    }
-
-    /**
-     * Retrieves the primary key value
-     *
-     * @return mixed
-     */
-    public function getKeyValue(): mixed
-    {
-        return $this->original[$this->primary_key] ?? null;
-    }
-
-    /**
-     * Retrieves the primary key
-     *
-     * @return string
-     */
-    public function getKey(): string
-    {
-        return $this->primary_key;
     }
 
     /**
@@ -466,7 +452,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $row_affected = $model->insert($this->attributes);
 
             // We get a last insertion id value
-            $primary_key_value = $model->getLastInsertId();
+            if (static::$builder->getAdapterName() == 'pgsql') {
+                $sequence = $this->table . "_" . $this->primary_key . '_seq';
+                $primary_key_value = static::$builder->getPdo()->lastInsertId($sequence);
+            } else {
+                $primary_key_value = static::$builder->getPdo()->lastInsertId();
+            }
+
             $primary_key_value = !is_numeric($primary_key_value) ? $primary_key_value : (int) $primary_key_value;
 
             // Set the primary key value
@@ -631,6 +623,26 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Retrieves the primary key value
+     *
+     * @return mixed
+     */
+    public function getKeyValue(): mixed
+    {
+        return $this->original[$this->primary_key] ?? null;
+    }
+
+    /**
+     * Retrieves the primary key
+     *
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return $this->primary_key;
+    }
+
+    /**
      * Used to update the timestamp.
      *
      * @return bool
@@ -668,13 +680,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Set connection point
      *
-     * @param string $connection
+     * @param string $name
      * @return Builder
      */
-    public function setConnection(string $connection): Builder
+    public function setConnection(string $name): Builder
     {
-        $this->connection = $connection;
+        $this->connection = $name;
 
+        DB::connection($name);
         $builder = static::query();
 
         return $builder;
@@ -886,7 +899,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param  array  $arguments
      * @return mixed
      */
-    public static function __callStatic($name, $arguments)
+    public static function __callStatic(string $name, array $arguments)
     {
         $model = static::query();
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Database\Migration;
+namespace Bow\Tests\Database\Migration\SQLite;
 
 use Bow\Database\Migration\SQLGenerator;
 
@@ -15,7 +15,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->generator = new SQLGenerator('bow_tests');
+        $this->generator = new SQLGenerator('bow_tests', 'sqlite', 'create');
     }
 
     /**
@@ -25,67 +25,68 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
     {
         $sql = $this->generator->addString('name')->make();
         $this->assertNotEquals($sql, '`name` STRING NOT NULL');
-        $this->assertEquals($sql, '`name` VARCHAR(255) NOT NULL');
+        $this->assertEquals($sql, '`name` TEXT NOT NULL');
 
         $sql = $this->generator->addString('name', ['default' => 'bow', 'size' => 100])->make();
-        $this->assertEquals($sql, "`name` VARCHAR(100) NOT NULL DEFAULT 'bow'");
+        $this->assertEquals($sql, "`name` TEXT NOT NULL DEFAULT 'bow'");
 
         $sql = $this->generator->addString('name', ['default' => 'bow', 'size' => 100, 'nullable' => true])->make();
-        $this->assertEquals($sql, "`name` VARCHAR(100) NULL DEFAULT 'bow'");
+        $this->assertEquals($sql, "`name` TEXT NULL DEFAULT 'bow'");
 
         $sql = $this->generator->addString('name', ['primary' => true])->make();
-        $this->assertEquals($sql, "`name` VARCHAR(255) PRIMARY KEY NOT NULL");
+        $this->assertEquals($sql, "`name` TEXT PRIMARY KEY NOT NULL");
 
         $sql = $this->generator->addString('name', ['primary' => true, 'default' => 'bow', 'size' => 100, 'nullable' => true])->make();
-        $this->assertEquals($sql, "`name` VARCHAR(100) PRIMARY KEY NULL DEFAULT 'bow'");
+        $this->assertEquals($sql, "`name` TEXT PRIMARY KEY NULL DEFAULT 'bow'");
 
         $sql = $this->generator->addString('name', ['unique' => true])->make();
-        $this->assertEquals($sql, "`name` VARCHAR(255) UNIQUE NOT NULL");
+        $this->assertEquals($sql, "`name` TEXT UNIQUE NOT NULL");
     }
 
     /**
      * Test Add column action
      * @dataProvider getNumberTypes
      */
-    public function test_add_int_sql_statement(string $type, string $method, int|string $default = 1)
+    public function test_add_int_sql_statement(string $method, int|string $default = 1)
     {
-        $type = strtoupper($type);
-
         $sql = $this->generator->{"add$method"}('column')->make();
-        $this->assertEquals($sql, "`column` {$type} NOT NULL");
+        $this->assertEquals($sql, "`column` INTEGER NOT NULL");
 
         $sql = $this->generator->{"add$method"}('column', ['default' => $default, 'size' => 100])->make();
-        $this->assertEquals($sql, "`column` {$type}(100) NOT NULL DEFAULT $default");
+        $this->assertEquals($sql, "`column` INTEGER NOT NULL DEFAULT $default");
 
         $sql = $this->generator->{"add$method"}('column', ['default' => $default, 'size' => 100, 'nullable' => true])->make();
-        $this->assertEquals($sql, "`column` {$type}(100) NULL DEFAULT $default");
+        $this->assertEquals($sql, "`column` INTEGER NULL DEFAULT $default");
 
         $sql = $this->generator->{"add$method"}('column', ['primary' => true])->make();
-        $this->assertEquals($sql, "`column` {$type} PRIMARY KEY NOT NULL");
+        $this->assertEquals($sql, "`column` INTEGER PRIMARY KEY NOT NULL");
 
         $sql = $this->generator->{"add$method"}('column', ['primary' => true, 'default' => $default, 'size' => 100, 'nullable' => true])->make();
-        $this->assertEquals($sql, "`column` {$type}(100) PRIMARY KEY NULL DEFAULT $default");
+        $this->assertEquals($sql, "`column` INTEGER PRIMARY KEY NULL DEFAULT $default");
+
+        $sql = $this->generator->{"add$method"}('column', ['primary' => true, 'increment' => true, 'size' => 100, 'nullable' => true])->make();
+        $this->assertEquals($sql, "`column` INTEGER PRIMARY KEY AUTOINCREMENT NULL");
 
         $sql = $this->generator->{"add$method"}('column', ['unique' => true])->make();
-        $this->assertEquals($sql, "`column` {$type} UNIQUE NOT NULL");
+        $this->assertEquals($sql, "`column` INTEGER UNIQUE NOT NULL");
 
         $method = "add{$method}Increment";
         if (method_exists($this->generator, $method)) {
             $sql = $this->generator->{$method}('column')->make();
-            $this->assertEquals($sql, "`column` {$type} AUTO_INCREMENT PRIMARY KEY NOT NULL");
+            $this->assertEquals($sql, "`column` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL");
         }
     }
 
     public function getNumberTypes()
     {
         return [
-            ["int", "Integer", 1],
-            ["bigint", "BigInteger", 1],
-            ["tinyint", "TinyInteger", 1],
-            ["float", "Float", 1],
-            ["double", "Double", 1],
-            ["smallint", "SmallInteger", 1],
-            ["mediumint", "MediumInteger", 1],
+            ["Integer", 1],
+            ["BigInteger", 1],
+            ["TinyInteger", 1],
+            ["Float", 1],
+            ["Double", 1],
+            ["SmallInteger", 1],
+            ["MediumInteger", 1],
         ];
     }
 }

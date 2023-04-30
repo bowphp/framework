@@ -7,6 +7,7 @@ use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
 use Bow\Configuration\Loader as ConfigurationLoader;
+use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
 
 class ConnectionTest extends \PHPUnit\Framework\TestCase
 {
@@ -72,5 +73,35 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     public function test_mysql_adapter_name(MysqlAdapter $mysqlAdapter)
     {
         $this->assertEquals($mysqlAdapter->getName(), 'mysql');
+    }
+
+    /**
+     * @return PostgreSQLAdapter
+     */
+    public function test_get_pgsql_connection(): PostgreSQLAdapter
+    {
+        $config = static::$config["database"];
+        $pgsqlAdapter = new PostgreSQLAdapter($config['connections']['pgsql']);
+
+        $this->assertInstanceOf(AbstractConnection::class, $pgsqlAdapter);
+
+        return $pgsqlAdapter;
+    }
+
+    /**
+     * @depends test_get_pgsql_connection
+     */
+    public function test_get_pgsql_pdo(PostgreSQLAdapter $pgsqlAdapter)
+    {
+        $this->assertInstanceOf(\PDO::class, $pgsqlAdapter->getConnection());
+        $this->assertEquals($pgsqlAdapter->getConnection()->getAttribute(\PDO::ATTR_DRIVER_NAME), 'pgsql');
+    }
+
+    /**
+     * @depends test_get_pgsql_connection
+     */
+    public function test_pgsql_adapter_name(PostgreSQLAdapter $pgsqlAdapter)
+    {
+        $this->assertEquals($pgsqlAdapter->getName(), 'pgsql');
     }
 }

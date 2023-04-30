@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Database\Migration\Shortcut;
 
+use Bow\Database\Exception\SQLGeneratorException;
 use Bow\Database\Migration\SQLGenerator;
 
 trait TextColumn
@@ -18,18 +19,6 @@ trait TextColumn
     public function addString(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'string', $attribute);
-    }
-
-    /**
-     * Add string column
-     *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
-     */
-    public function addLongString(string $column, array $attribute = []): SQLGenerator
-    {
-        return $this->addColumn($column, 'long varchar', $attribute);
     }
 
     /**
@@ -53,7 +42,7 @@ trait TextColumn
      */
     public function addChar(string $column, array $attribute = []): SQLGenerator
     {
-        return $this->addColumn($column, 'character', $attribute);
+        return $this->addColumn($column, 'char', $attribute);
     }
 
     /**
@@ -105,18 +94,6 @@ trait TextColumn
     }
 
     /**
-     * Change string column
-     *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
-     */
-    public function changeLongString(string $column, array $attribute = []): SQLGenerator
-    {
-        return $this->changeColumn($column, 'long varchar', $attribute);
-    }
-
-    /**
      * Change json column
      *
      * @param string $column
@@ -137,7 +114,7 @@ trait TextColumn
      */
     public function changeChar(string $column, array $attribute = []): SQLGenerator
     {
-        return $this->changeColumn($column, 'character', $attribute);
+        return $this->changeColumn($column, 'char', $attribute);
     }
 
     /**
