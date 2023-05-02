@@ -23,9 +23,9 @@ To use this package, please create an application from this package [bowphp/app]
 - File System Management with many drivers like S3 and FTP (Support connection switch)
 - Extensible with an external package that can plug-in
 - Application logs Management
-- Database Connection (MySQL and SQLite)
+- Database Connection (MySQL, SQLite, PostgreSQL)
 - Simplest ORM which names Barry
-- Cache support (Only filesystem caching)
+- Cache support (Filesystem, Redis, Database caching)
 - Event Management (Interpage Event)
 - Emailing (SMTP, SES, Native PHP mail supports)
 - Task runner (Which helps you to generate the controller and match more)
