@@ -81,6 +81,7 @@ class Route
         $this->cb = $cb;
 
         $this->path = str_replace('.', '\.', $path);
+        $this->path = rtrim($this->path, "/");
 
         $this->match = [];
     }
@@ -169,14 +170,12 @@ class Route
 
             if (!is_int($this->match[$key])) {
                 $this->params[$value] = urldecode($this->match[$key]);
-
                 continue;
             }
 
             $tmp = (int) $this->match[$key];
 
             $this->params[$value] = $tmp;
-
             $this->match[$key] = $tmp;
         }
 
@@ -242,15 +241,7 @@ class Route
      */
     public function match(string $uri): bool
     {
-        // Normalization of the url of the navigator.
-        if (preg_match('~(.*)/$~', $uri, $match)) {
-            $uri = end($match);
-        }
-
-        // Normalization of the path defined by the programmer.
-        if (preg_match('~(.*)/$~', $this->path, $match)) {
-            $this->path = end($match);
-        }
+        $uri = rtrim($uri, "/");
 
         // We go straight back to gain performance.
         if ($this->path === $uri) {
@@ -274,9 +265,18 @@ class Route
         if (empty($this->with)) {
             $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
 
-            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
+            // Perform url variables parsing
+            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $matches);
 
-            $this->keys = end($this->keys);
+            $raws = $matches[0];
+            $keys = $matches[1];
+    
+            foreach ($keys as $key => $value) {
+                $this->keys[$value] = [
+                    "key" => $value,
+                    "optional" => ":{$value}?" === $raws[$key]
+                ];
+            }
 
             return $this->checkRequestUri($path, $uri);
         }
