@@ -14,6 +14,13 @@ class Env
     private static bool $loaded = false;
 
     /**
+     * Define the env list
+     *
+     * @var array
+     */
+    private static array $envs = [];
+
+    /**
      * Check if env is load
      *
      * @return bool
@@ -45,9 +52,9 @@ class Env
         // Get the env file content
         $content = file_get_contents($filename);
 
-        $envs = json_decode(trim($content), true);
+        static::$envs = json_decode(trim($content), true);
 
-        foreach ($envs as $key => $value) {
+        foreach (static::$envs as $key => $value) {
             $key = Str::upper(trim($key));
             putenv($key . '=' . $value);
         }
@@ -77,8 +84,7 @@ class Env
     public static function get(string $key, mixed $default = null): mixed
     {
         $key = Str::upper(trim($key));
-
-        $value = getenv($key);
+        $value = static::$envs[$key] ?? getenv($key);
 
         if ($value === false) {
             return $default;
@@ -97,6 +103,7 @@ class Env
     public static function set(string $key, mixed $value): bool
     {
         $key = Str::upper(trim($key));
+        static::$envs[$key] = $value;
 
         return putenv($key . '=' . $value);
     }
