@@ -75,11 +75,17 @@ abstract class EngineAbstract
     abstract public function render(string $filename, array $data = []): string;
 
     /**
+     * Get the using engine
+     *
+     * @return mixed
+     */
+    abstract public function getEngine(): mixed;
+
+    /**
      * Check the parsed file
      *
      * @param  string $filename
      * @param  bool   $extended
-     *
      * @return string
      * @throws ViewException
      */

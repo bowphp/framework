@@ -34,7 +34,7 @@ class Storage
      *
      * @var array
      */
-    private static array $available_services = [
+    private static array $available_services_driviers = [
         'ftp' => FTPService::class,
         's3' => S3Service::class,
     ];
@@ -71,28 +71,36 @@ class Storage
      * Mount service
      *
      * @param string $service
-     *
-     * @return mixed
+     * @return FTPService|S3Service
      */
     public static function service(string $service)
     {
-        if (!array_key_exists($service, self::$available_services)) {
-            throw (new ServiceNotFoundException(sprintf(
-                '"%s" is not registered as a service.',
-                $service
-            )))->setServiceName($service);
-        }
-
-        $service_class = static::$available_services[$service];
-
         $config = static::$config['services'][$service] ?? null;
 
         if (is_null($config)) {
             throw (new ServiceConfigurationNotFoundException(sprintf(
                 '"%s" configuration not found.',
                 $service
-            )))->setServiceName($service);
+            )))->setService($service);
         }
+
+        $driver = $config["driver"] ?? null;
+
+        if (is_null($driver)) {
+            throw (new ServiceNotFoundException(sprintf(
+                '"%s" driver is not support.',
+                $driver
+            )))->setService($driver);
+        }
+
+        if (!array_key_exists($driver, self::$available_services_driviers)) {
+            throw (new ServiceNotFoundException(sprintf(
+                '"%s" is not registered as a service.',
+                $driver
+            )))->setService($driver);
+        }
+
+        $service_class = static::$available_services_driviers[$driver];
 
         return $service_class::configure($config);
     }
@@ -101,16 +109,16 @@ class Storage
      * Push a new service who implement
      * the Bow\Storage\Contracts\ServiceInterface
      *
-     * @param array $services
+     * @param array $drivers
      */
-    public static function pushService(array $services)
+    public static function pushService(array $drivers)
     {
-        foreach ($services as $service => $hanlder) {
-            if (isset(static::$available_services[$service])) {
-                throw new InvalidArgumentException("The $service is already define");
+        foreach ($drivers as $driver => $hanlder) {
+            if (isset(static::$available_services_driviers[$driver])) {
+                throw new InvalidArgumentException("The $driver is already define");
             }
 
-            static::$available_services[$service] = $hanlder;
+            static::$available_services_driviers[$driver] = $hanlder;
         }
     }
 

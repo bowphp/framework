@@ -79,7 +79,7 @@ class Util
      *
      * @return string
      */
-    public static function sep()
+    public static function sep(): string
     {
         if (static::$sep !== null) {
             return static::$sep;
@@ -99,10 +99,9 @@ class Util
      * Function to secure the data.
      *
      * @param array $data
-     *
      * @return string
      */
-    public static function rangeField($data)
+    public static function rangeField(array $data): string
     {
         $field = '';
         $i = 0;

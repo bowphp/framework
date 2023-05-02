@@ -10,7 +10,6 @@ use Bow\Storage\Exception\ResourceException;
 use InvalidArgumentException;
 use RuntimeException;
 use FTP\Connection as FTPConnection;
-use resource;
 
 class FTPService implements ServiceInterface
 {
@@ -41,13 +40,6 @@ class FTPService implements ServiceInterface
      * @var bool
      */
     private bool $use_passive_mode = true;
-
-    /**
-     * Root folder absolute path.
-     *
-     * @var string
-     */
-    private string $base_directory;
 
     /**
      * The FTPService Instance
@@ -175,18 +167,19 @@ class FTPService implements ServiceInterface
     /**
      * Set the connection root.
      *
+     * @param string $path
      * @return void
      */
-    public function setConnectionRoot($path = '')
+    public function setConnectionRoot(string $path = '')
     {
-        $basePath = $path ?: $this->config['root'];
+        $base_path = $path ?: $this->config['root'];
 
-        if ($basePath && (!ftp_chdir($this->connection, $basePath))) {
-            throw new RuntimeException('Root is invalid or does not exist: ' . $basePath);
+        if ($base_path && (!@ftp_chdir($this->connection, $base_path))) {
+            throw new RuntimeException('Root is invalid or does not exist: ' . $base_path);
         }
 
         // Store absolute path for further reference.
-        $this->base_directory = ftp_pwd($this->connection);
+        ftp_pwd($this->connection);
     }
 
     /**

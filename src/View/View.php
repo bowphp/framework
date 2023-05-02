@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\View;
 
 use BadMethodCallException;
-use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\Contracts\ResponseInterface;
 use Bow\View\EngineAbstract;
 use Bow\View\Exception\ViewException;
@@ -41,13 +40,6 @@ class View implements ResponseInterface
     private static string $content;
 
     /**
-     * The enable view caching
-     *
-     * @var bool
-     */
-    private bool $cachabled = true;
-
-    /**
      * The build-in template engine
      *
      * @var array
@@ -57,6 +49,13 @@ class View implements ResponseInterface
         'twig' => \Bow\View\Engine\TwigEngine::class,
         'php' => \Bow\View\Engine\PHPEngine::class,
     ];
+
+    /**
+     * The cachabled flash for twig
+     *
+     * @var boolean
+     */
+    private bool $cachabled = false;
 
     /**
      * View constructor.
@@ -138,6 +137,16 @@ class View implements ResponseInterface
     public function getTemplate()
     {
         return static::$template;
+    }
+
+    /**
+     * Get the engine
+     *
+     * @return Tintin|\Twig\Environment
+     */
+    public function getEngine()
+    {
+        return static::$template->getEngine();
     }
 
     /**

@@ -39,8 +39,14 @@ trait ConstraintColumn
             );
         }
 
+        if ($this->adapter === 'pgsql') {
+            $replacement = '%s %s FOREIGN KEY (%s)%s%s';
+        } else {
+            $replacement = '%s %s FOREIGN KEY (`%s`)%s%s';
+        }
+
         $sql = sprintf(
-            '%s %s FOREIGN KEY (`%s`)%s%s',
+            $replacement,
             $command,
             $target,
             $name,
@@ -57,15 +63,22 @@ trait ConstraintColumn
      * Drop constraintes column;
      *
      * @param string $name
+     * @param bool $as_raw
      * @return SQLGenerator
      */
-    public function dropForeign(string $name): SQLGenerator
+    public function dropForeign(string|array $name, bool $as_raw = false): SQLGenerator
     {
         $names = (array) $name;
 
         foreach ($names as $name) {
-            $name = sprintf("%s_%s_foreign", $this->getTable(), $name);
-            $this->sqls[] = sprintf('DROP FOREIGN KEY `%s`', $name);
+            if (!$as_raw) {
+                $name = sprintf("%s_%s_foreign", $this->getTable(), $name);
+            }
+            if ($this->adapter === 'pgsql') {
+                $this->sqls[] = sprintf('DROP FOREIGN KEY `%s`', $name);
+            } else {
+                $this->sqls[] = sprintf('DROP FOREIGN KEY %s', $name);
+            }
         }
 
         return $this;
@@ -85,7 +98,11 @@ trait ConstraintColumn
             $command = 'INDEX';
         }
 
-        $this->sqls[] = sprintf('%s `%s`', $command, $name);
+        if ($this->adapter === 'pgsql') {
+            $this->sqls[] = sprintf('%s %s', $command, $name);
+        } else {
+            $this->sqls[] = sprintf('%s `%s`', $command, $name);
+        }
 
         return $this;
     }
@@ -101,7 +118,11 @@ trait ConstraintColumn
         $names = (array) $name;
 
         foreach ($names as $name) {
-            $this->sqls[] = sprintf('DROP INDEX `%s`', $name);
+            if ($this->adapter === 'pgsql') {
+                $this->sqls[] = sprintf('DROP INDEX %s', $name);
+            } else {
+                $this->sqls[] = sprintf('DROP INDEX `%s`', $name);
+            }
         }
 
         return $this;
@@ -133,7 +154,11 @@ trait ConstraintColumn
             $command = 'UNIQUE';
         }
 
-        $this->sqls[] = sprintf('%s `%s`', $command, $name);
+        if ($this->adapter === 'pgsql') {
+            $this->sqls[] = sprintf('%s %s', $command, $name);
+        } else {
+            $this->sqls[] = sprintf('%s `%s`', $command, $name);
+        }
 
         return $this;
     }
@@ -149,7 +174,11 @@ trait ConstraintColumn
         $names = (array) $name;
 
         foreach ($names as $name) {
-            $this->sqls[] = sprintf('DROP UNIQUE `%s`', $name);
+            if ($this->adapter === 'pgsql') {
+                $this->sqls[] = sprintf('DROP UNIQUE %s', $name);
+            } else {
+                $this->sqls[] = sprintf('DROP UNIQUE `%s`', $name);
+            }
         }
 
         return $this;

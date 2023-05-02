@@ -3,6 +3,7 @@
 namespace Bow\Tests\Config;
 
 use Bow\Configuration\Loader as ConfigurationLoader;
+use Bow\Testing\KernelTesting;
 
 class TestingConfiguration
 {
@@ -21,6 +22,6 @@ class TestingConfiguration
      */
     public static function getConfig(): ConfigurationLoader
     {
-        return TestingKernel::configure(__DIR__ . '/stubs');
+        return KernelTesting::configure(__DIR__ . '/stubs');
     }
 }

@@ -6,6 +6,7 @@ namespace Bow\View\Engine;
 
 use Bow\Configuration\Loader;
 use Bow\View\EngineAbstract;
+use RuntimeException;
 
 class PHPEngine extends EngineAbstract
 {
@@ -20,7 +21,6 @@ class PHPEngine extends EngineAbstract
      * PHPEngine constructor.
      *
      * @param array $config
-     *
      * @return void
      */
     public function __construct(array $config)
@@ -29,7 +29,7 @@ class PHPEngine extends EngineAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function render(string $filename, array $data = []): string
     {
@@ -42,22 +42,15 @@ class PHPEngine extends EngineAbstract
         }
 
         $cache_hash_filename = '_PHP_' . md5($hash_filename) . '.php';
-
         $cache_hash_filename = $this->config['cache'] . '/' . $cache_hash_filename;
 
         extract($data);
 
         if (file_exists($cache_hash_filename)) {
             if (filemtime($cache_hash_filename) >= fileatime($filename)) {
-                ob_start();
-
-                require $cache_hash_filename;
-
-                return ob_get_clean();
+                return $this->includeFile($cache_hash_filename);
             }
         }
-
-        ob_start();
 
         $content = file_get_contents($filename);
 
@@ -67,7 +60,28 @@ class PHPEngine extends EngineAbstract
             $content
         );
 
-        require $cache_hash_filename;
+        return $this->includeFile($cache_hash_filename);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEngine(): mixed
+    {
+        throw new RuntimeException("This method cannot work for PHP native engine");
+    }
+
+    /**
+     * include the execute filename
+     *
+     * @param string $filename
+     * @return string
+     */
+    private function includeFile(string $filename): string
+    {
+        ob_start();
+
+        require $filename;
 
         return ob_get_clean();
     }

@@ -28,11 +28,18 @@ class Request
     private array $input = [];
 
     /**
-     * Define the bag instance
+     * Define the bags instance
      *
      * @var array
      */
-    private array $bag = [];
+    private array $bags = [];
+
+    /**
+     * Define the request id
+     *
+     * @var string
+     */
+    private string $id;
 
     /**
      * Request constructor
@@ -41,19 +48,17 @@ class Request
      */
     private function __construct()
     {
+        $data = [];
+
         if ($this->getHeader('content-type') == 'application/json') {
             $data = json_decode(file_get_contents("php://input"), true);
             $this->input = array_merge((array) $data, $_GET);
         } else {
-            $data = [];
-
+            $data = $_POST ?? [];
             if ($this->isPut()) {
                 parse_str(file_get_contents("php://input"), $data);
-            } elseif ($this->isPost()) {
-                $data = $_POST;
             }
-
-            $this->input = array_merge($data, $_GET);
+            $this->input = array_merge((array) $data, $_GET);
         }
 
         foreach ($this->input as $key => $value) {
@@ -63,6 +68,37 @@ class Request
 
             $this->input[$key] = $value;
         }
+    }
+
+    /**
+     * Set the request id
+     *
+     * @param string|int $id
+     * @return void
+     */
+    public function setId(string|int $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * Get the request ID
+     *
+     * @return string|int
+     */
+    public function getId(): string|int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Alias of getId
+     *
+     * @return string|int
+     */
+    public function id(): string|int
+    {
+        return $this->id;
     }
 
     /**
@@ -276,14 +312,15 @@ class Request
     /**
      * Get previous request data
      *
-     * @param  mixed $key
+     * @param  string $key
+     * @param  mixed $fullback
      * @return mixed
      */
-    public function old(string $key): mixed
+    public function old(string $key, mixed $fullback): mixed
     {
         $old = Session::getInstance()->get('__bow.old', []);
 
-        return $old[$key] ?? null;
+        return $old[$key] ?? $fullback;
     }
 
     /**
@@ -315,6 +352,17 @@ class Request
     public function is($match): bool
     {
         return (bool) preg_match('@' . $match . '@', $this->path());
+    }
+
+    /**
+     * Check if a url matches with the pattern
+     *
+     * @param  string $match
+     * @return bool
+     */
+    public function isReferer($match): bool
+    {
+        return (bool) preg_match('@' . $match . '@', $this->referer());
     }
 
     /**
@@ -412,6 +460,26 @@ class Request
     public function isSecure(): bool
     {
         return $this->isProtocol('https');
+    }
+
+    /**
+     * Get Request header
+     *
+     * @param  string $key
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        $headers = [];
+
+        foreach ($_SERVER as $key => $value) {
+            if (preg_match('/^http_/i', $key)) {
+                $key = str_replace("http_", "", strtolower($key));
+                $headers[$key] = $value;
+            }
+        }
+
+        return $headers;
     }
 
     /**
@@ -551,7 +619,7 @@ class Request
     }
 
     /**
-     * Set the value in request bag
+     * Set the shared value in request bags
      *
      * @param string $name
      * @param mixed $value
@@ -559,17 +627,38 @@ class Request
      */
     public function setBag($name, $value)
     {
-        $this->bag[$name] = $value;
+        $this->bags[$name] = $value;
     }
 
     /**
-     * Get the value in request bag
+     * Get the shared value in request bags
      *
      * @return mixed
      */
-    public function getBag($name)
+    public function getBag(string $name)
     {
-        return $this->bag[$name] ?? null;
+        return $this->bags[$name] ?? null;
+    }
+
+    /**
+     * Set the shared value in request bags
+     *
+     * @param Array<mixed> $bags
+     * @return mixed
+     */
+    public function setBags(array $bags)
+    {
+        $this->bags = $bags;
+    }
+
+    /**
+     * Get the shared value in request bags
+     *
+     * @return array
+     */
+    public function getBags()
+    {
+        return $this->bags;
     }
 
     /**

@@ -21,9 +21,11 @@ class SeederCommand extends AbstractCommand
      */
     public function generate(string $seeder): void
     {
+        $seeder = Str::plurial($seeder);
+
         $generator = new Generator(
             $this->setting->getSeederDirectory(),
-            "{$seeder}_seeder"
+            $seeder
         );
 
         if ($generator->fileExists()) {
@@ -32,13 +34,7 @@ class SeederCommand extends AbstractCommand
             exit(1);
         }
 
-        // Get the number of execution
-        $num = (int) $this->arg->getParameters()->get('--seed', 5);
-
-        $generator->write('seeder', [
-            'num' => $num,
-            'name' => Str::plurial($seeder)
-        ]);
+        $generator->write('seeder', ['name' => $seeder]);
 
         echo "\033[0;32mThe seeder has been created.\033[00m\n";
 
@@ -52,7 +48,7 @@ class SeederCommand extends AbstractCommand
      */
     public function all(): void
     {
-        $seeds_filenames = glob($this->setting->getSeederDirectory() . '/*_seeder.php');
+        $seeds_filenames = glob($this->setting->getSeederDirectory() . '/*.php');
 
         $this->make($seeds_filenames);
     }
@@ -63,22 +59,22 @@ class SeederCommand extends AbstractCommand
      * @param string $table_name
      * @return void
      */
-    public function table(string $table_name): void
+    public function table(string $seeder_name): void
     {
-        $table_name = trim($table_name);
+        $seeder_name = trim($seeder_name);
 
-        if (is_null($table_name)) {
+        if (is_null($seeder_name)) {
             $this->throwFailsCommand('Specify the seeder table name', 'help seed');
         }
 
-        if (!file_exists($this->setting->getSeederDirectory() . "/{$table_name}_seeder.php")) {
-            echo Color::red("Seeder $table_name not exists.");
+        if (!file_exists($this->setting->getSeederDirectory() . "/{$seeder_name}.php")) {
+            echo Color::red("Seeder $seeder_name not exists.");
 
             exit(1);
         }
 
         $this->make([
-            $this->setting->getSeederDirectory() . "/{$table_name}_seeder.php"
+            $this->setting->getSeederDirectory() . "/{$seeder_name}.php"
         ]);
     }
 
@@ -105,6 +101,13 @@ class SeederCommand extends AbstractCommand
             $connection = Database::connection($connection);
 
             foreach ($seed_collection as $table => $seed) {
+                if (class_exists($table, true)) {
+                    $instance = app($table);
+                    if ($instance instanceof \Bow\Database\Barry\Model) {
+                        $table = $instance->getTable();
+                    }
+                }
+
                 $result = $connection->table($table)->insert($seed);
 
                 echo Color::green("$result seed" . ($result > 1 ? 's' : '') . " on $table table\n");

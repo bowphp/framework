@@ -1,0 +1,26 @@
+<?php
+
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\SQLGenerator;
+
+class FakeCreateTableMigration extends Migration
+{
+    /**
+     * Up Migration
+     */
+    public function up(): void
+    {
+        $this->create("fakers", function (SQLGenerator $table) {
+            $table->addIncrement('id');
+            $table->addTimestamps();
+        });
+    }
+
+    /**
+     * Rollback migration
+     */
+    public function rollback(): void
+    {
+        $this->dropIfExists("fakers");
+    }
+}

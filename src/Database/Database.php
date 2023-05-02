@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
+use PDO;
+use Bow\Security\Sanitize;
+use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Connection\AbstractConnection;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
-use Bow\Database\Exception\ConnectionException;
-use Bow\Database\Exception\DatabaseException;
-use Bow\Security\Sanitize;
-use PDO;
+use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
 
 class Database
 {
@@ -33,14 +34,14 @@ class Database
      *
      * @var array
      */
-    private static array $config;
+    private static array $config = [];
 
     /**
      * Configuration
      *
      * @var string
      */
-    private static string $name;
+    private static ?string $name = null;
 
     /**
      * Load configuration
@@ -53,9 +54,7 @@ class Database
     {
         if (is_null(static::$instance)) {
             static::$instance = new self();
-
             static::$name = $config['default'];
-
             static::$config = $config;
         }
 
@@ -85,11 +84,7 @@ class Database
     public static function connection(?string $name = null): ?Database
     {
         if (is_null($name) || strlen($name) == 0) {
-            if (is_null(static::$name)) {
-                static::$name = static::$config['default'];
-            }
-
-            $name = static::$name;
+            $name = static::$name ?? static::$config['default'];
         }
 
         if (!isset(static::$config['connections'][$name])) {
@@ -109,6 +104,8 @@ class Database
                 static::$adapter = new MysqlAdapter($config);
             } elseif ($config['driver'] == 'sqlite') {
                 static::$adapter = new SqliteAdapter($config);
+            } elseif ($config['driver'] == 'pgsql') {
+                static::$adapter = new PostgreSQLAdapter($config);
             } else {
                 throw new ConnectionException('This driver is not praised');
             }
@@ -138,7 +135,7 @@ class Database
      *
      * @return ?AbstractConnection
      */
-    public static function getAdapterConnection(): ?AbstractConnection
+    public static function getConnectionAdapter(): ?AbstractConnection
     {
         static::verifyConnection();
 
@@ -156,7 +153,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (preg_match("/^update\s[\w\d_`]+\s\bset\b\s.+\s\bwhere\b\s.+$/i", $sql_statement)) {
+        if (preg_match("/^update\s[\w\d_`]+\s+\bset\b\s.+\s\bwhere\b\s+.+$/i", $sql_statement)) {
             return static::executePrepareQuery($sql_statement, $data);
         }
 
@@ -245,7 +242,7 @@ class Database
 
         if (
             !preg_match(
-                "/^insert\s+into\s+[\w\d_-`]+\s?(\(.+\))?\s+(values\s?(\(.+\),?)+|\s?set\s+(.+)+);?$/i",
+                "/^insert\s+into\s+[\w\d_-`]+\s*(\(.+\))?\s+(values\s*(\(.+\),?)+|\s?set\s+(.+)+);?$/ism",
                 $sql_statement
             )
         ) {
@@ -264,16 +261,13 @@ class Database
         }
 
         $collection = [];
-
         $result = 0;
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $result += static::executePrepareQuery($sql_statement, $value);
-
                 continue;
             }
-
             $collection[$key] = $value;
         }
 
@@ -310,12 +304,7 @@ class Database
     {
         static::verifyConnection();
 
-        if (
-            !preg_match(
-                "/^delete\sfrom\s[\w\d_`]+\swhere\s.+;?$/i",
-                $sql_statement
-            )
-        ) {
+        if (!preg_match("/^delete\s+from\s+[\w\d_`]+\s+where\s+.+;?$/i", $sql_statement)) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -415,16 +404,18 @@ class Database
     /**
      * Retrieves the identifier of the last record.
      *
-     * @param  string $name
-     * @return int
+     * @param  ?string $name
+     * @return int|string
      */
     public static function lastInsertId(?string $name = null): int|string
     {
         static::verifyConnection();
 
-        return (int) static::$adapter
-            ->getConnection()
-            ->lastInsertId($name);
+        if ($name === null) {
+            return static::$adapter->getConnection();
+        }
+
+        return static::$adapter->getConnection()->lastInsertId($name);
     }
 
     /**
@@ -447,9 +438,7 @@ class Database
 
         $pdo_statement->execute();
 
-        $r = $pdo_statement->rowCount();
-
-        return $r;
+        return $pdo_statement->rowCount();
     }
 
     /**

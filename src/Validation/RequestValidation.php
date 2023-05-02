@@ -41,7 +41,6 @@ abstract class RequestValidation
     {
         if (!$this->authorize()) {
             $this->authorizationFailAction();
-
             $this->sendFailAuthorization();
         }
 
@@ -59,7 +58,6 @@ abstract class RequestValidation
 
         if ($this->validate->fails()) {
             $this->validationFailAction();
-
             $this->validate->throwError();
         }
     }
@@ -219,7 +217,6 @@ abstract class RequestValidation
      *
      * @param  string $name
      * @param  array  $arguments
-     *
      * @return Request
      */
     public function __call($name, array $arguments)
@@ -235,7 +232,6 @@ abstract class RequestValidation
      * __get
      *
      * @param  string $name
-     *
      * @return string
      */
     public function __get($name)

@@ -23,6 +23,6 @@ class {className} extends Migration
      */
     public function rollback(): void
     {
-        $this->dropIfExists("{table}");
+        $this->dropIfExists("sessions");
     }
 }

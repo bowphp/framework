@@ -31,4 +31,14 @@ class PetWithMasterModelStub extends \Bow\Database\Barry\Model
     {
         return $this->belongsTo(PetMasterModelStub::class, "master_id");
     }
+
+    /**
+     * Build the relation with pet class
+     *
+     * @return BelongsTo
+     */
+    public function pet(): BelongsTo
+    {
+        return $this->belongsTo(PetModelStub::class, "pet_id");
+    }
 }

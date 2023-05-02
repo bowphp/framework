@@ -58,7 +58,12 @@ class Response
      */
     public function assertExactJson(array $data, string $message = ''): Response
     {
-        Assert::assertArraySubset($data, json_decode($this->content), $message);
+        $response = $this->toJson(true);
+
+        foreach ($response as $key => $value) {
+            Assert::assertArrayHasKey($key, $data, $message);
+            Assert::assertEquals($value, $data[$key], $message);
+        }
 
         return $this;
     }
@@ -253,6 +258,16 @@ class Response
     public function getContent(): string
     {
         return $this->content;
+    }
+
+    /**
+     * Get the response content as array
+     *
+     * @return array|object
+     */
+    public function toArray(): array|object
+    {
+        return json_decode($this->content, true, 1024, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
     }
 
     /**

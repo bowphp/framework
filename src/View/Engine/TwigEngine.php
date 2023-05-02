@@ -27,7 +27,6 @@ class TwigEngine extends EngineAbstract
      * TwigEngine constructor.
      *
      * @param array $config
-     *
      * @return void
      */
     public function __construct(array $config)
@@ -68,7 +67,7 @@ class TwigEngine extends EngineAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function render($filename, array $data = []): string
     {
@@ -82,7 +81,7 @@ class TwigEngine extends EngineAbstract
      *
      * @return \Twig\Environment
      */
-    public function getTemplate(): \Twig\Environment
+    public function getEngine(): \Twig\Environment
     {
         return $this->template;
     }

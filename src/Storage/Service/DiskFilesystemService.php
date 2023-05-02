@@ -172,11 +172,9 @@ class DiskFilesystemService implements FilesystemInterface
     {
         $dirname = $this->path($dirname);
 
-        $directory_contents = glob($dirname . "/*", GLOB_FILE);
+        $directory_contents = glob($dirname . "/*");
 
-        return array_filter($directory_contents, function ($file) {
-            return filetype($file) == "file";
-        });
+        return array_filter($directory_contents, fn ($file) => filetype($file) == "file");
     }
 
     /**
@@ -189,7 +187,7 @@ class DiskFilesystemService implements FilesystemInterface
     {
         $directory_contents = glob($this->path($dirname) . "/*", GLOB_ONLYDIR);
 
-        return array_filter($directory_contents, fn ($file) => filetype($file) === "dir");
+        return $directory_contents;
     }
 
     /**

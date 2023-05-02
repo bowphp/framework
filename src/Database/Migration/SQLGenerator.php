@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Database\Migration;
 
-use Bow\Database\Database;
-use Bow\Exception\ModelException;
-use Bow\Support\Str;
+use Bow\Database\Exception\SQLGeneratorException;
 
 class SQLGenerator
 {
@@ -15,6 +13,9 @@ class SQLGenerator
     use Shortcut\TextColumn;
     use Shortcut\DateColumn;
     use Shortcut\ConstraintColumn;
+    use Compose\MysqlCompose;
+    use Compose\SqliteCompose;
+    use Compose\PgsqlCompose;
 
     /**
      * The managed table name
@@ -74,18 +75,13 @@ class SQLGenerator
      * @param string $adapter
      * @param string $scope
      */
-    public function __construct(string $table, string $adapter = 'mysql', string $scope = 'create')
+    public function __construct(string $table, string $adapter, string $scope)
     {
         $this->table = $table;
-
         $this->scope = $scope;
-
         $this->adapter = $adapter;
-
         $this->engine = 'InnoDB';
-
         $this->collation = 'utf8_unicode_ci';
-
         $this->charset = 'utf8';
     }
 
@@ -97,7 +93,6 @@ class SQLGenerator
     public function make(): string
     {
         $sql = trim(implode(', ', $this->sqls));
-
         $this->sqls = [];
 
         return $sql;
@@ -108,11 +103,10 @@ class SQLGenerator
      *
      * @param string $name
      * @param string $type
-     * @param array $attributes
-     *
+     * @param array $attribute
      * @return SQLGenerator
      */
-    public function addColumn(string $name, string $type, array $attributes = []): SQLGenerator
+    public function addColumn(string $name, string $type, array $attribute = []): SQLGenerator
     {
         if ($this->scope == 'alter') {
             $command = 'ADD COLUMN';
@@ -122,8 +116,52 @@ class SQLGenerator
 
         $this->sqls[] = $this->composeAddColumn(
             trim($name, '`'),
-            compact('name', 'type', 'attributes', 'command')
+            compact('name', 'type', 'attribute', 'command')
         );
+
+        return $this;
+    }
+
+    /**
+     * Change a column in the table
+     *
+     * @param string $name
+     * @param string $type
+     * @param array $attributes
+     * @return SQLGenerator
+     */
+    public function changeColumn(string $name, string $type, array $attribute = []): SQLGenerator
+    {
+        $command = 'MODIFY COLUMN';
+
+        $this->sqls[] = $this->composeAddColumn(
+            trim($name, '`'),
+            compact('name', 'type', 'attribute', 'command')
+        );
+
+        return $this;
+    }
+
+    /**
+     * Rename a column in the table
+     *
+     * @param string $name
+     * @param string $new
+     * @return SQLGenerator
+     */
+    public function renameColumn(string $name, string $new): SQLGenerator
+    {
+        if (!in_array($this->adapter, ['mysql', 'pgsql'])) {
+            $this->renameColumnOnSqlite($name, $new);
+
+            return $this;
+        }
+
+        if ($this->adapter === 'pgsql') {
+            $this->sqls[] = sprintf("RENAME COLUMN %s TO %s", $name, $new);
+        } else {
+            $this->sqls[] = sprintf("RENAME COLUMN `%s` TO `%s`", $name, $new);
+        }
 
         return $this;
     }
@@ -132,79 +170,25 @@ class SQLGenerator
      * Drop table column
      *
      * @param string $name
-     *
      * @return SQLGenerator
      */
     public function dropColumn(string $name): SQLGenerator
     {
-        if ($this->adapter == 'mysql') {
-            $this->dropColumnOnMysql($name);
+        if ($this->adapter === 'mysql') {
+            $this->dropColumnForMysql($name);
+        } elseif ($this->adapter === 'pgsql') {
+            $this->dropColumnForPgsql($name);
         } else {
-            $this->dropColumnOnSqlite($name);
+            $this->dropColumnForSqlite($name);
         }
 
         return $this;
     }
 
     /**
-     * Drop Column action with mysql
-     *
-     * @param string $name
-     *
-     * @return void
-     */
-    private function dropColumnOnMysql(string $name): void
-    {
-        $names = (array) $name;
-
-        foreach ($names as $name) {
-            $this->sqls[] = trim(sprintf('DROP COLUMN `%s`', $name));
-        }
-    }
-
-    /**
-     * Drop Column action with mysql
-     *
-     * @param string $name
-     */
-    private function dropColumnOnSqlite(string $name): void
-    {
-        $pdo = Database::getPdo();
-
-        $names = (array) $name;
-
-        $statement = $pdo->query(sprintf('PRAGMA table_info(%s);', $this->table));
-
-        $statement->execute();
-
-        $select = [];
-
-        foreach ($statement->fetchAll() as $column) {
-            if (!in_array($column->name, $names)) {
-                $select[] = $column->name;
-            }
-        }
-
-        $pdo->exec('BEGIN TRANSACTION;');
-
-        $pdo->exec(sprintf(
-            'CREATE TABLE __temp_sqlite_table AS SELECT %s FROM %s;',
-            implode(', ', $select),
-            $this->table
-        ));
-
-        $pdo->exec(sprintf('DROP TABLE %s;', $this->table));
-
-        $pdo->exec(sprintf('ALTER TABLE __temp_sqlite_table RENAME TO %s;', $this->table));
-
-        $pdo->exec('COMMIT;');
-    }
-
-    /**
      * Set the engine
      *
      * @param string $engine
-     *
      * @return void
      */
     public function withEngine(string $engine): void
@@ -226,7 +210,6 @@ class SQLGenerator
      * Set the collation
      *
      * @param string $collation
-     *
      * @return void
      */
     public function withCollation(string $collation): void
@@ -248,7 +231,6 @@ class SQLGenerator
      * Set the charset
      *
      * @param string $charset
-     *
      * @return void
      */
     public function withCharset(string $charset): void
@@ -277,88 +259,40 @@ class SQLGenerator
     }
 
     /**
+     * Set the define table name
+     *
+     * @param string $table
+     * @return string
+     */
+    public function setTable(string $table): string
+    {
+        $this->table = $table;
+
+        return $this->table;
+    }
+
+    /**
      * Compose sql instruction
      *
      * @param string $name
      * @param array $description
-     *
      * @return string
      */
     private function composeAddColumn(string $name, array $description): string
     {
-        $type = strtoupper($description['type']);
-        $attributes = $description['attributes'];
-
-        // Transform attributes
-        $default = $attributes['default'] ?? null;
-        $size = $attributes['size'] ?? false;
-        $primary = $attributes['primary'] ?? false;
-        $increment = $attributes['increment'] ?? false;
-        $nullable = $attributes['nullable'] ?? false;
-        $unique = $attributes['unique'] ?? false;
-        $check = $attributes['check'] ?? false;
-        $unsigned = $attributes['unsigned'] ?? false;
-
-        // String to VARCHAR
-        if ($type == 'STRING') {
-            $type = 'VARCHAR';
-
-            if (!$size) {
-                $size = 255;
-            }
+        if (isset($attribute['size']) && in_array($description["attribute"]["type"], ['blob', 'json', 'character'])) {
+            $type = strtoupper($description["attribute"]["type"]);
+            throw new SQLGeneratorException("Cannot define size for $type type");
         }
 
-        // Wrap default value
-        if (in_array($type, ['VARCHAR', 'CHAR'])) {
-            if (!is_null($default)) {
-                $default = "'" . $default . "'";
-            }
+        switch ($this->adapter) {
+            case "sqlite":
+                return $this->composeAddSqliteColumn($name, $description);
+            case "mysql":
+                return $this->composeAddMysqlColumn($name, $description);
+            case "pgsql":
+                return $this->composeAddPgsqlColumn($name, $description);
         }
-
-        // Add column size
-        if ($size) {
-            $type = sprintf('%s(%s)', $type, $size);
-        }
-
-        // Bind auto increment action
-        if ($increment) {
-            $type = sprintf('%s AUTO_INCREMENT', $type);
-        }
-
-        // Set column as primary key
-        if ($primary) {
-            $type = sprintf('%s PRIMARY KEY', $type);
-        }
-
-        // Set column as unique
-        if ($unique) {
-            $type = sprintf('%s UNIQUE', $type);
-        }
-
-        // Add null or not null
-        if ($nullable) {
-            $type = sprintf('%s NULL', $type);
-        } else {
-            $type = sprintf('%s NOT NULL', $type);
-        }
-
-        // Add default value
-        if ($default) {
-            $type = sprintf('%s DEFAULT %s', $type, $default);
-        }
-
-        if ($check) {
-            $type = sprintf('%s CHECK (%s)', $type, $check);
-        }
-
-        // Add unsigned mention
-        if ($unsigned) {
-            $type = sprintf('UNSIGNED %s', $type);
-        }
-
-        return trim(
-            sprintf('%s `%s` %s', $description['command'], $name, $type)
-        );
     }
 
     /**
@@ -388,15 +322,25 @@ class SQLGenerator
     }
 
     /**
-     * Prefix column name by an other pieces
+     * Normalize the data type
      *
-     * @param string $name
-     * @param string $by
-     *
+     * @param string $type
      * @return string
      */
-    private function prefixColumn(string $name, string $by): string
+    public function normalizeOfType(string $type)
     {
-        return $this->table . '_' . $name . '_' . $by;
+        if (in_array($this->adapter, ["mysql", "pgsql"])) {
+            return $type;
+        }
+
+        if (preg_match('/int|float|double/', $type)) {
+            $type = 'integer';
+        } elseif (preg_match('/float|double/', $type)) {
+            $type = 'real';
+        } elseif (preg_match('/^(text|char|string)$/i', $type)) {
+            $type = 'text';
+        }
+
+        return $type;
     }
 }

@@ -12,52 +12,52 @@ use ReflectionClass;
 class Capsule implements ArrayAccess
 {
     /**
-    * The container register for bind by alias
-    *
-    * @var array
-    */
+     * The container register for bind by alias
+     *
+     * @var array
+     */
     private array $registers = [];
 
     /**
-    * The container register for instance
-    *
-    * @var array
-    */
+     * The container register for instance
+     *
+     * @var array
+     */
     private array $instances = [];
 
     /**
-    * The container factory maker
-    *
-    * @var array
-    */
+     * The container factory maker
+     *
+     * @var array
+     */
     private array $factories = [];
 
     /**
-    * Represents a cache collector
-    *
-    * @var array
-    */
+     * Represents a cache collector
+     *
+     * @var array
+     */
     private array $key = [];
 
     /**
-    * Represents the compilation parameters
-    *
-    * @var array
-    */
+     * Represents the compilation parameters
+     *
+     * @var array
+     */
     private array $parameters = [];
 
     /**
-    * Represents the instance of Capsule
-    *
-    * @var Capsule
-    */
+     * Represents the instance of Capsule
+     *
+     * @var Capsule
+     */
     private static ?Capsule $instance = null;
 
     /**
-    * Get instance of Capsule
-    *
-    * @return Capsule
-    */
+     * Get instance of Capsule
+     *
+     * @return Capsule
+     */
     public static function getInstance(): Capsule
     {
         if (is_null(static::$instance)) {
@@ -68,12 +68,12 @@ class Capsule implements ArrayAccess
     }
 
     /**
-    * Make the
-    *
-    * @param string $key
-    * @return mixed
-    * @throws
-    */
+     * Make the
+     *
+     * @param string $key
+     * @return mixed
+     * @throws
+     */
     public function make(string $key): mixed
     {
         if (isset($this->factories[$key])) {
@@ -142,26 +142,26 @@ class Capsule implements ArrayAccess
     }
 
     /**
-    * Register the instance of a class
-    *
-    * @param string $key
-    * @param Closure $value
-    *
-    * @return void
-    */
+     * Register the instance of a class
+     *
+     * @param string $key
+     * @param Closure $value
+     *
+     * @return void
+     */
     public function factory($key, \Closure $value)
     {
         $this->factories[$key] = $value;
     }
 
     /**
-    * Saves the instance of a class
-    *
-    * @param string   $key
-    * @param mixed $instance
-    *
-    * @return void
-    */
+     * Saves the instance of a class
+     *
+     * @param string   $key
+     * @param mixed $instance
+     *
+     * @return void
+     */
     public function instance($key, $instance)
     {
         if (!is_object($instance)) {
@@ -172,13 +172,12 @@ class Capsule implements ArrayAccess
     }
 
     /**
-    * Instantiate a class by its key
-    *
-    * @param string $key
-    *
-    * @return mixed
-    * @throws
-    */
+     * Instantiate a class by its key
+     *
+     * @param string $key
+     * @return mixed
+     * @throws
+     */
     private function resolve($key)
     {
         $reflection = new ReflectionClass($key);
@@ -217,32 +216,32 @@ class Capsule implements ArrayAccess
     }
 
     /**
-    * @inheritDoc
-    */
+     * @inheritDoc
+     */
     public function offsetExists($offset): bool
     {
         return isset($this->key[$offset]);
     }
 
     /**
-    * @inheritDoc
-    */
-    public function offsetGet(mixed $offset)
+     * @inheritDoc
+     */
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->make($offset);
     }
 
     /**
-    * @inheritDoc
-    */
+     * @inheritDoc
+     */
     public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->registers[$offset] = $value;
     }
 
     /**
-    * @inheritDoc
-    */
+     * @inheritDoc
+     */
     public function offsetUnset(mixed $offset): void
     {
         unset($this->registers[$offset]);

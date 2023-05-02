@@ -14,7 +14,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
     public static function setUpBeforeClass(): void
     {
         $config = TestingConfiguration::getConfig();
-        Storage::configure($config['resource']);
+        Storage::configure($config['storage']);
     }
 
     public static function tearDownAfterClass(): void

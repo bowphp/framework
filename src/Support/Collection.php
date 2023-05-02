@@ -38,9 +38,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * The last element of the list
      *
-     * @return array
+     * @return mixed
      */
-    public function last()
+    public function last(): mixed
     {
         $element = end($this->storage);
 
@@ -54,9 +54,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @param  string $key
      * @param  bool   $strict
-     * @return boolean
+     * @return bool
      */
-    public function has($key, $strict = false)
+    public function has(string $key, bool $strict = false): bool
     {
         // When $strict is true, he check $key not how a key but a value.
         $isset = isset($this->storage[$key]);
@@ -73,9 +73,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * Check if a collection is empty.
      *
-     * @return boolean
+     * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         $isEmpty = empty($this->storage);
 
@@ -95,10 +95,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @param string $key
      * @param mixed  $default
-     *
      * @return mixed
      */
-    public function get($key = null, $default = null)
+    public function get(string $key = null, mixed $default = null)
     {
         if (is_null($key)) {
             return $this->storage;
@@ -204,13 +203,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed  $value
      * @return mixed
      */
-    public function set(mixed $key, mixed $value): mixed
+    public function set(string $key, mixed $value): mixed
     {
         if ($this->has($key)) {
             $old = $this->storage[$key];
-
             $this->storage[$key] = $value;
-
             return $old;
         }
 
@@ -238,7 +235,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @return Collection
      * @throws \ErrorException
      */
-    public function merge($array): Collection
+    public function merge(Collection|array $array): Collection
     {
         if (is_array($array)) {
             $this->storage = array_merge(
@@ -259,11 +256,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
 
         return $this;
     }
+
     /**
      * Map
      *
      * @param callable $cb
-     *
      * @return Collection
      */
     public function map(callable $cb): Collection
@@ -283,7 +280,6 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * Filter
      *
      * @param callable $cb
-     *
      * @return Collection
      */
     public function filter(callable $cb): Collection
@@ -701,7 +697,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @return string
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->storage;
     }
@@ -711,7 +707,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      *
      * @return \ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->storage);
     }
@@ -722,7 +718,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $offset
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return $this->has($offset);
     }
@@ -733,7 +729,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $offset
      * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->get($offset);
     }
@@ -745,7 +741,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $value
      * @return void
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->set($offset, $value);
     }
@@ -756,7 +752,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * @param mixed $offset
      * @return void
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->storage[$offset]);
     }

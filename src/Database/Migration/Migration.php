@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Bow\Database\Migration;
 
 use Bow\Console\Color;
-use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Database;
+use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Exception\MigrationException;
+use Bow\Database\Connection\AbstractConnection;
 
 abstract class Migration
 {
@@ -24,7 +26,7 @@ abstract class Migration
      */
     public function __construct()
     {
-        $this->adapter = Database::getAdapterConnection();
+        $this->adapter = Database::getConnectionAdapter();
     }
 
     /**
@@ -51,7 +53,7 @@ abstract class Migration
     {
         Database::connection($name);
 
-        $this->adapter = Database::getAdapterConnection();
+        $this->adapter = Database::getConnectionAdapter();
 
         return $this;
     }
@@ -66,7 +68,7 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        $sql = sprintf('DROP TABLE `%s`;', $table);
+        $sql = sprintf('DROP TABLE %s;', $table);
 
         return $this->executeSqlQuery($sql);
     }
@@ -81,7 +83,11 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        $sql = sprintf('DROP TABLE IF EXISTS `%s`;', $table);
+        if ($this->adapter->getName() === 'pgsql') {
+            $sql = sprintf('DROP TABLE IF EXISTS %s CASCADE;', $table);
+        } else {
+            $sql = sprintf('DROP TABLE IF EXISTS %s;', $table);
+        }
 
         return $this->executeSqlQuery($sql);
     }
@@ -97,17 +103,21 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        $generator = new SQLGenerator($table, $this->adapter->getName());
-
-        call_user_func_array($cb, [$generator]);
+        call_user_func_array($cb, [
+            $generator = new SQLGenerator($table, $this->adapter->getName(), 'create')
+        ]);
 
         if ($this->adapter->getName() == 'mysql') {
-            $engine = sprintf('ENGINE=%s', strtoupper($generator->getEngine()));
+            $engine = sprintf(' ENGINE=%s', strtoupper($generator->getEngine()));
         } else {
             $engine = null;
         }
 
-        $sql = sprintf("CREATE TABLE `%s` (%s) %s;", $table, $generator->make(), $engine);
+        if ($this->adapter->getName() === 'pgsql') {
+            $sql = sprintf("CREATE TABLE %s (%s)%s;", $table, $generator->make(), $engine);
+        } else {
+            $sql = sprintf("CREATE TABLE `%s` (%s)%s;", $table, $generator->make(), $engine);
+        }
 
         return $this->executeSqlQuery($sql);
     }
@@ -127,7 +137,11 @@ abstract class Migration
             $generator = new SQLGenerator($table, $this->adapter->getName(), 'alter')
         ]);
 
-        $sql = sprintf('ALTER TABLE `%s` %s;', $table, $generator->make());
+        if ($this->adapter->getName() === 'pgsql') {
+            $sql = sprintf('ALTER TABLE %s %s;', $table, $generator->make());
+        } else {
+            $sql = sprintf('ALTER TABLE `%s` %s;', $table, $generator->make());
+        }
 
         return $this->executeSqlQuery($sql);
     }
@@ -144,7 +158,7 @@ abstract class Migration
     }
 
     /**
-     * Add SQL query
+     * Rename table
      *
      * @param string $table
      * @param string $to
@@ -152,13 +166,21 @@ abstract class Migration
      */
     final public function renameTable(string $table, string $to): Migration
     {
-        if ($this->adapter->getName() == 'mysql') {
-            $command = 'RENAME';
-        } else {
-            $command = 'ALTER TABLE';
-        }
+        $sql = sprintf('ALTER TABLE %s RENAME TO %s', $table, $to);
 
-        $sql = sprintf('%s %s TO %s', $command, $table, $to);
+        return $this->executeSqlQuery($sql);
+    }
+
+    /**
+     * Rename table if exists
+     *
+     * @param string $table
+     * @param string $to
+     * @return Migration
+     */
+    final public function renameTableIfExists(string $table, string $to): Migration
+    {
+        $sql = sprintf('ALTER TABLE IF EXISTS %s RENAME TO %s', $table, $to);
 
         return $this->executeSqlQuery($sql);
     }
@@ -181,18 +203,18 @@ abstract class Migration
      *
      * @param string $sql
      * @return Migration
+     * @throws MigrationException
      */
     private function executeSqlQuery(string $sql): Migration
     {
         try {
-            $result = (bool) Database::statement($sql);
+            Database::statement($sql);
         } catch (\Exception $exception) {
             echo sprintf("%s%s\n", Color::red("▶"), $sql);
-            throw $exception;
+            throw new MigrationException($exception->getMessage(), (int) $exception->getCode());
         }
 
         echo sprintf("%s%s\n", Color::green("▶"), $sql);
-
         return $this;
     }
 }

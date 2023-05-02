@@ -9,12 +9,11 @@
     },
     "require": {
         "php": "^8.1",
-        "bowphp/tintin": "2.*",
+        "bowphp/tintin": "^3.0",
         "filp/whoops": "^2.1",
         "nesbot/carbon": "^2.16",
         "psy/psysh": "v0.10.*",
         "fakerphp/faker": "^1.20",
-        "pda/pheanstalk": "^4.0",
         "neitanod/forceutf8": "^2.0",
         "ext-openssl": "*",
         "ext-intl": "*",
@@ -23,9 +22,11 @@
         "ext-xml": "*",
         "ext-json": "*",
         "ext-pdo_mysql": "*",
-        "ext-pdo_sqlite": "*"
+        "ext-pdo_sqlite": "*",
+        "ext-redis": "*"
     },
     "require-dev": {
+        "pda/pheanstalk": "^4.0",
         "phpunit/phpunit": "^8",
         "monolog/monolog": "^1.22",
         "twig/twig": "^2.5",
@@ -35,7 +36,8 @@
         "php-amqplib/php-amqplib": "^3.0",
         "bowphp/policier": "dev-master",
         "mockery/mockery": "^1.5",
-        "spatie/phpunit-snapshot-assertions": "^4.2"
+        "spatie/phpunit-snapshot-assertions": "^4.2",
+        "predis/predis": "^2.1"
     },
     "authors": [
         {

@@ -208,7 +208,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Modify http headers
+     * Add http header
      *
      * @param  string $key
      * @param  string $value
@@ -222,18 +222,29 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Add http headers
+     *
+     * @param  array $headers
+     * @return Response
+     */
+    public function addHeaders(array $headers): Response
+    {
+        $this->headers = [...$this->headers, ...$headers];
+
+        return $this;
+    }
+
+    /**
      * Download the given file as an argument
      *
      * @param string $file
      * @param null   $filename
-     * @param string $disposition
      * @param array  $headers
      * @return string
      */
     public function download(
         string $file,
         ?string $filename = null,
-        string $disposition = 'attachment',
         array $headers = []
     ): string {
         $type = mime_content_type($file);
@@ -241,6 +252,8 @@ class Response implements ResponseInterface
         if (is_null($filename)) {
             $filename = basename($file);
         }
+
+        $disposition = $headers["disposition"] ?? 'attachment';
 
         $this->addHeader('Content-Disposition', $disposition . '; filename=' . $filename);
         $this->addHeader('Content-Type', $type);
@@ -268,8 +281,9 @@ class Response implements ResponseInterface
      */
     public function status(int $code): Response
     {
+        $this->code = $code;
+
         if (in_array($code, array_keys(static::$status_codes), true)) {
-            $this->code = $code;
             @header('HTTP/1.1 ' . $code . ' ' . static::$status_codes[$code], $this->override, $code);
         }
 
@@ -369,11 +383,11 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Get accessControl instance
+     * Modify the service access control from ServerAccessControl instance
      *
      * @return ServerAccessControl
      */
-    public function serverAccessControl(): ServerAccessControl
+    public function getServerAccessControl(): ServerAccessControl
     {
         return new ServerAccessControl($this);
     }

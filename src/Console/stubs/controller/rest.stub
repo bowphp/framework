@@ -37,10 +37,11 @@ class {className} extends Controller
      *
      * GET {prefix}/:id
      *
+     * @param Request $request
      * @param mixed $id
      * @return void
      */
-    public function show(mixed $id): void
+    public function show(Request $request, mixed $id): void
     {
         // Code Here
     }
@@ -50,10 +51,11 @@ class {className} extends Controller
      *
      * PUT {prefix}/:id
      *
+     * @param Request $request
      * @param mixed $id
      * @return void
      */
-    public function update(mixed $id): void
+    public function update(Request $request, mixed $id): void
     {
         // Code Here
     }
@@ -63,10 +65,11 @@ class {className} extends Controller
      *
      * DELETE {prefix}/:id
      *
+     * @param Request $request
      * @param mixed $id
      * @return void
      */
-    public function destroy(mixed $id): void
+    public function destroy(Request $request, mixed $id): void
     {
         // Code Here
     }

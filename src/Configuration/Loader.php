@@ -261,8 +261,10 @@ class Loader implements \ArrayAccess
             return $this;
         }
 
-        $services = $this->configurations();
-        $services[] = \Bow\Container\ContainerConfiguration::class;
+        $services = array_merge(
+            [\Bow\Container\ContainerConfiguration::class],
+            $this->configurations(),
+        );
 
         $service_collection = [];
 

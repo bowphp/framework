@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Controllers;
+
+{modelNamespace}use App\\Controller;
+use Bow\Http\Request;
+
+class ExampleController extends Controller
+{
+    /**
+     * Start point
+     *
+     * GET {prefix}
+     *
+     * @return void
+     */
+    public function index(): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Add a new resource in the information base
+     *
+     * POST {prefix}
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function store(Request $request): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Allows you to retrieve specific information with an identifier.
+     *
+     * GET {prefix}/:id
+     *
+     * @param Request $request
+     * @param mixed $id
+     * @return void
+     */
+    public function show(Request $request, mixed $id): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Updating a resource
+     *
+     * PUT {prefix}/:id
+     *
+     * @param Request $request
+     * @param mixed $id
+     * @return void
+     */
+    public function update(Request $request, mixed $id): void
+    {
+        // Code Here
+    }
+
+    /**
+     * Delete a resource
+     *
+     * DELETE {prefix}/:id
+     *
+     * @param Request $request
+     * @param mixed $id
+     * @return void
+     */
+    public function destroy(Request $request, mixed $id): void
+    {
+        // Code Here
+    }
+}

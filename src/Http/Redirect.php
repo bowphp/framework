@@ -130,7 +130,7 @@ class Redirect implements ResponseInterface
      * @param int $status
      * @return Redirect
      */
-    public function back($status = 302)
+    public function back(int $status = 302)
     {
         $this->to($this->request->referer(), $status);
 
