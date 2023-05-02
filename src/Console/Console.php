@@ -228,7 +228,7 @@ class Console
         }
 
         try {
-            call_user_func_array([$this, $command], [$target]);
+            return call_user_func_array([$this, $command], [$target]);
         } catch (\Exception $e) {
             echo $e->getMessage();
             exit(1);
@@ -298,7 +298,6 @@ class Console
      * Launch a migration
      *
      * @return void
-     *
      * @throws \ErrorException
      */
     private function migration(): void
@@ -395,9 +394,7 @@ class Console
             $this->throwFailsCommand('Bad command usage', 'help run');
         }
 
-        $target = $this->arg->getTarget();
-
-        $this->command->call('runner', $action, $target);
+        $this->command->call('runner', $action, $this->arg->getTarget());
     }
 
     /**
@@ -413,9 +410,7 @@ class Console
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
-        $target = $this->arg->getTarget();
-
-        $this->command->call('generator', $action, $target);
+        $this->command->call('generator', $action, $this->arg->getTarget());
     }
 
     /**
