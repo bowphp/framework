@@ -1465,7 +1465,10 @@ class QueryBuilder implements \JsonSerializable
         }
 
         return in_array(Str::upper($comparator), [
-            '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN"
+            '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN",
+            'ILIKE', '&', '|', '<<', '>>', 'NOT LIKE',
+            '&&', '@>', '<@', '?', '?|', '?&', '||', '-', '@?', '@@', '#-',
+            'IS DISTINCT FROM', 'IS NOT DISTINCT FROM',
         ], true);
     }
 }

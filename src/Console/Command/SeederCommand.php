@@ -25,7 +25,7 @@ class SeederCommand extends AbstractCommand
 
         $generator = new Generator(
             $this->setting->getSeederDirectory(),
-            "{$seeder}_seeder"
+            $seeder
         );
 
         if ($generator->fileExists()) {
@@ -48,7 +48,7 @@ class SeederCommand extends AbstractCommand
      */
     public function all(): void
     {
-        $seeds_filenames = glob($this->setting->getSeederDirectory() . '/*_seeder.php');
+        $seeds_filenames = glob($this->setting->getSeederDirectory() . '/*.php');
 
         $this->make($seeds_filenames);
     }
@@ -59,22 +59,22 @@ class SeederCommand extends AbstractCommand
      * @param string $table_name
      * @return void
      */
-    public function table(string $table_name): void
+    public function table(string $seeder_name): void
     {
-        $table_name = trim($table_name);
+        $seeder_name = trim($seeder_name);
 
-        if (is_null($table_name)) {
+        if (is_null($seeder_name)) {
             $this->throwFailsCommand('Specify the seeder table name', 'help seed');
         }
 
-        if (!file_exists($this->setting->getSeederDirectory() . "/{$table_name}_seeder.php")) {
-            echo Color::red("Seeder $table_name not exists.");
+        if (!file_exists($this->setting->getSeederDirectory() . "/{$seeder_name}.php")) {
+            echo Color::red("Seeder $seeder_name not exists.");
 
             exit(1);
         }
 
         $this->make([
-            $this->setting->getSeederDirectory() . "/{$table_name}_seeder.php"
+            $this->setting->getSeederDirectory() . "/{$seeder_name}.php"
         ]);
     }
 
