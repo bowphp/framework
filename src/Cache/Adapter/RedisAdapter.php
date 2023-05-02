@@ -2,7 +2,7 @@
 
 namespace Bow\Cache\Adapter;
 
-use \Redis;
+use Redis;
 use Bow\Cache\Adapter\CacheAdapterInterface;
 
 class RedisAdapter implements CacheAdapterInterface
@@ -42,7 +42,7 @@ class RedisAdapter implements CacheAdapterInterface
             'base' => 500,
             'cap' => 750,
         ];
-    
+
         $this->redis = new Redis();
         $this->redis->connect(
             $config["host"],
