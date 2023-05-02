@@ -76,21 +76,21 @@ class SmtpDriver implements MailDriverInterface
      */
     public function __construct(array $config)
     {
-        if (!isset($config['secure'])) {
+        if (!isset($config['secure']) || is_null($config['secure'])) {
             $config['secure'] = false;
+        }
 
-            if (!isset($config['tls'])) {
-                $config['tls'] = false;
-            }
+        if (!isset($config['tls']) || is_null($config['tls'])) {
+            $config['tls'] = false;
         }
 
         $this->url = $config['hostname'];
         $this->username = $config['username'];
         $this->password = $config['password'];
-        $this->secure = $config['ssl'];
-        $this->tls = $config['tls'];
-        $this->timeout = $config['timeout'];
-        $this->port = $config['port'];
+        $this->secure = (bool) $config['ssl'];
+        $this->tls = (bool) $config['tls'];
+        $this->timeout = (int) $config['timeout'];
+        $this->port = (int) $config['port'];
     }
 
     /**
@@ -178,8 +178,8 @@ class SmtpDriver implements MailDriverInterface
         // itself and initiate the SMTP conversation.
         // The domain name or IP address of the SMTP client is usually sent as an argument
         // together with the command (e.g. “EHLO client.example.com”).
-        $client_host = isset($_SERVER['HTTP_HOST']) &&
-        preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        $client_host = isset($_SERVER['HTTP_HOST']) 
+            && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
         if ($code == 220) {
             $code = $this->write('EHLO ' . $client_host, 250, 'HELO');
