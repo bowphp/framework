@@ -223,12 +223,6 @@ class S3Service implements ServiceInterface
      * @param  string $filename
      * @return null|string
      */
-    /**
-     * Recover the contents of the file
-     *
-     * @param  string $filename
-     * @return null|string
-     */
     public function get(string $filename): string
     {
         $result = $this->client->getObject([

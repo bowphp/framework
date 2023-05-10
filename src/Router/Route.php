@@ -268,15 +268,7 @@ class Route
             // Perform url variables parsing
             preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $matches);
 
-            $raws = $matches[0];
-            $keys = $matches[1];
-    
-            foreach ($keys as $key => $value) {
-                $this->keys[$value] = [
-                    "key" => $value,
-                    "optional" => ":{$value}?" === $raws[$key]
-                ];
-            }
+            $this->keys = end($matches);
 
             return $this->checkRequestUri($path, $uri);
         }
