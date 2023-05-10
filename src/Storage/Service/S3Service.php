@@ -223,6 +223,12 @@ class S3Service implements ServiceInterface
      * @param  string $filename
      * @return null|string
      */
+    /**
+     * Recover the contents of the file
+     *
+     * @param  string $filename
+     * @return null|string
+     */
     public function get(string $filename): string
     {
         $result = $this->client->getObject([
@@ -230,7 +236,11 @@ class S3Service implements ServiceInterface
             'Key' => $filename
         ]);
 
-        return $result["Body"];
+        if (isset($result["Body"])) {
+            return $result["Body"]->getContents();
+        }
+
+        return null;
     }
 
     /**
