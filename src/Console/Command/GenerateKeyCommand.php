@@ -25,7 +25,7 @@ class GenerateKeyCommand extends AbstractCommand
         }
 
         $contents = file_get_contents($env_file);
-        $contents = preg_replace('@"APP_KEY"\s*:\s*".+?"@', '"APP_KEY": "' . $key . '"', $contents);
+        $contents = preg_replace('@"APP_KEY"\s*:\s*".*?"@', '"APP_KEY": "' . $key . '"', $contents);
 
         file_put_contents($env_file, $contents);
 
