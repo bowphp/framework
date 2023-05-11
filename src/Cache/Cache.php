@@ -42,7 +42,7 @@ class Cache
     /**
      * Cache configuration method
      *
-     * @param string $base_directory
+     * @param array $config
      */
     public static function confirgure(array $config)
     {
