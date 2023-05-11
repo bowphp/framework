@@ -81,7 +81,6 @@ class Route
         $this->cb = $cb;
 
         $this->path = str_replace('.', '\.', $path);
-        $this->path = rtrim($this->path, "/");
 
         $this->match = [];
     }
@@ -116,7 +115,7 @@ class Route
     {
         $middleware = (array) $middleware;
 
-        if (! is_array($this->cb)) {
+        if (!is_array($this->cb)) {
             $this->cb = [
                 'controller' => $this->cb,
                 'middleware' => $middleware
@@ -174,7 +173,6 @@ class Route
             }
 
             $tmp = (int) $this->match[$key];
-
             $this->params[$value] = $tmp;
             $this->match[$key] = $tmp;
         }
@@ -241,7 +239,15 @@ class Route
      */
     public function match(string $uri): bool
     {
-        $uri = rtrim($uri, "/");
+        // Normalization of the url of the navigator.
+        if (preg_match('~(.*)/$~', $uri, $match)) {
+            $uri = end($match);
+        }
+
+        // Normalization of the path defined by the programmer.
+        if (preg_match('~(.*)/$~', $this->path, $match)) {
+            $this->path = end($match);
+        }
 
         // We go straight back to gain performance.
         if ($this->path === $uri) {
@@ -265,10 +271,9 @@ class Route
         if (empty($this->with)) {
             $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
 
-            // Perform url variables parsing
-            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $matches);
+            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
 
-            $this->keys = end($matches);
+            $this->keys = end($this->keys);
 
             return $this->checkRequestUri($path, $uri);
         }

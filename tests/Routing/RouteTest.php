@@ -67,14 +67,14 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 
         $route->where(['name' => '[a-z0-9_-]+', 'id' => '\d+']);
 
+        $this->assertFalse($route->match('/bow/framework'));
+        $this->assertFalse($route->match('/'));
+
         $this->assertTrue($route->match('/bow/1'));
         $this->assertTrue($route->call());
 
         $this->assertTrue($route->match('/bow/2'));
         $this->assertFalse($route->call());
-
-        $this->assertFalse($route->match('/bow/framework'));
-        $this->assertFalse($route->match('/'));
     }
 
     public function test_uri_with_optionnal_parameter()
