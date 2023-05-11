@@ -2,8 +2,6 @@
 
 namespace Bow\Tests\Stubs\Container;
 
-use Bow\Support\Collection;
-
 class MyClass
 {
     private $collection;
