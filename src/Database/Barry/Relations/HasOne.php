@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Database\Barry\Relation;
+use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
+use Bow\Database\Barry\Relation;
 
 class HasOne extends Relation
 {
@@ -47,8 +48,22 @@ class HasOne extends Relation
      */
     public function getResults(): ?Model
     {
-        // TODO: Cache the result
-        return $this->query->first();
+        $key = $this->query->getTable() . "_" . $this->local_key;
+        $cache = Cache::cache('file')->get($key);
+
+        if (!is_null($cache)) {
+            $related = new $this->related;
+            $related->setAttributes($cache);
+            return $related;
+        }
+
+        $result = $this->query->first();
+
+        if (!is_null($result)) {
+            Cache::cache('file')->add($key, $result->toArray(), 500);
+        }
+
+        return $result;
     }
 
     /**
