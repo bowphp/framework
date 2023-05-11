@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\Color;
+use Bow\Console\Exception\ConsoleException;
+
 class GenerateKeyCommand extends AbstractCommand
 {
     /**
@@ -15,11 +18,18 @@ class GenerateKeyCommand extends AbstractCommand
     {
         $key = base64_encode(openssl_random_pseudo_bytes(12) . date('Y-m-d H:i:s') . microtime(true));
 
-        file_put_contents($this->setting->getConfigDirectory() . "/.key", $key);
+        $env_file = config('app.env_file');
 
-        config('app.env');
+        if (!file_exists($env_file)) {
+            throw new ConsoleException("The .env.json file not found. Run cp .env.example.json .env.json");
+        }
 
-        echo "Application key => \033[0;32m$key\033[00m\n";
+        $contents = file_get_contents($env_file);
+        $contents = preg_replace('@"APP_KEY"\s*:\s*".+?"@', '"APP_KEY": "' . $key . '"', $contents);
+
+        file_put_contents($env_file, $contents);
+
+        echo sprintf("Application key => %s\n", Color::green($key));
 
         exit;
     }
