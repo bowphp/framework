@@ -9,14 +9,15 @@ env:
   FTP_PORT: 21
 
 jobs:
-  build-and-test:
+  lunix-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         php: [8.1, 8.2]
         os: [ubuntu-latest]
+        stability: [prefer-lowest, prefer-stable]
 
-    name: PHP-${{ matrix.php }} - ${{ matrix.os }}
+    name: PHP ${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -64,8 +65,59 @@ jobs:
       - name: Create test cache directory
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
-      - name: Check code standard
-        run: ./vendor/bin/phpcs --standard=psr12 --severity=4 --tab-width=4 src --ignore="tests"
+      - name: Run test suite
+        run: composer run-script test
+
+  windows_tests:
+    runs-on: windows-2019
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.1, 8.2]
+        stability: [prefer-lowest, prefer-stable]
+
+    name: PHP ${{ matrix.php }} - ${{ matrix.stability }} - Windows
+
+    steps:
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
+          coverage: none
+
+      - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
+      - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
+      - run: docker run -p 6379:6379 -d --name redis redis
+      - run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
+      - run: docker run -d -p 11301:11300 schickling/beanstalkd
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+
+      - name: Copy the php ini config
+        run: cp php.dist.ini php.ini
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction
+
+      - name: Create test cache directory
+        run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Run test suite
         run: composer run-script test
