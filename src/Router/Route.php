@@ -115,7 +115,7 @@ class Route
     {
         $middleware = (array) $middleware;
 
-        if (! is_array($this->cb)) {
+        if (!is_array($this->cb)) {
             $this->cb = [
                 'controller' => $this->cb,
                 'middleware' => $middleware
@@ -169,14 +169,11 @@ class Route
 
             if (!is_int($this->match[$key])) {
                 $this->params[$value] = urldecode($this->match[$key]);
-
                 continue;
             }
 
             $tmp = (int) $this->match[$key];
-
             $this->params[$value] = $tmp;
-
             $this->match[$key] = $tmp;
         }
 

@@ -1250,7 +1250,7 @@ class QueryBuilder implements \JsonSerializable
      * @see httsp://php.net/manual/en/jsonserializable.jsonserialize.php
      * @return string
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return json_encode($this->get());
     }
