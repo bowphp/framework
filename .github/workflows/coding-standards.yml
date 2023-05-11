@@ -1,0 +1,41 @@
+name: fix code styling
+
+on:
+  workflow_call:
+    inputs:
+      php:
+        default: "8.1"
+        type: string
+      message:
+        default: Fix code styling
+        type: string
+      fix:
+        default: true
+        type: boolean
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.php }}
+          extensions: json, dom, curl, libxml, mbstring
+          coverage: none
+
+      - name: Install PHP CS
+        run: composer global require squizlabs/php_codesniffer
+
+      - name: Run Phpcbf
+        run: phpcbf --standard=psr11 --tab-width=4 --severity=4
+
+      - name: Commit linted files
+        if: ${{ inputs.fix }}
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: ${{ inputs.message }}

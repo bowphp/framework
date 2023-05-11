@@ -230,7 +230,11 @@ class S3Service implements ServiceInterface
             'Key' => $filename
         ]);
 
-        return $result["Body"];
+        if (isset($result["Body"])) {
+            return $result["Body"]->getContents();
+        }
+
+        return null;
     }
 
     /**

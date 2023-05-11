@@ -9,14 +9,15 @@ env:
   FTP_PORT: 21
 
 jobs:
-  build-and-test:
+  lunix-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         php: [8.1, 8.2]
         os: [ubuntu-latest]
+        stability: [prefer-lowest, prefer-stable]
 
-    name: PHP-${{ matrix.php }} - ${{ matrix.os }}
+    name: PHP ${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -63,9 +64,6 @@ jobs:
 
       - name: Create test cache directory
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
-
-      - name: Check code standard
-        run: ./vendor/bin/phpcs --standard=psr12 --severity=4 --tab-width=4 src --ignore="tests"
 
       - name: Run test suite
         run: composer run-script test
