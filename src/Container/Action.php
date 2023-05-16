@@ -12,7 +12,6 @@ use ReflectionException;
 use Bow\Support\Collection;
 use Bow\Database\Barry\Model;
 use InvalidArgumentException;
-use Bow\Middleware\BaseMiddleware;
 use Bow\Contracts\ResponseInterface;
 use Bow\Router\Exception\RouterException;
 
@@ -191,7 +190,6 @@ class Action
         foreach ($actions as $key => $action) {
             if (is_string($action)) {
                 array_push($functions, $this->controller($action));
-
                 continue;
             }
 
@@ -215,14 +213,12 @@ class Action
             if (is_callable($middleware)) {
                 if ($middleware instanceof Closure || is_array($middleware)) {
                     $this->dispatcher->pipe($middleware);
-
                     continue;
                 }
             }
 
             if (class_exists($middleware)) {
                 $this->dispatcher->pipe($middleware);
-
                 continue;
             }
 
@@ -237,12 +233,18 @@ class Action
 
             // We check if middleware if define via aliases
             if (!array_key_exists($middleware, $this->middlewares)) {
-                throw new RouterException(sprintf('%s is not define middleware.', $middleware), E_ERROR);
+                throw new RouterException(
+                    sprintf('%s is not define middleware.', $middleware),
+                    E_ERROR
+                );
             }
 
             // We check if the defined middleware is a valid middleware.
             if (!class_exists($this->middlewares[$middleware])) {
-                throw new RouterException(sprintf('%s is not a middleware class.', $middleware));
+                throw new RouterException(
+                    sprintf('%s is not a middleware class.', $middleware),
+                    E_ERROR
+                );
             }
 
             // We add middleware into dispatch pipeline
@@ -439,9 +441,9 @@ class Action
     {
         $reflection = new ReflectionFunction($closure);
 
-        $parameters = $reflection->getParameters();
-
-        return $this->getInjectParameters($parameters);
+        return $this->getInjectParameters(
+            $reflection->getParameters()
+        );
     }
 
     /**
@@ -484,14 +486,14 @@ class Action
     {
         $class_name = $class->getName();
 
+        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
+            return null;
+        }
+
         if (!class_exists($class_name, true)) {
             throw new InvalidArgumentException(
                 sprintf('class %s not exists', $class_name)
             );
-        }
-
-        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
-            return null;
         }
 
         if (method_exists($class_name, 'getInstance')) {
