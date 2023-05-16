@@ -52,7 +52,7 @@ class HasOne extends Relation
         $cache = Cache::cache('file')->get($key);
 
         if (!is_null($cache)) {
-            $related = new $this->related;
+            $related = new $this->related();
             $related->setAttributes($cache);
             return $related;
         }

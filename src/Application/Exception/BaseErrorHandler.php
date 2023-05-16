@@ -6,16 +6,16 @@ namespace Bow\Application\Exception;
 
 use Bow\View\View;
 
-class BaseErrorHandler extends \Exception
+class BaseErrorHandler
 {
     /**
      * Render view as response
      *
      * @param string $view
      * @param array $data
-     * @return mixed
+     * @return string
      */
-    protected function render($view, $data = [])
+    protected function render($view, $data = []): string
     {
         return View::parse($view, $data)->getContent();
     }
