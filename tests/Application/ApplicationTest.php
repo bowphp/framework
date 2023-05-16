@@ -57,13 +57,14 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
     public function test_send_application_with_404_status()
     {
+        $this->expectException(RouterException::class);
+
         $response = Mockery::mock(Response::class);
         $request = Mockery::mock(Request::class);
 
         // Response mock method
         $response->allows()->addHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status(404);
-        $response->allows()->send('Cannot GET / 404');
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
@@ -80,8 +81,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         $app = new Application($request, $response);
         $app->bind($config);
-
-        $this->assertFalse($app->send());
+        $app->send();
     }
 
     public function test_send_application_with_matched_route()
