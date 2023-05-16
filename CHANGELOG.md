@@ -12,7 +12,7 @@ Release for 5.0.2
 - Fix action dependency injector
 - Add the base error handler
 
-## [Unreleased]
+## 5.0.0 - 2023-05-10
 
 - [Add] Convert the project from PHP7 to PHP8
 - [Add] Multiconnection for storage system

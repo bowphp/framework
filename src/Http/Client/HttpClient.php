@@ -57,6 +57,8 @@ class HttpClient
 
         $this->addFields($data);
 
+        curl_setopt($this->ch, CURLOPT_HTTPGET, true);
+
         return new Parser($this->ch);
     }
 
@@ -81,6 +83,7 @@ class HttpClient
             $data = array_merge($this->attach, $data);
         }
 
+        curl_setopt($this->ch, CURLOPT_POST, true);
         $this->addFields($data);
 
         return new Parser($this->ch);
@@ -100,6 +103,8 @@ class HttpClient
         if (!curl_setopt($this->ch, CURLOPT_PUT, true)) {
             $this->addFields($data);
         }
+
+        curl_setopt($this->ch, CURLOPT_PUT, true);
 
         return new Parser($this->ch);
     }
@@ -145,6 +150,7 @@ class HttpClient
     private function initCurl(string $url): void
     {
         $url = $this->base_url . "/" . trim($url, "/");
+
         $this->ch = curl_init($url);
     }
 
@@ -156,6 +162,8 @@ class HttpClient
      */
     private function addFields(array $data): void
     {
-        curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        if (count($data) > 0) {
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        }
     }
 }

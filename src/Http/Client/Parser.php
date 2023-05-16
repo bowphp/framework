@@ -153,7 +153,7 @@ class Parser
     private function returnTransfertToRaw()
     {
         if ($this->returnTransfert()) {
-            if (!curl_setopt($this->ch, CURLOPT_BINARYTRANSFER, true)) {
+            if (!curl_setopt($this->ch, CURLOPT_HTTPGET, true)) {
                 $this->close();
 
                 return false;

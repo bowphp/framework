@@ -6,14 +6,16 @@ namespace Bow\Configuration;
 
 use Bow\View\View;
 use Monolog\Logger;
-use Bow\Http\Redirect;
 use Bow\Support\Collection;
 use Bow\Configuration\Loader;
 use Bow\Database\Barry\Model;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FirePHPHandler;
+use Whoops\Handler\CallbackHandler;
 use Bow\Configuration\Configuration;
 use Bow\Contracts\ResponseInterface;
+use Whoops\Handler\PrettyPageHandler;
+use Whoops\Handler\Handler;
 
 class LoggerConfiguration extends Configuration
 {
@@ -54,44 +56,38 @@ class LoggerConfiguration extends Configuration
     {
         $whoops = new \Whoops\Run();
 
-        if (app_env('APP_ENV') == 'development') {
-            $whoops->pushHandler(
-                new \Whoops\Handler\PrettyPageHandler()
-            );
+        if (app_env('APP_ENV') != 'production') {
+            $whoops->pushHandler(new PrettyPageHandler());
+            $whoops->register();
+            return;
         }
 
-        if (class_exists($error_handler)) {
-            $handler = new \Whoops\Handler\CallbackHandler(
-                function ($exception, $inspector, $run) use ($monolog, $error_handler) {
-                    $monolog->error($exception->getMessage(), $exception->getTrace());
+        $handler = new CallbackHandler(
+            function ($exception, $inspector, $run) use ($monolog, $error_handler) {
+                $monolog->error($exception->getMessage(), $exception->getTrace());
 
-                    $result = call_user_func_array(
-                        [new $error_handler(), 'handle'],
-                        [$exception]
-                    );
+                $result = call_user_func_array([new $error_handler(), 'handle'], [$exception]);
 
-                    switch (true) {
-                        case $result instanceof View:
-                            return $result->getContent();
-                        case $result instanceof ResponseInterface || $result instanceof Redirect:
-                            $result->sendContent();
-                            break;
-                        case $result instanceof Model || $result instanceof Collection:
-                            return $result->toArray();
-                        case is_null($result):
-                        case is_string($result):
-                        case is_array($result):
-                        case is_object($result):
-                        case $result instanceof \Iterable:
-                            return $result;
-                    }
-                    exit(1);
+                if ($result instanceof View) {
+                    echo $result->getContent();
+                } elseif ($result instanceof ResponseInterface) {
+                    $result->sendContent();
+                } elseif (
+                    is_null($result)
+                    || $result instanceof Model || $result instanceof Collection
+                    || is_string($result)
+                    || is_array($result)
+                    || is_object($result)
+                    || $result instanceof \Iterable
+                ) {
+                    echo json_encode($result);
                 }
-            );
 
-            $whoops->pushHandler($handler);
-        }
+                return Handler::QUIT;
+            }
+        );
 
+        $whoops->pushHandler($handler);
         $whoops->register();
     }
 
