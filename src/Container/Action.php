@@ -168,9 +168,13 @@ class Action
          * like [AppController::class, 'action']
          */
         if (count($actions) === 2) {
-            if (class_exists($actions[0])) {
-                $actions = [$actions[0] . '::' . $actions[1]];
+            if (!class_exists($actions[0])) {
+                throw new InvalidArgumentException(
+                    'The controller ' . $actions[0] . ' is not exists',
+                    E_USER_ERROR
+                );
             }
+            $actions = [$actions[0] . '::' . $actions[1]];
         }
 
         /**
@@ -179,31 +183,6 @@ class Action
          */
         if (isset($actions['controller'])) {
             $actions = (array) $actions['controller'];
-        }
-
-        $functions = [];
-
-        /**
-         * We normalize of the action to execute and
-         * creation of the dependency injection
-         */
-        foreach ($actions as $key => $action) {
-            if (is_string($action)) {
-                array_push($functions, $this->controller($action));
-                continue;
-            }
-
-            if (!is_callable($action)) {
-                continue;
-            }
-
-            if (is_array($action) && $action[0] instanceof Closure) {
-                $injection = $this->injectorForClosure($action[0]);
-            } else {
-                $injection = $this->injectorForClosure($action);
-            }
-
-            array_push($functions, ['action' => $action, 'injection' => $injection]);
         }
 
         /**
@@ -269,6 +248,29 @@ class Action
                 return $response;
             case $response instanceof Model || $response instanceof Collection:
                 return $response->toArray();
+        }
+
+        $functions = [];
+
+        /**
+         * We normalize of the action to execute and
+         * creation of the dependency injection
+         */
+        foreach ($actions as $key => $action) {
+            if (is_string($action)) {
+                array_push($functions, $this->controller($action));
+                continue;
+            }
+            if (!is_callable($action)) {
+                continue;
+            }
+            if (is_array($action) && $action[0] instanceof Closure) {
+                $injection = $this->injectorForClosure($action[0]);
+            } else {
+                $injection = $this->injectorForClosure($action);
+            }
+
+            array_push($functions, ['action' => $action, 'injection' => $injection]);
         }
 
         return $this->dispatchControllers($functions, $param);
