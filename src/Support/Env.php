@@ -56,8 +56,6 @@ class Env
 
         static::$envs = static::bindVariables(static::$envs);
 
-        dd(static::$envs);
-
         foreach (static::$envs as $key => $value) {
             $key = Str::upper(trim($key));
             putenv($key . '=' . json_encode($value));
