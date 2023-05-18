@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Bow\Http\Client;
 
 use CurlHandle;
+use BadFunctionCallException;
+use Bow\Http\Client\Response as HttpClientResponse;
 
 class HttpClient
 {
@@ -38,10 +40,21 @@ class HttpClient
     public function __construct(?string $base_url = null)
     {
         if (!function_exists('curl_init')) {
-            throw new \BadFunctionCallException('cURL php is require.');
+            throw new BadFunctionCallException('cURL php is require.');
         }
 
         $this->base_url = rtrim($base_url, "/");
+    }
+
+    /**
+     * Set the base url
+     *
+     * @param string $url
+     * @return void
+     */
+    public function setBaseUrl(string $url): void
+    {
+        $this->base_url = rtrim($url, "/");
     }
 
     /**
@@ -49,17 +62,17 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     * @return Parser
+     * @return HttpClientResponse
      */
-    public function get(string $url, array $data = []): Parser
+    public function get(string $url, array $data = []): HttpClientResponse
     {
-        $this->initCurl($url);
+        $this->init($url);
 
         $this->addFields($data);
 
         curl_setopt($this->ch, CURLOPT_HTTPGET, true);
 
-        return new Parser($this->ch);
+        return new HttpClientResponse($this->ch);
     }
 
     /**
@@ -67,11 +80,11 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     * @return Parser
+     * @return HttpClientResponse
      */
-    public function post(string $url, array $data = []): Parser
+    public function post(string $url, array $data = []): HttpClientResponse
     {
-        $this->initCurl($url);
+        $this->init($url);
 
         if (!empty($this->attach)) {
             curl_setopt($this->ch, CURLOPT_UPLOAD, true);
@@ -86,7 +99,7 @@ class HttpClient
         curl_setopt($this->ch, CURLOPT_POST, true);
         $this->addFields($data);
 
-        return new Parser($this->ch);
+        return new HttpClientResponse($this->ch);
     }
 
     /**
@@ -94,11 +107,11 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     * @return Parser
+     * @return HttpClientResponse
      */
-    public function put(string $url, array $data = []): Parser
+    public function put(string $url, array $data = []): HttpClientResponse
     {
-        $this->initCurl($url);
+        $this->init($url);
 
         if (!curl_setopt($this->ch, CURLOPT_PUT, true)) {
             $this->addFields($data);
@@ -106,18 +119,20 @@ class HttpClient
 
         curl_setopt($this->ch, CURLOPT_PUT, true);
 
-        return new Parser($this->ch);
+        return new HttpClientResponse($this->ch);
     }
 
     /**
      * Attach new file
      *
      * @param string $attach
-     * @return array
+     * @return HttpClient
      */
-    public function addAttach(string|array $attach): array
+    public function addAttach(string|array $attach): HttpClient
     {
-        return $this->attach = (array) $attach;
+        $this->attach = (array) $attach;
+
+        return $this;
     }
 
     /**
@@ -142,19 +157,6 @@ class HttpClient
     }
 
     /**
-     * Reset alway connection
-     *
-     * @param string $url
-     * @return void
-     */
-    private function initCurl(string $url): void
-    {
-        $url = $this->base_url . "/" . trim($url, "/");
-
-        $this->ch = curl_init($url);
-    }
-
-    /**
      * Add field
      *
      * @param array $data
@@ -165,5 +167,20 @@ class HttpClient
         if (count($data) > 0) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
         }
+    }
+
+    /**
+     * Reset alway connection
+     *
+     * @param string $url
+     * @return void
+     */
+    private function init(string $url): void
+    {
+        if (is_null($this->base_url)) {
+            $url = $this->base_url . "/" . trim($url, "/");
+        }
+
+        $this->ch = curl_init(trim($url, "/"));
     }
 }

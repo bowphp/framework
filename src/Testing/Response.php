@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Bow\Testing;
 
 use InvalidArgumentException;
-use Bow\Http\Client\Parser;
+use Bow\Http\Client\Response as HttpClientResponse;
 
 class Response
 {
     /**
      * The http parser
      *
-     * @var Parser
+     * @var HttpClientResponse
      */
-    private Parser $parser;
+    private HttpClientResponse $http_response;
 
     /**
      * The parser content
@@ -26,13 +26,13 @@ class Response
     /**
      * Behovior constructor.
      *
-     * @param Parser $parser
+     * @param HttpClientResponse $http_response
      */
-    public function __construct(Parser $parser)
+    public function __construct(HttpClientResponse $http_response)
     {
-        $this->parser = $parser;
+        $this->http_response = $http_response;
 
-        $this->content = $parser->getContent();
+        $this->content = $http_response->getContent();
     }
 
     /**
