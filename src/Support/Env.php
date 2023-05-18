@@ -56,7 +56,7 @@ class Env
 
         foreach (static::$envs as $key => $value) {
             $key = Str::upper(trim($key));
-            putenv($key . '=' . $value);
+            putenv($key . '=' . json_encode($value));
         }
 
         if (json_last_error() == JSON_ERROR_SYNTAX) {
@@ -90,7 +90,13 @@ class Env
             return $default;
         }
 
-        return $value;
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $data = json_decode($value);
+
+        return json_last_error() ? $value : $data;
     }
 
     /**
