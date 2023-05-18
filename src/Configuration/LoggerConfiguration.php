@@ -56,7 +56,7 @@ class LoggerConfiguration extends Configuration
     {
         $whoops = new \Whoops\Run();
 
-        if (app_env('APP_ENV') != 'production') {
+        if (app_env('APP_DEBUG')) {
             $whoops->pushHandler(new PrettyPageHandler());
             $whoops->register();
             return;
