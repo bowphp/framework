@@ -54,6 +54,10 @@ class Env
 
         static::$envs = json_decode(trim($content), true);
 
+        static::$envs = static::bindVariables(static::$envs);
+
+        dd(static::$envs);
+
         foreach (static::$envs as $key => $value) {
             $key = Str::upper(trim($key));
             putenv($key . '=' . json_encode($value));
@@ -109,8 +113,38 @@ class Env
     public static function set(string $key, mixed $value): bool
     {
         $key = Str::upper(trim($key));
+
         static::$envs[$key] = $value;
 
         return putenv($key . '=' . $value);
+    }
+
+    /**
+     * Bind variable
+     *
+     * @param array $envs
+     * @return array
+     */
+    private static function bindVariables(array $envs): array
+    {
+        $keys = array_keys(static::$envs);
+
+        foreach ($envs as $env_key => $value) {
+            foreach ($keys as $key) {
+                if ($key == $env_key) {
+                    break;
+                }
+                if (is_array($value)) {
+                    $envs[$env_key] = static::bindVariables($value);
+                    break;
+                }
+                if (is_string($value) && preg_match("/\\$\{\s*$key\s*\}/", $value)) {
+                    $envs[$env_key] = str_replace('${' . $key . '}', static::$envs[$key], $value);
+                    break;
+                }
+            }
+        }
+
+        return $envs;
     }
 }
