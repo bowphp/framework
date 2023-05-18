@@ -62,7 +62,7 @@ class Request
         }
 
         foreach ($this->input as $key => $value) {
-            if (!is_array($value) && strlen($value) == 0) {
+            if (is_string($value) && strlen($value) == 0) {
                 $value = null;
             }
 
@@ -351,7 +351,7 @@ class Request
      */
     public function is($match): bool
     {
-        return (bool) preg_match('@' . $match . '@', $this->path());
+        return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->path());
     }
 
     /**
@@ -362,7 +362,7 @@ class Request
      */
     public function isReferer($match): bool
     {
-        return (bool) preg_match('@' . $match . '@', $this->referer());
+        return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->referer());
     }
 
     /**
@@ -574,7 +574,7 @@ class Request
     {
         $data = [];
 
-        if (! is_array($exceptions)) {
+        if (!is_array($exceptions)) {
             $exceptions = func_get_args();
         }
 
@@ -594,7 +594,7 @@ class Request
     {
         $data = $this->input;
 
-        if (! is_array($ignores)) {
+        if (!is_array($ignores)) {
             $ignores = func_get_args();
         }
 
