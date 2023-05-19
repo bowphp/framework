@@ -15,7 +15,7 @@ class FakeMiddleware implements BaseMiddleware
      * @param array $args
      * @return mixed
      */
-    public function process(Request $request, callable $next, array $args = []): void
+    public function process(Request $request, callable $next, array $args = []): mixed
     {
         // Code Here
 
