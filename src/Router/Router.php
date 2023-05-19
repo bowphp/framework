@@ -113,6 +113,7 @@ class Router
      * Note: Disable only you run on test env
      *
      * @param bool $auto_csrf
+     * @return void
      */
     public function setAutoCsrf(bool $auto_csrf): void
     {
@@ -151,10 +152,10 @@ class Router
     /**
      * Allows to associate a global middleware on an route
      *
-     * @param array $middlewares
+     * @param array|string $middlewares
      * @return Router
      */
-    public function middleware(array $middlewares): Router
+    public function middleware(array|string $middlewares): Router
     {
         $middlewares = (array) $middlewares;
 
@@ -395,10 +396,11 @@ class Router
 
         static::$routes[$method][] = $route;
 
-        if (app_env('APP_ENV') != 'production' && $this->auto_csrf === true) {
-            if (in_array($method, ['POST', 'DELETE', 'PUT'])) {
-                $route->middleware('csrf');
-            }
+        if (
+            $this->auto_csrf === true
+            && in_array($method, ['POST', 'DELETE', 'PUT'])
+        ) {
+            $route->middleware('csrf');
         }
 
         return $route;

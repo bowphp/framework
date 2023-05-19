@@ -9,7 +9,7 @@ trait RegexRule
     /**
      * Compile Regex Rule
      *
-     * [regex] Check that the contents of the field with a regular expression
+     * Check that the contents of the field with a regular expression
      *
      * @param string $key
      * @param string $masque
@@ -21,7 +21,7 @@ trait RegexRule
             return;
         }
 
-        $regex = '~^' . $match[1] . '$~';
+        $regex = '~' . addcslashes($match[1], "~") . '~';
 
         if (preg_match($regex, $this->inputs[$key])) {
             return;

@@ -41,7 +41,20 @@ class HttpClient
             throw new \BadFunctionCallException('cURL php is require.');
         }
 
-        $this->base_url = rtrim($base_url, "/");
+        if (!is_null($base_url)) {
+            $this->base_url = rtrim($base_url, "/");
+        }
+    }
+
+    /**
+     * Set the base url
+     *
+     * @param string $url
+     * @return void
+     */
+    public function setBaseUrl(string $url): void
+    {
+        $this->base_url = rtrim($url, "/");
     }
 
     /**
@@ -53,9 +66,9 @@ class HttpClient
      */
     public function get(string $url, array $data = []): Parser
     {
-        $this->initCurl($url);
+        $params = http_build_query($data);
 
-        $this->addFields($data);
+        $this->init($url . "?" . $params);
 
         curl_setopt($this->ch, CURLOPT_HTTPGET, true);
 
@@ -71,7 +84,7 @@ class HttpClient
      */
     public function post(string $url, array $data = []): Parser
     {
-        $this->initCurl($url);
+        $this->init($url);
 
         if (!empty($this->attach)) {
             curl_setopt($this->ch, CURLOPT_UPLOAD, true);
@@ -84,6 +97,7 @@ class HttpClient
         }
 
         curl_setopt($this->ch, CURLOPT_POST, true);
+
         $this->addFields($data);
 
         return new Parser($this->ch);
@@ -98,7 +112,7 @@ class HttpClient
      */
     public function put(string $url, array $data = []): Parser
     {
-        $this->initCurl($url);
+        $this->init($url);
 
         if (!curl_setopt($this->ch, CURLOPT_PUT, true)) {
             $this->addFields($data);
@@ -147,15 +161,17 @@ class HttpClient
      * @param string $url
      * @return void
      */
-    private function initCurl(string $url): void
+    private function init(string $url): void
     {
-        $url = $this->base_url . "/" . trim($url, "/");
+        if (is_null($this->base_url)) {
+            $url = $this->base_url . "/" . trim($url, "/");
+        }
 
-        $this->ch = curl_init($url);
+        $this->ch = curl_init(trim($url, "/"));
     }
 
     /**
-     * Add field
+     * Add fields
      *
      * @param array $data
      * @return void

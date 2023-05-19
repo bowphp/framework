@@ -6,7 +6,7 @@ namespace Bow\Http\Client;
 
 use CurlHandle;
 
-class Parser
+class Response
 {
     /**
      * The error message
@@ -30,11 +30,11 @@ class Parser
     private CurlHandle $ch;
 
     /**
-     * The header
+     * The headers
      *
      * @var array
      */
-    private array $header = [];
+    private array $headers = [];
 
     /**
      * Flag
@@ -42,13 +42,6 @@ class Parser
      * @var bool
      */
     private bool $executed = false;
-
-    /**
-     * The attachment collection
-     *
-     * @var array
-     */
-    private array $attach = [];
 
     /**
      * Parser constructor.
@@ -193,7 +186,7 @@ class Parser
 
         $this->error = curl_error($this->ch);
         $this->errno = curl_errno($this->ch);
-        $this->header = curl_getinfo($this->ch);
+        $this->headers = curl_getinfo($this->ch);
         $this->executed = true;
 
         $this->close();
@@ -217,7 +210,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header;
+        return $this->headers;
     }
 
     /**
@@ -232,7 +225,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['http_code'] ?? null;
+        return $this->headers['http_code'] ?? null;
     }
 
     /**
@@ -247,7 +240,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['total_time'] ?? null;
+        return $this->headers['total_time'] ?? null;
     }
 
     /**
@@ -262,7 +255,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['connect_time'] ?? null;
+        return $this->headers['connect_time'] ?? null;
     }
 
     /**
@@ -277,7 +270,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['size_upload'] ?? null;
+        return $this->headers['size_upload'] ?? null;
     }
 
     /**
@@ -292,7 +285,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['speed_upload'] ?? null;
+        return $this->headers['speed_upload'] ?? null;
     }
 
     /**
@@ -307,7 +300,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['size_download'] ?? null;
+        return $this->headers['size_download'] ?? null;
     }
 
     /**
@@ -322,7 +315,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['speed_download'] ?? null;
+        return $this->headers['speed_download'] ?? null;
     }
 
     /**
@@ -367,39 +360,7 @@ class Parser
             $this->execute();
         }
 
-        return $this->header['content_type'] ?? null;
-    }
-
-    /**
-     * Add attach file
-     *
-     * @param array $attach
-     * @return void
-     */
-    public function addAttach($attach)
-    {
-        $this->attach = array_merge($this->attach, (array) $attach);
-    }
-
-    /**
-     * Get attached files
-     *
-     * @return array
-     */
-    public function getAttach(): array
-    {
-        return $this->attach;
-    }
-
-    /**
-     * Set attach files
-     *
-     * @param array $attachs
-     * @return void
-     */
-    public function setAttach(array $attachs): void
-    {
-        $this->attach = $attachs;
+        return $this->headers['content_type'] ?? null;
     }
 
     /**
