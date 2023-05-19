@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.0.4 - 2023-05-19
+
+Release 5.0.4
+
+- Fixes HTTP Client
+- Add variable binding to the env loader
+- Fixes validation for regex rule
+- Fixes request data parser
+- Fixes middleware execution order
+
+All update ref #230
+
 ## 5.0.3 - 2023-05-16
 
 Add many fixes
