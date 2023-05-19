@@ -25,22 +25,33 @@ trait ConstraintColumn
 
         $on = '';
         $references = '';
-        $target = sprintf("%s_%s_foreign", $this->getTable(), $name);
+
+        if ($this->adapter == "pgsql") {
+            $target = sprintf("\"%s_%s_foreign\"", $this->getTable(), $name);
+        }
 
         if (isset($attributes['on'])) {
             $on = strtoupper(' ON ' . $attributes['on']);
         }
 
         if (isset($attributes['references'], $attributes['table'])) {
-            $references = sprintf(
-                ' REFERENCES %s(%s)',
-                $attributes['table'],
-                $attributes['references']
-            );
+            if ($this->adapter === 'pgsql') {
+                $references = sprintf(
+                    ' REFERENCES %s("%s")',
+                    $attributes['table'],
+                    $attributes['references']
+                );
+            } else {
+                $references = sprintf(
+                    ' REFERENCES %s(`%s`)',
+                    $attributes['table'],
+                    $attributes['references']
+                );
+            }
         }
 
         if ($this->adapter === 'pgsql') {
-            $replacement = '%s %s FOREIGN KEY (%s)%s%s';
+            $replacement = '%s %s FOREIGN KEY ("%s")%s%s';
         } else {
             $replacement = '%s %s FOREIGN KEY (`%s`)%s%s';
         }

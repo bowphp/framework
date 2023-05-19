@@ -6,6 +6,18 @@ use Bow\Database\Exception\SQLGeneratorException;
 
 trait PgsqlCompose
 {
+    protected array $custom_types = [];
+
+    /**
+     * Generate the custom type for pgsql
+     *
+     * @return array
+     */
+    public function generateCustomTypes(): array
+    {
+        return $this->custom_types;
+    }
+
     /**
      * Compose sql statement for pgsql
      *
@@ -35,6 +47,7 @@ trait PgsqlCompose
         $unsigned = $attribute['unsigned'] ?? false;
         $after = $attribute['after'] ?? false;
         $first = $attribute['first'] ?? false;
+        $custom = $attribute['custom'] ?? false;
 
         if ($after || $first) {
             throw new SQLGeneratorException("The key first and after only work on mysql");
@@ -45,24 +58,43 @@ trait PgsqlCompose
             $type = 'VARCHAR';
         }
 
+        // Redefine the size
         if (!$size && in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR'])) {
             $size = 255;
         }
 
         // Add column size
-        if ($size) {
-            if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-                $size = (array) $size;
-                $size = "'" . implode("', '", $size) . "'";
-            }
-            if (in_array($raw_type, ['ENUM', 'CHECK', 'VARCHAR', 'LONG VARCHAR', 'STRING'])) {
-                $type = sprintf('%s(%s)', $type, $size);
+        if (in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR']) && $size) {
+            $type = sprintf('%s(%s)', $type, $size);
+        }
+
+        if (in_array($raw_type, ['ENUM', 'CHECK'])) {
+            $size = (array) $size;
+            $size = "'" . implode("', '", $size) . "'";
+            if ($raw_type == "ENUM") {
+                $table = preg_replace("/(ies)$/", "y", $this->table);
+                $table = preg_replace("/(s)$/", "", $table);
+
+                $this->custom_types[] = sprintf(
+                    "CREATE TYPE %s_%s_enum AS ENUM(%s);",
+                    $table,
+                    $name,
+                    $size
+                );
+                $type = sprintf('%s_%s_enum', $this->table, $name);
+            } else {
+                $type = sprintf('TEXT CHECK (%s IN CHECK(%s))', $name, $size);
             }
         }
 
         // Bind auto increment action
         if ($increment) {
             $type = 'SERIAL';
+        }
+
+        // Bind precision
+        if ($raw_type == "DOUBLE") {
+            $type = sprintf('DOUBLE PRECISION', $type);
         }
 
         // Set column as primary key
@@ -98,8 +130,13 @@ trait PgsqlCompose
             $type = sprintf('UNSIGNED %s', $type);
         }
 
+        // Apply the custom definition
+        if ($custom) {
+            $type = sprintf('%s %s', $type, $custom);
+        }
+
         return trim(
-            sprintf('%s %s %s', $description['command'], $name, $type)
+            sprintf('%s "%s" %s', $description['command'], $name, $type)
         );
     }
 

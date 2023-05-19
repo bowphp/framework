@@ -33,6 +33,7 @@ trait SqliteCompose
         $increment = $attribute['increment'] ?? false;
         $nullable = $attribute['nullable'] ?? false;
         $unique = $attribute['unique'] ?? false;
+        $custom = $attribute['custom'] ?? false;
 
         // String to VARCHAR
         if ($raw_type == 'STRING') {
@@ -41,10 +42,6 @@ trait SqliteCompose
 
         if (!$size && in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR'])) {
             $size = 255;
-        }
-
-        // Add column size
-        if ($size) {
         }
 
         // Set column as primary key
@@ -77,6 +74,11 @@ trait SqliteCompose
                 $default = $default ? 'true' : 'false';
             }
             $type = sprintf('%s DEFAULT %s', $type, $default);
+        }
+
+        // Apply the custom definition
+        if ($custom) {
+            $type = sprintf('%s %s', $type, $custom);
         }
 
         return trim(

@@ -113,12 +113,21 @@ abstract class Migration
             $engine = null;
         }
 
-        if ($this->adapter->getName() === 'pgsql') {
-            $sql = sprintf("CREATE TABLE %s (%s)%s;", $table, $generator->make(), $engine);
-        } else {
+        if ($this->adapter->getName() !== 'pgsql') {
             $sql = sprintf("CREATE TABLE `%s` (%s)%s;", $table, $generator->make(), $engine);
+
+            return $this->executeSqlQuery($sql);
         }
 
+        foreach ($generator->generateCustomTypes() as $sql) {
+            try {
+                $this->executeSqlQuery($sql);
+            } catch (\Exception $exception) {
+                echo sprintf("%s %s\n", Color::yellow("Warning"), $exception->getMessage());
+            }
+        }
+
+        $sql = sprintf("CREATE TABLE %s (%s)%s;", $table, $generator->make(), $engine);
         return $this->executeSqlQuery($sql);
     }
 
@@ -210,11 +219,11 @@ abstract class Migration
         try {
             Database::statement($sql);
         } catch (\Exception $exception) {
-            echo sprintf("%s%s\n", Color::red("▶"), $sql);
+            echo sprintf("%s %s\n", Color::red("▶"), $sql);
             throw new MigrationException($exception->getMessage(), (int) $exception->getCode());
         }
 
-        echo sprintf("%s%s\n", Color::green("▶"), $sql);
+        echo sprintf("%s %s\n", Color::green("▶"), $sql);
         return $this;
     }
 }
