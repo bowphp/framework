@@ -396,8 +396,10 @@ class Router
 
         static::$routes[$method][] = $route;
 
-        if ($this->auto_csrf === true 
-            && in_array($method, ['POST', 'DELETE', 'PUT'])) {
+        if (
+            $this->auto_csrf === true
+            && in_array($method, ['POST', 'DELETE', 'PUT'])
+        ) {
             $route->middleware('csrf');
         }
 
