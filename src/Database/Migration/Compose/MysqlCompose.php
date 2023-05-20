@@ -35,6 +35,7 @@ trait MysqlCompose
         $unsigned = $attribute['unsigned'] ?? false;
         $after = $attribute['after'] ?? false;
         $first = $attribute['first'] ?? false;
+        $custom = $attribute['custom'] ?? false;
 
         // String to VARCHAR
         if ($raw_type == 'STRING') {
@@ -98,6 +99,11 @@ trait MysqlCompose
 
         if ($first === true) {
             $type = sprintf('%s FIRST', $type);
+        }
+
+        // Apply the custom definition
+        if ($custom) {
+            $type = sprintf('%s %s', $type, $custom);
         }
 
         return trim(
