@@ -10,14 +10,14 @@ use Bow\Http\Client\Response as HttpClientResponse;
 class Response
 {
     /**
-     * The http parser
+     * The http http_response
      *
      * @var HttpClientResponse
      */
     private HttpClientResponse $http_response;
 
     /**
-     * The parser content
+     * The http_response content
      *
      * @var string
      */
@@ -93,7 +93,7 @@ class Response
      */
     public function assertHeader(string $header, string $message = ''): Response
     {
-        Assert::assertArrayHasKey($header, $this->parser->getHeaders(), $message);
+        Assert::assertArrayHasKey($header, $this->http_response->getHeaders(), $message);
 
         return $this;
     }
@@ -107,7 +107,7 @@ class Response
      */
     public function assertArray(string $message = ''): Response
     {
-        Assert::assertTrue(is_array($this->parser->toArray()), $message);
+        Assert::assertTrue(is_array($this->http_response->toArray()), $message);
 
         return $this;
     }
@@ -122,7 +122,7 @@ class Response
      */
     public function assertContentType(string $content_type, string $message = ''): Response
     {
-        $type = $this->parser->getContentType();
+        $type = $this->http_response->getContentType();
 
         Assert::assertEquals(
             $content_type,
@@ -198,7 +198,7 @@ class Response
      */
     public function assertStatus(int $code, string $message = ''): Response
     {
-        Assert::assertEquals($this->parser->getCode(), $code, $message);
+        Assert::assertEquals($this->http_response->getCode(), $code, $message);
 
         return $this;
     }
@@ -210,7 +210,7 @@ class Response
      */
     public function assertKeyExists(string $key, string $message = ''): Response
     {
-        $data = $this->parser->toArray();
+        $data = $this->http_response->toArray();
 
         Assert::assertTrue(isset($data[$key]), $message);
 
@@ -279,8 +279,8 @@ class Response
      */
     public function __call(string $method, array $params = [])
     {
-        if (method_exists($this->parser, $method)) {
-            return call_user_func([$this->parser, $method]);
+        if (method_exists($this->http_response, $method)) {
+            return call_user_func([$this->http_response, $method]);
         }
 
         throw new InvalidArgumentException(
