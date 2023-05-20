@@ -158,7 +158,7 @@ class SQLGenerator
         }
 
         if ($this->adapter === 'pgsql') {
-            $this->sqls[] = sprintf("RENAME COLUMN %s TO %s", $name, $new);
+            $this->sqls[] = sprintf('RENAME COLUMN "%s" TO %s', $name, $new);
         } else {
             $this->sqls[] = sprintf("RENAME COLUMN `%s` TO `%s`", $name, $new);
         }

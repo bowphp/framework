@@ -87,14 +87,14 @@ trait PgsqlCompose
             }
         }
 
-        // Bind auto increment action
-        if ($increment) {
-            $type = 'SERIAL';
-        }
-
         // Bind precision
         if ($raw_type == "DOUBLE") {
             $type = sprintf('DOUBLE PRECISION', $type);
+        }
+
+        // Bind auto increment action
+        if ($increment) {
+            $type = 'SERIAL';
         }
 
         // Set column as primary key
