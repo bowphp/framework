@@ -28,6 +28,8 @@ trait ConstraintColumn
 
         if ($this->adapter == "pgsql") {
             $target = sprintf("\"%s_%s_foreign\"", $this->getTable(), $name);
+        } else {
+            $target = sprintf("%s_%s_foreign", $this->getTable(), $name);
         }
 
         if (isset($attributes['on'])) {
