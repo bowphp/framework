@@ -404,7 +404,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if (!isset($properties['table']) || $properties['table'] == null) {
             $parts = explode('\\', static::class);
-            $table = Str::snake(end($parts)) . 's';
+            $table = Str::lower(Str::snake(Str::plurial(end($parts))));
         } else {
             $table = $properties['table'];
         }
