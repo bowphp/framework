@@ -79,12 +79,13 @@ class Event
      */
     public static function emit(string|AppEvent $event): ?bool
     {
-        $data = array_slice(func_get_args(), 1);
         $event_name = $event;
 
         if ($event instanceof AppEvent) {
             $event_name = get_class($event);
             $data = [$event];
+        } else {
+            $data = array_slice(func_get_args(), 1);
         }
 
         if (!static::bound($event_name)) {

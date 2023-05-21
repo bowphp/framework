@@ -49,6 +49,7 @@ class Request
     private function __construct()
     {
         $data = [];
+        $this->id = "req_" . sha1(uniqid() . time());
 
         if ($this->getHeader('content-type') == 'application/json') {
             $data = json_decode(file_get_contents("php://input"), true);
