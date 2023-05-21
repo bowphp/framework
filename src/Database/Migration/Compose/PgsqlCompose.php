@@ -81,7 +81,7 @@ trait PgsqlCompose
                     $name,
                     $size
                 );
-                $type = sprintf('%s_%s_enum', $this->table, $name);
+                $type = sprintf('%s_%s_enum', $table, $name);
             } else {
                 $type = sprintf('TEXT CHECK (%s IN CHECK(%s))', $name, $size);
             }

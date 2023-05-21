@@ -123,7 +123,7 @@ abstract class Migration
             try {
                 $this->executeSqlQuery($sql);
             } catch (\Exception $exception) {
-                echo sprintf("%s %s\n", Color::yellow("Warning"), $exception->getMessage());
+                echo sprintf("%s\n", Color::yellow("Warning: " . $exception->getMessage()));
             }
         }
 
