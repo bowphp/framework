@@ -3,12 +3,14 @@
 namespace Bow\Tests\Translate;
 
 use Bow\Translate\Translator;
+use Bow\Tests\Config\TestingConfiguration;
 
 class TranslationTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        Translator::configure('fr', __DIR__ . '/stubs');
+        $config = TestingConfiguration::getConfig();
+        Translator::configure($config['translate.lang'], $config["translate.dictionary"]);
     }
 
     public function test_fr_welcome_message()

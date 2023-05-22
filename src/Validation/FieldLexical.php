@@ -15,17 +15,20 @@ trait FieldLexical
      */
     private function lexical(string $key, string|array $value): ?string
     {
-        $data = array_merge($this->inputs ?? [], ['attribute' => $value]);
+        $data = array_merge(
+            $this->inputs ?? [],
+            is_array($value) ? $value : ['attribute' => $value]
+        );
 
-        if (
-            is_array($value)
-            && isset($value['attribute'])
-            && isset($this->messages[$value['attribute']])
-        ) {
-            $message = $this->messages[$value['attribute']][$key] ?? $this->messages[$value['attribute']];
+        if (is_array($value) && isset($value['attribute'])) {
+            $message = $this->messages[$value['attribute']][$key] ?? $this->messages[$value['attribute']] ?? null;
 
             if (is_string($message)) {
                 return $this->parseAttribute($data, $message);
+            }
+
+            if (is_null($message)) {
+                return $this->parseFromTranslate($key, $data);
             }
         }
 
@@ -69,7 +72,7 @@ trait FieldLexical
     private function parseAttribute(array $attribute, string $lexical): ?string
     {
         foreach ($attribute as $key => $value) {
-            $lexical = str_replace('{' . $key . '}', $value, $lexical);
+            $lexical = str_replace('{' . $key . '}', (string) $value, $lexical);
         }
 
         return $lexical;
