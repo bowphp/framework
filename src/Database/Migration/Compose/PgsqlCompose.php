@@ -99,7 +99,7 @@ trait PgsqlCompose
 
         // Bind auto increment action
         if ($increment) {
-            $type = $raw_type == "INT" ? "SERIAL" : "BIGSERIAL";
+            $type = in_array($raw_type, ["INT", "TINYINT", "SMALLINT"]) ? "SERIAL" : "BIGSERIAL";
         }
 
         // Set column as primary key
