@@ -60,6 +60,30 @@ class PostgreSQLAdapter extends AbstractConnection
         // Formatting connection parameters
         $dsn  = sprintf("pgsql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
 
+        if (isset($$this->config['sslmode'])) {
+            $dsn .= ';sslmode=' . $$this->config['sslmode'];
+        }
+
+        if (isset($$this->config['sslrootcert'])) {
+            $dsn .= ';sslrootcert=' . $$this->config['sslrootcert'];
+        }
+
+        if (isset($$this->config['sslcert'])) {
+            $dsn .= ';sslcert=' . $$this->config['sslcert'];
+        }
+
+        if (isset($$this->config['sslkey'])) {
+            $dsn .= ';sslkey=' . $$this->config['sslkey'];
+        }
+
+        if (isset($$this->config['sslcrl'])) {
+            $dsn .= ';sslcrl=' . $$this->config['sslcrl'];
+        }
+
+        if (isset($$this->config['application_name'])) {
+            $dsn .= ';application_name=' . $$this->config['application_name'];
+        }
+
         $username = $this->config["username"];
         $password = $this->config["password"];
 
@@ -71,5 +95,9 @@ class PostgreSQLAdapter extends AbstractConnection
 
         // Build the PDO connection
         $this->pdo = new PDO($dsn, $username, $password, $options);
+
+        if ($this->config["charset"]) {
+            $this->pdo->query('SET NAMES \'' . $this->config["charset"] . '\'');
+        }
     }
 }
