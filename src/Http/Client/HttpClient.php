@@ -62,17 +62,20 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     * @return Parser
+     * @return Response
      */
-    public function get(string $url, array $data = []): Parser
+    public function get(string $url, array $data = []): Response
     {
-        $params = http_build_query($data);
+        if (count($data) > 0) {
+            $params = http_build_query($data);
+            $url . "?" . $params;
+        }
 
-        $this->init($url . "?" . $params);
+        $this->init($url);
 
         curl_setopt($this->ch, CURLOPT_HTTPGET, true);
 
-        return new Parser($this->ch);
+        return new Response($this->ch);
     }
 
     /**
@@ -80,9 +83,9 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     * @return Parser
+     * @return Response
      */
-    public function post(string $url, array $data = []): Parser
+    public function post(string $url, array $data = []): Response
     {
         $this->init($url);
 
@@ -100,7 +103,7 @@ class HttpClient
 
         $this->addFields($data);
 
-        return new Parser($this->ch);
+        return new Response($this->ch);
     }
 
     /**
@@ -108,9 +111,9 @@ class HttpClient
      *
      * @param string $url
      * @param array $data
-     * @return Parser
+     * @return Response
      */
-    public function put(string $url, array $data = []): Parser
+    public function put(string $url, array $data = []): Response
     {
         $this->init($url);
 
@@ -120,7 +123,7 @@ class HttpClient
 
         curl_setopt($this->ch, CURLOPT_PUT, true);
 
-        return new Parser($this->ch);
+        return new Response($this->ch);
     }
 
     /**
@@ -163,7 +166,7 @@ class HttpClient
      */
     private function init(string $url): void
     {
-        if (is_null($this->base_url)) {
+        if (!is_null($this->base_url)) {
             $url = $this->base_url . "/" . trim($url, "/");
         }
 
