@@ -470,6 +470,49 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Create the new row
+     *
+     * @param Builder $model
+     * @return int
+     */
+    private function writeRows(Builder $builder)
+    {
+        // Fire the creating event
+        $this->fireEvent('model.creating');
+
+        $primary_key_value = $this->getKeyValue();
+
+        // Insert information in the database
+        $row_affected = $builder->insert($this->attributes);
+
+        // We get a last insertion id value
+        if (static::$builder->getAdapterName() == 'pgsql') {
+            if ($this->auto_increment) {
+                $sequence = $this->table . "_" . $this->primary_key . '_seq';
+                $primary_key_value = static::$builder->getPdo()->lastInsertId($sequence);
+            }
+        } else {
+            $primary_key_value = static::$builder->getPdo()->lastInsertId();
+        }
+
+        if (is_null($primary_key_value)) {
+            $primary_key_value = $this->attributes[$this->primary_key] ?? null;
+        }
+
+        $primary_key_value = !is_numeric($primary_key_value) ? $primary_key_value : (int) $primary_key_value;
+
+        // Set the primary key value
+        $this->attributes[$this->primary_key] = $primary_key_value;
+        $this->original = $this->attributes;
+
+        if ($row_affected == 1) {
+            $this->fireEvent('model.created');
+        }
+
+        return $row_affected;
+    }
+
+    /**
      * Save aliases on insert action
      *
      * @return int
@@ -477,48 +520,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function save()
     {
-        $model = static::query();
+        $builder = static::query();
 
-        /**
-         * Get the current primary key value
-         */
+         // Get the current primary key value
         $primary_key_value = $this->getKeyValue();
 
         // If primary key value is null, we are going to start the creation of new row
-        if ($primary_key_value == null) {
-            // Fire the creating event
-            $this->fireEvent('model.creating');
-
-            // Insert information in the database
-            $row_affected = $model->insert($this->attributes);
-
-            // We get a last insertion id value
-            if (static::$builder->getAdapterName() == 'pgsql') {
-                if ($this->auto_increment) {
-                    $sequence = $this->table . "_" . $this->primary_key . '_seq';
-                    $primary_key_value = static::$builder->getPdo()->lastInsertId($sequence);
-                }
-            } else {
-                $primary_key_value = static::$builder->getPdo()->lastInsertId();
-            }
-
-            $primary_key_value = !is_numeric($primary_key_value) ? $primary_key_value : (int) $primary_key_value;
-
-            // Set the primary key value
-            $this->attributes[$this->primary_key] = $primary_key_value;
-            $this->original = $this->attributes;
-
-            if ($row_affected == 1) {
-                $this->fireEvent('model.created');
-            }
-
-            return $row_affected;
+        if (is_null($primary_key_value)) {
+            return $this->writeRows($builder);
         }
 
         $primary_key_value = $this->transtypeKeyValue($primary_key_value);
 
         // Check the existent in database
-        if (!$model->exists($this->primary_key, $primary_key_value)) {
+        if (!$builder->exists($this->primary_key, $primary_key_value)) {
             return 0;
         }
 
@@ -542,7 +557,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->fireEvent('model.updating');
 
         // Execute update model
-        $updated = $model->where($this->primary_key, $primary_key_value)->update($update_data);
+        $updated = $builder->where($this->primary_key, $primary_key_value)->update($update_data);
 
         // Fire the updated event if there are affected row
         if ($updated) {
@@ -562,14 +577,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Transtype value to the define primary key type
         if ($this->primary_key_type == 'int') {
-            $primary_key_value = (int) $primary_key_value;
-        } elseif ($this->primary_key_type == 'float' || $this->primary_key_type == 'double') {
-            $primary_key_value = (float) $primary_key_value;
-        } else {
-            $primary_key_value = (string) $primary_key_value;
+            return (int) $primary_key_value;
         }
 
-        return $primary_key_value;
+        if ($this->primary_key_type == 'float' || $this->primary_key_type == 'double') {
+            return (float) $primary_key_value;
+        }
+
+        return (string) $primary_key_value;
     }
 
     /**
@@ -681,7 +696,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getKeyValue(): mixed
     {
-        return $this->original[$this->primary_key] ?? $this->attributes[$this->primary_key] ?? null;
+        return $this->original[$this->primary_key] ?? null;
     }
 
     /**
