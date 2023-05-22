@@ -15,5 +15,5 @@ return [
     /**
      * Path to the language repeater
      */
-    'dictionary' => __DIR__ . '/../Translate/stubs',
+    'dictionary' => __DIR__ . '/../../Translate/stubs',
 ];
