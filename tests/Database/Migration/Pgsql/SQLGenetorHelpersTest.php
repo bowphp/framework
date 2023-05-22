@@ -206,7 +206,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, "\"column\" {$type} PRIMARY KEY NULL DEFAULT $default");
 
         $sql = $this->generator->{"add$method"}('column', ['primary' => true, 'increment' => true, 'size' => 100, 'nullable' => true])->make();
-        $this->assertEquals($sql, "\"column\" SERIAL PRIMARY KEY NULL");
+        $this->assertEquals($sql, "\"column\" BIGSERIAL PRIMARY KEY NULL");
 
         $sql = $this->generator->{"add$method"}('column', ['unique' => true])->make();
         $this->assertEquals($sql, "\"column\" {$type} UNIQUE NOT NULL");
@@ -214,7 +214,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $method = "add{$method}Increment";
         if (method_exists($this->generator, $method)) {
             $sql = $this->generator->{$method}('column')->make();
-            $this->assertEquals($sql, "\"column\" SERIAL PRIMARY KEY NOT NULL");
+            $this->assertEquals($sql, "\"column\" BIGSERIAL PRIMARY KEY NOT NULL");
         }
     }
 
@@ -241,7 +241,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($sql, "MODIFY COLUMN \"column\" {$type} PRIMARY KEY NULL DEFAULT $default");
 
         $sql = $this->generator->{"change$method"}('column', ['primary' => true, 'increment' => true, 'size' => 100, 'nullable' => true])->make();
-        $this->assertEquals($sql, "MODIFY COLUMN \"column\" SERIAL PRIMARY KEY NULL");
+        $this->assertEquals($sql, "MODIFY COLUMN \"column\" BIGSERIAL PRIMARY KEY NULL");
 
         $sql = $this->generator->{"change$method"}('column', ['unique' => true])->make();
         $this->assertEquals($sql, "MODIFY COLUMN \"column\" {$type} UNIQUE NOT NULL");
@@ -249,7 +249,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $method = "change{$method}Increment";
         if (method_exists($this->generator, $method)) {
             $sql = $this->generator->{$method}('column')->make();
-            $this->assertEquals($sql, "MODIFY COLUMN \"column\" {$type} SERIAL PRIMARY KEY NOT NULL");
+            $this->assertEquals($sql, "MODIFY COLUMN \"column\" {$type} BIGSERIAL PRIMARY KEY NOT NULL");
         }
     }
 
