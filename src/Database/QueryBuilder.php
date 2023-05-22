@@ -1171,7 +1171,7 @@ class QueryBuilder implements \JsonSerializable
      * @param int $chunk
      * @return array
      */
-    public function paginate(int $number_of_page, int $current = 0, int $chunk = null): array
+    public function paginate(int $number_of_page, int $current = 0, ?int $chunk = null): array
     {
         // We go to back page
         --$current;

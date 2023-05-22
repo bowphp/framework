@@ -6,14 +6,19 @@ use Bow\Database\Exception\SQLGeneratorException;
 
 trait PgsqlCompose
 {
+    /**
+     * Define the query for create the custom type
+     *
+     * @var array
+     */
     protected array $custom_types = [];
 
     /**
-     * Generate the custom type for pgsql
+     * Get the custom type for pgsql
      *
      * @return array
      */
-    public function generateCustomTypes(): array
+    public function getCustomTypeQueries(): array
     {
         return $this->custom_types;
     }
@@ -94,7 +99,7 @@ trait PgsqlCompose
 
         // Bind auto increment action
         if ($increment) {
-            $type = 'SERIAL';
+            $type = in_array($raw_type, ["INT", "TINYINT", "SMALLINT"]) ? "SERIAL" : "BIGSERIAL";
         }
 
         // Set column as primary key

@@ -10,48 +10,69 @@ trait FieldLexical
      * Get error debugging information
      *
      * @param string       $key
-     * @param string|array $attributes
+     * @param string|array $value
      * @return ?string
      */
-    private function lexical(string $key, string|array $attributes): ?string
+    private function lexical(string $key, string|array $value): ?string
     {
-        if (is_string($attributes) && isset($this->messages[$attributes])) {
-            return $this->messages[$attributes][$key] ?? $this->messages[$attributes];
+        $data = array_merge(
+            $this->inputs ?? [],
+            is_array($value) ? $value : ['attribute' => $value]
+        );
+
+        if (is_array($value) && isset($value['attribute'])) {
+            $message = $this->messages[$value['attribute']][$key] ?? $this->messages[$value['attribute']] ?? null;
+
+            if (is_string($message)) {
+                return $this->parseAttribute($data, $message);
+            }
+
+            if (is_null($message)) {
+                return $this->parseFromTranslate($key, $data);
+            }
         }
 
-        if (
-            is_array($attributes)
-            && isset($attributes['attribute'])
-            && isset($this->messages[$attributes['attribute']])
-        ) {
-            return $this->messages[$attributes['attribute']][$key] ?? $this->messages[$attributes['attribute']];
+        if (is_string($value) && isset($this->messages[$value])) {
+            $message = $this->messages[$value][$key] ?? $this->messages[$value];
+
+            if (is_string($message)) {
+                return $this->parseAttribute($data, $message);
+            }
         }
 
-        if (is_string($attributes)) {
-            $attributes = ['attribute' => $attributes];
-        }
+        return $this->parseFromTranslate($key, $data);
+    }
 
+    /**
+     * Parse the translate content
+     *
+     * @param string $key
+     * @param array $data
+     * @return string
+     */
+    private function parseFromTranslate(string $key, array $data)
+    {
         // Get lexical provided by dev app
-        $lexical = trans('validation.' . $key, $attributes);
+        $message = trans('validation.' . $key, $data);
 
-        if (is_null($lexical)) {
-            $lexical = $this->parseAttribute($attributes, $this->lexical[$key]);
+        if (is_null($message)) {
+            $message = $this->lexical[$key];
         }
 
-        return $lexical;
+        return $this->parseAttribute($data, $message);
     }
 
     /**
      * Normalize beneficiaries
      *
-     * @param array $attributes
+     * @param array $attribute
      * @param string $lexical
      * @return string
      */
-    private function parseAttribute(array $attributes, string $lexical): ?string
+    private function parseAttribute(array $attribute, string $lexical): ?string
     {
-        foreach ($attributes as $key => $value) {
-            $lexical = str_replace('{' . $key . '}', $value, $lexical);
+        foreach ($attribute as $key => $value) {
+            $lexical = str_replace('{' . $key . '}', (string) $value, $lexical);
         }
 
         return $lexical;

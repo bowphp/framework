@@ -1,8 +1,8 @@
 # Bow Translate
 
-Bow Framework's translate system is a very simple translate api. He support plurialize.
+Bow Framework's translation system is a very simple translation API. Also supports pluralization.
 
-This the sample configuration
+This is the sample configuration
 
 ```php
 // frontend/lang/en/messages.php
@@ -11,14 +11,12 @@ return [
 ];
 ```
 
-Let's show a little exemple:
+Let's show a little example:
 
 ```php
 use Bow\Translate\Translator;
 
 echo Translator::translate('messages.welcome');
-
 // Or
-
 echo trans('messages.welcome');
 ```

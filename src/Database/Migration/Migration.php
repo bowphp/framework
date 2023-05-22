@@ -119,7 +119,7 @@ abstract class Migration
             return $this->executeSqlQuery($sql);
         }
 
-        foreach ($generator->generateCustomTypes() as $sql) {
+        foreach ($generator->getCustomTypeQueries() as $sql) {
             try {
                 $this->executeSqlQuery($sql);
             } catch (\Exception $exception) {

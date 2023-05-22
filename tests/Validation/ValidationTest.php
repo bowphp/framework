@@ -3,21 +3,17 @@
 namespace Bow\Tests\Validation;
 
 use Bow\Database\Database;
-use Bow\Tests\Config\TestingConfiguration;
+use Bow\Translate\Translator;
 use Bow\Validation\Validator;
+use Bow\Tests\Config\TestingConfiguration;
 
 class ValidationTest extends \PHPUnit\Framework\TestCase
 {
-    private static Database $database;
-
     public static function setUpBeforeClass(): void
     {
-        static::$database = Database::getInstance();
-
-        if (!static::$database) {
-            $configuration = TestingConfiguration::getConfig();
-            Database::configure($configuration["database"]);
-        }
+        $config = TestingConfiguration::getConfig();
+        Database::configure($config["database"]);
+        Translator::configure($config['translate.lang'], $config["translate.dictionary"]);
 
         Database::statement("create table if not exists pets (id int primary key, name varchar(225));");
         Database::table("pets")->truncate();
