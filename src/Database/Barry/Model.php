@@ -681,7 +681,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getKeyValue(): mixed
     {
-        return $this->original[$this->primary_key] ?? null;
+        return $this->original[$this->primary_key] ?? $this->attributes[$this->primary_key] ?? null;
     }
 
     /**
