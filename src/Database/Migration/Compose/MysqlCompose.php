@@ -28,6 +28,7 @@ trait MysqlCompose
         // Transform attribute
         $default = $attribute['default'] ?? null;
         $size = $attribute['size'] ?? false;
+        $check = $attribute['check'] ?? false;
         $primary = $attribute['primary'] ?? false;
         $increment = $attribute['increment'] ?? false;
         $nullable = $attribute['nullable'] ?? false;
@@ -46,13 +47,16 @@ trait MysqlCompose
             $size = 255;
         }
 
-        // Add column size
+        // Set the size
         if ($size) {
-            if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-                $size = (array) $size;
-                $size = "'" . implode("', '", $size) . "'";
-            }
             $type = sprintf('%s(%s)', $type, $size);
+        }
+
+        // Add column size
+        if (in_array($raw_type, ['ENUM', 'CHECK'])) {
+            $check = (array) $check;
+            $check = "'" . implode("', '", $check) . "'";
+            $type = sprintf('%s(%s)', $type, $check);
         }
 
         // Bind auto increment action

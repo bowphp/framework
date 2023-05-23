@@ -179,16 +179,20 @@ trait MixedColumn
      */
     public function addCheck(string $column, array $attribute = []): SQLGenerator
     {
-        if (!isset($attribute['size'])) {
+        if (!isset($attribute['check'])) {
             throw new SQLGeneratorException("The check values should be define.");
         }
 
-        if (!is_array($attribute['size'])) {
-            throw new SQLGeneratorException("The enum values should be array.");
+        if (!is_array($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be array.");
         }
 
-        if (count($attribute['size']) === 0) {
-            throw new SQLGeneratorException("The enum values cannot be empty.");
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
         }
 
         return $this->addColumn($column, 'check', $attribute);
@@ -312,6 +316,18 @@ trait MixedColumn
      */
     public function changeEnum(string $column, array $attribute = []): SQLGenerator
     {
+        if (!isset($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be define!");
+        }
+
+        if (!is_array($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be array");
+        }
+
+        if (count($attribute['size']) === 0) {
+            throw new SQLGeneratorException("The enum values cannot be empty.");
+        }
+
         return $this->changeColumn($column, 'enum', $attribute);
     }
 
@@ -324,6 +340,22 @@ trait MixedColumn
      */
     public function changeCheck(string $column, array $attribute = []): SQLGenerator
     {
+        if (!isset($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be define.");
+        }
+
+        if (!is_array($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be array.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
+
         return $this->changeColumn($column, 'check', $attribute);
     }
 }
