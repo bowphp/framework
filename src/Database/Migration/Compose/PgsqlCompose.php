@@ -74,22 +74,7 @@ trait PgsqlCompose
         }
 
         if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-            $size = (array) $size;
-            $size = "'" . implode("', '", $size) . "'";
-            if ($raw_type == "ENUM") {
-                $table = preg_replace("/(ies)$/", "y", $this->table);
-                $table = preg_replace("/(s)$/", "", $table);
-
-                $this->custom_types[] = sprintf(
-                    "CREATE TYPE %s_%s_enum AS ENUM(%s);",
-                    $table,
-                    $name,
-                    $size
-                );
-                $type = sprintf('%s_%s_enum', $table, $name);
-            } else {
-                $type = sprintf('TEXT CHECK (%s IN CHECK(%s))', $name, $size);
-            }
+            $type = $this->formatCheckOrEnum($name, $raw_type, $attribute);
         }
 
         // Bind precision
@@ -158,5 +143,67 @@ trait PgsqlCompose
         foreach ($names as $name) {
             $this->sqls[] = trim(sprintf('DROP COLUMN %s', $name));
         }
+    }
+
+    /**
+     * Format the CHECK in ENUM
+     *
+     * @param string $name
+     * @param string $type
+     * @param array $attribute
+     * @return void
+     */
+    private function formatCheckOrEnum($name, $type, $attribute): string
+    {
+        if ($type == "ENUM") {
+            $size = (array) $attribute['size'];
+            $size = "'" . implode("', '", $size) . "'";
+            $table = preg_replace("/(ies)$/", "y", $this->table);
+            $table = preg_replace("/(s)$/", "", $table);
+            $this->custom_types[] = sprintf(
+                "CREATE TYPE %s_%s_enum AS ENUM(%s);",
+                $table,
+                $name,
+                $size
+            );
+
+            return sprintf('%s_%s_enum', $table, $name);
+        }
+
+        if (count($attribute["check"]) === 3) {
+            [$column, $comparaison, $value] = $attribute["check"];
+            if (is_array($value)) {
+                $value = "('" . implode("', '", $value) . "')";
+            }
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+        }
+
+        [$column, $value] = $attribute["check"];
+
+        $comparaison = "=";
+
+        if (is_string($value)) {
+            $value = "'" . addcslashes($value, "'") . "'";
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+        }
+
+        $value = (array) $value;
+
+        if (count($value) > 1) {
+            $comparaison = "IN";
+
+            foreach ($value as $key => $item) {
+                if (is_string($item)) {
+                    $value[$key] = "'" . addcslashes($item, "'") . "'";
+                }
+            }
+
+            $value = "(" . implode(", ", $value) . ")";
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+        }
+
+        $value = end($value);
+
+        return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
     }
 }
