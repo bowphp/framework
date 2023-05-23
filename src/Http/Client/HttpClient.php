@@ -72,10 +72,13 @@ class HttpClient
         }
 
         $this->init($url);
+        $this->applyCommonOptions();
 
         curl_setopt($this->ch, CURLOPT_HTTPGET, true);
 
-        return new Response($this->ch);
+        $content = $this->execute();
+
+        return new Response($this->ch, $content);
     }
 
     /**
@@ -99,11 +102,14 @@ class HttpClient
             $data = array_merge($this->attach, $data);
         }
 
+        $this->addFields($data);
+        $this->applyCommonOptions();
+
         curl_setopt($this->ch, CURLOPT_POST, true);
 
-        $this->addFields($data);
+        $content = $this->execute();
 
-        return new Response($this->ch);
+        return new Response($this->ch, $content);
     }
 
     /**
@@ -116,14 +122,33 @@ class HttpClient
     public function put(string $url, array $data = []): Response
     {
         $this->init($url);
-
-        if (!curl_setopt($this->ch, CURLOPT_PUT, true)) {
-            $this->addFields($data);
-        }
+        $this->addFields($data);
+        $this->applyCommonOptions();
 
         curl_setopt($this->ch, CURLOPT_PUT, true);
 
-        return new Response($this->ch);
+        $content = $this->execute();
+
+        return new Response($this->ch, $content);
+    }
+
+    /**
+     * Make put requete
+     *
+     * @param string $url
+     * @param array $data
+     * @return Response
+     */
+    public function delete(string $url, array $data = []): Response
+    {
+        $this->init($url);
+        $this->addFields($data);
+        $this->applyCommonOptions();
+
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        $content = $this->execute();
+
+        return new Response($this->ch, $content);
     }
 
     /**
@@ -145,15 +170,13 @@ class HttpClient
      */
     public function addHeaders(array $headers): HttpClient
     {
-        if (is_resource($this->ch)) {
-            $data = [];
+        $data = [];
 
-            foreach ($headers as $key => $value) {
-                $data[] = $key . ': ' . $value;
-            }
-
-            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $data);
+        foreach ($headers as $key => $value) {
+            $data[] = $key . ': ' . $value;
         }
+
+        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $data);
 
         return $this;
     }
@@ -166,7 +189,7 @@ class HttpClient
      */
     private function init(string $url): void
     {
-        if (!is_null($this->base_url)) {
+        if (is_null($this->base_url)) {
             $url = $this->base_url . "/" . trim($url, "/");
         }
 
@@ -184,5 +207,47 @@ class HttpClient
         if (count($data) > 0) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
         }
+    }
+
+    /**
+     * Close connection
+     *
+     * @return void
+     */
+    private function close(): void
+    {
+        curl_close($this->ch);
+    }
+
+    /**
+     * Execute request
+     *
+     * @return string
+     * @throws \Exception
+     */
+    private function execute(): string
+    {
+        $content = curl_exec($this->ch);
+        $errno = curl_errno($this->ch);
+
+        $this->close();
+
+        if ($content === false) {
+            throw new \Exception(curl_strerror($errno));
+        }
+
+        return $content;
+    }
+
+    /**
+     * Set Curl CURLOPT_RETURNTRANSFER option
+     *
+     * @return bool
+     */
+    private function applyCommonOptions()
+    {
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($this->ch, CURLOPT_AUTOREFERER, true);
     }
 }
