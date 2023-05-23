@@ -38,7 +38,8 @@ class HasOne extends Relation
 
         $this->local_key = $local_key;
         $this->foreign_key = $foreign_key;
-        $this->query = $this->query->where($this->foreign_key, $this->parent->getKeyValue());
+
+        $this->query = $this->query->where($this->foreign_key, $this->parent->$local_key);
     }
 
     /**
