@@ -47,6 +47,11 @@ trait MysqlCompose
             $size = 255;
         }
 
+        // Set the size
+        if ($size) {
+            $type = sprintf('%s(%s)', $type, $size);
+        }
+
         // Add column size
         if (in_array($raw_type, ['ENUM', 'CHECK'])) {
             $check = (array) $check;
