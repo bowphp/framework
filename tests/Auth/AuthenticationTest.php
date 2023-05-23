@@ -44,6 +44,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     {
         $config = TestingConfiguration::getConfig();
         $auth = Auth::getInstance();
+
         $this->assertEquals($auth->getName(), $config["auth"]["default"]);
         $this->assertEquals($auth->getName(), "web");
     }
