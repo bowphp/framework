@@ -129,7 +129,6 @@ class Validate
 
         throw new ValidationException(
             "Error on data validation sent",
-            "VALIADTION_ERROR",
             $this->messages
         );
     }

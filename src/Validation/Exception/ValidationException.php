@@ -19,13 +19,13 @@ class ValidationException extends HttpException
      * ValidationException constructor
      *
      * @param string $message
-     * @param string $status
      * @param array $errors
+     * @param string $status
      */
     public function __construct(
         string $message,
-        string $status = 'VALIDATION_ERROR',
-        array $errors = []
+        array $errors = [],
+        string $status = 'VALIDATION_ERROR'
     ) {
         parent::__construct($message, 400);
         $this->errors = $errors;
