@@ -78,7 +78,9 @@ class SessionGuard extends GuardContract
         $session = Session::getInstance();
 
         if (is_null($session)) {
-            throw new AuthenticationException("Please the session configuration is not load");
+            throw new AuthenticationException(
+                "Please the session configuration is not load"
+            );
         }
 
         return $session;

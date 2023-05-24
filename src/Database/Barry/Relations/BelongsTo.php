@@ -51,7 +51,7 @@ class BelongsTo extends Relation
      */
     public function getResults(): ?Model
     {
-        $key = $this->query->getTable() . "_" . $this->local_key;
+        $key = $this->query->getTable() . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
         $cache = Cache::cache('file')->get($key);
 
         if (!is_null($cache)) {

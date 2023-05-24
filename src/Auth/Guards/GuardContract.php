@@ -8,7 +8,7 @@ use Bow\Auth\Auth;
 use Bow\Auth\Authentication;
 
 /**
- * @method ?string getToken()
+ * @method ?\Policier\Token getToken()
  */
 abstract class GuardContract
 {
