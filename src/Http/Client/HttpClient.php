@@ -16,6 +16,13 @@ class HttpClient
     private $attach = [];
 
     /**
+     * The headers collection
+     *
+     * @var array
+     */
+    private $headers = [];
+
+    /**
      * The curl instance
      *
      * @var CurlHandle
@@ -146,6 +153,7 @@ class HttpClient
         $this->applyCommonOptions();
 
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+
         $content = $this->execute();
 
         return new Response($this->ch, $content);
@@ -170,13 +178,9 @@ class HttpClient
      */
     public function addHeaders(array $headers): HttpClient
     {
-        $data = [];
-
         foreach ($headers as $key => $value) {
-            $data[] = $key . ': ' . $value;
+            $this->headers[] = $key . ': ' . $value;
         }
-
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $data);
 
         return $this;
     }
@@ -189,7 +193,7 @@ class HttpClient
      */
     private function init(string $url): void
     {
-        if (is_null($this->base_url)) {
+        if (!is_null($this->base_url)) {
             $url = $this->base_url . "/" . trim($url, "/");
         }
 
@@ -227,6 +231,10 @@ class HttpClient
      */
     private function execute(): string
     {
+        if ($this->headers) {
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
+        }
+
         $content = curl_exec($this->ch);
         $errno = curl_errno($this->ch);
 

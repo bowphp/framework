@@ -58,14 +58,27 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Specify the additionnal who are use in the request
+     * Specify the additionnal headers
      *
      * @param array $headers
      * @return TestCase
      */
-    public function withHeader(array $headers): TestCase
+    public function withHeaders(array $headers): TestCase
     {
         $this->headers = $headers;
+
+        return $this;
+    }
+
+    /**
+     * Specify the additionnal header
+     *
+     * @param array $headers
+     * @return TestCase
+     */
+    public function withHeader(string $key, string $value): TestCase
+    {
+        $this->headers[$key] = $value;
 
         return $this;
     }
