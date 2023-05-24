@@ -49,7 +49,7 @@ class HasOne extends Relation
      */
     public function getResults(): ?Model
     {
-        $key = $this->query->getTable() . "_" . $this->local_key;
+        $key = $this->query->getTable() . ":hasone:" . $this->related->getTable() . ":" . $this->foreign_key;
         $cache = Cache::cache('file')->get($key);
 
         if (!is_null($cache)) {
