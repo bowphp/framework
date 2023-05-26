@@ -163,11 +163,13 @@ class HttpClient
      * Attach new file
      *
      * @param string $attach
-     * @return array
+     * @return HttpClient
      */
-    public function addAttach(string|array $attach): array
+    public function addAttach(string|array $attach): HttpClient
     {
-        return $this->attach = (array) $attach;
+        $this->attach = (array) $attach;
+
+        return $this;
     }
 
     /**
@@ -181,6 +183,19 @@ class HttpClient
         foreach ($headers as $key => $value) {
             $this->headers[] = $key . ': ' . $value;
         }
+
+        return $this;
+    }
+
+    /**
+     * Set the user agent
+     *
+     * @param string $user_agent
+     * @return HttpClient
+     */
+    public function setUserAgent(string $user_agent): HttpClient
+    {
+        curl_setopt($this->ch, CURLOPT_USERAGENT, $user_agent);
 
         return $this;
     }
