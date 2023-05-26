@@ -43,7 +43,7 @@ class FilesystemAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
-    public function add(string $key, mixed $data, ?int $time = null): bool
+    public function add(string $key, mixed $data, ?int $time = 60): bool
     {
         if (is_callable($data)) {
             $content = $data();
@@ -51,7 +51,7 @@ class FilesystemAdapter implements CacheAdapterInterface
             $content = $data;
         }
 
-        $meta['__bow_meta'] = ['expire_at' => $time == null ? '+' : $time];
+        $meta['__bow_meta'] = ['expire_at' => $time == null ? '+' : time() + $time];
 
         $meta['content'] = $content;
 
@@ -142,6 +142,14 @@ class FilesystemAdapter implements CacheAdapterInterface
 
         $cache = unserialize(file_get_contents($this->makeHashFilename($key)));
 
+        $expire_at = $cache['__bow_meta']['expire_at'];
+
+        if ($expire_at != '+') {
+            if (time() > $expire_at) {
+                return null;
+            }
+        }
+
         if (!$this->with_meta) {
             unset($cache['__bow_meta']);
 
@@ -167,7 +175,7 @@ class FilesystemAdapter implements CacheAdapterInterface
         }
 
         if ($cache['__bow_meta']['expire_at'] == '+') {
-            $cache['__bow_meta']['expire_at'] = time();
+            $cache['__bow_meta']['expire_at'] = time() + $time;
         }
 
         $cache['__bow_meta']['expire_at'] += $time;
@@ -243,11 +251,11 @@ class FilesystemAdapter implements CacheAdapterInterface
             return false;
         }
 
+        $expire_at = $cache['__bow_meta']['expire_at'];
+
         $this->with_meta = false;
 
-        return $cache['__bow_meta']['expire_at'] == '+'
-            ? false
-            : (time() > $cache['__bow_meta']['expire_at']);
+        return $expire_at == '+' ? false : (time() > $expire_at);
     }
 
     /**
