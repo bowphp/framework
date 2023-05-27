@@ -13,14 +13,14 @@ class Response
      *
      * @var string
      */
-    private ?string $error = null;
+    private ?string $error_message = null;
 
     /**
      * The error number
      *
      * @var int
      */
-    private int $errno;
+    private int $errer_number;
 
     /**
      * The headers
@@ -44,8 +44,8 @@ class Response
      */
     public function __construct(CurlHandle &$ch, ?string $content = null)
     {
-        $this->error = curl_error($ch);
-        $this->errno = curl_errno($ch);
+        $this->error_message = curl_error($ch);
+        $this->errer_number = curl_errno($ch);
         $this->headers = curl_getinfo($ch);
         $this->content = $content;
     }
@@ -63,9 +63,9 @@ class Response
     /**
      * Get response content as json
      *
-     * @return bool|string
+     * @return object|array
      */
-    public function toJson(): bool|string
+    public function toJson(): object|array
     {
         $content = $this->getContent();
 
@@ -75,9 +75,9 @@ class Response
     /**
      * Get response content as json
      *
-     * @return bool|string
+     * @return array
      */
-    public function toArray(): bool|string
+    public function toArray(): array
     {
         $content = $this->getContent();
 
@@ -181,7 +181,7 @@ class Response
      */
     public function getErrorMessage(): string
     {
-        return $this->error;
+        return $this->error_message ?? curl_strerror($this->errer_number);
     }
 
     /**
@@ -191,7 +191,7 @@ class Response
      */
     public function getErrorNumber(): int
     {
-        return $this->errno;
+        return $this->errer_number;
     }
 
     /**

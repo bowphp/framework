@@ -856,11 +856,11 @@ if (!function_exists('route')) {
      * Get Route by name
      *
      * @param  string $name
-     * @param  array  $data
+     * @param  bool|array  $data
      * @param  bool  $absolute
      * @return string
      */
-    function route(string $name, array $data = [], $absolute = false)
+    function route(string $name, bool|array $data = [], bool $absolute = false)
     {
         $routes = config('app.routes');
 
@@ -881,12 +881,12 @@ if (!function_exists('route')) {
         if (preg_match_all('/(?::([a-zA-Z0-9_-]+\??))/', $url, $matches)) {
             $keys = end($matches);
             foreach ($keys as $key) {
-                if (preg_match("/?$/", $key)) {
+                if (preg_match("/\?$/", $key)) {
                     $valide_key = trim($key, "?");
                     $value = $data[$valide_key] ?? "";
                     unset($data[$valide_key]);
                 } else {
-                    if (isset($data[$key])) {
+                    if (!isset($data[$key])) {
                         throw new InvalidArgumentException(
                             "The $key key is not provide"
                         );
