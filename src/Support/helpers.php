@@ -856,11 +856,11 @@ if (!function_exists('route')) {
      * Get Route by name
      *
      * @param  string $name
-     * @param  array  $data
+     * @param  bool|array  $data
      * @param  bool  $absolute
      * @return string
      */
-    function route(string $name, array $data = [], $absolute = false)
+    function route(string $name, bool|array $data = [], bool $absolute = false)
     {
         $routes = config('app.routes');
 
