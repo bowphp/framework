@@ -881,7 +881,7 @@ if (!function_exists('route')) {
         if (preg_match_all('/(?::([a-zA-Z0-9_-]+\??))/', $url, $matches)) {
             $keys = end($matches);
             foreach ($keys as $key) {
-                if (preg_match("/?$/", $key)) {
+                if (preg_match("/\?$/", $key)) {
                     $valide_key = trim($key, "?");
                     $value = $data[$valide_key] ?? "";
                     unset($data[$valide_key]);
