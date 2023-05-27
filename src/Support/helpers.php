@@ -886,7 +886,7 @@ if (!function_exists('route')) {
                     $value = $data[$valide_key] ?? "";
                     unset($data[$valide_key]);
                 } else {
-                    if (isset($data[$key])) {
+                    if (!isset($data[$key])) {
                         throw new InvalidArgumentException(
                             "The $key key is not provide"
                         );
