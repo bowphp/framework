@@ -176,9 +176,9 @@ class FilesystemAdapter implements CacheAdapterInterface
 
         if ($cache['__bow_meta']['expire_at'] == '+') {
             $cache['__bow_meta']['expire_at'] = time() + $time;
+        } else {
+            $cache['__bow_meta']['expire_at'] += $time;
         }
-
-        $cache['__bow_meta']['expire_at'] += $time;
 
         return (bool) file_put_contents(
             $this->makeHashFilename($key),
@@ -201,7 +201,7 @@ class FilesystemAdapter implements CacheAdapterInterface
             return false;
         }
 
-        return $cache['__bow_meta']['expire_at'];
+        return (int) $cache['__bow_meta']['expire_at'];
     }
 
     /**
