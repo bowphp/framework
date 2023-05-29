@@ -12,12 +12,12 @@ trait RegexRule
      * Check that the contents of the field with a regular expression
      *
      * @param string $key
-     * @param string $masque
+     * @param string|int|float $masque
      * @return void
      */
-    protected function compileRegex(string $key, string $masque): void
+    protected function compileRegex(string $key, string|int|float $masque): void
     {
-        if (!preg_match("/^regex:(.+)+$/", $masque, $match)) {
+        if (!preg_match("/^regex:(.+)+$/", (string) $masque, $match)) {
             return;
         }
 
