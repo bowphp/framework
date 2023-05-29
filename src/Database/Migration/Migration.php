@@ -17,7 +17,7 @@ abstract class Migration
      *
      * @var AbstractConnection
      */
-    private $adapter;
+    private AbstractConnection $adapter;
 
     /**
      * Migration constructor
@@ -56,6 +56,16 @@ abstract class Migration
         $this->adapter = Database::getConnectionAdapter();
 
         return $this;
+    }
+
+    /**
+     * Get adapter name
+     *
+     * @return string
+     */
+    public function getAdapterName(): string
+    {
+        return $this->adapter->getName();
     }
 
     /**
