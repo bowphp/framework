@@ -74,8 +74,7 @@ class HttpClient
     public function get(string $url, array $data = []): Response
     {
         if (count($data) > 0) {
-            $params = http_build_query($data);
-            $url . "?" . $params;
+            $url = $url . "?" . http_build_query($data);
         }
 
         $this->init($url);
