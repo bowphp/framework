@@ -256,7 +256,9 @@ class HttpClient
         $this->close();
 
         if ($content === false) {
-            throw new \Exception(curl_strerror($errno));
+            throw new HttpClientException(
+                curl_strerror($errno), $errno
+            );
         }
 
         return $content;
