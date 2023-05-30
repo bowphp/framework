@@ -214,7 +214,8 @@ class HttpClient
     public function acceptJson(): HttpClient
     {
         $this->accept_json = true;
-        $this->addHeaders("Content-Type", "application/json");
+
+        $this->addHeaders(["Content-Type" => "application/json"]);
 
         return $this;
     }
