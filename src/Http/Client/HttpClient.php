@@ -280,7 +280,8 @@ class HttpClient
 
         if ($content === false) {
             throw new HttpClientException(
-                curl_strerror($errno), $errno
+                curl_strerror($errno),
+                $errno
             );
         }
 

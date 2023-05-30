@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
+use Bow\Application\Exception\ApplicationException;
+
 class Env
 {
     /**
@@ -52,9 +54,16 @@ class Env
         // Get the env file content
         $content = file_get_contents($filename);
 
-        static::$envs = json_decode(trim($content), true);
+        $envs = json_decode(trim($content), true, 1024);
 
-        static::$envs = static::bindVariables(static::$envs);
+        if (json_last_error()) {
+            throw new ApplicationException(
+                json_last_error_msg() . ": check your env json and synthax please."
+            );
+        }
+
+        static::$envs = $envs;
+        static::$envs = static::bindVariables($envs);
 
         foreach (static::$envs as $key => $value) {
             $key = Str::upper(trim($key));
