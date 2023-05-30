@@ -13,7 +13,14 @@ class HttpClient
      *
      * @var array
      */
-    private $attach = [];
+    private array $attach = [];
+
+    /**
+     * Define the accept json header
+     *
+     * @var boolean
+     */
+    private bool $accept_json = false;
 
     /**
      * The headers collection
@@ -200,6 +207,19 @@ class HttpClient
     }
 
     /**
+     * Set the json accept prop to format the sent content in json
+     *
+     * @return HttpClient
+     */
+    public function acceptJson(): HttpClient
+    {
+        $this->accept_json = true;
+        $this->addHeaders("Content-Type", "application/json");
+
+        return $this;
+    }
+
+    /**
      * Reset alway connection
      *
      * @param string $url
@@ -222,9 +242,13 @@ class HttpClient
      */
     private function addFields(array $data): void
     {
-        if (count($data) > 0) {
-            curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        if ($this->accept_json) {
+            $payload = json_encode($data);
+        } else {
+            $payload = http_build_query($data);
         }
+
+        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $payload);
     }
 
     /**
