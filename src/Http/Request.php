@@ -52,7 +52,7 @@ class Request
         $this->id = "req_" . sha1(uniqid() . time());
 
         if ($this->getHeader('content-type') == 'application/json') {
-            $data = json_decode(file_get_contents("php://input"), true);
+            $data = json_decode(file_get_contents("php://input"), true, 1024, JSON_THROW_ON_ERROR);
             $this->input = array_merge((array) $data, $_GET);
         } else {
             $data = $_POST ?? [];
