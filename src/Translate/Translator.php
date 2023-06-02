@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Translate;
 
+use Iterator;
 use Bow\Support\Arraydotify;
 
 class Translator
@@ -188,7 +189,10 @@ class Translator
     private static function format(string $str, array $values = []): string
     {
         foreach ($values as $key => $value) {
-            $str = preg_replace('/{\s*' . $key . '\s*\}/', $value, $str);
+            if (is_array($value) || is_object($value) || $value instanceof Iterator) {
+                $value = json_encode($value);
+            }
+            $str = preg_replace('/{\s*' . $key . '\s*\}/', (string) $value, $str);
         }
 
         return $str;

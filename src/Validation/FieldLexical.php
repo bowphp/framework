@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Validation;
 
+use Iterator;
+
 trait FieldLexical
 {
     /**
@@ -72,6 +74,9 @@ trait FieldLexical
     private function parseAttribute(array $attribute, string $lexical): ?string
     {
         foreach ($attribute as $key => $value) {
+            if (is_array($value) || is_object($value) || $value instanceof Iterator) {
+                $value = json_encode($value);
+            }
             $lexical = str_replace('{' . $key . '}', (string) $value, $lexical);
         }
 
