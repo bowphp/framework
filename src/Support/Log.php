@@ -3,12 +3,12 @@
 namespace Bow\Support;
 
 /**
- * @method void error(string $message, array $context = [])
- * @method void info(string $message, array $context = [])
- * @method void warning(string $message, array $context = [])
- * @method void alert(string $message, array $context = [])
- * @method void critical(string $message, array $context = [])
- * @method void emergency(string $message, array $context = [])
+ * @method static void error(string $message, array $context = [])
+ * @method static void info(string $message, array $context = [])
+ * @method static void warning(string $message, array $context = [])
+ * @method static void alert(string $message, array $context = [])
+ * @method static void critical(string $message, array $context = [])
+ * @method static void emergency(string $message, array $context = [])
  */
 class Log
 {
