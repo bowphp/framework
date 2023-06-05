@@ -53,11 +53,8 @@ trait StringRule
      */
     protected function compileRequiredIf(string $key, string $masque): void
     {
-        $error = false;
-        $exists = false;
-
         if (!preg_match("/^required_if:(.+)+$/", (string) $masque, $match)) {
-            throw new ValidationException("The required_if is malformed");
+            return;
         }
 
         array_shift($match);
@@ -66,11 +63,15 @@ trait StringRule
             throw new ValidationException("The required_if is malformed");
         }
 
-        foreach ($match as $key => $present) {
+        $error = false;
+        $exists = false;
+        $fields = explode(",", $match[0]);
+
+        foreach ($fields as $key => $field) {
             if ($key == 0) {
-                $exists = isset($this->inputs[$present]);
+                $exists = isset($this->inputs[$field]);
             } else {
-                $exists = $exists && isset($this->inputs[$present]);
+                $exists = $exists && isset($this->inputs[$field]);
             }
         }
 
