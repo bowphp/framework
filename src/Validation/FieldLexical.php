@@ -12,10 +12,10 @@ trait FieldLexical
      * Get error debugging information
      *
      * @param string       $key
-     * @param string|array $value
+     * @param string|array|int|float $value
      * @return ?string
      */
-    private function lexical(string $key, string|array $value): ?string
+    private function lexical(string $key, string|array|int|float $value): ?string
     {
         $data = array_merge(
             $this->inputs ?? [],

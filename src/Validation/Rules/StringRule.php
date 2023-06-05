@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Validation\Rules;
 
 use Bow\Support\Str;
+use Bow\Validation\Exception\ValidationException;
 
 trait StringRule
 {
@@ -19,6 +20,10 @@ trait StringRule
     {
         $error = false;
 
+        if (!preg_match("/^required$/", (string) $masque, $match)) {
+            return;
+        }
+
         if (!isset($this->inputs[$key])) {
             $error = true;
         }
@@ -29,6 +34,56 @@ trait StringRule
 
         if ($error) {
             $this->last_message = $message = $this->lexical('required', $key);
+
+            $this->errors[$key][] = [
+                "masque" => $masque,
+                "message" => $message
+            ];
+
+            $this->fails = true;
+        }
+    }
+
+    /**
+     * Compile Required Rule
+     *
+     * @param string $key
+     * @param string $masque
+     * @return void
+     */
+    protected function compileRequiredIf(string $key, string $masque): void
+    {
+        $error = false;
+        $exists = false;
+
+        if (!preg_match("/^required_if:(.+)+$/", (string) $masque, $match)) {
+            throw new ValidationException("The required_if is malformed");
+        }
+
+        array_shift($match);
+
+        if (count($match) < 1) {
+            throw new ValidationException("The required_if is malformed");
+        }
+
+        foreach ($match as $key => $present) {
+            if ($key == 0) {
+                $exists = isset($this->inputs[$present]);
+            } else {
+                $exists = $exists && isset($this->inputs[$present]);
+            }
+        }
+
+        if ($exists && !isset($this->inputs[$key])) {
+            $error = true;
+        }
+
+        if (!$error && isset($this->inputs[$key]) && (is_null($this->inputs[$key]) || $this->inputs[$key] === '')) {
+            $error = true;
+        }
+
+        if ($error) {
+            $this->last_message = $message = $this->lexical('required_if', $key);
 
             $this->errors[$key][] = [
                 "masque" => $masque,
