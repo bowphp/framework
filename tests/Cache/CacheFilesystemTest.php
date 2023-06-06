@@ -11,7 +11,7 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
     {
         parent::setUp();
         $config = TestingConfiguration::getConfig();
-        Cache::confirgure($config["cache"]);
+        Cache::configure($config["cache"]);
         Cache::cache("file");
     }
 

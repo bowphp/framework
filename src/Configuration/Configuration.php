@@ -24,6 +24,16 @@ abstract class Configuration
     }
 
     /**
+     * Get the container instance
+     *
+     * @return Container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
+    /**
      * Get la service class name
      *
      * @return string

@@ -120,30 +120,6 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * Push middlewares
-     *
-     * @param array $middlewares
-     */
-    public function pushMiddleware(array $middlewares): void
-    {
-        foreach ($middlewares as $key => $middleware) {
-            $this->middlewares[$key] = $middleware;
-        }
-    }
-
-    /**
-     * Push namespaces
-     *
-     * @param array $namespaces
-     */
-    public function pushNamespaces(array $namespaces): void
-    {
-        foreach ($namespaces as $key => $namespace) {
-            $this->namespaces[$key] = $namespace;
-        }
-    }
-
-    /**
      * Middleware collection
      *
      * @return array

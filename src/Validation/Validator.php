@@ -64,6 +64,7 @@ class Validator
      */
     protected array $rules = [
         'Required',
+        "RequiredIf",
         'Max',
         'Min',
         'Lower',

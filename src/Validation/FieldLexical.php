@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Bow\Validation;
 
+use Iterator;
+
 trait FieldLexical
 {
     /**
      * Get error debugging information
      *
      * @param string       $key
-     * @param string|array $value
+     * @param string|array|int|float $value
      * @return ?string
      */
-    private function lexical(string $key, string|array $value): ?string
+    private function lexical(string $key, string|array|int|float $value): ?string
     {
         $data = array_merge(
             $this->inputs ?? [],
@@ -72,6 +74,9 @@ trait FieldLexical
     private function parseAttribute(array $attribute, string $lexical): ?string
     {
         foreach ($attribute as $key => $value) {
+            if (is_array($value) || is_object($value) || $value instanceof Iterator) {
+                $value = json_encode($value);
+            }
             $lexical = str_replace('{' . $key . '}', (string) $value, $lexical);
         }
 
