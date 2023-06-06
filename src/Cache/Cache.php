@@ -44,7 +44,7 @@ class Cache
      *
      * @param array $config
      */
-    public static function confirgure(array $config)
+    public static function configure(array $config)
     {
         if (!is_null(static::$instance)) {
             return static::$instance;
