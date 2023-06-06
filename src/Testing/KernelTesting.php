@@ -6,6 +6,10 @@ use Bow\Configuration\Loader as ConfigurationLoader;
 
 class KernelTesting extends ConfigurationLoader
 {
+    private static array $configurations = [];
+    private static array $events = [];
+    private static array $middlewares = [];
+
     /**
      * Set the loading configuration
      *
