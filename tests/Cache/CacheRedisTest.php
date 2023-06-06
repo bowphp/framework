@@ -11,7 +11,7 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
     {
         parent::setUp();
         $config = TestingConfiguration::getConfig();
-        Cache::confirgure($config["cache"]);
+        Cache::configure($config["cache"]);
         Cache::cache("redis");
     }
 
@@ -27,7 +27,7 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(Cache::get('name'), 'Dakia');
     }
 
-    public function test_AddWithCallbackCache()
+    public function test_add_with_callback_cache()
     {
         $result = Cache::add('lastname', fn () => 'Franck');
         $result = $result && Cache::add('age', fn () => 25, 20000);
@@ -35,14 +35,14 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($result, true);
     }
 
-    public function test_GetCallbackCache()
+    public function test_get_callback_cache()
     {
         $this->assertEquals(Cache::get('lastname'), 'Franck');
 
         $this->assertEquals(Cache::get('age'), 25);
     }
 
-    public function test_AddArrayCache()
+    public function test_add_array_cache()
     {
         $result = Cache::add('address', [
             'tel' => "49929598",
@@ -53,7 +53,7 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($result, true);
     }
 
-    public function test_GetArrayCache()
+    public function test_get_array_cache()
     {
         $result = Cache::get('address');
 
