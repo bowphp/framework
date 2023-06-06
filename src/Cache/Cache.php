@@ -96,6 +96,19 @@ class Cache
     }
 
     /**
+     * Add the custom adapters
+     *
+     * @param array $adapters
+     * @return void
+     */
+    public static function addAdapters(array $adapters): void
+    {
+        foreach ($adapters as $name => $adapter) {
+            static::$adapters[$name] = $adapter;
+        }
+    }
+
+    /**
      * __call
      *
      * @param string $name
