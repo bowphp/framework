@@ -56,6 +56,15 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($second_validation->fails());
     }
 
+    public function test_min_rule()
+    {
+        $first_validation = Validator::make(['name' => 'bow'], ['name' => 'required|min:3']);
+        $second_validation = Validator::make(['name' => 'fr'], ['name' => 'required|min:5']);
+
+        $this->assertFalse($first_validation->fails());
+        $this->assertTrue($second_validation->fails());
+    }
+
     public function test_lower_rule()
     {
         $first_validation = Validator::make(['name' => 'bow'], ['name' => 'required|lower']);
@@ -137,7 +146,7 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($second_validation->fails());
     }
 
-    public function test_unique()
+    public function test_unique_rule()
     {
         Database::insert("insert into pets values(3, 'Couli');");
 
@@ -151,5 +160,23 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
 
         $thrid_validation = Validator::make(['name' => 'Couli'], ['name' => 'required|unique:pets,name']);
         $this->assertTrue($thrid_validation->fails());
+    }
+
+    public function test_required_rule()
+    {
+        $first_validation = Validator::make(['name' => 'Couli'], ['lastname' => 'required']);
+        $second_validation = Validator::make(['name' => 'Milou'], ['name' => 'required']);
+
+        $this->assertTrue($first_validation->fails());
+        $this->assertFalse($second_validation->fails());
+    }
+
+    public function test_required_if_rule()
+    {
+        $first_validation = Validator::make(['name' => 'Couli'], ['lastname' => 'required_if:username']);
+        $second_validation = Validator::make(['name' => 'Milou'], ['lastname' => 'required_if:name']);
+
+        $this->assertFalse($first_validation->fails());
+        $this->assertTrue($second_validation->fails());
     }
 }

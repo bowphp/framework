@@ -17,6 +17,7 @@ use Bow\Queue\ProducerService;
 use Bow\Database\Database as DB;
 use Bow\Http\Exception\HttpException;
 use Bow\Http\Redirect;
+use Monolog\Logger;
 
 if (!function_exists('app')) {
     /**
@@ -134,7 +135,7 @@ if (!function_exists('view')) {
      * @param int       $code
      * @return mixed
      */
-    function view(string $template, $data = [], $code = 200)
+    function view(string $template, int|array $data = [], int $code = 200)
     {
         if (is_int($data)) {
             $code = $data;
@@ -512,47 +513,6 @@ if (!function_exists('redirect')) {
     }
 }
 
-if (!function_exists('curl')) {
-    /**
-     * Curl help
-     *
-     * @param  string $method
-     * @param  string $url
-     * @param  array  $payload
-     * @param  bool   $return
-     * @param  array $headers
-     * @return array|null
-     */
-    function curl(string $method, string $url, array $payload = [], array $headers = [], $return = false)
-    {
-        $method = strtoupper($method);
-        $options = [];
-
-        if (!in_array($method, ['GET'])) {
-            $options['CURLOPT_POSTFIELDS'] = http_build_query($payload);
-            $options['CURLOPT_POST'] = 1;
-        }
-
-        $ch = curl_init($url);
-
-        if ($return == true) {
-            if (!curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)) {
-                curl_close($ch);
-                return null;
-            }
-        }
-
-        // Set curl option
-        curl_setopt_array($ch, $options);
-
-        // Execute curl
-        $data = curl_exec($ch);
-        curl_close($ch);
-
-        return $data;
-    }
-}
-
 if (!function_exists('url')) {
     /**
      * Build url
@@ -843,11 +803,12 @@ if (!function_exists('validator')) {
      *
      * @param  array $inputs
      * @param  array $rules
+     * @param  array $messages
      * @return \Bow\Validation\Validate
      */
-    function validator(array $inputs, array $rules): \Bow\Validation\Validate
+    function validator(array $inputs, array $rules, array $messages = []): \Bow\Validation\Validate
     {
-        return \Bow\Validation\Validator::make($inputs, $rules);
+        return \Bow\Validation\Validator::make($inputs, $rules, $messages);
     }
 }
 
@@ -1220,26 +1181,18 @@ if (!function_exists('auth')) {
     }
 }
 
-if (!function_exists('logger')) {
+if (!function_exists('log')) {
     /**
      * Log error message
      *
      * @param string $level
      * @param string $message
      * @param array $context
-     * @return Monolog
+     * @return Logger
      */
-    function logger(?string $level, ?string $message, array $context = [])
+    function log(): Logger
     {
-        if (is_null($level)) {
-            return app('logger');
-        }
-
-        if (!in_array($level, ['info', 'warning', 'error', 'critical', 'debug'])) {
-            return false;
-        }
-
-        return app('logger')->$level($message, $context);
+        return app('logger');
     }
 }
 
