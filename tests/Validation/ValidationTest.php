@@ -167,8 +167,8 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
         $first_validation = Validator::make(['name' => 'Couli'], ['lastname' => 'required']);
         $second_validation = Validator::make(['name' => 'Milou'], ['name' => 'required']);
 
-        $this->assertFalse($first_validation->fails());
-        $this->assertTrue($second_validation->fails());
+        $this->assertTrue($first_validation->fails());
+        $this->assertFalse($second_validation->fails());
     }
 
     public function test_required_if_rule()
