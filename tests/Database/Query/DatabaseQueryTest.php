@@ -214,7 +214,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
         $database->insert("insert into pets values(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
         $result = 0;
-        $database->startTransaction(function () use ($database, &$result) {
+        $database->transaction(function () use ($database, &$result) {
             $result = $database->delete("delete from pets where id = :id", ['id' => 1]);
             $this->assertEquals($database->inTransaction(), true);
         });

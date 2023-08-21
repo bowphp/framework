@@ -591,10 +591,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Delete a record
      *
      * @param array $attributes
-     * @return int
+     * @return int|bool
      * @throws
      */
-    public function update(array $attributes): int
+    public function update(array $attributes): int|bool
     {
         $primary_key_value = $this->getKeyValue();
 
@@ -820,7 +820,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function toArray(): array
     {
-        return $this->attributes;
+        $data = [];
+
+        foreach ($this->attributes as $key => $value) {
+            if (!in_array($key, $this->hidden)) {
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
     }
 
     /**
