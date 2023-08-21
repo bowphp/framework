@@ -121,7 +121,7 @@ class Database
     }
 
     /**
-     * Get connexion name
+     * Get the connexion name
      *
      * @return string|null
      */
@@ -315,7 +315,7 @@ class Database
     }
 
     /**
-     * Load the query builder factory on table name
+     * Load the query builder factory on the table name
      *
      * @param string $table
      * @return QueryBuilder
@@ -338,27 +338,17 @@ class Database
      * @param callable $callback
      * @return void
      */
-    public static function startTransaction(?callable $callback = null): void
+    public static function startTransaction(): mixed
     {
         static::verifyConnection();
 
         if (!static::$adapter->getConnection()->inTransaction()) {
             static::$adapter->getConnection()->beginTransaction();
         }
-
-        if (is_callable($callback)) {
-            try {
-                call_user_func_array($callback, []);
-
-                static::commit();
-            } catch (DatabaseException $e) {
-                static::rollback();
-            }
-        }
     }
 
     /**
-     * Check if database execution is in transaction
+     * Check if database execution is in the transaction
      *
      * @return bool
      */
@@ -387,6 +377,29 @@ class Database
         static::verifyConnection();
 
         static::$adapter->getConnection()->rollBack();
+    }
+
+    /**
+     * Starting the start of a transaction wrapper on top of the callback
+     *
+     * @param callable $callback
+     * @return void
+     */
+    public static function transaction(callable $callback): mixed
+    {
+        static::startTransaction();
+
+        try {
+            $result = call_user_func_array($callback, []);
+
+            static::commit();
+
+            return $result;
+        } catch (DatabaseException $e) {
+            static::rollback();
+
+           throw $e;
+        }
     }
 
     /**
