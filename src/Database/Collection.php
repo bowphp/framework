@@ -73,13 +73,7 @@ class Collection extends \Bow\Support\Collection
      */
     public function __toString(): string
     {
-        $data = [];
-
-        foreach ($this->toArray() as $model) {
-            $data[] = $model->toArray();
-        }
-
-        return json_encode($data);
+        return json_encode($this->all());
     }
 
     /**
@@ -87,12 +81,6 @@ class Collection extends \Bow\Support\Collection
      */
     public function jsonSerialize(): array
     {
-        $data = [];
-
-        foreach ($this->toArray() as $model) {
-            $data[] = $model->toArray();
-        }
-
-        return $data;
+        return $this->all();
     }
 }
