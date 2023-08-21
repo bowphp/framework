@@ -338,7 +338,7 @@ class Database
      * @param callable $callback
      * @return void
      */
-    public static function startTransaction(): mixed
+    public static function startTransaction(): void
     {
         static::verifyConnection();
 
