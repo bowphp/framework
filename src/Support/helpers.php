@@ -157,6 +157,7 @@ if (!function_exists('table')) {
      * @param  string $name
      * @param  string $connexion
      * @return Bow\Database\QueryBuilder
+     * @deprecated
      */
     function table(string $name, string $connexion = null)
     {
@@ -179,6 +180,24 @@ if (!function_exists('get_last_insert_id')) {
     function get_last_insert_id(string $name = null)
     {
         return DB::lastInsertId($name);
+    }
+}
+
+if (!function_exists('db_table')) {
+    /**
+     * Table alias of DB::table
+     *
+     * @param  string $name
+     * @param  string $connexion
+     * @return Bow\Database\QueryBuilder
+     */
+    function db_table(string $name, string $connexion = null)
+    {
+        if (is_string($connexion)) {
+            db($connexion);
+        }
+
+        return DB::table($name);
     }
 }
 
@@ -1454,7 +1473,7 @@ if (!function_exists('db_seed')) {
             }
         }
 
-        $filename = rtrim(config('app.seeder_path'), '/') . '/' . $name . '_seeder.php';
+        $filename = rtrim(config('app.seeder_path'), '/') . '/' . $name . '.php';
 
         if (!file_exists($filename)) {
             throw new \ErrorException('[' . $name . '] seeder file not found');
