@@ -383,7 +383,7 @@ class Database
      * Starting the start of a transaction wrapper on top of the callback
      *
      * @param callable $callback
-     * @return void
+     * @return mixed
      */
     public static function transaction(callable $callback): mixed
     {
