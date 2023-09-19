@@ -39,6 +39,13 @@ abstract class ProducerService
     protected int $priority = 1;
 
     /**
+     * Determine if the job can be deleted
+     *
+     * @var bool
+     */
+    private bool $delete = false;
+
+    /**
      * Get the producer priority
      *
      * @return int
@@ -76,6 +83,26 @@ abstract class ProducerService
     final public function getDelay(): int
     {
         return $this->delay;
+    }
+
+    /**
+     * Delete the job from queue.
+     *
+     * @return void
+     */
+    public function deleteJob(): void
+    {
+        $this->delete = true;
+    }
+
+    /**
+     * Delete the job from queue.
+     *
+     * @return bool
+     */
+    public function jobShouldBeDelete(): bool
+    {
+        return $this->delete;
     }
 
     /**

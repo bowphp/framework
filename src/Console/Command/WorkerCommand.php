@@ -25,8 +25,18 @@ class WorkerCommand extends AbstractCommand
             $queue->setConnection($connection);
         }
 
-        $worker = new WorkerService();
+        $worker = $this->getWorderService();
         $worker->setConnection($queue->getAdapter());
         $worker->run($default, $retry);
+    }
+
+    /**
+     * Get the worker service
+     *
+     * @return WorkerService
+     */
+    private function getWorderService()
+    {
+        return new WorkerService();
     }
 }

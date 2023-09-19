@@ -280,6 +280,25 @@ class QueryBuilder implements \JsonSerializable
     }
 
     /**
+     * Add orWhere clause into the request
+     *
+     * WHERE column1 $comparator $value|column
+     *
+     * @param string $where
+     * @return QueryBuilder
+     */
+    public function orWhereRaw(string $where): QueryBuilder
+    {
+        if ($this->where == null) {
+            $this->where = $where;
+        } else {
+            $this->where .= ' or ' . $where;
+        }
+
+        return $this;
+    }
+
+    /**
      * orWhere, add a condition of type:
      *
      * [where column = value or column = value]

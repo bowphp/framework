@@ -950,13 +950,17 @@ if (!function_exists('cache')) {
     /**
      * Cache help
      *
-     * @param  string $key
-     * @param  mixed  $value
-     * @param  int  $ttl
+     * @param  ?string $key
+     * @param  ?mixed  $value
+     * @param  ?int  $ttl
      * @return mixed
      */
     function cache(string $key = null, mixed $value = null, int $ttl = null)
     {
+        if ($key === null) {
+            return \Bow\Cache\Cache::getInstance();
+        }
+
         if ($key !== null && $value === null) {
             return \Bow\Cache\Cache::get($key);
         }
@@ -1200,16 +1204,13 @@ if (!function_exists('auth')) {
     }
 }
 
-if (!function_exists('log')) {
+if (!function_exists('logger')) {
     /**
      * Log error message
      *
-     * @param string $level
-     * @param string $message
-     * @param array $context
      * @return Logger
      */
-    function log(): Logger
+    function logger(): Logger
     {
         return app('logger');
     }

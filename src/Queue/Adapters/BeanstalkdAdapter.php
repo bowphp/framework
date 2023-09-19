@@ -7,7 +7,7 @@ namespace Bow\Queue\Adapters;
 use Pheanstalk\Pheanstalk;
 use Bow\Queue\ProducerService;
 use Bow\Queue\Adapters\QueueAdapter;
-use Pheanstalk\Job as PheanstalkJob;
+use Pheanstalk\Contract\PheanstalkInterface;
 use RuntimeException;
 
 class BeanstalkdAdapter extends QueueAdapter
@@ -71,20 +71,6 @@ class BeanstalkdAdapter extends QueueAdapter
     }
 
     /**
-     * Delete a message from the Beanstalk queue.
-     *
-     * @param  string  $queue
-     * @param  string|int  $id
-     * @return void
-     */
-    public function deleteJob(string $queue, string|int $id): void
-    {
-        $queue = $this->getQueue($queue);
-
-        $this->pheanstalk->useTube($queue)->delete(new PheanstalkJob($id, ''));
-    }
-
-    /**
      * Get the queue or return the default.
      *
      * @param  ?string $queue
@@ -134,17 +120,29 @@ class BeanstalkdAdapter extends QueueAdapter
         $this->pheanstalk->watch($queue);
 
         // This hangs until a Job is produced.
-        $job = $this->pheanstalk->reserve();
+        $job = $this->pheanstalk->reserveWithTimeout(50);
+
+        if (is_null($job)) {
+            return;
+        }
 
         try {
             $payload = $job->getData();
+            /**@var ProducerService */
             $producer = unserialize($payload);
+            $delay = $producer->getDelay();
             call_user_func([$producer, "process"]);
             $this->pheanstalk->touch($job);
-            $this->deleteJob($queue, $job->getId());
+            $this->pheanstalk->delete($job);
         } catch (\Exception $e) {
-            cache($job->getId(), $job->getData());
-            $this->pheanstalk->release($job);
+            error_log($e->getMessage());
+            app('logger')->error($e->getMessage(), $e->getTrace());
+            cache("failed:job:" . $job->getId(), $job->getData());
+            if ($producer->jobShouldBeDelete()) {
+                $this->pheanstalk->delete($job);
+            } else {
+                $this->pheanstalk->release($job, PheanstalkInterface::DEFAULT_PRIORITY, $delay);
+            }
         }
     }
 }

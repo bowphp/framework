@@ -68,15 +68,6 @@ abstract class QueueAdapter
     abstract public function size(string $queue): int;
 
     /**
-     * Delete a message from the queue.
-     *
-     * @param  string  $queue
-     * @param  string|int  $id
-     * @return void
-     */
-    abstract public function deleteJob(string $queue, string|int $id): void;
-
-    /**
      * Get the queue or return the default.
      *
      * @param  ?string $queue
