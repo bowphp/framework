@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Event;
 
-use Bow\Session\Session;
-use Bow\Container\Action;
-use Bow\Support\Collection;
 use Bow\Event\Contracts\AppEvent;
 
 class Event
