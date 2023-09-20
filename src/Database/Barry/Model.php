@@ -876,7 +876,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $attribute_exists = isset($this->attributes[$name]);
 
         if (!$attribute_exists && method_exists($this, $name)) {
-            return $this->$name()->getResults();
+            $result = $this->$name();
+            if ($result instanceof Relation) {
+                return $result->getResults();
+            }
+            return $result;
         }
 
         if (!$attribute_exists) {
