@@ -292,7 +292,7 @@ class HttpClient
     /**
      * Set Curl CURLOPT_RETURNTRANSFER option
      *
-     * @return bool
+     * @return void
      */
     private function applyCommonOptions()
     {
