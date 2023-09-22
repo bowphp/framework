@@ -12,7 +12,7 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
         parent::setUp();
         $config = TestingConfiguration::getConfig();
         Cache::configure($config["cache"]);
-        Cache::cache("redis");
+        Cache::store("redis");
     }
 
     public function test_create_cache()

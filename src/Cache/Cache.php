@@ -57,7 +57,7 @@ class Cache
         static::$config = $config;
         $store = (array) $config["stores"][$config["default"]];
 
-        return static::cache($store["driver"]);
+        return static::store($store["driver"]);
     }
 
     /**
@@ -80,7 +80,7 @@ class Cache
      * @param string $driver
      * @return CacheAdapterInterface
      */
-    public static function cache(string $store): CacheAdapterInterface
+    public static function store(string $store): CacheAdapterInterface
     {
         $stores = static::$config["stores"];
 
