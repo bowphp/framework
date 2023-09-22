@@ -23,7 +23,7 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
             )");
 
         Cache::configure($config["cache"]);
-        Cache::cache("database");
+        Cache::store("database");
     }
 
     public function test_create_cache()

@@ -2,12 +2,13 @@
 
 namespace Bow\Tests\Database\Relation;
 
+use Bow\Cache\Cache;
 use Bow\Database\Database;
 use Bow\Database\Migration\SQLGenerator;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Database\Stubs\MigrationExtendedStub;
-use Bow\Tests\Database\Stubs\PetMasterModelStub;
 use Bow\Tests\Database\Stubs\PetModelStub;
+use Bow\Tests\Database\Stubs\PetMasterModelStub;
+use Bow\Tests\Database\Stubs\MigrationExtendedStub;
 
 class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
 {
@@ -15,6 +16,7 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
     {
         $config = TestingConfiguration::getConfig();
         Database::configure($config["database"]);
+        Cache::configure($config["cache"]);
     }
 
     public function connectionNames()

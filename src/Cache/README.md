@@ -16,7 +16,7 @@ $content = cache("name");
 By specifying the driver:
 
 ```
-$content = Cache::cache('redis')->get('name');
+$content = Cache::store('redis')->get('name');
 ```
 
 Is very enjoyful api

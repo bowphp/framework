@@ -50,7 +50,7 @@ class HasOne extends Relation
     public function getResults(): ?Model
     {
         $key = $this->query->getTable() . ":hasone:" . $this->related->getTable() . ":" . $this->foreign_key;
-        $cache = Cache::cache('file')->get($key);
+        $cache = Cache::store('file')->get($key);
 
         if (!is_null($cache)) {
             $related = new $this->related();
@@ -61,7 +61,7 @@ class HasOne extends Relation
         $result = $this->query->first();
 
         if (!is_null($result)) {
-            Cache::cache('file')->add($key, $result->toArray(), 500);
+            Cache::store('file')->add($key, $result->toArray(), 60);
         }
 
         return $result;
