@@ -8,7 +8,7 @@ use Bow\Console\Color;
 use Bow\Console\Generator;
 use Bow\Support\Str;
 
-class GenerateDatabaseQueueCommand extends AbstractCommand
+class GenerateQueueCommand extends AbstractCommand
 {
     /**
      * Generate session
@@ -18,7 +18,7 @@ class GenerateDatabaseQueueCommand extends AbstractCommand
     public function generate(): void
     {
         $create_at = date("YmdHis");
-        $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('DatabaseQueue')));
+        $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('queue')));
 
         $generator = new Generator(
             $this->setting->getMigrationDirectory(),

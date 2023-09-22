@@ -124,12 +124,20 @@ class QueueTest extends \PHPUnit\Framework\TestCase
      */
     public function getConnection(): array
     {
-        return [
+        $data = [];
+
+        $data = [
             ["beanstalkd"],
-            ["sqs"],
             ["database"],
+            // ["sqs"],
             // ["redis"],
-            // ["rabbitmq"],
+            // ["rabbitmq"]
         ];
+
+        if (getenv("AWS_SQS_URL")) {
+            $data[] = ["sqs"];
+        }
+
+        return $data;
     }
 }

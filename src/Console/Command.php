@@ -37,6 +37,7 @@ class Command extends AbstractCommand
             "key" => \Bow\Console\Command\GenerateKeyCommand::class,
             "resource" => \Bow\Console\Command\GenerateResourceControllerCommand::class,
             "session" => \Bow\Console\Command\GenerateSessionCommand::class,
+            "queue" => \Bow\Console\Command\GenerateQueueCommand::class,
             "cache" => \Bow\Console\Command\GenerateCacheCommand::class,
         ],
         "runner" => [
