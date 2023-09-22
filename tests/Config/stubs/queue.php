@@ -21,8 +21,8 @@ return [
          * The beanstalkd connexion
          */
         "beanstalkd" => [
-            "hostname" => "127.0.0.0",
-            "port" => 11301,
+            "hostname" => "127.0.0.1",
+            "port" => 11300,
             "timeout" => 10,
         ],
 
@@ -30,9 +30,14 @@ return [
          * The sqs connexion
          */
         "sqs" => [
-            "hostname" => "127.0.0.0",
-            "port" => 11300,
-            "timeout" => 10,
+            'url' => app_env('SQS_URL', 'https://sqs.ap-south-1.amazonaws.com/242848748621/messaging'),
+        ],
+
+        /**
+         * The sqs connexion
+         */
+        "database" => [
+            'table' => "queue_jobs",
         ]
     ]
 ];

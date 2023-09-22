@@ -2,8 +2,11 @@
 
 namespace Bow\Tests\Queue;
 
+use Bow\Cache\Adapter\RedisAdapter;
+use Bow\Cache\Cache;
 use Bow\Database\Database;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
+use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\PetModelStub;
 use Bow\Queue\Connection as QueueConnection;
@@ -17,42 +20,94 @@ class QueueTest extends \PHPUnit\Framework\TestCase
     public static function setUpBeforeClass(): void
     {
         $config = TestingConfiguration::getConfig();
-        @unlink(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt');
         static::$connection = new QueueConnection($config["queue"]);
 
+        Database::configure($config["database"]);
+        Cache::configure($config["cache"]);
         Database::connection('mysql');
         Database::statement('drop table if exists pets');
         Database::statement('create table pets (id int primary key auto_increment, name varchar(255))');
     }
 
-    public function test_instance_of_adapter()
+    /**
+     * @dataProvider getConnection
+     *
+     * @param string $connection
+     * @return void
+     */
+    public function test_instance_of_adapter($connection)
     {
-        $this->assertInstanceOf(BeanstalkdAdapter::class, static::$connection->getAdapter());
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
+
+        if ($connection == "beanstalkd") {
+            $this->assertInstanceOf(BeanstalkdAdapter::class, $adapter);
+        } elseif ($connection == "sqs") {
+            $this->assertInstanceOf(SQSAdapter::class, $adapter);
+        } elseif ($connection == "redis") {
+            $this->assertInstanceOf(RedisAdapter::class, $adapter);
+        } elseif ($connection == "database") {
+            $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
+        }
     }
 
-    public function test_push_service_adapter()
+    /**
+     * @dataProvider getConnection
+     *
+     * @param string $connection
+     * @return void
+     */
+    public function test_push_service_adapter($connection)
     {
-        $adapter = static::$connection->getAdapter();
-        $adapter->push(new BasicProducerStubs("running"));
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
+        $filename = TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt";
+
+        $adapter->push(new BasicProducerStubs($connection));
         $adapter->run();
 
-        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'));
-        $this->assertEquals(file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'), 'running');
+        $this->assertTrue(file_exists($filename));
+        $this->assertEquals(file_get_contents($filename), BasicProducerStubs::class);
+
+        @unlink($filename);
     }
 
-    public function test_push_service_adapter_with_model()
+    /**
+     * @dataProvider getConnection
+     * @param string $connection
+     * @return void
+     */
+    public function test_push_service_adapter_with_model($connection)
     {
-        $adapter = static::$connection->getAdapter();
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
         $pet = new PetModelStub(["name" => "Filou"]);
-        $producer = new ModelProducerStub($pet);
+        $producer = new ModelProducerStub($pet, $connection);
 
         $adapter->push($producer);
         $adapter->run();
 
-        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'));
-        $this->assertEquals(file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/producer.txt'), 'running');
+        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_queue_pet_model_stub.txt"));
+        $content = file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_queue_pet_model_stub.txt");
+        $data = json_decode($content);
+        $this->assertEquals($data->name, "Filou");
 
         $pet = PetModelStub::first();
         $this->assertNotNull($pet);
+
+        @unlink(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt");
+    }
+
+    /**
+     * Get the connection data
+     *
+     * @return array
+     */
+    public function getConnection(): array
+    {
+        return [
+            ["beanstalkd"],
+            // ["sqs"],
+            // ["redis"],
+            // ["rabbitmq"],
+            // ["database"]
+        ];
     }
 }

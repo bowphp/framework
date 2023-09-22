@@ -7,15 +7,14 @@ use Bow\Tests\Queue\Stubs\ServiceStub;
 
 class MixedProducerStub extends ProducerService
 {
-    private ServiceStub $service;
-
-    public function __construct(ServiceStub $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private ServiceStub $service,
+        private string $connection
+    ) {
     }
 
     public function process(): void
     {
-        $this->service->fire();
+        $this->service->fire($this->connection);
     }
 }

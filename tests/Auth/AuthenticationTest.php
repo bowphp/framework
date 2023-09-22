@@ -138,6 +138,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     public function test_attempt_login_with_session_provider()
     {
         $this->expectException(AuthenticationException::class);
+
         $auth = Auth::guard('web');
         $auth->attempts([
             "username" => "papac",

@@ -4,8 +4,14 @@ namespace Bow\Tests\Queue\Stubs;
 
 class ServiceStub
 {
-    public function fire(): void
+    /**
+     * The fire method
+     *
+     * @param string $connection
+     * @return void
+     */
+    public function fire(string $connection): void
     {
-        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/producer_service.txt', ServiceStub::class);
+        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer_service.txt", ServiceStub::class);
     }
 }
