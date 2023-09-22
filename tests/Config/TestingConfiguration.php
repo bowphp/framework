@@ -16,6 +16,39 @@ class TestingConfiguration
     }
 
     /**
+     * Configure the testing
+     *
+     * @param array $configurations
+     * @return void
+     */
+    public static function withConfigurations(array $configurations)
+    {
+        KernelTesting::withConfigurations($configurations);
+    }
+
+    /**
+     * Configure the testing
+     *
+     * @param array $middlewares
+     * @return void
+     */
+    public static function withMiddlewares(array $middlewares)
+    {
+        KernelTesting::withMiddlewares($middlewares);
+    }
+
+    /**
+     * Set the loading events
+     *
+     * @param array $events
+     * @return void
+     */
+    public static function withEvents(array $events): void
+    {
+        KernelTesting::withEvents($events);
+    }
+
+    /**
      * Get the configuration for testing
      *
      * @return ConfigurationLoader

@@ -44,6 +44,9 @@ class Command extends AbstractCommand
             "server" => \Bow\Console\Command\ServerCommand::class,
             "worker" => \Bow\Console\Command\WorkerCommand::class,
         ],
+        "flush" => [
+            "worker" => \Bow\Console\Command\WorkerCommand::class,
+        ],
     ];
 
     /**
@@ -79,5 +82,7 @@ class Command extends AbstractCommand
         if (method_exists($instance, $method)) {
             return call_user_func_array([$instance, $method], $rest);
         }
+
+        return null;
     }
 }

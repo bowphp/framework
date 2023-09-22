@@ -255,13 +255,22 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $id
      * @param array $select
      *
-     * @return Collection|static|null
+     * @return Collection|Model|null
      */
     public static function findAndDelete(
         int | string | array $id,
         array $select = ['*']
-    ): Model {
+    ): Collection|Model|null {
         $model = static::find($id, $select);
+
+        if (is_null($model)) {
+            return $model;
+        }
+
+        if ($model instanceof Collection) {
+            $model->dropAll();
+            return $model;
+        }
 
         $model->delete();
 
@@ -876,7 +885,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $attribute_exists = isset($this->attributes[$name]);
 
         if (!$attribute_exists && method_exists($this, $name)) {
-            return $this->$name()->getResults();
+            $result = $this->$name();
+            if ($result instanceof Relation) {
+                return $result->getResults();
+            }
+            return $result;
         }
 
         if (!$attribute_exists) {

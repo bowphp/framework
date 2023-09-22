@@ -16,7 +16,7 @@ class KernelTesting extends ConfigurationLoader
      * @param array $configurations
      * @return void
      */
-    public static function withConfiguations(array $configurations): void
+    public static function withConfigurations(array $configurations): void
     {
         static::$configurations = $configurations;
     }

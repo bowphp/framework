@@ -4,18 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Queue;
 
-use Bow\Queue\Traits\SerializesModels;
+use Bow\Support\Serializes;
 
 abstract class ProducerService
 {
-    use SerializesModels;
-
-    /**
-     * Define the delay
-     *
-     * @var int
-     */
-    protected int $delay = 30;
+    use Serializes;
 
     /**
      * Define the queue
@@ -23,6 +16,13 @@ abstract class ProducerService
      * @var string
      */
     protected string $queue = "default";
+
+    /**
+     * Define the delay
+     *
+     * @var int
+     */
+    protected int $delay = 30;
 
     /**
      * Define the time of retry
@@ -39,6 +39,30 @@ abstract class ProducerService
     protected int $priority = 1;
 
     /**
+     * Determine if the job can be deleted
+     *
+     * @var bool
+     */
+    protected bool $delete = false;
+
+    /**
+     * Define the job id
+     *
+     * @return integer
+     */
+    protected string $id;
+
+    /**
+     * ProducerService constructor
+     *
+     * @return mixed
+     */
+    public function __construct()
+    {
+        $this->id = sha1(uniqid(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), true));
+    }
+
+    /**
      * Get the producer priority
      *
      * @return int
@@ -46,6 +70,16 @@ abstract class ProducerService
     final public function getPriority(): int
     {
         return $this->priority;
+    }
+
+    /**
+     * Get the producer id
+     *
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
     }
 
     /**
@@ -76,6 +110,26 @@ abstract class ProducerService
     final public function getDelay(): int
     {
         return $this->delay;
+    }
+
+    /**
+     * Delete the job from queue.
+     *
+     * @return void
+     */
+    public function deleteJob(): void
+    {
+        $this->delete = true;
+    }
+
+    /**
+     * Delete the job from queue.
+     *
+     * @return bool
+     */
+    public function jobShouldBeDelete(): bool
+    {
+        return $this->delete;
     }
 
     /**

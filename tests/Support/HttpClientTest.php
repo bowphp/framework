@@ -11,7 +11,7 @@ class HttpClientTest extends TestCase
     {
         $http = new HttpClient();
 
-        $response = $http->get("https://google.com");
+        $response = $http->get("https://www.oogle.com");
 
         $this->assertEquals($response->statusCode(), 200);
     }
@@ -21,14 +21,14 @@ class HttpClientTest extends TestCase
         $http = new HttpClient();
 
         $http->addHeaders(["X-Api-Key" => "Fake-Key"]);
-        $response = $http->get("https://google.com");
+        $response = $http->get("https://www.google.com");
 
         $this->assertEquals($response->statusCode(), 200);
     }
 
     public function test_should_be_fail_with_get_method()
     {
-        $http = new HttpClient("https://google.com");
+        $http = new HttpClient("https://www.google.com");
 
         $http->addHeaders(["X-Api-Key" => "Fake-Key"]);
         $response = $http->get("/the-fake-url");

@@ -45,7 +45,7 @@ jobs:
       - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
       - run: docker run -p 6379:6379 -d --name redis redis
       - run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
-      - run: docker run -d -p 11301:11300 schickling/beanstalkd
+      - run: docker run -d -p 11300:11300 schickling/beanstalkd
 
       - name: Cache Composer packages
         id: composer-cache

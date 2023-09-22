@@ -19,18 +19,19 @@ class ServiceNotFoundException extends ErrorException
      * Set the service name
      *
      * @param string $service_name
-     *
-     * @return void
+     * @return ServiceNotFoundException
      */
-    public function setService($service_name)
+    public function setService(string $service_name): ServiceNotFoundException
     {
         $this->service_name = $service_name;
+
+        return $this;
     }
 
     /**
      * Get the service name
      *
-     * @return void
+     * @return string
      */
     public function getService()
     {

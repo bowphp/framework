@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Http;
 
 use Bow\Auth\Authentication;
+use Bow\Http\Exception\BadRequestException;
 use Bow\Session\Session;
 use Bow\Support\Collection;
 use Bow\Support\Str;
@@ -52,7 +53,11 @@ class Request
         $this->id = "req_" . sha1(uniqid() . time());
 
         if ($this->getHeader('content-type') == 'application/json') {
-            $data = json_decode(file_get_contents("php://input"), true, 1024, JSON_THROW_ON_ERROR);
+            try {
+                $data = json_decode(file_get_contents("php://input"), true, 1024, JSON_THROW_ON_ERROR);
+            } catch (\Throwable $e) {
+                throw new BadRequestException("Invalid JSON syntax");
+            }
             $this->input = array_merge((array) $data, $_GET);
         } else {
             $data = $_POST ?? [];
