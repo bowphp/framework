@@ -263,6 +263,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     ): Model {
         $model = static::find($id, $select);
 
+        if (is_null($model)) {
+            return $model;
+        }
+
+        if ($model instanceof Collection) {
+            $model->dropAll();
+            return $model;
+        }
+
         $model->delete();
 
         return $model;
