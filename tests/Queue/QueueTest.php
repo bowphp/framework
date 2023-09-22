@@ -40,11 +40,12 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         Database::statement('drop table if exists pets');
         Database::statement('create table pets (id int primary key auto_increment, name varchar(255))');
         Database::statement('create table if not exists queues (
-            id int primary key auto_increment,
+            id varchar(255) primary key,
             queue varchar(255),
             payload text,
             status varchar(100),
             attempts int,
+            avalaibled_at datetime null default null,
             reserved_at datetime null default null,
             created_at datetime
         )');
