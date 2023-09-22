@@ -180,6 +180,20 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertRegExp("@\nclass\sFakeSessionMigration\sextends\sMigration\n@", $content);
     }
 
+    public function test_generate_queue_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'QueueTableMigration');
+        $content = $generator->makeStubContent('model/queue', [
+            "className" => "QueueTableMigration",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertRegExp("@\nclass\sQueueTableMigration\sextends\sMigration\n@", $content);
+        $this->assertStringContainsString("\$this->create(\"queues\", function (SQLGenerator \$table) {", $content);
+        $this->assertStringContainsString("\$table->addInteger('attempts', [\"default\" => 3]);\n", $content);
+    }
+
     public function test_generate_table_migration_stubs()
     {
         $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeTableMigration');

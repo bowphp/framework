@@ -8,6 +8,8 @@ use PDOException;
 use Bow\View\View;
 use Bow\Http\Exception\HttpException;
 use Bow\Validation\Exception\ValidationException;
+use Policier\Exception\TokenExpiredException;
+use Policier\Exception\TokenInvalidException;
 
 class BaseErrorHandler
 {
@@ -32,6 +34,14 @@ class BaseErrorHandler
      */
     protected function json($exception, $code = null)
     {
+        if ($exception instanceof TokenInvalidException) {
+            $code = 'TOKEN_INVALID';
+        }
+
+        if ($exception instanceof TokenExpiredException) {
+            $code = 'TOKEN_EXPIRED';
+        }
+
         if (is_null($code)) {
             if (method_exists($exception, 'getStatus')) {
                 $code = $exception->getStatus();
@@ -66,6 +76,8 @@ class BaseErrorHandler
             $response["trace"] = $exception->getTrace();
         }
 
-        return response()->json($response, $status);
+        response()->status($status);
+
+        return die(json_encode($response));
     }
 }

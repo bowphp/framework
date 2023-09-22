@@ -406,7 +406,7 @@ class Console
     {
         $action = $this->arg->getAction();
 
-        if (!in_array($action, ['key', 'resource', 'session', 'cache'])) {
+        if (!in_array($action, ['key', 'resource', 'session', 'cache', 'queue'])) {
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 

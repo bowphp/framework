@@ -50,7 +50,14 @@ abstract class ProducerService
      *
      * @return integer
      */
-    protected string $id;
+    protected ?string $id = null;
+
+    /**
+     * Define the job attempts
+     *
+     * @return integer
+     */
+    protected int $attemps = 2;
 
     /**
      * ProducerService constructor
@@ -80,6 +87,16 @@ abstract class ProducerService
     public function getId(): string
     {
         return $this->id;
+    }
+
+    /**
+     * Get the producer attemps
+     *
+     * @return int
+     */
+    public function getAttemps(): int
+    {
+        return $this->attemps;
     }
 
     /**

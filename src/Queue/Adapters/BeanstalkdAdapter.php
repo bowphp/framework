@@ -20,27 +20,6 @@ class BeanstalkdAdapter extends QueueAdapter
     private Pheanstalk $pheanstalk;
 
     /**
-     * Determine the default watch name
-     *
-     * @var string
-     */
-    private string $queue = "default";
-
-    /**
-     * The number of working attempts
-     *
-     * @var int
-     */
-    private int $tries;
-
-    /**
-     * Define the sleep time
-     *
-     * @var int
-     */
-    private int $sleep = 5;
-
-    /**
      * Configure Beanstalkd driver
      *
      * @param array $queue
@@ -122,12 +101,10 @@ class BeanstalkdAdapter extends QueueAdapter
      * Queue a job
      *
      * @param ProducerService $producer
-     * @return QueueAdapter
+     * @return void
      */
     public function push(ProducerService $producer): void
     {
-        // TODO: should be removed
-        // $this->flush();
         $queues = (array) cache("beanstalkd:queues");
 
         if (!in_array($producer->getQueue(), $queues)) {

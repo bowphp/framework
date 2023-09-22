@@ -1,0 +1,35 @@
+<?php
+
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\SQLGenerator;
+
+class {className} extends Migration
+{
+    /**
+     * Up Migration
+     */
+    public function up(): void
+    {
+        $this->create("queues", function (SQLGenerator $table) {
+            $table->addString('id', ["primary" => true]);
+            $table->addString('queue');
+            $table->addText('payload');
+            $table->addInteger('attempts', ["default" => 3]);
+            $table->addEnum('status', [
+                "size" => ["waiting", "processing", "reserved", "failed", "done"],
+                "default" => "waiting",
+            ]);
+            $table->addDatetime('avalaibled_at');
+            $table->addDatetime('reserved_at', ["nullable" => true, "default" => null]);
+            $table->addDatetime('created_at');
+        });
+    }
+
+    /**
+     * Rollback migration
+     */
+    public function rollback(): void
+    {
+        $this->dropIfExists("queues");
+    }
+}
