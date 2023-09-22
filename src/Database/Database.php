@@ -12,6 +12,7 @@ use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
 use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
+use ErrorException;
 
 class Database
 {
@@ -76,9 +77,8 @@ class Database
     /**
      * Connection, starts the connection on the DB
      *
-     * @param  null $name
-     * @return null|Database
-     *
+     * @param ?string $name
+     * @return ?Database
      * @throws ConnectionException
      */
     public static function connection(?string $name = null): ?Database
@@ -398,7 +398,7 @@ class Database
         } catch (DatabaseException $e) {
             static::rollback();
 
-           throw $e;
+            throw $e;
         }
     }
 
@@ -418,9 +418,9 @@ class Database
      * Retrieves the identifier of the last record.
      *
      * @param  ?string $name
-     * @return int|string
+     * @return int|string|PDO
      */
-    public static function lastInsertId(?string $name = null): int|string
+    public static function lastInsertId(?string $name = null): int|string|PDO
     {
         static::verifyConnection();
 
@@ -488,6 +488,12 @@ class Database
      */
     public function __call(string $method, array $arguments)
     {
+        if (is_null(static::$instance)) {
+            throw new ErrorException(
+                "Unable to get database instance before configuration"
+            );
+        }
+
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array(
                 [static::$instance, $method],

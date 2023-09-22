@@ -115,13 +115,22 @@ class Cache
      * @param array $arguments
      * @return mixed
      * @throws BadMethodCallException
+     * @throws ErrorException
      */
     public static function __callStatic(string $name, array $arguments)
     {
+        if (is_null(static::$instance)) {
+            throw new ErrorException(
+                "Unable to get cache instance before configuration"
+            );
+        }
+
         if (method_exists(static::$instance, $name)) {
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new BadMethodCallException("The $name method does not exist");
+        throw new BadMethodCallException(
+            "The $name method does not exist"
+        );
     }
 }

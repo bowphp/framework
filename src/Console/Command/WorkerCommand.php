@@ -16,8 +16,11 @@ class WorkerCommand extends AbstractCommand
      */
     public function run(?string $connection = null): void
     {
-        $retry = (int) $this->arg->getParameter('--retry', 3);
+        $tries = (int) $this->arg->getParameter('--tries', 3);
         $default = $this->arg->getParameter('--queue', "default");
+        $memory = $this->arg->getParameter('--memory', 126);
+        $timout = $this->arg->getParameter('--timout', 60);
+        $sleep = $this->arg->getParameter('--sleep', 60);
 
         $queue = app("queue");
 
@@ -27,7 +30,27 @@ class WorkerCommand extends AbstractCommand
 
         $worker = $this->getWorderService();
         $worker->setConnection($queue->getAdapter());
-        $worker->run($default, $retry);
+        $worker->run($default, $tries, $sleep, $timout, $memory);
+    }
+
+    /**
+     * Flush the queue
+     *
+     * @param ?string $connection
+     * @return void
+     */
+    public function flush(?string $connection = null)
+    {
+        $connection_queue = $this->arg->getParameter('--queue');
+
+        $queue = app("queue");
+
+        if (!is_null($connection)) {
+            $queue->setConnection($connection);
+        }
+
+        $adapter = $queue->getAdapter();
+        $adapter->flush($connection_queue);
     }
 
     /**

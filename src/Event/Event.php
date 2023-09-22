@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Event;
 
 use Bow\Event\Contracts\AppEvent;
+use ErrorException;
 
 class Event
 {
@@ -140,6 +141,12 @@ class Event
      */
     public function __call(string $name, array $arguments)
     {
+        if (is_null(static::$instance)) {
+            throw new ErrorException(
+                "Unable to get event instance before configuration"
+            );
+        }
+
         if (method_exists(static::$instance, $name)) {
             return call_user_func_array([static::$instance, $name], $arguments);
         }

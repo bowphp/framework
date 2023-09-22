@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Storage;
 
 use BadMethodCallException;
+use Bow\Storage\Contracts\FilesystemInterface;
 use InvalidArgumentException;
 use Bow\Storage\Exception\DiskNotFoundException;
 use Bow\Storage\Exception\ServiceConfigurationNotFoundException;
@@ -12,6 +13,8 @@ use Bow\Storage\Exception\ServiceNotFoundException;
 use Bow\Storage\Service\DiskFilesystemService;
 use Bow\Storage\Service\FTPService;
 use Bow\Storage\Service\S3Service;
+use ErrorException;
+use Tintin\Filesystem;
 
 class Storage
 {
@@ -72,6 +75,8 @@ class Storage
      *
      * @param string $service
      * @return FTPService|S3Service
+     * @throws ServiceConfigurationNotFoundException
+     * @throws ServiceNotFoundException
      */
     public static function service(string $service)
     {
@@ -90,14 +95,14 @@ class Storage
             throw (new ServiceNotFoundException(sprintf(
                 '"%s" driver is not support.',
                 $driver
-            )))->setService($driver);
+            )))->setService($service);
         }
 
         if (!array_key_exists($driver, self::$available_services_driviers)) {
             throw (new ServiceNotFoundException(sprintf(
                 '"%s" is not registered as a service.',
                 $driver
-            )))->setService($driver);
+            )))->setService($service);
         }
 
         $service_class = static::$available_services_driviers[$driver];
@@ -126,10 +131,10 @@ class Storage
      * Configure Storage
      *
      * @param array $config
-     * @return MountFilesystem
+     * @return FilesystemInterface
      * @throws
      */
-    public static function configure(array $config)
+    public static function configure(array $config): FilesystemInterface
     {
         static::$config = $config;
 
@@ -149,6 +154,12 @@ class Storage
      */
     public function __call($name, array $arguments)
     {
+        if (is_null(static::$disk)) {
+            throw new ErrorException(
+                "Unable to get storage instance before configuration"
+            );
+        }
+
         if (method_exists(static::$disk, $name)) {
             return call_user_func_array([static::$disk, $name], $arguments);
         }
@@ -165,6 +176,12 @@ class Storage
      */
     public static function __callStatic($name, array $arguments)
     {
+        if (is_null(static::$disk)) {
+            throw new ErrorException(
+                "Unable to get storage instance before configuration"
+            );
+        }
+
         if (method_exists(static::$disk, $name)) {
             return call_user_func_array([static::$disk, $name], $arguments);
         }
