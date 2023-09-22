@@ -34,7 +34,6 @@ return [
             'region' => 'ap-south-1',
             'version' => 'latest',
             'url' => app_env("AWS_SQS_URL"),
-            'bucket' => app_env('AWS_S3_BUCKET'),
             'credentials' => [
                 'key' => app_env('AWS_KEY'),
                 'secret' => app_env('AWS_SECRET'),
