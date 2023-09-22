@@ -38,10 +38,10 @@ return [
         's3' => [
             "driver" => "s3",
             'credentials' => [
-                'key'    => app_env('AWS_KEY'),
-                'secret' => app_env('AWS_SECRET'),
+                'key'    => getenv('AWS_KEY'),
+                'secret' => getenv('AWS_SECRET'),
             ],
-            'bucket' => app_env('AWS_S3_BUCKET'),
+            'bucket' => getenv('AWS_S3_BUCKET'),
             'region' => 'us-east-1',
             'version' => 'latest'
         ]

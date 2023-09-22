@@ -33,10 +33,10 @@ return [
             'profile' => 'default',
             'region' => 'ap-south-1',
             'version' => 'latest',
-            'url' => app_env("AWS_SQS_URL"),
+            'url' => getenv("AWS_SQS_URL"),
             'credentials' => [
-                'key' => app_env('AWS_KEY'),
-                'secret' => app_env('AWS_SECRET'),
+                'key' => getenv('AWS_KEY'),
+                'secret' => getenv('AWS_SECRET'),
             ],
         ],
         
