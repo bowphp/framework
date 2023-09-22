@@ -335,7 +335,14 @@ if (!function_exists('csrf_token')) {
      */
     function csrf_token(): string
     {
-        $csrf = create_csrf_token();
+        $csrf = (array) create_csrf_token();
+
+        if (count($csrf) == 0) {
+            throw new HttpException(
+                "CSRF token is not generated",
+                500
+            );
+        }
 
         return $csrf['token'];
     }
@@ -349,7 +356,14 @@ if (!function_exists('csrf_field')) {
      */
     function csrf_field(): string
     {
-        $csrf = create_csrf_token();
+        $csrf = (array) create_csrf_token();
+
+        if (count($csrf) == 0) {
+            throw new HttpException(
+                "CSRF token is not generated",
+                500
+            );
+        }
 
         return $csrf['field'];
     }
@@ -928,7 +942,7 @@ if (!function_exists('mount')) {
      */
     function mount(string $mount): \Bow\Storage\Service\DiskFilesystemService
     {
-        return Storage::mount($mount);
+        return Storage::disk($mount);
     }
 }
 
@@ -936,13 +950,13 @@ if (!function_exists('file_system')) {
     /**
      * Alias on the mount method
      *
-     * @param string $mount
+     * @param string $disk
      * @return \Bow\Storage\Service\DiskFilesystemService
      * @throws \Bow\Storage\Exception\ResourceException
      */
-    function file_system(string $mount): \Bow\Storage\Service\DiskFilesystemService
+    function file_system(string $disk): \Bow\Storage\Service\DiskFilesystemService
     {
-        return mount($mount);
+        return Storage::disk($disk);
     }
 }
 
@@ -974,9 +988,9 @@ if (!function_exists('redirect_back')) {
      * Make redirection to back
      *
      * @param int $status
-     * @return Bow\Http\Redirect
+     * @return Redirect
      */
-    function redirect_back(int $status = 302): \Bow\Http\Redirect
+    function redirect_back(int $status = 302): Redirect
     {
         return redirect()->back($status);
     }

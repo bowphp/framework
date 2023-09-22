@@ -14,7 +14,6 @@ use Bow\Storage\Service\DiskFilesystemService;
 use Bow\Storage\Service\FTPService;
 use Bow\Storage\Service\S3Service;
 use ErrorException;
-use Tintin\Filesystem;
 
 class Storage
 {
@@ -50,7 +49,7 @@ class Storage
      * @return DiskFilesystemService
      * @throws DiskNotFoundException
      */
-    public static function disk(?string $disk = null)
+    public static function disk(?string $disk = null): DiskFilesystemService
     {
         // Use the default disk as fallback
         if (is_null($disk)) {
