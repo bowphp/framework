@@ -5,6 +5,7 @@ namespace Bow\Tests\Queue;
 use Bow\Cache\Adapter\RedisAdapter;
 use Bow\Cache\Cache;
 use Bow\Cache\CacheConfiguration;
+use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\Database;
 use Bow\Database\DatabaseConfiguration;
@@ -27,6 +28,7 @@ class QueueTest extends \PHPUnit\Framework\TestCase
             LoggerConfiguration::class,
             DatabaseConfiguration::class,
             CacheConfiguration::class,
+            EnvConfiguration::class,
         ]);
 
         $config = TestingConfiguration::getConfig();
@@ -113,8 +115,8 @@ class QueueTest extends \PHPUnit\Framework\TestCase
     public function getConnection(): array
     {
         return [
-            ["beanstalkd"],
-            // ["sqs"],
+            // ["beanstalkd"],
+            ["sqs"],
             // ["redis"],
             // ["rabbitmq"],
             // ["database"]

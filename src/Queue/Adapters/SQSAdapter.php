@@ -15,7 +15,7 @@ class SQSAdapter extends QueueAdapter
      *
      * @var SqsClient
      */
-    private SqsClient $client;
+    private SqsClient $sqs;
 
     /**
      * The configuration array
@@ -59,15 +59,7 @@ class SQSAdapter extends QueueAdapter
 
         $this->config = $config;
 
-        $this->client = new SqsClient([
-            'profile' => 'default',
-            'region' => 'us-west-2',
-            'version' => '2012-11-05',
-            'credentials' => [
-                'key' => $config["key"],
-                'secret' => $config["secret"]
-            ]
-        ]);
+        $this->sqs = new SqsClient($config);
 
         return $this;
     }
@@ -106,51 +98,6 @@ class SQSAdapter extends QueueAdapter
     }
 
     /**
-     * Push a job onto the queue.
-     *
-     * @param ProducerService $producer
-     * @return void
-     */
-    public function push(ProducerService $producer): void
-    {
-        $params = [
-            'DelaySeconds' => $producer->getDelay(),
-            'MessageAttributes' => [
-                "Title" => [
-                    'DataType' => "String",
-                    'StringValue' => get_class($producer)
-                ],
-            ],
-            'MessageBody' => $this->serializeProducer($producer),
-            'QueueUrl' => $this->config["url"]
-        ];
-
-        try {
-            $result = $this->client->sendMessage($params);
-        } catch (AwsException $e) {
-            error_log($e->getMessage());
-        }
-    }
-
-    /**
-     * Get the size of the queue.
-     *
-     * @param string $queue
-     * @return int
-     */
-    public function size(string $queue): int
-    {
-        $response = $this->client->getQueueAttributes([
-            'QueueUrl' => $this->getQueue($queue),
-            'AttributeNames' => ['ApproximateNumberOfMessages'],
-        ]);
-
-        $attributes = $response->get('Attributes');
-
-        return (int) $attributes['ApproximateNumberOfMessages'];
-    }
-
-    /**
      * Get the queue or return the default.
      *
      * @param ?string $queue
@@ -173,6 +120,51 @@ class SQSAdapter extends QueueAdapter
     }
 
     /**
+     * Push a job onto the queue.
+     *
+     * @param ProducerService $producer
+     * @return void
+     */
+    public function push(ProducerService $producer): void
+    {
+        $params = [
+            'DelaySeconds' => $producer->getDelay(),
+            'MessageAttributes' => [
+                "Title" => [
+                    'DataType' => "String",
+                    'StringValue' => get_class($producer)
+                ],
+            ],
+            'MessageBody' => base64_encode($this->serializeProducer($producer)),
+            'QueueUrl' => $this->config["url"]
+        ];
+
+        try {
+            $this->sqs->sendMessage($params);
+        } catch (AwsException $e) {
+            error_log($e->getMessage());
+        }
+    }
+
+    /**
+     * Get the size of the queue.
+     *
+     * @param string $queue
+     * @return int
+     */
+    public function size(string $queue): int
+    {
+        $response = $this->sqs->getQueueAttributes([
+            'QueueUrl' => $this->getQueue($queue),
+            'AttributeNames' => ['ApproximateNumberOfMessages'],
+        ]);
+
+        $attributes = $response->get('Attributes');
+
+        return (int) $attributes['ApproximateNumberOfMessages'];
+    }
+
+    /**
      * Process the next job on the queue.
      *
      * @param ?string $queue
@@ -183,7 +175,7 @@ class SQSAdapter extends QueueAdapter
         $this->sleep($this->sleep ?? 5);
 
         try {
-            $result = $this->client->receiveMessage([
+            $result = $this->sqs->receiveMessage([
                 'AttributeNames' => ['SentTimestamp'],
                 'MaxNumberOfMessages' => 1,
                 'MessageAttributeNames' => ['All'],
@@ -196,23 +188,27 @@ class SQSAdapter extends QueueAdapter
                 return;
             }
             $message = $result->get('Messages')[0];
-            $producer = $this->unserializeProducer($message["MessageBody"]);
+            $producer = $this->unserializeProducer(base64_decode($message["Body"]));
             $delay = $producer->getDelay();
             call_user_func([$producer, "process"]);
-            $result = $this->client->deleteMessage([
+            $result = $this->sqs->deleteMessage([
                 'QueueUrl' => $this->config["url"],
                 'ReceiptHandle' => $message['ReceiptHandle']
             ]);
         } catch (AwsException $e) {
             error_log($e->getMessage());
             app('logger')->error($e->getMessage(), $e->getTrace());
+            if (!isset($producer)) {
+                $this->sleep(1);
+                return;
+            }
             if ($producer->jobShouldBeDelete()) {
-                $result = $this->client->deleteMessage([
+                $result = $this->sqs->deleteMessage([
                     'QueueUrl' => $this->config["url"],
                     'ReceiptHandle' => $message['ReceiptHandle']
                 ]);
             } else {
-                $result = $this->client->changeMessageVisibilityBatch([
+                $result = $this->sqs->changeMessageVisibilityBatch([
                     'QueueUrl' => $this->config["url"],
                     'Entries' => [
                         'Id' => $producer->getId(),
@@ -223,5 +219,16 @@ class SQSAdapter extends QueueAdapter
             }
             $this->sleep(1);
         }
+    }
+
+    /**
+     * flush the queue.
+     *
+     * @param ?string $queue
+     * @return void
+     */
+    public function flush(?string $queue = null): void
+    {
+        
     }
 }

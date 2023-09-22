@@ -30,14 +30,22 @@ return [
          * The sqs connexion
          */
         "sqs" => [
-            'url' => app_env('SQS_URL', 'https://sqs.ap-south-1.amazonaws.com/242848748621/messaging'),
+            'profile' => 'default',
+            'region' => 'ap-south-1',
+            'version' => 'latest',
+            'url' => app_env("AWS_SQS_URL"),
+            'bucket' => app_env('AWS_S3_BUCKET'),
+            'credentials' => [
+                'key' => app_env('AWS_KEY'),
+                'secret' => app_env('AWS_SECRET'),
+            ],
         ],
-
+        
         /**
          * The sqs connexion
          */
         "database" => [
-            'table' => "queue_jobs",
+            'table' => "queues",
         ]
     ]
 ];

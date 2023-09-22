@@ -122,12 +122,10 @@ class BeanstalkdAdapter extends QueueAdapter
      * Queue a job
      *
      * @param ProducerService $producer
-     * @return QueueAdapter
+     * @return void
      */
     public function push(ProducerService $producer): void
     {
-        // TODO: should be removed
-        // $this->flush();
         $queues = (array) cache("beanstalkd:queues");
 
         if (!in_array($producer->getQueue(), $queues)) {

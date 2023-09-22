@@ -54,7 +54,7 @@ class DatabaseAdapter extends QueueAdapter
      * Get connexion
      *
      * @param string $name
-     * @return Pheanstalk
+     * @return void
      */
     public function setWatch(string $name): void
     {
