@@ -255,12 +255,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param mixed $id
      * @param array $select
      *
-     * @return Collection|static|null
+     * @return Collection|Model|null
      */
     public static function findAndDelete(
         int | string | array $id,
         array $select = ['*']
-    ): Model {
+    ): Collection|Model|null {
         $model = static::find($id, $select);
 
         if (is_null($model)) {
