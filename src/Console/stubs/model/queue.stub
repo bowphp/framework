@@ -11,10 +11,17 @@ class {className} extends Migration
     public function up(): void
     {
         $this->create("queues", function (SQLGenerator $table) {
-            $table->addColumn('id', 'string', ['primary' => true]);
-            $table->addColumn('time', 'timestamp');
-            $table->addColumn('data', 'text');
-            $table->addColumn('ip', 'string');
+            $table->addString('id', ["primary" => true]);
+            $table->addString('queue');
+            $table->addText('payload');
+            $table->addInteger('attempts', ["default" => 3]);
+            $table->addEnum('status', [
+                "size" => ["waiting", "processing", "reserved", "failed", "done"],
+                "default" => "waiting",
+            ]);
+            $table->addDatetime('avalaibled_at');
+            $table->addDatetime('reserved_at', ["nullable" => true, "default" => null]);
+            $table->addDatetime('created_at');
         });
     }
 
@@ -23,6 +30,6 @@ class {className} extends Migration
      */
     public function rollback(): void
     {
-        $this->dropIfExists("sessions");
+        $this->dropIfExists("queues");
     }
 }

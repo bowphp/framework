@@ -17,21 +17,28 @@ abstract class QueueAdapter
      *
      * @var int
      */
-    private int $start_time;
+    protected int $start_time;
 
     /**
-     * Determine if the worker should quit
+     * Determine the default watch name
      *
-     * @var bool
+     * @var string
      */
-    protected bool $should_quit = false;
+    protected string $queue = "default";
 
     /**
-     * Determine if the worker is paused
+     * The number of working attempts
      *
-     * @var bool
+     * @var int
      */
-    protected bool $paused = false;
+    protected int $tries = 3;
+
+    /**
+     * Define the sleep time
+     *
+     * @var int
+     */
+    protected int $sleep = 5;
 
     /**
      * Create producer serialization
@@ -160,6 +167,50 @@ abstract class QueueAdapter
         return extension_loaded('pcntl');
     }
 
+
+    /**
+     * Set job tries
+     *
+     * @param int $tries
+     * @return void
+     */
+    public function setTries(int $tries): void
+    {
+        $this->tries = $tries;
+    }
+
+    /**
+     * Set sleep time
+     *
+     * @param int $sleep
+     * @return void
+     */
+    public function setSleep(int $sleep): void
+    {
+        $this->sleep = $sleep;
+    }
+
+    /**
+     * Get the queue or return the default.
+     *
+     * @param  ?string $queue
+     * @return string
+     */
+    public function getQueue(?string $queue = null): string
+    {
+        return $queue ?: $this->queue;
+    }
+
+    /**
+     * Generate the job id
+     *
+     * @return string
+     */
+    public function generateId(): string
+    {
+        return sha1(uniqid(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), true));
+    }
+
     /**
      * Make adapter configuration
      *
@@ -167,27 +218,6 @@ abstract class QueueAdapter
      * @return QueueAdapter
      */
     abstract public function configure(array $config): QueueAdapter;
-
-    /**
-     * Watch the the queue name
-     *
-     * @param string $queue
-     */
-    abstract public function setWatch(string $queue): void;
-
-    /**
-     * Set the tries value
-     *
-     * @param int $tries
-     */
-    abstract public function setTries(int $tries): void;
-
-    /**
-     * Set the sleep value
-     *
-     * @param int $sleep
-     */
-    abstract public function setSleep(int $sleep): void;
 
     /**
      * Push new producer
@@ -203,14 +233,6 @@ abstract class QueueAdapter
      * @return int
      */
     abstract public function size(string $queue): int;
-
-    /**
-     * Get the queue or return the default.
-     *
-     * @param  ?string $queue
-     * @return string
-     */
-    abstract public function getQueue(?string $queue = null): string;
 
     /**
      * Start the worker server

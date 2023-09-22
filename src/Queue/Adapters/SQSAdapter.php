@@ -25,27 +25,6 @@ class SQSAdapter extends QueueAdapter
     private array $config = [];
 
     /**
-     * Determine the default watch name
-     *
-     * @var string
-     */
-    private string $queue = "default";
-
-    /**
-     * The number of working attempts
-     *
-     * @var int
-     */
-    private int $tries;
-
-    /**
-     * Define the sleep time
-     *
-     * @var int
-     */
-    private int $sleep = 5;
-
-    /**
      * Configure the queue.
      *
      * @param array $config
@@ -65,61 +44,6 @@ class SQSAdapter extends QueueAdapter
     }
 
     /**
-     * Set the watch queue.
-     *
-     * @param string $queue
-     * @return void
-     */
-    public function setWatch(string $queue): void
-    {
-        $this->queue = $queue;
-    }
-
-    /**
-     * Set the number of times to attempt a job.
-     *
-     * @param int $tries
-     * @return void
-     */
-    public function setTries(int $tries): void
-    {
-        $this->tries = $tries;
-    }
-
-    /**
-     * Set the number of seconds to sleep between jobs.
-     *
-     * @param int $sleep
-     * @return void
-     */
-    public function setSleep(int $sleep): void
-    {
-        $this->sleep = $sleep;
-    }
-
-    /**
-     * Get the queue or return the default.
-     *
-     * @param ?string $queue
-     * @return string
-     */
-    public function getQueue(?string $queue = null): string
-    {
-        return $queue ?: $this->queue;
-    }
-
-    /**
-     * Set the number of seconds to wait before retrying a job.
-     *
-     * @param int $retry
-     * @return void
-     */
-    public function setRetries(int $tries)
-    {
-        $this->tries = $tries;
-    }
-
-    /**
      * Push a job onto the queue.
      *
      * @param ProducerService $producer
@@ -134,6 +58,10 @@ class SQSAdapter extends QueueAdapter
                     'DataType' => "String",
                     'StringValue' => get_class($producer)
                 ],
+                "Id" => [
+                    "DataType" => "String",
+                    "StringValue" => $this->generateId(),
+                ]
             ],
             'MessageBody' => base64_encode($this->serializeProducer($producer)),
             'QueueUrl' => $this->config["url"]
@@ -229,6 +157,5 @@ class SQSAdapter extends QueueAdapter
      */
     public function flush(?string $queue = null): void
     {
-        
     }
 }

@@ -20,27 +20,6 @@ class BeanstalkdAdapter extends QueueAdapter
     private Pheanstalk $pheanstalk;
 
     /**
-     * Determine the default watch name
-     *
-     * @var string
-     */
-    private string $queue = "default";
-
-    /**
-     * The number of working attempts
-     *
-     * @var int
-     */
-    private int $tries;
-
-    /**
-     * Define the sleep time
-     *
-     * @var int
-     */
-    private int $sleep = 5;
-
-    /**
      * Configure Beanstalkd driver
      *
      * @param array $queue

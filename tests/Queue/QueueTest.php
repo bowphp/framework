@@ -3,13 +3,13 @@
 namespace Bow\Tests\Queue;
 
 use Bow\Cache\Adapter\RedisAdapter;
-use Bow\Cache\Cache;
 use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\Database;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
+use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\PetModelStub;
@@ -39,6 +39,15 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         Database::connection('mysql');
         Database::statement('drop table if exists pets');
         Database::statement('create table pets (id int primary key auto_increment, name varchar(255))');
+        Database::statement('create table if not exists queues (
+            id int primary key auto_increment,
+            queue varchar(255),
+            payload text,
+            status varchar(100),
+            attempts int,
+            reserved_at datetime null default null,
+            created_at datetime
+        )');
     }
 
     /**
@@ -117,7 +126,7 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         return [
             ["beanstalkd"],
             ["sqs"],
-            // ["database"],
+            ["database"],
             // ["redis"],
             // ["rabbitmq"],
         ];

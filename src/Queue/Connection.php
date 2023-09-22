@@ -6,6 +6,7 @@ namespace Bow\Queue;
 
 use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
+use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use ErrorException;
 
@@ -33,6 +34,7 @@ class Connection
     private static array $connections = [
         "beanstalkd" => BeanstalkdAdapter::class,
         "sqs" => SQSAdapter::class,
+        "database" => DatabaseAdapter::class,
     ];
 
     /**

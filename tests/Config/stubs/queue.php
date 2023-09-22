@@ -39,7 +39,7 @@ return [
                 'secret' => getenv('AWS_SECRET'),
             ],
         ],
-        
+
         /**
          * The sqs connexion
          */
