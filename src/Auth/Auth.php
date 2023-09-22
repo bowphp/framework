@@ -8,6 +8,7 @@ use Bow\Auth\Guards\JwtGuard;
 use Bow\Auth\Guards\SessionGuard;
 use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Exception\AuthenticationException;
+use ErrorException;
 
 class Auth
 {
@@ -100,10 +101,16 @@ class Auth
      *
      * @param string $method
      * @param array $params
-     * @return GuardContract
+     * @return ?GuardContract
      */
     public static function __callStatic(string $method, array $params)
     {
+        if (is_null(static::$instance)) {
+            throw new ErrorException(
+                "Unable to get auth instance before configuration"
+            );
+        }
+
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array([static::$instance, $method], $params);
         }
