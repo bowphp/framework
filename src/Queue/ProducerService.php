@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Queue;
 
+use Bow\Support\Serializes;
+
 abstract class ProducerService
 {
-    /**
-     * Define the delay
-     *
-     * @var int
-     */
-    protected int $delay = 30;
+    use Serializes;
 
     /**
      * Define the queue
@@ -19,6 +16,13 @@ abstract class ProducerService
      * @var string
      */
     protected string $queue = "default";
+
+    /**
+     * Define the delay
+     *
+     * @var int
+     */
+    protected int $delay = 30;
 
     /**
      * Define the time of retry
@@ -39,7 +43,24 @@ abstract class ProducerService
      *
      * @var bool
      */
-    private bool $delete = false;
+    protected bool $delete = false;
+
+    /**
+     * Define the job id
+     *
+     * @return integer
+     */
+    protected string $id;
+
+    /**
+     * ProducerService constructor
+     *
+     * @return mixed
+     */
+    public function __construct()
+    {
+        $this->id = sha1(uniqid(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), true));
+    }
 
     /**
      * Get the producer priority
@@ -49,6 +70,16 @@ abstract class ProducerService
     final public function getPriority(): int
     {
         return $this->priority;
+    }
+
+    /**
+     * Get the producer id
+     *
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
     }
 
     /**

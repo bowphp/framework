@@ -8,14 +8,40 @@ use Bow\Queue\ProducerService;
 
 abstract class QueueAdapter
 {
+    const EXIT_SUCCESS = 0;
+    const EXIT_ERROR = 1;
+    const EXIT_MEMORY_LIMIT = 12;
+
+    /**
+     * Define the start time
+     *
+     * @var int
+     */
+    private int $start_time;
+
+    /**
+     * Determine if the worker should quit
+     *
+     * @var bool
+     */
+    protected bool $should_quit = false;
+
+    /**
+     * Determine if the worker is paused
+     *
+     * @var bool
+     */
+    protected bool $paused = false;
+
     /**
      * Create producer serialization
      *
      * @param ProducerService $producer
      * @return string
      */
-    public function serializeProducer(ProducerService $producer): string
-    {
+    public function serializeProducer(
+        ProducerService $producer
+    ): string {
         return serialize($producer);
     }
 
@@ -25,9 +51,113 @@ abstract class QueueAdapter
      * @param string $producer
      * @return ProducerService
      */
-    public function unserializeProducer(string $producer): ProducerService
-    {
+    public function unserializeProducer(
+        string $producer
+    ): ProducerService {
         return unserialize($producer);
+    }
+
+    /**
+     * Sleep the process
+     *
+     * @param int $seconds
+     * @return void
+     */
+    public function sleep(int $seconds): void
+    {
+        if ($seconds < 1) {
+            usleep($seconds * 1000000);
+        } else {
+            sleep($seconds);
+        }
+    }
+
+    /**
+     * Laund the worker
+     *
+     * @param integer $timeout
+     * @param integer $memory
+     * @return void
+     */
+    public function work(int $timeout, int $memory): void
+    {
+        [$this->start_time, $jobs_processed] = [hrtime(true) / 1e9, 0];
+
+        if ($supportsAsyncSignals = $this->supportsAsyncSignals()) {
+            $this->listenForSignals();
+        }
+
+        while (true) {
+            $this->run();
+
+            if ($this->timeoutReached($timeout)) {
+                $this->kill(static::EXIT_ERROR);
+            } elseif ($this->memoryExceeded($memory)) {
+                $this->kill(static::EXIT_MEMORY_LIMIT);
+            }
+        }
+    }
+
+    /**
+     * Kill the process.
+     *
+     * @param  int  $status
+     * @return never
+     */
+    public function kill($status = 0)
+    {
+        if (extension_loaded('posix')) {
+            posix_kill(getmypid(), SIGKILL);
+        }
+
+        exit($status);
+    }
+
+    /**
+     * Determine if the timeout is reached
+     *
+     * @param int $timeout
+     * @return boolean
+     */
+    protected function timeoutReached(int $timeout): bool
+    {
+        return (time() - $this->start_time) >= $timeout;
+    }
+
+    /**
+     * Determine if the memory is exceeded
+     *
+     * @param int $memory_timit
+     * @return boolean
+     */
+    private function memoryExceeded(int $memory_timit): bool
+    {
+        return (memory_get_usage() / 1024 / 1024) >= $memory_timit;
+    }
+
+    /**
+     * Enable async signals for the process.
+     *
+     * @return void
+     */
+    protected function listenForSignals()
+    {
+        pcntl_async_signals(true);
+
+        pcntl_signal(SIGQUIT, fn () => error_log("bow worker exiting..."));
+        pcntl_signal(SIGTERM, fn () => error_log("bow worker exit..."));
+        pcntl_signal(SIGUSR2, fn () => error_log("bow worker restarting..."));
+        pcntl_signal(SIGCONT, fn () => error_log("bow worker continue..."));
+    }
+
+    /**
+     * Determine if "async" signals are supported.
+     *
+     * @return bool
+     */
+    protected function supportsAsyncSignals()
+    {
+        return extension_loaded('pcntl');
     }
 
     /**
@@ -46,11 +176,18 @@ abstract class QueueAdapter
     abstract public function setWatch(string $queue): void;
 
     /**
-     * Set the retry value
+     * Set the tries value
      *
-     * @param int $retry
+     * @param int $tries
      */
-    abstract public function setRetry(int $retry): void;
+    abstract public function setTries(int $tries): void;
+
+    /**
+     * Set the sleep value
+     *
+     * @param int $sleep
+     */
+    abstract public function setSleep(int $sleep): void;
 
     /**
      * Push new producer
@@ -73,7 +210,7 @@ abstract class QueueAdapter
      * @param  ?string $queue
      * @return string
      */
-    abstract public function getQueue(string $queue = null): string;
+    abstract public function getQueue(?string $queue = null): string;
 
     /**
      * Start the worker server
@@ -81,4 +218,12 @@ abstract class QueueAdapter
      * @param ?string $queue
      */
     abstract public function run(?string $queue = null): void;
+
+    /**
+     * Flush the queue
+     *
+     * @param ?string $queue
+     * @return void
+     */
+    abstract public function flush(?string $queue = null): void;
 }

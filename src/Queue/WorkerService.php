@@ -30,16 +30,73 @@ class WorkerService
      * Start the consumer
      *
      * @param string $queue
-     * @param integer $retry
+     * @param int $tries
+     * @param int $sleep
+     * @param int $timeout
+     * @param int $memory
      * @return void
      */
-    public function run(string $queue = "default", int $retry = 60): void
-    {
+    public function run(
+        string $queue = "default",
+        int $tries = 3,
+        int $sleep = 5,
+        int $timeout = 60,
+        int $memory = 128
+    ): void {
         $this->connection->setWatch($queue);
-        $this->connection->setRetry($retry);
+        $this->connection->setTries($tries);
+        $this->connection->setSleep($sleep);
+        $this->connection->work($timeout, $memory);
+    }
 
-        while (true) {
-            $this->connection->run();
+    /**
+     * Determine if the worker should restart
+     *
+     * @param int $timeout
+     * @param int $memory
+     * @return boolean
+     */
+    protected function shouldRestart(int $timeout, int $memory): bool
+    {
+        if (
+            $this->timeoutReached($timeout)
+            || $this->memoryExceeded($memory)
+        ) {
+            return true;
         }
+
+        return false;
+    }
+
+    /**
+     * Determine if the timeout is reached
+     *
+     * @param int $timeout
+     * @return boolean
+     */
+    protected function timeoutReached(int $timeout): bool
+    {
+        return (time() - $this->start_time) >= $timeout;
+    }
+
+    /**
+     * Determine if the memory is exceeded
+     *
+     * @param int $memory_timit
+     * @return boolean
+     */
+    protected function memoryExceeded(int $memory_timit): bool
+    {
+        return (memory_get_usage() / 1024 / 1024) >= $memory_timit;
+    }
+
+    /**
+     * Stop the worker
+     *
+     * @return void
+     */
+    protected function stop(): void
+    {
+        die;
     }
 }
