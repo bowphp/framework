@@ -115,11 +115,11 @@ class QueueTest extends \PHPUnit\Framework\TestCase
     public function getConnection(): array
     {
         return [
-            // ["beanstalkd"],
+            ["beanstalkd"],
             ["sqs"],
+            // ["database"],
             // ["redis"],
             // ["rabbitmq"],
-            // ["database"]
         ];
     }
 }
