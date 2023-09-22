@@ -83,7 +83,11 @@ class JwtGuard extends GuardContract
         $policier = $this->getPolicier();
 
         if (is_null($this->token)) {
-            $this->token = $policier->getParsedToken();
+            try {
+                $this->token = $policier->getParsedToken();
+            } catch (\Exception $e) {
+                return false;
+            }
         }
 
         if (is_null($this->token)) {

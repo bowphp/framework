@@ -4,12 +4,16 @@ namespace Bow\Tests\Queue;
 
 use Bow\Cache\Adapter\RedisAdapter;
 use Bow\Cache\Cache;
+use Bow\Cache\CacheConfiguration;
+use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\Database;
+use Bow\Database\DatabaseConfiguration;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\PetModelStub;
 use Bow\Queue\Connection as QueueConnection;
+use Bow\Testing\KernelTesting;
 use Bow\Tests\Queue\Stubs\ModelProducerStub;
 use Bow\Tests\Queue\Stubs\BasicProducerStubs;
 
@@ -19,11 +23,17 @@ class QueueTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
+        TestingConfiguration::withConfigurations([
+            LoggerConfiguration::class,
+            DatabaseConfiguration::class,
+            CacheConfiguration::class,
+        ]);
+
         $config = TestingConfiguration::getConfig();
+        $config->boot();
+
         static::$connection = new QueueConnection($config["queue"]);
 
-        Database::configure($config["database"]);
-        Cache::configure($config["cache"]);
         Database::connection('mysql');
         Database::statement('drop table if exists pets');
         Database::statement('create table pets (id int primary key auto_increment, name varchar(255))');

@@ -126,14 +126,14 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function push(ProducerService $producer): void
     {
+        // TODO: should be removed
+        // $this->flush();
         $queues = (array) cache("beanstalkd:queues");
 
         if (!in_array($producer->getQueue(), $queues)) {
             $queues[] = $producer->getQueue();
             cache("beanstalkd:queues", $queues);
         }
-        $queues = (array) cache("beanstalkd:queues");
-        dump($queues);
 
         $this->pheanstalk
             ->useTube($producer->getQueue())
@@ -168,7 +168,6 @@ class BeanstalkdAdapter extends QueueAdapter
         try {
             $payload = $job->getData();
             $producer = $this->unserializeProducer($payload);
-            dump($producer);
             call_user_func([$producer, "process"]);
             $this->sleep(2);
             $this->pheanstalk->touch($job);
