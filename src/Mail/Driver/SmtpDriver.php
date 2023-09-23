@@ -226,9 +226,9 @@ class SmtpDriver implements MailDriverInterface
     /**
      * Read the current connection stream.
      *
-     * @return string
+     * @return int
      */
-    private function read()
+    private function read(): int
     {
         $s = null;
 
@@ -255,7 +255,7 @@ class SmtpDriver implements MailDriverInterface
      * @param ?string   $message
      *
      * @throws SmtpException
-     * @return string
+     * @return string|int|null
      */
     private function write(string $command, ?int $code = null, ?string $message = null)
     {

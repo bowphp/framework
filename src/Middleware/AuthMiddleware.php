@@ -15,7 +15,7 @@ class AuthMiddleware implements BaseMiddleware
      * Handle an incoming request.
      *
      * @param  Request $request
-     * @param  Callable  $next
+     * @param  callable  $next
      * @param  array $args
      * @return Redirect
      */

@@ -14,7 +14,7 @@ class CsrfMiddleware implements BaseMiddleware
      * Handle an incoming request.
      *
      * @param  Request $request
-     * @param  Callable $next
+     * @param  callable $next
      * @param  array $args
      * @throws
      */
@@ -33,14 +33,18 @@ class CsrfMiddleware implements BaseMiddleware
 
             response()->status(401);
 
-            throw new TokenMismatch('Token Mismatch');
+            throw new TokenMismatch(
+                'The request csrf token mismatch'
+            );
         }
 
         if ($request->get('_token') == $request->session()->get('_token')) {
             return $next($request);
         }
 
-        throw new TokenMismatch('Token Mismatch');
+        throw new TokenMismatch(
+            'The request csrf token mismatch'
+        );
     }
 
     /**

@@ -15,6 +15,6 @@ trait SeedingHelper
      */
     public function seed(string $seeder, array $data = []): int
     {
-        return seed($seeder, $data);
+        return db_seed($seeder, $data);
     }
 }

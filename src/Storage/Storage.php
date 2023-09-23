@@ -185,6 +185,8 @@ class Storage
             return call_user_func_array([static::$disk, $name], $arguments);
         }
 
-        throw new BadMethodCallException("unkdown $name method");
+        throw new BadMethodCallException(
+            "The method $name is not defined"
+        );
     }
 }

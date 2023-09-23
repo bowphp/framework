@@ -6,7 +6,6 @@ namespace Bow\Database;
 
 use Bow\Database\Connection\AbstractConnection;
 use PDO;
-use stdClass;
 use PDOStatement;
 use Bow\Support\Str;
 use Bow\Support\Util;

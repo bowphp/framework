@@ -28,7 +28,7 @@ class TranslatorConfiguration extends Configuration
                 }
             }
 
-            return Translator::configure($lang, $dictionary, $auto_detected);
+            return Translator::configure($lang, $dictionary);
         });
     }
 

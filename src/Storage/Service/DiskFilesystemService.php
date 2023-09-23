@@ -237,7 +237,7 @@ class DiskFilesystemService implements FilesystemInterface
         }
 
         if (!$this->exists($source)) {
-            $this->makeDirectory(dirname($source), true);
+            $this->makeDirectory(dirname($source));
         }
 
         return (bool) file_put_contents($source, $this->get($target));

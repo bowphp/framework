@@ -100,21 +100,21 @@ class Str
      * slice
      *
      * @param  string $str
-     * @param  string $start
-     * @param  string|null $end
+     * @param  int $start
+     * @param  int $length
      * @return string
      */
-    public static function slice(string $str, int $start, ?int $end = null)
+    public static function slice(string $str, int $start, ?int $length = null)
     {
         $sliceStr = '';
 
         if (is_string($str)) {
-            if ($end === null) {
-                $end = static::len($str);
+            if ($length === null) {
+                $length = static::len($str);
             }
 
-            if ($start < $end) {
-                $sliceStr = mb_substr($str, $start, $end, 'UTF-8');
+            if ($start < $length) {
+                $sliceStr = mb_substr($str, $start, $length, 'UTF-8');
             }
         }
 
