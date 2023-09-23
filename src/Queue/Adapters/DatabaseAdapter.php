@@ -105,7 +105,7 @@ class DatabaseAdapter extends QueueAdapter
                     $this->sleep(1);
                     continue;
                 }
-                
+
                 // Execute the onException method for notify the producer
                 // and let developper to decide if the job should be delete
                 $producer->onException($e);

@@ -129,7 +129,8 @@ class SQSAdapter extends QueueAdapter
             app('logger')->error($e->getMessage(), $e->getTrace());
 
             if (isset($message)) {
-                cache("job:failed:" . $message["ReceiptHandle"],
+                cache(
+                    "job:failed:" . $message["ReceiptHandle"],
                     $message["Body"]
                 );
             }
