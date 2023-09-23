@@ -151,9 +151,22 @@ class BeanstalkdAdapter extends QueueAdapter
             $this->sleep(2);
             $this->pheanstalk->delete($job);
         } catch (\Throwable $e) {
+            // Write the error log
             error_log($e->getMessage());
             app('logger')->error($e->getMessage(), $e->getTrace());
-            cache("failed:job:" . $job->getId(), $job->getData());
+            cache("job:failed:" . $job->getId(), $job->getData());
+
+            // Check if producer has been loaded
+            if (!isset($producer)) {
+                $this->pheanstalk->delete($job);
+                return;
+            }
+
+            // Execute the onException method for notify the producer
+            // and let developper to decide if the job should be delete
+            $producer->onException($e);
+
+            // Check if the job should be delete
             if ($producer->jobShouldBeDelete()) {
                 $this->pheanstalk->delete($job);
             } else {

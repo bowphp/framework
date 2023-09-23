@@ -95,24 +95,38 @@ class DatabaseAdapter extends QueueAdapter
                     continue;
                 }
             } catch (\Exception $e) {
+                // Write the error log
                 error_log($e->getMessage());
                 app('logger')->error($e->getMessage(), $e->getTrace());
-                cache("failed:job:" . $job->id, $job->payload);
+                cache("job:failed:" . $job->id, $job->payload);
+
+                 // Check if producer has been loaded
                 if (!isset($producer)) {
                     $this->sleep(1);
                     continue;
                 }
+
+                // Execute the onException method for notify the producer
+                // and let developper to decide if the job should be delete
+                $producer->onException($e);
+
+                // Check if the job should be delete
                 if ($producer->jobShouldBeDelete() || $job->attempts <= 0) {
-                    $this->table->where("id", $job->id)->delete();
+                    $this->table->where("id", $job->id)->update([
+                        "status" => "failed",
+                    ]);
                     $this->sleep(1);
                     continue;
                 }
+
+                // Check if the job should be retry
                 $this->table->where("id", $job->id)->update([
                     "status" => "reserved",
                     "attempts" => $job->attempts - 1,
                     "avalaibled_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
                     "reserved_at" => date("Y-m-d H:i:s", time() + $producer->getRetry())
                 ]);
+
                 $this->sleep(1);
             }
         }

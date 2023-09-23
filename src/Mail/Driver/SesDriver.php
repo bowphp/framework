@@ -30,12 +30,25 @@ class SesDriver implements MailDriverInterface
     * @param array $config
     * @return void
     */
-    public function __construct(array $config)
+    public function __construct(private array $config)
     {
-        $this->config_set = $config["config_set"] ?? false;
-        unset($config["config_set"]);
+        $this->config_set = $this->config["config_set"] ?? false;
 
-        $this->ses = new SesClient($config);
+        unset($this->config["config_set"]);
+
+        $this->initializeSesClient();
+    }
+
+    /**
+     * Get the SES Instance
+     *
+     * @return SesClient
+     */
+    public function initializeSesClient(): SesClient
+    {
+        $this->ses = new SesClient($this->config);
+
+        return $this->ses;
     }
 
     /**

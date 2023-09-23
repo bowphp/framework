@@ -124,12 +124,28 @@ class SQSAdapter extends QueueAdapter
                 'ReceiptHandle' => $message['ReceiptHandle']
             ]);
         } catch (AwsException $e) {
+            // Write the error log
             error_log($e->getMessage());
             app('logger')->error($e->getMessage(), $e->getTrace());
+
+            if (isset($message)) {
+                cache(
+                    "job:failed:" . $message["ReceiptHandle"],
+                    $message["Body"]
+                );
+            }
+
+            // Check if producer has been loaded
             if (!isset($producer)) {
                 $this->sleep(1);
                 return;
             }
+
+            // Execute the onException method for notify the producer
+            // and let developper to decide if the job should be delete
+            $producer->onException($e);
+
+            // Check if the job should be delete
             if ($producer->jobShouldBeDelete()) {
                 $result = $this->sqs->deleteMessage([
                     'QueueUrl' => $this->config["url"],

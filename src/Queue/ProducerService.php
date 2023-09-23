@@ -150,6 +150,17 @@ abstract class ProducerService
     }
 
     /**
+     * Get the job error
+     *
+     * @param \Throwable $e
+     * @return void
+     */
+    public function onException(\Throwable $e)
+    {
+        //
+    }
+
+    /**
      * Process the producer
      *
      * @return mixed
