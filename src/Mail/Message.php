@@ -398,6 +398,16 @@ class Message
     }
 
     /**
+     * @see setMessage
+     * @param string $message
+     * @param string $type
+     */
+    public function message(string $message, string $type = 'text/html')
+    {
+        $this->setMessage($message, $type);
+    }
+
+    /**
      * Get the headers
      *
      * @return array

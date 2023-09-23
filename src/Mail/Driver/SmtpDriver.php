@@ -137,6 +137,7 @@ class SmtpDriver implements MailDriverInterface
         try {
             $this->write('.', 250);
         } catch (SmtpException $e) {
+            app("logger")->error($e->getMessage(), $e->getTraceAsString());
             error_log($e->getMessage());
         }
 
