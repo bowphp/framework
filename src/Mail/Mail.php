@@ -64,8 +64,18 @@ class Mail
             static::$config = $config;
         }
 
+        if (!isset($config['driver'])) {
+            throw new MailException(
+                "The driver is not defined.",
+                E_USER_ERROR
+            );
+        }
+
         if (!in_array($config['driver'], array_keys(static::$drivers))) {
-            throw new MailException("The type is not known.", E_USER_ERROR);
+            throw new MailException(
+                "The driver is not defined.",
+                E_USER_ERROR
+            );
         }
 
         $name = $config['driver'];

@@ -24,9 +24,9 @@ class UploadFile
     /**
      * Get the file extension
      *
-     * @return string
+     * @return ?string
      */
-    public function getExtension(): string
+    public function getExtension(): ?string
     {
         if (!isset($this->file['name'])) {
             return null;

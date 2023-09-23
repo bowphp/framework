@@ -159,7 +159,9 @@ class Session implements CollectionInterface
         $driver = $this->driver[$this->config['driver']] ?? null;
 
         if (is_null($driver)) {
-            throw new SessionException('The driver ' . $this->config['driver'] . ' is not valid');
+            throw new SessionException(
+                'The driver ' . $this->config['driver'] . ' is not valid'
+            );
         }
 
         switch ($this->config['driver']) {
@@ -174,13 +176,16 @@ class Session implements CollectionInterface
                 $handler = new $driver();
                 break;
             default:
-                throw new SessionException('Cannot set the session driver');
-                break;
+                throw new SessionException(
+                    'Cannot set the session driver'
+                );
         }
 
         // Set the session driver
         if (!@session_set_save_handler($handler, true)) {
-            throw new SessionException('Cannot set the session driver');
+            throw new SessionException(
+                'Cannot set the session driver'
+            );
         }
     }
 

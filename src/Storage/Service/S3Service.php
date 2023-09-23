@@ -127,22 +127,22 @@ class S3Service implements ServiceInterface
      * @param string $content
      * @param array $options
      *
-     * @return bool
+     * @return mixed
      */
-    public function put(string $file, string $content, array $options = []): bool
+    public function put(string $file, string $content, array $options = []): mixed
     {
         $options = is_string($options)
             ? ['visibility' => $options]
             : (array) $options;
 
-        $this->client->putObject([
+        $result = $this->client->putObject([
             'Bucket' => $this->config['bucket'],
             'Key'    => $file,
             'Body'   => $content,
             "Visibility" => $options["visibility"] ?? 'public'
         ]);
 
-        return true;
+        return $result;
     }
 
     /**
@@ -221,9 +221,9 @@ class S3Service implements ServiceInterface
      * Recover the contents of the file
      *
      * @param  string $filename
-     * @return null|string
+     * @return ?string
      */
-    public function get(string $filename): string
+    public function get(string $filename): ?string
     {
         $result = $this->client->getObject([
             'Bucket' => $this->config['bucket'],

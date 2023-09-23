@@ -695,7 +695,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * jsonSerialize
      *
-     * @return string
+     * @return mixed
      */
     public function jsonSerialize(): mixed
     {

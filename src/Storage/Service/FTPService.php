@@ -232,7 +232,7 @@ class FTPService implements ServiceInterface
         rewind($stream);
 
         //
-        $result = $this->writeStream($location, $stream, $option);
+        $result = $this->writeStream($location, $stream);
         fclose($stream);
 
         if ($result === false) {
@@ -358,7 +358,7 @@ class FTPService implements ServiceInterface
         $directories = explode('/', $dirname);
 
         foreach ($directories as $directory) {
-            if (false === $this->makeActualDirectory($directory, $mode)) {
+            if (false === $this->makeActualDirectory($directory)) {
                 $this->setConnectionRoot();
                 return false;
             }
@@ -405,7 +405,7 @@ class FTPService implements ServiceInterface
     public function get(string $filename): ?string
     {
         if (!$stream = $this->readStream($filename)) {
-            return false;
+            return null;
         }
 
         $contents = stream_get_contents($stream);

@@ -214,7 +214,6 @@ class Action
             if (!array_key_exists($middleware, $this->middlewares)) {
                 throw new RouterException(
                     sprintf('%s is not define middleware.', $middleware),
-                    E_ERROR
                 );
             }
 
@@ -222,7 +221,6 @@ class Action
             if (!class_exists($this->middlewares[$middleware])) {
                 throw new RouterException(
                     sprintf('%s is not a middleware class.', $middleware),
-                    E_ERROR
                 );
             }
 
@@ -243,7 +241,8 @@ class Action
             case is_string($response):
             case is_array($response):
             case is_object($response):
-            case $response instanceof \Iterable:
+            case is_iterable($response):
+            case $response instanceof \Iterator:
             case $response instanceof ResponseInterface:
                 return $response;
             case $response instanceof Model || $response instanceof Collection:
@@ -315,19 +314,19 @@ class Action
     /**
      * Successively launches a function list.
      *
-     * @param array|callable $function
-     * @param array $arg
+     * @param array|callable|string $function
+     * @param array $arguments
      * @return mixed
      * @throws ReflectionException
      */
-    public function execute(array|callable $function, array $arg): mixed
+    public function execute(array|callable|string $function, array $arguments): mixed
     {
         if (is_callable($function)) {
-            return call_user_func_array($function, $arg);
+            return call_user_func_array($function, $arguments);
         }
 
         if (is_array($function)) {
-            return call_user_func_array($function, $arg);
+            return call_user_func_array($function, $arguments);
         }
 
         // We launch the controller loader if $cb is a String
@@ -340,7 +339,7 @@ class Action
         if (is_array($controller)) {
             return call_user_func_array(
                 $controller['action'],
-                array_merge($controller['injection'], $arg)
+                array_merge($controller['injection'], $arguments)
             );
         }
 

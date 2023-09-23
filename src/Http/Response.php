@@ -237,9 +237,9 @@ class Response implements ResponseInterface
     /**
      * Download the given file as an argument
      *
-     * @param string $file
-     * @param null   $filename
-     * @param array  $headers
+     * @param string  $file
+     * @param ?string $filename
+     * @param array   $headers
      * @return string
      */
     public function download(

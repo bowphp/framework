@@ -56,7 +56,9 @@ class Request
             try {
                 $data = json_decode(file_get_contents("php://input"), true, 1024, JSON_THROW_ON_ERROR);
             } catch (\Throwable $e) {
-                throw new BadRequestException("Invalid JSON syntax");
+                throw new BadRequestException(
+                    "The request json payload is invalid: " . $e->getMessage(),
+                );
             }
             $this->input = array_merge((array) $data, $_GET);
         } else {
@@ -649,7 +651,7 @@ class Request
     /**
      * Set the shared value in request bags
      *
-     * @param Array<mixed> $bags
+     * @param array $bags
      * @return mixed
      */
     public function setBags(array $bags)

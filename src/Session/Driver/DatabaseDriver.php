@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Session\Driver;
 
-use Bow\Support\Capsule;
 use Bow\Database\QueryBuilder;
 use Bow\Database\Database as DB;
 
