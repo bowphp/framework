@@ -8,7 +8,7 @@ To use this package, please create an application from this package [bowphp/app]
 
 ## The Framework Main Feature
 
-- Full Featured database classes with support for several platforms.
+- Full-featured database classes with support for several platforms.
 - Query Builder Database Support
 - Form and Data Validation
 - Security and XSS Filtering
@@ -21,10 +21,10 @@ To use this package, please create an application from this package [bowphp/app]
 - Pagination
 - CQRS helpful implementation
 - File System Management with many drivers like S3 and FTP (Support connection switch)
-- Extensible with an external package that can plug-in
+- Extensible with an external package that can plug in
 - Application logs Management
 - Database Connection (MySQL, SQLite, PostgreSQL)
-- Simplest ORM which names Barry
+- Simplest ORM which is named Barry
 - Cache support (Filesystem, Redis, Database caching)
 - Event Management (Interpage Event)
 - Emailing (SMTP, SES, Native PHP mail supports)
@@ -34,6 +34,7 @@ To use this package, please create an application from this package [bowphp/app]
 - Very easy Translate Management
 - Many helpers
 - The native authentication system
+- Producer/Consumer with beanstalkd, database, Redis, SQS backend
 
 ## Contributing
 
