@@ -47,14 +47,14 @@ class Message
     /**
      * Define the mail sender
      *
-     * @var string
+     * @var ?string
      */
     private ?string $from = null;
 
     /**
      * The mail message
      *
-     * @var string
+     * @var ?string
      */
     private ?string $message = null;
 
@@ -440,9 +440,9 @@ class Message
     /**
      * Get the sender
      *
-     * @return string
+     * @return ?string
      */
-    public function getFrom(): string
+    public function getFrom(): ?string
     {
         return $this->from;
     }
@@ -450,9 +450,9 @@ class Message
     /**
      * Get the email message
      *
-     * @return string
+     * @return ?string
      */
-    public function getMessage(): string
+    public function getMessage(): ?string
     {
         return $this->message;
     }
@@ -460,9 +460,9 @@ class Message
     /**
      * Get the email encoding
      *
-     * @return string
+     * @return ?string
      */
-    public function getCharset(): string
+    public function getCharset(): ?string
     {
         return $this->charset;
     }
@@ -470,11 +470,11 @@ class Message
     /**
      * Get Content-Type
      *
-     * @return string
+     * @return ?string
      */
-    public function getType(): string
+    public function getType(): ?string
     {
-        return $this->type;
+        return is_null($this->type) ? 'text/html' : $this->type;
     }
 
     /**
