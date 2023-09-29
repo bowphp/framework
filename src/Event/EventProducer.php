@@ -10,7 +10,7 @@ class EventProducer extends ProducerService
 {
     /**
      * EventProducer constructor
-     * 
+     *
      * @param EventListener|EventShouldQueue $event
      */
     public function __construct(

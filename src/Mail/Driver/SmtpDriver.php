@@ -110,7 +110,7 @@ class SmtpDriver implements MailDriverInterface
         // SMTP command
         if ($message->getFrom() !== null) {
             $this->write('MAIL FROM: <' . $message->getFrom() . '>', 250);
-        } else if ($this->username !== null) {
+        } elseif ($this->username !== null) {
             $this->write('MAIL FROM: <' . $this->username . '>', 250);
         }
 
@@ -171,7 +171,8 @@ class SmtpDriver implements MailDriverInterface
 
         if ($sock == null) {
             throw new SocketException(
-                'Impossible to get connected to ' . $this->url . ':' . $this->port, E_USER_ERROR
+                'Impossible to get connected to ' . $this->url . ':' . $this->port,
+                E_USER_ERROR
             );
         }
 
@@ -200,7 +201,8 @@ class SmtpDriver implements MailDriverInterface
 
             if (!$secured) {
                 throw new ErrorException(
-                    'Can not secure your connection with tls', E_ERROR
+                    'Can not secure your connection with tls',
+                    E_ERROR
                 );
             }
         }
