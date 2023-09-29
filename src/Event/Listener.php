@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Event;
 
 use Bow\Event\Contracts\EventListener;
+use Bow\Event\Contracts\EventShouldQueue;
 
 class Listener
 {
@@ -48,6 +49,10 @@ class Listener
         if (is_string($callable) && class_exists($callable, true)) {
             $instance = app($callable);
             if ($instance instanceof EventListener) {
+                if ($instance instanceof EventShouldQueue) {
+                    queue(new EventProducer($instance, $data));
+                    return null;
+                }
                 $callable = [$instance, 'process'];
             }
         }
