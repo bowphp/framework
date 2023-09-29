@@ -5,6 +5,8 @@ namespace Bow\Mail;
 use Bow\Mail\Mail;
 use Bow\Mail\Message;
 use Bow\Queue\ProducerService;
+use Bow\View\View;
+use Throwable;
 
 class MailQueueProducer extends ProducerService
 {
@@ -41,6 +43,23 @@ class MailQueueProducer extends ProducerService
      */
     public function process(): void
     {
-        Mail::getInstance()->send($this->bags["message"]);
+        $message = $this->bags["message"];
+
+        $message->setMessage(
+            View::parse($this->bags["view"], $this->bags["data"])->getContent()
+        );
+
+        Mail::getInstance()->send($message);
+    }
+
+    /**
+     * Send the processing exception
+     *
+     * @param Throwable $e
+     * @return void
+     */
+    public function onException(Throwable $e)
+    {
+        $this->deleteJob();
     }
 }

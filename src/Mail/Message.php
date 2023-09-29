@@ -145,12 +145,12 @@ class Message
     /**
      * Define the receiver in list
      *
-     * @param array $sendTo
+     * @param array $recipients
      * @return $this
      */
-    public function toList(array $sendTo): Message
+    public function toList(array $recipients): Message
     {
-        foreach ($sendTo as $name => $to) {
+        foreach ($recipients as $name => $to) {
             $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
         }
 
