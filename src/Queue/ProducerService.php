@@ -129,6 +129,51 @@ abstract class ProducerService
         return $this->delay;
     }
 
+
+
+    /**
+     * Set the producer attemps
+     *
+     * @param int $attemps
+     * @return void
+     */
+    public function setAttemps(int $attemps)
+    {
+        $this->attemps = $attemps;
+    }
+
+    /**
+     * Set the producer retry
+     *
+     * @param int $retry
+     * @return void
+     */
+    final public function setRetry(int $retry)
+    {
+        $this->retry = $retry;
+    }
+
+    /**
+     * Set the producer queue
+     *
+     * @param string $queue
+     * @return void
+     */
+    final public function setQueue(string $queue)
+    {
+        $this->queue = $queue;
+    }
+
+    /**
+     * Set the producer delay
+     *
+     * @param int $delay
+     */
+    final public function setDelay(int $delay)
+    {
+        $this->delay = $delay;
+    }
+
     /**
      * Delete the job from queue.
      *

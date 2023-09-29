@@ -6,10 +6,13 @@ namespace Bow\Mail;
 
 use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Exception\MailException;
+use Bow\Mail\MailQueueProducer;
 use Bow\View\View;
 
 /**
  * @method mixed view(string $template, array $data, callable $cb)
+ * @method mixed queue(string $template, array $data, callable $cb)
+ * @method mixed queueOn(string $queue, string $template, array $data, callable $cb)
  * @method mixed send($view, array|callable $data, ?callable $cb = null)
  * @method mixed raw(string|array $to, string $subject, string $data, array $headers = [])
  */
@@ -161,24 +164,90 @@ class Mail
     }
 
     /**
-     * Send mail similar to the PHP mail function
+     * Send message on queue
      *
-     * @param  string $template
-     * @param  array  $data
-     * @param  callable $cb
-     * @return mixed
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
      */
-    public static function view(string $template, array $data, callable $cb)
+    public static function queue(string $template, array $data, callable $cb)
     {
         $message = new Message();
 
-        $data = View::parse($template, $data)->getContent();
+        call_user_func_array($cb, [$message]);
 
-        $message->setMessage($data);
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        queue($producer);
+    }
+
+    /**
+     * Send message on specific queue
+     *
+     * @param string $queue
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
+     */
+    public static function queueOn(string $queue, string $template, array $data, callable $cb)
+    {
+        $message = new Message();
 
         call_user_func_array($cb, [$message]);
 
-        return static::$instance->send($message);
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        $producer->setQueue($queue);
+
+        queue($producer);
+    }
+
+    /**
+     * Send mail later
+     *
+     * @param integer $delay
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
+     */
+    public static function later(int $delay, string $template, array $data, callable $cb)
+    {
+        $message = new Message();
+
+        call_user_func_array($cb, [$message]);
+
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        $producer->setDelay($delay);
+
+        queue($producer);
+    }
+
+    /**
+     * Send mail later on specific queue
+     *
+     * @param integer $delay
+     * @param string $queue
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
+     */
+    public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb)
+    {
+        $message = new Message();
+
+        call_user_func_array($cb, [$message]);
+
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        $producer->setQueue($queue);
+        $producer->setDelay($delay);
+
+        queue($producer);
     }
 
     /**

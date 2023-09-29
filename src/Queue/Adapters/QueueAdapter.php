@@ -90,12 +90,13 @@ abstract class QueueAdapter
     {
         [$this->start_time, $jobs_processed] = [hrtime(true) / 1e9, 0];
 
-        if ($supportsAsyncSignals = $this->supportsAsyncSignals()) {
+        if ($this->supportsAsyncSignals()) {
             $this->listenForSignals();
         }
 
         while (true) {
             $this->run();
+            $jobs_processed++;
 
             if ($this->timeoutReached($timeout)) {
                 $this->kill(static::EXIT_ERROR);

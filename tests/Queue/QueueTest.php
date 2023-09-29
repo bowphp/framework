@@ -124,8 +124,6 @@ class QueueTest extends \PHPUnit\Framework\TestCase
      */
     public function getConnection(): array
     {
-        $data = [];
-
         $data = [
             ["beanstalkd"],
             ["database"],

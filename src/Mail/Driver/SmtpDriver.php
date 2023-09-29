@@ -108,12 +108,10 @@ class SmtpDriver implements MailDriverInterface
         $error = true;
 
         // SMTP command
-        if ($this->username !== null) {
+        if ($message->getFrom() !== null) {
+            $this->write('MAIL FROM: <' . $message->getFrom() . '>', 250);
+        } elseif ($this->username !== null) {
             $this->write('MAIL FROM: <' . $this->username . '>', 250);
-        } else {
-            if ($message->getFrom() !== null) {
-                $this->write('MAIL FROM: <' . $message->getFrom() . '>', 250);
-            }
         }
 
         foreach ($message->getTo() as $value) {
@@ -126,12 +124,16 @@ class SmtpDriver implements MailDriverInterface
             $this->write('RCPT TO: ' . $to, 250);
         }
 
+        $message->setDefaultHeader();
+
         $this->write('DATA', 354);
+
         $data = 'Subject: ' . $message->getSubject() . Message::END;
         $data .= $message->compileHeaders();
         $data .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
         $data .= 'Content-Transfer-Encoding: 8bit' . Message::END;
         $data .= Message::END . $message->getMessage() . Message::END;
+
         $this->write($data);
 
         try {
@@ -168,7 +170,10 @@ class SmtpDriver implements MailDriverInterface
         $sock = fsockopen($url, $this->port, $errno, $errstr, $this->timeout);
 
         if ($sock == null) {
-            throw new SocketException('Impossible to get connected to ' . $this->url . ':' . $this->port, E_USER_ERROR);
+            throw new SocketException(
+                'Impossible to get connected to ' . $this->url . ':' . $this->port,
+                E_USER_ERROR
+            );
         }
 
         $this->sock = $sock;
@@ -195,7 +200,10 @@ class SmtpDriver implements MailDriverInterface
             $secured = @stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
 
             if (!$secured) {
-                throw new ErrorException('Can not secure your connection with tls', E_ERROR);
+                throw new ErrorException(
+                    'Can not secure your connection with tls',
+                    E_ERROR
+                );
             }
         }
 
