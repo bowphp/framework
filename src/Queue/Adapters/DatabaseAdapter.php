@@ -144,7 +144,7 @@ class DatabaseAdapter extends QueueAdapter
         $this->table->where("id", $job->id)->update([
             "status" => "done"
         ]);
-        sleep($this->sleep ?? 5);
+        $this->sleep($this->sleep ?? 5);
     }
 
     /**

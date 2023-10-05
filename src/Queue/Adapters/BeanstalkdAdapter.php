@@ -41,50 +41,6 @@ class BeanstalkdAdapter extends QueueAdapter
     }
 
     /**
-     * Get connexion
-     *
-     * @param string $name
-     * @return Pheanstalk
-     */
-    public function setWatch(string $name): void
-    {
-        $this->queue = $name;
-    }
-
-    /**
-     * Set job tries
-     *
-     * @param int $tries
-     * @return void
-     */
-    public function setTries(int $tries): void
-    {
-        $this->tries = $tries;
-    }
-
-    /**
-     * Get connexion
-     *
-     * @param int $sleep
-     * @return void
-     */
-    public function setSleep(int $sleep): void
-    {
-        $this->sleep = $sleep;
-    }
-
-    /**
-     * Get the queue or return the default.
-     *
-     * @param  ?string $queue
-     * @return string
-     */
-    public function getQueue(?string $queue = null): string
-    {
-        return $queue ?: $this->queue;
-    }
-
-    /**
      * Get the size of the queue.
      *
      * @param string $queue

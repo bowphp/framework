@@ -43,7 +43,7 @@ class WorkerService
         int $timeout = 60,
         int $memory = 128
     ): void {
-        $this->connection->setWatch($queue);
+        $this->connection->setQueue($queue);
         $this->connection->setTries($tries);
         $this->connection->setSleep($sleep);
         $this->connection->work($timeout, $memory);
