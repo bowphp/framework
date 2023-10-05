@@ -8,6 +8,7 @@ use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
+use Bow\Queue\Adapters\SyncAdapter;
 use ErrorException;
 
 class Connection
@@ -35,6 +36,7 @@ class Connection
         "beanstalkd" => BeanstalkdAdapter::class,
         "sqs" => SQSAdapter::class,
         "database" => DatabaseAdapter::class,
+        "sync" => SyncAdapter::class,
     ];
 
     /**

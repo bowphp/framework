@@ -33,7 +33,9 @@ class SQSAdapter extends QueueAdapter
     public function configure(array $config): QueueAdapter
     {
         if (!class_exists(SqsClient::class)) {
-            throw new RuntimeException("Please install the aws/aws-sdk-php package");
+            throw new RuntimeException(
+                "Please install the aws/aws-sdk-php package"
+            );
         }
 
         $this->config = $config;
@@ -163,15 +165,5 @@ class SQSAdapter extends QueueAdapter
             }
             $this->sleep(1);
         }
-    }
-
-    /**
-     * flush the queue.
-     *
-     * @param ?string $queue
-     * @return void
-     */
-    public function flush(?string $queue = null): void
-    {
     }
 }

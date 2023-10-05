@@ -11,6 +11,7 @@ use Bow\Database\DatabaseConfiguration;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
+use Bow\Queue\Adapters\SyncAdapter;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\PetModelStub;
 use Bow\Queue\Connection as QueueConnection;
@@ -69,7 +70,10 @@ class QueueTest extends \PHPUnit\Framework\TestCase
             $this->assertInstanceOf(RedisAdapter::class, $adapter);
         } elseif ($connection == "database") {
             $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
+        } elseif ($connection == "sync") {
+            $this->assertInstanceOf(SyncAdapter::class, $adapter);
         }
+
     }
 
     /**
@@ -84,6 +88,9 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         $filename = TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt";
 
         $adapter->push(new BasicProducerStubs($connection));
+        $adapter->setQueue("queue_{$connection}");
+        $adapter->setTries(3);
+        $adapter->setSleep(5);
         $adapter->run();
 
         $this->assertTrue(file_exists($filename));
@@ -127,6 +134,7 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         $data = [
             ["beanstalkd"],
             ["database"],
+            ["sync"],
             // ["sqs"],
             // ["redis"],
             // ["rabbitmq"]

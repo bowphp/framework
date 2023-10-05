@@ -41,6 +41,21 @@ abstract class QueueAdapter
     protected int $sleep = 5;
 
     /**
+     * Make adapter configuration
+     *
+     * @param array $config
+     * @return QueueAdapter
+     */
+    abstract public function configure(array $config): QueueAdapter;
+
+    /**
+     * Push new producer
+     *
+     * @param ProducerService $producer
+     */
+    abstract public function push(ProducerService $producer): void;
+
+    /**
      * Create producer serialization
      *
      * @param ProducerService $producer
@@ -86,7 +101,7 @@ abstract class QueueAdapter
      * @param integer $memory
      * @return void
      */
-    public function work(int $timeout, int $memory): void
+    final public function work(int $timeout, int $memory): void
     {
         [$this->start_time, $jobs_processed] = [hrtime(true) / 1e9, 0];
 
@@ -168,7 +183,6 @@ abstract class QueueAdapter
         return extension_loaded('pcntl');
     }
 
-
     /**
      * Set job tries
      *
@@ -213,34 +227,25 @@ abstract class QueueAdapter
     }
 
     /**
-     * Make adapter configuration
-     *
-     * @param array $config
-     * @return QueueAdapter
-     */
-    abstract public function configure(array $config): QueueAdapter;
-
-    /**
-     * Push new producer
-     *
-     * @param ProducerService $producer
-     */
-    abstract public function push(ProducerService $producer): void;
-
-    /**
      * Get the queue size
      *
      * @param string $queue
      * @return int
      */
-    abstract public function size(string $queue): int;
+    public function size(string $queue): int
+    {
+        return 0;
+    }
 
     /**
      * Start the worker server
      *
      * @param ?string $queue
      */
-    abstract public function run(?string $queue = null): void;
+    public function run(?string $queue = null): void
+    {
+        //
+    }
 
     /**
      * Flush the queue
@@ -248,5 +253,18 @@ abstract class QueueAdapter
      * @param ?string $queue
      * @return void
      */
-    abstract public function flush(?string $queue = null): void;
+    public function flush(?string $queue = null): void
+    {
+        //
+    }
+
+    /**
+     * Watch the the queue name
+     *
+     * @param string $queue
+     */
+    public function setQueue(string $queue): void
+    {
+        //
+    }
 }

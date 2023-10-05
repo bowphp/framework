@@ -4,7 +4,7 @@ return [
     /**
      * The defaut connexion
      */
-    "default" => "beanstalkd",
+    "default" => "sync",
 
     /**
      * The queue drive connection
