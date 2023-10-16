@@ -37,6 +37,10 @@ class BeanstalkdAdapter extends QueueAdapter
             $queue["timeout"]
         );
 
+        if (isset($queue["queue"])) {
+            $this->setQueue($queue["queue"]);
+        }
+
         return $this;
     }
 
