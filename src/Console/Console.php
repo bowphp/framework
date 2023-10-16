@@ -587,7 +587,7 @@ U;
     [option]
     run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
     run:console [--include=filename.php] [--prompt=prompt_name]
-    run:worker [--queue=default] [--connexion=beanstalkd,sqs] [--retry-after=duration]
+    run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
