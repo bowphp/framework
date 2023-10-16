@@ -18,9 +18,9 @@ class WorkerCommand extends AbstractCommand
     {
         $tries = (int) $this->arg->getParameter('--tries', 3);
         $default = $this->arg->getParameter('--queue', "default");
-        $memory = $this->arg->getParameter('--memory', 126);
-        $timout = $this->arg->getParameter('--timout', 60);
-        $sleep = $this->arg->getParameter('--sleep', 60);
+        $memory = (int) $this->arg->getParameter('--memory', 126);
+        $timout = (int) $this->arg->getParameter('--timout', 60);
+        $sleep = (int) $this->arg->getParameter('--sleep', 60);
 
         $queue = app("queue");
 
