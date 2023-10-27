@@ -504,7 +504,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $primary_key_value = static::$builder->getPdo()->lastInsertId();
         }
 
-        if (is_null($primary_key_value)) {
+        if (is_null($primary_key_value) || $primary_key_value == 0) {
             $primary_key_value = $this->attributes[$this->primary_key] ?? null;
         }
 
