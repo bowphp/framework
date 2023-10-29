@@ -48,13 +48,13 @@ trait MysqlCompose
         }
 
         // Set the size
-        if ($size) {
+        if (is_numeric($size)) {
             $type = sprintf('%s(%s)', $type, $size);
         }
 
         // Add column size
         if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-            $check = (array) $check;
+            $check = (array) $size;
             $check = "'" . implode("', '", $check) . "'";
             $type = sprintf('%s(%s)', $type, $check);
         }
