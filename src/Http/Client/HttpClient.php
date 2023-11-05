@@ -187,7 +187,9 @@ class HttpClient
     public function addHeaders(array $headers): HttpClient
     {
         foreach ($headers as $key => $value) {
-            $this->headers[] = $key . ': ' . $value;
+            if (!in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers))) {
+                $this->headers[] = $key . ': ' . $value;
+            }
         }
 
         return $this;
