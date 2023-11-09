@@ -29,6 +29,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request = Mockery::mock(Request::class);
 
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->get("_method")->andReturns("");
 
         $app = Application::make($request, $response);
@@ -45,6 +46,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request = Mockery::mock(Request::class);
 
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->get("_method")->andReturns("");
 
         $app = Application::make($request, $response);
@@ -68,6 +70,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns("/");
         $request->allows()->get("_method")->andReturns("");
 
@@ -96,6 +99,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns("/");
         $request->allows()->get("_method")->andReturns("");
 
@@ -128,6 +132,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns("/name");
         $request->allows()->get("_method")->andReturns("");
 
