@@ -82,10 +82,11 @@ class Application extends Router
 
         $this->capsule = Capsule::getInstance();
 
-        $this->capsule->instance('request', $request);
         $this->capsule->instance('response', $response);
+        $this->capsule->instance('request', $request);
         $this->capsule->instance('app', $this);
 
+        $this->request->capture();
         parent::__construct($request->method(), $request->get('_method'));
     }
 
