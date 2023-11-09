@@ -43,12 +43,23 @@ class Request
     private string $id;
 
     /**
+     * Define the request captured
+     *
+     * @var bool
+     */
+    private bool $capture = false;
+
+    /**
      * Request constructor
      *
      * @return mixed
      */
-    private function __construct()
+    public function capture()
     {
+        if ($this->capture) {
+            return;
+        }
+
         $data = [];
         $this->id = "req_" . sha1(uniqid() . time());
 
@@ -76,6 +87,8 @@ class Request
 
             $this->input[$key] = $value;
         }
+
+        $this->capture = true;
     }
 
     /**
@@ -345,6 +358,12 @@ class Request
         $xhr_obj = Str::lower($_SERVER['HTTP_X_REQUESTED_WITH']);
 
         if ($xhr_obj == 'xmlhttprequest' || $xhr_obj == 'activexobject') {
+            return true;
+        }
+
+        $content_type = $this->getHeader("content-type");
+
+        if ($content_type && str_contains($content_type, "application/json")) {
             return true;
         }
 

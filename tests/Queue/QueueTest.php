@@ -73,7 +73,6 @@ class QueueTest extends \PHPUnit\Framework\TestCase
         } elseif ($connection == "sync") {
             $this->assertInstanceOf(SyncAdapter::class, $adapter);
         }
-
     }
 
     /**

@@ -248,7 +248,7 @@ class HttpClient
         if (count($data) == 0) {
             return;
         }
-        
+
         if ($this->accept_json) {
             $payload = json_encode($data);
         } else {
