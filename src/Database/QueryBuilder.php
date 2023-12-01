@@ -812,9 +812,9 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param $aggregate
      * @param string $column
-     * @return int|float
+     * @return mixed
      */
-    private function aggregate($aggregate, $column): int|float
+    private function aggregate($aggregate, $column): mixed
     {
         $sql = 'select ' . $aggregate . '(' . $column . ') from ' . $this->table;
 
