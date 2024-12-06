@@ -14,7 +14,8 @@
         "nesbot/carbon": "^2.16",
         "psy/psysh": "v0.10.*",
         "fakerphp/faker": "^1.20",
-        "neitanod/forceutf8": "^2.0"
+        "neitanod/forceutf8": "^2.0",
+        "ramsey/uuid": "^4.7"
     },
     "require-dev": {
         "pda/pheanstalk": "^4.0",
