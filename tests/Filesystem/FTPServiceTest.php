@@ -159,7 +159,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->createFile($this->ftp_service, 'append.txt', 'something');
         $this->ftp_service->append('append.txt', ' else');
 
-        $this->assertRegExp('/something else/', $this->ftp_service->get('append.txt'));
+        $this->assertMatchesRegularExpression('/something else/', $this->ftp_service->get('append.txt'));
     }
 
     public function test_prepend_content_into_file()
@@ -167,7 +167,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->createFile($this->ftp_service, 'prepend.txt', 'else');
         $this->ftp_service->prepend('prepend.txt', 'something ');
 
-        $this->assertRegExp('/something else/', $this->ftp_service->get('prepend.txt'));
+        $this->assertMatchesRegularExpression('/something else/', $this->ftp_service->get('prepend.txt'));
     }
 
     public function test_put_content_into_file()

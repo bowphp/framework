@@ -16,8 +16,8 @@ class GeneratorBasicTest extends \PHPUnit\Framework\TestCase
         ]);
 
         $this->assertNotNull($content);
-        $this->assertRegExp("@\nnamespace\sGenerator\\\Testing;\n@", $content);
-        $this->assertRegExp("@\nclass\sCreateUserCommand\sextends\sConsoleCommand\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sGenerator\\\Testing;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sCreateUserCommand\sextends\sConsoleCommand\n@", $content);
     }
 
     public function test_generate_stub_without_data()
@@ -26,8 +26,8 @@ class GeneratorBasicTest extends \PHPUnit\Framework\TestCase
         $content = $generator->makeStubContent('command', []);
 
         $this->assertNotNull($content);
-        $this->assertRegExp("@\nnamespace\s\{baseNamespace\}\{namespace\};\n@", $content);
-        $this->assertRegExp("@\nclass\s\{className\}\sextends\sConsoleCommand\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\s\{baseNamespace\}\{namespace\};\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\s\{className\}\sextends\sConsoleCommand\n@", $content);
     }
 
     public function test_generate_by_writing_file()

@@ -41,7 +41,7 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
           coverage: none
 
-      - run: docker run --net=host -p 21:21 -e FTP_USER=$FTP_USER -e FTP_PASS=$FTP_PASSWORD -e PASV_ADDRESS=127.0.0.1 -e PASV_MIN_PORT=21100 -e PASV_MAX_PORT=21110 -d --name ftp -v $(pwd)/:/ftp/$FTP_USER --restart=always fauria/vsftpd
+      - run: docker run --net=host -p 21:21 -p 20:20 -e FTP_USER=$FTP_USER -e FTP_PASS=$FTP_PASSWORD -e PASV_ADDRESS=127.0.0.1 -d --name ftp fauria/vsftpd
       - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
       - run: docker run -p 6379:6379 -d --name redis redis
       - run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
@@ -57,13 +57,13 @@ jobs:
             ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
       - name: Copy the php ini config
-        run: cp php.dist.ini php.ini
+        run: sudo cp php.dist.ini php.ini
 
       - name: Install dependencies
-        run: composer update --prefer-dist --no-interaction
+        run: sudo composer update --prefer-dist --no-interaction
 
       - name: Create test cache directory
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Run test suite
-        run: composer run-script test
+        run: sudo composer run-script test
