@@ -41,7 +41,7 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
           coverage: none
 
-      - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
+      - run: docker run --net=host -p 21:21 -e FTP_USER=$FTP_USER -e FTP_PASS=$FTP_PASSWORD -e PASV_ADDRESS=127.0.0.1 -e PASV_MIN_PORT=21100 -e PASV_MAX_PORT=21110 -d --name ftp -v $(pwd)/:/ftp/$FTP_USER --restart=always fauria/vsftpd
       - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
       - run: docker run -p 6379:6379 -d --name redis redis
       - run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
