@@ -19,9 +19,9 @@
     },
     "require-dev": {
         "pda/pheanstalk": "^4.0",
-        "phpunit/phpunit": "^8",
+        "phpunit/phpunit": "^9",
         "monolog/monolog": "^1.22",
-        "twig/twig": "^2.5",
+        "twig/twig": "^3",
         "squizlabs/php_codesniffer": "3.*",
         "aws/aws-sdk-php": "^3.87",
         "phpstan/phpstan": "^0.12.87",
