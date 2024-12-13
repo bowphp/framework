@@ -111,7 +111,7 @@ class FTPService implements ServiceInterface
         $this->connection = $connection;
 
         $this->login();
-        $this->setConnectionRoot();
+        $this->changePath();
         $this->setConnectionPassiveMode();
     }
 
@@ -165,21 +165,18 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Set the connection root.
+     * Change path.
      *
      * @param string $path
      * @return void
      */
-    public function setConnectionRoot(string $path = '')
+    public function changePath(?string $path = null)
     {
         $base_path = $path ?: $this->config['root'];
 
         if ($base_path && (!@ftp_chdir($this->connection, $base_path))) {
             throw new RuntimeException('Root is invalid or does not exist: ' . $base_path);
         }
-
-        // Store absolute path for further reference.
-        ftp_pwd($this->connection);
     }
 
     /**
@@ -359,13 +356,13 @@ class FTPService implements ServiceInterface
 
         foreach ($directories as $directory) {
             if (false === $this->makeActualDirectory($directory)) {
-                $this->setConnectionRoot();
+                $this->changePath();
                 return false;
             }
             ftp_chdir($connection, $directory);
         }
 
-        $this->setConnectionRoot();
+        $this->changePath();
 
         return true;
     }
@@ -567,7 +564,7 @@ class FTPService implements ServiceInterface
 
         $listing = @ftp_rawlist($this->getConnection(), '.') ?: [];
 
-        $this->setConnectionRoot();
+        $this->changePath();
 
         return  $this->normalizeDirectoryListing($listing);
     }

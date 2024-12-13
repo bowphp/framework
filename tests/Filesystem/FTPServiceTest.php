@@ -27,7 +27,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     protected function tearDown(): void
     {
-        $this->ftp_service->setConnectionRoot();
+        $this->ftp_service->changePath();
     }
 
     public function test_the_connection()
