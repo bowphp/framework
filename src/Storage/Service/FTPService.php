@@ -177,6 +177,8 @@ class FTPService implements ServiceInterface
         if ($base_path && (!@ftp_chdir($this->connection, $base_path))) {
             throw new RuntimeException('Root is invalid or does not exist: ' . $base_path);
         }
+
+        ftp_pwd($this->connection);
     }
 
     /**
@@ -483,13 +485,18 @@ class FTPService implements ServiceInterface
      */
     public function isDirectory(string $dirname): bool
     {
-        $listing = $this->listDirectoryContents();
+        $original_directory = ftp_pwd($this->connection);
 
-        $dirname_info = array_filter($listing, function ($item) use ($dirname) {
-            return $item['type'] === 'directory' && $item['name'] === $dirname;
-        });
+        // Test if you can change directory to $dirname
+        // suppress errors in case $dir is not a file or not a directory
+        if (!@ftp_chdir($this->connection, $dirname)) {
+            return false;
+        }
 
-        return count($dirname_info) !== 0;
+        // If it is a directory, then change the directory back to the original directory
+        ftp_chdir($this->connection, $original_directory);
+
+        return true;
     }
 
     /**

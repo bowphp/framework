@@ -23,7 +23,7 @@ return [
          */
         'ftp' => [
             "driver" => "ftp",
-            'hostname' => app_env('FTP_HOST', '127.0.0.1'),
+            'hostname' => app_env('FTP_HOST', 'localhost'),
             'password' => app_env('FTP_PASSWORD', 'password'),
             'username' => app_env('FTP_USERNAME', 'username'),
             'port'     => app_env('FTP_PORT', 21),
