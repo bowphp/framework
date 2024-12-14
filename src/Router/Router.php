@@ -220,16 +220,14 @@ class Router
      *
      * @param string $path
      * @param callable|string|array $cb
-     * @return Router
+     * @return Route
      * @throws
      */
-    public function any(string $path, callable|string|array $cb): Router
+    public function any(string $path, callable|string|array $cb): Route
     {
-        foreach (['options', 'patch', 'post', 'delete', 'put', 'get'] as $method) {
-            $this->$method($path, $cb);
-        }
+        $methods = array_map('strtoupper', ['options', 'patch', 'post', 'delete', 'put', 'get']);
 
-        return $this;
+        return $this->pushHttpVerb($methods, $path, $cb);
     }
 
     /**
