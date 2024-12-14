@@ -27,7 +27,7 @@ return [
             'password' => app_env('FTP_PASSWORD', 'password'),
             'username' => app_env('FTP_USERNAME', 'username'),
             'port'     => app_env('FTP_PORT', 21),
-            'root' => app_env('FTP_ROOT', sys_get_temp_dir()), // Start directory
+            'root' => app_env('FTP_ROOT', '/tmp'), // Start directory
             'tls' => app_env('FTP_SSL', false), // `true` enable the secure connexion.
             'timeout' => app_env('FTP_TIMEOUT', 90) // Temps d'attente de connection
         ],
