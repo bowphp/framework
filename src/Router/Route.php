@@ -13,7 +13,7 @@ class Route
     /**
      * The callback has launched if the url of the query has matched.
      *
-     * @var callable
+     * @var mixed
      */
     private mixed $cb;
 
@@ -70,7 +70,7 @@ class Route
      * Route constructor
      *
      * @param string $path
-     * @param callable $cb
+     * @param mixed $cb
      *
      * @throws
      */
@@ -124,11 +124,7 @@ class Route
             return $this;
         }
 
-        if (!isset($this->cb['middleware'])) {
-            $this->cb['middleware'] = $middleware;
-        } else {
-            $this->cb['middleware'] = array_merge((array) $this->cb['middleware'], $middleware);
-        }
+        $this->cb['middleware'] = !isset($this->cb['middleware']) ? $middleware : array_merge((array) $this->cb['middleware'], $middleware);
 
         return $this;
     }
@@ -142,11 +138,7 @@ class Route
      */
     public function where(array|string $where, $regex_constraint = null): Route
     {
-        if (is_array($where)) {
-            $other_rule = $where;
-        } else {
-            $other_rule = [$where => $regex_constraint];
-        }
+        $other_rule = is_array($where) ? $where : [$where => $regex_constraint];
 
         $this->with = array_merge($this->with, $other_rule);
 

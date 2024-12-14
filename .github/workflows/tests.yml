@@ -7,13 +7,14 @@ env:
   FTP_USER: username
   FTP_PASSWORD: password
   FTP_PORT: 21
+  FTP_ROOT: /tmp
 
 jobs:
   lunix-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        php: [8.1, 8.2]
+        php: [8.1, 8.2, 8.3]
         os: [ubuntu-latest]
         stability: [prefer-lowest, prefer-stable]
 
@@ -41,7 +42,7 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
           coverage: none
 
-      - run: docker run --net=host -p 21:21 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp -v $(pwd)/:/ftp/$FTP_USER emilybache/vsftpd-server
+      - run: docker run -p 21:21 -p 20:20 -p 12020:12020 -p 12021:12021 -p 12022:12022 -p 12023:12023 -p 12024:12024 -p 12025:12025 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp papacdev/vsftpd
       - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
       - run: docker run -p 6379:6379 -d --name redis redis
       - run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
@@ -57,13 +58,13 @@ jobs:
             ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
       - name: Copy the php ini config
-        run: cp php.dist.ini php.ini
+        run: sudo cp php.dist.ini php.ini
 
       - name: Install dependencies
-        run: composer update --prefer-dist --no-interaction
+        run: sudo composer update --prefer-dist --no-interaction
 
       - name: Create test cache directory
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Run test suite
-        run: composer run-script test
+        run: sudo composer run-script test

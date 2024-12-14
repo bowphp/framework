@@ -110,8 +110,9 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
             return $this->markTestSkipped('Test have been skip because /usr/sbin/sendmail not found');
         }
 
+        $config = (array) $this->config["mail"];
         View::configure($this->config["view"]);
-        Mail::configure([...$this->config["mail"], "driver" => "mail"]);
+        Mail::configure([...$config, "driver" => "mail"]);
 
         $response = Mail::send('mail', ['name' => "papac"], function (Message $message) {
             $message->to('bow@bowphp.com');
@@ -123,8 +124,10 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 
     public function test_send_mail_with_view_not_found_for_notive_driver()
     {
+        $config = (array) $this->config["mail"];
+
         View::configure($this->config["view"]);
-        Mail::configure([...$this->config["mail"], "driver" => "mail"]);
+        Mail::configure([...$config, "driver" => "mail"]);
 
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');

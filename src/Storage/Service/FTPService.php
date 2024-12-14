@@ -111,8 +111,8 @@ class FTPService implements ServiceInterface
         $this->connection = $connection;
 
         $this->login();
-        $this->setConnectionRoot();
-        $this->setConnectionPassiveMode();
+        $this->changePath();
+        $this->activePassiveMode();
     }
 
     /**
@@ -139,14 +139,7 @@ class FTPService implements ServiceInterface
     {
         ['username' => $username, 'password' => $password] = $this->config;
 
-        // We disable error handling to avoid credentials leak :+1:
-        set_error_handler(
-            fn () => error_log("set_error_handler muted for hidden the ftp credential to user")
-        );
-
         $is_logged_in = ftp_login($this->connection, $username, $password);
-
-        restore_error_handler();
 
         if ($is_logged_in) {
             return true;
@@ -165,12 +158,12 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Set the connection root.
+     * Change path.
      *
      * @param string $path
      * @return void
      */
-    public function setConnectionRoot(string $path = '')
+    public function changePath(?string $path = null)
     {
         $base_path = $path ?: $this->config['root'];
 
@@ -178,7 +171,6 @@ class FTPService implements ServiceInterface
             throw new RuntimeException('Root is invalid or does not exist: ' . $base_path);
         }
 
-        // Store absolute path for further reference.
         ftp_pwd($this->connection);
     }
 
@@ -359,13 +351,13 @@ class FTPService implements ServiceInterface
 
         foreach ($directories as $directory) {
             if (false === $this->makeActualDirectory($directory)) {
-                $this->setConnectionRoot();
+                $this->changePath();
                 return false;
             }
             ftp_chdir($connection, $directory);
         }
 
-        $this->setConnectionRoot();
+        $this->changePath();
 
         return true;
     }
@@ -486,13 +478,18 @@ class FTPService implements ServiceInterface
      */
     public function isDirectory(string $dirname): bool
     {
-        $listing = $this->listDirectoryContents();
+        $original_directory = ftp_pwd($this->connection);
 
-        $dirname_info = array_filter($listing, function ($item) use ($dirname) {
-            return $item['type'] === 'directory' && $item['name'] === $dirname;
-        });
+        // Test if you can change directory to $dirname
+        // suppress errors in case $dir is not a file or not a directory
+        if (!@ftp_chdir($this->connection, $dirname)) {
+            return false;
+        }
 
-        return count($dirname_info) !== 0;
+        // If it is a directory, then change the directory back to the original directory
+        ftp_chdir($this->connection, $original_directory);
+
+        return true;
     }
 
     /**
@@ -567,7 +564,7 @@ class FTPService implements ServiceInterface
 
         $listing = @ftp_rawlist($this->getConnection(), '.') ?: [];
 
-        $this->setConnectionRoot();
+        $this->changePath();
 
         return  $this->normalizeDirectoryListing($listing);
     }
@@ -638,8 +635,10 @@ class FTPService implements ServiceInterface
      *
      * @throws RuntimeException
      */
-    private function setConnectionPassiveMode()
+    private function activePassiveMode()
     {
+        @ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
+
         if (!ftp_pasv($this->connection, $this->use_passive_mode)) {
             throw new RuntimeException(
                 'Could not set passive mode for connection: '

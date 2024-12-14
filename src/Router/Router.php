@@ -162,11 +162,7 @@ class Router
         $collection = [];
 
         foreach ($middlewares as $middleware) {
-            if (class_exists($middleware, true)) {
-                $collection[] = [new $middleware(), 'process'];
-            } else {
-                $collection[] = $middleware;
-            }
+            $collection[] = class_exists($middleware, true) ? [new $middleware(), 'process'] : $middleware;
         }
 
         return new Router($this->method, $this->magic_method, $this->base_route, $collection);
@@ -341,66 +337,72 @@ class Router
      * @param callable|string|array $cb
      * @return Router
      */
-    public function match(array $methods, string $path, callable|string|array $cb): Router
+    public function match(array $methods, string $path, callable|string|array $cb): Route
     {
-        foreach ($methods as $method) {
-            if ($this->method == strtoupper($method)) {
-                $this->pushHttpVerb(strtoupper($method), $path, $cb);
-            }
-        }
+        $methods = array_map('strtoupper', $methods);
 
-        return $this;
+        return $this->pushHttpVerb($methods, $path, $cb);
     }
 
     /**
      * Add other HTTP verbs [PUT, DELETE, UPDATE, HEAD, PATCH]
      *
-     * @param string $method
+     * @param string|array $methods
      * @param string $path
      * @param callable|array|string $cb
      * @return Route
      */
-    private function pushHttpVerb(string $method, string $path, callable|string|array $cb): Route
+    private function pushHttpVerb(string|array $methods, string $path, callable|string|array $cb): Route
     {
-        if ($this->magic_method) {
+        $methods = (array) $methods;
+
+        if (!$this->magic_method) {
+            return $this->routeLoader($methods, $path, $cb);
+        }
+
+        foreach ($methods as $key => $method) {
             if ($this->magic_method === $method) {
-                $method = $this->magic_method;
+                $methods[$key] = $this->magic_method;
             }
         }
 
-        return $this->routeLoader($method, $path, $cb);
+        return $this->routeLoader($methods, $path, $cb);
     }
 
     /**
      * Start loading a route.
      *
-     * @param string $method
+     * @param string|array $method
      * @param string $path
-     * @param Callable|string|array $cb
+     * @param callable|string|array $cb
      * @return Route
      */
-    private function routeLoader(string $method, string $path, callable|string|array $cb): Route
+    private function routeLoader(string|array $methods, string $path, callable|string|array $cb): Route
     {
+        $methods = (array) $methods;
+
         $path = '/' . trim($path, '/');
 
         // We build the original path based on the Router loader
         $path = $this->base_route . $this->prefix . $path;
-
-        // We define the current route and current method
-        $this->current = ['path' => $path, 'method' => $method];
 
         // We add the new route
         $route = new Route($path, $cb);
 
         $route->middleware($this->middlewares);
 
-        static::$routes[$method][] = $route;
+        foreach ($methods as $method) {
+            static::$routes[$method][] = $route;
 
-        if (
-            $this->auto_csrf === true
-            && in_array($method, ['POST', 'DELETE', 'PUT'])
-        ) {
-            $route->middleware('csrf');
+            // We define the current route and current method
+            $this->current = ['path' => $path, 'method' => $method];
+
+            if (
+                $this->auto_csrf === true
+                && in_array($method, ['POST', 'DELETE', 'PUT'])
+            ) {
+                $route->middleware('csrf');
+            }
         }
 
         return $route;
