@@ -112,7 +112,7 @@ class FTPService implements ServiceInterface
 
         $this->login();
         $this->changePath();
-        $this->setConnectionPassiveMode();
+        $this->activePassiveMode();
     }
 
     /**
@@ -139,14 +139,7 @@ class FTPService implements ServiceInterface
     {
         ['username' => $username, 'password' => $password] = $this->config;
 
-        // We disable error handling to avoid credentials leak :+1:
-        set_error_handler(
-            fn () => error_log("set_error_handler muted for hidden the ftp credential to user")
-        );
-
         $is_logged_in = ftp_login($this->connection, $username, $password);
-
-        restore_error_handler();
 
         if ($is_logged_in) {
             return true;
@@ -642,8 +635,10 @@ class FTPService implements ServiceInterface
      *
      * @throws RuntimeException
      */
-    private function setConnectionPassiveMode()
+    private function activePassiveMode()
     {
+        @ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
+
         if (!ftp_pasv($this->connection, $this->use_passive_mode)) {
             throw new RuntimeException(
                 'Could not set passive mode for connection: '
