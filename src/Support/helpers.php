@@ -872,7 +872,7 @@ if (!function_exists('route')) {
 
         $url = $routes[$name];
 
-        if (preg_match_all('/(?::([a-zA-Z0-9_-]+\??))/', $url, $matches)) {
+        if (preg_match_all('/(?::([a-zA-Z0-9_]+\??))/', $url, $matches)) {
             $keys = end($matches);
             foreach ($keys as $key) {
                 if (preg_match("/\?$/", $key)) {
