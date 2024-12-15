@@ -513,7 +513,7 @@ class Request
      * Get Request header
      *
      * @param  string $key
-     * @return bool|string
+     * @return ?string
      */
     public function getHeader($key): ?string
     {
@@ -539,6 +539,16 @@ class Request
     public function hasHeader($key): bool
     {
         return isset($_SERVER[strtoupper($key)]);
+    }
+
+    /**
+     * Get the client user agent
+     * 
+     * @return ?string
+     */
+    public function userAgent(): ?string
+    {
+        return $this->getHeader('USER_AGENT');
     }
 
     /**
