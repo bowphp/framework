@@ -1187,9 +1187,9 @@ class QueryBuilder implements \JsonSerializable
      * @param int $number_of_page
      * @param int $current
      * @param int $chunk
-     * @return array
+     * @return Pagination
      */
-    public function paginate(int $number_of_page, int $current = 0, ?int $chunk = null): array
+    public function paginate(int $number_of_page, int $current = 0, ?int $chunk = null): Pagination
     {
         // We go to back page
         --$current;
@@ -1208,7 +1208,7 @@ class QueryBuilder implements \JsonSerializable
         $join = $this->join;
         $data_bind = $this->where_data_binding;
 
-        $data = $this->jump($jump)->take($number_of_page)->get();
+        $data = (array) $this->jump($jump)->take($number_of_page)->get();
 
         // Reinitialisation of current query
         $this->where = $where;
@@ -1224,14 +1224,14 @@ class QueryBuilder implements \JsonSerializable
         }
 
         // Enables automatic paging.
-        return [
-            'next' => $current >= 1 && $rest_of_page > 0 ? $current + 1 : false,
-            'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),
-            'total' => (int) ($rest_of_page + $current),
-            'per_page' => $number_of_page,
-            'current' => $current,
-            'data' => $data
-        ];
+        return new Pagination(
+            $current >= 1 && $rest_of_page > 0 ? $current + 1 : 0,
+            ($current - 1) <= 0 ? 1 : ($current - 1),
+            (int) ($rest_of_page + $current),
+            $number_of_page,
+            $current,
+            $data
+        );
     }
 
     /**

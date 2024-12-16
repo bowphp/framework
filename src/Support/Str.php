@@ -254,7 +254,7 @@ class Str
 
     /**
      * Alias of slugify
-     * 
+     *
      * @param string $str
      * @param string $delimiter
      * @return string
