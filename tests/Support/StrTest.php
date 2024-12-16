@@ -4,7 +4,7 @@ namespace Bow\Tests\Support;
 
 use Bow\Support\Str;
 
-class StrText extends \PHPUnit\Framework\TestCase
+class StrTest extends \PHPUnit\Framework\TestCase
 {
     public function test_upper()
     {
@@ -78,9 +78,9 @@ class StrText extends \PHPUnit\Framework\TestCase
         $this->assertEquals(Str::capitalize('comment faire un site web avec php'), 'Comment Faire Un Site Web Avec Php');
     }
 
-    public function test_randomize()
+    public function test_random()
     {
-        $this->assertEquals(strlen(Str::randomize(10)), 10);
+        $this->assertEquals(strlen(Str::random(10)), 10);
     }
 
     public function test_get_words()

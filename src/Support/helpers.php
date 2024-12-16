@@ -2,11 +2,18 @@
 
 use Bow\Auth\Auth;
 use Bow\Mail\Mail;
+use Bow\View\View;
+use Carbon\Carbon;
+use Monolog\Logger;
 use Bow\Event\Event;
 use Bow\Support\Env;
+use Bow\Http\Request;
 use Bow\Support\Util;
+use Bow\Http\Redirect;
+use Bow\Http\Response;
 use Bow\Security\Hash;
 use Bow\Session\Cookie;
+use Bow\Security\Crypto;
 use Bow\Session\Session;
 use Bow\Storage\Storage;
 use Bow\Container\Capsule;
@@ -16,18 +23,16 @@ use Bow\Translate\Translator;
 use Bow\Queue\ProducerService;
 use Bow\Database\Database as DB;
 use Bow\Http\Exception\HttpException;
-use Bow\Http\Redirect;
-use Monolog\Logger;
 
 if (!function_exists('app')) {
     /**
      * Application container
      *
-     * @param  string|null  $key
+     * @param  ?string  $key
      * @param  array $setting
-     * @return \Bow\Support\Capsule|mixed
+     * @return mixed
      */
-    function app($key = null, array $setting = [])
+    function app(?string $key = null, array $setting = []): mixed
     {
         $capsule = Capsule::getInstance();
 
@@ -52,7 +57,7 @@ if (!function_exists('config')) {
      * @return \Bow\Configuration\Loader|mixed
      * @throws
      */
-    function config($key = null, $setting = null)
+    function config($key = null, $setting = null): mixed
     {
         $config = \Bow\Configuration\Loader::getInstance();
 
@@ -72,11 +77,16 @@ if (!function_exists('response')) {
     /**
      * Response object instance
      *
-     * @return \Bow\Http\Response
+     * @return Response
      */
-    function response()
+    function response(): Response
     {
-        return app('response');
+        /**
+         * @var Response
+         */
+        $response = app('response');
+
+        return $response;
     }
 }
 
@@ -84,11 +94,16 @@ if (!function_exists('request')) {
     /**
      * Represents the Request class
      *
-     * @return \Bow\Http\Request
+     * @return Request
      */
-    function request()
+    function request(): Request
     {
-        return app('request');
+        /**
+         * @var Request
+         */
+        $request = app('request');
+
+        return $request;
     }
 }
 
@@ -146,7 +161,7 @@ if (!function_exists('view')) {
         response()
             ->status($code);
 
-        return Bow\View\View::parse($template, $data);
+        return View::parse($template, $data);
     }
 }
 
@@ -639,7 +654,7 @@ if (!function_exists('decrypt')) {
      */
     function decrypt(string $data): string
     {
-        return \Bow\Security\Crypto::decrypt($data);
+        return Crypto::decrypt($data);
     }
 }
 
@@ -652,7 +667,7 @@ if (!function_exists('db_transaction')) {
      */
     function db_transaction(callable $cb = null): void
     {
-        DB::startTransaction($cb);
+        DB::startTransaction();
     }
 }
 
@@ -664,7 +679,7 @@ if (!function_exists('db_transaction_started')) {
      */
     function db_transaction_started(): bool
     {
-        return DB::getPdo()->inTransaction();
+        return DB::inTransaction();
     }
 }
 
@@ -996,6 +1011,18 @@ if (!function_exists('redirect_back')) {
     }
 }
 
+if (!function_exists('app_now')) {
+    /**
+     * Get the current carbon
+     *
+     * @return Carbon
+     */
+    function app_now(): Carbon
+    {
+        return Carbon::now();
+    }
+}
+
 if (!function_exists('app_hash')) {
     /**
      * Alias on the class Hash.
@@ -1029,7 +1056,7 @@ if (!function_exists('bow_hash')) {
     }
 }
 
-if (!function_exists('trans')) {
+if (!function_exists('app_trans(')) {
     /**
      * Make translation
      *
@@ -1038,7 +1065,7 @@ if (!function_exists('trans')) {
      * @param bool $choose
      * @return string|Bow\Translate\Translator
      */
-    function trans(
+    function app_trans(
         string $key = null,
         array $data = [],
         bool $choose = false
@@ -1070,7 +1097,7 @@ if (!function_exists('t')) {
         array $data = [],
         bool $choose = false
     ): string|Bow\Translate\Translator {
-        return trans($key, $data, $choose);
+        return app_trans($key, $data, $choose);
     }
 }
 
@@ -1088,7 +1115,7 @@ if (!function_exists('__')) {
         array $data = [],
         bool $choose = false
     ): string|Bow\Translate\Translator {
-        return trans($key, $data, $choose);
+        return app_trans($key, $data, $choose);
     }
 }
 
@@ -1169,6 +1196,18 @@ if (!function_exists('app_mode')) {
     function app_mode(): string
     {
         return strtolower(app_env('APP_ENV'));
+    }
+}
+
+if (!function_exists('app_in_debug')) {
+    /**
+     * Get app enviroment mode
+     *
+     * @return bool
+     */
+    function app_in_debug(): bool
+    {
+        return (bool) app_env('APP_DEBUG');
     }
 }
 
@@ -1441,7 +1480,7 @@ if (!function_exists('str_random')) {
      */
     function str_random(string $string): string
     {
-        return \Bow\Support\Str::randomize($string);
+        return \Bow\Support\Str::random($string);
     }
 }
 
