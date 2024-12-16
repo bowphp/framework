@@ -18,5 +18,5 @@ use Bow\Translate\Translator;
 
 echo Translator::translate('messages.welcome');
 // Or
-echo trans('messages.welcome');
+echo app_trans('messages.welcome');
 ```

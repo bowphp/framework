@@ -55,7 +55,7 @@ trait FieldLexical
     private function parseFromTranslate(string $key, array $data)
     {
         // Get lexical provided by dev app
-        $message = trans('validation.' . $key, $data);
+        $message = app_trans('validation.' . $key, $data);
 
         if (is_null($message)) {
             $message = $this->lexical[$key];

@@ -129,7 +129,7 @@ class Str
      * @param int|null $limit
      * @return array
      */
-    public static function split(string $pattern, string $str, ?string $limit = null): array
+    public static function split(string $pattern, string $str, ?int $limit = null): array
     {
         return mb_split($pattern, $str, $limit);
     }
@@ -228,7 +228,7 @@ class Str
      * @param int $size
      * @return string
      */
-    public static function randomize(int $size = 16): string
+    public static function random(int $size = 16): string
     {
         return static::slice(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, $size);
     }
@@ -250,6 +250,18 @@ class Str
         );
 
         return preg_replace('/-{2,}/', $delimiter, $temp);
+    }
+
+    /**
+     * Alias of slugify
+     * 
+     * @param string $str
+     * @param string $delimiter
+     * @return string
+     */
+    public static function slug(string $str, string $delimiter = '-'): string
+    {
+        return static::slugify($str, $delimiter);
     }
 
     /**
@@ -409,7 +421,7 @@ class Str
      * @param int $len
      * @return string
      */
-    public static function getWords(string $words, int $len): string
+    public static function words(string $words, int $len): string
     {
         $wordParts = explode(' ', $words);
 
