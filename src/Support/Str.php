@@ -6,6 +6,7 @@ namespace Bow\Support;
 
 use ErrorException;
 use ForceUTF8\Encoding;
+use Ramsey\Uuid\Uuid;
 
 class Str
 {
@@ -234,6 +235,16 @@ class Str
     }
 
     /**
+     * Get rondom uuid
+     *
+     * @return string
+     */
+    public static function uuid(): string
+    {
+        return Uuid::uuid4()->toString();
+    }
+
+    /**
      * slugify slug creator using a simple chain.
      * eg: 'I am a string of character' => 'i-am-a-chain-of-character'
      *
@@ -273,6 +284,17 @@ class Str
     public static function unSlugify(string $str): string
     {
         return preg_replace('/[^a-z0-9]/', ' ', strtolower(trim(strip_tags($str))));
+    }
+
+    /**
+     * Alias of unslugify
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function unSlug(string $str): string
+    {
+        return static::unSlugify($str);
     }
 
     /**
