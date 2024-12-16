@@ -543,7 +543,7 @@ class Request
 
     /**
      * Get the client user agent
-     * 
+     *
      * @return ?string
      */
     public function userAgent(): ?string
