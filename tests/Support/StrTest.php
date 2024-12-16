@@ -83,9 +83,9 @@ class StrTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(strlen(Str::random(10)), 10);
     }
 
-    public function test_get_words()
+    public function test_words()
     {
-        $this->assertEquals(Str::getWords('comment faire un site web avce php', 2), 'comment faire');
+        $this->assertEquals(Str::words('comment faire un site web avce php', 2), 'comment faire');
     }
 
     public function test_contains()
