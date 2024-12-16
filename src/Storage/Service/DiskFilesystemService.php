@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Storage\Service;
 
-use Bow\Http\UploadFile;
+use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\FilesystemInterface;
 use InvalidArgumentException;
 
@@ -51,14 +51,14 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Function to upload a file
      *
-     * @param  UploadFile $file
+     * @param  UploadedFile $file
      * @param  string|array $location
      * @param  array $option
      *
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, string|array $location = null, array $option = []): bool
+    public function store(UploadedFile $file, string|array $location = null, array $option = []): bool
     {
         if (is_array($location)) {
             $option = $location;

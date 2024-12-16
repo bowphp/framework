@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Storage\Service;
 
-use Bow\Http\UploadFile;
+use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\ServiceInterface;
 use Bow\Storage\Exception\ResourceException;
 use InvalidArgumentException;
@@ -199,14 +199,14 @@ class FTPService implements ServiceInterface
     /**
      * Store directly the upload file
      *
-     * @param  UploadFile $file
+     * @param  UploadedFile $file
      * @param  string $location
      * @param  array $option
      *
      * @return mixed
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, ?string $location = null, array $option = []): array|bool
+    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool
     {
         if (is_null($location)) {
             throw new InvalidArgumentException("Please define the store location");

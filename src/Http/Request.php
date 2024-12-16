@@ -291,23 +291,23 @@ class Request
      * Load the factory for FILES
      *
      * @param string $key
-     * @return UploadFile|Collection|null
+     * @return UploadedFile|Collection|null
      */
-    public function file(string $key): UploadFile|Collection|null
+    public function file(string $key): UploadedFile|Collection|null
     {
         if (!isset($_FILES[$key])) {
             return null;
         }
 
         if (!is_array($_FILES[$key]['name'])) {
-            return new UploadFile($_FILES[$key]);
+            return new UploadedFile($_FILES[$key]);
         }
 
         $files = $_FILES[$key];
         $collect = [];
 
         foreach ($files['name'] as $key => $name) {
-            $collect[] = new UploadFile([
+            $collect[] = new UploadedFile([
                 'name' => $name,
                 'type' => $files['type'][$key],
                 'size' => $files['size'][$key],

@@ -2,7 +2,7 @@
 
 namespace Bow\Tests\Filesystem;
 
-use Bow\Http\UploadFile;
+use Bow\Http\UploadedFile;
 use Bow\Storage\Service\DiskFilesystemService;
 use Bow\Storage\Storage;
 use Bow\Tests\Config\TestingConfiguration;
@@ -29,9 +29,9 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
         $this->storage = Storage::disk();
     }
 
-    public function getUploadFileMock(): \PHPUnit\Framework\MockObject\MockObject
+    public function getUploadedFileMock(): \PHPUnit\Framework\MockObject\MockObject
     {
-        $uploadedFile = $this->getMockBuilder(UploadFile::class)
+        $uploadedFile = $this->getMockBuilder(UploadedFile::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -127,7 +127,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_store()
     {
-        $uploadedFile = $this->getUploadFileMock();
+        $uploadedFile = $this->getUploadedFileMock();
 
         $filename = sprintf("%s.txt", md5(time()));
         $uploadedFile->method("getHashName")->willReturn($filename);
@@ -138,7 +138,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_store_on_custom_store()
     {
-        $uploadedFile = $this->getUploadFileMock();
+        $uploadedFile = $this->getUploadedFileMock();
 
         $filename = sprintf("%s.txt", md5(time()));
         $uploadedFile->method("getHashName")->willReturn($filename);
@@ -149,7 +149,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_store_with_location_by_filename_setting()
     {
-        $uploadedFile = $this->getUploadFileMock();
+        $uploadedFile = $this->getUploadedFileMock();
 
         $filename = "stub_store_filename.txt";
         $result = $this->storage->store($uploadedFile, "stores", [
@@ -162,7 +162,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_store_with_location_as_null_and_filename_as_null()
     {
-        $uploadedFile = $this->getUploadFileMock();
+        $uploadedFile = $this->getUploadedFileMock();
 
         $filename = sprintf("%s.txt", md5(time()));
         $uploadedFile->method("getHashName")->willReturn($filename);
@@ -175,7 +175,7 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_store_with_location_as_array_with_as_filename_key()
     {
-        $uploadedFile = $this->getUploadFileMock();
+        $uploadedFile = $this->getUploadedFileMock();
 
         $result = $this->storage->store($uploadedFile, [
             "as" => "stub_store_filename.txt"

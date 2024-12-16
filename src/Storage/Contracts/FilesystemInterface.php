@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Storage\Contracts;
 
-use Bow\Http\UploadFile;
+use Bow\Http\UploadedFile;
 use InvalidArgumentException;
 
 interface FilesystemInterface
@@ -12,13 +12,13 @@ interface FilesystemInterface
     /**
      * Store directly the upload file
      *
-     * @param  UploadFile $file
+     * @param  UploadedFile $file
      * @param  string  $location
      * @param  array $option
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, ?string $location = null, array $option = []): array|bool;
+    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool;
 
     /**
      * Write following a file specify
