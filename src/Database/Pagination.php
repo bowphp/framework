@@ -19,9 +19,24 @@ class Pagination
         return $this->next;
     }
 
+    public function hasNext(): bool
+    {
+        return $this->next != 0;
+    }
+
+    public function perPage(): int
+    {
+        return $this->perPage;
+    }
+
     public function previous(): int
     {
-        return $this->next;
+        return $this->previous;
+    }
+
+    public function hasPrevious(): bool
+    {
+        return $this->previous != 0;
     }
 
     public function current(): int
@@ -31,11 +46,11 @@ class Pagination
 
     public function items(): array
     {
-        return $this->data;
+        return (array) $this->data;
     }
 
-    public function total(): array
+    public function total(): int
     {
-        return $this->data;
+        return $this->total;
     }
 }
