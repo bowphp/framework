@@ -1290,9 +1290,9 @@ if (!function_exists('str_uuid')) {
     /**
      * Get str uuid
      *
-     * @return bool
+     * @return string
      */
-    function str_uuid(): bool
+    function str_uuid(): string
     {
         return Str::uuid();
     }
