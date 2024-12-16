@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Monolog\Logger;
 use Bow\Event\Event;
 use Bow\Support\Env;
+use Bow\Support\Str;
 use Bow\Http\Request;
 use Bow\Support\Util;
 use Bow\Http\Redirect;
@@ -1268,7 +1269,7 @@ if (!function_exists('str_slug')) {
      */
     function str_slug(string $str, string $sep = '-'): string
     {
-        return \Bow\Support\Str::slugify($str, $sep);
+        return Str::slugify($str, $sep);
     }
 }
 
@@ -1281,7 +1282,7 @@ if (!function_exists('str_is_mail')) {
      */
     function str_is_mail(string $email): bool
     {
-        return \Bow\Support\Str::isMail($email);
+        return Str::isMail($email);
     }
 }
 
@@ -1293,7 +1294,7 @@ if (!function_exists('str_uuid')) {
      */
     function str_uuid(): bool
     {
-        return \Bow\Support\Str::uuid();
+        return Str::uuid();
     }
 }
 
@@ -1307,7 +1308,7 @@ if (!function_exists('str_is_domain')) {
      */
     function str_is_domain(string $domain): bool
     {
-        return \Bow\Support\Str::isDomain($domain);
+        return Str::isDomain($domain);
     }
 }
 
@@ -1321,7 +1322,7 @@ if (!function_exists('str_is_slug')) {
      */
     function str_is_slug(string $slug): string
     {
-        return \Bow\Support\Str::isSlug($slug);
+        return Str::isSlug($slug);
     }
 }
 
@@ -1335,7 +1336,7 @@ if (!function_exists('str_is_alpha')) {
      */
     function str_is_alpha(string $string): bool
     {
-        return \Bow\Support\Str::isAlpha($string);
+        return Str::isAlpha($string);
     }
 }
 
@@ -1348,7 +1349,7 @@ if (!function_exists('str_is_lower')) {
      */
     function str_is_lower(string $string): bool
     {
-        return \Bow\Support\Str::isLower($string);
+        return Str::isLower($string);
     }
 }
 
@@ -1361,7 +1362,7 @@ if (!function_exists('str_is_upper')) {
      */
     function str_is_upper(string $string): bool
     {
-        return \Bow\Support\Str::isUpper($string);
+        return Str::isUpper($string);
     }
 }
 
@@ -1375,7 +1376,7 @@ if (!function_exists('str_is_alpha_num')) {
      */
     function str_is_alpha_num(string $slug): bool
     {
-        return \Bow\Support\Str::isAlphaNum($slug);
+        return Str::isAlphaNum($slug);
     }
 }
 
@@ -1388,7 +1389,7 @@ if (!function_exists('str_shuffle_words')) {
      */
     function str_shuffle_words(string $words): string
     {
-        return \Bow\Support\Str::shuffleWords($words);
+        return Str::shuffleWords($words);
     }
 }
 
@@ -1402,7 +1403,7 @@ if (!function_exists('str_wordify')) {
      */
     function str_wordify(string $words, string $sep = ''): array
     {
-        return \Bow\Support\Str::wordify($words, $sep);
+        return Str::wordify($words, $sep);
     }
 }
 
@@ -1415,7 +1416,7 @@ if (!function_exists('str_plurial')) {
      */
     function str_plurial(string $slug): string
     {
-        return \Bow\Support\Str::plurial($slug);
+        return Str::plurial($slug);
     }
 }
 
@@ -1428,7 +1429,7 @@ if (!function_exists('str_camel')) {
      */
     function str_camel($slug): string
     {
-        return \Bow\Support\Str::camel($slug);
+        return Str::camel($slug);
     }
 }
 
@@ -1441,7 +1442,7 @@ if (!function_exists('str_snake')) {
      */
     function str_snake(string $slug): string
     {
-        return \Bow\Support\Str::snake($slug);
+        return Str::snake($slug);
     }
 }
 
@@ -1455,7 +1456,7 @@ if (!function_exists('str_contains')) {
      */
     function str_contains(string $search, string $string): bool
     {
-        return \Bow\Support\Str::contains($search, $string);
+        return Str::contains($search, $string);
     }
 }
 
@@ -1468,7 +1469,7 @@ if (!function_exists('str_capitalize')) {
      */
     function str_capitalize(string $slug): string
     {
-        return \Bow\Support\Str::capitalize($slug);
+        return Str::capitalize($slug);
     }
 }
 
@@ -1481,7 +1482,7 @@ if (!function_exists('str_random')) {
      */
     function str_random(string $string): string
     {
-        return \Bow\Support\Str::random($string);
+        return Str::random($string);
     }
 }
 
@@ -1493,7 +1494,7 @@ if (!function_exists('str_force_in_utf8')) {
      */
     function str_force_in_utf8(): void
     {
-        \Bow\Support\Str::forceInUTF8();
+        Str::forceInUTF8();
     }
 }
 
@@ -1506,7 +1507,7 @@ if (!function_exists('str_fix_utf8')) {
      */
     function str_fix_utf8(string $string): string
     {
-        return \Bow\Support\Str::fixUTF8($string);
+        return Str::fixUTF8($string);
     }
 }
 
