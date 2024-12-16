@@ -333,7 +333,7 @@ class Router
      * @param array $methods
      * @param string $path
      * @param callable|string|array $cb
-     * @return Router
+     * @return Route
      */
     public function match(array $methods, string $path, callable|string|array $cb): Route
     {
