@@ -434,11 +434,11 @@ class Action
     /**
      * Injection for closure
      *
-     * @param callable $closure
+     * @param Closure|callable $closure
      * @return array
      * @throws
      */
-    public function injectorForClosure(callable $closure): array
+    public function injectorForClosure(Closure|callable $closure): array
     {
         $reflection = new ReflectionFunction($closure);
 

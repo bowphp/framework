@@ -7,6 +7,7 @@ namespace Bow\Configuration;
 use Bow\View\View;
 use Monolog\Logger;
 use Bow\Support\Collection;
+use Whoops\Handler\Handler;
 use Bow\Configuration\Loader;
 use Bow\Database\Barry\Model;
 use Monolog\Handler\StreamHandler;
@@ -14,8 +15,8 @@ use Monolog\Handler\FirePHPHandler;
 use Whoops\Handler\CallbackHandler;
 use Bow\Configuration\Configuration;
 use Bow\Contracts\ResponseInterface;
+use Iterator;
 use Whoops\Handler\PrettyPageHandler;
-use Whoops\Handler\Handler;
 
 class LoggerConfiguration extends Configuration
 {
@@ -73,14 +74,14 @@ class LoggerConfiguration extends Configuration
                 } elseif ($result instanceof ResponseInterface) {
                     $result->sendContent();
                 } elseif (
-                    is_null($result)
-                    || $result instanceof Model || $result instanceof Collection
-                    || is_string($result)
+                    $result instanceof Model || $result instanceof Collection
                     || is_array($result)
                     || is_object($result)
-                    || $result instanceof \Iterable
+                    || $result instanceof Iterator
                 ) {
                     echo json_encode($result);
+                } elseif (is_string($result)) {
+                    echo $result;
                 }
 
                 return Handler::QUIT;

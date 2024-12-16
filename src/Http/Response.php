@@ -276,7 +276,7 @@ class Response implements ResponseInterface
     /**
      * Modify http headers
      *
-     * @param  int $code
+     * @param int $code
      * @return mixed
      */
     public function status(int $code): Response

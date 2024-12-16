@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Http\Exception;
 
-use ErrorException;
-
-class ResponseException extends ErrorException
+class ResponseException extends HttpException
 {
     /**
      * Define the http response code

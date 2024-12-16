@@ -40,9 +40,9 @@ class ArrayDriver implements \SessionHandlerInterface
      * Garbage collector
      *
      * @param int $max_lifetime
-     * @return bool|void
+     * @return int|false
      */
-    public function gc(int $max_lifetime): bool
+    public function gc(int $max_lifetime): int|false
     {
         foreach ($this->sessions as $session_id => $content) {
             if ($this->sessions[$session_id]['time'] <= $this->createTimestamp()) {
@@ -50,7 +50,7 @@ class ArrayDriver implements \SessionHandlerInterface
             }
         }
 
-        return true;
+        return 1;
     }
 
     /**

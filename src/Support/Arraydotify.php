@@ -182,6 +182,8 @@ class Arraydotify implements \ArrayAccess
     {
         $this->items[$offset] = $value;
 
+        $this->items = $this->dotify($this->items);
+
         $this->updateOrigin();
     }
 
@@ -191,6 +193,8 @@ class Arraydotify implements \ArrayAccess
     public function offsetUnset($offset): void
     {
         unset($this->items[$offset]);
+
+        $this->items = $this->dotify($this->items);
 
         $this->updateOrigin();
     }
