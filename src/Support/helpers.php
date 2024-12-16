@@ -18,15 +18,20 @@ use Bow\Security\Crypto;
 use Bow\Session\Session;
 use Bow\Storage\Storage;
 use Bow\Container\Capsule;
+use Bow\Security\Sanitize;
 use Bow\Security\Tokenize;
 use Bow\Support\Collection;
 use Bow\Validation\Validate;
+use Bow\Database\Barry\Model;
 use Bow\Translate\Translator;
 use Bow\Validation\Validator;
 use Bow\Queue\ProducerService;
 use Bow\Database\Database as DB;
+use Bow\Auth\Guards\GuardContract;
 use Bow\Http\Exception\HttpException;
 use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Storage\Exception\ResourceException;
+use Bow\Storage\Service\DiskFilesystemService;
 
 if (!function_exists('app')) {
     /**
@@ -498,7 +503,7 @@ if (!function_exists('sanitize')) {
             return $data;
         }
 
-        return \Bow\Security\Sanitize::make($data);
+        return Sanitize::make($data);
     }
 }
 
@@ -515,7 +520,7 @@ if (!function_exists('secure')) {
             return $data;
         }
 
-        return \Bow\Security\Sanitize::make($data, true);
+        return Sanitize::make($data, true);
     }
 }
 
@@ -628,9 +633,9 @@ if (!function_exists('collect')) {
      * Create new Ccollection instance
      *
      * @param  array $data
-     * @return \Bow\Support\Collection
+     * @return Collection
      */
-    function collect(array $data = []): \Bow\Support\Collection
+    function collect(array $data = []): Collection
     {
         return new Collection($data);
     }
@@ -645,7 +650,7 @@ if (!function_exists('encrypt')) {
      */
     function encrypt(string $data): string
     {
-        return \Bow\Security\Crypto::encrypt($data);
+        return Crypto::encrypt($data);
     }
 }
 
@@ -956,10 +961,10 @@ if (!function_exists('app_file_system')) {
      * Alias on the mount method
      *
      * @param string $disk
-     * @return \Bow\Storage\Service\DiskFilesystemService
-     * @throws \Bow\Storage\Exception\ResourceException
+     * @return DiskFilesystemService
+     * @throws ResourceException
      */
-    function app_file_system(string $disk): \Bow\Storage\Service\DiskFilesystemService
+    function app_file_system(string $disk): DiskFilesystemService
     {
         return Storage::disk($disk);
     }
@@ -1053,13 +1058,13 @@ if (!function_exists('app_trans')) {
      * @param string $key
      * @param array $data
      * @param bool $choose
-     * @return string|Bow\Translate\Translator
+     * @return string|Translator
      */
     function app_trans(
         string $key = null,
         array $data = [],
         bool $choose = false
-    ): string|Bow\Translate\Translator {
+    ): string|Translator {
         if (is_null($key)) {
             return Translator::getInstance();
         }
@@ -1086,7 +1091,7 @@ if (!function_exists('t')) {
         string $key,
         array $data = [],
         bool $choose = false
-    ): string|Bow\Translate\Translator {
+    ): string|Translator {
         return app_trans($key, $data, $choose);
     }
 }
@@ -1104,7 +1109,7 @@ if (!function_exists('__')) {
         string $key,
         array $data = [],
         bool $choose = false
-    ): string|Bow\Translate\Translator {
+    ): string|Translator {
         return app_trans($key, $data, $choose);
     }
 }
@@ -1146,7 +1151,7 @@ if (!function_exists('app_abort')) {
      *
      * @param int    $code
      * @param string $message
-     * @return \Bow\Http\Response
+     * @return Response
      * @throws HttpException
      */
     function app_abort(int $code = 500, string $message = '')
@@ -1162,7 +1167,7 @@ if (!function_exists('app_abort_if')) {
      * @param boolean $boolean
      * @param int $code
      * @param string $message
-     * @return \Bow\Http\Response|null
+     * @return Response|null
      */
     function app_abort_if(
         bool $boolean,
@@ -1232,10 +1237,10 @@ if (!function_exists('auth')) {
      * Recovery of the guard
      *
      * @param string $guard
-     * @return \Bow\Auth\Guards\GuardContract
+     * @return GuardContract
      * @throws
      */
-    function auth(string $guard = null): \Bow\Auth\Guards\GuardContract
+    function auth(string $guard = null): GuardContract
     {
         $auth = Auth::getInstance();
 
@@ -1523,7 +1528,8 @@ if (!function_exists('db_seed')) {
     {
         if (class_exists($name, true)) {
             $instance = app($name);
-            if ($instance instanceof \Bow\Database\Barry\Model) {
+
+            if ($instance instanceof Model) {
                 $table = $instance->getTable();
                 return DB::table($table)->insert($data);
             }
@@ -1542,7 +1548,7 @@ if (!function_exists('db_seed')) {
         foreach ($seeds as $table => $payload) {
             if (class_exists($table, true)) {
                 $instance = app($table);
-                if ($instance instanceof \Bow\Database\Barry\Model) {
+                if ($instance instanceof Model) {
                     $table = $instance->getTable();
                 }
             }

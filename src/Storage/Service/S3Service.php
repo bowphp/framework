@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Bow\Storage\Service;
 
 use Aws\S3\S3Client;
-use Bow\Http\UploadFile;
+use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\ServiceInterface;
 
 class S3Service implements ServiceInterface
@@ -73,14 +73,14 @@ class S3Service implements ServiceInterface
     /**
      * Function to upload a file
      *
-     * @param  UploadFile  $file
+     * @param  UploadedFile  $file
      * @param  string  $location
      * @param  array   $option
      *
      * @return mixed
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, ?string $location = null, array $option = []): array|bool
+    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool
     {
         $result = $this->put($file->getHashName(), $file->getContent());
 
