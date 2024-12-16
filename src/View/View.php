@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\View;
 
+use Tintin\Tintin;
 use BadMethodCallException;
-use Bow\Contracts\ResponseInterface;
 use Bow\View\EngineAbstract;
+use Bow\Contracts\ResponseInterface;
 use Bow\View\Exception\ViewException;
 
 class View implements ResponseInterface
