@@ -7,8 +7,6 @@ namespace Bow\Console;
 use Bow\Configuration\Loader;
 use Bow\Console\Exception\ConsoleException;
 use Bow\Console\Traits\ConsoleTrait;
-use Psy\Exception\FatalErrorException;
-use RuntimeException;
 
 /**
  * @method static Console addCommand(string $command, callable $cb)

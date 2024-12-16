@@ -12,7 +12,7 @@
         "bowphp/tintin": "^3.0",
         "filp/whoops": "^2.1",
         "nesbot/carbon": "^2.16",
-        "psy/psysh": "v0.10.*",
+        "psy/psysh": "v0.12.*",
         "fakerphp/faker": "^1.20",
         "neitanod/forceutf8": "^2.0",
         "ramsey/uuid": "^4.7"
