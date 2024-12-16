@@ -25,6 +25,7 @@ use Bow\Validation\Validator;
 use Bow\Queue\ProducerService;
 use Bow\Database\Database as DB;
 use Bow\Http\Exception\HttpException;
+use Bow\Mail\Contracts\MailDriverInterface;
 
 if (!function_exists('app')) {
     /**
@@ -553,7 +554,7 @@ if (!function_exists('redirect')) {
      */
     function redirect(string $path = null): Redirect
     {
-        $redirect = \Bow\Http\Redirect::getInstance();
+        $redirect = Redirect::getInstance();
 
         if ($path !== null) {
             $redirect->to($path);
@@ -751,14 +752,14 @@ if (!function_exists('email')) {
      * @param null|string $view
      * @param array       $data
      * @param callable    $cb
-     * @return \Bow\Mail\Contracts\MailDriverInterface|bool
+     * @return MailDriverInterface|bool
      * @throws
      */
     function email(
         string $view = null,
         array $data = [],
         callable $cb = null
-    ): \Bow\Mail\Contracts\MailDriverInterface|bool {
+    ): MailDriverInterface|bool {
         if ($view === null) {
             return Mail::getInstance();
         }
@@ -949,21 +950,7 @@ if (!function_exists('storage_service')) {
     }
 }
 
-if (!function_exists('mount')) {
-    /**
-     * Alias on the mount method
-     *
-     * @param string $mount
-     * @return \Bow\Storage\Service\DiskFilesystemService
-     * @throws \Bow\Storage\Exception\ResourceException
-     */
-    function mount(string $mount): \Bow\Storage\Service\DiskFilesystemService
-    {
-        return Storage::disk($mount);
-    }
-}
-
-if (!function_exists('file_system')) {
+if (!function_exists('app_file_system')) {
     /**
      * Alias on the mount method
      *
@@ -971,7 +958,7 @@ if (!function_exists('file_system')) {
      * @return \Bow\Storage\Service\DiskFilesystemService
      * @throws \Bow\Storage\Exception\ResourceException
      */
-    function file_system(string $disk): \Bow\Storage\Service\DiskFilesystemService
+    function app_file_system(string $disk): \Bow\Storage\Service\DiskFilesystemService
     {
         return Storage::disk($disk);
     }
@@ -1058,7 +1045,7 @@ if (!function_exists('bow_hash')) {
     }
 }
 
-if (!function_exists('app_trans(')) {
+if (!function_exists('app_trans')) {
     /**
      * Make translation
      *
@@ -1180,7 +1167,7 @@ if (!function_exists('app_abort_if')) {
         bool $boolean,
         int $code,
         string $message = ''
-    ): \Bow\Http\Response|null {
+    ): Response|null {
         if ($boolean) {
             return app_abort($code, $message);
         }
@@ -1295,6 +1282,18 @@ if (!function_exists('str_is_mail')) {
     function str_is_mail(string $email): bool
     {
         return \Bow\Support\Str::isMail($email);
+    }
+}
+
+if (!function_exists('str_uuid')) {
+    /**
+     * Get str uuid
+     *
+     * @return bool
+     */
+    function str_uuid(): bool
+    {
+        return \Bow\Support\Str::uuid();
     }
 }
 
