@@ -55,10 +55,10 @@ class DiskFilesystemService implements FilesystemInterface
      * @param  string|array $location
      * @param  array $option
      *
-     * @return bool
+     * @return array|bool|string
      * @throws InvalidArgumentException
      */
-    public function store(UploadedFile $file, string|array $location = null, array $option = []): bool
+    public function store(UploadedFile $file, string|array $location = null, array $option = []): array|bool|string
     {
         if (is_array($location)) {
             $option = $location;

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\Http;
 
-use Bow\Auth\Authentication;
-use Bow\Http\Exception\BadRequestException;
-use Bow\Session\Session;
-use Bow\Support\Collection;
 use Bow\Support\Str;
+use Bow\Session\Session;
+use Bow\Http\UploadedFile;
+use Bow\Support\Collection;
+use Bow\Auth\Authentication;
 use Bow\Validation\Validate;
 use Bow\Validation\Validator;
+use Bow\Http\Exception\BadRequestException;
 
 class Request
 {

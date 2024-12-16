@@ -203,10 +203,10 @@ class FTPService implements ServiceInterface
      * @param  string $location
      * @param  array $option
      *
-     * @return mixed
+     * @return array|bool|string
      * @throws InvalidArgumentException
      */
-    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool
+    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool|string
     {
         if (is_null($location)) {
             throw new InvalidArgumentException("Please define the store location");

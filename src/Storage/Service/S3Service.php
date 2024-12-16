@@ -76,11 +76,9 @@ class S3Service implements ServiceInterface
      * @param  UploadedFile  $file
      * @param  string  $location
      * @param  array   $option
-     *
-     * @return mixed
-     * @throws InvalidArgumentException
+     * @return array|bool|string
      */
-    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool
+    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool|string
     {
         $result = $this->put($file->getHashName(), $file->getContent());
 

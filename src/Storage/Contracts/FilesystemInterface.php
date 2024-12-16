@@ -15,10 +15,10 @@ interface FilesystemInterface
      * @param  UploadedFile $file
      * @param  string  $location
      * @param  array $option
-     * @return bool
+     * @return array|bool|string
      * @throws InvalidArgumentException
      */
-    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool;
+    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool|string;
 
     /**
      * Write following a file specify
