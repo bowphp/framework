@@ -26,7 +26,7 @@ class HttpException extends Exception
      * HttpException constructor
      *
      * @param string $message
-     * @param string $code
+     * @param int $code
      */
     public function __construct(string $message, int $code = 200)
     {
@@ -40,7 +40,7 @@ class HttpException extends Exception
      *
      * @return string
      */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -48,9 +48,9 @@ class HttpException extends Exception
     /**
      * Get the status code
      *
-     * @return string
+     * @return int
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->getCode();
     }
