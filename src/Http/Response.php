@@ -377,7 +377,7 @@ class Response implements ResponseInterface
 
         $view = View::parse($template, $data);
 
-        $this->content = $view->sendContent();
+        $this->content = $view->getContent();
 
         return $this->buildHttpResponse();
     }

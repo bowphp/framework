@@ -305,15 +305,15 @@ class Request
 
         $files = $_FILES[$key];
         $collect = [];
+
         foreach ($files['name'] as $key => $name) {
-            $file = [
+            $collect[] = new UploadFile([
                 'name' => $name,
                 'type' => $files['type'][$key],
                 'size' => $files['size'][$key],
                 'error' => $files['error'][$key],
                 'tmp_name' => $files['tmp_name'][$key],
-            ];
-            $collect[] = new UploadFile($file);
+            ]);
         }
 
         return new Collection($collect);

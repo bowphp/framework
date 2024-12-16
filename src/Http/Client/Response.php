@@ -65,11 +65,11 @@ class Response
      *
      * @return object|array
      */
-    public function toJson(): object|array
+    public function toJson(?bool $associative = null): object|array
     {
         $content = $this->getContent();
 
-        return json_decode($content);
+        return json_decode($content, $associative);
     }
 
     /**
@@ -79,9 +79,7 @@ class Response
      */
     public function toArray(): array
     {
-        $content = $this->getContent();
-
-        return json_decode($content, true);
+        return $this->toJson(true);
     }
 
     /**
@@ -112,6 +110,26 @@ class Response
     public function statusCode(): ?int
     {
         return $this->getCode();
+    }
+
+    /**
+     * Check if status code is successful
+     *
+     * @return bool
+     */
+    public function isSuccessful(): bool
+    {
+        return $this->getCode() === 200 || $this->getCode() === 201;
+    }
+
+    /**
+     * Check if status code is failed
+     *
+     * @return bool
+     */
+    public function isFailed(): bool
+    {
+        return !$this->isSuccessful();
     }
 
     /**

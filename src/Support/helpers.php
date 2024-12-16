@@ -19,7 +19,9 @@ use Bow\Storage\Storage;
 use Bow\Container\Capsule;
 use Bow\Security\Tokenize;
 use Bow\Support\Collection;
+use Bow\Validation\Validate;
 use Bow\Translate\Translator;
+use Bow\Validation\Validator;
 use Bow\Queue\ProducerService;
 use Bow\Database\Database as DB;
 use Bow\Http\Exception\HttpException;
@@ -852,11 +854,11 @@ if (!function_exists('validator')) {
      * @param  array $inputs
      * @param  array $rules
      * @param  array $messages
-     * @return \Bow\Validation\Validate
+     * @return Validate
      */
-    function validator(array $inputs, array $rules, array $messages = []): \Bow\Validation\Validate
+    function validator(array $inputs, array $rules, array $messages = []): Validate
     {
-        return \Bow\Validation\Validator::make($inputs, $rules, $messages);
+        return Validator::make($inputs, $rules, $messages);
     }
 }
 
