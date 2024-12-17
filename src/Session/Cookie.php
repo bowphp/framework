@@ -75,7 +75,7 @@ class Cookie
     public static function all(): array
     {
         foreach ($_COOKIE as $key => $value) {
-            $_COOKIE[$key] = Crypto::decrypt($value);
+            $_COOKIE[$key] = json_decode(Crypto::decrypt($value));
         }
 
         return $_COOKIE;
@@ -95,7 +95,7 @@ class Cookie
         $data,
         $expirate = 3600,
     ) {
-        $data = Crypto::encrypt($data);
+        $data = Crypto::encrypt(json_encode($data));
 
         return setcookie(
             $key,

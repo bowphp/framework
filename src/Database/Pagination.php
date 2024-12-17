@@ -10,7 +10,7 @@ class Pagination
         private int $total,
         private int $perPage,
         private int $current,
-        private array $data
+        private Collection $data
     ) {
     }
 
@@ -44,9 +44,9 @@ class Pagination
         return $this->current;
     }
 
-    public function items(): array
+    public function items(): Collection
     {
-        return (array) $this->data;
+        return $this->data;
     }
 
     public function total(): int

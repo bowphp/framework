@@ -13,6 +13,7 @@ use Bow\Database\Barry\Concerns\Relationship;
 use Bow\Database\Exception\NotFoundException;
 use Bow\Database\Barry\Traits\ArrayAccessTrait;
 use Bow\Database\Barry\Traits\SerializableTrait;
+use Bow\Database\Pagination;
 
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
@@ -342,9 +343,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param int $page_number
      * @param int $current
      * @param int $chunk
-     * @return array
+     * @return Pagination
      */
-    public static function paginate(int $page_number, int $current = 0, ?int $chunk = null): array
+    public static function paginate(int $page_number, int $current = 0, ?int $chunk = null): Pagination
     {
         return static::query()->paginate($page_number, $current, $chunk);
     }
@@ -705,7 +706,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getKeyValue(): mixed
     {
-        return $this->original[$this->primary_key] ?? null;
+        return $this->original[$this->primary_key] ?? $this->attributes[$this->primary_key] ?? null;
     }
 
     /**
