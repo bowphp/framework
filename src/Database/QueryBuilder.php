@@ -87,9 +87,9 @@ class QueryBuilder implements \JsonSerializable
     /**
      * The PDO instance
      *
-     * @var \PDO
+     * @var PDO
      */
-    protected ?\PDO $connection = null;
+    protected ?PDO $connection = null;
 
     /**
      * Define whether to retrieve information from the list
@@ -1208,7 +1208,11 @@ class QueryBuilder implements \JsonSerializable
         $join = $this->join;
         $data_bind = $this->where_data_binding;
 
-        $data = (array) $this->jump($jump)->take($number_of_page)->get();
+        $data = $this->jump($jump)->take($number_of_page)->get();
+
+        if (is_array($data)) {
+            $data = collect($data);
+        }
 
         // Reinitialisation of current query
         $this->where = $where;
@@ -1220,7 +1224,7 @@ class QueryBuilder implements \JsonSerializable
 
         // Grouped data
         if (is_int($chunk)) {
-            $data = array_chunk($data, $chunk);
+            $data = $data->chunk($chunk);
         }
 
         // Enables automatic paging.

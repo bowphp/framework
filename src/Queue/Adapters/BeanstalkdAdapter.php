@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
+use RuntimeException;
 use Pheanstalk\Pheanstalk;
 use Bow\Queue\ProducerService;
 use Bow\Queue\Adapters\QueueAdapter;
 use Pheanstalk\Contract\PheanstalkInterface;
-use RuntimeException;
 
 class BeanstalkdAdapter extends QueueAdapter
 {

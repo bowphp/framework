@@ -17,7 +17,7 @@ abstract class QueueAdapter
      *
      * @var int
      */
-    protected flaot $start_time;
+    protected float $start_time;
 
     /**
      * Determine the default watch name

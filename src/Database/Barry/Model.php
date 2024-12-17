@@ -13,6 +13,7 @@ use Bow\Database\Barry\Concerns\Relationship;
 use Bow\Database\Exception\NotFoundException;
 use Bow\Database\Barry\Traits\ArrayAccessTrait;
 use Bow\Database\Barry\Traits\SerializableTrait;
+use Bow\Database\Pagination;
 
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
@@ -342,9 +343,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @param int $page_number
      * @param int $current
      * @param int $chunk
-     * @return array
+     * @return Pagination
      */
-    public static function paginate(int $page_number, int $current = 0, ?int $chunk = null): array
+    public static function paginate(int $page_number, int $current = 0, ?int $chunk = null): Pagination
     {
         return static::query()->paginate($page_number, $current, $chunk);
     }
@@ -531,7 +532,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $builder = static::query();
 
-         // Get the current primary key value
+        // Get the current primary key value
         $primary_key_value = $this->getKeyValue();
 
         // If primary key value is null, we are going to start the creation of new row
@@ -543,7 +544,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Check the existent in database
         if (!$builder->exists($this->primary_key, $primary_key_value)) {
-            return 0;
+            return $this->writeRows($builder);
         }
 
         // We set the primary key value
@@ -705,7 +706,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getKeyValue(): mixed
     {
-        return $this->original[$this->primary_key] ?? null;
+        return $this->original[$this->primary_key] ?? $this->attributes[$this->primary_key] ?? null;
     }
 
     /**

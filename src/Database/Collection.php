@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
+use Bow\Support\Collection as SupportCollection;
 use Bow\Database\Barry\Model;
 
-class Collection extends \Bow\Support\Collection
+class Collection extends SupportCollection
 {
     /**
      * @inheritdoc

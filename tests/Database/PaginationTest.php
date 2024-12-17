@@ -19,7 +19,7 @@ class PaginationTest extends TestCase
             total: 3,
             perPage: 10,
             current: 1,
-            data: ['item1', 'item2', 'item3']
+            data: collect(['item1', 'item2', 'item3'])
         );
     }
 
@@ -40,7 +40,7 @@ class PaginationTest extends TestCase
 
     public function test_items(): void
     {
-        $this->assertSame(['item1', 'item2', 'item3'], $this->pagination->items());
+        $this->assertSame(['item1', 'item2', 'item3'], $this->pagination->items()->toArray());
     }
 
     public function test_total(): void

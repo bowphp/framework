@@ -2,6 +2,9 @@
 
 namespace Bow\Database;
 
+use Bow\Support\Collection as SupportCollection;
+use Bow\Database\Collection as DatabaseCollection;
+
 class Pagination
 {
     public function __construct(
@@ -10,7 +13,7 @@ class Pagination
         private int $total,
         private int $perPage,
         private int $current,
-        private array $data
+        private SupportCollection|DatabaseCollection $data
     ) {
     }
 
@@ -44,9 +47,9 @@ class Pagination
         return $this->current;
     }
 
-    public function items(): array
+    public function items(): SupportCollection|DatabaseCollection
     {
-        return (array) $this->data;
+        return $this->data;
     }
 
     public function total(): int
