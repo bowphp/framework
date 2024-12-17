@@ -126,6 +126,14 @@ class Arraydotify implements \ArrayAccess
 
         foreach ($parts as $key => $part) {
             if ($key != 0) {
+                if (is_array($array) && is_null($array[$part] ?? null)) {
+                    return null;
+                }
+
+                if (is_array($array) && isset($array[$part]) && is_null($array[$part])) {
+                    return null;
+                }
+
                 if (isset($array[$part]) && is_array($array[$part])) {
                     $array = &$array[$part];
                 }
@@ -133,7 +141,7 @@ class Arraydotify implements \ArrayAccess
                 continue;
             }
 
-            if (!isset($origin[$part])) {
+            if (!isset($origin[$part]) || is_null($origin[$part])) {
                 return null;
             }
 
