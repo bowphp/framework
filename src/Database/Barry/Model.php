@@ -532,7 +532,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $builder = static::query();
 
-         // Get the current primary key value
+        // Get the current primary key value
         $primary_key_value = $this->getKeyValue();
 
         // If primary key value is null, we are going to start the creation of new row
@@ -544,7 +544,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         // Check the existent in database
         if (!$builder->exists($this->primary_key, $primary_key_value)) {
-            return 0;
+            return $this->writeRows($builder);
         }
 
         // We set the primary key value
