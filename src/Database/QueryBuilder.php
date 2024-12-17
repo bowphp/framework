@@ -878,9 +878,10 @@ class QueryBuilder implements \JsonSerializable
         $this->bind($statement, $this->where_data_binding);
 
         $this->where_data_binding = [];
+
         $statement->execute();
 
-        $data = Sanitize::make($statement->fetchAll());
+        $data = $statement->fetchAll();
 
         $statement->closeCursor();
 
