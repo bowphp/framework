@@ -876,21 +876,19 @@ if (!function_exists('route')) {
      */
     function route(string $name, bool|array $data = [], bool $absolute = false)
     {
-        $routes = config('app.routes');
-
         if (is_bool($data)) {
             $absolute = $data;
             $data = [];
         }
 
-        if (!isset($routes[$name])) {
+        $url = config('app.routes.' . $name);
+
+        if (is_null($url)) {
             throw new \InvalidArgumentException(
                 'The route named ' . $name . ' does not define.',
                 E_USER_ERROR
             );
         }
-
-        $url = $routes[$name];
 
         if (preg_match_all('/(?::([a-zA-Z0-9_]+\??))/', $url, $matches)) {
             $keys = end($matches);
@@ -901,9 +899,7 @@ if (!function_exists('route')) {
                     unset($data[$valide_key]);
                 } else {
                     if (!isset($data[$key])) {
-                        throw new InvalidArgumentException(
-                            "The $key key is not provide"
-                        );
+                        throw new InvalidArgumentException("Route: The $key key is not provide");
                     }
                     $value = $data[$key];
                     unset($data[$key]);

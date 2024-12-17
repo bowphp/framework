@@ -1210,6 +1210,10 @@ class QueryBuilder implements \JsonSerializable
 
         $data = $this->jump($jump)->take($number_of_page)->get();
 
+        if (is_array($data)) {
+            $data = collect($data);
+        }
+
         // Reinitialisation of current query
         $this->where = $where;
         $this->join = $join;

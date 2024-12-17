@@ -124,6 +124,7 @@ class Cookie
 
         if (!static::$is_decrypt[$key]) {
             $old = Crypto::decrypt($_COOKIE[$key]);
+
             unset(static::$is_decrypt[$key]);
         }
 
