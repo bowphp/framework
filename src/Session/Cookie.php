@@ -87,10 +87,6 @@ class Cookie
      * @param string|int $key
      * @param mixed      $data
      * @param int        $expirate
-     * @param string     $path
-     * @param string     $domain
-     * @param bool       $secure
-     * @param bool       $http
      *
      * @return bool
      */
@@ -98,10 +94,6 @@ class Cookie
         $key,
         $data,
         $expirate = 3600,
-        $path = null,
-        $domain = null,
-        $secure = false,
-        $http = true
     ) {
         $data = Crypto::encrypt($data);
 
@@ -109,10 +101,10 @@ class Cookie
             $key,
             $data,
             time() + $expirate,
-            $path,
-            $domain,
-            $secure,
-            $http
+            config('session.path'),
+            config('session.domain'),
+            config('session.secure'),
+            config('session.httponly')
         );
     }
 
@@ -135,7 +127,8 @@ class Cookie
             unset(static::$is_decrypt[$key]);
         }
 
-        static::set($key, null, -1000);
+        static::set($key, '', -1000);
+
         unset($_COOKIE[$key]);
 
         return $old;

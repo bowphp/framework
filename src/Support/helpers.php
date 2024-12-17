@@ -832,11 +832,7 @@ if (!function_exists('cookie')) {
     function cookie(
         string $key = null,
         mixed $data = null,
-        int $expirate = 3600,
-        string $path = null,
-        string $domain = null,
-        bool $secure = false,
-        bool $http = true
+        int $expirate = 3600
     ) {
         if ($key === null) {
             return Cookie::all();
@@ -847,7 +843,7 @@ if (!function_exists('cookie')) {
         }
 
         if ($key !== null && $data !== null) {
-            return Cookie::set($key, $data, $expirate, $path, $domain, $secure, $http);
+            return Cookie::set($key, $data, $expirate);
         }
 
         return null;
