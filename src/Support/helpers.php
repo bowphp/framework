@@ -794,18 +794,19 @@ if (!function_exists('session')) {
     /**
      * Session help
      *
-     * @param  string $value
-     * @param  mixed $default
+     * @param array|string $value
+     * @param mixed $default
      * @return mixed
      */
-    function session(string $value = null, mixed $default = null): mixed
+    function session(array|string $value = null, mixed $default = null): mixed
     {
         if ($value == null) {
             return Session::getInstance();
         }
 
         if (!is_array($value)) {
-            return Session::getInstance()->get($value, $default);
+            $key = $value;
+            return Session::getInstance()->get($key, $default);
         }
 
         foreach ($value as $key => $item) {
