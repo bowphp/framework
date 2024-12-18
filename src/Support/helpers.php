@@ -928,12 +928,12 @@ if (!function_exists('e')) {
     /**
      * Escape the HTML tags in the chain.
      *
-     * @param  string $value
+     * @param  ?string $value
      * @return string
      */
-    function e(string $value): string
+    function e(?string $value = null): string
     {
-        return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+        return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
     }
 }
 
