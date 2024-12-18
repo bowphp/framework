@@ -794,18 +794,19 @@ if (!function_exists('session')) {
     /**
      * Session help
      *
-     * @param  string $value
-     * @param  mixed $default
+     * @param array|string $value
+     * @param mixed $default
      * @return mixed
      */
-    function session(string $value = null, mixed $default = null): mixed
+    function session(array|string $value = null, mixed $default = null): mixed
     {
         if ($value == null) {
             return Session::getInstance();
         }
 
         if (!is_array($value)) {
-            return Session::getInstance()->get($value, $default);
+            $key = $value;
+            return Session::getInstance()->get($key, $default);
         }
 
         foreach ($value as $key => $item) {
@@ -927,12 +928,12 @@ if (!function_exists('e')) {
     /**
      * Escape the HTML tags in the chain.
      *
-     * @param  string $value
+     * @param  ?string $value
      * @return string
      */
-    function e(string $value): string
+    function e(?string $value = null): string
     {
-        return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+        return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
     }
 }
 
