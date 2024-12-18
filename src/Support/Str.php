@@ -450,6 +450,10 @@ class Str
         $sentence = '';
 
         for ($i = 0; $i < $len; $i++) {
+            if (!isset($wordParts[$i])) {
+                break;
+            }
+    
             $sentence .= ' ' . $wordParts[$i];
         }
 
