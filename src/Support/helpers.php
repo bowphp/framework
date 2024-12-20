@@ -14,6 +14,7 @@ use Bow\Http\Redirect;
 use Bow\Http\Response;
 use Bow\Security\Hash;
 use Bow\Session\Cookie;
+use Bow\Http\HttpStatus;
 use Bow\Security\Crypto;
 use Bow\Session\Session;
 use Bow\Storage\Storage;
@@ -1149,6 +1150,10 @@ if (!function_exists('app_abort')) {
      */
     function app_abort(int $code = 500, string $message = '')
     {
+        if (strlen($message) == 0) {
+            $message = HttpStatus::getMessage($code);
+        }
+
         throw new HttpException($message, $code);
     }
 }

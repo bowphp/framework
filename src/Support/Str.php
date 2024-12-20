@@ -453,7 +453,7 @@ class Str
             if (!isset($wordParts[$i])) {
                 break;
             }
-    
+
             $sentence .= ' ' . $wordParts[$i];
         }
 
