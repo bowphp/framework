@@ -11,20 +11,6 @@ use Bow\Database\Barry\Relation;
 class HasOne extends Relation
 {
     /**
-     * The foreign key of the parent model.
-     *
-     * @var string
-     */
-    protected string $foreign_key;
-
-    /**
-     * The associated key on the parent model.
-     *
-     * @var string
-     */
-    protected string $local_key;
-
-    /**
      * Create a new belongs to relationship instance.
      *
      * @param Model $related
@@ -38,8 +24,6 @@ class HasOne extends Relation
 
         $this->local_key = $local_key;
         $this->foreign_key = $foreign_key;
-
-        $this->query = $this->query->where($this->foreign_key, $this->parent->$local_key);
     }
 
     /**
@@ -50,6 +34,7 @@ class HasOne extends Relation
     public function getResults(): ?Model
     {
         $key = $this->query->getTable() . ":hasone:" . $this->related->getTable() . ":" . $this->foreign_key;
+    
         $cache = Cache::store('file')->get($key);
 
         if (!is_null($cache)) {
@@ -74,8 +59,10 @@ class HasOne extends Relation
      */
     public function addConstraints(): void
     {
-        if (static::$has_constraints) {
-            // Todo
+        if (!static::$has_constraints) {
+            return;
         }
+
+        $this->query = $this->query->where($this->foreign_key, $this->parent->getAttribute($this->local_key));
     }
 }

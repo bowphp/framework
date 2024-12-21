@@ -11,20 +11,6 @@ use Bow\Database\Barry\Relation;
 class BelongsToMany extends Relation
 {
     /**
-     * The foreign key of the parent model.
-     *
-     * @var string
-     */
-    protected $foreign_key;
-
-    /**
-     * The associated key on the parent model.
-     *
-     * @var string
-     */
-    protected $local_key;
-
-    /**
      * Create a new belongs to relationship instance.
      *
      * @param Model $related
@@ -47,7 +33,6 @@ class BelongsToMany extends Relation
      */
     public function getResults(): Collection
     {
-        // TODO: Cache the result
         return $this->query->get();
     }
 
@@ -58,8 +43,14 @@ class BelongsToMany extends Relation
      */
     public function addConstraints(): void
     {
-        if (static::$has_constraints) {
-            // Todo
+        if (!static::$has_constraints) {
+            return;
         }
+
+        // For belongs to relationships, which are essentially the inverse of has one
+        // or has many relationships, we need to actually query on the primary key
+        // of the related models matching on the foreign key that's on a parent.
+        $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
+        $this->query->where($this->local_key, '=', $foreign_key_value);
     }
 }

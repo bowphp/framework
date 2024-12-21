@@ -13,21 +13,12 @@ trait CanSerialized
      *
      * @return string
      */
-    public function __sleep()
+    public function __sleep(): array
     {
         if ($this instanceof Model) {
             return ['attributes' => $this->attributes];
         }
 
         return ['attributes' => $this->toArray()];
-    }
-
-    /**
-     * __wakeup
-     *
-     * @return string
-     */
-    public function __wakeup()
-    {
     }
 }
