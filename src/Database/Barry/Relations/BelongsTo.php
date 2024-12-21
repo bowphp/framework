@@ -11,20 +11,6 @@ use Bow\Database\Barry\Relation;
 class BelongsTo extends Relation
 {
     /**
-     * The foreign key of the parent model.
-     *
-     * @var string
-     */
-    protected $foreign_key;
-
-    /**
-     * The associated key on the parent model.
-     *
-     * @var string
-     */
-    protected $local_key;
-
-    /**
      * Create a new belongs to relationship instance.
      *
      * @param Model $related
@@ -52,6 +38,7 @@ class BelongsTo extends Relation
     public function getResults(): ?Model
     {
         $key = $this->query->getTable() . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
+    
         $cache = Cache::store('file')->get($key);
 
         if (!is_null($cache)) {
