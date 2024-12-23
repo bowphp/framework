@@ -64,6 +64,14 @@ class FilesystemAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
+    public function set(string $key, mixed $data, ?int $time = null): bool
+    {
+        return $this->add($key, $data, $time);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function addMany(array $data): bool
     {
         $return = true;

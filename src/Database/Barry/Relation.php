@@ -116,8 +116,8 @@ abstract class Relation
     }
 
     /**
-     * Create a new row of the related 
-     * 
+     * Create a new row of the related
+     *
      * @param array $attributes
      * @return Model
      */

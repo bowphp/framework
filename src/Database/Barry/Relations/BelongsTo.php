@@ -38,7 +38,7 @@ class BelongsTo extends Relation
     public function getResults(): ?Model
     {
         $key = $this->query->getTable() . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
-    
+
         $cache = Cache::store('file')->get($key);
 
         if (!is_null($cache)) {
