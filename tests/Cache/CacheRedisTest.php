@@ -45,8 +45,19 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
     public function test_add_array_cache()
     {
         $result = Cache::add('address', [
-            'tel' => "49929598",
+            'tel' => "0700000000",
             'city' => "Abidjan",
+            'country' => "Cote d'ivoire"
+        ]);
+
+        $this->assertEquals($result, true);
+    }
+
+    public function test_set_array_cache()
+    {
+        $result = Cache::set('address_2', [
+            'tel' => "0700000000",
+            'city' => "Yop",
             'country' => "Cote d'ivoire"
         ]);
 
@@ -56,6 +67,17 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
     public function test_get_array_cache()
     {
         $result = Cache::get('address');
+
+        $this->assertEquals(true, is_array($result));
+        $this->assertEquals(count($result), 3);
+        $this->assertArrayHasKey('tel', $result);
+        $this->assertArrayHasKey('city', $result);
+        $this->assertArrayHasKey('country', $result);
+    }
+
+    public function test_get_2_array_cache()
+    {
+        $result = Cache::get('address_2');
 
         $this->assertEquals(true, is_array($result));
         $this->assertEquals(count($result), 3);

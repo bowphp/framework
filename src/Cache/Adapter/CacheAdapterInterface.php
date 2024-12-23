@@ -15,6 +15,16 @@ interface CacheAdapterInterface
     public function add(string $key, mixed $data, ?int $time = null): bool;
 
     /**
+     * Set a new enter
+     *
+     * @param string $key
+     * @param mixed $data
+     * @param ?int $time
+     * @return bool
+     */
+    public function set(string $key, mixed $data, ?int $time = null): bool;
+
+    /**
      * Add many item
      *
      * @param array $data

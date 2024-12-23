@@ -55,6 +55,14 @@ class DatabaseAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
+    public function set(string $key, mixed $data, ?int $time = null): bool
+    {
+        return $this->add($key, $data, $time);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function get(string $key, mixed $default = null): mixed
     {
         if (!$this->has($key)) {
