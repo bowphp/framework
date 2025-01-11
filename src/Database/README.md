@@ -3,6 +3,7 @@
 Bow Framework's database system is very simple database manager api with support:
 
 - MySQL
+- PostGreSQL
 - SQLite
 
 Make database connexion is very simple
