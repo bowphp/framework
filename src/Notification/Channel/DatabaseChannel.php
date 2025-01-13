@@ -14,5 +14,6 @@ class DatabaseChannel implements ChannelInterface
      */
     public function send(mixed $message)
     {
+        
     }
 }

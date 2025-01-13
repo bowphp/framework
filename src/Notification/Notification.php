@@ -31,9 +31,14 @@ abstract class Notification
      * Send notification to mail
      *
      * @param \Bow\Database\Barry\Model $notifiable
-     * @return Message
+     * @return mixed
      */
-    abstract public function toMail(Model $notifiable): Message;
+    public function toMail(Model $notifiable): ?Message
+    {
+        $message = new Message();
+
+        return $message;
+    }
 
     /**
      * Send notification to database
@@ -41,7 +46,10 @@ abstract class Notification
      * @param \Bow\Database\Barry\Model $notifiable
      * @return array
      */
-    abstract public function toDatabase(Model $notifiable): array;
+    public function toDatabase(Model $notifiable): array
+    {
+        return [];
+    }
 
     /**
      * Process the notification
