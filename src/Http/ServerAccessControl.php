@@ -110,11 +110,11 @@ class ServerAccessControl
     /**
      * Active Access-control-Max-Age
      *
-     * @param  string $excepted
+     * @param  float|int $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
-    public function maxAge(string $excepted): ServerAccessControl
+    public function maxAge(float|int $excepted): ServerAccessControl
     {
         if (!is_numeric($excepted)) {
             throw new ServerAccessControlException(
@@ -123,7 +123,7 @@ class ServerAccessControl
             );
         }
 
-        return $this->push('Access-Control-Max-Age', $excepted);
+        return $this->push('Access-Control-Max-Age', (string) $excepted);
     }
 
     /**

@@ -6,8 +6,16 @@ namespace Bow\Mail;
 
 use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Exception\MailException;
+use Bow\Mail\MailQueueProducer;
 use Bow\View\View;
 
+/**
+ * @method mixed view(string $template, array $data, callable $cb)
+ * @method mixed queue(string $template, array $data, callable $cb)
+ * @method mixed queueOn(string $queue, string $template, array $data, callable $cb)
+ * @method mixed send($view, array|callable $data, ?callable $cb = null)
+ * @method mixed raw(string|array $to, string $subject, string $data, array $headers = [])
+ */
 class Mail
 {
     /**
@@ -59,8 +67,18 @@ class Mail
             static::$config = $config;
         }
 
+        if (!isset($config['driver'])) {
+            throw new MailException(
+                "The driver is not defined.",
+                E_USER_ERROR
+            );
+        }
+
         if (!in_array($config['driver'], array_keys(static::$drivers))) {
-            throw new MailException("The type is not known.", E_USER_ERROR);
+            throw new MailException(
+                "The driver is not defined.",
+                E_USER_ERROR
+            );
         }
 
         $name = $config['driver'];
@@ -76,8 +94,8 @@ class Mail
     /**
      * Push new driver
      *
-     * @param strinb $name
-     * @param strinb $class_name
+     * @param string $name
+     * @param string $class_name
      * @return bool
      */
     public function pushDriver(string $name, string $class_name): bool
@@ -104,18 +122,17 @@ class Mail
     /**
      * @inheritdoc
      */
-    public static function send($view, $bind, callable $cb)
+    public static function send(string $view, callable|array $data, ?callable $cb = null)
     {
-        if (is_callable($bind)) {
-            $cb = $bind;
-            $bind = [];
+        if (is_null($cb)) {
+            $cb = $data;
+            $data = [];
         }
 
+        $content = View::parse($view, $data)->getContent();
+
         $message = new Message();
-
-        $data = View::parse($view, $bind)->getContent();
-
-        $message->setMessage($data);
+        $message->setMessage($content);
 
         call_user_func_array($cb, [$message]);
 
@@ -131,11 +148,9 @@ class Mail
      * @param  array        $headers
      * @return mixed
      */
-    public static function raw($to, $subject, $data, array $headers = [])
+    public static function raw(string|array $to, string $subject, string $data, array $headers = [])
     {
-        if (!is_array($to)) {
-            $to = [$to];
-        }
+        $to = (array) $to;
 
         $message = new Message();
 
@@ -149,20 +164,111 @@ class Mail
     }
 
     /**
-     * Modify the smtp|mail driver
+     * Send message on queue
+     *
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
+     */
+    public static function queue(string $template, array $data, callable $cb)
+    {
+        $message = new Message();
+
+        call_user_func_array($cb, [$message]);
+
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        queue($producer);
+    }
+
+    /**
+     * Send message on specific queue
+     *
+     * @param string $queue
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
+     */
+    public static function queueOn(string $queue, string $template, array $data, callable $cb)
+    {
+        $message = new Message();
+
+        call_user_func_array($cb, [$message]);
+
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        $producer->setQueue($queue);
+
+        queue($producer);
+    }
+
+    /**
+     * Send mail later
+     *
+     * @param integer $delay
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
+     */
+    public static function later(int $delay, string $template, array $data, callable $cb)
+    {
+        $message = new Message();
+
+        call_user_func_array($cb, [$message]);
+
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        $producer->setDelay($delay);
+
+        queue($producer);
+    }
+
+    /**
+     * Send mail later on specific queue
+     *
+     * @param integer $delay
+     * @param string $queue
+     * @param string $template
+     * @param array $data
+     * @param callable $cb
+     * @return void
+     */
+    public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb)
+    {
+        $message = new Message();
+
+        call_user_func_array($cb, [$message]);
+
+        $producer = new MailQueueProducer($template, $data, $message);
+
+        $producer->setQueue($queue);
+        $producer->setDelay($delay);
+
+        queue($producer);
+    }
+
+    /**
+     * Modify the smtp|mail|ses driver
      *
      * @param string $driver
-     * @return SendInterface
+     * @return MailDriverInterface
      * @throws MailException
      */
-    public static function setDriver($driver)
+    public static function setDriver(string $driver): MailDriverInterface
     {
         if (static::$config == null) {
-            throw new MailException('Mail non configurer.');
+            throw new MailException(
+                'Please configure the Mail service.'
+            );
         }
 
         if (in_array($driver, array_keys(static::$drivers))) {
-            throw new MailException('The driver [$driver] is not available');
+            throw new MailException(
+                "The driver $driver is not available"
+            );
         }
 
         static::$config['driver'] = $driver;
@@ -184,6 +290,9 @@ class Mail
             return call_user_func_array([static::class, $name], $arguments);
         }
 
-        throw new \ErrorException("This function does not exist. [$name]", E_ERROR);
+        throw new \ErrorException(
+            "This function $name does not existe",
+            E_ERROR
+        );
     }
 }

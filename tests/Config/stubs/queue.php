@@ -4,7 +4,7 @@ return [
     /**
      * The defaut connexion
      */
-    "default" => "beanstalkd",
+    "default" => "sync",
 
     /**
      * The queue drive connection
@@ -21,8 +21,8 @@ return [
          * The beanstalkd connexion
          */
         "beanstalkd" => [
-            "hostname" => "127.0.0.0",
-            "port" => 11301,
+            "hostname" => "127.0.0.1",
+            "port" => 11300,
             "timeout" => 10,
         ],
 
@@ -30,9 +30,21 @@ return [
          * The sqs connexion
          */
         "sqs" => [
-            "hostname" => "127.0.0.0",
-            "port" => 11300,
-            "timeout" => 10,
+            'profile' => 'default',
+            'region' => 'ap-south-1',
+            'version' => 'latest',
+            'url' => getenv("AWS_SQS_URL"),
+            'credentials' => [
+                'key' => getenv('AWS_KEY'),
+                'secret' => getenv('AWS_SECRET'),
+            ],
+        ],
+
+        /**
+         * The sqs connexion
+         */
+        "database" => [
+            'table' => "queues",
         ]
     ]
 ];

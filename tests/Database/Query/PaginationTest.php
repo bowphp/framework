@@ -3,6 +3,7 @@
 namespace Bow\Tests\Database\Query;
 
 use Bow\Database\Database;
+use Bow\Database\Pagination;
 use Bow\Tests\Config\TestingConfiguration;
 
 class PaginationTest extends \PHPUnit\Framework\TestCase
@@ -22,13 +23,13 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->createTestingTable($name);
         $result = Database::table("pets")->paginate(10);
 
-        $this->assertIsArray($result);
-        $this->assertEquals(count($result["data"]), 10);
-        $this->assertEquals($result["per_page"], 10);
-        $this->assertEquals($result["total"], 3);
-        $this->assertEquals($result["current"], 1);
-        $this->assertEquals($result["previous"], 1);
-        $this->assertEquals($result["next"], 2);
+        $this->assertInstanceOf(Pagination::class, $result);
+        $this->assertEquals(count($result->items()), 10);
+        $this->assertEquals($result->perPage(), 10);
+        $this->assertEquals($result->total(), 3);
+        $this->assertEquals($result->current(), 1);
+        $this->assertEquals($result->previous(), 1);
+        $this->assertEquals($result->next(), 2);
     }
 
     /**
@@ -40,13 +41,13 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->createTestingTable($name);
         $result = Database::table("pets")->paginate(10, 2);
 
-        $this->assertIsArray($result);
-        $this->assertEquals(count($result["data"]), 10);
-        $this->assertEquals($result["per_page"], 10);
-        $this->assertEquals($result["total"], 3);
-        $this->assertEquals($result["current"], 2);
-        $this->assertEquals($result["previous"], 1);
-        $this->assertEquals($result["next"], 3);
+        $this->assertInstanceOf(Pagination::class, $result);
+        $this->assertEquals(count($result->items()), 10);
+        $this->assertEquals($result->perPage(), 10);
+        $this->assertEquals($result->total(), 3);
+        $this->assertEquals($result->current(), 2);
+        $this->assertEquals($result->previous(), 1);
+        $this->assertEquals($result->next(), 3);
     }
 
     /**
@@ -58,13 +59,13 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->createTestingTable($name);
         $result = Database::table("pets")->paginate(10, 3);
 
-        $this->assertIsArray($result);
-        $this->assertEquals(count($result["data"]), 10);
-        $this->assertEquals($result["per_page"], 10);
-        $this->assertEquals($result["total"], 3);
-        $this->assertEquals($result["current"], 3);
-        $this->assertEquals($result["previous"], 2);
-        $this->assertEquals($result["next"], false);
+        $this->assertInstanceOf(Pagination::class, $result);
+        $this->assertEquals(count($result->items()), 10);
+        $this->assertEquals($result->perPage(), 10);
+        $this->assertEquals($result->total(), 3);
+        $this->assertEquals($result->current(), 3);
+        $this->assertEquals($result->previous(), 2);
+        $this->assertEquals($result->next(), false);
     }
 
     /**

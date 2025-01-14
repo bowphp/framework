@@ -7,16 +7,20 @@ use Bow\Tests\Queue\Stubs\PetModelStub;
 
 class ModelProducerStub extends ProducerService
 {
-    private PetModelStub $pet;
-
-    public function __construct(PetModelStub $pet)
-    {
+    public function __construct(
+        private PetModelStub $pet,
+        private string $connection
+    ) {
         $this->pet = $pet;
+        $this->connection = $connection;
     }
 
     public function process(): void
     {
         $this->pet->save();
-        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/queue_pet_model_stub.txt', $this->pet->toJson());
+
+        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$this->connection}_queue_pet_model_stub.txt", $this->pet->toJson());
+
+        $this->deleteJob();
     }
 }

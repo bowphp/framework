@@ -7,8 +7,6 @@ namespace Bow\Console;
 use Bow\Configuration\Loader;
 use Bow\Console\Exception\ConsoleException;
 use Bow\Console\Traits\ConsoleTrait;
-use Psy\Exception\FatalErrorException;
-use RuntimeException;
 
 /**
  * @method static Console addCommand(string $command, callable $cb)
@@ -79,7 +77,7 @@ class Console
      * @var array
      */
     private const COMMAND = [
-        'add', 'migration', 'migrate', 'run', 'generate', 'gen', 'seed', 'help', 'launch', 'clear'
+        'add', 'migration', 'migrate', 'run', 'generate', 'gen', 'seed', 'help', 'launch', 'clear', 'flush'
     ];
 
     /**
@@ -144,7 +142,7 @@ class Console
     /**
      * Launch Bow task runner
      *
-     * @return void
+     * @return mixed
      * @throws
      */
     public function run(): mixed
@@ -406,7 +404,7 @@ class Console
     {
         $action = $this->arg->getAction();
 
-        if (!in_array($action, ['key', 'resource', 'session', 'cache'])) {
+        if (!in_array($action, ['key', 'resource', 'session', 'cache', 'queue'])) {
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
@@ -437,6 +435,23 @@ class Console
     }
 
     /**
+     * Flush the connections
+     *
+     * @return void
+     * @throws \ErrorException
+     */
+    private function flush(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, ['worker'])) {
+            $this->throwFailsCommand('This action is not exists', 'help flush');
+        }
+
+        $this->command->call('flush', $action);
+    }
+
+    /**
      * Display global help or helper command.
      *
      * @param  string|null $command
@@ -458,9 +473,9 @@ Bow task runner usage: php bow command:action [name] --option
 
  \033[0;32mGENERATE\033[00m create a new app key and resources
    \033[0;33mgenerate:resource\033[00m   Create new REST controller
-   \033[0;33mgenerate:session\033[00m    For generate session table
-   \033[0;33mgenerate:cache\033[00m      For generate cache table
+   \033[0;33mgenerate:table\033[00m      For generate the preset table for session, cache, queue
    \033[0;33mgenerate:key\033[00m        Create new app key
+   \033[0;33mflush:worker\033[00m        Flush all queues
 
  \033[0;32mADD\033[00m Create a user class
    \033[0;33madd:middleware\033[00m      Create new middleware
@@ -545,7 +560,7 @@ U;
     --model=[model_name] Define the usable model
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   For create a new REST controller
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:session                  For generate session table
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:table                    For generate the table for session, cache, queue
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      For generate a new APP KEY
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     For display this
 
@@ -570,7 +585,7 @@ U;
     [option]
     run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
     run:console [--include=filename.php] [--prompt=prompt_name]
-    run:worker [--queue=default] [--connexion=beanstalkd,sqs] [--retry-after=duration]
+    run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
@@ -600,10 +615,20 @@ U;
 U;
                 break;
 
+            case 'flush':
+                echo <<<U
+\n\033[0;32mMFlush all queues content\033[00m\n
+    [option]
+    flush:worker [connection] [--queue=queue_name]
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m flush:worker\033[00m           Flush all queues
+
+U;
+                break;
+
             default:
                 $this->throwFailsCommand("Please make php bow help for show whole docs !");
                 exit(1);
-                break;
         }
 
         exit(0);

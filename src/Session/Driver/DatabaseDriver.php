@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Session\Driver;
 
-use Bow\Support\Capsule;
 use Bow\Database\QueryBuilder;
 use Bow\Database\Database as DB;
 
@@ -74,15 +73,15 @@ class DatabaseDriver implements \SessionHandlerInterface
      * Garbage collector for cleans old sessions
      *
      * @param int $max_lifetime
-     * @return bool
+     * @return int|false
      */
-    public function gc(int $max_lifetime): bool
+    public function gc(int $max_lifetime): int|false
     {
         $this->sessions()
             ->where('time', '<', $this->createTimestamp())
             ->delete();
 
-        return true;
+        return 1;
     }
 
     /**

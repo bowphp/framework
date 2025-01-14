@@ -10,6 +10,20 @@ use Bow\Database\QueryBuilder;
 abstract class Relation
 {
     /**
+     * The foreign key of the parent model.
+     *
+     * @var string
+     */
+    protected string $foreign_key;
+
+    /**
+     * The associated key on the parent model.
+     *
+     * @var string
+     */
+    protected string $local_key;
+
+    /**
      * The parent model instance
      *
      * @var Model
@@ -54,6 +68,7 @@ abstract class Relation
     {
         $this->parent = $parent;
         $this->related = $related;
+
         $this->query = $this->related::query();
 
         // Build the constraint effect
@@ -61,20 +76,6 @@ abstract class Relation
             $this->addConstraints();
         }
     }
-
-    /**
-     * Set the base constraints on the relation query.
-     *
-     * @return void
-     */
-    abstract public function addConstraints(): void;
-
-    /**
-     * Get the results of the relationship.
-     *
-     * @return mixed
-     */
-    abstract public function getResults(): mixed;
 
     /**
      * Get the parent model.
@@ -108,9 +109,36 @@ abstract class Relation
         $result = call_user_func_array([$this->query, $method], (array) $args);
 
         if ($result === $this->query) {
-            return $this->query;
+            return $this;
         }
 
         return $result;
     }
+
+    /**
+     * Create a new row of the related 
+     * 
+     * @param array $attributes
+     * @return Model
+     */
+    public function create(array $attributes): Model
+    {
+        $attributes[$this->foreign_key] = $this->parent->getKeyValue();
+
+        return $this->related->create($attributes);
+    }
+
+    /**
+     * Get the results of the relationship.
+     *
+     * @return mixed
+     */
+    abstract public function getResults(): mixed;
+
+    /**
+     * Set the base constraints on the relation query.
+     *
+     * @return void
+     */
+    abstract public function addConstraints(): void;
 }

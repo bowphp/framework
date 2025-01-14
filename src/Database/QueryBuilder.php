@@ -6,7 +6,6 @@ namespace Bow\Database;
 
 use Bow\Database\Connection\AbstractConnection;
 use PDO;
-use stdClass;
 use PDOStatement;
 use Bow\Support\Str;
 use Bow\Support\Util;
@@ -88,9 +87,9 @@ class QueryBuilder implements \JsonSerializable
     /**
      * The PDO instance
      *
-     * @var \PDO
+     * @var PDO
      */
-    protected ?\PDO $connection = null;
+    protected ?PDO $connection = null;
 
     /**
      * Define whether to retrieve information from the list
@@ -274,6 +273,25 @@ class QueryBuilder implements \JsonSerializable
             $this->where = $where;
         } else {
             $this->where .= ' and ' . $where;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add orWhere clause into the request
+     *
+     * WHERE column1 $comparator $value|column
+     *
+     * @param string $where
+     * @return QueryBuilder
+     */
+    public function orWhereRaw(string $where): QueryBuilder
+    {
+        if ($this->where == null) {
+            $this->where = $where;
+        } else {
+            $this->where .= ' or ' . $where;
         }
 
         return $this;
@@ -794,9 +812,9 @@ class QueryBuilder implements \JsonSerializable
      *
      * @param $aggregate
      * @param string $column
-     * @return int|float
+     * @return mixed
      */
-    private function aggregate($aggregate, $column): int|float
+    private function aggregate($aggregate, $column): mixed
     {
         $sql = 'select ' . $aggregate . '(' . $column . ') from ' . $this->table;
 
@@ -860,9 +878,10 @@ class QueryBuilder implements \JsonSerializable
         $this->bind($statement, $this->where_data_binding);
 
         $this->where_data_binding = [];
+
         $statement->execute();
 
-        $data = Sanitize::make($statement->fetchAll());
+        $data = $statement->fetchAll();
 
         $statement->closeCursor();
 
@@ -1169,9 +1188,9 @@ class QueryBuilder implements \JsonSerializable
      * @param int $number_of_page
      * @param int $current
      * @param int $chunk
-     * @return array
+     * @return Pagination
      */
-    public function paginate(int $number_of_page, int $current = 0, int $chunk = null): array
+    public function paginate(int $number_of_page, int $current = 0, ?int $chunk = null): Pagination
     {
         // We go to back page
         --$current;
@@ -1192,6 +1211,10 @@ class QueryBuilder implements \JsonSerializable
 
         $data = $this->jump($jump)->take($number_of_page)->get();
 
+        if (is_array($data)) {
+            $data = collect($data);
+        }
+
         // Reinitialisation of current query
         $this->where = $where;
         $this->join = $join;
@@ -1202,18 +1225,18 @@ class QueryBuilder implements \JsonSerializable
 
         // Grouped data
         if (is_int($chunk)) {
-            $data = array_chunk($data, $chunk);
+            $data = $data->chunk($chunk);
         }
 
         // Enables automatic paging.
-        return [
-            'next' => $current >= 1 && $rest_of_page > 0 ? $current + 1 : false,
-            'previous' => ($current - 1) <= 0 ? 1 : ($current - 1),
-            'total' => (int) ($rest_of_page + $current),
-            'per_page' => $number_of_page,
-            'current' => $current,
-            'data' => $data
-        ];
+        return new Pagination(
+            $current >= 1 && $rest_of_page > 0 ? $current + 1 : 0,
+            ($current - 1) <= 0 ? 1 : ($current - 1),
+            (int) ($rest_of_page + $current),
+            $number_of_page,
+            $current,
+            $data
+        );
     }
 
     /**

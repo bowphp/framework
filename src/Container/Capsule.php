@@ -145,11 +145,10 @@ class Capsule implements ArrayAccess
      * Register the instance of a class
      *
      * @param string $key
-     * @param Closure $value
-     *
+     * @param Closure|callable $value
      * @return void
      */
-    public function factory($key, \Closure $value)
+    public function factory($key, Closure|callable $value)
     {
         $this->factories[$key] = $value;
     }
@@ -157,15 +156,16 @@ class Capsule implements ArrayAccess
     /**
      * Saves the instance of a class
      *
-     * @param string   $key
+     * @param string $key
      * @param mixed $instance
-     *
      * @return void
      */
-    public function instance($key, $instance)
+    public function instance(string $key, mixed $instance): void
     {
         if (!is_object($instance)) {
-            throw new InvalidArgumentException('Parameter [2] is invalid');
+            throw new InvalidArgumentException(
+                "The parameter $instance must be an object."
+            );
         }
 
         $this->instances[$key] = $instance;
@@ -178,7 +178,7 @@ class Capsule implements ArrayAccess
      * @return mixed
      * @throws
      */
-    private function resolve($key)
+    private function resolve($key): mixed
     {
         $reflection = new ReflectionClass($key);
 

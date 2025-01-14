@@ -28,6 +28,7 @@ trait MysqlCompose
         // Transform attribute
         $default = $attribute['default'] ?? null;
         $size = $attribute['size'] ?? false;
+        $check = $attribute['check'] ?? false;
         $primary = $attribute['primary'] ?? false;
         $increment = $attribute['increment'] ?? false;
         $nullable = $attribute['nullable'] ?? false;
@@ -35,6 +36,7 @@ trait MysqlCompose
         $unsigned = $attribute['unsigned'] ?? false;
         $after = $attribute['after'] ?? false;
         $first = $attribute['first'] ?? false;
+        $custom = $attribute['custom'] ?? false;
 
         // String to VARCHAR
         if ($raw_type == 'STRING') {
@@ -45,13 +47,16 @@ trait MysqlCompose
             $size = 255;
         }
 
-        // Add column size
-        if ($size) {
-            if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-                $size = (array) $size;
-                $size = "'" . implode("', '", $size) . "'";
-            }
+        // Set the size
+        if (is_numeric($size)) {
             $type = sprintf('%s(%s)', $type, $size);
+        }
+
+        // Add column size
+        if (in_array($raw_type, ['ENUM', 'CHECK'])) {
+            $check = (array) $size;
+            $check = "'" . implode("', '", $check) . "'";
+            $type = sprintf('%s(%s)', $type, $check);
         }
 
         // Bind auto increment action
@@ -98,6 +103,11 @@ trait MysqlCompose
 
         if ($first === true) {
             $type = sprintf('%s FIRST', $type);
+        }
+
+        // Apply the custom definition
+        if ($custom) {
+            $type = sprintf('%s %s', $type, $custom);
         }
 
         return trim(

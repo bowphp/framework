@@ -104,14 +104,14 @@ trait Relationship
      * The has one relative
      *
      * @param string $related
-     * @param string $primary_key
      * @param string $foreign_key
+     * @param string $primary_key
      * @return HasOne
      */
     public function hasOne(
         string $related,
-        ?string $primary_key = null,
-        ?string $foreign_key = null
+        ?string $foreign_key = null,
+        ?string $primary_key = null
     ): HasOne {
         $related_model = app()->make($related);
 
@@ -124,6 +124,6 @@ trait Relationship
             $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
 
-        return new HasOne($related_model, $this, $primary_key, $foreign_key);
+        return new HasOne($related_model, $this, $foreign_key, $primary_key);
     }
 }

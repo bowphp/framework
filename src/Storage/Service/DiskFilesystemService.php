@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Storage\Service;
 
-use Bow\Http\UploadFile;
+use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\FilesystemInterface;
 use InvalidArgumentException;
 
@@ -51,14 +51,14 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Function to upload a file
      *
-     * @param  UploadFile $file
+     * @param  UploadedFile $file
      * @param  string|array $location
      * @param  array $option
      *
-     * @return bool
+     * @return array|bool|string
      * @throws InvalidArgumentException
      */
-    public function store(UploadFile $file, string|array $location = null, array $option = []): bool
+    public function store(UploadedFile $file, string|array $location = null, array $option = []): array|bool|string
     {
         if (is_array($location)) {
             $option = $location;
@@ -237,7 +237,7 @@ class DiskFilesystemService implements FilesystemInterface
         }
 
         if (!$this->exists($source)) {
-            $this->makeDirectory(dirname($source), true);
+            $this->makeDirectory(dirname($source));
         }
 
         return (bool) file_put_contents($source, $this->get($target));

@@ -17,4 +17,14 @@ class Authentication extends Model
     {
         return $this->attributes[$this->primary_key];
     }
+
+    /**
+     * Define the additionals values
+     *
+     * @return array
+     */
+    public function customJwtAttributes(): array
+    {
+        return [];
+    }
 }

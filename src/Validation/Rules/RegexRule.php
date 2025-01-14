@@ -9,19 +9,19 @@ trait RegexRule
     /**
      * Compile Regex Rule
      *
-     * [regex] Check that the contents of the field with a regular expression
+     * Check that the contents of the field with a regular expression
      *
      * @param string $key
-     * @param string $masque
+     * @param string|int|float $masque
      * @return void
      */
-    protected function compileRegex(string $key, string $masque): void
+    protected function compileRegex(string $key, string|int|float $masque): void
     {
-        if (!preg_match("/^regex:(.+)+$/", $masque, $match)) {
+        if (!preg_match("/^regex:(.+)+$/", (string) $masque, $match)) {
             return;
         }
 
-        $regex = '~^' . $match[1] . '$~';
+        $regex = '~' . addcslashes($match[1], "~") . '~';
 
         if (preg_match($regex, $this->inputs[$key])) {
             return;

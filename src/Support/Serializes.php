@@ -1,11 +1,11 @@
 <?php
 
-namespace Bow\Queue\Traits;
+namespace Bow\Support;
 
 use ReflectionClass;
 use ReflectionProperty;
 
-trait SerializesModels
+trait Serializes
 {
     /**
      * Prepare the instance values for serialization.
@@ -26,13 +26,11 @@ trait SerializesModels
             }
 
             $property->setAccessible(true);
-
-            if (! $property->isInitialized($this)) {
+            if (!$property->isInitialized($this)) {
                 continue;
             }
 
             $value = $this->getPropertyValue($property);
-
             if ($property->hasDefaultValue() && $value === $property->getDefaultValue()) {
                 continue;
             }
@@ -76,7 +74,7 @@ trait SerializesModels
                 $name = "\0*\0{$name}";
             }
 
-            if (! array_key_exists($name, $values)) {
+            if (!array_key_exists($name, $values)) {
                 continue;
             }
 
@@ -95,8 +93,9 @@ trait SerializesModels
      * @param  \ReflectionProperty  $property
      * @return mixed
      */
-    protected function getPropertyValue(ReflectionProperty $property)
-    {
+    protected function getPropertyValue(
+        ReflectionProperty $property
+    ) {
         $property->setAccessible(true);
 
         return $property->getValue($this);

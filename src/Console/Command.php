@@ -37,11 +37,15 @@ class Command extends AbstractCommand
             "key" => \Bow\Console\Command\GenerateKeyCommand::class,
             "resource" => \Bow\Console\Command\GenerateResourceControllerCommand::class,
             "session" => \Bow\Console\Command\GenerateSessionCommand::class,
+            "queue" => \Bow\Console\Command\GenerateQueueCommand::class,
             "cache" => \Bow\Console\Command\GenerateCacheCommand::class,
         ],
         "runner" => [
             "console" => \Bow\Console\Command\ReplCommand::class,
             "server" => \Bow\Console\Command\ServerCommand::class,
+            "worker" => \Bow\Console\Command\WorkerCommand::class,
+        ],
+        "flush" => [
             "worker" => \Bow\Console\Command\WorkerCommand::class,
         ],
     ];
@@ -79,5 +83,7 @@ class Command extends AbstractCommand
         if (method_exists($instance, $method)) {
             return call_user_func_array([$instance, $method], $rest);
         }
+
+        return null;
     }
 }

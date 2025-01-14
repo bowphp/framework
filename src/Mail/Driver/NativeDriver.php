@@ -6,7 +6,6 @@ namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Message;
-use Bow\Support\Str;
 use Bow\Mail\Exception\MailException;
 use InvalidArgumentException;
 

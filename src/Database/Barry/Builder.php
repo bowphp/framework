@@ -53,13 +53,13 @@ class Builder extends QueryBuilder
      */
     public function exists(?string $column = null, mixed $value = null): bool
     {
-        if (is_null($column) == null && is_null($value)) {
+        if (is_null($column) && is_null($value)) {
             return $this->count() > 0;
         }
 
         // If value is null and column is define
         // we make the column as value on model primary key name
-        if (!is_null($column) and is_null($value)) {
+        if (!is_null($column) && is_null($value)) {
             $value = $column;
 
             $column = (new $this->model())->getKey();

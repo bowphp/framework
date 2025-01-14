@@ -10,70 +10,6 @@ use Bow\View\View;
 class Response implements ResponseInterface
 {
     /**
-     * Valid http code list for the app Except that
-     * the user can himself redefine these codes
-     * if it uses the `header` function of php
-     */
-    private static array $status_codes = [
-        100 => 'Continue',
-        101 => 'Switching Protocols',
-        102 => 'Processing',
-        200 => 'OK',
-        201 => 'Created',
-        202 => 'Accepted',
-        204 => 'No Content',
-        205 => 'Reset Content',
-        206 => 'Partial Content',
-        207 => 'Multi-Status',
-        208 => 'Already Reported',
-        226 => 'IM Used',
-        300 => 'Multipe Choices',
-        301 => 'Moved Permanently',
-        302 => 'Found',
-        303 => 'See Other',
-        304 => 'Not Modified',
-        305 => 'Use Proxy',
-        307 => 'Temporary Redirect',
-        308 => 'Permanent Redirect',
-        400 => 'Bad Request',
-        401 => 'Unauthorized',
-        402 => 'Payment Required',
-        403 => 'Forbidden',
-        404 => 'Not Found',
-        405 => 'Method Not Allowed',
-        406 => 'Not Acceptable',
-        407 => 'Proxy Authentication',
-        408 => 'Request Time Out',
-        409 => 'Conflict',
-        410 => 'Gone',
-        411 => 'Length Required',
-        412 => 'Precondition Failed',
-        413 => 'Payload Too Large',
-        414 => 'URI Too Long',
-        415 => 'Unsupport Media',
-        416 => 'Range Not Statisfiable',
-        417 => 'Expectation Failed',
-        418 => 'I\'m a teapot',
-        421 => 'Misdirected Request',
-        422 => 'Unprocessable Entity',
-        423 => 'Locked',
-        424 => 'Failed Dependency',
-        426 => 'Upgrade Required',
-        428 => 'Precondition Required',
-        429 => 'Too Many Requests',
-        431 => 'Request Header Fields Too Large',
-        444 => 'Connection Closed Without Response',
-        451 => 'Unavailable For Legal Reasons',
-        499 => 'Client Closed Request',
-        500 => 'Internal Server Error',
-        501 => 'Not Implemented',
-        502 => 'Bad Gateway',
-        503 => 'Service Unavailable',
-        504 => 'Gateway Timeout',
-        505 => 'HTTP Version Not Supported',
-    ];
-
-    /**
      * The Response instamce
      *
      * @var Response
@@ -237,9 +173,9 @@ class Response implements ResponseInterface
     /**
      * Download the given file as an argument
      *
-     * @param string $file
-     * @param null   $filename
-     * @param array  $headers
+     * @param string  $file
+     * @param ?string $filename
+     * @param array   $headers
      * @return string
      */
     public function download(
@@ -276,15 +212,15 @@ class Response implements ResponseInterface
     /**
      * Modify http headers
      *
-     * @param  int $code
+     * @param int $code
      * @return mixed
      */
     public function status(int $code): Response
     {
         $this->code = $code;
 
-        if (in_array($code, array_keys(static::$status_codes), true)) {
-            @header('HTTP/1.1 ' . $code . ' ' . static::$status_codes[$code], $this->override, $code);
+        if (in_array($code, HttpStatus::getCodes(), true)) {
+            @header('HTTP/1.1 ' . $code . ' ' . HttpStatus::getMessage($code), $this->override, $code);
         }
 
         return $this;
@@ -377,7 +313,7 @@ class Response implements ResponseInterface
 
         $view = View::parse($template, $data);
 
-        $this->content = $view->sendContent();
+        $this->content = $view->getContent();
 
         return $this->buildHttpResponse();
     }

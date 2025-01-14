@@ -80,6 +80,16 @@ class JwtGuard extends GuardContract
      */
     public function check(): bool
     {
+        $policier = $this->getPolicier();
+
+        if (is_null($this->token)) {
+            try {
+                $this->token = $policier->getParsedToken();
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+
         if (is_null($this->token)) {
             return false;
         }
@@ -147,10 +157,12 @@ class JwtGuard extends GuardContract
      */
     public function login(Authentication $user): bool
     {
-        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), [
+        $attributes = array_merge($user->customJwtAttributes(), [
             "id" => $user->getAuthenticateUserId(),
             "logged" => true
         ]);
+
+        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), $attributes);
 
         return true;
     }

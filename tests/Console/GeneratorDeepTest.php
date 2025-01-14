@@ -20,8 +20,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Commands;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeCommand\sextends\sConsoleCommand\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Commands;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeCommand\sextends\sConsoleCommand\n@", $content);
     }
 
     public function test_generate_configuration_stubs()
@@ -35,8 +35,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Configurations;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeConfiguration\sextends\sConfiguration\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Configurations;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeConfiguration\sextends\sConfiguration\n@", $content);
     }
 
     public function test_generate_event_stubs()
@@ -50,8 +50,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Events;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeEvent\simplements\sAppEvent\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Events;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeEvent\simplements\sAppEvent\n@", $content);
     }
 
     public function test_generate_exception_stubs()
@@ -65,8 +65,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Exceptions;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeException\sextends\sException\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Exceptions;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeException\sextends\sException\n@", $content);
     }
 
     public function test_generate_listener_stubs()
@@ -80,8 +80,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Listeners;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeListener\simplements\sEventListener\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Listeners;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeListener\simplements\sEventListener\n@", $content);
     }
 
     public function test_generate_middleware_stubs()
@@ -95,8 +95,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Middlewares;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeMiddleware\simplements\sBaseMiddleware\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Middlewares;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeMiddleware\simplements\sBaseMiddleware\n@", $content);
     }
 
     public function test_generate_producer_stubs()
@@ -110,8 +110,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Producers;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeProducer\sextends\sProducerService\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Producers;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeProducer\sextends\sProducerService\n@", $content);
     }
 
     public function test_generate_seeder_stubs()
@@ -137,8 +137,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Services;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeService\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Services;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeService\n@", $content);
     }
 
     public function test_generate_validation_stubs()
@@ -152,8 +152,8 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nnamespace\sApp\\\Validations;\n@", $content);
-        $this->assertRegExp("@\nclass\sFakeValidationRequest\sextends\sRequestValidation\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Validations;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeValidationRequest\sextends\sRequestValidation\n@", $content);
     }
 
     public function test_generate_cache_migration_stubs()
@@ -165,7 +165,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nclass\sFakeCacheMigration\sextends\sMigration\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeCacheMigration\sextends\sMigration\n@", $content);
     }
 
     public function test_generate_session_migration_stubs()
@@ -177,7 +177,21 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nclass\sFakeSessionMigration\sextends\sMigration\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeSessionMigration\sextends\sMigration\n@", $content);
+    }
+
+    public function test_generate_queue_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'QueueTableMigration');
+        $content = $generator->makeStubContent('model/queue', [
+            "className" => "QueueTableMigration",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertMatchesRegularExpression("@\nclass\sQueueTableMigration\sextends\sMigration\n@", $content);
+        $this->assertStringContainsString("\$this->create(\"queues\", function (SQLGenerator \$table) {", $content);
+        $this->assertStringContainsString("\$table->addInteger('attempts', [\"default\" => 3]);\n", $content);
     }
 
     public function test_generate_table_migration_stubs()
@@ -190,7 +204,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nclass\sFakeTableMigration\sextends\sMigration\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeTableMigration\sextends\sMigration\n@", $content);
     }
 
     public function test_generate_create_migration_stubs()
@@ -203,7 +217,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nclass\sFakeCreateTableMigration\sextends\sMigration\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeCreateTableMigration\sextends\sMigration\n@", $content);
     }
 
     public function test_generate_standard_migration_stubs()
@@ -216,7 +230,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nclass\sFakeStandardTableMigration\sextends\sMigration\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeStandardTableMigration\sextends\sMigration\n@", $content);
     }
 
     public function test_generate_model_stubs()
@@ -231,7 +245,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nclass\sExample\sextends\sModel\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sExample\sextends\sModel\n@", $content);
     }
 
     public function test_generate_controller_stubs()
@@ -245,7 +259,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp("@\nclass\sExampleController\sextends\sController\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sExampleController\sextends\sController\n@", $content);
     }
 
     public function test_generate_controller_no_plain_stubs()
@@ -259,14 +273,14 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp('@\nclass\sExampleController\sextends\sController\n@', $content);
-        $this->assertRegExp('@public\sfunction\sindex()@', $content);
-        $this->assertRegExp('@public\sfunction\screate()@', $content);
-        $this->assertRegExp('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
-        $this->assertRegExp('@public\sfunction\sshow\(mixed\s\$id\)@', $content);
-        $this->assertRegExp('@public\sfunction\sedit\(mixed\s\$id\)@', $content);
-        $this->assertRegExp('@public\sfunction\sstore\(Request\s\$request\)@', $content);
-        $this->assertRegExp('@public\sfunction\sdestroy\(mixed\s\$id\)@', $content);
+        $this->assertMatchesRegularExpression('@\nclass\sExampleController\sextends\sController\n@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sindex()@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\screate()@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sshow\(mixed\s\$id\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sedit\(mixed\s\$id\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sstore\(Request\s\$request\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sdestroy\(mixed\s\$id\)@', $content);
     }
 
     public function test_generate_controller_rest_stubs()
@@ -280,11 +294,11 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertRegExp('@\nclass\sExampleController\sextends\sController\n@', $content);
-        $this->assertRegExp('@public\sfunction\sindex()@', $content);
-        $this->assertRegExp('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
-        $this->assertRegExp('@public\sfunction\sshow\(Request\s\$request,\smixed\s\$id\)@', $content);
-        $this->assertRegExp('@public\sfunction\sstore\(Request\s\$request\)@', $content);
-        $this->assertRegExp('@public\sfunction\sdestroy\(Request\s\$request,\smixed\s\$id\)@', $content);
+        $this->assertMatchesRegularExpression('@\nclass\sExampleController\sextends\sController\n@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sindex()@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sshow\(Request\s\$request,\smixed\s\$id\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sstore\(Request\s\$request\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\sdestroy\(Request\s\$request,\smixed\s\$id\)@', $content);
     }
 }

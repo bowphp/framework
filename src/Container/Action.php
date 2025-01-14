@@ -12,7 +12,6 @@ use ReflectionException;
 use Bow\Support\Collection;
 use Bow\Database\Barry\Model;
 use InvalidArgumentException;
-use Bow\Middleware\BaseMiddleware;
 use Bow\Contracts\ResponseInterface;
 use Bow\Router\Exception\RouterException;
 
@@ -169,9 +168,13 @@ class Action
          * like [AppController::class, 'action']
          */
         if (count($actions) === 2) {
-            if (class_exists($actions[0])) {
-                $actions = [$actions[0] . '::' . $actions[1]];
+            if (!class_exists($actions[0])) {
+                throw new InvalidArgumentException(
+                    'The controller ' . $actions[0] . ' is not exists',
+                    E_USER_ERROR
+                );
             }
+            $actions = [$actions[0] . '::' . $actions[1]];
         }
 
         /**
@@ -182,32 +185,6 @@ class Action
             $actions = (array) $actions['controller'];
         }
 
-        $functions = [];
-
-        /**
-         * We normalize of the action to execute and
-         * creation of the dependency injection
-         */
-        foreach ($actions as $key => $action) {
-            if (is_string($action)) {
-                array_push($functions, $this->controller($action));
-
-                continue;
-            }
-
-            if (!is_callable($action)) {
-                continue;
-            }
-
-            if (is_array($action) && $action[0] instanceof Closure) {
-                $injection = $this->injectorForClosure($action[0]);
-            } else {
-                $injection = $this->injectorForClosure($action);
-            }
-
-            array_push($functions, ['action' => $action, 'injection' => $injection]);
-        }
-
         /**
          * We load the middleware associated with the action
          */
@@ -215,14 +192,12 @@ class Action
             if (is_callable($middleware)) {
                 if ($middleware instanceof Closure || is_array($middleware)) {
                     $this->dispatcher->pipe($middleware);
-
                     continue;
                 }
             }
 
             if (class_exists($middleware)) {
                 $this->dispatcher->pipe($middleware);
-
                 continue;
             }
 
@@ -237,12 +212,16 @@ class Action
 
             // We check if middleware if define via aliases
             if (!array_key_exists($middleware, $this->middlewares)) {
-                throw new RouterException(sprintf('%s is not define middleware.', $middleware), E_ERROR);
+                throw new RouterException(
+                    sprintf('%s is not define middleware.', $middleware),
+                );
             }
 
             // We check if the defined middleware is a valid middleware.
             if (!class_exists($this->middlewares[$middleware])) {
-                throw new RouterException(sprintf('%s is not a middleware class.', $middleware));
+                throw new RouterException(
+                    sprintf('%s is not a middleware class.', $middleware),
+                );
             }
 
             // We add middleware into dispatch pipeline
@@ -262,11 +241,35 @@ class Action
             case is_string($response):
             case is_array($response):
             case is_object($response):
-            case $response instanceof \Iterable:
+            case is_iterable($response):
+            case $response instanceof \Iterator:
             case $response instanceof ResponseInterface:
                 return $response;
             case $response instanceof Model || $response instanceof Collection:
                 return $response->toArray();
+        }
+
+        $functions = [];
+
+        /**
+         * We normalize of the action to execute and
+         * creation of the dependency injection
+         */
+        foreach ($actions as $key => $action) {
+            if (is_string($action)) {
+                array_push($functions, $this->controller($action));
+                continue;
+            }
+            if (!is_callable($action)) {
+                continue;
+            }
+            if (is_array($action) && $action[0] instanceof Closure) {
+                $injection = $this->injectorForClosure($action[0]);
+            } else {
+                $injection = $this->injectorForClosure($action);
+            }
+
+            array_push($functions, ['action' => $action, 'injection' => $injection]);
         }
 
         return $this->dispatchControllers($functions, $param);
@@ -311,19 +314,19 @@ class Action
     /**
      * Successively launches a function list.
      *
-     * @param array|callable $function
-     * @param array $arg
+     * @param array|callable|string $function
+     * @param array $arguments
      * @return mixed
      * @throws ReflectionException
      */
-    public function execute(array|callable $function, array $arg): mixed
+    public function execute(array|callable|string $function, array $arguments): mixed
     {
         if (is_callable($function)) {
-            return call_user_func_array($function, $arg);
+            return call_user_func_array($function, $arguments);
         }
 
         if (is_array($function)) {
-            return call_user_func_array($function, $arg);
+            return call_user_func_array($function, $arguments);
         }
 
         // We launch the controller loader if $cb is a String
@@ -336,7 +339,7 @@ class Action
         if (is_array($controller)) {
             return call_user_func_array(
                 $controller['action'],
-                array_merge($controller['injection'], $arg)
+                array_merge($controller['injection'], $arguments)
             );
         }
 
@@ -431,17 +434,17 @@ class Action
     /**
      * Injection for closure
      *
-     * @param callable $closure
+     * @param Closure|callable $closure
      * @return array
      * @throws
      */
-    public function injectorForClosure(callable $closure): array
+    public function injectorForClosure(Closure|callable $closure): array
     {
         $reflection = new ReflectionFunction($closure);
 
-        $parameters = $reflection->getParameters();
-
-        return $this->getInjectParameters($parameters);
+        return $this->getInjectParameters(
+            $reflection->getParameters()
+        );
     }
 
     /**
@@ -484,14 +487,14 @@ class Action
     {
         $class_name = $class->getName();
 
+        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
+            return null;
+        }
+
         if (!class_exists($class_name, true)) {
             throw new InvalidArgumentException(
                 sprintf('class %s not exists', $class_name)
             );
-        }
-
-        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
-            return null;
         }
 
         if (method_exists($class_name, 'getInstance')) {

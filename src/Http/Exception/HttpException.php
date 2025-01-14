@@ -16,10 +16,17 @@ class HttpException extends Exception
     protected $status = 'OK';
 
     /**
+     * Define the errors bags
+     *
+     * @var array
+     */
+    protected array $error_bags = [];
+
+    /**
      * HttpException constructor
      *
      * @param string $message
-     * @param string $code
+     * @param int $code
      */
     public function __construct(string $message, int $code = 200)
     {
@@ -33,7 +40,7 @@ class HttpException extends Exception
      *
      * @return string
      */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -41,10 +48,30 @@ class HttpException extends Exception
     /**
      * Get the status code
      *
-     * @return string
+     * @return int
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->getCode();
+    }
+
+    /**
+     * Set the errors bags
+     *
+     * @param array $errors
+     */
+    public function setErrorBags(array $errors)
+    {
+        $this->error_bags = $errors;
+    }
+
+    /**
+     * Get the errors bags
+     *
+     * @return array
+     */
+    public function getErrorBags(): array
+    {
+        return $this->error_bags;
     }
 }

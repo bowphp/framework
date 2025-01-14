@@ -29,6 +29,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request = Mockery::mock(Request::class);
 
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->get("_method")->andReturns("");
 
         $app = Application::make($request, $response);
@@ -45,6 +46,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request = Mockery::mock(Request::class);
 
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->get("_method")->andReturns("");
 
         $app = Application::make($request, $response);
@@ -57,16 +59,18 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
     public function test_send_application_with_404_status()
     {
+        $this->expectException(RouterException::class);
+
         $response = Mockery::mock(Response::class);
         $request = Mockery::mock(Request::class);
 
         // Response mock method
         $response->allows()->addHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status(404);
-        $response->allows()->send('Cannot GET / 404');
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns("/");
         $request->allows()->get("_method")->andReturns("");
 
@@ -80,8 +84,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         $app = new Application($request, $response);
         $app->bind($config);
-
-        $this->assertFalse($app->send());
+        $app->send();
     }
 
     public function test_send_application_with_matched_route()
@@ -96,6 +99,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns("/");
         $request->allows()->get("_method")->andReturns("");
 
@@ -128,6 +132,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
+        $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns("/name");
         $request->allows()->get("_method")->andReturns("");
 

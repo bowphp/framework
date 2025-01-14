@@ -49,10 +49,6 @@ trait MixedColumn
             return $this->addColumn($column, 'varchar', $attribute);
         }
 
-        if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
-            $attribute['default'] = 'uuid_generate_v4()';
-        }
-
         return $this->addColumn($column, 'uuid', $attribute);
     }
 
@@ -163,8 +159,12 @@ trait MixedColumn
             throw new SQLGeneratorException("The enum values should be define!");
         }
 
-        if (is_array($attribute['size'])) {
+        if (!is_array($attribute['size'])) {
             throw new SQLGeneratorException("The enum values should be array");
+        }
+
+        if (count($attribute['size']) === 0) {
+            throw new SQLGeneratorException("The enum values cannot be empty.");
         }
 
         return $this->addColumn($column, 'enum', $attribute);
@@ -179,16 +179,20 @@ trait MixedColumn
      */
     public function addCheck(string $column, array $attribute = []): SQLGenerator
     {
-        if (!isset($attribute['size'])) {
+        if (!isset($attribute['check'])) {
             throw new SQLGeneratorException("The check values should be define.");
         }
 
-        if (!is_array($attribute['size'])) {
-            throw new SQLGeneratorException("The enum values should be array.");
+        if (!is_array($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be array.");
         }
 
-        if (count($attribute['size']) === 0) {
-            throw new SQLGeneratorException("The enum values cannot be empty.");
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
         }
 
         return $this->addColumn($column, 'check', $attribute);
@@ -226,10 +230,6 @@ trait MixedColumn
 
         if ($this->adapter === "sqlite") {
             return $this->changeColumn($column, 'varchar', $attribute);
-        }
-
-        if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
-            $attribute['default'] = 'uuid_generate_v4()';
         }
 
         return $this->changeColumn($column, 'uuid', $attribute);
@@ -316,6 +316,18 @@ trait MixedColumn
      */
     public function changeEnum(string $column, array $attribute = []): SQLGenerator
     {
+        if (!isset($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be define!");
+        }
+
+        if (!is_array($attribute['size'])) {
+            throw new SQLGeneratorException("The enum values should be array");
+        }
+
+        if (count($attribute['size']) === 0) {
+            throw new SQLGeneratorException("The enum values cannot be empty.");
+        }
+
         return $this->changeColumn($column, 'enum', $attribute);
     }
 
@@ -328,6 +340,22 @@ trait MixedColumn
      */
     public function changeCheck(string $column, array $attribute = []): SQLGenerator
     {
+        if (!isset($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be define.");
+        }
+
+        if (!is_array($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be array.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
+
         return $this->changeColumn($column, 'check', $attribute);
     }
 }

@@ -99,6 +99,19 @@ class SQLGenerator
     }
 
     /**
+     * Add a raw column definiton
+     *
+     * @param string $definition
+     * @return SQLGenerator
+     */
+    public function addRaw(string $definition): SQLGenerator
+    {
+        $this->sqls[] = $definition;
+
+        return $this;
+    }
+
+    /**
      * Add new column in the table
      *
      * @param string $name
@@ -158,7 +171,7 @@ class SQLGenerator
         }
 
         if ($this->adapter === 'pgsql') {
-            $this->sqls[] = sprintf("RENAME COLUMN %s TO %s", $name, $new);
+            $this->sqls[] = sprintf('RENAME COLUMN "%s" TO %s', $name, $new);
         } else {
             $this->sqls[] = sprintf("RENAME COLUMN `%s` TO `%s`", $name, $new);
         }

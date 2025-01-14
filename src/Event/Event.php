@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Event;
 
-use Bow\Session\Session;
-use Bow\Container\Action;
-use Bow\Support\Collection;
 use Bow\Event\Contracts\AppEvent;
+use ErrorException;
 
 class Event
 {
@@ -79,12 +77,13 @@ class Event
      */
     public static function emit(string|AppEvent $event): ?bool
     {
-        $data = array_slice(func_get_args(), 1);
         $event_name = $event;
 
         if ($event instanceof AppEvent) {
             $event_name = get_class($event);
             $data = [$event];
+        } else {
+            $data = array_slice(func_get_args(), 1);
         }
 
         if (!static::bound($event_name)) {
@@ -142,6 +141,12 @@ class Event
      */
     public function __call(string $name, array $arguments)
     {
+        if (is_null(static::$instance)) {
+            throw new ErrorException(
+                "Unable to get event instance before configuration"
+            );
+        }
+
         if (method_exists(static::$instance, $name)) {
             return call_user_func_array([static::$instance, $name], $arguments);
         }

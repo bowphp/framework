@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Validation;
 
-use BadMethodCallException;
 use Bow\Http\Request;
+use BadMethodCallException;
+use Bow\Validation\Exception\ValidationException;
 use Bow\Validation\Exception\AuthorizationException;
 
 abstract class RequestValidation
@@ -51,7 +52,7 @@ abstract class RequestValidation
         if ((count($keys) == 1 && $keys[0] === '*') || count($keys) == 0) {
             $this->data = $this->request->all();
         } else {
-            $this->data = $this->request->excepts($keys);
+            $this->data = $this->request->only($keys);
         }
 
         $this->validate = Validator::make($this->data, $this->rules(), $this->messages());
@@ -109,10 +110,9 @@ abstract class RequestValidation
     /**
      * Send fails authorization
      *
-     * @param mixed $response
      * @throws AuthorizationException
      */
-    private function sendFailAuthorization($response = null)
+    private function sendFailAuthorization()
     {
         throw new AuthorizationException(
             'You do not have permission to make a request'
@@ -225,7 +225,9 @@ abstract class RequestValidation
             return call_user_func_array([$this->request, $name], $arguments);
         }
 
-        throw new BadMethodCallException('The method ' . $name . ' does not define.');
+        throw new BadMethodCallException(
+            'The method ' . $name . ' does not defined.'
+        );
     }
 
     /**

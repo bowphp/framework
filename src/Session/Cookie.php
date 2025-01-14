@@ -75,7 +75,7 @@ class Cookie
     public static function all(): array
     {
         foreach ($_COOKIE as $key => $value) {
-            $_COOKIE[$key] = Crypto::decrypt($value);
+            $_COOKIE[$key] = json_decode(Crypto::decrypt($value));
         }
 
         return $_COOKIE;
@@ -87,10 +87,6 @@ class Cookie
      * @param string|int $key
      * @param mixed      $data
      * @param int        $expirate
-     * @param string     $path
-     * @param string     $domain
-     * @param bool       $secure
-     * @param bool       $http
      *
      * @return bool
      */
@@ -98,21 +94,17 @@ class Cookie
         $key,
         $data,
         $expirate = 3600,
-        $path = null,
-        $domain = null,
-        $secure = false,
-        $http = true
     ) {
-        $data = Crypto::encrypt($data);
+        $data = Crypto::encrypt(json_encode($data));
 
         return setcookie(
             $key,
             $data,
             time() + $expirate,
-            $path,
-            $domain,
-            $secure,
-            $http
+            config('session.path'),
+            config('session.domain'),
+            config('session.secure'),
+            config('session.httponly')
         );
     }
 
@@ -132,10 +124,12 @@ class Cookie
 
         if (!static::$is_decrypt[$key]) {
             $old = Crypto::decrypt($_COOKIE[$key]);
+
             unset(static::$is_decrypt[$key]);
         }
 
-        static::set($key, null, -1000);
+        static::set($key, '', -1000);
+
         unset($_COOKIE[$key]);
 
         return $old;

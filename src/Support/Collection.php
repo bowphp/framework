@@ -52,11 +52,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * Check existence of a key in the session collection
      *
-     * @param  string $key
+     * @param  int|string $key
      * @param  bool   $strict
      * @return bool
      */
-    public function has(string $key, bool $strict = false): bool
+    public function has(int|string $key, bool $strict = false): bool
     {
         // When $strict is true, he check $key not how a key but a value.
         $isset = isset($this->storage[$key]);
@@ -93,11 +93,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * Allows to recover a value or value collection.
      *
-     * @param string $key
+     * @param int|string $key
      * @param mixed  $default
      * @return mixed
      */
-    public function get(string $key = null, mixed $default = null)
+    public function get(int|string $key = null, mixed $default = null)
     {
         if (is_null($key)) {
             return $this->storage;
@@ -163,12 +163,23 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
+     * Chunk the storage content
+     *
+     * @param int $count
+     * @return int
+     */
+    public function chunk(int $chunk): Collection
+    {
+        return new Collection(array_chunk($this->storage, $chunk));
+    }
+
+    /**
      * To retrieve a value or value collection form d'instance de collection.
      *
      * @param string $key
      * @return Collection
      */
-    public function collectionify(string $key): Collection
+    public function collectify(string $key): Collection
     {
         $data = [];
 
@@ -695,7 +706,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * jsonSerialize
      *
-     * @return string
+     * @return mixed
      */
     public function jsonSerialize(): mixed
     {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Bow\Storage\Service;
 
 use Aws\S3\S3Client;
-use Bow\Http\UploadFile;
+use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\ServiceInterface;
 
 class S3Service implements ServiceInterface
@@ -73,14 +73,12 @@ class S3Service implements ServiceInterface
     /**
      * Function to upload a file
      *
-     * @param  UploadFile  $file
+     * @param  UploadedFile  $file
      * @param  string  $location
      * @param  array   $option
-     *
-     * @return mixed
-     * @throws InvalidArgumentException
+     * @return array|bool|string
      */
-    public function store(UploadFile $file, ?string $location = null, array $option = []): array|bool
+    public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool|string
     {
         $result = $this->put($file->getHashName(), $file->getContent());
 
@@ -127,22 +125,22 @@ class S3Service implements ServiceInterface
      * @param string $content
      * @param array $options
      *
-     * @return bool
+     * @return mixed
      */
-    public function put(string $file, string $content, array $options = []): bool
+    public function put(string $file, string $content, array $options = []): mixed
     {
         $options = is_string($options)
             ? ['visibility' => $options]
             : (array) $options;
 
-        $this->client->putObject([
+        $result = $this->client->putObject([
             'Bucket' => $this->config['bucket'],
             'Key'    => $file,
             'Body'   => $content,
             "Visibility" => $options["visibility"] ?? 'public'
         ]);
 
-        return true;
+        return $result;
     }
 
     /**
@@ -221,9 +219,9 @@ class S3Service implements ServiceInterface
      * Recover the contents of the file
      *
      * @param  string $filename
-     * @return null|string
+     * @return ?string
      */
-    public function get(string $filename): string
+    public function get(string $filename): ?string
     {
         $result = $this->client->getObject([
             'Bucket' => $this->config['bucket'],

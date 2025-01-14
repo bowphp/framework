@@ -12,6 +12,7 @@ use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
 use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
+use ErrorException;
 
 class Database
 {
@@ -76,9 +77,8 @@ class Database
     /**
      * Connection, starts the connection on the DB
      *
-     * @param  null $name
-     * @return null|Database
-     *
+     * @param ?string $name
+     * @return ?Database
      * @throws ConnectionException
      */
     public static function connection(?string $name = null): ?Database
@@ -121,7 +121,7 @@ class Database
     }
 
     /**
-     * Get connexion name
+     * Get the connexion name
      *
      * @return string|null
      */
@@ -315,7 +315,7 @@ class Database
     }
 
     /**
-     * Load the query builder factory on table name
+     * Load the query builder factory on the table name
      *
      * @param string $table
      * @return QueryBuilder
@@ -338,27 +338,17 @@ class Database
      * @param callable $callback
      * @return void
      */
-    public static function startTransaction(?callable $callback = null): void
+    public static function startTransaction(): void
     {
         static::verifyConnection();
 
         if (!static::$adapter->getConnection()->inTransaction()) {
             static::$adapter->getConnection()->beginTransaction();
         }
-
-        if (is_callable($callback)) {
-            try {
-                call_user_func_array($callback, []);
-
-                static::commit();
-            } catch (DatabaseException $e) {
-                static::rollback();
-            }
-        }
     }
 
     /**
-     * Check if database execution is in transaction
+     * Check if database execution is in the transaction
      *
      * @return bool
      */
@@ -390,6 +380,29 @@ class Database
     }
 
     /**
+     * Starting the start of a transaction wrapper on top of the callback
+     *
+     * @param callable $callback
+     * @return mixed
+     */
+    public static function transaction(callable $callback): mixed
+    {
+        static::startTransaction();
+
+        try {
+            $result = call_user_func_array($callback, []);
+
+            static::commit();
+
+            return $result;
+        } catch (DatabaseException $e) {
+            static::rollback();
+
+            throw $e;
+        }
+    }
+
+    /**
      * Starts the verification of the connection establishment
      *
      * @throws
@@ -405,9 +418,9 @@ class Database
      * Retrieves the identifier of the last record.
      *
      * @param  ?string $name
-     * @return int|string
+     * @return int|string|PDO
      */
-    public static function lastInsertId(?string $name = null): int|string
+    public static function lastInsertId(?string $name = null): int|string|PDO
     {
         static::verifyConnection();
 
@@ -475,6 +488,12 @@ class Database
      */
     public function __call(string $method, array $arguments)
     {
+        if (is_null(static::$instance)) {
+            throw new ErrorException(
+                "Unable to get database instance before configuration"
+            );
+        }
+
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array(
                 [static::$instance, $method],

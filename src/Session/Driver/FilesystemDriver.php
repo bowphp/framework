@@ -54,9 +54,9 @@ class FilesystemDriver implements \SessionHandlerInterface
      * Garbage collector
      *
      * @param int $maxlifetime
-     * @return bool
+     * @return int|false
      */
-    public function gc(int $maxlifetime): int
+    public function gc(int $maxlifetime): int|false
     {
         foreach (glob($this->save_path . "/*") as $file) {
             if (filemtime($file) + $maxlifetime < $this->createTimestamp() && file_exists($file)) {
@@ -64,7 +64,7 @@ class FilesystemDriver implements \SessionHandlerInterface
             }
         }
 
-        return true;
+        return 1;
     }
 
     /**

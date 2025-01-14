@@ -7,6 +7,23 @@ use Bow\Database\Exception\SQLGeneratorException;
 trait PgsqlCompose
 {
     /**
+     * Define the query for create the custom type
+     *
+     * @var array
+     */
+    protected array $custom_types = [];
+
+    /**
+     * Get the custom type for pgsql
+     *
+     * @return array
+     */
+    public function getCustomTypeQueries(): array
+    {
+        return $this->custom_types;
+    }
+
+    /**
      * Compose sql statement for pgsql
      *
      * @param string $name
@@ -35,6 +52,7 @@ trait PgsqlCompose
         $unsigned = $attribute['unsigned'] ?? false;
         $after = $attribute['after'] ?? false;
         $first = $attribute['first'] ?? false;
+        $custom = $attribute['custom'] ?? false;
 
         if ($after || $first) {
             throw new SQLGeneratorException("The key first and after only work on mysql");
@@ -45,24 +63,28 @@ trait PgsqlCompose
             $type = 'VARCHAR';
         }
 
+        // Redefine the size
         if (!$size && in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR'])) {
             $size = 255;
         }
 
         // Add column size
-        if ($size) {
-            if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-                $size = (array) $size;
-                $size = "'" . implode("', '", $size) . "'";
-            }
-            if (in_array($raw_type, ['ENUM', 'CHECK', 'VARCHAR', 'LONG VARCHAR', 'STRING'])) {
-                $type = sprintf('%s(%s)', $type, $size);
-            }
+        if (in_array($raw_type, ['VARCHAR', 'STRING', 'LONG VARCHAR']) && $size) {
+            $type = sprintf('%s(%s)', $type, $size);
+        }
+
+        if (in_array($raw_type, ['ENUM', 'CHECK'])) {
+            $type = $this->formatCheckOrEnum($name, $raw_type, $attribute);
+        }
+
+        // Bind precision
+        if ($raw_type == "DOUBLE") {
+            $type = sprintf('DOUBLE PRECISION', $type);
         }
 
         // Bind auto increment action
         if ($increment) {
-            $type = 'SERIAL';
+            $type = in_array($raw_type, ["INT", "TINYINT", "SMALLINT"]) ? "SERIAL" : "BIGSERIAL";
         }
 
         // Set column as primary key
@@ -98,8 +120,13 @@ trait PgsqlCompose
             $type = sprintf('UNSIGNED %s', $type);
         }
 
+        // Apply the custom definition
+        if ($custom) {
+            $type = sprintf('%s %s', $type, $custom);
+        }
+
         return trim(
-            sprintf('%s %s %s', $description['command'], $name, $type)
+            sprintf('%s "%s" %s', $description['command'], $name, $type)
         );
     }
 
@@ -116,5 +143,67 @@ trait PgsqlCompose
         foreach ($names as $name) {
             $this->sqls[] = trim(sprintf('DROP COLUMN %s', $name));
         }
+    }
+
+    /**
+     * Format the CHECK in ENUM
+     *
+     * @param string $name
+     * @param string $type
+     * @param array $attribute
+     * @return void
+     */
+    private function formatCheckOrEnum($name, $type, $attribute): string
+    {
+        if ($type == "ENUM") {
+            $size = (array) $attribute['size'];
+            $size = "'" . implode("', '", $size) . "'";
+            $table = preg_replace("/(ies)$/", "y", $this->table);
+            $table = preg_replace("/(s)$/", "", $table);
+            $this->custom_types[] = sprintf(
+                "CREATE TYPE %s_%s_enum AS ENUM(%s);",
+                $table,
+                $name,
+                $size
+            );
+
+            return sprintf('%s_%s_enum', $table, $name);
+        }
+
+        if (count($attribute["check"]) === 3) {
+            [$column, $comparaison, $value] = $attribute["check"];
+            if (is_array($value)) {
+                $value = "('" . implode("', '", $value) . "')";
+            }
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+        }
+
+        [$column, $value] = $attribute["check"];
+
+        $comparaison = "=";
+
+        if (is_string($value)) {
+            $value = "'" . addcslashes($value, "'") . "'";
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+        }
+
+        $value = (array) $value;
+
+        if (count($value) > 1) {
+            $comparaison = "IN";
+
+            foreach ($value as $key => $item) {
+                if (is_string($item)) {
+                    $value[$key] = "'" . addcslashes($item, "'") . "'";
+                }
+            }
+
+            $value = "(" . implode(", ", $value) . ")";
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+        }
+
+        $value = end($value);
+
+        return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
     }
 }

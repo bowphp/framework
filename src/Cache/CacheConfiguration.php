@@ -16,7 +16,7 @@ class CacheConfiguration extends Configuration
     public function create(Loader $config): void
     {
         $this->container->bind('cache', function () use ($config) {
-            return Cache::confirgure($config['cache']);
+            return Cache::configure($config['cache']);
         });
     }
 

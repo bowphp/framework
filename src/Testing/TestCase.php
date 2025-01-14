@@ -31,20 +31,17 @@ class TestCase extends PHPUnitTestCase
     private array $headers = [];
 
     /**
-     * Format url
+     * Get the base url
      *
-     * @param  $url
      * @return string
      */
-    private function formatUrl(string $url): string
+    private function getBaseUrl(): string
     {
-        if (!$this->url) {
-            $this->url = app_env('APP_URL', 'http://127.0.0.1:5000');
+        if (is_null($this->url)) {
+            return rtrim(app_env('APP_URL', 'http://127.0.0.1:5000'));
         }
 
-        $url = rtrim($this->url, '/') . $url;
-
-        return trim($url, '/');
+        return $this->url ?? 'http://127.0.0.1:5000';
     }
 
     /**
@@ -61,14 +58,27 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Specify the additionnal who are use in the request
+     * Specify the additionnal headers
      *
      * @param array $headers
      * @return TestCase
      */
-    public function withHeader(array $headers): TestCase
+    public function withHeaders(array $headers): TestCase
     {
         $this->headers = $headers;
+
+        return $this;
+    }
+
+    /**
+     * Specify the additionnal header
+     *
+     * @param array $headers
+     * @return TestCase
+     */
+    public function withHeader(string $key, string $value): TestCase
+    {
+        $this->headers[$key] = $value;
 
         return $this;
     }
@@ -82,7 +92,7 @@ class TestCase extends PHPUnitTestCase
      */
     public function get(string $url, array $param = []): Response
     {
-        $http = new HttpClient($this->formatUrl($url));
+        $http = new HttpClient($this->getBaseUrl());
 
         $http->addHeaders($this->headers);
 
@@ -98,7 +108,7 @@ class TestCase extends PHPUnitTestCase
      */
     public function post(string $url, array $param = []): Response
     {
-        $http = new HttpClient($this->formatUrl($url));
+        $http = new HttpClient($this->getBaseUrl());
 
         if (!empty($this->attach)) {
             $http->addAttach($this->attach);
@@ -118,7 +128,7 @@ class TestCase extends PHPUnitTestCase
      */
     public function put(string $url, array $param = []): Response
     {
-        $http = new HttpClient($this->formatUrl($url));
+        $http = new HttpClient($this->getBaseUrl());
 
         $http->addHeaders($this->headers);
 

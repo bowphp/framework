@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
+use RuntimeException;
 use Pheanstalk\Pheanstalk;
 use Bow\Queue\ProducerService;
 use Bow\Queue\Adapters\QueueAdapter;
-use Pheanstalk\Job as PheanstalkJob;
-use RuntimeException;
+use Pheanstalk\Contract\PheanstalkInterface;
 
 class BeanstalkdAdapter extends QueueAdapter
 {
@@ -18,18 +18,6 @@ class BeanstalkdAdapter extends QueueAdapter
      * @var Pheanstalk
      */
     private Pheanstalk $pheanstalk;
-
-    /**
-     * Determine the default watch name
-     *
-     * @var string
-     */
-    private string $default = "default";
-
-    /**
-     * @var int
-     */
-    private int $retry;
 
     /**
      * Configure Beanstalkd driver
@@ -43,56 +31,17 @@ class BeanstalkdAdapter extends QueueAdapter
             throw new RuntimeException("Please install the pda/pheanstalk package");
         }
 
-        $this->pheanstalk = Pheanstalk::create($queue["hostname"], $queue["port"], $queue["timeout"]);
+        $this->pheanstalk = Pheanstalk::create(
+            $queue["hostname"],
+            $queue["port"],
+            $queue["timeout"]
+        );
+
+        if (isset($queue["queue"])) {
+            $this->setQueue($queue["queue"]);
+        }
 
         return $this;
-    }
-
-    /**
-     * Get connexion
-     *
-     * @param string $name
-     * @return Pheanstalk
-     */
-    public function setWatch(string $name): void
-    {
-        $this->default = $name;
-    }
-
-    /**
-     * Get connexion
-     *
-     * @param int $retry
-     * @return Pheanstalk
-     */
-    public function setRetry(int $retry): void
-    {
-        $this->retry = $retry;
-    }
-
-    /**
-     * Delete a message from the Beanstalk queue.
-     *
-     * @param  string  $queue
-     * @param  string|int  $id
-     * @return void
-     */
-    public function deleteJob(string $queue, string|int $id): void
-    {
-        $queue = $this->getQueue($queue);
-
-        $this->pheanstalk->useTube($queue)->delete(new PheanstalkJob($id, ''));
-    }
-
-    /**
-     * Get the queue or return the default.
-     *
-     * @param  ?string $queue
-     * @return string
-     */
-    public function getQueue(?string $queue = null): string
-    {
-        return $queue ?: $this->default;
     }
 
     /**
@@ -112,13 +61,25 @@ class BeanstalkdAdapter extends QueueAdapter
      * Queue a job
      *
      * @param ProducerService $producer
-     * @return QueueAdapter
+     * @return void
      */
     public function push(ProducerService $producer): void
     {
+        $queues = (array) cache("beanstalkd:queues");
+
+        if (!in_array($producer->getQueue(), $queues)) {
+            $queues[] = $producer->getQueue();
+            cache("beanstalkd:queues", $queues);
+        }
+
         $this->pheanstalk
             ->useTube($producer->getQueue())
-            ->put(serialize($producer), $producer->getDelay(), $producer->getRetry());
+            ->put(
+                $this->serializeProducer($producer),
+                $this->getPriority($producer->getPriority()),
+                $producer->getDelay(),
+                $producer->getRetry()
+            );
     }
 
     /**
@@ -129,22 +90,91 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function run(string $queue = null): void
     {
-        // we want jobs from 'testtube' only.
+        // we want jobs from define queue only.
         $queue = $this->getQueue($queue);
         $this->pheanstalk->watch($queue);
 
         // This hangs until a Job is produced.
         $job = $this->pheanstalk->reserve();
 
+        if (is_null($job)) {
+            sleep($this->sleep ?? 5);
+            return;
+        }
+
         try {
             $payload = $job->getData();
-            $producer = unserialize($payload);
+            $producer = $this->unserializeProducer($payload);
             call_user_func([$producer, "process"]);
+            $this->sleep(2);
             $this->pheanstalk->touch($job);
-            $this->deleteJob($queue, $job->getId());
-        } catch (\Exception $e) {
-            cache($job->getId(), $job->getData());
-            $this->pheanstalk->release($job);
+            $this->sleep(2);
+            $this->pheanstalk->delete($job);
+        } catch (\Throwable $e) {
+            // Write the error log
+            error_log($e->getMessage());
+            app('logger')->error($e->getMessage(), $e->getTrace());
+            cache("job:failed:" . $job->getId(), $job->getData());
+
+            // Check if producer has been loaded
+            if (!isset($producer)) {
+                $this->pheanstalk->delete($job);
+                return;
+            }
+
+            // Execute the onException method for notify the producer
+            // and let developper to decide if the job should be delete
+            $producer->onException($e);
+
+            // Check if the job should be delete
+            if ($producer->jobShouldBeDelete()) {
+                $this->pheanstalk->delete($job);
+            } else {
+                $this->pheanstalk->release($job, $this->getPriority($producer->getPriority()), $producer->getDelay());
+            }
+            $this->sleep(1);
+        }
+    }
+
+    /**
+     * Flush the queue
+     *
+     * @return void
+     */
+    public function flush(?string $queue = null): void
+    {
+        $queues = (array) $queue;
+
+        if (count($queues) == 0) {
+            $queues = cache("beanstalkd:queues");
+        }
+
+        foreach ($queues as $queue) {
+            $this->pheanstalk->useTube($queue);
+
+            while ($job = $this->pheanstalk->reserve()) {
+                $this->pheanstalk->delete($job);
+            }
+        }
+    }
+
+    /**
+     * Get the priority
+     *
+     * @param int $priority
+     * @return int
+     */
+    public function getPriority(int $priority): int
+    {
+        switch ($priority) {
+            case $priority > 2:
+                return 4294967295;
+            case 1:
+                return PheanstalkInterface::DEFAULT_PRIORITY;
+            case 0:
+                return 0;
+            default:
+                return PheanstalkInterface::DEFAULT_PRIORITY;
         }
     }
 }

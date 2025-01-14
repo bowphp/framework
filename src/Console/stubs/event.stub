@@ -4,11 +4,11 @@ namespace {baseNamespace}{namespace};
 
 use Bow\Event\Contracts\AppEvent;
 use Bow\Event\Dispatchable;
-use Bow\Queue\Traits\SerializesModels;
+use Bow\Support\Serializes;
 
 class {className} implements AppEvent
 {
-	use Dispatchable, SerializesModels;
+	use Dispatchable, Serializes;
 
     /**
      * Create a new event instance.

@@ -42,9 +42,9 @@ class Cache
     /**
      * Cache configuration method
      *
-     * @param string $base_directory
+     * @param array $config
      */
-    public static function confirgure(array $config)
+    public static function configure(array $config)
     {
         if (!is_null(static::$instance)) {
             return static::$instance;
@@ -57,7 +57,7 @@ class Cache
         static::$config = $config;
         $store = (array) $config["stores"][$config["default"]];
 
-        return static::cache($store["driver"]);
+        return static::store($store["driver"]);
     }
 
     /**
@@ -80,7 +80,7 @@ class Cache
      * @param string $driver
      * @return CacheAdapterInterface
      */
-    public static function cache(string $store): CacheAdapterInterface
+    public static function store(string $store): CacheAdapterInterface
     {
         $stores = static::$config["stores"];
 
@@ -96,19 +96,41 @@ class Cache
     }
 
     /**
+     * Add the custom adapters
+     *
+     * @param array $adapters
+     * @return void
+     */
+    public static function addAdapters(array $adapters): void
+    {
+        foreach ($adapters as $name => $adapter) {
+            static::$adapters[$name] = $adapter;
+        }
+    }
+
+    /**
      * __call
      *
      * @param string $name
      * @param array $arguments
      * @return mixed
      * @throws BadMethodCallException
+     * @throws ErrorException
      */
     public static function __callStatic(string $name, array $arguments)
     {
+        if (is_null(static::$instance)) {
+            throw new ErrorException(
+                "Unable to get cache instance before configuration"
+            );
+        }
+
         if (method_exists(static::$instance, $name)) {
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new BadMethodCallException("The $name method does not exist");
+        throw new BadMethodCallException(
+            "The $name method does not exist"
+        );
     }
 }

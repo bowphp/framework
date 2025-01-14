@@ -16,7 +16,9 @@ trait EventTrait
      */
     private static function formatEventName(string $event): string
     {
-        return str_replace('\\', '', strtolower(Str::snake(static::class))) . '.' . Str::snake($event);
+        $class_name = str_replace('\\', '', strtolower(Str::snake(static::class)));
+
+        return sprintf("%s.%s", $class_name, strtolower($event));
     }
 
     /**
@@ -26,7 +28,7 @@ trait EventTrait
      */
     private function fireEvent(string $event): void
     {
-        $env = $this->formatEventName($event);
+        $env = static::formatEventName($event);
 
         if (event()->bound($env)) {
             event()->emit($env, $this);

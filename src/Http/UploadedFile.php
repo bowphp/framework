@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Http;
 
-class UploadFile
+class UploadedFile
 {
     /**
      * @var array
@@ -12,7 +12,7 @@ class UploadFile
     private array $file;
 
     /**
-     * UploadFile constructor.
+     * UploadedFile constructor.
      *
      * @param array $file
      */
@@ -24,9 +24,9 @@ class UploadFile
     /**
      * Get the file extension
      *
-     * @return string
+     * @return ?string
      */
-    public function getExtension(): string
+    public function getExtension(): ?string
     {
         if (!isset($this->file['name'])) {
             return null;

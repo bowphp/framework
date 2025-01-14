@@ -82,10 +82,11 @@ class Application extends Router
 
         $this->capsule = Capsule::getInstance();
 
-        $this->capsule->instance('request', $request);
         $this->capsule->instance('response', $response);
+        $this->capsule->instance('request', $request);
         $this->capsule->instance('app', $this);
 
+        $this->request->capture();
         parent::__construct($request->method(), $request->get('_method'));
     }
 
@@ -195,30 +196,17 @@ class Application extends Router
         // the routing collection
         $routes = $this->getRoutes();
 
-        if (!isset($routes[$method])) {
-            // We verify and call function associate by 404 code
-            $this->response->status(404);
-
-            if (empty($this->error_code)) {
-                $this->response->send(
-                    sprintf('Cannot %s %s 404', $method, $this->request->path())
-                );
-            }
-
-            return false;
-        }
-
         $response = null;
         $resolved = false;
 
-        foreach ($routes[$method] as $route) {
+        foreach ($routes[$method] ?? [] as $route) {
             // The route must be an instance of Route
             if (!($route instanceof Route)) {
                 continue;
             }
 
             // We launch the search of the method that arrived in the query
-             // then start checking the url of the request
+            // then start checking the url of the request
             if (!$route->match($this->request->path())) {
                 continue;
             }

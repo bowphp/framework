@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\Http;
 
-use Bow\Auth\Authentication;
-use Bow\Session\Session;
-use Bow\Support\Collection;
 use Bow\Support\Str;
+use Bow\Session\Session;
+use Bow\Http\UploadedFile;
+use Bow\Support\Collection;
+use Bow\Auth\Authentication;
 use Bow\Validation\Validate;
 use Bow\Validation\Validator;
+use Bow\Http\Exception\BadRequestException;
 
 class Request
 {
@@ -42,16 +44,34 @@ class Request
     private string $id;
 
     /**
+     * Define the request captured
+     *
+     * @var bool
+     */
+    private bool $capture = false;
+
+    /**
      * Request constructor
      *
      * @return mixed
      */
-    private function __construct()
+    public function capture()
     {
+        if ($this->capture) {
+            return;
+        }
+
         $data = [];
+        $this->id = "req_" . sha1(uniqid() . time());
 
         if ($this->getHeader('content-type') == 'application/json') {
-            $data = json_decode(file_get_contents("php://input"), true);
+            try {
+                $data = json_decode(file_get_contents("php://input"), true, 1024, JSON_THROW_ON_ERROR);
+            } catch (\Throwable $e) {
+                throw new BadRequestException(
+                    "The request json payload is invalid: " . $e->getMessage(),
+                );
+            }
             $this->input = array_merge((array) $data, $_GET);
         } else {
             $data = $_POST ?? [];
@@ -62,12 +82,14 @@ class Request
         }
 
         foreach ($this->input as $key => $value) {
-            if (!is_array($value) && strlen($value) == 0) {
+            if (is_string($value) && strlen($value) == 0) {
                 $value = null;
             }
 
             $this->input[$key] = $value;
         }
+
+        $this->capture = true;
     }
 
     /**
@@ -270,29 +292,29 @@ class Request
      * Load the factory for FILES
      *
      * @param string $key
-     * @return UploadFile|Collection|null
+     * @return UploadedFile|Collection|null
      */
-    public function file(string $key): UploadFile|Collection|null
+    public function file(string $key): UploadedFile|Collection|null
     {
         if (!isset($_FILES[$key])) {
             return null;
         }
 
         if (!is_array($_FILES[$key]['name'])) {
-            return new UploadFile($_FILES[$key]);
+            return new UploadedFile($_FILES[$key]);
         }
 
         $files = $_FILES[$key];
         $collect = [];
+
         foreach ($files['name'] as $key => $name) {
-            $file = [
+            $collect[] = new UploadedFile([
                 'name' => $name,
                 'type' => $files['type'][$key],
                 'size' => $files['size'][$key],
                 'error' => $files['error'][$key],
                 'tmp_name' => $files['tmp_name'][$key],
-            ];
-            $collect[] = new UploadFile($file);
+            ]);
         }
 
         return new Collection($collect);
@@ -340,6 +362,12 @@ class Request
             return true;
         }
 
+        $content_type = $this->getHeader("content-type");
+
+        if ($content_type && str_contains($content_type, "application/json")) {
+            return true;
+        }
+
         return false;
     }
 
@@ -351,7 +379,7 @@ class Request
      */
     public function is($match): bool
     {
-        return (bool) preg_match('@' . $match . '@', $this->path());
+        return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->path());
     }
 
     /**
@@ -362,7 +390,7 @@ class Request
      */
     public function isReferer($match): bool
     {
-        return (bool) preg_match('@' . $match . '@', $this->referer());
+        return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->referer());
     }
 
     /**
@@ -486,7 +514,7 @@ class Request
      * Get Request header
      *
      * @param  string $key
-     * @return bool|string
+     * @return ?string
      */
     public function getHeader($key): ?string
     {
@@ -512,6 +540,16 @@ class Request
     public function hasHeader($key): bool
     {
         return isset($_SERVER[strtoupper($key)]);
+    }
+
+    /**
+     * Get the client user agent
+     *
+     * @return ?string
+     */
+    public function userAgent(): ?string
+    {
+        return $this->getHeader('USER_AGENT');
     }
 
     /**
@@ -574,7 +612,7 @@ class Request
     {
         $data = [];
 
-        if (! is_array($exceptions)) {
+        if (!is_array($exceptions)) {
             $exceptions = func_get_args();
         }
 
@@ -594,7 +632,7 @@ class Request
     {
         $data = $this->input;
 
-        if (! is_array($ignores)) {
+        if (!is_array($ignores)) {
             $ignores = func_get_args();
         }
 
@@ -643,7 +681,7 @@ class Request
     /**
      * Set the shared value in request bags
      *
-     * @param Array<mixed> $bags
+     * @param array $bags
      * @return mixed
      */
     public function setBags(array $bags)

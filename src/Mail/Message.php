@@ -47,14 +47,14 @@ class Message
     /**
      * Define the mail sender
      *
-     * @var string
+     * @var ?string
      */
     private ?string $from = null;
 
     /**
      * The mail message
      *
-     * @var string
+     * @var ?string
      */
     private ?string $message = null;
 
@@ -145,12 +145,12 @@ class Message
     /**
      * Define the receiver in list
      *
-     * @param array $sendTo
+     * @param array $recipients
      * @return $this
      */
-    public function toList(array $sendTo): Message
+    public function toList(array $recipients): Message
     {
-        foreach ($sendTo as $name => $to) {
+        foreach ($recipients as $name => $to) {
             $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
         }
 
@@ -398,6 +398,16 @@ class Message
     }
 
     /**
+     * @see setMessage
+     * @param string $message
+     * @param string $type
+     */
+    public function message(string $message, string $type = 'text/html')
+    {
+        $this->setMessage($message, $type);
+    }
+
+    /**
      * Get the headers
      *
      * @return array
@@ -430,9 +440,9 @@ class Message
     /**
      * Get the sender
      *
-     * @return string
+     * @return ?string
      */
-    public function getFrom(): string
+    public function getFrom(): ?string
     {
         return $this->from;
     }
@@ -440,9 +450,9 @@ class Message
     /**
      * Get the email message
      *
-     * @return string
+     * @return ?string
      */
-    public function getMessage(): string
+    public function getMessage(): ?string
     {
         return $this->message;
     }
@@ -450,9 +460,9 @@ class Message
     /**
      * Get the email encoding
      *
-     * @return string
+     * @return ?string
      */
-    public function getCharset(): string
+    public function getCharset(): ?string
     {
         return $this->charset;
     }
@@ -460,11 +470,11 @@ class Message
     /**
      * Get Content-Type
      *
-     * @return string
+     * @return ?string
      */
-    public function getType(): string
+    public function getType(): ?string
     {
-        return $this->type;
+        return is_null($this->type) ? 'text/html' : $this->type;
     }
 
     /**

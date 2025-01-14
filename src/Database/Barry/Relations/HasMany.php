@@ -11,20 +11,6 @@ use Bow\Database\Barry\Relation;
 class HasMany extends Relation
 {
     /**
-     * The foreign key of the parent model.
-     *
-     * @var string
-     */
-    protected string $foreign_key;
-
-    /**
-     * The associated key on the parent model.
-     *
-     * @var string
-     */
-    protected string $local_key;
-
-    /**
      * Create a new belongs to relationship instance.
      *
      * @param Model $related
@@ -50,7 +36,6 @@ class HasMany extends Relation
      */
     public function getResults(): Collection
     {
-        // TODO: Cache the result
         return $this->query->get();
     }
 
@@ -61,8 +46,6 @@ class HasMany extends Relation
      */
     public function addConstraints(): void
     {
-        if (static::$has_constraints) {
-            // Todo
-        }
+        //
     }
 }

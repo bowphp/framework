@@ -274,9 +274,9 @@ class MigrationCommand extends AbstractCommand
             'create'
         );
 
-        $generator->addColumn('migration', 'string', ['unique' => true]);
-        $generator->addColumn('batch', 'int');
-        $generator->addColumn('created_at', 'datetime', [
+        $generator->addString('migration', ['unique' => true]);
+        $generator->addInteger('batch');
+        $generator->addDatetime('created_at', [
             'default' => 'CURRENT_TIMESTAMP',
             'nullable' => true
         ]);

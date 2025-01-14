@@ -6,6 +6,9 @@ namespace Bow\Queue;
 
 use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
+use Bow\Queue\Adapters\DatabaseAdapter;
+use Bow\Queue\Adapters\SQSAdapter;
+use Bow\Queue\Adapters\SyncAdapter;
 use ErrorException;
 
 class Connection
@@ -31,6 +34,9 @@ class Connection
      */
     private static array $connections = [
         "beanstalkd" => BeanstalkdAdapter::class,
+        "sqs" => SQSAdapter::class,
+        "database" => DatabaseAdapter::class,
+        "sync" => SyncAdapter::class,
     ];
 
     /**
@@ -67,11 +73,13 @@ class Connection
      * Set connection
      *
      * @param string $connection
-     * @return void
+     * @return Connection
      */
-    public function setConnection(string $connection): void
+    public function setConnection(string $connection): Connection
     {
         $this->connection = $connection;
+
+        return $this;
     }
 
     /**
@@ -84,6 +92,7 @@ class Connection
         $driver = $this->connection ?: $this->config["default"];
 
         $connection = $this->config["connections"][$driver];
+
         $queue = new static::$connections[$driver]();
 
         return $queue->configure($connection);

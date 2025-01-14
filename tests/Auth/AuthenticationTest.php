@@ -44,6 +44,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     {
         $config = TestingConfiguration::getConfig();
         $auth = Auth::getInstance();
+
         $this->assertEquals($auth->getName(), $config["auth"]["default"]);
         $this->assertEquals($auth->getName(), "web");
     }
@@ -104,7 +105,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Authentication::class, $user);
         $this->assertTrue($auth->check());
         $this->assertEquals($auth->id(), $user->id);
-        $this->assertRegExp("/^([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+$/", $token);
+        $this->assertMatchesRegularExpression("/^([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+$/", $token);
     }
 
     public function test_direct_login_with_jwt_provider()
@@ -118,7 +119,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($auth->check());
         $this->assertInstanceOf(Authentication::class, $user);
         $this->assertEquals($auth->id(), $user->id);
-        $this->assertRegExp("/^([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+$/", $token);
+        $this->assertMatchesRegularExpression("/^([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+$/", $token);
     }
 
     public function test_attempt_login_with_jwt_provider_fail()
@@ -137,6 +138,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     public function test_attempt_login_with_session_provider()
     {
         $this->expectException(AuthenticationException::class);
+
         $auth = Auth::guard('web');
         $auth->attempts([
             "username" => "papac",

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
+use Bow\Application\Exception\ApplicationException;
+
 class Env
 {
     /**
@@ -52,11 +54,20 @@ class Env
         // Get the env file content
         $content = file_get_contents($filename);
 
-        static::$envs = json_decode(trim($content), true);
+        $envs = json_decode(trim($content), true, 1024);
+
+        if (json_last_error()) {
+            throw new ApplicationException(
+                json_last_error_msg() . ": check your env json and synthax please."
+            );
+        }
+
+        static::$envs = $envs;
+        static::$envs = static::bindVariables($envs);
 
         foreach (static::$envs as $key => $value) {
             $key = Str::upper(trim($key));
-            putenv($key . '=' . $value);
+            putenv($key . '=' . json_encode($value));
         }
 
         if (json_last_error() == JSON_ERROR_SYNTAX) {
@@ -90,7 +101,13 @@ class Env
             return $default;
         }
 
-        return $value;
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $data = json_decode($value);
+
+        return json_last_error() ? $value : $data;
     }
 
     /**
@@ -103,8 +120,38 @@ class Env
     public static function set(string $key, mixed $value): bool
     {
         $key = Str::upper(trim($key));
+
         static::$envs[$key] = $value;
 
         return putenv($key . '=' . $value);
+    }
+
+    /**
+     * Bind variable
+     *
+     * @param array $envs
+     * @return array
+     */
+    private static function bindVariables(array $envs): array
+    {
+        $keys = array_keys(static::$envs);
+
+        foreach ($envs as $env_key => $value) {
+            foreach ($keys as $key) {
+                if ($key == $env_key) {
+                    break;
+                }
+                if (is_array($value)) {
+                    $envs[$env_key] = static::bindVariables($value);
+                    break;
+                }
+                if (is_string($value) && preg_match("/\\$\{\s*$key\s*\}/", $value)) {
+                    $envs[$env_key] = str_replace('${' . $key . '}', static::$envs[$key], $value);
+                    break;
+                }
+            }
+        }
+
+        return $envs;
     }
 }
