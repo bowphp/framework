@@ -59,7 +59,7 @@ abstract class Relation
     protected static bool $has_pivot = false;
 
     /**
-     * Relation Contructor
+     * Relation Contractor
      *
      * @param Model $related
      * @param Model $parent
@@ -101,10 +101,10 @@ abstract class Relation
      * _Call
      *
      * @param string $method
-     * @param string $args
+     * @param array $args
      * @return mixed
      */
-    public function __call(string $method, array $args)
+    public function __call(string $method, array $args = [])
     {
         $result = call_user_func_array([$this->query, $method], (array) $args);
 

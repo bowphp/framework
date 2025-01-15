@@ -32,7 +32,7 @@ class Mail
     /**
      * The mail driver instance
      *
-     * @var MailDriverInterface
+     * @var ?MailDriverInterface
      */
     private static ?MailDriverInterface $instance = null;
 
@@ -120,9 +120,14 @@ class Mail
     }
 
     /**
-     * @inheritdoc
+     * The method thad send the configured mail
+     *
+     * @param string $view
+     * @param callable|array $data
+     * @param callable|null $cb
+     * @return bool
      */
-    public static function send(string $view, callable|array $data, ?callable $cb = null)
+    public static function send(string $view, callable|array $data, ?callable $cb = null): bool
     {
         if (is_null($cb)) {
             $cb = $data;
@@ -148,7 +153,7 @@ class Mail
      * @param  array        $headers
      * @return mixed
      */
-    public static function raw(string|array $to, string $subject, string $data, array $headers = [])
+    public static function raw(string|array $to, string $subject, string $data, array $headers = []): mixed
     {
         $to = (array) $to;
 
@@ -191,7 +196,7 @@ class Mail
      * @param callable $cb
      * @return void
      */
-    public static function queueOn(string $queue, string $template, array $data, callable $cb)
+    public static function queueOn(string $queue, string $template, array $data, callable $cb): void
     {
         $message = new Message();
 
@@ -213,7 +218,7 @@ class Mail
      * @param callable $cb
      * @return void
      */
-    public static function later(int $delay, string $template, array $data, callable $cb)
+    public static function later(int $delay, string $template, array $data, callable $cb): void
     {
         $message = new Message();
 
@@ -236,7 +241,7 @@ class Mail
      * @param callable $cb
      * @return void
      */
-    public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb)
+    public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb): void
     {
         $message = new Message();
 
@@ -279,12 +284,12 @@ class Mail
     /**
      * __call
      *
-     * @param  string $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array $arguments
      * @return mixed
      * @throws \ErrorException
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments = [])
     {
         if (method_exists(static::class, $name)) {
             return call_user_func_array([static::class, $name], $arguments);

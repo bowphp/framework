@@ -14,9 +14,6 @@ class ViewConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        /**
-         * Configuration of view
-         */
         $this->container->bind('view', function () use ($config) {
             View::configure($config["view"]);
 

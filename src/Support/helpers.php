@@ -1,7 +1,14 @@
 <?php
 
 use Bow\Auth\Auth;
+use Bow\Configuration\Loader;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Mail\Mail;
+use Bow\Storage\Exception\DiskNotFoundException;
+use Bow\Storage\Exception\ServiceConfigurationNotFoundException;
+use Bow\Storage\Exception\ServiceNotFoundException;
+use Bow\Storage\Service\FTPService;
+use Bow\Storage\Service\S3Service;
 use Bow\View\View;
 use Carbon\Carbon;
 use Monolog\Logger;
@@ -62,14 +69,14 @@ if (!function_exists('config')) {
     /**
      * Application configuration
      *
-     * @param  string|array $key
-     * @param  mixed        $setting
-     * @return \Bow\Configuration\Loader|mixed
+     * @param ?string|null $key
+     * @param mixed|null $setting
+     * @return Loader|mixed
      * @throws
      */
-    function config($key = null, $setting = null): mixed
+    function config(?string $key = null, mixed $setting = null): mixed
     {
-        $config = \Bow\Configuration\Loader::getInstance();
+        $config = Loader::getInstance();
 
         if (is_null($key)) {
             return $config;
@@ -92,7 +99,7 @@ if (!function_exists('response')) {
     function response(): Response
     {
         /**
-         * @var Response
+         * @var Response $response
          */
         $response = app('response');
 
@@ -109,7 +116,7 @@ if (!function_exists('request')) {
     function request(): Request
     {
         /**
-         * @var Request
+         * @var Request $request
          */
         $request = app('request');
 
@@ -121,12 +128,12 @@ if (!function_exists('db')) {
     /**
      * Allows to connect to another database and return the instance of the DB
      *
-     * @param string  $name
-     * @param callable $cb
+     * @param string|null $name
+     * @param callable|null $cb
      * @return DB
-     * @throws
+     * @throws ConnectionException
      */
-    function db(string $name = null, callable $cb = null)
+    function db(string $name = null, callable $cb = null): DB
     {
         if (func_num_args() == 0) {
             return DB::getInstance();
@@ -140,7 +147,7 @@ if (!function_exists('db')) {
             $instance = DB::connection($name);
         }
 
-        // When callback is define, we execute the callback
+        // When callback is defined, we execute the callback
         // set the old connection name after execution
         if (is_callable($cb)) {
             $cb();
@@ -158,9 +165,9 @@ if (!function_exists('view')) {
      * @param string    $template
      * @param array|int $data
      * @param int       $code
-     * @return mixed
+     * @return View
      */
-    function view(string $template, int|array $data = [], int $code = 200)
+    function view(string $template, int|array $data = [], int $code = 200): View
     {
         if (is_int($data)) {
             $code = $data;
@@ -179,12 +186,13 @@ if (!function_exists('table')) {
     /**
      * Table alias of DB::table
      *
-     * @param  string $name
-     * @param  string $connexion
+     * @param string $name
+     * @param ?string $connexion
      * @return Bow\Database\QueryBuilder
+     * @throws ConnectionException
      * @deprecated
      */
-    function table(string $name, string $connexion = null)
+    function table(string $name, string $connexion = null): \Bow\Database\QueryBuilder
     {
         if (is_string($connexion)) {
             db($connexion);
@@ -199,10 +207,10 @@ if (!function_exists('get_last_insert_id')) {
      * Returns the last ID following an INSERT query
      * on a table whose ID is auto_increment.
      *
-     * @param  string $name
+     * @param string|null $name
      * @return int
      */
-    function get_last_insert_id(string $name = null)
+    function get_last_insert_id(string $name = null): int
     {
         return DB::lastInsertId($name);
     }
@@ -212,11 +220,12 @@ if (!function_exists('db_table')) {
     /**
      * Table alias of DB::table
      *
-     * @param  string $name
-     * @param  string $connexion
+     * @param string $name
+     * @param string|null $connexion
      * @return Bow\Database\QueryBuilder
+     * @throws ConnectionException
      */
-    function db_table(string $name, string $connexion = null)
+    function db_table(string $name, string $connexion = null): \Bow\Database\QueryBuilder
     {
         if (is_string($connexion)) {
             db($connexion);
@@ -236,7 +245,7 @@ if (!function_exists('db_select')) {
      * @param array    $data
      * @return int|array|stdClass
      */
-    function db_select(string $sql, array $data = [])
+    function db_select(string $sql, array $data = []): array|int|stdClass
     {
         return DB::select($sql, $data);
     }
@@ -250,7 +259,7 @@ if (!function_exists('db_select_one')) {
      * @param array    $data
      * @return int|array|StdClass
      */
-    function db_select_one(string $sql, array $data = [])
+    function db_select_one(string $sql, array $data = []): array|int|StdClass
     {
         return DB::selectOne($sql, $data);
     }
@@ -264,7 +273,7 @@ if (!function_exists('db_insert')) {
      * @param array    $data
      * @return int
      */
-    function db_insert(string $sql, array $data = [])
+    function db_insert(string $sql, array $data = []): int
     {
         return DB::insert($sql, $data);
     }
@@ -275,10 +284,10 @@ if (!function_exists('db_delete')) {
      * Launches DELETE type SQL queries
      *
      * @param string   $sql
-     * @param array    $data
+     * @param array $data
      * @return int
      */
-    function db_delete(string $sql, $data = [])
+    function db_delete(string $sql, array $data = []): int
     {
         return DB::delete($sql, $data);
     }
@@ -292,7 +301,7 @@ if (!function_exists('db_update')) {
      * @param array  $data
      * @return int
      */
-    function db_update(string $sql, array $data = [])
+    function db_update(string $sql, array $data = []): int
     {
         return DB::update($sql, $data);
     }
@@ -305,7 +314,7 @@ if (!function_exists('db_statement')) {
      * @param string $sql
      * @return int
      */
-    function db_statement($sql)
+    function db_statement(string $sql): int
     {
         return DB::statement($sql);
     }
@@ -315,11 +324,11 @@ if (!function_exists('debug')) {
     /**
      * debug, variable debug function
      * it allows you to have a color
-     * Synthaxic data types.
+     * Synthetic data types.
      *
      * @return void
      */
-    function debug()
+    function debug(): void
     {
         array_map(function ($x) {
             call_user_func_array([Util::class, 'debug'], [$x]);
@@ -333,7 +342,7 @@ if (!function_exists("sep")) {
      *
      * @return string
      */
-    function sep()
+    function sep(): string
     {
         return call_user_func([Util::class, 'sep']);
     }
@@ -343,7 +352,7 @@ if (!function_exists('create_csrf_token')) {
     /**
      * Create a new token
      *
-     * @param  int $time
+     * @param int|null $time
      * @return ?array
      */
     function create_csrf_token(int $time = null): ?array
@@ -357,6 +366,7 @@ if (!function_exists('csrf_token')) {
      * Get the generate token
      *
      * @return string
+     * @throws HttpException
      */
     function csrf_token(): string
     {
@@ -378,6 +388,7 @@ if (!function_exists('csrf_field')) {
      * Get the input csrf field
      *
      * @return string
+     * @throws HttpException
      */
     function csrf_field(): string
     {
@@ -398,10 +409,10 @@ if (!function_exists('method_field')) {
     /**
      * Create hidden http method field
      *
-     * @param  string $method
+     * @param string $method
      * @return string
      */
-    function method_field($method): string
+    function method_field(string $method): string
     {
         $method = strtoupper($method);
 
@@ -439,7 +450,7 @@ if (!function_exists('csrf_time_is_expired')) {
     /**
      * Check if token is expired by time
      *
-     * @param  string $time
+     * @param string|null $time
      * @return bool
      */
     function csrf_time_is_expired(string $time = null): bool
@@ -510,7 +521,7 @@ if (!function_exists('sanitize')) {
 
 if (!function_exists('secure')) {
     /**
-     * Secure data with sanitaze it
+     * Secure data with sanitize it
      *
      * @param  mixed $data
      * @return mixed
@@ -556,7 +567,7 @@ if (!function_exists('redirect')) {
     /**
      * Make redirect response
      *
-     * @param  string $path
+     * @param string|null $path
      * @return Redirect
      */
     function redirect(string $path = null): Redirect
@@ -575,11 +586,11 @@ if (!function_exists('url')) {
     /**
      * Build url
      *
-     * @param string|null $url
-     * @param array       $parameters
+     * @param string|array|null $url
+     * @param array $parameters
      * @return string
      */
-    function url(string $url = null, array $parameters = [])
+    function url(string|array $url = null, array $parameters = []): string
     {
         $current = trim(request()->url(), '/');
 
@@ -631,7 +642,7 @@ if (!function_exists('set_pdo')) {
 if (!function_exists('collect')) {
 
     /**
-     * Create new Ccollection instance
+     * Create new Collection instance
      *
      * @param  array $data
      * @return Collection
@@ -672,7 +683,7 @@ if (!function_exists('db_transaction')) {
     /**
      * Start Database transaction
      *
-     * @param callable $cb
+     * @param callable|null $cb
      * @return void
      */
     function db_transaction(callable $cb = null): void
@@ -719,7 +730,7 @@ if (!function_exists('db_commit')) {
 
 if (!function_exists('event')) {
     /**
-     * Event event
+     * Event
      *
      * @return mixed
      */
@@ -745,7 +756,7 @@ if (!function_exists('flash')) {
      * @param string $message
      * @return mixed
      */
-    function flash(string $key, string $message)
+    function flash(string $key, string $message): mixed
     {
         return Session::getInstance()
             ->flash($key, $message);
@@ -757,10 +768,9 @@ if (!function_exists('email')) {
      * Send email
      *
      * @param null|string $view
-     * @param array       $data
-     * @param callable    $cb
+     * @param array $data
+     * @param callable|null $cb
      * @return MailDriverInterface|bool
-     * @throws
      */
     function email(
         string $view = null,
@@ -779,10 +789,10 @@ if (!function_exists('raw_email')) {
     /**
      * Send raw email
      *
-     * @param  array $to
-     * @param  string       $subject
-     * @param  string       $message
-     * @param  array        $headers
+     * @param string $to
+     * @param string $subject
+     * @param string $message
+     * @param array $headers
      * @return bool
      */
     function raw_email(string $to, string $subject, string $message, array $headers = []): bool
@@ -795,7 +805,7 @@ if (!function_exists('session')) {
     /**
      * Session help
      *
-     * @param array|string $value
+     * @param array|string|null $value
      * @param mixed $default
      * @return mixed
      */
@@ -822,33 +832,25 @@ if (!function_exists('cookie')) {
     /**
      * Cooke alias
      *
-     * @param  string   $key
-     * @param  mixed    $data
-     * @param  int      $expirate
-     * @param  string   $path
-     * @param  string   $domain
-     * @param  bool     $secure
-     * @param  bool     $http
-     * @return null|string
+     * @param string|null $key
+     * @param mixed $data
+     * @param int $expiration
+     * @return string|array|object|null
      */
     function cookie(
         string $key = null,
         mixed $data = null,
-        int $expirate = 3600
-    ) {
+        int $expiration = 3600
+    ): string|array|object|null {
         if ($key === null) {
             return Cookie::all();
         }
 
-        if ($key !== null && $data == null) {
+        if ($data == null) {
             return Cookie::get($key);
         }
 
-        if ($key !== null && $data !== null) {
-            return Cookie::set($key, $data, $expirate);
-        }
-
-        return null;
+        return Cookie::set($key, $data, $expiration);
     }
 }
 
@@ -876,7 +878,7 @@ if (!function_exists('route')) {
      * @param  bool  $absolute
      * @return string
      */
-    function route(string $name, bool|array $data = [], bool $absolute = false)
+    function route(string $name, bool|array $data = [], bool $absolute = false): string
     {
         if (is_bool($data)) {
             $absolute = $data;
@@ -892,13 +894,13 @@ if (!function_exists('route')) {
             );
         }
 
-        if (preg_match_all('/(?::([a-zA-Z0-9_]+\??))/', $url, $matches)) {
+        if (preg_match_all('/:([a-zA-Z0-9_]+\??)/', $url, $matches)) {
             $keys = end($matches);
             foreach ($keys as $key) {
                 if (preg_match("/\?$/", $key)) {
-                    $valide_key = trim($key, "?");
-                    $value = $data[$valide_key] ?? "";
-                    unset($data[$valide_key]);
+                    $valid_key = trim($key, "?");
+                    $value = $data[$valid_key] ?? "";
+                    unset($data[$valid_key]);
                 } else {
                     if (!isset($data[$key])) {
                         throw new InvalidArgumentException("Route: The $key key is not provide");
@@ -942,9 +944,12 @@ if (!function_exists('storage_service')) {
     /**
      * Service loader
      *
-     * @return \Bow\Storage\Service\FTPService|\Bow\Storage\Service\S3Service
+     * @param string $service
+     * @return FTPService|S3Service
+     * @throws ServiceConfigurationNotFoundException
+     * @throws ServiceNotFoundException
      */
-    function storage_service(string $service)
+    function storage_service(string $service): S3Service|FTPService
     {
         return Storage::service($service);
     }
@@ -956,7 +961,7 @@ if (!function_exists('app_file_system')) {
      *
      * @param string $disk
      * @return DiskFilesystemService
-     * @throws ResourceException
+     * @throws DiskNotFoundException
      */
     function app_file_system(string $disk): DiskFilesystemService
     {
@@ -969,21 +974,24 @@ if (!function_exists('cache')) {
      * Cache help
      *
      * @param  ?string $key
-     * @param  ?mixed  $value
-     * @param  ?int  $ttl
+     * @param  ?mixed $value
+     * @param  ?int $ttl
      * @return mixed
+     * @throws ErrorException
      */
-    function cache(string $key = null, mixed $value = null, int $ttl = null)
+    function cache(string $key = null, mixed $value = null, int $ttl = null): mixed
     {
+        $instance = \Bow\Cache\Cache::getInstance();
+
         if ($key === null) {
-            return \Bow\Cache\Cache::getInstance();
+            return $instance;
         }
 
-        if ($key !== null && $value === null) {
-            return \Bow\Cache\Cache::get($key);
+        if ($value === null) {
+            return $instance->get($key);
         }
 
-        return \Bow\Cache\Cache::add($key, $value, $ttl);
+        return $instance->add($key, $value, $ttl);
     }
 }
 
@@ -1049,7 +1057,7 @@ if (!function_exists('app_trans')) {
     /**
      * Make translation
      *
-     * @param string $key
+     * @param string|null $key
      * @param array $data
      * @param bool $choose
      * @return string|Translator
@@ -1076,10 +1084,10 @@ if (!function_exists('t')) {
     /**
      * Alias of trans
      *
-     * @param  string $key
-     * @param  array $data
-     * @param  bool $choose
-     * @return string
+     * @param string $key
+     * @param array $data
+     * @param bool $choose
+     * @return string|Translator
      */
     function t(
         string $key,
@@ -1094,10 +1102,10 @@ if (!function_exists('__')) {
     /**
      * Alias of trans
      *
-     * @param  $key
-     * @param  $data
-     * @param  bool $choose
-     * @return string
+     * @param string $key
+     * @param array $data
+     * @param bool $choose
+     * @return string|Translator
      */
     function __(
         string $key,
@@ -1110,13 +1118,13 @@ if (!function_exists('__')) {
 
 if (!function_exists('app_env')) {
     /**
-     * Gets the app environement variable
+     * Gets the app environment variable
      *
      * @param string $key
      * @param mixed $default
-     * @return string
+     * @return ?string
      */
-    function app_env(string $key, mixed $default = null)
+    function app_env(string $key, mixed $default = null): ?string
     {
         if (Env::isLoaded()) {
             return Env::get($key, $default);
@@ -1148,7 +1156,7 @@ if (!function_exists('app_abort')) {
      * @return Response
      * @throws HttpException
      */
-    function app_abort(int $code = 500, string $message = '')
+    function app_abort(int $code = 500, string $message = ''): Response
     {
         if (strlen($message) == 0) {
             $message = HttpStatus::getMessage($code);
@@ -1160,12 +1168,13 @@ if (!function_exists('app_abort')) {
 
 if (!function_exists('app_abort_if')) {
     /**
-     * Abort bow execution if condiction is true
+     * Abort bow execution if condition is true
      *
      * @param boolean $boolean
      * @param int $code
      * @param string $message
      * @return Response|null
+     * @throws HttpException
      */
     function app_abort_if(
         bool $boolean,
@@ -1182,7 +1191,7 @@ if (!function_exists('app_abort_if')) {
 
 if (!function_exists('app_mode')) {
     /**
-     * Get app enviroment mode
+     * Get app environment mode
      *
      * @return string
      */
@@ -1194,7 +1203,7 @@ if (!function_exists('app_mode')) {
 
 if (!function_exists('app_in_debug')) {
     /**
-     * Get app enviroment mode
+     * Get app environment mode
      *
      * @return bool
      */
@@ -1218,7 +1227,7 @@ if (!function_exists('client_locale')) {
 
 if (!function_exists('old')) {
     /**
-     * Get old request valude
+     * Get old request value
      *
      * @param string $key
      * @param mixed $fullback
@@ -1234,9 +1243,8 @@ if (!function_exists('auth')) {
     /**
      * Recovery of the guard
      *
-     * @param string $guard
+     * @param string|null $guard
      * @return GuardContract
-     * @throws
      */
     function auth(string $guard = null): GuardContract
     {
@@ -1320,8 +1328,8 @@ if (!function_exists('str_is_slug')) {
      * Check if string is slug
      *
      * @param string $slug
-     * @return bool
-     * @throws
+     * @return string
+     * @throws ErrorException
      */
     function str_is_slug(string $slug): string
     {
@@ -1406,7 +1414,7 @@ if (!function_exists('str_wordify')) {
      */
     function str_wordify(string $words, string $sep = ''): array
     {
-        return Str::wordify($words, $sep);
+        return Str::wordily($words, $sep);
     }
 }
 
@@ -1419,7 +1427,7 @@ if (!function_exists('str_plurial')) {
      */
     function str_plurial(string $slug): string
     {
-        return Str::plurial($slug);
+        return Str::plural($slug);
     }
 }
 
@@ -1451,7 +1459,7 @@ if (!function_exists('str_snake')) {
 
 if (!function_exists('str_contains')) {
     /**
-     * Check if string contain an other string
+     * Check if string contain another string
      *
      * @param string $search
      * @param string $string
@@ -1520,9 +1528,10 @@ if (!function_exists('db_seed')) {
      *
      * @param string $name
      * @param array $data
-     * @return mixed
+     * @return int|array
+     * @throws ErrorException
      */
-    function db_seed(string $name, array $data = []): mixed
+    function db_seed(string $name, array $data = []): int|array
     {
         if (class_exists($name, true)) {
             $instance = app($name);

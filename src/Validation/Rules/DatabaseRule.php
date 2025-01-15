@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Validation\Rules;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\QueryBuilderException;
 
 trait DatabaseRule
 {
@@ -16,6 +17,7 @@ trait DatabaseRule
      * @param string $key
      * @param string $masque
      * @return void
+     * @throws QueryBuilderException
      */
     protected function compileExists(string $key, string $masque): void
     {
@@ -26,13 +28,11 @@ trait DatabaseRule
         $catch = end($match);
         $parts = explode(',', $catch);
 
-        if (count($parts) == 1) {
-            $exists = Database::table($parts[0])
-                ->where($key, $this->inputs[$key])->exists();
-        } else {
-            $exists = Database::table($parts[0])
+        $exists = count($parts) == 1
+            ? Database::table($parts[0])
+                ->where($key, $this->inputs[$key])->exists()
+            : Database::table($parts[0])
                 ->where($parts[1], $this->inputs[$key])->exists();
-        }
 
         if (!$exists) {
             $this->last_message = $this->lexical('exists', $key);
@@ -54,6 +54,7 @@ trait DatabaseRule
      * @param string $key
      * @param string $masque
      * @return void
+     * @throws QueryBuilderException
      */
     protected function compileNotExists(string $key, string $masque): void
     {
@@ -64,13 +65,11 @@ trait DatabaseRule
         $catch = end($match);
         $parts = explode(',', $catch);
 
-        if (count($parts) == 1) {
-            $exists = Database::table($parts[0])
-                ->where($key, $this->inputs[$key])->exists();
-        } else {
-            $exists = Database::table($parts[0])
+        $exists = count($parts) == 1
+            ? Database::table($parts[0])
+                ->where($key, $this->inputs[$key])->exists()
+            : Database::table($parts[0])
                 ->where($parts[1], $this->inputs[$key])->exists();
-        }
 
         if ($exists) {
             $this->last_message = $this->lexical('not_exists', $key);
@@ -92,6 +91,7 @@ trait DatabaseRule
      * @param string $key
      * @param string $masque
      * @return void
+     * @throws QueryBuilderException
      */
     protected function compileUnique(string $key, string $masque): void
     {

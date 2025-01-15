@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 use Bow\Database\Database;
+use Bow\Database\Exception\ConnectionException;
+use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\QueryBuilder;
 use Bow\Support\Str;
+use JetBrains\PhpStorm\NoReturn;
 
 class MigrationCommand extends AbstractCommand
 {
     /**
      * Make a migration command
      *
-     * @param  string $model
      * @return void
      * @throws \Exception
      */
@@ -49,13 +53,11 @@ class MigrationCommand extends AbstractCommand
     /**
      * Create a migration in both directions
      *
-     * @param string $model
      * @param string $type
-     *
      * @return void
      * @throws \Exception
      */
-    private function factory(string $type)
+    private function factory(string $type): void
     {
         $migrations = [];
 
@@ -67,13 +69,9 @@ class MigrationCommand extends AbstractCommand
         // We create the migration database status
         $this->createMigrationTable();
 
-        try {
-            $action = 'make' . strtoupper($type);
+        $action = 'make' . strtoupper($type);
 
-            return $this->$action($migrations);
-        } catch (\Exception $exception) {
-            throw $exception;
-        }
+        $this->$action($migrations);
     }
 
     /**
@@ -81,6 +79,8 @@ class MigrationCommand extends AbstractCommand
      *
      * @param array $migrations
      * @return void
+     * @throws ConnectionException
+     * @throws QueryBuilderException
      */
     protected function makeUp(array $migrations): void
     {
@@ -126,6 +126,8 @@ class MigrationCommand extends AbstractCommand
      *
      * @param array $migrations
      * @return void
+     * @throws ConnectionException
+     * @throws QueryBuilderException
      */
     protected function makeRollback(array $migrations): void
     {
@@ -186,6 +188,8 @@ class MigrationCommand extends AbstractCommand
      *
      * @param array $migrations
      * @return void
+     * @throws ConnectionException
+     * @throws QueryBuilderException
      */
     protected function makeReset(array $migrations): void
     {
@@ -233,7 +237,7 @@ class MigrationCommand extends AbstractCommand
      * @param string $migration
      * @return void
      */
-    private function printExceptionMessage(string $message, string $migration)
+    #[NoReturn] private function printExceptionMessage(string $message, string $migration): void
     {
         $message = Color::red($message);
         $migration = Color::yellow($migration);
@@ -247,7 +251,7 @@ class MigrationCommand extends AbstractCommand
      * @param \Exception $exception
      * @param string $migration
      */
-    private function throwMigrationException(\Exception $exception, string $migration)
+    #[NoReturn] private function throwMigrationException(\Exception $exception, string $migration): void
     {
         $this->printExceptionMessage(
             $exception->getMessage(),
@@ -259,8 +263,9 @@ class MigrationCommand extends AbstractCommand
      * Create the migration status table
      *
      * @return void
+     * @throws ConnectionException
      */
-    private function createMigrationTable()
+    private function createMigrationTable(): void
     {
         $connection = $this->arg->getParameter("--connection", config("database.default"));
 
@@ -287,20 +292,21 @@ class MigrationCommand extends AbstractCommand
             $generator->make()
         );
 
-        return Database::statement($sql);
+        Database::statement($sql);
     }
 
     /**
      * Create migration status
      *
      * @param string $migration
-     * @return int
+     * @return void
+     * @throws ConnectionException
      */
-    private function createMigrationStatus(string $migration): int
+    private function createMigrationStatus(string $migration): void
     {
         $table = $this->getMigrationTable();
 
-        return $table->insert([
+        $table->insert([
             'migration' => $migration,
             'batch' => 1,
             'created_at' => date('Y-m-d H:i:s')
@@ -312,13 +318,14 @@ class MigrationCommand extends AbstractCommand
      *
      * @param string $migration
      * @param int $batch
-     * @return int
+     * @return void
+     * @throws ConnectionException|QueryBuilderException
      */
-    private function updateMigrationStatus(string $migration, int $batch): int
+    private function updateMigrationStatus(string $migration, int $batch): void
     {
         $table = $this->getMigrationTable();
 
-        return $table->where('migration', $migration)->update([
+        $table->where('migration', $migration)->update([
             'migration' => $migration,
             'batch' => $batch
         ]);
@@ -329,6 +336,7 @@ class MigrationCommand extends AbstractCommand
      *
      * @param string $migration
      * @return bool
+     * @throws ConnectionException|QueryBuilderException
      */
     private function checkIfMigrationExist(string $migration): bool
     {
@@ -342,13 +350,14 @@ class MigrationCommand extends AbstractCommand
     /**
      * Get migration table
      *
-     * @return \Database\Database\QueryBuilder
+     * @return QueryBuilder
+     * @throws ConnectionException
      */
-    private function getMigrationTable()
+    private function getMigrationTable(): QueryBuilder
     {
         $migration_status_table = config('database.migration', 'migrations');
 
-        return table($migration_status_table);
+        return db_table($migration_status_table);
     }
 
     /**
@@ -356,7 +365,7 @@ class MigrationCommand extends AbstractCommand
      *
      * @return array
      */
-    private function getMigrationFiles()
+    private function getMigrationFiles(): array
     {
         $file_pattern = $this->setting->getMigrationDirectory() . strtolower("/*.php");
 
@@ -371,7 +380,7 @@ class MigrationCommand extends AbstractCommand
      * @return void
      * @throws \ErrorException
      */
-    public function generate($model)
+    public function generate(string $model): void
     {
         $create_at = date("YmdHis");
         $filename = sprintf("Version%s%s", $create_at, ucfirst(Str::camel($model)));

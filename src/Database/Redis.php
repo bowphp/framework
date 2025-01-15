@@ -14,7 +14,7 @@ class Redis
     /**
      * Define the php-redis instance
      *
-     * @var Redis
+     * @var RedisClient
      */
     private static RedisClient $redis;
 
@@ -54,7 +54,7 @@ class Redis
             $auth[] = $config["password"];
         }
 
-        if (isset($config["username"]) && !is_null($config["username"])) {
+        if (isset($config["username"])) {
             array_unshift($auth, $config["username"]);
         }
 
@@ -69,6 +69,7 @@ class Redis
         ];
 
         static::$redis = new RedisClient();
+
         static::$redis->connect(
             $config["host"],
             $config["port"] ?? 6379,
@@ -93,7 +94,7 @@ class Redis
      *
      * @param ?string $message
      */
-    public static function ping(?string $message = null)
+    public static function ping(?string $message = null): void
     {
         static::$redis->ping($message);
     }

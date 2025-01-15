@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
+use JetBrains\PhpStorm\NoReturn;
 
 class EventListenerCommand extends AbstractCommand
 {
@@ -14,7 +16,7 @@ class EventListenerCommand extends AbstractCommand
      * @param string $event
      * @return void
      */
-    public function generate(string $event): void
+    #[NoReturn] public function generate(string $event): void
     {
         $generator = new Generator(
             $this->setting->getEventListenerDirectory(),

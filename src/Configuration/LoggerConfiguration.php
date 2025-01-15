@@ -51,9 +51,10 @@ class LoggerConfiguration extends Configuration
      * Loader view logger
      *
      * @param Logger $monolog
+     * @param $error_handler
      * @return void
      */
-    private function loadFrontLogger(Logger $monolog, $error_handler)
+    private function loadFrontLogger(Logger $monolog, $error_handler): void
     {
         $whoops = new \Whoops\Run();
 
@@ -100,7 +101,7 @@ class LoggerConfiguration extends Configuration
      * @return Logger
      * @throws \Exception
      */
-    private function loadFileLogger($log_dir, $name)
+    private function loadFileLogger(string $log_dir, string $name): Logger
     {
         $monolog = new Logger($name);
 

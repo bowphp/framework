@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Application\Exception;
 
+use JetBrains\PhpStorm\NoReturn;
 use PDOException;
 use Bow\View\View;
 use Bow\Http\Exception\HttpException;
@@ -20,7 +21,7 @@ class BaseErrorHandler
      * @param array $data
      * @return string
      */
-    protected function render($view, $data = []): string
+    protected function render(string $view, array $data = []): string
     {
         return View::parse($view, $data)->getContent();
     }
@@ -28,11 +29,11 @@ class BaseErrorHandler
     /**
      * Send the json as response
      *
-     * @param string $data
-     * @param mixed $code
-     * @return mixed
+     * @param $exception
+     * @param mixed|null $code
+     * @return void
      */
-    protected function json($exception, $code = null)
+    #[NoReturn] protected function json($exception, mixed $code = null): void
     {
         if ($exception instanceof TokenInvalidException) {
             $code = 'TOKEN_INVALID';
@@ -50,8 +51,12 @@ class BaseErrorHandler
             }
         }
 
-        if (app_env("APP_ENV") == "production" && $exception instanceof PDOException) {
-            $message = 'An SQL error occurs. For security, we did not display the message.';
+        if ($exception instanceof PDOException) {
+            if (app_env("APP_ENV") == "production") {
+                $message = 'An SQL error occurs. For security, we did not display the message.';
+            } else {
+                $message = $exception->getMessage();
+            }
         } else {
             $message = $exception->getMessage();
         }
@@ -78,6 +83,6 @@ class BaseErrorHandler
 
         response()->status($status);
 
-        return die(json_encode($response));
+        die(json_encode($response));
     }
 }

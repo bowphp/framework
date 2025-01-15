@@ -41,6 +41,7 @@ class MailQueueTest extends PHPUnit\Framework\TestCase
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
 
         $adapter->push($producer);
+
         $adapter->run();
     }
 }

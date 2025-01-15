@@ -38,12 +38,12 @@ class FilesystemDriver implements \SessionHandlerInterface
     /**
      * Destroy session information
      *
-     * @param string $session_id
+     * @param string $id
      * @return bool
      */
-    public function destroy(string $session_id): bool
+    public function destroy(string $id): bool
     {
-        $file = $this->sessionFile($session_id);
+        $file = $this->sessionFile($id);
 
         @unlink($file);
 
@@ -70,11 +70,11 @@ class FilesystemDriver implements \SessionHandlerInterface
     /**
      * When the session start
      *
-     * @param string $save_path
+     * @param string $path
      * @param string $name
      * @return bool
      */
-    public function open(string $save_path, string $name): bool
+    public function open(string $path, string $name): bool
     {
         if (!is_dir($this->save_path)) {
             mkdir($this->save_path, 0777);

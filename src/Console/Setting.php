@@ -165,7 +165,7 @@ class Setting
     private string $event_listener_directory;
 
     /**
-     * The namesapces directory
+     * The namespaces directory
      *
      * @var array
      */

@@ -2,7 +2,7 @@
 
 Bow Framework's validator system help developer to make data validation delightful.
 
-Let's show a little exemple:
+Let's show a little example:
 
 ```php
 $data = ["name" => "Franck DAKIA"];

@@ -15,6 +15,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addString(string $column, array $attribute = []): SQLGenerator
     {
@@ -27,6 +28,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addJson(string $column, array $attribute = []): SQLGenerator
     {
@@ -39,6 +41,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addChar(string $column, array $attribute = []): SQLGenerator
     {
@@ -51,6 +54,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addLongtext(string $column, array $attribute = []): SQLGenerator
     {
@@ -63,6 +67,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addText(string $column, array $attribute = []): SQLGenerator
     {
@@ -75,6 +80,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addBlob(string $column, array $attribute = []): SQLGenerator
     {
@@ -87,6 +93,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeString(string $column, array $attribute = []): SQLGenerator
     {
@@ -99,6 +106,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeJson(string $column, array $attribute = []): SQLGenerator
     {
@@ -111,6 +119,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeChar(string $column, array $attribute = []): SQLGenerator
     {
@@ -123,6 +132,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeLongtext(string $column, array $attribute = []): SQLGenerator
     {
@@ -135,6 +145,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeText(string $column, array $attribute = []): SQLGenerator
     {
@@ -147,6 +158,7 @@ trait TextColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeBlob(string $column, array $attribute = []): SQLGenerator
     {

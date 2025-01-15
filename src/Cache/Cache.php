@@ -43,8 +43,9 @@ class Cache
      * Cache configuration method
      *
      * @param array $config
+     * @return CacheAdapterInterface|null
      */
-    public static function configure(array $config)
+    public static function configure(array $config): ?CacheAdapterInterface
     {
         if (!is_null(static::$instance)) {
             return static::$instance;
@@ -64,6 +65,7 @@ class Cache
      * Get the cache instance
      *
      * @return CacheAdapterInterface
+     * @throws ErrorException
      */
     public static function getInstance(): CacheAdapterInterface
     {
@@ -77,7 +79,7 @@ class Cache
     /**
      * Get the cache instance
      *
-     * @param string $driver
+     * @param string $store
      * @return CacheAdapterInterface
      */
     public static function store(string $store): CacheAdapterInterface

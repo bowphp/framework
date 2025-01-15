@@ -54,6 +54,7 @@ class Request
      * Request constructor
      *
      * @return mixed
+     * @throws BadRequestException
      */
     public function capture()
     {
@@ -72,14 +73,14 @@ class Request
                     "The request json payload is invalid: " . $e->getMessage(),
                 );
             }
-            $this->input = array_merge((array) $data, $_GET);
         } else {
             $data = $_POST ?? [];
             if ($this->isPut()) {
                 parse_str(file_get_contents("php://input"), $data);
             }
-            $this->input = array_merge((array) $data, $_GET);
         }
+
+        $this->input = array_merge((array) $data, $_GET);
 
         foreach ($this->input as $key => $value) {
             if (is_string($value) && strlen($value) == 0) {
@@ -138,7 +139,7 @@ class Request
     }
 
     /**
-     * Check if key is exists
+     * Check if key is existing
      *
      * @param string $key
      * @return bool
@@ -229,7 +230,7 @@ class Request
     /**
      * Returns the method of the request.
      *
-     * @return string
+     * @return string|null
      */
     public function method(): ?string
     {
@@ -326,7 +327,7 @@ class Request
      * @param mixed $file
      * @return bool
      */
-    public static function hasFile($file): bool
+    public static function hasFile(mixed $file): bool
     {
         return isset($_FILES[$file]);
     }
@@ -374,10 +375,10 @@ class Request
     /**
      * Check if a url matches with the pattern
      *
-     * @param  string $match
+     * @param string $match
      * @return bool
      */
-    public function is($match): bool
+    public function is(string $match): bool
     {
         return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->path());
     }
@@ -385,10 +386,10 @@ class Request
     /**
      * Check if a url matches with the pattern
      *
-     * @param  string $match
+     * @param string $match
      * @return bool
      */
-    public function isReferer($match): bool
+    public function isReferer(string $match): bool
     {
         return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->referer());
     }
@@ -406,7 +407,7 @@ class Request
     /**
      * Get client port
      *
-     * @return string
+     * @return string|null
      */
     public function port(): ?string
     {
@@ -438,7 +439,7 @@ class Request
 
         $tmp = explode(';', $accept_language)[0];
 
-        preg_match('/^([a-z]+(?:-|_)?[a-z]+)/i', $tmp, $match);
+        preg_match('^([a-z]+)[-_]?/i', $tmp, $match);
 
         return end($match);
     }
@@ -446,7 +447,7 @@ class Request
     /**
      * Get request lang.
      *
-     * @return string
+     * @return string|null
      */
     public function lang(): ?string
     {
@@ -475,7 +476,7 @@ class Request
      * @param string $protocol
      * @return mixed
      */
-    public function isProtocol($protocol): bool
+    public function isProtocol(string $protocol): bool
     {
         return $this->scheme() == $protocol;
     }
@@ -493,7 +494,6 @@ class Request
     /**
      * Get Request header
      *
-     * @param  string $key
      * @return array
      */
     public function getHeaders(): array
@@ -513,10 +513,10 @@ class Request
     /**
      * Get Request header
      *
-     * @param  string $key
+     * @param string $key
      * @return ?string
      */
-    public function getHeader($key): ?string
+    public function getHeader(string $key): ?string
     {
         $key = str_replace('-', '_', strtoupper($key));
 
@@ -534,10 +534,10 @@ class Request
     /**
      * Check if a header exists.
      *
-     * @param  string $key
+     * @param string $key
      * @return bool
      */
-    public function hasHeader($key): bool
+    public function hasHeader(string $key): bool
     {
         return isset($_SERVER[strtoupper($key)]);
     }
@@ -576,10 +576,10 @@ class Request
     /**
      * Get cookie
      *
-     * @param string $property
-     * @return mixed
+     * @param string|null $property
+     * @return string|array|object|null
      */
-    public function cookie($property = null)
+    public function cookie(string $property = null): string|array|object|null
     {
         return cookie($property);
     }
@@ -587,11 +587,11 @@ class Request
     /**
      * Retrieve a value or a collection of values.
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed|null $default
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $value = $this->input[$key] ?? $default;
 
@@ -608,7 +608,7 @@ class Request
      * @param array $exceptions
      * @return array
      */
-    public function only($exceptions)
+    public function only(array $exceptions = []): array
     {
         $data = [];
 
@@ -626,9 +626,12 @@ class Request
     }
 
     /**
-     * @inheritdoc
+     * Retrieves the rest of values
+     *
+     * @param array $ignores
+     * @return array
      */
-    public function ignore($ignores)
+    public function ignore(array $ignores = []): array
     {
         $data = $this->input;
 
@@ -651,7 +654,7 @@ class Request
      * @param  array $rule
      * @return Validate
      */
-    public function validate(array $rule)
+    public function validate(array $rule): Validate
     {
         return Validator::make($this->input, $rule);
     }
@@ -661,9 +664,9 @@ class Request
      *
      * @param string $name
      * @param mixed $value
-     * @return mixed
+     * @return void
      */
-    public function setBag($name, $value)
+    public function setBag(string $name, mixed $value): void
     {
         $this->bags[$name] = $value;
     }
@@ -671,9 +674,10 @@ class Request
     /**
      * Get the shared value in request bags
      *
+     * @param string $name
      * @return mixed
      */
-    public function getBag(string $name)
+    public function getBag(string $name): mixed
     {
         return $this->bags[$name] ?? null;
     }
@@ -682,9 +686,9 @@ class Request
      * Set the shared value in request bags
      *
      * @param array $bags
-     * @return mixed
+     * @return void
      */
-    public function setBags(array $bags)
+    public function setBags(array $bags): void
     {
         $this->bags = $bags;
     }
@@ -694,7 +698,7 @@ class Request
      *
      * @return array
      */
-    public function getBags()
+    public function getBags(): array
     {
         return $this->bags;
     }

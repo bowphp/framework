@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 
 class ClearCommand extends AbstractCommand
@@ -13,6 +14,7 @@ class ClearCommand extends AbstractCommand
      *
      * @param string $action
      * @return void
+     * @throws \ErrorException
      */
     public function make(string $action): void
     {
@@ -32,7 +34,7 @@ class ClearCommand extends AbstractCommand
      *
      * @return void
      */
-    private function clear($action)
+    private function clear(string $action): void
     {
         if ($action == 'all') {
             $this->unlinks($this->setting->getVarDirectory() . '/view/*/*');
@@ -79,11 +81,10 @@ class ClearCommand extends AbstractCommand
     /**
      * Delete file
      *
-     * @param  string $dirname
-     *
+     * @param string $dirname
      * @return void
      */
-    private function unlinks($dirname)
+    private function unlinks(string $dirname): void
     {
         $glob = glob($dirname);
 

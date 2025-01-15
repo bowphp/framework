@@ -29,6 +29,8 @@ class MailQueueProducer extends ProducerService
         array $data,
         Message $message
     ) {
+        parent::__construct();
+
         $this->bags = [
             "view" => $view,
             "data" => $data,
@@ -58,7 +60,7 @@ class MailQueueProducer extends ProducerService
      * @param Throwable $e
      * @return void
      */
-    public function onException(Throwable $e)
+    public function onException(Throwable $e): void
     {
         $this->deleteJob();
     }

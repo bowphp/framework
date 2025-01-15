@@ -28,11 +28,13 @@ class ArrayDriver implements \SessionHandlerInterface
     /**
      * Destroy session information
      *
-     * @param string $session_id
-     * @return bool|void
+     * @param string $id
+     * @return bool
      */
-    public function destroy(string $session_id): bool
+    public function destroy(string $id): bool
     {
+        unset($this->sessions[$id]);
+
         return true;
     }
 
@@ -44,9 +46,9 @@ class ArrayDriver implements \SessionHandlerInterface
      */
     public function gc(int $max_lifetime): int|false
     {
-        foreach ($this->sessions as $session_id => $content) {
-            if ($this->sessions[$session_id]['time'] <= $this->createTimestamp()) {
-                $this->destroy($session_id);
+        foreach ($this->sessions as $id => $content) {
+            if ($this->sessions[$id]['time'] <= $this->createTimestamp()) {
+                $this->destroy($id);
             }
         }
 
@@ -56,11 +58,11 @@ class ArrayDriver implements \SessionHandlerInterface
     /**
      * When the session start
      *
-     * @param string $save_path
-     * @param string $session_id
+     * @param string $path
+     * @param string $name
      * @return bool
      */
-    public function open(string $save_path, string $session_id): bool
+    public function open(string $path, string $name): bool
     {
         $this->sessions = [];
 
@@ -70,30 +72,30 @@ class ArrayDriver implements \SessionHandlerInterface
     /**
      * Read the session information
      *
-     * @param string $session_id
+     * @param string $id
      * @return string
      */
-    public function read(string $session_id): string
+    public function read(string $id): string
     {
-        if (!isset($this->sessions[$session_id])) {
+        if (!isset($this->sessions[$id])) {
             return '';
         }
 
-        return $this->sessions[$session_id]['data'];
+        return $this->sessions[$id]['data'];
     }
 
     /**
      * Write session information
      *
-     * @param string $session_id
-     * @param string $session_data
+     * @param string $id
+     * @param string $data
      * @return bool
      */
-    public function write(string $session_id, string $session_data): bool
+    public function write(string $id, string $data): bool
     {
-        $this->sessions[$session_id] = [
+        $this->sessions[$id] = [
             'time' => $this->createTimestamp(),
-            'data' => $session_data
+            'data' => $data
         ];
 
         return true;

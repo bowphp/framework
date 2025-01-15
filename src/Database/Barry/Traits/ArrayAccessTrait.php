@@ -58,8 +58,6 @@ trait ArrayAccessTrait
      */
     public function offsetGet(mixed $offset): mixed
     {
-        return isset($this->attributes[$offset])
-            ? $this->attributes[$offset]
-            : null;
+        return $this->attributes[$offset] ?? null;
     }
 }

@@ -21,8 +21,8 @@ class {className} extends Controller
 	 * @param {serviceClassName} ${serviceName}
 	 * @return mixed
 	 */
-    public function __construct({serviceClassName} ${serviceName})
-    {
-    	$this->{serviceName} = ${serviceName};
+    public function __construct(
+        private {serviceClassName} ${serviceName}
+    ){
     }
 }

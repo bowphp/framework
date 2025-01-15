@@ -46,7 +46,7 @@ class QueueTest extends \PHPUnit\Framework\TestCase
             payload text,
             status varchar(100),
             attempts int,
-            avalaibled_at datetime null default null,
+            available_at datetime null default null,
             reserved_at datetime null default null,
             created_at datetime
         )');

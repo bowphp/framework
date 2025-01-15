@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Database\Barry;
 
 use Bow\Database\Collection;
+use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
 use Bow\Database\Exception\ModelException;
 
@@ -13,15 +14,15 @@ class Builder extends QueryBuilder
     /**
      * The model instance
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $model = null;
 
     /**
-     * Get informations
+     * Get information
      *
      * @param array $columns
-     * @return Model|Collection
+     * @return Model|Collection|null
      */
     public function get(array $columns = []): Model|Collection|null
     {
@@ -46,10 +47,10 @@ class Builder extends QueryBuilder
     /**
      * Check if rows exists
      *
-     * @param string $column
+     * @param string|null $column
      * @param mixed $value
      * @return bool
-     * @throws
+     * @throws QueryBuilderException
      */
     public function exists(?string $column = null, mixed $value = null): bool
     {
@@ -57,7 +58,7 @@ class Builder extends QueryBuilder
             return $this->count() > 0;
         }
 
-        // If value is null and column is define
+        // If value is null and column is defined
         // we make the column as value on model primary key name
         if (!is_null($column) && is_null($value)) {
             $value = $column;
@@ -85,6 +86,7 @@ class Builder extends QueryBuilder
      * Get model
      *
      * @return string
+     * @throws ModelException
      */
     public function getModel(): string
     {

@@ -130,11 +130,11 @@ final class HttpStatus
      */
     public static function getMessage(int $code): string
     {
-        if (!isset(static::STATUS[$code])) {
+        if (!isset(HttpStatus::STATUS[$code])) {
             throw new InvalidArgumentException("The code {$code} is not exists");
         }
 
-        return static::STATUS[$code];
+        return HttpStatus::STATUS[$code];
     }
 
     /**
@@ -144,6 +144,6 @@ final class HttpStatus
      */
     public static function getCodes(): array
     {
-        return array_keys(static::STATUS);
+        return array_keys(HttpStatus::STATUS);
     }
 }

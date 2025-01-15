@@ -19,7 +19,7 @@ class {className} extends Migration
                 "size" => ["waiting", "processing", "reserved", "failed", "done"],
                 "default" => "waiting",
             ]);
-            $table->addDatetime('avalaibled_at');
+            $table->addDatetime('available_at');
             $table->addDatetime('reserved_at', ["nullable" => true, "default" => null]);
             $table->addDatetime('created_at');
         });

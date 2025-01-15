@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Container;
 
-use Bow\Container\Action;
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
 

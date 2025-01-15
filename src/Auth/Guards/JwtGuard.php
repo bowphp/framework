@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Bow\Auth\Guards;
 
 use Bow\Security\Hash;
+use Bow\Support\Log;
+use Exception;
 use Policier\Policier;
 use Bow\Auth\Authentication;
-use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Auth\Exception\AuthenticationException;
 use Policier\Token;
@@ -26,7 +27,7 @@ class JwtGuard extends GuardContract
     /**
      * Defines token data
      *
-     * @var Token
+     * @var ?Token
      */
     private ?Token $token = null;
 
@@ -35,6 +36,7 @@ class JwtGuard extends GuardContract
      *
      * @param array $provider
      * @param string $guard
+     * @throws AuthenticationException
      */
     public function __construct(array $provider, string $guard)
     {
@@ -47,14 +49,17 @@ class JwtGuard extends GuardContract
     }
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @param array $credentials
      * @return bool
+     * @throws AuthenticationException
+     * @throws Exception
      */
     public function attempts(array $credentials): bool
     {
         $user = $this->makeLogin($credentials);
+
         $this->token = null;
 
         if (is_null($user)) {
@@ -74,9 +79,10 @@ class JwtGuard extends GuardContract
     }
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @return bool
+     * @throws Exception
      */
     public function check(): bool
     {
@@ -85,7 +91,7 @@ class JwtGuard extends GuardContract
         if (is_null($this->token)) {
             try {
                 $this->token = $policier->getParsedToken();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return false;
             }
         }
@@ -111,6 +117,7 @@ class JwtGuard extends GuardContract
      * Check if user is guest
      *
      * @return bool
+     * @throws Exception
      */
     public function guest(): bool
     {
@@ -118,11 +125,13 @@ class JwtGuard extends GuardContract
     }
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
-     * @return bool
+     * @return ?Authentication
+     * @throws AuthenticationException
+     * @throws Exception
      */
-    public function user(): Authentication
+    public function user(): ?Authentication
     {
         if (!$this->check()) {
             throw new AuthenticationException(
@@ -153,7 +162,8 @@ class JwtGuard extends GuardContract
      * Make direct login
      *
      * @param Authentication $user
-     * @return string
+     * @return bool
+     * @throws Exception
      */
     public function login(Authentication $user): bool
     {
@@ -168,7 +178,7 @@ class JwtGuard extends GuardContract
     }
 
     /**
-     * Destruit token
+     * Destruct token
      *
      * @return bool
      */
@@ -180,7 +190,8 @@ class JwtGuard extends GuardContract
     /**
      * Get the user id
      *
-     * @return bool
+     * @return int|string
+     * @throws AuthenticationException
      */
     public function id(): int|string
     {
@@ -195,23 +206,24 @@ class JwtGuard extends GuardContract
      * Get the Policier instance
      *
      * @return Policier
+     * @throws Exception
      */
-    private function getPolicier()
+    private function getPolicier(): Policier
     {
         if (!class_exists(Policier::class)) {
-            throw new \Exception('Please install bowphp/policier: composer require bowphp/policier');
+            throw new Exception('Please install bowphp/policier: composer require bowphp/policier');
         }
 
         $policier = Policier::getInstance();
 
         if (is_null($policier)) {
-            throw new \Exception('Please load the \Policier\Bow\PolicierConfiguration::class configuration.');
+            throw new Exception('Please load the \Policier\Bow\PolicierConfiguration::class configuration.');
         }
 
         $config = (array) config('policier');
 
-        if (!isset($config['signkey']) || is_null($config['signkey'])) {
-            throw new \Exception('Please set the signkey.');
+        if (!isset($config['signkey'])) {
+            throw new Exception('Please set the signkey.');
         }
 
         return $policier;

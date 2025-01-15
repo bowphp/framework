@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\View;
 
-use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\View\Exception\ViewException;
 
 abstract class EngineAbstract
@@ -93,7 +92,7 @@ abstract class EngineAbstract
     {
         $normalized_filename = $this->normalizeFilename($filename);
 
-        // Vérification de l'existance du fichier
+        // Check if file exists
         if ($this->config['path'] !== null && !file_exists($this->config['path'] . '/' . $normalized_filename)) {
             throw new ViewException(
                 sprintf(
@@ -139,6 +138,6 @@ abstract class EngineAbstract
      */
     private function normalizeFilename(string $filename): string
     {
-        return preg_replace('/@|\./', '/', $filename) . $this->config['extension'];
+        return preg_replace('/@|\./', '/', $filename) . '.' . trim($this->config['extension'], '.');
     }
 }

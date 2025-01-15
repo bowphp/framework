@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Bow\Console\Command;
+namespace Bow\Console;
 
-use Bow\Console\Setting;
-use Bow\Console\Argument;
 use Bow\Console\Traits\ConsoleTrait;
 
 abstract class AbstractCommand

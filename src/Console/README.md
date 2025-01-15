@@ -8,4 +8,4 @@ Let's show the console guide:
 php bow help
 ```
 
-Is very enjoyful api
+Is very joyful api

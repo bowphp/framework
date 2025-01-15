@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Session\Driver;
 
+use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
-use Bow\Database\Database as DB;
+use Bow\Database\Database;
 
 class DatabaseDriver implements \SessionHandlerInterface
 {
@@ -58,13 +59,14 @@ class DatabaseDriver implements \SessionHandlerInterface
     /**
      * Destroy session information
      *
-     * @param string $session_id
+     * @param string $id
      * @return bool
+     * @throws QueryBuilderException
      */
-    public function destroy(string $session_id): bool
+    public function destroy(string $id): bool
     {
         $this->sessions()
-            ->where('id', $session_id)->delete();
+            ->where('id', $id)->delete();
 
         return true;
     }
@@ -74,6 +76,7 @@ class DatabaseDriver implements \SessionHandlerInterface
      *
      * @param int $max_lifetime
      * @return int|false
+     * @throws QueryBuilderException
      */
     public function gc(int $max_lifetime): int|false
     {
@@ -87,11 +90,11 @@ class DatabaseDriver implements \SessionHandlerInterface
     /**
      * When the session start
      *
-     * @param string $save_path
+     * @param string $path
      * @param string $name
      * @return bool
      */
-    public function open(string $save_path, string $name): bool
+    public function open(string $path, string $name): bool
     {
         return true;
     }
@@ -101,11 +104,12 @@ class DatabaseDriver implements \SessionHandlerInterface
      *
      * @param string $session_id
      * @return string
+     * @throws QueryBuilderException
      */
-    public function read(string $session_id): string
+    public function read(string $id): string
     {
         $session = $this->sessions()
-            ->where('id', $session_id)->first();
+            ->where('id', $id)->first();
 
         if (is_null($session)) {
             return '';
@@ -117,24 +121,25 @@ class DatabaseDriver implements \SessionHandlerInterface
     /**
      * Write session information
      *
-     * @param string $session_id
-     * @param string $session_data
+     * @param string $id
+     * @param string $data
      * @return bool
+     * @throws QueryBuilderException
      */
-    public function write(string $session_id, string $session_data): bool
+    public function write(string $id, string $data): bool
     {
         // When create the new session record
-        if (! $this->sessions()->where('id', $session_id)->exists()) {
+        if (! $this->sessions()->where('id', $id)->exists()) {
             $insert = $this->sessions()
-                ->insert($this->data($session_id, $session_data));
+                ->insert($this->data($id, $data));
 
             return (bool) $insert;
         }
 
         // Update the session information
-        $update = $this->sessions()->where('id', $session_id)->update([
-            'data' => $session_data,
-            'id' => $session_id
+        $update = $this->sessions()->where('id', $id)->update([
+            'data' => $data,
+            'id' => $id
         ]);
 
         return (bool) $update;
@@ -164,6 +169,6 @@ class DatabaseDriver implements \SessionHandlerInterface
      */
     private function sessions(): QueryBuilder
     {
-        return DB::table($this->table);
+        return Database::table($this->table);
     }
 }

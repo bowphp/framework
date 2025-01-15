@@ -15,6 +15,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addBoolean(string $column, array $attribute = []): SQLGenerator
     {
@@ -27,6 +28,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addUuid(string $column, array $attribute = []): SQLGenerator
     {
@@ -58,6 +60,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addUuidPrimary(string $column, array $attribute = []): SQLGenerator
     {
@@ -80,6 +83,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addBinary(string $column, array $attribute = []): SQLGenerator
     {
@@ -92,6 +96,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addTinyBlob(string $column, array $attribute = []): SQLGenerator
     {
@@ -104,6 +109,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addLongBlob(string $column, array $attribute = []): SQLGenerator
     {
@@ -116,6 +122,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addMediumBlob(string $column, array $attribute = []): SQLGenerator
     {
@@ -128,6 +135,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addIpAddress(string $column, array $attribute = []): SQLGenerator
     {
@@ -140,6 +148,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addMacAddress(string $column, array $attribute = []): SQLGenerator
     {
@@ -152,6 +161,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addEnum(string $column, array $attribute = []): SQLGenerator
     {
@@ -176,24 +186,11 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addCheck(string $column, array $attribute = []): SQLGenerator
     {
-        if (!isset($attribute['check'])) {
-            throw new SQLGeneratorException("The check values should be define.");
-        }
-
-        if (!is_array($attribute['check'])) {
-            throw new SQLGeneratorException("The check values should be array.");
-        }
-
-        if (count($attribute['check']) === 0) {
-            throw new SQLGeneratorException("The check values cannot be empty.");
-        }
-
-        if (count($attribute['check']) === 0) {
-            throw new SQLGeneratorException("The check values cannot be empty.");
-        }
+        $this->verifyCheckAttribute($attribute);
 
         return $this->addColumn($column, 'check', $attribute);
     }
@@ -204,6 +201,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeBoolean(string $column, array $attribute = []): SQLGenerator
     {
@@ -216,6 +214,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeUuid(string $column, array $attribute = []): SQLGenerator
     {
@@ -241,6 +240,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeBinary(string $column, array $attribute = []): SQLGenerator
     {
@@ -253,6 +253,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeLongBlob(string $column, array $attribute = []): SQLGenerator
     {
@@ -265,6 +266,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeMediumBlob(string $column, array $attribute = []): SQLGenerator
     {
@@ -277,6 +279,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeTinyBlob(string $column, array $attribute = []): SQLGenerator
     {
@@ -289,6 +292,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeIpAddress(string $column, array $attribute = []): SQLGenerator
     {
@@ -301,6 +305,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeMacAddress(string $column, array $attribute = []): SQLGenerator
     {
@@ -313,6 +318,7 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeEnum(string $column, array $attribute = []): SQLGenerator
     {
@@ -337,8 +343,19 @@ trait MixedColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeCheck(string $column, array $attribute = []): SQLGenerator
+    {
+        $this->verifyCheckAttribute($attribute);
+
+        return $this->changeColumn($column, 'check', $attribute);
+    }
+
+    /**
+     * @throws SQLGeneratorException
+     */
+    private function verifyCheckAttribute($attribute): void
     {
         if (!isset($attribute['check'])) {
             throw new SQLGeneratorException("The check values should be define.");
@@ -355,7 +372,5 @@ trait MixedColumn
         if (count($attribute['check']) === 0) {
             throw new SQLGeneratorException("The check values cannot be empty.");
         }
-
-        return $this->changeColumn($column, 'check', $attribute);
     }
 }

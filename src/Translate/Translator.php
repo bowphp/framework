@@ -10,7 +10,7 @@ use Bow\Support\Arraydotify;
 class Translator
 {
     /**
-     * The define langue
+     * The define language
      *
      * @var string
      */
@@ -26,7 +26,7 @@ class Translator
     /**
      * The Translator instance
      *
-     * @var Translator
+     * @var ?Translator
      */
     private static ?Translator $instance = null;
 
@@ -96,26 +96,18 @@ class Translator
      *
      * @param  string $key
      * @param  array  $data
-     * @param  bool   $plurial
+     * @param  bool   $plural
      *
      * @return string
      */
-    public static function translate(string $key, array $data = [], bool $plurial = false): string
+    public static function translate(string $key, array $data = [], bool $plural = false): string
     {
-        if (!is_string($key)) {
-            throw new \InvalidArgumentException(
-                'The first parameter must be a string.',
-                E_USER_ERROR
-            );
-        }
-
         $map = explode('.', $key);
 
         if (count($map) == 1) {
             return $key;
         }
 
-        // Formatage du path de fichier de la translation
         $translation_filename = static::$directory . '/' . static::$lang . '/' . current($map) . '.php';
 
         if (!file_exists($translation_filename)) {
@@ -141,7 +133,7 @@ class Translator
         $value = $translations[$key];
         $parts = explode('|', $value);
 
-        if ($plurial === true) {
+        if ($plural === true) {
             if (!isset($parts[1])) {
                 return $key;
             }
@@ -168,19 +160,19 @@ class Translator
     }
 
     /**
-     * Make plurial translation
+     * Make plural translation
      *
-     * @param $key
+     * @param string $key
      * @param array $data
      * @return string
      */
-    public static function plurial(string $key, array $data = []): string
+    public static function plural(string $key, array $data = []): string
     {
         return static::translate($key, $data, true);
     }
 
     /**
-     * Permet de formater
+     * Str formatter
      *
      * @param  string $str
      * @param  array $values

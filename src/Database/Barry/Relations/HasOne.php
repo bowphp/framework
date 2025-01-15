@@ -7,6 +7,7 @@ namespace Bow\Database\Barry\Relations;
 use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
+use Bow\Database\Exception\QueryBuilderException;
 
 class HasOne extends Relation
 {
@@ -29,9 +30,9 @@ class HasOne extends Relation
     /**
      * Get the results of the relationship.
      *
-     * @return Model
+     * @return Model|null
      */
-    public function getResults(): ?Model
+    public function getResults(): mixed
     {
         $key = $this->query->getTable() . ":hasone:" . $this->related->getTable() . ":" . $this->foreign_key;
 
@@ -56,6 +57,7 @@ class HasOne extends Relation
      * Set the base constraints on the relation query.
      *
      * @return void
+     * @throws QueryBuilderException
      */
     public function addConstraints(): void
     {

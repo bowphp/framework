@@ -3,7 +3,6 @@
 namespace Bow\Cache\Adapter;
 
 use Redis;
-use Bow\Cache\Adapter\CacheAdapterInterface;
 use Bow\Database\Redis as RedisStore;
 
 class RedisAdapter implements CacheAdapterInterface
@@ -19,7 +18,7 @@ class RedisAdapter implements CacheAdapterInterface
      * RedisAdapter constructor.
      *
      * @param array $config
-     * @return mixed
+     * @return void
      */
     public function __construct(array $config)
     {
@@ -36,8 +35,9 @@ class RedisAdapter implements CacheAdapterInterface
      * Ping the redis service
      *
      * @param ?string $message
+     * @return RedisAdapter
      */
-    public function ping(?string $message = null)
+    public function ping(?string $message = null): RedisAdapter
     {
         $this->redis->ping($message);
 
@@ -157,7 +157,9 @@ class RedisAdapter implements CacheAdapterInterface
      */
     public function expired(string $key): bool
     {
-        return $this->redis->expire($key);
+        $result = $this->redis->expiretime($key);
+
+        return $result < -1;
     }
 
     /**

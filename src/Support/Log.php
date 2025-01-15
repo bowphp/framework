@@ -19,8 +19,10 @@ class Log
      * @param array $arguments
      * @return void
      */
-    public static function __callStatic($name, $arguments)
+    public static function __callStatic(string $name, array $arguments = [])
     {
-        call_user_func_array([app("logger"), $name], $arguments);
+        $instance = app("logger");
+
+        call_user_func_array([$instance, $name], $arguments);
     }
 }

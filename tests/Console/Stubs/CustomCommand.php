@@ -2,7 +2,7 @@
 
 namespace Bow\Tests\Console\Stubs;
 
-use Bow\Console\Command\AbstractCommand as ConsoleCommand;
+use Bow\Console\AbstractCommand as ConsoleCommand;
 
 class CustomCommand extends ConsoleCommand
 {

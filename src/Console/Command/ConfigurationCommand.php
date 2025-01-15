@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
+use JetBrains\PhpStorm\NoReturn;
 
 class ConfigurationCommand extends AbstractCommand
 {
@@ -15,7 +17,7 @@ class ConfigurationCommand extends AbstractCommand
      * @param string $configuration
      * @return void
      */
-    public function generate(string $configuration): void
+    #[NoReturn] public function generate(string $configuration): void
     {
         $generator = new Generator(
             $this->setting->getPackageDirectory(),

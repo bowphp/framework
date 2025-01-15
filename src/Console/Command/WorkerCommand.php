@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Queue\WorkerService;
 
 class WorkerCommand extends AbstractCommand

@@ -22,7 +22,7 @@ class Cookie
      * @param bool $strict
      * @return bool
      */
-    public static function has($key, $strict = false)
+    public static function has(string $key, bool $strict = false): bool
     {
         $isset = isset($_COOKIE[$key]);
 
@@ -31,7 +31,7 @@ class Cookie
         }
 
         if ($isset) {
-            $isset = $isset && !empty($_COOKIE[$key]);
+            $isset = !empty($_COOKIE[$key]);
         }
 
         return $isset;
@@ -84,23 +84,22 @@ class Cookie
     /**
      * Add a value to the cookie table.
      *
-     * @param string|int $key
+     * @param int|string $key
      * @param mixed      $data
-     * @param int        $expirate
-     *
+     * @param int $expiration
      * @return bool
      */
     public static function set(
-        $key,
-        $data,
-        $expirate = 3600,
-    ) {
+        int|string $key,
+        mixed $data,
+        int $expiration = 3600,
+    ): bool {
         $data = Crypto::encrypt(json_encode($data));
 
         return setcookie(
             $key,
             $data,
-            time() + $expirate,
+            time() + $expiration,
             config('session.path'),
             config('session.domain'),
             config('session.secure'),
@@ -112,14 +111,14 @@ class Cookie
      * Delete an entry in the table
      *
      * @param string $key
-     * @return mixed
+     * @return string|bool|null
      */
-    public static function remove(string $key): mixed
+    public static function remove(string $key): string|bool|null
     {
         $old = null;
 
         if (!static::has($key)) {
-            return $old;
+            return null;
         }
 
         if (!static::$is_decrypt[$key]) {

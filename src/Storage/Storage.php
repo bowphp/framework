@@ -27,7 +27,7 @@ class Storage
     /**
      * The disk mounting
      *
-     * @var DiskFilesystemService
+     * @var ?DiskFilesystemService
      */
     private static ?DiskFilesystemService $disk = null;
 
@@ -36,7 +36,7 @@ class Storage
      *
      * @var array
      */
-    private static array $available_services_driviers = [
+    private static array $available_services_drivers = [
         'ftp' => FTPService::class,
         's3' => S3Service::class,
     ];
@@ -44,7 +44,7 @@ class Storage
     /**
      * Mount disk
      *
-     * @param string $disk
+     * @param string|null $disk
      *
      * @return DiskFilesystemService
      * @throws DiskNotFoundException
@@ -77,7 +77,7 @@ class Storage
      * @throws ServiceConfigurationNotFoundException
      * @throws ServiceNotFoundException
      */
-    public static function service(string $service)
+    public static function service(string $service): S3Service|FTPService
     {
         $config = static::$config['services'][$service] ?? null;
 
@@ -97,14 +97,14 @@ class Storage
             )))->setService($service);
         }
 
-        if (!array_key_exists($driver, self::$available_services_driviers)) {
+        if (!array_key_exists($driver, self::$available_services_drivers)) {
             throw (new ServiceNotFoundException(sprintf(
                 '"%s" is not registered as a service.',
                 $driver
             )))->setService($service);
         }
 
-        $service_class = static::$available_services_driviers[$driver];
+        $service_class = static::$available_services_drivers[$driver];
 
         return $service_class::configure($config);
     }
@@ -115,14 +115,14 @@ class Storage
      *
      * @param array $drivers
      */
-    public static function pushService(array $drivers)
+    public static function pushService(array $drivers): void
     {
-        foreach ($drivers as $driver => $hanlder) {
-            if (isset(static::$available_services_driviers[$driver])) {
+        foreach ($drivers as $driver => $handler) {
+            if (isset(static::$available_services_drivers[$driver])) {
                 throw new InvalidArgumentException("The $driver is already define");
             }
 
-            static::$available_services_driviers[$driver] = $hanlder;
+            static::$available_services_drivers[$driver] = $handler;
         }
     }
 
@@ -147,11 +147,12 @@ class Storage
     /**
      * __call
      *
-     * @param  string $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array $arguments
      * @return mixed
+     * @throws ErrorException
      */
-    public function __call($name, array $arguments)
+    public function __call(string $name, array $arguments = [])
     {
         if (is_null(static::$disk)) {
             throw new ErrorException(
@@ -169,11 +170,12 @@ class Storage
     /**
      * __callStatic
      *
-     * @param  string $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array $arguments
      * @return mixed
+     * @throws ErrorException
      */
-    public static function __callStatic($name, array $arguments)
+    public static function __callStatic(string $name, array $arguments)
     {
         if (is_null(static::$disk)) {
             throw new ErrorException(

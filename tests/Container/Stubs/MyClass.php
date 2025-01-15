@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Stubs\Container;
+namespace Bow\Tests\Container\Stubs;
 
 class MyClass
 {

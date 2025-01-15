@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 use Bow\Support\Str;
+use JetBrains\PhpStorm\NoReturn;
 
 class GenerateResourceControllerCommand extends AbstractCommand
 {
@@ -17,7 +19,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
      * @return void
      * @throws
      */
-    public function generate(string $controller): void
+    #[NoReturn] public function generate(string $controller): void
     {
         // We create command generator instance
         $generator = new Generator(
@@ -34,7 +36,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
         // We create the resource url prefix
         $prefix = preg_replace("/controller/i", "", strtolower($controller));
         $prefix = '/' . trim($prefix, '/');
-        $prefix = Str::plurial(Str::snake($prefix));
+        $prefix = Str::plural(Str::snake($prefix));
 
         $parameters = $this->arg->getParameters();
 

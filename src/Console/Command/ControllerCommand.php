@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
+use JetBrains\PhpStorm\NoReturn;
 
 class ControllerCommand extends AbstractCommand
 {
@@ -14,7 +16,7 @@ class ControllerCommand extends AbstractCommand
      * @param string $controller
      * @return void
      */
-    public function generate(string $controller): void
+    #[NoReturn] public function generate(string $controller): void
     {
         $generator = new Generator(
             $this->setting->getControllerDirectory(),

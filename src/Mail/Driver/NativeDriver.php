@@ -29,7 +29,6 @@ class NativeDriver implements MailDriverInterface
      * SimpleMail Constructor
      *
      * @param array $config
-     * @return mixed
      */
     public function __construct(array $config = [])
     {
@@ -45,6 +44,7 @@ class NativeDriver implements MailDriverInterface
      *
      * @param string $from
      * @return NativeDriver
+     * @throws MailException
      */
     public function on(string $from): NativeDriver
     {

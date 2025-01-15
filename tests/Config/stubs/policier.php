@@ -29,16 +29,6 @@ return [
     "iat" => 60,
 
     /**
-     * Configures the issuer
-     */
-    "iss" => "localhost",
-
-    /**
-     * Configures the audience
-     */
-    "aud" => "localhost",
-
-    /**
      * The type of the token, which is JWT
      */
     "typ" => "JWT",

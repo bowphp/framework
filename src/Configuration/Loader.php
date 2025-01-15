@@ -13,7 +13,7 @@ use Bow\Application\Exception\ApplicationException;
 class Loader implements \ArrayAccess
 {
     /**
-     * @var Loader
+     * @var ?Loader
      */
     protected static ?Loader $instance = null;
 
@@ -110,7 +110,7 @@ class Loader implements \ArrayAccess
      * @return Loader
      * @throws
      */
-    public static function configure($base_path): Loader
+    public static function configure(string $base_path): Loader
     {
         if (!static::$instance instanceof Loader) {
             static::$instance = new static($base_path);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 
 class ReplCommand extends AbstractCommand
@@ -11,7 +12,7 @@ class ReplCommand extends AbstractCommand
     /**
      * Launch the REPL console
      *
-     * @return mixed
+     * @return void
      */
     public function run(): void
     {
@@ -27,7 +28,7 @@ class ReplCommand extends AbstractCommand
         }
 
         if (!class_exists('\Psy\Shell')) {
-            echo Color::red('Please, insall psy/psysh:@stable');
+            echo Color::red('Please, install psy/psysh:@stable');
 
             return;
         }
@@ -35,11 +36,11 @@ class ReplCommand extends AbstractCommand
         $config = new \Psy\Configuration();
         $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
 
-        // Load the custum prompt
+        // Load the custom prompt
         $prompt = $this->arg->getParameter('--prompt', '(bow) >>');
         $prompt = trim($prompt) . ' ';
 
-        $config->setPrompt($prompt);
+        $config->theme()->setPrompt($prompt);
 
         $shell = new \Psy\Shell($config);
 

@@ -9,9 +9,9 @@ class LoggerService
      *
      * @param string $message
      * @param array $context
-     * @return mixed
+     * @return void
      */
-    public function error(string $message, array $context = [])
+    public function error(string $message, array $context = []): void
     {
         app('logger')->error($message, $context);
     }
@@ -21,9 +21,9 @@ class LoggerService
      *
      * @param string $message
      * @param array $context
-     * @return mixed
+     * @return void
      */
-    public function info(string $message, array $context = [])
+    public function info(string $message, array $context = []): void
     {
         app('logger')->info($message, $context);
     }
@@ -33,9 +33,9 @@ class LoggerService
      *
      * @param string $message
      * @param array $context
-     * @return mixed
+     * @return void
      */
-    public function warning(string $message, array $context = [])
+    public function warning(string $message, array $context = []): void
     {
         app('logger')->warning($message, $context);
     }
@@ -45,9 +45,9 @@ class LoggerService
      *
      * @param string $message
      * @param array $context
-     * @return mixed
+     * @return void
      */
-    public function alert(string $message, array $context = [])
+    public function alert(string $message, array $context = []): void
     {
         app('logger')->alert($message, $context);
     }
@@ -57,9 +57,9 @@ class LoggerService
      *
      * @param string $message
      * @param array $context
-     * @return mixed
+     * @return void
      */
-    public function critical(string $message, array $context = [])
+    public function critical(string $message, array $context = []): void
     {
         app('logger')->critical($message, $context);
     }
@@ -69,9 +69,9 @@ class LoggerService
      *
      * @param string $message
      * @param array $context
-     * @return mixed
+     * @return void
      */
-    public function emergency(string $message, array $context = [])
+    public function emergency(string $message, array $context = []): void
     {
         app('logger')->emergency($message, $context);
     }

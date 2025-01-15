@@ -7,6 +7,7 @@ namespace Bow\Database\Barry\Relations;
 use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
+use Bow\Database\Exception\QueryBuilderException;
 
 class BelongsTo extends Relation
 {
@@ -33,9 +34,9 @@ class BelongsTo extends Relation
     /**
      * Get the results of the relationship.
      *
-     * @return Model
+     * @return mixed
      */
-    public function getResults(): ?Model
+    public function getResults(): mixed
     {
         $key = $this->query->getTable() . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
 
@@ -60,6 +61,7 @@ class BelongsTo extends Relation
      * Set the base constraints on the relation query.
      *
      * @return void
+     * @throws QueryBuilderException
      */
     public function addConstraints(): void
     {

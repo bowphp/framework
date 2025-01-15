@@ -25,7 +25,7 @@ class TranslationTest extends \PHPUnit\Framework\TestCase
 
     public function test_fr_plurial()
     {
-        $this->assertEquals(Translator::plurial('welcome.plurial'), 'Utilisateurs');
+        $this->assertEquals(Translator::plural('welcome.plurial'), 'Utilisateurs');
     }
 
     public function test_fr_single()
@@ -53,7 +53,7 @@ class TranslationTest extends \PHPUnit\Framework\TestCase
     public function test_en_plurial()
     {
         Translator::setLocale("en");
-        $this->assertEquals(Translator::plurial('welcome.plurial'), 'Users');
+        $this->assertEquals(Translator::plural('welcome.plurial'), 'Users');
     }
 
     public function test_en_single()

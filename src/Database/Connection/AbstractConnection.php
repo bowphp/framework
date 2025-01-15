@@ -12,7 +12,7 @@ abstract class AbstractConnection
     /**
      * The connexion name
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $name = null;
 

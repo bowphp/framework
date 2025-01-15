@@ -7,6 +7,7 @@ namespace Bow\Database\Barry\Relations;
 use Bow\Database\Collection;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
+use Bow\Database\Exception\QueryBuilderException;
 
 class BelongsToMany extends Relation
 {
@@ -40,6 +41,7 @@ class BelongsToMany extends Relation
      * Set the base constraints on the relation query.
      *
      * @return void
+     * @throws QueryBuilderException
      */
     public function addConstraints(): void
     {

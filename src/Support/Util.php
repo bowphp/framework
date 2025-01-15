@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
+use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 use Symfony\Component\VarDumper\Dumper\HtmlDumper;
@@ -15,14 +16,14 @@ class Util
      *
      * @var string
      */
-    private static $sep;
+    private static string $sep;
 
     /**
      * Run a var_dump on the variables passed in parameter.
      *
      * @return void
      */
-    public static function debug()
+    public static function debug(): void
     {
         $vars = func_get_args();
 
@@ -67,7 +68,7 @@ class Util
      *
      * @return void
      */
-    public static function dd(mixed $var)
+    #[NoReturn] public static function dd(mixed $var): void
     {
         call_user_func_array([static::class, 'debug'], func_get_args());
 
@@ -88,7 +89,7 @@ class Util
         if (defined('PHP_EOL')) {
             static::$sep = PHP_EOL;
         } else {
-            static::$sep = (strpos(PHP_OS, 'WIN') === false) ? '\n' : '\r\n';
+            static::$sep = (!str_contains(PHP_OS, 'WIN')) ? '\n' : '\r\n';
         }
 
         return static::$sep;

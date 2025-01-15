@@ -37,11 +37,11 @@ class Generator
     }
 
     /**
-     * Check if filename is valide
+     * Check if filename is valid
      *
-     * @param string $filename
+     * @param string|null $filename
      */
-    public function filenameIsValide(?string $filename): void
+    public function filenameIsValid(?string $filename): void
     {
         if (is_null($filename)) {
             echo Color::red('The file name is invalid.');
@@ -57,7 +57,7 @@ class Generator
      */
     public function fileExists(): bool
     {
-        $this->filenameIsValide($this->name);
+        $this->filenameIsValid($this->name);
 
         return file_exists($this->getPath()) || is_dir($this->base_directory . "/" . $this->name);
     }
@@ -79,7 +79,7 @@ class Generator
      */
     public function exists(): bool
     {
-        $this->filenameIsValide($this->name);
+        $this->filenameIsValid($this->name);
 
         return file_exists($this->getPath());
     }
@@ -144,7 +144,7 @@ class Generator
      *
      * @param string $name
      */
-    public function setName($name): void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }

@@ -73,9 +73,9 @@ trait ConstraintColumn
     }
 
     /**
-     * Drop constraintes column;
+     * Drop constraints column;
      *
-     * @param string $name
+     * @param string|array $name
      * @param bool $as_raw
      * @return SQLGenerator
      */

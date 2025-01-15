@@ -11,7 +11,7 @@ class Env
     /**
      * The env collection
      *
-     * @var array
+     * @var bool
      */
     private static bool $loaded = false;
 
@@ -27,7 +27,7 @@ class Env
      *
      * @return bool
      */
-    public static function isLoaded()
+    public static function isLoaded(): bool
     {
         return static::$loaded;
     }
@@ -39,7 +39,7 @@ class Env
      * @return void
      * @throws
      */
-    public static function load(string $filename)
+    public static function load(string $filename): void
     {
         if (static::$loaded) {
             return;
@@ -58,7 +58,7 @@ class Env
 
         if (json_last_error()) {
             throw new ApplicationException(
-                json_last_error_msg() . ": check your env json and synthax please."
+                json_last_error_msg() . ": check your env json and syntax please."
             );
         }
 
@@ -95,6 +95,7 @@ class Env
     public static function get(string $key, mixed $default = null): mixed
     {
         $key = Str::upper(trim($key));
+
         $value = static::$envs[$key] ?? getenv($key);
 
         if ($value === false) {

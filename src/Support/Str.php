@@ -13,27 +13,23 @@ class Str
     /**
      * upper case
      *
-     * @param  string $str
-     * @return array|string
+     * @param string $str
+     * @return string
      */
     public static function upper(string $str): string
     {
-        $str = mb_strtoupper($str, 'UTF-8');
-
-        return $str;
+        return mb_strtoupper($str, 'UTF-8');
     }
 
     /**
      * lower case
      *
-     * @param  string $str
-     * @return array|string
+     * @param string $str
+     * @return string
      */
     public static function lower(string $str): string
     {
-        $str = mb_strtolower($str, 'UTF-8');
-
-        return $str;
+        return mb_strtolower($str, 'UTF-8');
     }
 
     /**
@@ -65,9 +61,9 @@ class Str
      *
      * @param  string $str
      * @param  string $delimiter
-     * @return mixed
+     * @return string
      */
-    public static function snake(string $str, string $delimiter = '_')
+    public static function snake(string $str, string $delimiter = '_'): string
     {
         $str = preg_replace('/\s+/u', $delimiter, $str);
 
@@ -79,20 +75,20 @@ class Str
     }
 
     /**
-     * Get str plurial
+     * Get str plural
      *
      * @param string $str
      * @return string
      */
-    public static function plurial(string $str): string
+    public static function plural(string $str): string
     {
-        if (preg_match('/y$/', $str)) {
+        if (str_ends_with($str, 'y')) {
             $str = static::slice($str, 0, static::len($str) - 1);
 
             return $str . 'ies';
         }
 
-        preg_match('/s$/', $str) ?: $str = $str . 's';
+        str_ends_with($str, 's') ?: $str = $str . 's';
 
         return $str;
     }
@@ -100,26 +96,24 @@ class Str
     /**
      * slice
      *
-     * @param  string $str
-     * @param  int $start
-     * @param  int $length
+     * @param string $str
+     * @param int $start
+     * @param int|null $length
      * @return string
      */
-    public static function slice(string $str, int $start, ?int $length = null)
+    public static function slice(string $str, int $start, ?int $length = null): string
     {
-        $sliceStr = '';
+        $slice_str = '';
 
-        if (is_string($str)) {
-            if ($length === null) {
-                $length = static::len($str);
-            }
-
-            if ($start < $length) {
-                $sliceStr = mb_substr($str, $start, $length, 'UTF-8');
-            }
+        if ($length === null) {
+            $length = static::len($str);
         }
 
-        return $sliceStr;
+        if ($start < $length) {
+            $slice_str = mb_substr($str, $start, $length, 'UTF-8');
+        }
+
+        return $slice_str;
     }
 
     /**
@@ -200,13 +194,13 @@ class Str
     }
 
     /**
-     * Wordify
+     * Wordily
      *
      * @param string $str
      * @param string $sep
      * @return array
      */
-    public static function wordify(string $str, string $sep = ' '): array
+    public static function wordily(string $str, string $sep = ' '): array
     {
         return static::split($sep, $str, static::count($sep, $str));
     }
@@ -235,7 +229,7 @@ class Str
     }
 
     /**
-     * Get rondom uuid
+     * Get random uuid
      *
      * @return string
      */
@@ -276,7 +270,7 @@ class Str
     }
 
     /**
-     * unslugify, Lets you undo a slug
+     * un-slugify, Lets you undo a slug
      *
      * @param string $str
      * @return string
@@ -287,7 +281,7 @@ class Str
     }
 
     /**
-     * Alias of unslugify
+     * Alias of un-slugify
      *
      * @param string $str
      * @return string
@@ -309,7 +303,7 @@ class Str
     {
         $parts = explode('@', $email);
 
-        if (!is_string($email) || count($parts) != 2) {
+        if (count($parts) != 2) {
             return false;
         }
 
@@ -319,19 +313,14 @@ class Str
     /**
      * Check if the string is a domain
      *
-     * eg: http://exemple.com => true
-     * eg: http:/exemple.com => false
+     * eg: http://example.com => true
+     * eg: http:/example.com => false
      *
      * @param string $domain
      * @return bool
-     * @throws ErrorException
      */
     public static function isDomain(string $domain): bool
     {
-        if (!is_string($domain)) {
-            throw new ErrorException('Accept string ' . gettype($domain) . ' given');
-        }
-
         return (bool) preg_match(
             '/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/',
             $domain
@@ -343,14 +332,9 @@ class Str
      *
      * @param string $str
      * @return bool
-     * @throws ErrorException
      */
     public static function isAlphaNum(string $str): bool
     {
-        if (!is_string($str)) {
-            throw new ErrorException('Accept string ' . gettype($str) . ' given');
-        }
-
         return (bool) preg_match('/^[a-zA-Z0-9]+$/', $str);
     }
 
@@ -359,14 +343,9 @@ class Str
      *
      * @param string $str
      * @return bool
-     * @throws ErrorException
      */
     public static function isNumeric(string $str): bool
     {
-        if (!is_string($str)) {
-            throw new ErrorException('Accept string ' . gettype($str) . ' given');
-        }
-
         return (bool) preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
     }
 
@@ -375,14 +354,9 @@ class Str
      *
      * @param string $str
      * @return bool
-     * @throws ErrorException
      */
     public static function isAlpha(string $str): bool
     {
-        if (!is_string($str)) {
-            throw new ErrorException('Accept string ' . gettype($str) . ' given');
-        }
-
         return (bool) preg_match('/^[a-zA-Z]+$/', $str);
     }
 
@@ -391,14 +365,9 @@ class Str
      *
      * @param string $str
      * @return bool
-     * @throws ErrorException
      */
     public static function isSlug(string $str): bool
     {
-        if (!is_string($str)) {
-            throw new ErrorException('Accept string ' . gettype($str) . ' given');
-        }
-
         return (bool) preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
     }
 
@@ -511,19 +480,17 @@ class Str
      */
     public static function fixUTF8(string $garbled_utf8_string): string
     {
-        $utf8_string = Encoding::fixUTF8($garbled_utf8_string);
-
-        return $utf8_string;
+        return Encoding::fixUTF8($garbled_utf8_string);
     }
 
     /**
      * __call
      *
-     * @param  string $method
+     * @param string $method
      * @param  array  $arguments
      * @return mixed
      */
-    public function __call($method, $arguments)
+    public function __call(string $method, array $arguments = [])
     {
         return call_user_func_array([static::class, $method], $arguments);
     }

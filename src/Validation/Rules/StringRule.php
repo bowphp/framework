@@ -50,6 +50,7 @@ trait StringRule
      * @param string $key
      * @param string $masque
      * @return void
+     * @throws ValidationException
      */
     protected function compileRequiredIf(string $key, string $masque): void
     {
@@ -67,8 +68,8 @@ trait StringRule
         $exists = false;
         $fields = explode(",", $match[0]);
 
-        foreach ($fields as $key => $field) {
-            if ($key == 0) {
+        foreach ($fields as $field_key => $field) {
+            if ($field_key == 0) {
                 $exists = isset($this->inputs[$field]);
             } else {
                 $exists = $exists && isset($this->inputs[$field]);
@@ -127,7 +128,7 @@ trait StringRule
      */
     protected function compileAlphaNum(string $key, string $masque): void
     {
-        if (!preg_match("/^alphanum$/", $masque)) {
+        if (!($masque === "alphanum")) {
             return;
         }
 
@@ -229,7 +230,7 @@ trait StringRule
      */
     protected function compileLower(string $key, string $masque): void
     {
-        if (!preg_match("/^lower/", $masque)) {
+        if (!str_starts_with($masque, "lower")) {
             return;
         }
 
@@ -258,7 +259,7 @@ trait StringRule
      */
     protected function compileUpper(string $key, string $masque): void
     {
-        if (!preg_match("/^upper/", $masque)) {
+        if (!str_starts_with($masque, "upper")) {
             return;
         }
 
@@ -287,7 +288,7 @@ trait StringRule
      */
     protected function compileAlpha(string $key, string $masque): void
     {
-        if (!preg_match("/^alpha$/", $masque)) {
+        if (!($masque === "alpha")) {
             return;
         }
 

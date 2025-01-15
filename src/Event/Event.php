@@ -14,21 +14,21 @@ class Event
      *
      * @var array
      */
-    private static $events = [];
+    private static array $events = [];
 
     /**
      * The Event instance
      *
-     * @var Event
+     * @var ?Event
      */
-    private static $instance;
+    private static ?Event $instance = null;
 
     /**
      * Event constructor.
      *
      * @return Event
      */
-    public static function getInstance()
+    public static function getInstance(): Event
     {
         if (static::$instance == null) {
             static::$instance = new Event();
@@ -41,10 +41,10 @@ class Event
      * addEventListener
      *
      * @param string $event
-     * @param callable|array|string $fn
+     * @param callable|string $fn
      * @param int $priority
      */
-    public static function on(string $event, callable|string $fn, int $priority = 0)
+    public static function on(string $event, callable|string $fn, int $priority = 0): void
     {
         if (!static::bound($event)) {
             static::$events[$event] = [];
@@ -72,8 +72,9 @@ class Event
     /**
      * Dispatch event
      *
-     * @param  string|AppEvent $event
-     * @return bool
+     * @param string|AppEvent $event
+     * @return bool|null
+     * @throws EventException
      */
     public static function emit(string|AppEvent $event): ?bool
     {
@@ -127,17 +128,18 @@ class Event
      */
     public static function bound(string $event): bool
     {
-        $onces = static::$events['__bow.once.event'] ?? [];
+        $once = static::$events['__bow.once.event'] ?? [];
 
-        return array_key_exists($event, $onces) || array_key_exists($event, static::$events);
+        return array_key_exists($event, $once) || array_key_exists($event, static::$events);
     }
 
     /**
      * __call
      *
-     * @param  string $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array $arguments
      * @return mixed
+     * @throws ErrorException
      */
     public function __call(string $name, array $arguments)
     {

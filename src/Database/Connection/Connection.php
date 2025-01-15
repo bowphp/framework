@@ -38,7 +38,7 @@ class Connection
      *
      * @param AbstractConnection $adapter
      */
-    public function setAdapter(AbstractConnection $adapter)
+    public function setAdapter(AbstractConnection $adapter): void
     {
         $this->adapter = $adapter;
     }

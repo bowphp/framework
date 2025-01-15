@@ -99,7 +99,7 @@ class SQLGenerator
     }
 
     /**
-     * Add a raw column definiton
+     * Add a raw column definition
      *
      * @param string $definition
      * @return SQLGenerator
@@ -118,6 +118,7 @@ class SQLGenerator
      * @param string $type
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addColumn(string $name, string $type, array $attribute = []): SQLGenerator
     {
@@ -140,8 +141,9 @@ class SQLGenerator
      *
      * @param string $name
      * @param string $type
-     * @param array $attributes
+     * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeColumn(string $name, string $type, array $attribute = []): SQLGenerator
     {
@@ -290,6 +292,7 @@ class SQLGenerator
      * @param string $name
      * @param array $description
      * @return string
+     * @throws SQLGeneratorException
      */
     private function composeAddColumn(string $name, array $description): string
     {
@@ -298,14 +301,12 @@ class SQLGenerator
             throw new SQLGeneratorException("Cannot define size for $type type");
         }
 
-        switch ($this->adapter) {
-            case "sqlite":
-                return $this->composeAddSqliteColumn($name, $description);
-            case "mysql":
-                return $this->composeAddMysqlColumn($name, $description);
-            case "pgsql":
-                return $this->composeAddPgsqlColumn($name, $description);
-        }
+        return match ($this->adapter) {
+            "sqlite" => $this->composeAddSqliteColumn($name, $description),
+            "mysql" => $this->composeAddMysqlColumn($name, $description),
+            "pgsql" => $this->composeAddPgsqlColumn($name, $description),
+            default => throw new SQLGeneratorException("Unknown adapter '{$this->adapter}'"),
+        };
     }
 
     /**
@@ -340,20 +341,14 @@ class SQLGenerator
      * @param string $type
      * @return string
      */
-    public function normalizeOfType(string $type)
+    public function normalizeOfType(string $type): string
     {
-        if (in_array($this->adapter, ["mysql", "pgsql"])) {
-            return $type;
-        }
-
-        if (preg_match('/int|float|double/', $type)) {
-            $type = 'integer';
-        } elseif (preg_match('/float|double/', $type)) {
-            $type = 'real';
-        } elseif (preg_match('/^(text|char|string)$/i', $type)) {
-            $type = 'text';
-        }
-
-        return $type;
+        return match (true) {
+            (bool) in_array($this->adapter, ["mysql", "pgsql"]) => $type,
+            (bool) preg_match('/int|float|double/', $type) => 'integer',
+            (bool) preg_match('/float|double/', $type) => 'real',
+            (bool) preg_match('/^(text|char|string)$/i', $type) => 'text',
+            default => $type,
+        };
     }
 }

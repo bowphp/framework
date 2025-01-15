@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Bow\Configuration;
 
 use Bow\Support\Env;
-use Bow\Configuration\Loader;
 use InvalidArgumentException;
-use Bow\Configuration\Configuration;
 
 class EnvConfiguration extends Configuration
 {
@@ -24,6 +22,7 @@ class EnvConfiguration extends Configuration
                     . "Copy the .env.example.json file to .env.json"
                 );
             }
+
             Env::load($config['app.env_file']);
         });
     }

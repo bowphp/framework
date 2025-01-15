@@ -10,9 +10,9 @@ use Bow\View\View;
 class Response implements ResponseInterface
 {
     /**
-     * The Response instamce
+     * The Response instance
      *
-     * @var Response
+     * @var ?Response
      */
     private static ?Response $instance = null;
 
@@ -21,7 +21,7 @@ class Response implements ResponseInterface
      *
      * @var string
      */
-    private ?string $content = '';
+    private string $content = '';
 
     /**
      * The Response code
@@ -45,14 +45,14 @@ class Response implements ResponseInterface
     private bool $download = false;
 
     /**
-     * The downloadable filenme
+     * The downloadable filename
      *
-     * @var string
+     * @var ?string
      */
     private ?string $download_filename = null;
 
     /**
-     * The override the respons
+     * The override the response
      *
      * @var bool
      */
@@ -123,7 +123,7 @@ class Response implements ResponseInterface
      * @param string $content
      * @return Response
      */
-    public function setContent($content): Response
+    public function setContent(string $content): Response
     {
         $this->content = $content;
 
@@ -233,7 +233,8 @@ class Response implements ResponseInterface
      */
     private function buildHttpResponse(): string
     {
-        $status_text = static::$status_codes[$this->code] ?? 'Unkdown';
+        $status_text = HttpStatus::getMessage($this->code) ?? 'Unknown';
+
         @header('HTTP/1.1 ' . $this->code . ' ' . $status_text, $this->override, $this->code);
 
         foreach ($this->getHeaders() as $key => $header) {
@@ -252,11 +253,11 @@ class Response implements ResponseInterface
      * JSON response
      *
      * @param  mixed $data
-     * @param  int   $code
+     * @param int $code
      * @param  array $headers
      * @return string
      */
-    public function json($data, $code = 200, array $headers = []): string
+    public function json(mixed $data, int $code = 200, array $headers = []): string
     {
         $this->addHeader('Content-Type', 'application/json; charset=UTF-8');
 

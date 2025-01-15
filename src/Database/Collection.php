@@ -18,7 +18,7 @@ class Collection extends SupportCollection
     }
 
     /**
-     * Get the first item of starage
+     * Get the first item of storage
      *
      * @return ?Model
      */

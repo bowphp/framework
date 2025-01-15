@@ -3,6 +3,8 @@
 namespace Bow\Cache\Adapter;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\ConnectionException;
+use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
 use Bow\Cache\Adapter\CacheAdapterInterface;
 
@@ -19,7 +21,8 @@ class DatabaseAdapter implements CacheAdapterInterface
      * RedisAdapter constructor.
      *
      * @param array $config
-     * @return mixed
+     * @return void
+     * @throws ConnectionException
      */
     public function __construct(array $config)
     {
@@ -28,6 +31,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
     public function add(string $key, mixed $data, ?int $time = null): bool
     {
@@ -54,6 +58,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
     public function set(string $key, mixed $data, ?int $time = null): bool
     {
@@ -62,6 +67,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws QueryBuilderException
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -77,7 +83,8 @@ class DatabaseAdapter implements CacheAdapterInterface
     }
 
     /**
-     * @inheritDoc
+     * Update value from key
+     * @throws \Exception
      */
     public function update(string $key, mixed $data, ?int $time = null): mixed
     {
@@ -103,6 +110,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
     public function addMany(array $data): bool
     {
@@ -117,6 +125,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
     public function forever(string $key, mixed $data): bool
     {
@@ -125,6 +134,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
     public function push(string $key, array $data): bool
     {
@@ -137,11 +147,13 @@ class DatabaseAdapter implements CacheAdapterInterface
         $value = (array) unserialize($result->data);
         $result->data = serialize(array_merge($value, $data));
 
-        return $$this->query->where("keyname", $key)->update((array) $result);
+        return (bool) $this->query->where("keyname", $key)->update((array) $result);
     }
 
     /**
      * @inheritDoc
+     * @throws QueryBuilderException
+     * @throws \Exception
      */
     public function addTime(string $key, int $time): bool
     {
@@ -153,11 +165,13 @@ class DatabaseAdapter implements CacheAdapterInterface
 
         $result->expire = date("Y-m-d H:i:s", strtotime($result->expire) + $time);
 
-        return $$this->query->where("keyname", $key)->update((array) $result);
+        return (bool) $this->query->where("keyname", $key)->update((array) $result);
     }
 
     /**
      * @inheritDoc
+     * @throws QueryBuilderException
+     * @throws \Exception
      */
     public function timeOf(string $key): int|bool|string
     {
@@ -172,6 +186,8 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws QueryBuilderException
+     * @throws \Exception
      */
     public function forget(string $key): bool
     {
@@ -184,6 +200,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws QueryBuilderException
      */
     public function has(string $key): bool
     {
@@ -192,12 +209,11 @@ class DatabaseAdapter implements CacheAdapterInterface
 
     /**
      * @inheritDoc
+     * @throws QueryBuilderException
      */
     public function expired(string $key): bool
     {
-        $data = $this->get($key);
-
-        return $data;
+        return $this->get($key);
     }
 
     /**

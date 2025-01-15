@@ -12,6 +12,7 @@ trait SeedingHelper
      * @param string $seeder
      * @param array $data
      * @return int
+     * @throws \ErrorException
      */
     public function seed(string $seeder, array $data = []): int
     {

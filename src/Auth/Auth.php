@@ -15,7 +15,7 @@ class Auth
     /**
      * The Auth instance
      *
-     * @var GuardContract
+     * @var ?GuardContract
      */
     private static ?GuardContract $instance = null;
 
@@ -29,7 +29,7 @@ class Auth
     /**
      * The current guard
      *
-     * @var string
+     * @var ?string
      */
     private static ?string $guard = null;
 
@@ -37,9 +37,10 @@ class Auth
      * Configure Auth system
      *
      * @param array $config
-     * @return GuardContract
+     * @return ?GuardContract
+     * @throws AuthenticationException
      */
-    public static function configure(array $config)
+    public static function configure(array $config): ?GuardContract
     {
         if (!is_null(static::$instance)) {
             return static::$instance;
@@ -61,7 +62,7 @@ class Auth
     }
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @param null|string $guard
      * @return GuardContract
@@ -102,6 +103,7 @@ class Auth
      * @param string $method
      * @param array $params
      * @return ?GuardContract
+     * @throws ErrorException
      */
     public static function __callStatic(string $method, array $params)
     {

@@ -13,7 +13,7 @@ class PostgreSQLAdapter extends AbstractConnection
     /**
      * The connexion nane
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $name = 'pgsql';
 
@@ -87,9 +87,9 @@ class PostgreSQLAdapter extends AbstractConnection
         $username = $this->config["username"];
         $password = $this->config["password"];
 
-        // Configuration the PDO attributes that we want to setting
+        // Configuration the PDO attributes that we want to set
         $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => isset($this->config['fetch']) ? $this->config['fetch'] : $this->fetch,
+            PDO::ATTR_DEFAULT_FETCH_MODE => $this->config['fetch'] ?? $this->fetch,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ];
 

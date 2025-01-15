@@ -14,7 +14,7 @@ class MysqlAdapter extends AbstractConnection
     /**
      * The connexion nane
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $name = 'mysql';
 
@@ -45,7 +45,7 @@ class MysqlAdapter extends AbstractConnection
     public function connection(): void
     {
         // Build of the mysql dsn
-        if (isset($this->config['socket']) && !is_null($this->config['socket']) && !empty($this->config['socket'])) {
+        if (isset($this->config['socket']) && !empty($this->config['socket'])) {
             $hostname = $this->config['socket'];
             $port = '';
         } else {
@@ -64,9 +64,9 @@ class MysqlAdapter extends AbstractConnection
         $username = $this->config["username"];
         $password = $this->config["password"];
 
-        // Configuration the PDO attributes that we want to setting
+        // Configuration the PDO attributes that we want to set
         $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => isset($this->config['fetch']) ? $this->config['fetch'] : $this->fetch,
+            PDO::ATTR_DEFAULT_FETCH_MODE => $this->config['fetch'] ?? $this->fetch,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . Str::upper($this->config["charset"]),
             PDO::ATTR_ORACLE_NULLS => PDO::NULL_EMPTY_STRING
