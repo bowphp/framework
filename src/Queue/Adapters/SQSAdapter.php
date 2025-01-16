@@ -99,10 +99,12 @@ class SQSAdapter extends QueueAdapter
      *
      * @param ?string $queue
      * @return void
+     * @throws \ErrorException
      */
     public function run(?string $queue = null): void
     {
         $this->sleep($this->sleep ?? 5);
+        $message = null;
 
         try {
             $result = $this->sqs->receiveMessage([
@@ -130,12 +132,12 @@ class SQSAdapter extends QueueAdapter
             error_log($e->getMessage());
             app('logger')->error($e->getMessage(), $e->getTrace());
 
-            if (isset($message)) {
-                cache(
-                    "job:failed:" . $message["ReceiptHandle"],
-                    $message["Body"]
-                );
+            if (!$message) {
+                $this->sleep(1);
+                return;
             }
+
+            cache("job:failed:" . $message["ReceiptHandle"], $message["Body"]);
 
             // Check if producer has been loaded
             if (!isset($producer)) {
@@ -144,17 +146,17 @@ class SQSAdapter extends QueueAdapter
             }
 
             // Execute the onException method for notify the producer
-            // and let developper to decide if the job should be delete
+            // and let developer decide if the job should be deleted
             $producer->onException($e);
 
-            // Check if the job should be delete
+            // Check if the job should be deleted
             if ($producer->jobShouldBeDelete()) {
-                $result = $this->sqs->deleteMessage([
+                $this->sqs->deleteMessage([
                     'QueueUrl' => $this->config["url"],
                     'ReceiptHandle' => $message['ReceiptHandle']
                 ]);
             } else {
-                $result = $this->sqs->changeMessageVisibilityBatch([
+                $this->sqs->changeMessageVisibilityBatch([
                     'QueueUrl' => $this->config["url"],
                     'Entries' => [
                         'Id' => $producer->getId(),
@@ -163,6 +165,7 @@ class SQSAdapter extends QueueAdapter
                     ],
                 ]);
             }
+
             $this->sleep(1);
         }
     }

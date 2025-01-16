@@ -134,6 +134,7 @@ class BeanstalkdAdapter extends QueueAdapter
             } else {
                 $this->pheanstalk->release($job, $this->getPriority($producer->getPriority()), $producer->getDelay());
             }
+
             $this->sleep(1);
         }
     }

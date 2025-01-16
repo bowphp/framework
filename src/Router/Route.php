@@ -6,7 +6,6 @@ namespace Bow\Router;
 
 use Bow\Container\Action;
 use Bow\Configuration\Loader;
-use Bow\Http\Request;
 
 class Route
 {
@@ -133,10 +132,10 @@ class Route
      * Add the url rules
      *
      * @param array|string $where
-     * @param string  $regex_constraint
+     * @param string|null $regex_constraint
      * @return Route
      */
-    public function where(array|string $where, $regex_constraint = null): Route
+    public function where(array|string $where, string $regex_constraint = null): Route
     {
         $other_rule = is_array($where) ? $where : [$where => $regex_constraint];
 
@@ -176,6 +175,7 @@ class Route
      * To give a name to the road
      *
      * @param string $name
+     * @return Route
      */
     public function name(string $name): Route
     {

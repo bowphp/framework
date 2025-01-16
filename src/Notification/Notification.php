@@ -22,7 +22,7 @@ abstract class Notification
     /**
      * Returns the available channels to be used
      *
-     * @param \Bow\Database\Barry\Model $notifiable
+     * @param Model $notifiable
      * @return array
      */
     abstract public function channels(Model $notifiable): array;
@@ -30,20 +30,18 @@ abstract class Notification
     /**
      * Send notification to mail
      *
-     * @param \Bow\Database\Barry\Model $notifiable
-     * @return mixed
+     * @param Model $notifiable
+     * @return Message|null
      */
     public function toMail(Model $notifiable): ?Message
     {
-        $message = new Message();
-
-        return $message;
+        return new Message();
     }
 
     /**
      * Send notification to database
      *
-     * @param \Bow\Database\Barry\Model $notifiable
+     * @param Model $notifiable
      * @return array
      */
     public function toDatabase(Model $notifiable): array
@@ -53,10 +51,10 @@ abstract class Notification
 
     /**
      * Process the notification
-     * @param \Bow\Database\Barry\Model $notifiable
+     * @param Model $notifiable
      * @return void
      */
-    final function process(Model $notifiable)
+    final function process(Model $notifiable): void
     {
         $channels = $this->channels($notifiable);
 

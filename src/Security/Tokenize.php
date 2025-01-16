@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Security;
 
+use Bow\Session\Exception\SessionException;
 use Bow\Session\Session;
 use Bow\Support\Str;
 
@@ -19,8 +20,9 @@ class Tokenize
     /**
      * Csrf token creator
      *
-     * @param  int $time
+     * @param int|null $time
      * @return bool
+     * @throws SessionException
      */
     public static function makeCsrfToken(?int $time = null): bool
     {
@@ -62,8 +64,9 @@ class Tokenize
     /**
      * Get a csrf token generate
      *
-     * @param  int $time
+     * @param int|null $time
      * @return ?array
+     * @throws SessionException
      */
     public static function csrf(int $time = null): ?array
     {
@@ -75,8 +78,9 @@ class Tokenize
     /**
      * Check if the token expires
      *
-     * @param int $time
+     * @param int|null $time
      * @return bool
+     * @throws SessionException
      */
     public static function csrfExpired(int $time = null): bool
     {
@@ -103,6 +107,7 @@ class Tokenize
      * @param string $token
      * @param bool $strict
      * @return bool
+     * @throws SessionException
      */
     public static function verify(string $token, bool $strict = false): bool
     {
@@ -119,7 +124,7 @@ class Tokenize
         $status = true;
 
         if ($strict) {
-            $status = $status && static::CsrfExpired(time());
+            $status = static::CsrfExpired(time());
         }
 
         return $status;
@@ -129,6 +134,7 @@ class Tokenize
      * Destroy the token
      *
      * @return void
+     * @throws SessionException
      */
     public static function clear(): void
     {

@@ -16,7 +16,8 @@
         "fakerphp/faker": "^1.20",
         "neitanod/forceutf8": "^2.0",
         "ramsey/uuid": "^4.7",
-        "ext-ftp": "*"
+        "ext-ftp": "*",
+        "ext-openssl": "*"
     },
     "require-dev": {
         "pda/pheanstalk": "^5.0",
