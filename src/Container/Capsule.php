@@ -49,7 +49,7 @@ class Capsule implements ArrayAccess
     /**
      * Represents the instance of Capsule
      *
-     * @var Capsule
+     * @var ?Capsule
      */
     private static ?Capsule $instance = null;
 
@@ -134,7 +134,7 @@ class Capsule implements ArrayAccess
      * @param string $key
      * @param callable  $value
      */
-    public function bind(string $key, callable $value)
+    public function bind(string $key, callable $value): void
     {
         $this->key[$key] = true;
 
@@ -148,7 +148,7 @@ class Capsule implements ArrayAccess
      * @param Closure|callable $value
      * @return void
      */
-    public function factory($key, Closure|callable $value)
+    public function factory(string $key, Closure|callable $value): void
     {
         $this->factories[$key] = $value;
     }
@@ -178,7 +178,7 @@ class Capsule implements ArrayAccess
      * @return mixed
      * @throws
      */
-    private function resolve($key): mixed
+    private function resolve(string $key): mixed
     {
         $reflection = new ReflectionClass($key);
 

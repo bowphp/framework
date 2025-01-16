@@ -13,13 +13,13 @@ class Authentication extends Model
      *
      * @return mixed
      */
-    public function getAuthenticateUserId()
+    public function getAuthenticateUserId(): mixed
     {
         return $this->attributes[$this->primary_key];
     }
 
     /**
-     * Define the additionals values
+     * Define the additional values
      *
      * @return array
      */

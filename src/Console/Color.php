@@ -64,7 +64,7 @@ class Color
     /**
      * Blue message with '[info]' prefix
      *
-     * @param  $message
+     * @param string $message
      * @return string
      */
     public static function info(string $message): string
@@ -84,7 +84,7 @@ class Color
     }
 
     /**
-     * Greean message with '[success]' prefix
+     * Green message with '[success]' prefix
      *
      * @param string $message
      * @return string

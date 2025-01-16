@@ -27,8 +27,9 @@ class Temporary
      *
      * @param string $lock_filename
      * @return void
+     * @throws ResourceException
      */
-    public function __construct($lock_filename = 'php://temp')
+    public function __construct(string $lock_filename = 'php://temp')
     {
         $this->lock_filename = $lock_filename;
 
@@ -49,6 +50,7 @@ class Temporary
      * Open the streaming
      *
      * @return void
+     * @throws ResourceException
      */
     public function open(): void
     {
@@ -67,6 +69,7 @@ class Temporary
      * @param string $lock_filename
      *
      * @return void
+     * @throws ResourceException
      */
     public function lockFile(string $lock_filename): void
     {
@@ -94,9 +97,10 @@ class Temporary
      *
      * @param string $content
      *
-     * @return mixed
+     * @return int|bool
+     * @throws ResourceException
      */
-    public function write($content): mixed
+    public function write(string $content): int|bool
     {
         if (!$this->isOpen()) {
             $this->open();
@@ -108,7 +112,8 @@ class Temporary
     /**
      * Read content of temp
      *
-     * @return string|null
+     * @return string
+     * @throws ResourceException
      */
     public function read(): string
     {

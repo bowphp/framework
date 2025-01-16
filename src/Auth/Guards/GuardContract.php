@@ -6,9 +6,10 @@ namespace Bow\Auth\Guards;
 
 use Bow\Auth\Auth;
 use Bow\Auth\Authentication;
+use Bow\Auth\Exception\AuthenticationException;
 
 /**
- * @method ?\Policier\Token getToken()
+ * @method ?\Bow\Policier\Token getToken()
  */
 abstract class GuardContract
 {
@@ -27,7 +28,7 @@ abstract class GuardContract
     abstract public function id(): mixed;
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @return bool
      */
@@ -58,12 +59,12 @@ abstract class GuardContract
     /**
      * Get authenticated user
      *
-     * @return Authentication
+     * @return ?Authentication
      */
     abstract public function user(): ?Authentication;
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @param array $credentials
      * @return bool
@@ -81,12 +82,13 @@ abstract class GuardContract
     }
 
     /**
-     * Load the a guard
+     * Load the guard
      *
-     * @param string $guard
+     * @param string|null $guard
      * @return GuardContract
+     * @throws AuthenticationException
      */
-    public function guard($guard = null): GuardContract
+    public function guard(string $guard = null): GuardContract
     {
         if ($guard) {
             $this->guard = $guard;

@@ -51,12 +51,11 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Function to upload a file
      *
-     * @param  UploadedFile $file
-     * @param  string|array $location
-     * @param  array $option
+     * @param UploadedFile $file
+     * @param string|array|null $location
+     * @param array $option
      *
      * @return array|bool|string
-     * @throws InvalidArgumentException
      */
     public function store(UploadedFile $file, string|array $location = null, array $option = []): array|bool|string
     {
@@ -185,9 +184,7 @@ class DiskFilesystemService implements FilesystemInterface
      */
     public function directories(string $dirname): array
     {
-        $directory_contents = glob($this->path($dirname) . "/*", GLOB_ONLYDIR);
-
-        return $directory_contents;
+        return glob($this->path($dirname) . "/*", GLOB_ONLYDIR);
     }
 
     /**
@@ -199,17 +196,14 @@ class DiskFilesystemService implements FilesystemInterface
      */
     public function makeDirectory(string $dirname, int $mode = 0777): bool
     {
-        $result = @mkdir($dirname, $mode, true);
-
-        return $result;
+        return @mkdir($dirname, $mode, true);
     }
 
     /**
      * Recover the contents of the file
      *
-     * @param  string $filename
-     *
-     * @return int
+     * @param string $filename
+     * @return string|null
      */
     public function get(string $filename): ?string
     {
@@ -227,7 +221,6 @@ class DiskFilesystemService implements FilesystemInterface
      *
      * @param  string $target
      * @param  string $source
-     *
      * @return bool
      */
     public function copy(string $target, string $source): bool
@@ -248,7 +241,6 @@ class DiskFilesystemService implements FilesystemInterface
      *
      * @param string $target
      * @param string $source
-     *
      * @return bool
      */
     public function move(string $target, string $source): bool
@@ -275,7 +267,7 @@ class DiskFilesystemService implements FilesystemInterface
      * The file extension
      *
      * @param string $filename
-     * @return string
+     * @return string|null
      */
     public function extension(string $filename): ?string
     {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
-use PDO;
 use Bow\Security\Sanitize;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Connection\AbstractConnection;
@@ -12,7 +11,7 @@ use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
 use Bow\Database\Connection\Adapter\SqliteAdapter;
 use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
-use ErrorException;
+use PDO;
 
 class Database
 {
@@ -204,7 +203,7 @@ class Database
      * @param  array  $data
      * @return mixed|null
      */
-    public static function selectOne(string $sql_statement, array $data = [])
+    public static function selectOne(string $sql_statement, array $data = []): mixed
     {
         static::verifyConnection();
 
@@ -232,8 +231,8 @@ class Database
     /**
      * Execute an insert query
      *
-     * @param  $sql_statement
-     * @param  array        $data
+     * @param string $sql_statement
+     * @param array $data
      * @return int
      */
     public static function insert(string $sql_statement, array $data = []): int
@@ -335,7 +334,6 @@ class Database
     /**
      * Starting the start of a transaction
      *
-     * @param callable $callback
      * @return void
      */
     public static function startTransaction(): void
@@ -471,7 +469,7 @@ class Database
      *
      * @param PDO $pdo
      */
-    public static function setPdo(PDO $pdo)
+    public static function setPdo(PDO $pdo): void
     {
         static::$adapter->setConnection($pdo);
     }
@@ -481,10 +479,8 @@ class Database
      *
      * @param string $method
      * @param array  $arguments
-     *
-     * @throws DatabaseException
-     *
      * @return mixed
+     * @throws DatabaseException|ErrorException
      */
     public function __call(string $method, array $arguments)
     {

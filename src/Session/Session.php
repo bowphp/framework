@@ -39,7 +39,7 @@ class Session implements CollectionInterface
     /**
      * The instance of Session
      *
-     * @var Session
+     * @var ?Session
      */
     private static ?Session $instance = null;
 
@@ -54,6 +54,7 @@ class Session implements CollectionInterface
      * Session constructor.
      *
      * @param array $config
+     * @throws SessionException
      */
     private function __construct(array $config)
     {
@@ -81,6 +82,7 @@ class Session implements CollectionInterface
      *
      * @param array $config
      * @return Session
+     * @throws SessionException
      */
     public static function configure(array $config): Session
     {
@@ -105,6 +107,7 @@ class Session implements CollectionInterface
      * Session starter.
      *
      * @return bool
+     * @throws SessionException
      */
     public function start(): bool
     {
@@ -121,7 +124,7 @@ class Session implements CollectionInterface
         // Boot session
         $started = $this->boot();
 
-        // Init interne session manager
+        // Init internet session manager
         $this->initializeInternalSessionStorage();
 
         return $started;
@@ -131,6 +134,7 @@ class Session implements CollectionInterface
      * Start session natively
      *
      * @return bool
+     * @throws SessionException
      */
     private function boot(): bool
     {
@@ -145,6 +149,7 @@ class Session implements CollectionInterface
      * Load session driver
      *
      * @return void
+     * @throws SessionException
      */
     private function initializeDriver(): void
     {
@@ -222,7 +227,7 @@ class Session implements CollectionInterface
      *
      * @return void
      */
-    private function setCookieParameters()
+    private function setCookieParameters(): void
     {
         session_set_cookie_params(
             $this->config["lifetime"],
@@ -238,15 +243,17 @@ class Session implements CollectionInterface
      *
      * @return string
      */
-    private function generateId()
+    private function generateId(): string
     {
         return Crypto::encrypt(uniqid(microtime(false)));
     }
 
     /**
      * Generate session
+     *
+     * @throws SessionException
      */
-    public function regenerate()
+    public function regenerate(): void
     {
         $this->flush();
         $this->start();
@@ -257,8 +264,9 @@ class Session implements CollectionInterface
      * and those used by the framework.
      *
      * @return array
+     * @throws SessionException
      */
-    private function filter()
+    private function filter(): array
     {
         $arr = [];
 
@@ -279,6 +287,7 @@ class Session implements CollectionInterface
      * @param string|int $key
      * @param bool $strict
      * @return bool
+     * @throws SessionException
      */
     public function has(string|int $key, bool $strict = false): bool
     {
@@ -311,7 +320,7 @@ class Session implements CollectionInterface
             return count((array) $value) > 0;
         }
 
-        if (isset($_SESSION[$key]) && !is_null($_SESSION[$key])) {
+        if (isset($_SESSION[$key])) {
             return count((array) $_SESSION[$key]) > 0;
         }
 
@@ -323,6 +332,7 @@ class Session implements CollectionInterface
      *
      * @param string $key
      * @return bool
+     * @throws SessionException
      */
     public function exists($key): bool
     {
@@ -333,6 +343,7 @@ class Session implements CollectionInterface
      * Check whether a collection is empty.
      *
      * @return bool
+     * @throws SessionException
      */
     public function isEmpty(): bool
     {
@@ -343,8 +354,9 @@ class Session implements CollectionInterface
      * Retrieves a value or value collection.
      *
      * @param string $key
-     * @param mixed  $default
+     * @param mixed $default
      * @return mixed
+     * @throws SessionException
      */
     public function get(mixed $key, mixed $default = null): mixed
     {
@@ -354,7 +366,7 @@ class Session implements CollectionInterface
             return $content;
         }
 
-        if (is_null($content) && $this->has($key)) {
+        if ($this->has($key)) {
             return $_SESSION[$key] ?? null;
         }
 
@@ -369,19 +381,19 @@ class Session implements CollectionInterface
      * Add an entry to the collection
      *
      * @param string|int $key
-     * @param mixed $value
+     * @param mixed $data
      * @param boolean $next
-     * @throws InvalidArgumentException
      * @return mixed
+     * @throws InvalidArgumentException|SessionException
      */
-    public function add(string|int $key, mixed $value, $next = false): mixed
+    public function add(string|int $key, mixed $data, bool $next = false): mixed
     {
         $this->start();
 
         $_SESSION[static::CORE_SESSION_KEY['cache']][$key] = true;
 
-        if ($next == false) {
-            return $_SESSION[$key] = $value;
+        if ($next === false) {
+            return $_SESSION[$key] = $data;
         }
 
         if (! $this->has($key)) {
@@ -392,14 +404,15 @@ class Session implements CollectionInterface
             $_SESSION[$key] = [$_SESSION[$key]];
         }
 
-        $_SESSION[$key] = array_merge($_SESSION[$key], [$value]);
+        $_SESSION[$key] = array_merge($_SESSION[$key], [$data]);
 
-        return $value;
+        return $data;
     }
 
     /**
      * The add alias
      *
+     * @throws SessionException
      * @see \Bow\Session\Session::add
      */
     public function put(string|int $key, mixed $value, $next = false): mixed
@@ -411,6 +424,7 @@ class Session implements CollectionInterface
      * Returns the list of session variables
      *
      * @return array
+     * @throws SessionException
      */
     public function all(): array
     {
@@ -420,9 +434,10 @@ class Session implements CollectionInterface
     /**
      * Delete an entry in the collection
      *
-     * @param string $key
+     * @param string|int $key
      *
      * @return mixed
+     * @throws SessionException
      */
     public function remove(string|int $key): mixed
     {
@@ -444,10 +459,11 @@ class Session implements CollectionInterface
     /**
      * set
      *
-     * @param string $key
-     * @param mixed  $value
+     * @param string|int $key
+     * @param mixed $value
      *
      * @return mixed
+     * @throws SessionException
      */
     public function set(string|int $key, mixed $value): mixed
     {
@@ -460,7 +476,7 @@ class Session implements CollectionInterface
         if (!$this->has($key)) {
             $_SESSION[$key] = $value;
 
-            return $old;
+            return null;
         }
 
         $old = $_SESSION[$key];
@@ -474,9 +490,10 @@ class Session implements CollectionInterface
      * Add flash data
      * After the data recovery is automatic deleted
      *
-     * @param  string|int $key
-     * @param  mixed $message
+     * @param string|int $key
+     * @param mixed $message
      * @return mixed
+     * @throws SessionException
      */
     public function flash(string|int $key, ?string $message = null): mixed
     {
@@ -490,14 +507,11 @@ class Session implements CollectionInterface
 
         $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
 
-        $content = isset($flash[$key]) ? $flash[$key] : null;
-        $tmp = [];
+        $content = $flash[$key] ?? null;
 
-        foreach ($flash as $i => $value) {
-            if ($i != $key) {
-                $tmp[$i] = $value;
-            }
-        }
+        $tmp = array_filter($flash, function ($i) use ($key) {
+            return $i != $key;
+        }, ARRAY_FILTER_USE_KEY);
 
         $_SESSION[static::CORE_SESSION_KEY['flash']] = $tmp;
 
@@ -508,6 +522,7 @@ class Session implements CollectionInterface
      * Returns the list of session data as a array.
      *
      * @return array
+     * @throws SessionException
      */
     public function toArray(): array
     {
@@ -516,8 +531,9 @@ class Session implements CollectionInterface
 
     /**
      * Empty the flash system.
+     * @throws SessionException
      */
-    public function clearFash(): void
+    public function clearFlash(): void
     {
         $this->start();
 
@@ -526,6 +542,8 @@ class Session implements CollectionInterface
 
     /**
      * Allows to clear the cache except csrf and __bow.flash
+     *
+     * @throws SessionException
      */
     public function clear(): void
     {
@@ -549,7 +567,7 @@ class Session implements CollectionInterface
     /**
      * Returns the list of session data as a toObject.
      *
-     * @return array|void
+     * @return array
      */
     public function toObject(): array
     {
@@ -560,6 +578,7 @@ class Session implements CollectionInterface
      * __toString
      *
      * @return string
+     * @throws SessionException
      */
     public function __toString(): string
     {

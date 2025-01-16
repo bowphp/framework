@@ -11,15 +11,16 @@
         "php": "^8.1",
         "bowphp/tintin": "^3.0",
         "filp/whoops": "^2.1",
-        "nesbot/carbon": "^2.16",
+        "nesbot/carbon": "3.8.4",
         "psy/psysh": "v0.12.*",
         "fakerphp/faker": "^1.20",
         "neitanod/forceutf8": "^2.0",
-        "ramsey/uuid": "^4.7"
+        "ramsey/uuid": "^4.7",
+        "ext-ftp": "*"
     },
     "require-dev": {
-        "pda/pheanstalk": "^4.0.5",
-        "phpunit/phpunit": "^9",
+        "pda/pheanstalk": "^5.0",
+        "phpunit/phpunit": "^9.6",
         "monolog/monolog": "^1.22",
         "twig/twig": "^3",
         "squizlabs/php_codesniffer": "3.*",

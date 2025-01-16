@@ -29,10 +29,10 @@ class ServerAccessControl
      * The access control
      *
      * @param string $allow
-     * @param string $excepted
+     * @param string|null $excepted
      * @return $this
      */
-    private function push(string $allow, string $excepted): ServerAccessControl
+    private function push(string $allow, ?string $excepted = null): ServerAccessControl
     {
         if ($excepted === null) {
             $excepted = '*';

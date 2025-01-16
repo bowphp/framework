@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\View\Engine;
 
-use Bow\Configuration\Loader;
 use Bow\View\EngineAbstract;
 use RuntimeException;
 

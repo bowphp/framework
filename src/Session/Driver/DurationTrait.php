@@ -9,7 +9,7 @@ trait DurationTrait
     /**
      * Create the timestamp
      *
-     * @param int max_lifetime
+     * @param int|null $max_lifetime
      * @return string
      */
     private function createTimestamp(?int $max_lifetime = null): string

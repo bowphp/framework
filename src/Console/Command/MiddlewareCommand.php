@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
+use JetBrains\PhpStorm\NoReturn;
 
 class MiddlewareCommand extends AbstractCommand
 {
@@ -15,7 +17,7 @@ class MiddlewareCommand extends AbstractCommand
      * @param string $middleware
      * @return void
      */
-    public function generate(string $middleware): void
+    #[NoReturn] public function generate(string $middleware): void
     {
         $generator = new Generator(
             $this->setting->getMiddlewareDirectory(),

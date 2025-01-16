@@ -18,12 +18,12 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Configure Beanstalkd driver
      *
-     * @param array $queue
+     * @param array $config
      * @return mixed
      */
-    public function configure(array $queue): DatabaseAdapter
+    public function configure(array $config): DatabaseAdapter
     {
-        $this->table = Database::table($queue["table"] ?? "queue_jobs");
+        $this->table = Database::table($config["table"] ?? "queue_jobs");
 
         return $this;
     }
@@ -55,7 +55,7 @@ class DatabaseAdapter extends QueueAdapter
             "payload" => base64_encode($this->serializeProducer($producer)),
             "attempts" => $this->tries,
             "status" => "waiting",
-            "avalaibled_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
+            "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
             "reserved_at" => null,
             "created_at" => date("Y-m-d H:i:s"),
         ]);
@@ -84,7 +84,7 @@ class DatabaseAdapter extends QueueAdapter
         foreach ($queues as $job) {
             try {
                 $producer = $this->unserializeProducer(base64_decode($job->payload));
-                if (strtotime($job->avalaibled_at) >= time()) {
+                if (strtotime($job->available_at) >= time()) {
                     if (!is_null($job->reserved_at) && strtotime($job->reserved_at) < time()) {
                         continue;
                     }
@@ -123,7 +123,7 @@ class DatabaseAdapter extends QueueAdapter
                 $this->table->where("id", $job->id)->update([
                     "status" => "reserved",
                     "attempts" => $job->attempts - 1,
-                    "avalaibled_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
+                    "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
                     "reserved_at" => date("Y-m-d H:i:s", time() + $producer->getRetry())
                 ]);
 

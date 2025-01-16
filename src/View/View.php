@@ -6,7 +6,6 @@ namespace Bow\View;
 
 use Tintin\Tintin;
 use BadMethodCallException;
-use Bow\View\EngineAbstract;
 use Bow\Contracts\ResponseInterface;
 use Bow\View\Exception\ViewException;
 
@@ -50,13 +49,6 @@ class View implements ResponseInterface
         'twig' => \Bow\View\Engine\TwigEngine::class,
         'php' => \Bow\View\Engine\PHPEngine::class,
     ];
-
-    /**
-     * The cachabled flash for twig
-     *
-     * @var boolean
-     */
-    private bool $cachabled = false;
 
     /**
      * View constructor.
@@ -145,7 +137,7 @@ class View implements ResponseInterface
      *
      * @return Tintin|\Twig\Environment
      */
-    public function getEngine()
+    public function getEngine(): \Twig\Environment|Tintin
     {
         return static::$template->getEngine();
     }
@@ -190,11 +182,10 @@ class View implements ResponseInterface
     }
 
     /**
-     * Ajouter un moteur de template
+     * Add a template engine
      *
-     * @param  $name
-     * @param  $engine
-     *
+     * @param string $name
+     * @param string $engine
      * @return bool
      * @throws ViewException
      */
@@ -228,7 +219,7 @@ class View implements ResponseInterface
     /**
      * Send Response
      *
-     * @return mixed
+     * @return void
      */
     public function sendContent(): void
     {

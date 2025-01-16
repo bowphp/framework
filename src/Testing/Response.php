@@ -24,7 +24,7 @@ class Response
     private string $content;
 
     /**
-     * Behovior constructor.
+     * Behavior constructor.
      *
      * @param HttpClientResponse $http_response
      */
@@ -69,7 +69,7 @@ class Response
     }
 
     /**
-     * Check if the content is some of parse data
+     * Check if the content is some parse data
      *
      * @param string $data
      * @param string $message

@@ -6,6 +6,7 @@ namespace Bow\Database\Migration;
 
 use Bow\Console\Color;
 use Bow\Database\Database;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Migration\SQLGenerator;
 use Bow\Database\Exception\MigrationException;
 use Bow\Database\Connection\AbstractConnection;
@@ -48,6 +49,7 @@ abstract class Migration
      *
      * @param string $name
      * @return Migration
+     * @throws ConnectionException
      */
     final public function connection(string $name): Migration
     {
@@ -73,6 +75,7 @@ abstract class Migration
      *
      * @param string $table
      * @return Migration
+     * @throws MigrationException
      */
     final public function drop(string $table): Migration
     {
@@ -88,6 +91,7 @@ abstract class Migration
      *
      * @param string $table
      * @return Migration
+     * @throws MigrationException
      */
     final public function dropIfExists(string $table): Migration
     {
@@ -105,9 +109,10 @@ abstract class Migration
     /**
      * Function of creation of a new table in the database.
      *
-     * @param string  $table
+     * @param string $table
      * @param callable $cb
      * @return Migration
+     * @throws MigrationException
      */
     final public function create(string $table, callable $cb): Migration
     {
@@ -147,6 +152,7 @@ abstract class Migration
      * @param string $table
      * @param callable $cb
      * @return Migration
+     * @throws MigrationException
      */
     final public function alter(string $table, callable $cb): Migration
     {
@@ -170,6 +176,7 @@ abstract class Migration
      *
      * @param string $sql
      * @return Migration
+     * @throws MigrationException
      */
     final public function addSql(string $sql): Migration
     {
@@ -182,6 +189,7 @@ abstract class Migration
      * @param string $table
      * @param string $to
      * @return Migration
+     * @throws MigrationException
      */
     final public function renameTable(string $table, string $to): Migration
     {
@@ -196,6 +204,7 @@ abstract class Migration
      * @param string $table
      * @param string $to
      * @return Migration
+     * @throws MigrationException
      */
     final public function renameTableIfExists(string $table, string $to): Migration
     {
@@ -212,9 +221,7 @@ abstract class Migration
      */
     final public function getTablePrefixed(string $table): string
     {
-        $table = $this->adapter->getTablePrefix() . $table;
-
-        return $table;
+        return $this->adapter->getTablePrefix() . $table;
     }
 
     /**
@@ -234,6 +241,7 @@ abstract class Migration
         }
 
         echo sprintf("%s %s\n", Color::green("▶"), $sql);
+
         return $this;
     }
 }

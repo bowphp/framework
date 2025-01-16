@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 

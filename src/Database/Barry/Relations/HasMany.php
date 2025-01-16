@@ -7,6 +7,7 @@ namespace Bow\Database\Barry\Relations;
 use Bow\Database\Collection;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
+use Bow\Database\Exception\QueryBuilderException;
 
 class HasMany extends Relation
 {
@@ -15,9 +16,9 @@ class HasMany extends Relation
      *
      * @param Model $related
      * @param Model $parent
-     * @param string   $foreign_key
-     * @param string   $local_key
-     * @param string   $relation
+     * @param string $foreign_key
+     * @param string $local_key
+     * @throws QueryBuilderException
      */
     public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
     {

@@ -7,8 +7,7 @@ namespace Bow\Queue\Adapters;
 use RuntimeException;
 use Pheanstalk\Pheanstalk;
 use Bow\Queue\ProducerService;
-use Bow\Queue\Adapters\QueueAdapter;
-use Pheanstalk\Contract\PheanstalkInterface;
+use Pheanstalk\Contract\PheanstalkPublisherInterface;
 
 class BeanstalkdAdapter extends QueueAdapter
 {
@@ -22,23 +21,23 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Configure Beanstalkd driver
      *
-     * @param array $queue
+     * @param array $config
      * @return mixed
      */
-    public function configure(array $queue): BeanstalkdAdapter
+    public function configure(array $config): BeanstalkdAdapter
     {
         if (!class_exists(Pheanstalk::class)) {
             throw new RuntimeException("Please install the pda/pheanstalk package");
         }
 
         $this->pheanstalk = Pheanstalk::create(
-            $queue["hostname"],
-            $queue["port"],
-            $queue["timeout"]
+            $config["hostname"],
+            $config["port"],
+            $config["timeout"] ? new \Pheanstalk\Values\Timeout($config["timeout"]) : null,
         );
 
-        if (isset($queue["queue"])) {
-            $this->setQueue($queue["queue"]);
+        if (isset($config["queue"])) {
+            $this->setQueue($config["queue"]);
         }
 
         return $this;
@@ -52,9 +51,9 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function size(?string $queue = null): int
     {
-        $queue = $this->getQueue($queue);
+        $queue = new \Pheanstalk\Values\TubeName($this->getQueue($queue));
 
-        return (int) $this->pheanstalk->statsTube($queue)->current_jobs_ready;
+        return (int) $this->pheanstalk->statsTube($queue)->currentJobsReady;
     }
 
     /**
@@ -62,6 +61,7 @@ class BeanstalkdAdapter extends QueueAdapter
      *
      * @param ProducerService $producer
      * @return void
+     * @throws \ErrorException
      */
     public function push(ProducerService $producer): void
     {
@@ -73,13 +73,14 @@ class BeanstalkdAdapter extends QueueAdapter
         }
 
         $this->pheanstalk
-            ->useTube($producer->getQueue())
-            ->put(
-                $this->serializeProducer($producer),
-                $this->getPriority($producer->getPriority()),
-                $producer->getDelay(),
-                $producer->getRetry()
-            );
+            ->useTube(new \Pheanstalk\Values\TubeName($producer->getQueue()));
+
+        $this->pheanstalk->put(
+            $this->serializeProducer($producer),
+            $this->getPriority($producer->getPriority()),
+            $producer->getDelay(),
+            $producer->getRetry()
+        );
     }
 
     /**
@@ -87,12 +88,13 @@ class BeanstalkdAdapter extends QueueAdapter
      *
      * @param string|null $queue
      * @return mixed
+     * @throws \ErrorException
      */
     public function run(string $queue = null): void
     {
         // we want jobs from define queue only.
         $queue = $this->getQueue($queue);
-        $this->pheanstalk->watch($queue);
+        $this->pheanstalk->watch(new \Pheanstalk\Values\TubeName($queue));
 
         // This hangs until a Job is produced.
         $job = $this->pheanstalk->reserve();
@@ -123,10 +125,10 @@ class BeanstalkdAdapter extends QueueAdapter
             }
 
             // Execute the onException method for notify the producer
-            // and let developper to decide if the job should be delete
+            // and let developer decide if the job should be deleted
             $producer->onException($e);
 
-            // Check if the job should be delete
+            // Check if the job should be deleted
             if ($producer->jobShouldBeDelete()) {
                 $this->pheanstalk->delete($job);
             } else {
@@ -139,7 +141,9 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Flush the queue
      *
+     * @param string|null $queue
      * @return void
+     * @throws \ErrorException
      */
     public function flush(?string $queue = null): void
     {
@@ -166,15 +170,11 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function getPriority(int $priority): int
     {
-        switch ($priority) {
-            case $priority > 2:
-                return 4294967295;
-            case 1:
-                return PheanstalkInterface::DEFAULT_PRIORITY;
-            case 0:
-                return 0;
-            default:
-                return PheanstalkInterface::DEFAULT_PRIORITY;
-        }
+        return match ($priority) {
+            $priority > 2 => 4294967295,
+            1 => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
+            0 => 0,
+            default => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
+        };
     }
 }

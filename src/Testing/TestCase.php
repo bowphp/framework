@@ -19,12 +19,12 @@ class TestCase extends PHPUnitTestCase
     /**
      * The base url
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $url = null;
 
     /**
-     * The list of additionnal header
+     * The list of additional header
      *
      * @var array
      */
@@ -37,18 +37,14 @@ class TestCase extends PHPUnitTestCase
      */
     private function getBaseUrl(): string
     {
-        if (is_null($this->url)) {
-            return rtrim(app_env('APP_URL', 'http://127.0.0.1:5000'));
-        }
-
-        return $this->url ?? 'http://127.0.0.1:5000';
+        return $this->url ?? rtrim(app_env('APP_URL', 'http://127.0.0.1:5000'));
     }
 
     /**
      * Add attachment
      *
      * @param array $attach
-     * @return Response
+     * @return TestCase
      */
     public function attach(array $attach): TestCase
     {
@@ -58,7 +54,7 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Specify the additionnal headers
+     * Specify the additional headers
      *
      * @param array $headers
      * @return TestCase
@@ -71,9 +67,10 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Specify the additionnal header
+     * Specify the additional header
      *
-     * @param array $headers
+     * @param string $key
+     * @param string $value
      * @return TestCase
      */
     public function withHeader(string $key, string $value): TestCase
@@ -89,6 +86,7 @@ class TestCase extends PHPUnitTestCase
      * @param string $url
      * @param array $param
      * @return Response
+     * @throws \Exception
      */
     public function get(string $url, array $param = []): Response
     {
@@ -105,6 +103,7 @@ class TestCase extends PHPUnitTestCase
      * @param string $url
      * @param array $param
      * @return Response
+     * @throws \Exception
      */
     public function post(string $url, array $param = []): Response
     {
@@ -125,6 +124,7 @@ class TestCase extends PHPUnitTestCase
      * @param string $url
      * @param array $param
      * @return Response
+     * @throws \Exception
      */
     public function put(string $url, array $param = []): Response
     {
@@ -141,6 +141,7 @@ class TestCase extends PHPUnitTestCase
      * @param string $url
      * @param array $param
      * @return Response
+     * @throws \Exception
      */
     public function delete(string $url, array $param = []): Response
     {
@@ -157,8 +158,9 @@ class TestCase extends PHPUnitTestCase
      * @param string $url
      * @param array $param
      * @return Response
+     * @throws \Exception
      */
-    public function patch(string $url, array $param = [])
+    public function patch(string $url, array $param = []): Response
     {
         $param = array_merge([
             '_method' => 'PATCH'
@@ -168,7 +170,7 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Initilalize Response action
+     * Initialize Response action
      *
      * @param string $method
      * @param string $url

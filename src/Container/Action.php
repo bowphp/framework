@@ -40,7 +40,7 @@ class Action
     /**
      * The Action instance
      *
-     * @var Action
+     * @var ?Action
      */
     private static ?Action $instance = null;
 
@@ -96,7 +96,7 @@ class Action
     /**
      * Add a middleware to the list
      *
-     * @param array|callable $middlewares
+     * @param array $middlewares
      * @param bool $end
      * @return void
      */
@@ -105,9 +105,9 @@ class Action
         $middlewares = (array) $middlewares;
 
         if ($end) {
-            array_merge($this->middlewares, $middlewares);
+            $this->middlewares = array_merge($this->middlewares, $middlewares);
         } else {
-            array_merge($middlewares, $this->middlewares);
+            $this->middlewares = array_merge($middlewares, $this->middlewares);
         }
     }
 
@@ -257,7 +257,7 @@ class Action
          */
         foreach ($actions as $key => $action) {
             if (is_string($action)) {
-                array_push($functions, $this->controller($action));
+                $functions[] = $this->controller($action);
                 continue;
             }
             if (!is_callable($action)) {
@@ -269,7 +269,7 @@ class Action
                 $injection = $this->injectorForClosure($action);
             }
 
-            array_push($functions, ['action' => $action, 'injection' => $injection]);
+            $functions[] = ['action' => $action, 'injection' => $injection];
         }
 
         return $this->dispatchControllers($functions, $param);
@@ -350,16 +350,11 @@ class Action
      * Load the controllers defined as string
      *
      * @param string $controller_name
-     * @return array
+     * @return array|null
      * @throws ReflectionException
      */
     public function controller(string $controller_name): ?array
     {
-        // Retrieving the class and method to launch.
-        if (is_null($controller_name)) {
-            return null;
-        }
-
         $parts = preg_split('/::|@/', $controller_name);
 
         if (count($parts) == 1) {
@@ -393,7 +388,7 @@ class Action
      * Load the closure define as action
      *
      * @param Closure $closure
-     * @return array
+     * @return array|null
      */
     public function closure(Closure $closure): ?array
     {
@@ -482,8 +477,9 @@ class Action
      *
      * @param ReflectionClass $class
      * @return ?object
+     * @throws ReflectionException
      */
-    private function getInjectParameter($class): ?object
+    private function getInjectParameter(ReflectionClass $class): ?object
     {
         $class_name = $class->getName();
 
@@ -491,7 +487,7 @@ class Action
             return null;
         }
 
-        if (!class_exists($class_name, true)) {
+        if (!class_exists($class_name)) {
             throw new InvalidArgumentException(
                 sprintf('class %s not exists', $class_name)
             );

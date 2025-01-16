@@ -117,7 +117,7 @@ class Redirect implements ResponseInterface
      * @param  bool  $absolute
      * @return Redirect
      */
-    public function route(string $name, array $data = [], bool $absolute = false)
+    public function route(string $name, array $data = [], bool $absolute = false): Redirect
     {
         $this->to = route($name, $data, $absolute);
 
@@ -130,7 +130,7 @@ class Redirect implements ResponseInterface
      * @param int $status
      * @return Redirect
      */
-    public function back(int $status = 302)
+    public function back(int $status = 302): Redirect
     {
         $this->to($this->request->referer(), $status);
 

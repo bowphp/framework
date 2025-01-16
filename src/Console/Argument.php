@@ -24,9 +24,9 @@ class Argument
 
     /**
      * The command first argument
-     * php bow add:constroller [target]
+     * php bow add:controller [target]
      *
-     * @var string
+     * @var ?string
      */
     private ?string $target = null;
 
@@ -34,7 +34,7 @@ class Argument
      * The command first argument
      * php bow [command]:action
      *
-     * @var string
+     * @var ?string
      */
     private ?string $command = null;
 
@@ -42,7 +42,7 @@ class Argument
      * The command first argument
      * php bow command:[action]
      *
-     * @var string
+     * @var ?string
      */
     private ?string $action = null;
 
@@ -121,7 +121,7 @@ class Argument
     /**
      * Retrieves the target value
      *
-     * @return string
+     * @return ?string
      */
     public function getTarget(): ?string
     {
@@ -131,7 +131,7 @@ class Argument
     /**
      * Retrieves the command value
      *
-     * @return string
+     * @return ?string
      */
     public function getCommand(): ?string
     {
@@ -141,7 +141,7 @@ class Argument
     /**
      * Retrieves the command action
      *
-     * @return string
+     * @return ?string
      */
     public function getAction(): ?string
     {
@@ -185,7 +185,7 @@ class Argument
     }
 
     /**
-     * Read ligne
+     * Read line
      *
      * @param  string $message
      * @return bool
@@ -196,7 +196,7 @@ class Argument
 
         $input = strtolower(trim(readline()));
 
-        if (is_null($input) || strlen($input) == 0) {
+        if (strlen($input) == 0) {
             $input = 'n';
         }
 

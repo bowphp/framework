@@ -35,7 +35,6 @@ abstract class RequestValidation
     /**
      * TodoValidation constructor.
      *
-     * @return mixed
      * @throws
      */
     public function __construct()
@@ -68,7 +67,7 @@ abstract class RequestValidation
      *
      * @return array
      */
-    protected function rules()
+    protected function rules(): array
     {
         return [
             // Your rules
@@ -80,7 +79,7 @@ abstract class RequestValidation
      *
      * @return array
      */
-    protected function keys()
+    protected function keys(): array
     {
         return [
             '*'
@@ -92,7 +91,7 @@ abstract class RequestValidation
      *
      * @return bool
      */
-    protected function authorize()
+    protected function authorize(): bool
     {
         return true;
     }
@@ -102,7 +101,7 @@ abstract class RequestValidation
      *
      * @return array
      */
-    protected function messages()
+    protected function messages(): array
     {
         return [];
     }
@@ -131,9 +130,9 @@ abstract class RequestValidation
     }
 
     /**
-     * When user have not authorize to launch a request
+     * When user have not authorized to launch a request
      * This is hook the method that can watch them for make an action
-     * This method permet to custom fail exception
+     * This method able to custom fail exception
      *
      * @throws AuthorizationException
      */
@@ -157,7 +156,7 @@ abstract class RequestValidation
      *
      * @return Validate
      */
-    protected function getValidationInstance()
+    protected function getValidationInstance(): Validate
     {
         return $this->validate;
     }
@@ -167,7 +166,7 @@ abstract class RequestValidation
      *
      * @return string
      */
-    protected function getMessage()
+    protected function getMessage(): string
     {
         return $this->validate->getLastMessage();
     }
@@ -187,7 +186,7 @@ abstract class RequestValidation
      *
      * @return array
      */
-    protected function getValidationData()
+    protected function getValidationData(): array
     {
         return $this->data;
     }
@@ -197,7 +196,7 @@ abstract class RequestValidation
      *
      * @return Request
      */
-    protected function getRequest()
+    protected function getRequest(): Request
     {
         return $this->request;
     }
@@ -207,7 +206,7 @@ abstract class RequestValidation
      *
      * @throws ValidationException;
      */
-    protected function throwError()
+    protected function throwError(): void
     {
         $this->validate->throwError();
     }
@@ -215,11 +214,11 @@ abstract class RequestValidation
     /**
      * __call
      *
-     * @param  string $name
+     * @param string $name
      * @param  array  $arguments
      * @return Request
      */
-    public function __call($name, array $arguments)
+    public function __call(string $name, array $arguments)
     {
         if (method_exists($this->request, $name)) {
             return call_user_func_array([$this->request, $name], $arguments);
@@ -233,10 +232,10 @@ abstract class RequestValidation
     /**
      * __get
      *
-     * @param  string $name
+     * @param string $name
      * @return string
      */
-    public function __get($name)
+    public function __get(string $name)
     {
         return $this->request->$name;
     }

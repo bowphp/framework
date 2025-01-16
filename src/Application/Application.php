@@ -9,6 +9,7 @@ use Bow\Container\Capsule;
 use Bow\Container\Action;
 use Bow\Configuration\Loader;
 use Bow\Contracts\ResponseInterface;
+use Bow\Http\Exception\BadRequestException;
 use Bow\Http\Exception\HttpException;
 use Bow\Http\Request;
 use Bow\Http\Response;
@@ -16,6 +17,7 @@ use Bow\Router\Exception\RouterException;
 use Bow\Router\Resource;
 use Bow\Router\Router;
 use Bow\Router\Route;
+use ReflectionException;
 
 class Application extends Router
 {
@@ -24,21 +26,21 @@ class Application extends Router
      *
      * @var Capsule
      */
-    private $capsule;
+    private Capsule $capsule;
 
     /**
      * The booting flag
      *
      * @var bool
      */
-    private $booted = false;
+    private bool $booted = false;
 
     /**
      * The Application instance
      *
-     * @var Application
+     * @var ?Application
      */
-    private static $instance;
+    private static ?Application $instance = null;
 
     /**
      * The HTTP Request
@@ -62,7 +64,7 @@ class Application extends Router
     private Loader $config;
 
     /**
-     * This define if the X-powered-By header must be put in response
+     * This defines if the X-powered-By header must be put in response
      *
      * @var bool
      */
@@ -74,6 +76,7 @@ class Application extends Router
      * @param Request $request
      * @param Response $response
      * @return void
+     * @throws BadRequestException
      */
     public function __construct(Request $request, Response $response)
     {
@@ -87,6 +90,7 @@ class Application extends Router
         $this->capsule->instance('app', $this);
 
         $this->request->capture();
+
         parent::__construct($request->method(), $request->get('_method'));
     }
 
@@ -114,7 +118,7 @@ class Application extends Router
             $this->setBaseRoute($config['app']['root']);
         }
 
-        // We active the auto csrf switcher
+        // We activate the auto csrf switcher
         $this->setAutoCsrf($config['app']['auto_csrf'] ?? false);
 
         $this->capsule->instance('config', $config);
@@ -144,6 +148,7 @@ class Application extends Router
      * @param Request $request
      * @param Response $response
      * @return Application
+     * @throws BadRequestException
      */
     public static function make(Request $request, Response $response): Application
     {
@@ -155,7 +160,7 @@ class Application extends Router
     }
 
     /**
-     * Check if is running on php cli
+     * Check if it is running on php cli
      *
      * @return bool
      */
@@ -168,7 +173,7 @@ class Application extends Router
      * Launcher of the application
      *
      * @return ?bool
-     * @throws RouterException
+     * @throws RouterException|ReflectionException
      */
     public function send(): ?bool
     {
@@ -244,7 +249,7 @@ class Application extends Router
      *
      * @param mixed $response
      * @param int $code
-     * @return null
+     * @return void
      */
     private function sendResponse(mixed $response, int $code = 200): void
     {
@@ -267,7 +272,7 @@ class Application extends Router
     }
 
     /**
-     * Make the REST API base on route and ressource controller.
+     * Make the REST API base on route and resource controller.
      *
      * @param string $url
      * @param string|array $controller_name
@@ -305,7 +310,7 @@ class Application extends Router
             }
         }
 
-        if (is_null($controller) || !is_string($controller)) {
+        if (!is_string($controller)) {
             throw new ApplicationException(
                 "[REST] No defined controller!",
                 E_ERROR
@@ -346,7 +351,7 @@ class Application extends Router
     }
 
     /**
-     * Build dependance
+     * Build dependence
      *
      * @param ?string $name
      * @param ?callable $callable
@@ -378,7 +383,7 @@ class Application extends Router
      * This point method on the container system
      *
      * @param array $params
-     * @return Capsule
+     * @return mixed
      * @throws ApplicationException
      */
     public function __invoke(...$params): mixed

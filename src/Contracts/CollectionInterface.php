@@ -44,7 +44,7 @@ interface CollectionInterface
     /**
      * Delete an entry in the collection
      *
-     * @param  string $key
+     * @param string|int $key
      * @return CollectionInterface
      */
     public function remove(string|int $key): mixed;

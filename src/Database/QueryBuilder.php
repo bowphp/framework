@@ -1379,6 +1379,7 @@ class QueryBuilder implements \JsonSerializable
      * Modify the prefix
      *
      * @param string $prefix
+     * @return QueryBuilder
      */
     public function setPrefix(string $prefix): QueryBuilder
     {
@@ -1427,9 +1428,9 @@ class QueryBuilder implements \JsonSerializable
      * @param PDOStatement $pdo_statement
      * @param array $bindings
      *
-     * @return PDOStatement
+     * @return void
      */
-    private function bind(PDOStatement $pdo_statement, array $bindings = []): PDOStatement
+    private function bind(PDOStatement $pdo_statement, array $bindings = []): void
     {
         foreach ($bindings as $key => $value) {
             if (is_null($value) || strtolower((string) $value) === 'null') {
@@ -1471,14 +1472,12 @@ class QueryBuilder implements \JsonSerializable
                 $param
             );
         }
-
-        return $pdo_statement;
     }
 
     /**
      * Utility, allows to validate an operator
      *
-     * comparatoram string $comp
+     * @param mixed $comparator
      * @return bool
      */
     private static function isComparisonOperator(mixed $comparator): bool

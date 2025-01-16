@@ -23,6 +23,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $config = TestingConfiguration::getConfig();
 
         Auth::configure($config["auth"]);
+        Policier::configure($config["policier"]);
 
         // Configuration database
         Database::configure($config["database"]);
@@ -32,7 +33,6 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
             'password' => Hash::make("password"),
             'username' => 'papac'
         ]);
-        Policier::configure($config["policier"]);
     }
 
     public static function tearDownAfterClass(): void
@@ -92,6 +92,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     public function test_attempt_login_with_jwt_provider()
     {
         $auth = Auth::guard('api');
+
         $result = $auth->attempts([
             "username" => "papac",
             "password" => "password"

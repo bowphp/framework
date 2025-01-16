@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Console\Traits;
 
 use Bow\Console\Color;
+use JetBrains\PhpStorm\NoReturn;
 
 trait ConsoleTrait
 {
@@ -12,11 +13,10 @@ trait ConsoleTrait
      * Throw fails command
      *
      * @param string $message
-     * @param string $command
+     * @param string|null $command
      * @return void
-     * @throws \ErrorException
      */
-    protected function throwFailsCommand(string $message, ?string $command = null): void
+    #[NoReturn] protected function throwFailsCommand(string $message, ?string $command = null): void
     {
         echo Color::red($message) . "\n";
 

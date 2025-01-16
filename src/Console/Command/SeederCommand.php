@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
-use Bow\Support\Str;
+use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
-use Bow\Database\Database;
 use Bow\Console\Traits\ConsoleTrait;
+use Bow\Database\Database;
+use Bow\Support\Str;
+use ErrorException;
+use JetBrains\PhpStorm\NoReturn;
 
 class SeederCommand extends AbstractCommand
 {
@@ -19,9 +22,9 @@ class SeederCommand extends AbstractCommand
      *
      * @param string $seeder
      */
-    public function generate(string $seeder): void
+    #[NoReturn] public function generate(string $seeder): void
     {
-        $seeder = Str::plurial($seeder);
+        $seeder = Str::plural($seeder);
 
         $generator = new Generator(
             $this->setting->getSeederDirectory(),
@@ -48,24 +51,25 @@ class SeederCommand extends AbstractCommand
      */
     public function all(): void
     {
-        $seeds_filenames = glob($this->setting->getSeederDirectory() . '/*.php');
+        $seeder = $this->setting->getSeederDirectory() . '/_database.php';
 
-        $this->make($seeds_filenames);
+        $this->make($seeder);
     }
 
     /**
      * Launch targeted seeding
      *
-     * @param string $table_name
+     * @param string|null $seeder_name
      * @return void
+     * @throws ErrorException
      */
-    public function table(string $seeder_name): void
+    public function table(?string $seeder_name = null): void
     {
-        $seeder_name = trim($seeder_name);
-
         if (is_null($seeder_name)) {
             $this->throwFailsCommand('Specify the seeder table name', 'help seed');
         }
+
+        $seeder_name = trim($seeder_name);
 
         if (!file_exists($this->setting->getSeederDirectory() . "/{$seeder_name}.php")) {
             echo Color::red("Seeder $seeder_name not exists.");
@@ -73,26 +77,22 @@ class SeederCommand extends AbstractCommand
             exit(1);
         }
 
-        $this->make([
+        $this->make(
             $this->setting->getSeederDirectory() . "/{$seeder_name}.php"
-        ]);
+        );
     }
 
     /**
      * Make Seeder
      *
-     * @param array $seeds_filenames
+     * @param string $seed_filename
      * @return void
      */
-    private function make(array $seeds_filenames): void
+    private function make(string $seed_filename): void
     {
-        $seed_collection = [];
+        $seeds = require $seed_filename;
 
-        foreach ($seeds_filenames as $filename) {
-            $seeds = require $filename;
-
-            $seed_collection = array_merge($seeds, $seed_collection);
-        }
+        $seed_collection = array_merge($seeds);
 
         // Get the database connexion
         $connection = $this->arg->getParameters()->get('--connection', config("database.default"));

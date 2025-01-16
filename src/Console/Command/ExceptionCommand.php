@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
+use JetBrains\PhpStorm\NoReturn;
 
 class ExceptionCommand extends AbstractCommand
 {
     /**
      * Add middleware
      *
-     * @param string $middleware
+     * @param string $exception
      * @return void
      */
-    public function generate(string $exception): void
+    #[NoReturn] public function generate(string $exception): void
     {
         $generator = new Generator(
             $this->setting->getExceptionDirectory(),

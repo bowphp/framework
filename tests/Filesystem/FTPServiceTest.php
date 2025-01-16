@@ -51,9 +51,8 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $file_name = 'test.txt';
         $result = $this->createFile($this->ftp_service, $file_name, $file_content);
 
-        $this->assertIsArray($result);
-        $this->assertEquals($result['content'], $file_content);
-        $this->assertEquals($result['path'], $file_name);
+        $this->assertIsBool($result);
+        $this->assertTrue($result);
     }
 
     public function test_file_should_not_be_existe()
@@ -91,6 +90,8 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function test_copy_file_and_the_contents()
     {
+        $this->createFile($this->ftp_service, 'file-copy.txt', 'something');
+        
         $result = $this->ftp_service->copy('file-copy.txt', 'test.txt');
 
         $this->assertTrue($result);
@@ -180,13 +181,13 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     private function createFile(FTPService $ftp_service, $filename, $content = '')
     {
-        $uploadedFile = $this->getMockBuilder(\Bow\Http\UploadedFile::class)
+        $uploaded_file = $this->getMockBuilder(\Bow\Http\UploadedFile::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $uploadedFile->method('getContent')->willReturn($content);
-        $uploadedFile->method('getFilename')->willReturn($filename);
+        $uploaded_file->method('getContent')->willReturn($content);
+        $uploaded_file->method('getFilename')->willReturn($filename);
 
-        return $ftp_service->store($uploadedFile, $filename);
+        return $ftp_service->store($uploaded_file, $filename);
     }
 }

@@ -6,12 +6,15 @@ namespace Bow\Database\Barry\Traits;
 
 use Bow\Database\Barry\Model;
 
+/**
+ * @method toArray(): array
+ */
 trait CanSerialized
 {
     /**
      * __sleep
      *
-     * @return string
+     * @return array
      */
     public function __sleep(): array
     {

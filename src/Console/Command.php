@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Console;
 
-use Bow\Console\Command\AbstractCommand;
 use Bow\Support\Str;
 
 class Command extends AbstractCommand
@@ -57,6 +56,7 @@ class Command extends AbstractCommand
      * @param string $command
      * @param array $rest
      * @return mixed
+     * @throws \ErrorException
      */
     public function call(string $command, string $action, ...$rest): mixed
     {

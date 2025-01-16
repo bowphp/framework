@@ -32,7 +32,7 @@ class Validator
     /**
      * The last name
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $last_message = null;
 

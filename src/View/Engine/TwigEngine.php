@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\View\Engine;
 
+use Bow\Application\Exception\ApplicationException;
 use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\View\EngineAbstract;
 
@@ -27,7 +28,8 @@ class TwigEngine extends EngineAbstract
      * TwigEngine constructor.
      *
      * @param array $config
-     * @return void
+     * @return \Twig\Environment
+     * @throws ApplicationException
      */
     public function __construct(array $config)
     {
@@ -35,7 +37,7 @@ class TwigEngine extends EngineAbstract
 
         $loader = new \Twig\Loader\FilesystemLoader($config['path']);
 
-        $aditionnals = $config['aditionnal_options'] ?? [];
+        $additional_options = $config['additional_options'] ?? [];
 
         $env = [
             'auto_reload' => true,
@@ -43,9 +45,9 @@ class TwigEngine extends EngineAbstract
             'cache' => $config['cache']
         ];
 
-        if (is_array($aditionnals)) {
-            foreach ($aditionnals as $key => $aditionnal) {
-                $env[$key] = $aditionnal;
+        if (is_array($additional_options)) {
+            foreach ($additional_options as $key => $additional_option) {
+                $env[$key] = $additional_option;
             }
         }
 
@@ -62,8 +64,6 @@ class TwigEngine extends EngineAbstract
                 new \Twig\TwigFunction($helper, $helper)
             );
         }
-
-        return $this->template;
     }
 
     /**

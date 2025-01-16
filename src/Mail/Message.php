@@ -33,7 +33,7 @@ class Message
     /**
      * Define the recipient
      *
-     * @var string
+     * @var ?string
      */
     private ?string $subject = null;
 
@@ -61,7 +61,7 @@ class Message
     /**
      * Define the boundary between the contents.
      *
-     * @var string
+     * @var ?string
      */
     private ?string $boundary;
 
@@ -91,7 +91,7 @@ class Message
      *
      * @param bool $boundary
      */
-    public function __construct($boundary = true)
+    public function __construct(bool $boundary = true)
     {
         $this->setDefaultHeader();
 
@@ -122,7 +122,7 @@ class Message
      * @param string $key
      * @param string $value
      */
-    public function addHeader($key, $value): void
+    public function addHeader(string $key, string $value): void
     {
         $this->headers[] = "$key: $value";
     }
@@ -296,7 +296,7 @@ class Message
      * Adds blind carbon copy
      *
      * @param string $mail
-     * @param ?string $name [optional]
+     * @param ?string $name
      *
      * @return Message
      */
@@ -313,7 +313,7 @@ class Message
      * Add carbon copy
      *
      * @param string $mail
-     * @param ?string $name [optional]
+     * @param ?string $name
      *
      * @return Message
      */
@@ -331,10 +331,9 @@ class Message
      *
      * @param string $mail
      * @param ?string $name
-     *
      * @return Message
      */
-    public function addReplyTo(string $mail, ?string $name = null)
+    public function addReplyTo(string $mail, ?string $name = null): Message
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -390,7 +389,7 @@ class Message
      * @param string $message
      * @param string $type
      */
-    public function setMessage(string $message, string $type = 'text/html')
+    public function setMessage(string $message, string $type = 'text/html'): void
     {
         $this->type = $type;
 
@@ -402,7 +401,7 @@ class Message
      * @param string $message
      * @param string $type
      */
-    public function message(string $message, string $type = 'text/html')
+    public function message(string $message, string $type = 'text/html'): void
     {
         $this->setMessage($message, $type);
     }
@@ -474,7 +473,7 @@ class Message
      */
     public function getType(): ?string
     {
-        return is_null($this->type) ? 'text/html' : $this->type;
+        return $this->type ?? 'text/html';
     }
 
     /**

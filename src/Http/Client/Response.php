@@ -11,7 +11,7 @@ class Response
     /**
      * The error message
      *
-     * @var string
+     * @var ?string
      */
     private ?string $error_message = null;
 
@@ -63,6 +63,7 @@ class Response
     /**
      * Get response content as json
      *
+     * @param bool|null $associative
      * @return object|array
      */
     public function toJson(?bool $associative = null): object|array
@@ -183,7 +184,7 @@ class Response
     }
 
     /**
-     * Get the downlad speed
+     * Get the download speed
      *
      * @return ?float
      */

@@ -90,9 +90,9 @@ class Arraydotify implements \ArrayAccess
      * @param mixed  $array
      * @param string $key
      * @param mixed  $value
-     * @return array
+     * @return void
      */
-    private function dataSet(mixed &$array, string $key, mixed $value): array
+    private function dataSet(mixed &$array, string $key, mixed $value): void
     {
         $keys = explode('.', $key);
 
@@ -107,8 +107,6 @@ class Arraydotify implements \ArrayAccess
         }
 
         $array[array_shift($keys)] = $value;
-
-        return $array;
     }
 
     /**
@@ -130,10 +128,6 @@ class Arraydotify implements \ArrayAccess
                     return null;
                 }
 
-                if (is_array($array) && isset($array[$part]) && is_null($array[$part])) {
-                    return null;
-                }
-
                 if (isset($array[$part]) && is_array($array[$part])) {
                     $array = &$array[$part];
                 }
@@ -141,7 +135,7 @@ class Arraydotify implements \ArrayAccess
                 continue;
             }
 
-            if (!isset($origin[$part]) || is_null($origin[$part])) {
+            if (!isset($origin[$part])) {
                 return null;
             }
 
@@ -178,9 +172,7 @@ class Arraydotify implements \ArrayAccess
             return null;
         }
 
-        return isset($this->items[$offset])
-            ? $this->items[$offset]
-            : $this->find($this->origin, $offset);
+        return $this->items[$offset] ?? $this->find($this->origin, $offset);
     }
 
     /**

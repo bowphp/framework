@@ -7,14 +7,13 @@ namespace Bow\Cache\Adapter;
 use Bow\Support\Str;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
-use Bow\Cache\Adapter\CacheAdapterInterface;
 
 class FilesystemAdapter implements CacheAdapterInterface
 {
     /**
      * The cache directory
      *
-     * @var string
+     * @var ?string
      */
     private ?string $directory = null;
 
@@ -28,8 +27,7 @@ class FilesystemAdapter implements CacheAdapterInterface
     /**
      * Cache constructor.
      *
-     * @param string $base_directory
-     * @return mixed
+     * @param array $config
      */
     public function __construct(array $config)
     {
@@ -59,6 +57,14 @@ class FilesystemAdapter implements CacheAdapterInterface
             $this->makeHashFilename($key, true),
             serialize($meta)
         );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function set(string $key, mixed $data, ?int $time = null): bool
+    {
+        return $this->add($key, $data, $time);
     }
 
     /**
@@ -114,7 +120,7 @@ class FilesystemAdapter implements CacheAdapterInterface
         $this->with_meta = false;
 
         if (is_array($cache['content'])) {
-            array_push($cache['content'], $content);
+            $cache['content'][] = $content;
         } else {
             $cache['content'] .= $content;
         }
@@ -255,7 +261,7 @@ class FilesystemAdapter implements CacheAdapterInterface
 
         $this->with_meta = false;
 
-        return $expire_at == '+' ? false : (time() > $expire_at);
+        return !($expire_at == '+') && time() > $expire_at;
     }
 
     /**
@@ -275,9 +281,6 @@ class FilesystemAdapter implements CacheAdapterInterface
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     private function makeHashFilename(string $key, bool $make_group_directory = false): string
     {
         $hash = hash('sha256', '/bow_' . $key);

@@ -23,21 +23,21 @@ class SmtpDriver implements MailDriverInterface
     /**
      * The username
      *
-     * @var string
+     * @var ?string
      */
     private ?string $username;
 
     /**
      * The password
      *
-     * @var string
+     * @var ?string
      */
     private ?string $password;
 
     /**
      * The SMTP server
      *
-     * @var string
+     * @var ?string
      */
     private ?string $url;
 
@@ -159,7 +159,7 @@ class SmtpDriver implements MailDriverInterface
      * @throws ErrorException
      * @throws SocketException | SmtpException
      */
-    private function connection()
+    private function connection(): void
     {
         $url = $this->url;
 
@@ -217,10 +217,10 @@ class SmtpDriver implements MailDriverInterface
     /**
      * Disconnection
      *
-     * @return mixed
+     * @return int|string|null
      * @throws ErrorException
      */
-    private function disconnect()
+    private function disconnect(): int|string|null
     {
         $r = $this->write('QUIT');
 
@@ -261,11 +261,10 @@ class SmtpDriver implements MailDriverInterface
      * @param string $command
      * @param ?int    $code
      * @param ?string   $message
-     *
      * @throws SmtpException
-     * @return string|int|null
+     * @return int|null
      */
-    private function write(string $command, ?int $code = null, ?string $message = null)
+    private function write(string $command, ?int $code = null, ?string $message = null): ?int
     {
         if ($message == null) {
             $message = $command;
@@ -278,7 +277,7 @@ class SmtpDriver implements MailDriverInterface
         $response = null;
 
         if ($code === null) {
-            return $response;
+            return null;
         }
 
         $response = $this->read();

@@ -13,10 +13,12 @@ trait SqliteCompose
      * @param string $name
      * @param array $description
      * @return string
+     * @throws SQLGeneratorException
      */
     private function composeAddSqliteColumn(string $name, array $description): string
     {
         $type = $this->normalizeOfType($description['type']);
+
         $raw_type = strtoupper($type);
 
         if (in_array($raw_type, ['ENUM', 'CHECK'])) {
@@ -68,7 +70,7 @@ trait SqliteCompose
 
         // Add default value
         if (!is_null($default)) {
-            if (in_array($raw_type, ['TEXT'])) {
+            if ($raw_type == 'TEXT') {
                 $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';
@@ -89,8 +91,8 @@ trait SqliteCompose
     /**
      * Rename column with sqlite
      *
-     * @param string $name
-     * @param string $new
+     * @param string $old_name
+     * @param string $new_name
      * @return void
      */
     private function renameColumnOnSqlite(string $old_name, string $new_name): void

@@ -67,7 +67,7 @@ class Console
     /**
      * The console instance
      *
-     * @var Console
+     * @var ?Console
      */
     private static ?Console $instance = null;
 
@@ -94,9 +94,10 @@ class Console
     /**
      * Bow constructor.
      *
-     * @param  Setting $setting
+     * @param Setting $setting
      *
      * @return void
+     * @throws \ErrorException
      */
     public function __construct(Setting $setting)
     {
@@ -173,7 +174,7 @@ class Console
         // Get the argument command
         $command = $this->arg->getCommand();
 
-        // Renaming the incomming command
+        // Renaming the incoming command
         if ($command == 'launch') {
             $command = null;
         }
@@ -195,9 +196,10 @@ class Console
     /**
      * Calls a command
      *
-     * @param  string $command
+     * @param string|null $command
      * @return mixed
-     * @throws
+     * @throws \ErrorException
+     * @throws \Exception
      */
     public function call(?string $command): mixed
     {
@@ -266,6 +268,7 @@ class Console
      *
      * @param string $command
      * @return mixed
+     * @throws \Exception
      */
     private function executeCustomCommand(string $command): mixed
     {
@@ -396,9 +399,10 @@ class Console
     }
 
     /**
-     * Allows generate a resource on a controller
+     * Allows to generate a resource on a controller
      *
      * @return void
+     * @throws \ErrorException
      */
     private function generate(): void
     {
@@ -415,6 +419,7 @@ class Console
      * Alias of generate
      *
      * @return void
+     * @throws \ErrorException
      */
     private function gen(): void
     {
@@ -444,7 +449,7 @@ class Console
     {
         $action = $this->arg->getAction();
 
-        if (!in_array($action, ['worker'])) {
+        if ($action != 'worker') {
             $this->throwFailsCommand('This action is not exists', 'help flush');
         }
 
@@ -454,8 +459,9 @@ class Console
     /**
      * Display global help or helper command.
      *
-     * @param  string|null $command
+     * @param string|null $command
      * @return int
+     * @throws \ErrorException
      */
     private function help(?string $command = null): int
     {

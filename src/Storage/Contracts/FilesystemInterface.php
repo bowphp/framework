@@ -12,9 +12,9 @@ interface FilesystemInterface
     /**
      * Store directly the upload file
      *
-     * @param  UploadedFile $file
-     * @param  string  $location
-     * @param  array $option
+     * @param UploadedFile $file
+     * @param string|null $location
+     * @param array $option
      * @return array|bool|string
      * @throws InvalidArgumentException
      */
@@ -37,7 +37,7 @@ interface FilesystemInterface
      * @return bool
      * @throws
      */
-    public function prepend(string $file, string $content);
+    public function prepend(string $file, string $content): bool;
 
     /**
      * Put other file content in given file
@@ -46,7 +46,7 @@ interface FilesystemInterface
      * @param  string $content
      * @return bool
      */
-    public function put(string $file, string $content);
+    public function put(string $file, string $content): bool;
 
     /**
      * Delete file
@@ -84,44 +84,44 @@ interface FilesystemInterface
     /**
      * Get file content
      *
-     * @param  string $filename
+     * @param  string $file
      * @return ?string
      */
-    public function get(string $filename): ?string;
+    public function get(string $file): ?string;
 
     /**
      * Copy the contents of a source file to a target file.
      *
+     * @param string $source
      * @param  string $target
-     * @param  string $source
      * @return bool
      */
-    public function copy(string $target, string $source): bool;
+    public function copy(string $source, string $target): bool;
 
     /**
-     * Rénme or move a source file to a target file.
+     * Rename or move a source file to a target file.
      *
-     * @param string $target
      * @param string $source
+     * @param string $target
      * @return bool
      */
-    public function move(string $target, string $source): bool;
+    public function move(string $source, string $target): bool;
 
     /**
      * Check the existence of a file
      *
-     * @param string $filename
+     * @param string $file
      * @return bool
      */
-    public function exists(string $filename): bool;
+    public function exists(string $file): bool;
 
     /**
      * isFile alias of is_file.
      *
-     * @param string $filename
+     * @param string $file
      * @return bool
      */
-    public function isFile(string $filename): bool;
+    public function isFile(string $file): bool;
 
     /**
      * isDirectory alias of is_dir.
@@ -135,8 +135,8 @@ interface FilesystemInterface
      * Resolves a path.
      * Give the absolute path of a path
      *
-     * @param string $filename
+     * @param string $file
      * @return string
      */
-    public function path(string $filename): string;
+    public function path(string $file): string;
 }

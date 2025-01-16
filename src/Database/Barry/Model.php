@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
+use Bow\Database\Exception\ConnectionException;
+use Bow\Database\Exception\QueryBuilderException;
 use Carbon\Carbon;
 use Bow\Support\Str;
 use Bow\Database\Collection;
@@ -15,6 +17,13 @@ use Bow\Database\Barry\Traits\ArrayAccessTrait;
 use Bow\Database\Barry\Traits\SerializableTrait;
 use Bow\Database\Pagination;
 
+/**
+ * @method select(array|string[] $select)
+ * @method whereIn(string $primary_key, array $id)
+ * @method get()
+ * @method where(string $column, mixed $value)
+ * @method orderBy(string $latest, string $string)
+ */
 abstract class Model implements \ArrayAccess, \JsonSerializable
 {
     use Relationship;
@@ -137,7 +146,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * The query builder instance
      *
-     * @var Builder
+     * @var ?Builder
      */
     protected static ?Builder $builder = null;
 
@@ -160,10 +169,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param string $name
      * @return Model
+     * @throws ConnectionException
      */
     public static function connection(string $name): Model
     {
         $model = new static();
+
         $model->setConnection($name);
 
         return $model;
@@ -174,9 +185,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param  array $columns
      *
-     * @return \Bow\Database\Collection
+     * @return Collection
      */
-    public static function all(array $columns = [])
+    public static function all(array $columns = []): Collection
     {
         $model = static::query();
 
@@ -190,7 +201,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Get first rows
      *
-     * @return Model
+     * @return Model|null
      */
     public static function first(): ?Model
     {
@@ -200,7 +211,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Get latest
      *
-     * @return Model
+     * @return Model|null
      */
     public static function latest(): ?Model
     {
@@ -230,9 +241,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return $model->get();
         }
 
-        $result = $model->first();
-
-        return $result;
+        return $model->first();
     }
 
     /**
@@ -265,7 +274,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $model = static::find($id, $select);
 
         if (is_null($model)) {
-            return $model;
+            return null;
         }
 
         if ($model instanceof Collection) {
@@ -282,12 +291,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Find information by id or throws an
      * exception in data box not found
      *
-     * @param  mixed          $id
-     * @param  array|callable $select
+     * @param  mixed $id
+     * @param array $select
      * @return Model
      * @throws NotFoundException
      */
-    public static function findOrFail(int | string $id, $select = ['*']): Model
+    public static function findOrFail(int | string $id, array $select = ['*']): Model
     {
         $result = static::find($id, $select);
 
@@ -315,7 +324,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             ]);
         }
 
-        // Check if the primary key existe on updating data
+        // Check if the primary key exist on updating data
         if (
             !array_key_exists($model->primary_key, $data)
             && static::$builder->getAdapterName() !== "pgsql"
@@ -342,7 +351,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param int $page_number
      * @param int $current
-     * @param int $chunk
+     * @param int|null $chunk
      * @return Pagination
      */
     public static function paginate(int $page_number, int $current = 0, ?int $chunk = null): Pagination
@@ -452,22 +461,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
         if (!isset($properties['table']) || $properties['table'] == null) {
             $parts = explode('\\', static::class);
-            $table = Str::lower(Str::snake(Str::plurial(end($parts))));
+            $table = Str::lower(Str::snake(Str::plural(end($parts))));
         } else {
             $table = $properties['table'];
         }
 
         // Check the connection parameter before apply
-        if (isset($properties['connection']) && !is_null($properties['connection'])) {
+        if (isset($properties['connection'])) {
             DB::connection($properties['connection']);
         }
 
         // Check the prefix parameter before apply
-        if (isset($properties['prefix']) && !is_null($properties['prefix'])) {
-            $prefix = $properties['prefix'];
-        } else {
-            $prefix = DB::getConnectionAdapter()->getTablePrefix();
-        }
+        $prefix = $properties['prefix'] ?? DB::getConnectionAdapter()->getTablePrefix();
 
         // Set the table prefix
         $table = $prefix . $table;
@@ -482,10 +487,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Create the new row
      *
-     * @param Builder $model
+     * @param Builder $builder
      * @return int
      */
-    private function writeRows(Builder $builder)
+    private function writeRows(Builder $builder): int
     {
         // Fire the creating event
         $this->fireEvent('model.creating');
@@ -505,7 +510,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $primary_key_value = static::$builder->getPdo()->lastInsertId();
         }
 
-        if (is_null($primary_key_value) || $primary_key_value == 0) {
+        if ((int) $primary_key_value == 0) {
             $primary_key_value = $this->attributes[$this->primary_key] ?? null;
         }
 
@@ -528,7 +533,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @return int
      * @throws
      */
-    public function save()
+    public function save(): int
     {
         $builder = static::query();
 
@@ -550,13 +555,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // We set the primary key value
         $this->original[$this->primary_key] = $primary_key_value;
 
-        $update_data = [];
-
-        foreach ($this->attributes as $key => $value) {
-            if (!array_key_exists($key, $this->original) || $this->original[$key] !== $value) {
-                $update_data[$key] = $value;
-            }
-        }
+        $update_data = array_filter($this->attributes, function ($value, $key) {
+            return !array_key_exists($key, $this->original) || $this->original[$key] !== $value;
+        }, ARRAY_FILTER_USE_BOTH);
 
         // When the update data is empty, we load the original data
         if (count($update_data) == 0) {
@@ -578,12 +579,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Transtype the primary key value
+     * Trans-type the primary key value
      *
      * @param mixed $primary_key_value
-     * @return mixed
+     * @return string|int|float
      */
-    private function transtypeKeyValue(mixed $primary_key_value): mixed
+    private function transtypeKeyValue(mixed $primary_key_value): string|int|float
     {
         // Transtype value to the define primary key type
         if ($this->primary_key_type == 'int') {
@@ -621,12 +622,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $data_for_updating = $attributes;
 
         if (count($this->original) > 0) {
-            $data_for_updating = [];
-            foreach ($attributes as $key => $value) {
-                if (array_key_exists($key, $this->original) || $this->original[$key] !== $value) {
-                    $data_for_updating[$key] = $value;
-                }
-            }
+            $data_for_updating = array_filter($attributes, function ($value, $key) {
+                return array_key_exists($key, $this->original) || $this->original[$key] !== $value;
+            }, ARRAY_FILTER_USE_BOTH);
         }
 
         // Fire the updating event
@@ -687,16 +685,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Delete Active Record by column name
      *
      * @param string $column
-     * @param string|int $value
+     * @param mixed $value
      * @return int
+     * @throws QueryBuilderException
      */
-    public static function deleteBy($column, $value): int
+    public static function deleteBy(string $column, mixed $value): int
     {
         $model = static::query();
 
-        $deleted = $model->where($column, $value)->delete();
-
-        return $deleted;
+        return $model->where($column, $value)->delete();
     }
 
     /**
@@ -720,7 +717,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Retrieves the primary key key
+     * Retrieves the primary key
      *
      * @return string
      */
@@ -769,15 +766,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param string $name
      * @return Builder
+     * @throws ConnectionException
      */
     public function setConnection(string $name): Builder
     {
         $this->connection = $name;
 
         DB::connection($name);
-        $builder = static::query();
 
-        return $builder;
+        return static::query();
     }
 
     /**
@@ -830,15 +827,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function toArray(): array
     {
-        $data = [];
-
-        foreach ($this->attributes as $key => $value) {
-            if (!in_array($key, $this->hidden)) {
-                $data[$key] = $value;
-            }
-        }
-
-        return $data;
+        return array_filter($this->attributes, function ($key) {
+            return !in_array($key, $this->hidden);
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     /**
@@ -848,13 +839,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function toJson(): string
     {
-        $data = [];
-
-        foreach ($this->attributes as $key => $value) {
-            if (!in_array($key, $this->hidden)) {
-                $data[$key] = $value;
-            }
-        }
+        $data = array_filter($this->attributes, function ($key) {
+            return !in_array($key, $this->hidden);
+        }, ARRAY_FILTER_USE_KEY);
 
         return json_encode($data);
     }
@@ -864,15 +851,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        $data = [];
-
-        foreach ($this->attributes as $key => $value) {
-            if (!in_array($key, $this->hidden)) {
-                $data[$key] = $value;
-            }
-        }
-
-        return $data;
+        return array_filter($this->attributes, function ($key) {
+            return !in_array($key, $this->hidden);
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     /**
@@ -953,9 +934,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * __set
      *
      * @param string $name
-     * @param $value
+     * @param mixed $value
      */
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value)
     {
         $this->attributes[$name] = $value;
     }
@@ -973,11 +954,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * __call
      *
-     * @param  string $name
+     * @param string $name
      * @param  array  $arguments
      * @return mixed
      */
-    public function __call($name, array $arguments)
+    public function __call(string $name, array $arguments = [])
     {
         $model = static::query();
 

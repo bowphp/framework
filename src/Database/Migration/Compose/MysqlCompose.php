@@ -12,6 +12,7 @@ trait MysqlCompose
      * @param string $name
      * @param array $description
      * @return string
+     * @throws SQLGeneratorException
      */
     private function composeAddMysqlColumn(string $name, array $description): string
     {
@@ -21,7 +22,7 @@ trait MysqlCompose
         $type = $raw_type;
         $attribute = $description['attribute'];
 
-        if (in_array($type, ['TEXT']) && isset($attribute['default'])) {
+        if ($type == 'TEXT' && isset($attribute['default'])) {
             throw new SQLGeneratorException("Cannot define default value for $type type");
         }
 

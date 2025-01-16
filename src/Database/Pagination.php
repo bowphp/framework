@@ -8,12 +8,12 @@ use Bow\Database\Collection as DatabaseCollection;
 class Pagination
 {
     public function __construct(
-        private int $next,
-        private int $previous,
-        private int $total,
-        private int $perPage,
-        private int $current,
-        private SupportCollection|DatabaseCollection $data
+        private readonly int $next,
+        private readonly int $previous,
+        private readonly int $total,
+        private readonly int $perPage,
+        private readonly int $current,
+        private readonly SupportCollection|DatabaseCollection $data
     ) {
     }
 

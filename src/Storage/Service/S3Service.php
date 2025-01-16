@@ -13,7 +13,7 @@ class S3Service implements ServiceInterface
     /**
      * The S3Service instance
      *
-     * @var S3Service
+     * @var ?S3Service
      */
     private static ?S3Service $instance = null;
 
@@ -73,9 +73,9 @@ class S3Service implements ServiceInterface
     /**
      * Function to upload a file
      *
-     * @param  UploadedFile  $file
-     * @param  string  $location
-     * @param  array   $option
+     * @param UploadedFile $file
+     * @param string|null $location
+     * @param array $option
      * @return array|bool|string
      */
     public function store(UploadedFile $file, ?string $location = null, array $option = []): array|bool|string
@@ -88,15 +88,15 @@ class S3Service implements ServiceInterface
     /**
      * Add content after the contents of the file
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @param string $content
      * @return bool
      */
-    public function append(string $filename, string $content): bool
+    public function append(string $file, string $content): bool
     {
-        $result = $this->get($filename);
+        $result = $this->get($file);
         $new_content = $result . PHP_EOL . $content;
-        $this->put($filename, $new_content);
+        $this->put($file, $new_content);
 
         return isset($result["Location"]);
     }
@@ -109,11 +109,11 @@ class S3Service implements ServiceInterface
      * @return bool
      * @throws
      */
-    public function prepend(string $filename, string $content): bool
+    public function prepend(string $file, string $content): bool
     {
-        $result = $this->get($filename);
+        $result = $this->get($file);
         $new_content = $content . PHP_EOL . $result;
-        $this->put($filename, $new_content);
+        $this->put($file, $new_content);
 
         return true;
     }
@@ -125,48 +125,34 @@ class S3Service implements ServiceInterface
      * @param string $content
      * @param array $options
      *
-     * @return mixed
+     * @return bool
      */
-    public function put(string $file, string $content, array $options = []): mixed
+    public function put(string $file, string $content, array $options = []): bool
     {
         $options = is_string($options)
             ? ['visibility' => $options]
             : (array) $options;
 
-        $result = $this->client->putObject([
+        return (bool) $this->client->putObject([
             'Bucket' => $this->config['bucket'],
             'Key'    => $file,
             'Body'   => $content,
             "Visibility" => $options["visibility"] ?? 'public'
         ]);
-
-        return $result;
     }
 
     /**
      * Delete file or directory
      *
-     * @param  string $filename
+     * @param string $file
      * @return bool
      */
-    public function delete(string|array $filename): bool
+    public function delete(string $file): bool
     {
-        $paths = is_array($filename) ? $filename : func_get_args();
-
-        $success = true;
-
-        foreach ($paths as $path) {
-            try {
-                $this->client->deleteObject([
-                    'Bucket' => $this->config['bucket'],
-                    'Key' => $path
-                ]);
-            } catch (\Exception $e) {
-                $success = false;
-            }
-        }
-
-        return $success;
+        return (bool) $this->client->deleteObject([
+            'Bucket' => $this->config['bucket'],
+            'Key' => $file
+        ]);
     }
 
     /**
@@ -177,11 +163,11 @@ class S3Service implements ServiceInterface
      */
     public function files(string $dirname): array
     {
-        $results = $this->client->listObjects([
+        $result = $this->client->listObjects([
             "Bucket" => $dirname
         ]);
 
-        return array_map(fn($file) => $file["Key"], $results["Contents"]);
+        return array_map(fn($file) => $file["Key"], $result["Contents"]);
     }
 
     /**
@@ -200,16 +186,15 @@ class S3Service implements ServiceInterface
     /**
      * Create a directory
      *
-     * @param  string $bucket
-     * @param  int    $mode
-     * @param  bool   $recursive
-     * @param  array  $option
+     * @param string $dirname
+     * @param int $mode
+     * @param array $option
      * @return bool
      */
-    public function makeDirectory(string $bucket, int $mode = 0777, array $option = []): bool
+    public function makeDirectory(string $dirname, int $mode = 0777, array $option = []): bool
     {
         $result = $this->client->createBucket([
-            "Bucket" => $bucket
+            "Bucket" => $dirname
         ]);
 
         return isset($result["Location"]);
@@ -218,14 +203,14 @@ class S3Service implements ServiceInterface
     /**
      * Recover the contents of the file
      *
-     * @param  string $filename
+     * @param  string $file
      * @return ?string
      */
-    public function get(string $filename): ?string
+    public function get(string $file): ?string
     {
         $result = $this->client->getObject([
             'Bucket' => $this->config['bucket'],
-            'Key' => $filename
+            'Key' => $file
         ]);
 
         if (isset($result["Body"])) {
@@ -238,8 +223,8 @@ class S3Service implements ServiceInterface
     /**
      * Copy the contents of a source file to a target file.
      *
-     * @param  string $source
-     * @param  string $target
+     * @param string $source
+     * @param string $target
      * @return bool
      */
     public function copy(string $source, string $target): bool
@@ -254,8 +239,9 @@ class S3Service implements ServiceInterface
     /**
      * Renames or moves a source file to a target file.
      *
-     * @param $source
-     * @param $target
+     * @param string $source
+     * @param string $target
+     * @return bool
      */
     public function move(string $source, string $target): bool
     {
@@ -269,25 +255,23 @@ class S3Service implements ServiceInterface
     /**
      * Check the existence of a file
      *
-     * @param  $filename
+     * @param string $file
      * @return bool
      */
-    public function exists(string $filename): bool
+    public function exists(string $file): bool
     {
-        $result = (bool) $this->get($filename);
-
-        return $result;
+        return (bool) $this->get($file);
     }
 
     /**
      * isFile alias of is_file.
      *
-     * @param  $filename
+     * @param string $file
      * @return bool
      */
-    public function isFile(string $filename): bool
+    public function isFile(string $file): bool
     {
-        $result = $this->get($filename);
+        $result = $this->get($file);
 
         return strlen($result) > -1;
     }
@@ -295,7 +279,7 @@ class S3Service implements ServiceInterface
     /**
      * isDirectory alias of is_dir.
      *
-     * @param  $dirname
+     * @param string $dirname
      * @return bool
      */
     public function isDirectory(string $dirname): bool
@@ -309,13 +293,11 @@ class S3Service implements ServiceInterface
      * Resolves file path.
      * Give the absolute path of a path
      *
-     * @param  $filename
+     * @param string $file
      * @return string
      */
-    public function path(string $filename): string
+    public function path(string $file): string
     {
-        $result = $this->client->getObjectUrl($this->config["bucket"], $filename);
-
-        return $result;
+        return $this->client->getObjectUrl($this->config["bucket"], $file);
     }
 }

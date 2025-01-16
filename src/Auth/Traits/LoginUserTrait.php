@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Auth\Traits;
 
+use Bow\Auth\Authentication;
 use Bow\Database\Barry\Model;
 use Bow\Auth\Exception\AuthenticationException;
 
@@ -13,9 +14,10 @@ trait LoginUserTrait
      * Make login
      *
      * @param array $credentials
-     * @return ?Model
+     * @return ?Authentication
+     * @throws AuthenticationException
      */
-    private function makeLogin(array $credentials): ?Model
+    private function makeLogin(array $credentials): ?Authentication
     {
         $model = $this->provider['model'];
         $fields = $this->provider['credentials'];
@@ -44,10 +46,10 @@ trait LoginUserTrait
      * Get user by key
      *
      * @param string $key
-     * @param string $value
-     * @return \Bow\Database\Barry\Model|null
+     * @param float|int|string $value
+     * @return Model|null
      */
-    private function getUserBy($key, $value)
+    private function getUserBy(string $key, float|int|string $value): ?Authentication
     {
         $model = $this->provider['model'];
 

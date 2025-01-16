@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Database\Migration\Shortcut;
 
+use Bow\Database\Exception\SQLGeneratorException;
 use Bow\Database\Migration\SQLGenerator;
 
 trait DateColumn
@@ -14,6 +15,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addDatetime(string $column, array $attribute = []): SQLGenerator
     {
@@ -30,6 +32,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addDate(string $column, array $attribute = []): SQLGenerator
     {
@@ -42,6 +45,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addTime(string $column, array $attribute = []): SQLGenerator
     {
@@ -54,6 +58,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addYear(string $column, array $attribute = []): SQLGenerator
     {
@@ -66,6 +71,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addTimestamp(string $column, array $attribute = []): SQLGenerator
     {
@@ -76,6 +82,7 @@ trait DateColumn
      * Add default timestamps
      *
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function addTimestamps(): SQLGenerator
     {
@@ -98,6 +105,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeDatetime(string $column, array $attribute = []): SQLGenerator
     {
@@ -114,6 +122,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeDate(string $column, array $attribute = []): SQLGenerator
     {
@@ -126,6 +135,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeTime(string $column, array $attribute = []): SQLGenerator
     {
@@ -138,6 +148,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeYear(string $column, array $attribute = []): SQLGenerator
     {
@@ -150,6 +161,7 @@ trait DateColumn
      * @param string $column
      * @param array $attribute
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
     public function changeTimestamp(string $column, array $attribute = []): SQLGenerator
     {
@@ -160,8 +172,9 @@ trait DateColumn
      * Change default timestamps
      *
      * @return SQLGenerator
+     * @throws SQLGeneratorException
      */
-    public function changeTimestamps()
+    public function changeTimestamps(): SQLGenerator
     {
         if ($this->adapter == 'sqlite') {
             $this->changeColumn('created_at', 'text', ['default' => 'CURRENT_TIMESTAMP']);

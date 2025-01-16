@@ -13,7 +13,7 @@ class SqliteAdapter extends AbstractConnection
     /**
      * The connexion name
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $name = 'sqlite';
 
@@ -48,7 +48,7 @@ class SqliteAdapter extends AbstractConnection
         // Set the PDO attributes that we want
         $this->pdo->setAttribute(
             PDO::ATTR_DEFAULT_FETCH_MODE,
-            isset($this->config['fetch']) ? $this->config['fetch'] : $this->fetch
+            $this->config['fetch'] ?? $this->fetch
         );
 
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

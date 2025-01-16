@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
+use Bow\Console\AbstractCommand;
+
 class ServerCommand extends AbstractCommand
 {
     /**

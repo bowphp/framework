@@ -18,7 +18,7 @@ class Validate
     /**
      * The last message
      *
-     * @var string
+     * @var ?string
      */
     private ?string $last_message = null;
 

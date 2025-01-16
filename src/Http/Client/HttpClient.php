@@ -9,7 +9,7 @@ use CurlHandle;
 class HttpClient
 {
     /**
-     * The attach file collection
+     * The attached file collection
      *
      * @var array
      */
@@ -27,12 +27,12 @@ class HttpClient
      *
      * @var array
      */
-    private $headers = [];
+    private array $headers = [];
 
     /**
      * The curl instance
      *
-     * @var CurlHandle
+     * @var ?CurlHandle
      */
     private ?CurlHandle $ch = null;
 
@@ -46,8 +46,7 @@ class HttpClient
     /**
      * HttpClient Constructor.
      *
-     * @param string $base_url
-     * @return void
+     * @param string|null $base_url
      */
     public function __construct(?string $base_url = null)
     {
@@ -72,11 +71,12 @@ class HttpClient
     }
 
     /**
-     * Make get requete
+     * Make get requester
      *
      * @param string $url
      * @param array $data
      * @return Response
+     * @throws \Exception
      */
     public function get(string $url, array $data = []): Response
     {
@@ -95,11 +95,12 @@ class HttpClient
     }
 
     /**
-     * make post requete
+     * Make post requester
      *
      * @param string $url
      * @param array $data
      * @return Response
+     * @throws \Exception
      */
     public function post(string $url, array $data = []): Response
     {
@@ -126,11 +127,12 @@ class HttpClient
     }
 
     /**
-     * Make put requete
+     * Make put requester
      *
      * @param string $url
      * @param array $data
      * @return Response
+     * @throws \Exception
      */
     public function put(string $url, array $data = []): Response
     {
@@ -146,11 +148,12 @@ class HttpClient
     }
 
     /**
-     * Make put requete
+     * Make put requester
      *
      * @param string $url
      * @param array $data
      * @return Response
+     * @throws \Exception
      */
     public function delete(string $url, array $data = []): Response
     {
@@ -168,7 +171,7 @@ class HttpClient
     /**
      * Attach new file
      *
-     * @param string $attach
+     * @param string|array $attach
      * @return HttpClient
      */
     public function addAttach(string|array $attach): HttpClient
@@ -179,7 +182,7 @@ class HttpClient
     }
 
     /**
-     * Add aditionnal header
+     * Add additional header
      *
      * @param array $headers
      * @return HttpClient
@@ -223,7 +226,7 @@ class HttpClient
     }
 
     /**
-     * Reset alway connection
+     * Reset always connection
      *
      * @param string $url
      * @return void
@@ -300,7 +303,7 @@ class HttpClient
      *
      * @return void
      */
-    private function applyCommonOptions()
+    private function applyCommonOptions(): void
     {
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);

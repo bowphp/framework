@@ -25,12 +25,12 @@ trait Serializes
                 continue;
             }
 
-            $property->setAccessible(true);
             if (!$property->isInitialized($this)) {
                 continue;
             }
 
             $value = $this->getPropertyValue($property);
+
             if ($property->hasDefaultValue() && $value === $property->getDefaultValue()) {
                 continue;
             }
@@ -55,7 +55,7 @@ trait Serializes
      * @param  array  $values
      * @return void
      */
-    public function __unserialize(array $values)
+    public function __unserialize(array $values): void
     {
         $properties = (new ReflectionClass($this))->getProperties();
 
@@ -78,8 +78,6 @@ trait Serializes
                 continue;
             }
 
-            $property->setAccessible(true);
-
             $property->setValue(
                 $this,
                 $values[$name]
@@ -95,9 +93,7 @@ trait Serializes
      */
     protected function getPropertyValue(
         ReflectionProperty $property
-    ) {
-        $property->setAccessible(true);
-
+    ): mixed {
         return $property->getValue($this);
     }
 }

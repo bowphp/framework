@@ -29,6 +29,7 @@ trait PgsqlCompose
      * @param string $name
      * @param array $description
      * @return string
+     * @throws SQLGeneratorException
      */
     private function composeAddPgsqlColumn(string $name, array $description): string
     {
@@ -38,7 +39,7 @@ trait PgsqlCompose
         $type = $raw_type;
         $attribute = $description['attribute'];
 
-        if (in_array($type, ['TEXT']) && isset($attribute['default'])) {
+        if ($type == 'TEXT' && isset($attribute['default'])) {
             throw new SQLGeneratorException("Cannot define default value for $type type");
         }
 
@@ -151,9 +152,9 @@ trait PgsqlCompose
      * @param string $name
      * @param string $type
      * @param array $attribute
-     * @return void
+     * @return string
      */
-    private function formatCheckOrEnum($name, $type, $attribute): string
+    private function formatCheckOrEnum(string $name, string $type, array $attribute): string
     {
         if ($type == "ENUM") {
             $size = (array) $attribute['size'];
@@ -171,26 +172,26 @@ trait PgsqlCompose
         }
 
         if (count($attribute["check"]) === 3) {
-            [$column, $comparaison, $value] = $attribute["check"];
+            [$column, $comparison, $value] = $attribute["check"];
             if (is_array($value)) {
                 $value = "('" . implode("', '", $value) . "')";
             }
-            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparison, $value);
         }
 
         [$column, $value] = $attribute["check"];
 
-        $comparaison = "=";
+        $comparison = "=";
 
         if (is_string($value)) {
             $value = "'" . addcslashes($value, "'") . "'";
-            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparison, $value);
         }
 
         $value = (array) $value;
 
         if (count($value) > 1) {
-            $comparaison = "IN";
+            $comparison = "IN";
 
             foreach ($value as $key => $item) {
                 if (is_string($item)) {
@@ -199,11 +200,11 @@ trait PgsqlCompose
             }
 
             $value = "(" . implode(", ", $value) . ")";
-            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+            return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparison, $value);
         }
 
         $value = end($value);
 
-        return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparaison, $value);
+        return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparison, $value);
     }
 }
