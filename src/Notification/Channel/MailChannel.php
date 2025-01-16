@@ -4,7 +4,6 @@ namespace Bow\Notification\Channel;
 
 use Bow\Mail\Mail;
 use Bow\Mail\Message;
-use Bow\Notification\Channel\ChannelInterface;
 
 class MailChannel implements ChannelInterface
 {
@@ -14,7 +13,7 @@ class MailChannel implements ChannelInterface
      * @param mixed $message
      * @return void
      */
-    public function send(mixed $message)
+    public function send(mixed $message): void
     {
         if ($message instanceof Message) {
             Mail::getInstance()->send($message);

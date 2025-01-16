@@ -31,7 +31,7 @@ class Router
     protected string $prefix = '';
 
     /**
-     * @var string
+     * @var ?string
      */
     protected ?string $special_method = null;
 
@@ -74,7 +74,7 @@ class Router
      * Define the request _method parse to form
      * for helper router define a good method called
      *
-     * @var string
+     * @var ?string
      */
     private ?string $magic_method;
 
@@ -136,11 +136,7 @@ class Router
             $prefix = '/' . $prefix;
         }
 
-        if ($this->prefix !== null) {
-            $this->prefix .= $prefix;
-        } else {
-            $this->prefix = $prefix;
-        }
+        $this->prefix .= $prefix;
 
         call_user_func_array($cb, [$this]);
 
@@ -304,7 +300,7 @@ class Router
      * Add a OPTIONS route
      *
      * @param string $path
-     * @param callable $cb
+     * @param callable|string|array $cb
      * @return Route
      */
     public function options(string $path, callable|string|array $cb): Route
@@ -317,7 +313,7 @@ class Router
      * When the define code match with response code.
      *
      * @param int $code
-     * @param callable $cb
+     * @param callable|array|string $cb
      * @return Router
      */
     public function code(int $code, callable|array|string $cb): Router
@@ -370,7 +366,7 @@ class Router
     /**
      * Start loading a route.
      *
-     * @param string|array $method
+     * @param string|array $methods
      * @param string $path
      * @param callable|string|array $cb
      * @return Route

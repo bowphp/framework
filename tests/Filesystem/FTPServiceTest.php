@@ -91,7 +91,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     public function test_copy_file_and_the_contents()
     {
         $this->createFile($this->ftp_service, 'file-copy.txt', 'something');
-        
+
         $result = $this->ftp_service->copy('file-copy.txt', 'test.txt');
 
         $this->assertTrue($result);

@@ -8,7 +8,7 @@ use Bow\Http\Exception\UnauthorizedException;
 
 $auth = auth();
 
-$logged = $auth->attemps(["username" => "name@example.com", "password" => "password"]);
+$logged = $auth->attempts(["username" => "name@example.com", "password" => "password"]);
 
 if (!$logged) {
     throw new UnauthorizedException("Access denied");

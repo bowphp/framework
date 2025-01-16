@@ -30,7 +30,7 @@ class Connection
     /**
      * The supported connection
      *
-     * @param array
+     * @var array
      */
     private static array $connections = [
         "beanstalkd" => BeanstalkdAdapter::class,
@@ -50,11 +50,12 @@ class Connection
     }
 
     /**
-     * Push the new connection support in connectors managment
+     * Push the new connection support in connectors management
      *
      * @param string $name
-     * @param string $name
+     * @param string $classname
      * @return bool
+     * @throws ErrorException
      */
     public static function pushConnection(string $name, string $classname): bool
     {

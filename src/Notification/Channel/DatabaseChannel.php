@@ -12,7 +12,7 @@ class DatabaseChannel implements ChannelInterface
      * @param mixed $message
      * @return void
      */
-    public function send(mixed $message)
+    public function send(mixed $message): void
     {
     }
 }

@@ -18,8 +18,8 @@ class WorkerService
     /**
      * Make connection base on default name
      *
-     * @param string $name
-     * @return QueueAdapter
+     * @param QueueAdapter $connection
+     * @return void
      */
     public function setConnection(QueueAdapter $connection): void
     {

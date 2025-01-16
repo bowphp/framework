@@ -55,14 +55,14 @@ abstract class ProducerService
     /**
      * Define the job attempts
      *
-     * @return integer
+     * @var int
      */
-    protected int $attemps = 2;
+    protected int $attempts = 2;
 
     /**
      * ProducerService constructor
      *
-     * @return mixed
+     * @return void
      */
     public function __construct()
     {
@@ -90,13 +90,13 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer attemps
+     * Get the producer attempts
      *
      * @return int
      */
-    public function getAttemps(): int
+    public function getAttempts(): int
     {
-        return $this->attemps;
+        return $this->attempts;
     }
 
     /**
@@ -132,14 +132,14 @@ abstract class ProducerService
 
 
     /**
-     * Set the producer attemps
+     * Set the producer attempts
      *
-     * @param int $attemps
+     * @param int $attempts
      * @return void
      */
-    public function setAttemps(int $attemps)
+    public function setAttempts(int $attempts): void
     {
-        $this->attemps = $attemps;
+        $this->attempts = $attempts;
     }
 
     /**
@@ -148,7 +148,7 @@ abstract class ProducerService
      * @param int $retry
      * @return void
      */
-    final public function setRetry(int $retry)
+    final public function setRetry(int $retry): void
     {
         $this->retry = $retry;
     }
@@ -159,7 +159,7 @@ abstract class ProducerService
      * @param string $queue
      * @return void
      */
-    final public function setQueue(string $queue)
+    final public function setQueue(string $queue): void
     {
         $this->queue = $queue;
     }
@@ -169,7 +169,7 @@ abstract class ProducerService
      *
      * @param int $delay
      */
-    final public function setDelay(int $delay)
+    final public function setDelay(int $delay): void
     {
         $this->delay = $delay;
     }
@@ -208,7 +208,7 @@ abstract class ProducerService
     /**
      * Process the producer
      *
-     * @return mixed
+     * @return void
      */
     abstract public function process(): void;
 }

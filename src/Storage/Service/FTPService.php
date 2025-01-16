@@ -288,7 +288,7 @@ class FTPService implements ServiceInterface
         $stream = $this->readStream($file);
 
         if (!$stream) {
-            return false;    
+            return false;
         }
 
         fwrite($stream, $content);

@@ -11,7 +11,7 @@ class Crypto
     /**
      * The security key
      *
-     * @var string
+     * @var ?string
      */
     private static ?string $key = null;
 
@@ -26,9 +26,9 @@ class Crypto
      * Set the key
      *
      * @param string $key
-     * @param string $cipher
+     * @param string|null $cipher
      */
-    public static function setKey(string $key, ?string $cipher = null)
+    public static function setKey(string $key, ?string $cipher = null): void
     {
         static::$key = $key;
 
