@@ -475,11 +475,11 @@ class Action
     /**
      * Get injectable parameter
      *
-     * @param ReflectionClass $class
+     * @param mixed $class
      * @return ?object
      * @throws ReflectionException
      */
-    private function getInjectParameter(ReflectionClass $class): ?object
+    private function getInjectParameter(mixed $class): ?object
     {
         $class_name = $class->getName();
 
