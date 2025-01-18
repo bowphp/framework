@@ -61,7 +61,6 @@ class SeederCommand extends AbstractCommand
      *
      * @param string|null $seeder_name
      * @return void
-     * @throws ErrorException
      */
     public function table(?string $seeder_name = null): void
     {

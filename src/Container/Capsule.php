@@ -132,13 +132,16 @@ class Capsule implements ArrayAccess
      * Add to register
      *
      * @param string $key
-     * @param callable  $value
+     * @param callable $value
+     * @return Capsule
      */
-    public function bind(string $key, callable $value): void
+    public function bind(string $key, callable $value): Capsule
     {
         $this->key[$key] = true;
 
         $this[$key] = $value;
+
+        return $this;
     }
 
     /**
@@ -146,11 +149,13 @@ class Capsule implements ArrayAccess
      *
      * @param string $key
      * @param Closure|callable $value
-     * @return void
+     * @return Capsule
      */
-    public function factory(string $key, Closure|callable $value): void
+    public function factory(string $key, Closure|callable $value): Capsule
     {
         $this->factories[$key] = $value;
+
+        return $this;
     }
 
     /**
@@ -158,9 +163,9 @@ class Capsule implements ArrayAccess
      *
      * @param string $key
      * @param mixed $instance
-     * @return void
+     * @return Capsule
      */
-    public function instance(string $key, mixed $instance): void
+    public function instance(string $key, mixed $instance): Capsule
     {
         if (!is_object($instance)) {
             throw new InvalidArgumentException(
@@ -169,6 +174,8 @@ class Capsule implements ArrayAccess
         }
 
         $this->instances[$key] = $instance;
+
+        return $this;
     }
 
     /**

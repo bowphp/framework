@@ -57,7 +57,7 @@ class Crypto
      *
      * @param string $data
      *
-     * @return string
+     * @return string|bool
      */
     public static function decrypt(string $data): string|bool
     {

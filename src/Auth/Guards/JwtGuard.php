@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Auth\Guards;
 
 use Bow\Security\Hash;
-use Bow\Support\Log;
 use Exception;
 use Policier\Policier;
 use Bow\Auth\Authentication;

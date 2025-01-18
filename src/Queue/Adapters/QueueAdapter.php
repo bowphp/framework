@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\ProducerService;
+use JetBrains\PhpStorm\NoReturn;
 
 abstract class QueueAdapter
 {
@@ -15,7 +16,7 @@ abstract class QueueAdapter
     /**
      * Define the start time
      *
-     * @var int
+     * @var float
      */
     protected float $start_time;
 
@@ -95,13 +96,13 @@ abstract class QueueAdapter
     }
 
     /**
-     * Laund the worker
+     * Launch the worker
      *
      * @param integer $timeout
      * @param integer $memory
      * @return void
      */
-    final public function work(int $timeout, int $memory): void
+    #[NoReturn] final public function work(int $timeout, int $memory): void
     {
         [$this->start_time, $jobs_processed] = [hrtime(true) / 1e9, 0];
 
@@ -124,10 +125,10 @@ abstract class QueueAdapter
     /**
      * Kill the process.
      *
-     * @param  int  $status
-     * @return never
+     * @param int $status
+     * @return void
      */
-    public function kill($status = 0)
+    #[NoReturn] public function kill(int $status = 0): void
     {
         if (extension_loaded('posix')) {
             posix_kill(getmypid(), SIGKILL);
@@ -163,7 +164,7 @@ abstract class QueueAdapter
      *
      * @return void
      */
-    protected function listenForSignals()
+    protected function listenForSignals(): void
     {
         pcntl_async_signals(true);
 
@@ -178,7 +179,7 @@ abstract class QueueAdapter
      *
      * @return bool
      */
-    protected function supportsAsyncSignals()
+    protected function supportsAsyncSignals(): bool
     {
         return extension_loaded('pcntl');
     }

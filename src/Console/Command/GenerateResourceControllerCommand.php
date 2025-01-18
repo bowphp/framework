@@ -79,7 +79,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
         string $prefix,
         string $controller,
         string $model_namespace = ''
-    ) {
+    ): void {
         $generator->write('controller/rest', [
             'modelNamespace' => $model_namespace,
             'prefix' => $prefix,

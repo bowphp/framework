@@ -60,9 +60,9 @@ class Command extends AbstractCommand
      */
     public function call(string $command, string $action, ...$rest): mixed
     {
-        $class = $this->command[$command] ?? null;
+        $classes = $this->command[$command] ?? null;
 
-        if (is_null($class)) {
+        if (is_null($classes)) {
             $this->throwFailsCommand("The command $command not found !");
         }
 
@@ -74,8 +74,10 @@ class Command extends AbstractCommand
             $method = Str::camel($action);
         }
 
-        if (is_array($class)) {
-            $class = $class[$action];
+        if (is_array($classes)) {
+            $class = $classes[$action];
+        } else {
+            $class = $classes;
         }
 
         $instance = new $class($this->setting, $this->arg);

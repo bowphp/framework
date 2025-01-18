@@ -3,8 +3,10 @@
 namespace Bow\Queue\Adapters;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
 use Bow\Queue\ProducerService;
+use ErrorException;
 
 class DatabaseAdapter extends QueueAdapter
 {
@@ -31,8 +33,9 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Get the size of the queue.
      *
-     * @param string $queue
+     * @param string|null $queue
      * @return int
+     * @throws QueryBuilderException
      */
     public function size(?string $queue = null): int
     {
@@ -45,7 +48,7 @@ class DatabaseAdapter extends QueueAdapter
      * Queue a job
      *
      * @param ProducerService $producer
-     * @return QueueAdapter
+     * @return void
      */
     public function push(ProducerService $producer): void
     {
@@ -65,7 +68,9 @@ class DatabaseAdapter extends QueueAdapter
      * Run the worker
      *
      * @param string|null $queue
-     * @return mixed
+     * @return void
+     * @throws QueryBuilderException
+     * @throws ErrorException
      */
     public function run(string $queue = null): void
     {
@@ -107,10 +112,10 @@ class DatabaseAdapter extends QueueAdapter
                 }
 
                 // Execute the onException method for notify the producer
-                // and let developper to decide if the job should be delete
+                // and let developer decide if the job should be deleted
                 $producer->onException($e);
 
-                // Check if the job should be delete
+                // Check if the job should be deleted
                 if ($producer->jobShouldBeDelete() || $job->attempts <= 0) {
                     $this->table->where("id", $job->id)->update([
                         "status" => "failed",
@@ -119,7 +124,7 @@ class DatabaseAdapter extends QueueAdapter
                     continue;
                 }
 
-                // Check if the job should be retry
+                // Check if the job should be retried
                 $this->table->where("id", $job->id)->update([
                     "status" => "reserved",
                     "attempts" => $job->attempts - 1,
@@ -137,8 +142,9 @@ class DatabaseAdapter extends QueueAdapter
      *
      * @param ProducerService $producer
      * @param mixed $job
+     * @throws QueryBuilderException
      */
-    private function execute(ProducerService $producer, mixed $job)
+    private function execute(ProducerService $producer, mixed $job): void
     {
         call_user_func([$producer, "process"]);
         $this->table->where("id", $job->id)->update([
@@ -152,6 +158,7 @@ class DatabaseAdapter extends QueueAdapter
      *
      * @param ?string $queue
      * @return void
+     * @throws QueryBuilderException
      */
     public function flush(?string $queue = null): void
     {

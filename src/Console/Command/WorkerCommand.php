@@ -12,7 +12,7 @@ class WorkerCommand extends AbstractCommand
     /**
      * The run server command
      *
-     * @param string $connection
+     * @param string|null $connection
      * @return void
      */
     public function run(?string $connection = null): void

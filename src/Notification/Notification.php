@@ -61,8 +61,8 @@ abstract class Notification
         foreach ($channels as $channel) {
             if (array_key_exists($channel, $this->channels)) {
                 $result = $this->{"to" . ucfirst($channel)}($notifiable);
-                $target_channel = new $this->channels[$channel]();
-                $target_channel->send($result);
+                $target_channel = new $this->channels[$channel]($result);
+                $target_channel->send();
             }
         }
     }

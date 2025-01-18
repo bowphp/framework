@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Queue;
 
 use Bow\Support\Serializes;
+use Throwable;
 
 abstract class ProducerService
 {
@@ -66,7 +67,7 @@ abstract class ProducerService
      */
     public function __construct()
     {
-        $this->id = sha1(uniqid(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), true));
+        $this->id = str_uuid();
     }
 
     /**
@@ -197,10 +198,10 @@ abstract class ProducerService
     /**
      * Get the job error
      *
-     * @param \Throwable $e
+     * @param Throwable $e
      * @return void
      */
-    public function onException(\Throwable $e)
+    public function onException(Throwable $e)
     {
         //
     }

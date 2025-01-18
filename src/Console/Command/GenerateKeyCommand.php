@@ -14,6 +14,7 @@ class GenerateKeyCommand extends AbstractCommand
      * Generate Key
      *
      * @return void
+     * @throws ConsoleException
      */
     public function generate(): void
     {

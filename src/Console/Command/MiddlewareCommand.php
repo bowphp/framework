@@ -26,6 +26,7 @@ class MiddlewareCommand extends AbstractCommand
 
         if ($generator->fileExists()) {
             echo Color::red("The middleware already exists");
+
             exit(1);
         }
 
@@ -34,6 +35,7 @@ class MiddlewareCommand extends AbstractCommand
         ]);
 
         echo Color::green("The middleware has been well created.");
+
         exit(0);
     }
 }

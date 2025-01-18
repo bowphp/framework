@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Bow\Configuration;
 
 use Bow\View\View;
+use Exception;
 use Monolog\Logger;
 use Bow\Support\Collection;
 use Whoops\Handler\Handler;
-use Bow\Configuration\Loader;
 use Bow\Database\Barry\Model;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FirePHPHandler;
 use Whoops\Handler\CallbackHandler;
-use Bow\Configuration\Configuration;
 use Bow\Contracts\ResponseInterface;
 use Iterator;
 use Whoops\Handler\PrettyPageHandler;
@@ -99,7 +98,7 @@ class LoggerConfiguration extends Configuration
      * @param string $log_dir
      * @param string $name
      * @return Logger
-     * @throws \Exception
+     * @throws Exception
      */
     private function loadFileLogger(string $log_dir, string $name): Logger
     {

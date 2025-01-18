@@ -374,7 +374,9 @@ class Application extends Router
             );
         }
 
-        return $this->capsule->bind($name, $callable);
+        $this->capsule->bind($name, $callable);
+
+        return $this;
     }
 
     /**

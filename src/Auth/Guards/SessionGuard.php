@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Bow\Auth\Guards;
 
 use Bow\Security\Hash;
+use Bow\Session\Exception\SessionException;
 use Bow\Session\Session;
 use Bow\Auth\Authentication;
 use Bow\Auth\Exception\AuthenticationException;
-use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Traits\LoginUserTrait;
 
 class SessionGuard extends GuardContract
@@ -25,7 +25,7 @@ class SessionGuard extends GuardContract
     /**
      * Defines the session_key
      *
-     * @var array
+     * @var string
      */
     private string $session_key;
 
@@ -44,10 +44,11 @@ class SessionGuard extends GuardContract
     }
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @param array $credentials
      * @return bool
+     * @throws AuthenticationException|SessionException
      */
     public function attempts(array $credentials): bool
     {
@@ -72,6 +73,7 @@ class SessionGuard extends GuardContract
      * Get the session instance
      *
      * @return Session
+     * @throws AuthenticationException
      */
     private function getSession(): Session
     {
@@ -87,9 +89,10 @@ class SessionGuard extends GuardContract
     }
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @return bool
+     * @throws AuthenticationException|SessionException
      */
     public function check(): bool
     {
@@ -100,6 +103,7 @@ class SessionGuard extends GuardContract
      * Check if user is guest
      *
      * @return bool
+     * @throws AuthenticationException|SessionException
      */
     public function guest(): bool
     {
@@ -107,9 +111,10 @@ class SessionGuard extends GuardContract
     }
 
     /**
-     * Check if user is authenticate
+     * Check if user is authenticated
      *
      * @return ?Authentication
+     * @throws AuthenticationException|SessionException
      */
     public function user(): ?Authentication
     {
@@ -121,6 +126,7 @@ class SessionGuard extends GuardContract
      *
      * @param mixed $user
      * @return bool
+     * @throws AuthenticationException|SessionException
      */
     public function login(Authentication $user): bool
     {
@@ -133,6 +139,7 @@ class SessionGuard extends GuardContract
      * Make direct logout
      *
      * @return bool
+     * @throws SessionException|AuthenticationException
      */
     public function logout(): bool
     {
@@ -145,6 +152,7 @@ class SessionGuard extends GuardContract
      * Get the user id
      *
      * @return mixed
+     * @throws AuthenticationException|SessionException
      */
     public function id(): mixed
     {

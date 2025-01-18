@@ -8,15 +8,23 @@ use Bow\Mail\Message;
 class MailChannel implements ChannelInterface
 {
     /**
-     * Send the notification to mail
+     * Set the configured message
      *
-     * @param mixed $message
+     * @param Message $message
      * @return void
      */
-    public function send(mixed $message): void
+    public function __construct(
+        private readonly Message $message
+    ) {
+    }
+
+    /**
+     * Send the notification to mail
+     *
+     * @return void
+     */
+    public function send(): void
     {
-        if ($message instanceof Message) {
-            Mail::getInstance()->send($message);
-        }
+        Mail::getInstance()->send($this->message);
     }
 }

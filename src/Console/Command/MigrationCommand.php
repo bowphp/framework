@@ -13,6 +13,7 @@ use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\Migration\SQLGenerator;
 use Bow\Database\QueryBuilder;
 use Bow\Support\Str;
+use Exception;
 use JetBrains\PhpStorm\NoReturn;
 
 class MigrationCommand extends AbstractCommand
@@ -21,7 +22,7 @@ class MigrationCommand extends AbstractCommand
      * Make a migration command
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function migrate(): void
     {
@@ -32,7 +33,7 @@ class MigrationCommand extends AbstractCommand
      * Rollback migration command
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function rollback(): void
     {
@@ -43,7 +44,7 @@ class MigrationCommand extends AbstractCommand
      * Reset migration command
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function reset(): void
     {
@@ -55,7 +56,7 @@ class MigrationCommand extends AbstractCommand
      *
      * @param string $type
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function factory(string $type): void
     {
@@ -105,7 +106,7 @@ class MigrationCommand extends AbstractCommand
             try {
                 // Up migration
                 (new $migration())->up();
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $this->throwMigrationException($exception, $migration);
             }
 
@@ -159,7 +160,7 @@ class MigrationCommand extends AbstractCommand
                 // Rollback migration
                 try {
                     (new $migration())->rollback();
-                } catch (\Exception $exception) {
+                } catch (Exception $exception) {
                     $this->throwMigrationException($exception, $migration);
                 }
 
@@ -218,7 +219,7 @@ class MigrationCommand extends AbstractCommand
                 // Rollback migration
                 try {
                     (new $migration())->rollback();
-                } catch (\Exception $exception) {
+                } catch (Exception $exception) {
                     $this->throwMigrationException($exception, $migration);
                 }
 
@@ -248,10 +249,10 @@ class MigrationCommand extends AbstractCommand
     /**
      * Throw migration exception
      *
-     * @param \Exception $exception
+     * @param Exception $exception
      * @param string $migration
      */
-    #[NoReturn] private function throwMigrationException(\Exception $exception, string $migration): void
+    #[NoReturn] private function throwMigrationException(Exception $exception, string $migration): void
     {
         $this->printExceptionMessage(
             $exception->getMessage(),

@@ -14,7 +14,6 @@ class ClearCommand extends AbstractCommand
      *
      * @param string $action
      * @return void
-     * @throws \ErrorException
      */
     public function make(string $action): void
     {
