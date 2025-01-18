@@ -7,8 +7,7 @@ interface ChannelInterface
     /**
      * Send the notification
      *
-     * @param mixed $message
      * @return void
      */
-    public function send(mixed $message): void;
+    public function send(): void;
 }

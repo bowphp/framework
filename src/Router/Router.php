@@ -9,7 +9,7 @@ use Bow\Router\Exception\RouterException;
 class Router
 {
     /**
-     * Define the functions related to an http
+     * Define the functions related to a http
      * code executed if this code is up
      *
      * @var array
@@ -132,7 +132,7 @@ class Router
     {
         $prefix = rtrim($prefix, '/');
 
-        if (!preg_match('@^/@', $prefix)) {
+        if (!str_starts_with($prefix, '/')) {
             $prefix = '/' . $prefix;
         }
 
@@ -146,7 +146,7 @@ class Router
     }
 
     /**
-     * Allows to associate a global middleware on an route
+     * Allows to associate a global middleware on a route
      *
      * @param array|string $middlewares
      * @return Router

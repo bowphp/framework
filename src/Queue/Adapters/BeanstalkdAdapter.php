@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
+use ErrorException;
+use Pheanstalk\Values\TubeName;
 use RuntimeException;
 use Pheanstalk\Pheanstalk;
 use Bow\Queue\ProducerService;
@@ -46,12 +48,12 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Get the size of the queue.
      *
-     * @param string $queue
+     * @param string|null $queue
      * @return int
      */
     public function size(?string $queue = null): int
     {
-        $queue = new \Pheanstalk\Values\TubeName($this->getQueue($queue));
+        $queue = new TubeName($this->getQueue($queue));
 
         return (int) $this->pheanstalk->statsTube($queue)->currentJobsReady;
     }
@@ -61,7 +63,7 @@ class BeanstalkdAdapter extends QueueAdapter
      *
      * @param ProducerService $producer
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function push(ProducerService $producer): void
     {
@@ -73,7 +75,7 @@ class BeanstalkdAdapter extends QueueAdapter
         }
 
         $this->pheanstalk
-            ->useTube(new \Pheanstalk\Values\TubeName($producer->getQueue()));
+            ->useTube(new TubeName($producer->getQueue()));
 
         $this->pheanstalk->put(
             $this->serializeProducer($producer),
@@ -87,22 +89,17 @@ class BeanstalkdAdapter extends QueueAdapter
      * Run the worker
      *
      * @param string|null $queue
-     * @return mixed
-     * @throws \ErrorException
+     * @return void
+     * @throws ErrorException
      */
     public function run(string $queue = null): void
     {
         // we want jobs from define queue only.
         $queue = $this->getQueue($queue);
-        $this->pheanstalk->watch(new \Pheanstalk\Values\TubeName($queue));
+        $this->pheanstalk->watch(new TubeName($queue));
 
         // This hangs until a Job is produced.
         $job = $this->pheanstalk->reserve();
-
-        if (is_null($job)) {
-            sleep($this->sleep ?? 5);
-            return;
-        }
 
         try {
             $payload = $job->getData();
@@ -144,7 +141,7 @@ class BeanstalkdAdapter extends QueueAdapter
      *
      * @param string|null $queue
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function flush(?string $queue = null): void
     {

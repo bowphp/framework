@@ -2,17 +2,22 @@
 
 namespace Bow\Notification\Channel;
 
-use Bow\Notification\Channel\ChannelInterface;
+use Bow\Database\Database;
 
 class DatabaseChannel implements ChannelInterface
 {
+    public function __construct(
+        private readonly array $database
+    ) {
+    }
+
     /**
      * Send the notification to database
      *
-     * @param mixed $message
      * @return void
      */
-    public function send(mixed $message): void
+    public function send(): void
     {
+        Database::table('notifications')->insert($this->database);
     }
 }

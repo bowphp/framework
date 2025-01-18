@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Queue;
 
 use Bow\Queue\Adapters\QueueAdapter;
+use JetBrains\PhpStorm\NoReturn;
 
 class WorkerService
 {
@@ -36,7 +37,7 @@ class WorkerService
      * @param int $memory
      * @return void
      */
-    public function run(
+    #[NoReturn] public function run(
         string $queue = "default",
         int $tries = 3,
         int $sleep = 5,

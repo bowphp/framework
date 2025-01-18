@@ -105,6 +105,7 @@ class SQSAdapter extends QueueAdapter
     {
         $this->sleep($this->sleep ?? 5);
         $message = null;
+        $delay = 5;
 
         try {
             $result = $this->sqs->receiveMessage([
