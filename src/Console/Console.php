@@ -7,6 +7,8 @@ namespace Bow\Console;
 use Bow\Configuration\Loader;
 use Bow\Console\Exception\ConsoleException;
 use Bow\Console\Traits\ConsoleTrait;
+use ErrorException;
+use Exception;
 
 /**
  * @method static Console addCommand(string $command, callable $cb)
@@ -95,9 +97,6 @@ class Console
      * Bow constructor.
      *
      * @param Setting $setting
-     *
-     * @return void
-     * @throws \ErrorException
      */
     public function __construct(Setting $setting)
     {
@@ -157,7 +156,7 @@ class Console
 
         try {
             $this->kernel->boot();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
 
@@ -185,7 +184,7 @@ class Console
 
         try {
             return $this->call($command);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
 
@@ -198,8 +197,8 @@ class Console
      *
      * @param string|null $command
      * @return mixed
-     * @throws \ErrorException
-     * @throws \Exception
+     * @throws ErrorException
+     * @throws Exception
      */
     public function call(?string $command): mixed
     {
@@ -229,7 +228,7 @@ class Console
 
         try {
             return call_user_func_array([$this, $command], [$target]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             echo $e->getMessage();
             exit(1);
         }
@@ -268,7 +267,7 @@ class Console
      *
      * @param string $command
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     private function executeCustomCommand(string $command): mixed
     {
@@ -283,7 +282,7 @@ class Console
             $instance = new $classname($this->setting, $this->arg);
 
             return call_user_func_array([$instance, "process"], []);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             if (php_sapi_name() !== "cli") {
                 throw $exception;
             }
@@ -299,7 +298,7 @@ class Console
      * Launch a migration
      *
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function migration(): void
     {
@@ -318,7 +317,7 @@ class Console
      * Launch a migration
      *
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function migrate(): void
     {
@@ -335,7 +334,7 @@ class Console
      * Create files
      *
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function add(): void
     {
@@ -385,7 +384,7 @@ class Console
     /**
      * Launch process
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function launch(): void
     {
@@ -402,7 +401,7 @@ class Console
      * Allows to generate a resource on a controller
      *
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function generate(): void
     {
@@ -419,7 +418,7 @@ class Console
      * Alias of generate
      *
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function gen(): void
     {
@@ -430,7 +429,7 @@ class Console
      * Remove the caches
      *
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function clear(): void
     {
@@ -443,7 +442,7 @@ class Console
      * Flush the connections
      *
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     private function flush(): void
     {
@@ -461,7 +460,6 @@ class Console
      *
      * @param string|null $command
      * @return int
-     * @throws \ErrorException
      */
     private function help(?string $command = null): int
     {
@@ -640,12 +638,12 @@ U;
         exit(0);
     }
 
-    /*
+    /**
      * Show bow framework version and current php version in console
      *
-     * @return string
+     * @return void
      */
-    private function getVersion()
+    private function getVersion(): void
     {
         $version = <<<USAGE
 \033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m

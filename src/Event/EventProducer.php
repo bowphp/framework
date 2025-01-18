@@ -12,11 +12,13 @@ class EventProducer extends ProducerService
      * EventProducer constructor
      *
      * @param EventListener|EventShouldQueue $event
+     * @param mixed $payload
      */
     public function __construct(
         private readonly mixed $event,
         private readonly mixed $payload = null,
     ) {
+        parent::__construct();
     }
 
     /**

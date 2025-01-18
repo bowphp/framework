@@ -6,6 +6,7 @@ namespace Bow\Console\Command;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
+use JetBrains\PhpStorm\NoReturn;
 
 class ServiceCommand extends AbstractCommand
 {
@@ -15,7 +16,7 @@ class ServiceCommand extends AbstractCommand
      * @param string $service
      * @return void
      */
-    public function generate(string $service): void
+    #[NoReturn] public function generate(string $service): void
     {
         $generator = new Generator(
             $this->setting->getServiceDirectory(),

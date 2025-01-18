@@ -6,7 +6,6 @@ namespace Bow\Cache;
 
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
-use Bow\Cache\Cache;
 
 class CacheConfiguration extends Configuration
 {
