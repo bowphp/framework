@@ -23,9 +23,9 @@ class Connection
     /**
      * The configuration array
      *
-     * @var string
+     * @var ?string
      */
-    private string $connection = "beanstalkd";
+    private ?string $connection = null;
 
     /**
      * The supported connection
@@ -104,7 +104,8 @@ class Connection
      *
      * @param string $name
      * @param array $arguments
-     * @return mixed
+     * @return mixed|null
+     * @throws ErrorException
      */
     public function __call(string $name, array $arguments)
     {
@@ -113,5 +114,9 @@ class Connection
         if (method_exists($adapter, $name)) {
             return call_user_func_array([$adapter, $name], $arguments);
         }
+
+        $class = get_class($adapter);
+
+        throw new ErrorException("Call to undefined method {$class}->{$name}()");
     }
 }

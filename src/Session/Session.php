@@ -230,7 +230,7 @@ class Session implements CollectionInterface
     private function setCookieParameters(): void
     {
         session_set_cookie_params(
-            $this->config["lifetime"],
+            (int) $this->config["lifetime"],
             $this->config["path"],
             $this->config['domain'],
             $this->config["secure"],
