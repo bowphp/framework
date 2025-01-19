@@ -29,7 +29,6 @@ class SessionGuard extends GuardContract
      */
     private string $session_key;
 
-
     /**
      * SessionGuard constructor.
      *

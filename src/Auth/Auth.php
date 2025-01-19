@@ -116,5 +116,9 @@ class Auth
         if (method_exists(static::$instance, $method)) {
             return call_user_func_array([static::$instance, $method], $params);
         }
+
+        throw new ErrorException(
+            "Method [$method] does not exists"
+        );
     }
 }
