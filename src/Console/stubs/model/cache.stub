@@ -1,7 +1,7 @@
 <?php
 
 use Bow\Database\Migration\Migration;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\SQLGenerator as Table;
 
 class {className} extends Migration
 {
@@ -10,7 +10,7 @@ class {className} extends Migration
      */
     public function up(): void
     {
-        $this->create("caches", function (SQLGenerator $table) {
+        $this->create("caches", function (Table $table) {
             $table->addString('keyname', ['primary' => true, 'size' => 500]);
             $table->addText('data');
             $table->addDatetime('expire', ['nullable' => true]);

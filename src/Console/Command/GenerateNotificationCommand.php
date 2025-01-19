@@ -9,7 +9,7 @@ use Bow\Console\Color;
 use Bow\Console\Generator;
 use Bow\Support\Str;
 
-class GenerateQueueCommand extends AbstractCommand
+class GenerateNotificationCommand extends AbstractCommand
 {
     /**
      * Generate session
@@ -19,17 +19,17 @@ class GenerateQueueCommand extends AbstractCommand
     public function generate(): void
     {
         $create_at = date("YmdHis");
-        $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('queues')));
+        $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('notification')));
 
         $generator = new Generator(
             $this->setting->getMigrationDirectory(),
             $filename
         );
 
-        $generator->write('model/queue', [
+        $generator->write('model/notification', [
             'className' => $filename
         ]);
 
-        echo Color::green('Queue migration created.');
+        echo Color::green('Notification migration created.');
     }
 }

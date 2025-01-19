@@ -1,0 +1,42 @@
+<?php
+
+namespace {baseNamespace}{namespace};
+
+use Bow\Database\Barry\Model;
+use Bow\Messaging\Messaging;
+
+class {className} extends Messaging
+{
+    /**
+     * Returns the available channels to be used
+     *
+     * @param Model $notifiable
+     * @return array
+     */
+    public function channels(Model $notifiable): array;
+    {
+        return ['mail', 'database'];
+    }
+
+    /**
+     * Send notification to mail
+     *
+     * @param Model $notifiable
+     * @return Message|null
+     */
+    public function toMail(Model $notifiable): ?Message
+    {
+        return new Message();
+    }
+
+    /**
+     * Send notification to database
+     *
+     * @param Model $notifiable
+     * @return array
+     */
+    public function toDatabase(Model $notifiable): array
+    {
+        return [];
+    }
+}

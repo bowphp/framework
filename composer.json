@@ -18,7 +18,8 @@
         "ramsey/uuid": "^4.7",
         "ext-ftp": "*",
         "ext-openssl": "*",
-        "ext-pcntl": "*"
+        "ext-pcntl": "*",
+        "ext-readline": "*"
     },
     "require-dev": {
         "pda/pheanstalk": "^5.0",
