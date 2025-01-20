@@ -190,7 +190,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
         $this->assertMatchesRegularExpression("@\nclass\sQueueTableMigration\sextends\sMigration\n@", $content);
-        $this->assertStringContainsString("\$this->create(\"queues\", function (SQLGenerator \$table) {", $content);
+        $this->assertStringContainsString("\$this->create(\"queues\", function (Table \$table) {", $content);
         $this->assertStringContainsString("\$table->addInteger('attempts', [\"default\" => 3]);\n", $content);
     }
 

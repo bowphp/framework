@@ -1,7 +1,7 @@
 <?php
 
 use Bow\Database\Migration\Migration;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\SQLGenerator as Table;
 
 class FakeSessionMigration extends Migration
 {
@@ -10,7 +10,7 @@ class FakeSessionMigration extends Migration
      */
     public function up(): void
     {
-        $this->create("sessions", function (SQLGenerator $table) {
+        $this->create("sessions", function (Table $table) {
             $table->addColumn('id', 'string', ['primary' => true]);
             $table->addColumn('time', 'timestamp');
             $table->addColumn('data', 'text');

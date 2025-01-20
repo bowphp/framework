@@ -1,7 +1,7 @@
 <?php
 
 use Bow\Database\Migration\Migration;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\SQLGenerator as Table;
 
 class FakeCreateTableMigration extends Migration
 {
@@ -10,7 +10,7 @@ class FakeCreateTableMigration extends Migration
      */
     public function up(): void
     {
-        $this->create("fakers", function (SQLGenerator $table) {
+        $this->create("fakers", function (Table $table) {
             $table->addIncrement('id');
             $table->addTimestamps();
         });

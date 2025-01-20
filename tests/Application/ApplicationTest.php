@@ -118,7 +118,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
             return "work";
         });
 
-        $this->assertNull($app->send());
+        $this->assertIsBool($app->send());
     }
 
     public function test_send_application_with_no_matched_route()
