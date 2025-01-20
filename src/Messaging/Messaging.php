@@ -1,13 +1,13 @@
 <?php
 
-namespace Bow\Notification;
+namespace Bow\Messaging;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Message;
-use Bow\Notification\Channel\MailChannel;
-use Bow\Notification\Channel\DatabaseChannel;
+use Bow\Messaging\Channel\MailChannel;
+use Bow\Messaging\Channel\DatabaseChannel;
 
-abstract class Notification
+abstract class Messaging
 {
     /**
      * Defines the available channel
@@ -50,6 +50,17 @@ abstract class Notification
     }
 
     /**
+     * Send notification to sms
+     *
+     * @param Model $notifiable
+     * @return array
+     */
+    public function toSms(Model $notifiable): array
+    {
+        return [];
+    }
+
+    /**
      * Process the notification
      * @param Model $notifiable
      * @return void
@@ -62,7 +73,7 @@ abstract class Notification
             if (array_key_exists($channel, $this->channels)) {
                 $result = $this->{"to" . ucfirst($channel)}($notifiable);
                 $target_channel = new $this->channels[$channel]($result);
-                $target_channel->send();
+                $target_channel->send($notifiable);
             }
         }
     }

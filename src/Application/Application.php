@@ -75,7 +75,6 @@ class Application extends Router
      *
      * @param Request $request
      * @param Response $response
-     * @return void
      * @throws BadRequestException
      */
     public function __construct(Request $request, Response $response)
@@ -172,10 +171,11 @@ class Application extends Router
     /**
      * Launcher of the application
      *
-     * @return ?bool
-     * @throws RouterException|ReflectionException
+     * @return bool
+     * @throws ReflectionException
+     * @throws RouterException
      */
-    public function send(): ?bool
+    public function send(): bool
     {
         if ($this->config->isCli()) {
             return true;
@@ -227,21 +227,24 @@ class Application extends Router
 
         // Error management
         if ($resolved) {
-            return $this->sendResponse($response);
+            $this->sendResponse($response);
+            return true;
         }
 
         // We apply the 404 error code
         $this->response->status(404);
 
-        if (array_key_exists(404, $this->error_code)) {
-            $response = Action::getInstance()->execute($this->error_code[404], []);
-
-            return $this->sendResponse($response, 404);
+        if (!array_key_exists(404, $this->error_code)) {
+            throw new RouterException(
+                sprintf('Route "%s" not found', $this->request->path())
+            );
         }
 
-        throw new RouterException(
-            sprintf('Route "%s" not found', $this->request->path())
-        );
+        $response = Action::getInstance()->execute($this->error_code[404], []);
+
+        $this->sendResponse($response, 404);
+
+        return false;
     }
 
     /**

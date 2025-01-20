@@ -407,7 +407,7 @@ class Console
     {
         $action = $this->arg->getAction();
 
-        if (!in_array($action, ['key', 'resource', 'session', 'cache', 'queue'])) {
+        if (!in_array($action, ['key', 'resource', 'session-table', 'cache-table', 'queue-table'])) {
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
@@ -476,10 +476,13 @@ Bow task runner usage: php bow command:action [name] --option
  \033[0;33mhelp\033[00m display command helper
 
  \033[0;32mGENERATE\033[00m create a new app key and resources
-   \033[0;33mgenerate:resource\033[00m   Create new REST controller
-   \033[0;33mgenerate:table\033[00m      For generate the preset table for session, cache, queue
-   \033[0;33mgenerate:key\033[00m        Create new app key
-   \033[0;33mflush:worker\033[00m        Flush all queues
+   \033[0;33mgenerate:resource\033[00m      Create new REST controller
+   \033[0;33mgenerate:session-table\033[00m        For generate the preset table for session
+   \033[0;33mgenerate:cache-table\033[00m          For generate the preset table for cache
+   \033[0;33mgenerate:queue-table\033[00m          For generate the preset table for queue
+   \033[0;33mgenerate:notification-table\033[00m   For generate the preset table for notification
+   \033[0;33mgenerate:key\033[00m                  Create new app key
+   \033[0;33mflush:worker\033[00m                  Flush all queues
 
  \033[0;32mADD\033[00m Create a user class
    \033[0;33madd:middleware\033[00m      Create new middleware
@@ -495,6 +498,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:listener\033[00m        Create a new event listener
    \033[0;33madd:producer\033[00m        Create a new producer
    \033[0;33madd:command\033[00m         Create a new bow console command
+   \033[0;33madd:messaging\033[00m       Create a new bow messaging
 
  \033[0;32mMIGRATION\033[00m apply a migration in user model
    \033[0;33mmigration:migrate\033[00m   Make migration
@@ -538,7 +542,7 @@ USAGE;
 
     * you can use --no-plain --with-model in same command
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  For create a new controlleur
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  For create a new controller
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           For create a new middleware
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name        For create a new configuration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
@@ -550,6 +554,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                For create a new event listener
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:producer name             For create a new queue producer
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              For create a new bow console command
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:messaging name            For create a new bow messaging
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
 
 U;
@@ -564,7 +569,10 @@ U;
     --model=[model_name] Define the usable model
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   For create a new REST controller
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:table                    For generate the table for session, cache, queue
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:session-table            For generate the table for session
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:cache-table              For generate the table for cache
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:queue-table              For generate the table for queue
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:notification-table       For generate the table for notification
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      For generate a new APP KEY
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     For display this
 
@@ -592,7 +600,7 @@ U;
     run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL 
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local developpement server
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local development server
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker\033[00m [option]  Start worker/consumer for handle the producer
 
 U; // phpcs:enable

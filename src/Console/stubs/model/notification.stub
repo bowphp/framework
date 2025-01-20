@@ -1,0 +1,35 @@
+<?php
+
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\SQLGenerator as Table;
+
+class {className} extends Migration
+{
+    /**
+     * Up Migration
+     */
+    public function up(): void
+    {
+        $this->create("notifications", function (Table $table) {
+            $table->addString('id', ["primary" => true]);
+            $table->addString('type');
+            $table->addString('concern_id');
+            $table->addString('concern_type');
+            $table->addText('data');
+            $table->addDatetime('read_at', ['nullable' => true);
+            $table->addTimestamps();
+        });
+    }
+
+    /**
+     * Rollback migration
+     */
+    public function rollback(): void
+    {
+        $this->dropIfExists("queues");
+
+        if ($this->getAdapterName() === 'pgsql') {
+            $this->addSql("DROP TYPE IF EXISTS queue_status");
+        }
+    }
+}

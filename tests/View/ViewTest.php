@@ -28,7 +28,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 
     public function test_twig_compilation()
     {
-        View::getInstance()->cachable(false);
+        View::getInstance();
 
         $result = View::parse('twig', ['name' => 'bow', 'engine' => 'twig']);
 
@@ -37,7 +37,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 
     public function test_tintin_compilation()
     {
-        View::getInstance()->setEngine('tintin')->setExtension('.tintin.php')->cachable(false);
+        View::getInstance()->setEngine('tintin')->setExtension('.tintin.php');
 
         $result = View::parse('tintin', ['name' => 'bow', 'engine' => 'tintin']);
 
@@ -46,7 +46,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
 
     public function test_php_compilation()
     {
-        View::getInstance()->setEngine('php')->setExtension('.php')->cachable(false);
+        View::getInstance()->setEngine('php')->setExtension('.php');
 
         $result = View::parse('php', ['name' => 'bow', 'engine' => 'php']);
 

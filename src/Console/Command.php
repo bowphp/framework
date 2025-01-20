@@ -31,13 +31,15 @@ class Command extends AbstractCommand
             "listener" => \Bow\Console\Command\EventListenerCommand::class,
             "producer" => \Bow\Console\Command\ProducerCommand::class,
             "command" => \Bow\Console\Command\ConsoleCommand::class,
+            "messaging" => \Bow\Console\Command\MessagingCommand::class,
         ],
         "generator" => [
             "key" => \Bow\Console\Command\GenerateKeyCommand::class,
             "resource" => \Bow\Console\Command\GenerateResourceControllerCommand::class,
-            "session" => \Bow\Console\Command\GenerateSessionCommand::class,
-            "queue" => \Bow\Console\Command\GenerateQueueCommand::class,
-            "cache" => \Bow\Console\Command\GenerateCacheCommand::class,
+            "session-table" => \Bow\Console\Command\GenerateSessionCommand::class,
+            "queue-table" => \Bow\Console\Command\GenerateQueueCommand::class,
+            "cache-table" => \Bow\Console\Command\GenerateCacheCommand::class,
+            "notification-table" => \Bow\Console\Command\GenerateCacheCommand::class,
         ],
         "runner" => [
             "console" => \Bow\Console\Command\ReplCommand::class,

@@ -172,6 +172,13 @@ class Setting
     private array $namespaces = [];
 
     /**
+     * The messaging directory
+     *
+     * @var string
+     */
+    private string $messaging_directory;
+
+    /**
      * Command constructor.
      *
      * @param string $dirname
@@ -301,6 +308,17 @@ class Setting
     public function setMiddlewareDirectory(string $middleware_directory): void
     {
         $this->middleware_directory = $middleware_directory;
+    }
+
+    /**
+     * Set the messaging directory
+     *
+     * @param string $messaging_directory
+     * @return void
+     */
+    public function setMessagingDirectory(string $messaging_directory): void
+    {
+        $this->messaging_directory = $messaging_directory;
     }
 
     /**
@@ -546,13 +564,23 @@ class Setting
     }
 
     /**
-     * Get the service directory
+     * Get the middleware directory
      *
      * @return string
      */
     public function getMiddlewareDirectory(): string
     {
         return $this->middleware_directory;
+    }
+
+    /**
+     * Get the messaging directory
+     *
+     * @return string
+     */
+    public function getMessagingDirectory(): string
+    {
+        return $this->messaging_directory;
     }
 
     /**

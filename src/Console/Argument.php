@@ -176,7 +176,7 @@ class Argument
      */
     private function initCommand(string $param): void
     {
-        if (!preg_match('/^[a-z]+:[a-z]+$/', $param)) {
+        if (!preg_match('/^[a-z-]+[a-z]+:[a-z-]+[a-z]+$/', $param)) {
             $this->command = $param;
             $this->action = null;
         } else {

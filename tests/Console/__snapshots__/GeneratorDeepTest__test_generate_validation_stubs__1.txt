@@ -11,7 +11,7 @@ class FakeValidationRequest extends RequestValidation
 	 *
 	 * @return array
 	 */
-    protected function rules()
+    protected function rules(): array
     {
 	    return [
             // Your roles here

@@ -1,9 +1,11 @@
 <?php
 
-namespace Bow\Notification\Channel;
+namespace Bow\Messaging\Channel;
 
+use Bow\Database\Barry\Model;
 use Bow\Mail\Mail;
 use Bow\Mail\Message;
+use Bow\Messaging\Contracts\ChannelInterface;
 
 class MailChannel implements ChannelInterface
 {
@@ -21,9 +23,10 @@ class MailChannel implements ChannelInterface
     /**
      * Send the notification to mail
      *
+     * @param Model $notifiable
      * @return void
      */
-    public function send(): void
+    public function send(Model $notifiable): void
     {
         Mail::getInstance()->send($this->message);
     }

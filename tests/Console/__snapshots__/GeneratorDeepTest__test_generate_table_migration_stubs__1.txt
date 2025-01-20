@@ -1,7 +1,7 @@
 <?php
 
 use Bow\Database\Migration\Migration;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\SQLGenerator as Table;
 
 class FakeTableMigration extends Migration
 {
@@ -10,7 +10,7 @@ class FakeTableMigration extends Migration
      */
     public function up(): void
     {
-        $this->alter("fakers", function (SQLGenerator $table) {
+        $this->alter("fakers", function (Table $table) {
             //
         });
     }
