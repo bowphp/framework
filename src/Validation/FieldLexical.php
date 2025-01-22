@@ -11,7 +11,7 @@ trait FieldLexical
     /**
      * Get error debugging information
      *
-     * @param string       $key
+     * @param string $key
      * @param string|array|int|float $value
      * @return ?string
      */
@@ -46,6 +46,25 @@ trait FieldLexical
     }
 
     /**
+     * Normalize beneficiaries
+     *
+     * @param array $attribute
+     * @param string $lexical
+     * @return string
+     */
+    private function parseAttribute(array $attribute, string $lexical): ?string
+    {
+        foreach ($attribute as $key => $value) {
+            if (is_array($value) || is_object($value) || $value instanceof Iterator) {
+                $value = json_encode($value);
+            }
+            $lexical = str_replace('{' . $key . '}', (string)$value, $lexical);
+        }
+
+        return $lexical;
+    }
+
+    /**
      * Parse the translate content
      *
      * @param string $key
@@ -62,24 +81,5 @@ trait FieldLexical
         }
 
         return $this->parseAttribute($data, $message);
-    }
-
-    /**
-     * Normalize beneficiaries
-     *
-     * @param array $attribute
-     * @param string $lexical
-     * @return string
-     */
-    private function parseAttribute(array $attribute, string $lexical): ?string
-    {
-        foreach ($attribute as $key => $value) {
-            if (is_array($value) || is_object($value) || $value instanceof Iterator) {
-                $value = json_encode($value);
-            }
-            $lexical = str_replace('{' . $key . '}', (string) $value, $lexical);
-        }
-
-        return $lexical;
     }
 }

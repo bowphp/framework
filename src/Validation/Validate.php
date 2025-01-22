@@ -46,9 +46,9 @@ class Validate
     /**
      * Validate constructor.
      *
-     * @param bool   $fails
+     * @param bool $fails
      * @param ?string $message
-     * @param array  $corrupted_fields
+     * @param array $corrupted_fields
      *
      * @return void
      */

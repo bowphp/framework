@@ -66,8 +66,8 @@ abstract class EngineAbstract
     /**
      * Make template rendering
      *
-     * @param  string $filename
-     * @param  array  $data
+     * @param string $filename
+     * @param array $data
      *
      * @return string
      */
@@ -79,33 +79,6 @@ abstract class EngineAbstract
      * @return mixed
      */
     abstract public function getEngine(): mixed;
-
-    /**
-     * Check the parsed file
-     *
-     * @param  string $filename
-     * @param  bool   $extended
-     * @return string
-     * @throws ViewException
-     */
-    protected function checkParseFile(string $filename, bool $extended = true): string
-    {
-        $normalized_filename = $this->normalizeFilename($filename);
-
-        // Check if file exists
-        if ($this->config['path'] !== null && !file_exists($this->config['path'] . '/' . $normalized_filename)) {
-            throw new ViewException(
-                sprintf(
-                    'The view [%s] does not exists. %s/%s',
-                    $normalized_filename,
-                    $this->config['path'],
-                    $filename
-                )
-            );
-        }
-
-        return $extended ? $normalized_filename : $filename;
-    }
 
     /**
      * Get the engine name
@@ -128,6 +101,33 @@ abstract class EngineAbstract
         $normalized_filename = $this->normalizeFilename($filename);
 
         return file_exists($this->config['path'] . '/' . $normalized_filename);
+    }
+
+    /**
+     * Check the parsed file
+     *
+     * @param string $filename
+     * @param bool $extended
+     * @return string
+     * @throws ViewException
+     */
+    protected function checkParseFile(string $filename, bool $extended = true): string
+    {
+        $normalized_filename = $this->normalizeFilename($filename);
+
+        // Check if file exists
+        if ($this->config['path'] !== null && !file_exists($this->config['path'] . '/' . $normalized_filename)) {
+            throw new ViewException(
+                sprintf(
+                    'The view [%s] does not exists. %s/%s',
+                    $normalized_filename,
+                    $this->config['path'],
+                    $filename
+                )
+            );
+        }
+
+        return $extended ? $normalized_filename : $filename;
     }
 
     /**

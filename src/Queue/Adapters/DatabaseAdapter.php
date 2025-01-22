@@ -7,6 +7,7 @@ use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
 use Bow\Queue\ProducerService;
 use ErrorException;
+use Exception;
 
 class DatabaseAdapter extends QueueAdapter
 {
@@ -99,13 +100,13 @@ class DatabaseAdapter extends QueueAdapter
                     $this->execute($producer, $job);
                     continue;
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Write the error log
                 error_log($e->getMessage());
                 app('logger')->error($e->getMessage(), $e->getTrace());
                 cache("job:failed:" . $job->id, $job->payload);
 
-                 // Check if producer has been loaded
+                // Check if producer has been loaded
                 if (!isset($producer)) {
                     $this->sleep(1);
                     continue;

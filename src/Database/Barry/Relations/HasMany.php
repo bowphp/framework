@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Database\Collection;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
+use Bow\Database\Collection;
 use Bow\Database\Exception\QueryBuilderException;
 
 class HasMany extends Relation

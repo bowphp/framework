@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Bow\Auth\Traits;
 
 use Bow\Auth\Authentication;
-use Bow\Database\Barry\Model;
 use Bow\Auth\Exception\AuthenticationException;
+use Bow\Database\Barry\Model;
 
 trait LoginUserTrait
 {

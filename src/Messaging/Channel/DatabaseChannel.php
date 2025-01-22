@@ -10,7 +10,8 @@ class DatabaseChannel implements ChannelInterface
 {
     public function __construct(
         private readonly array $database
-    ) {
+    )
+    {
     }
 
     /**

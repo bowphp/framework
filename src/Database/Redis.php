@@ -26,20 +26,6 @@ class Redis
     private static ?Redis $instance = null;
 
     /**
-     * Get the Redis Store instance
-     *
-     * @return Redis
-     */
-    public static function getInstance(): Redis
-    {
-        if (is_null(static::$instance)) {
-            static::$instance = new Redis(config("database.redis"));
-        }
-
-        return static::$instance;
-    }
-
-    /**
      * RedisAdapter constructor.
      *
      * @param array $config
@@ -128,6 +114,20 @@ class Redis
         }
 
         return static::$redis->set($key, $content, $options);
+    }
+
+    /**
+     * Get the Redis Store instance
+     *
+     * @return Redis
+     */
+    public static function getInstance(): Redis
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new Redis(config("database.redis"));
+        }
+
+        return static::$instance;
     }
 
     /**

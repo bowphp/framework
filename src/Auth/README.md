@@ -1,4 +1,3 @@
-
 # Bow Auth
 
 Bow Framework auth is a native authentification system

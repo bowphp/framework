@@ -147,7 +147,7 @@ trait SqliteCompose
     {
         $pdo = Database::getPdo();
 
-        $names = (array) $name;
+        $names = (array)$name;
         $statement = $pdo->query(sprintf('PRAGMA table_info(%s);', $this->table));
         $statement->execute();
 

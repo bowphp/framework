@@ -56,16 +56,6 @@ class HttpException extends Exception
     }
 
     /**
-     * Set the errors bags
-     *
-     * @param array $errors
-     */
-    public function setErrorBags(array $errors)
-    {
-        $this->error_bags = $errors;
-    }
-
-    /**
      * Get the errors bags
      *
      * @return array
@@ -73,5 +63,15 @@ class HttpException extends Exception
     public function getErrorBags(): array
     {
         return $this->error_bags;
+    }
+
+    /**
+     * Set the errors bags
+     *
+     * @param array $errors
+     */
+    public function setErrorBags(array $errors)
+    {
+        $this->error_bags = $errors;
     }
 }

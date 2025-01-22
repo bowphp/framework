@@ -7,35 +7,37 @@ namespace Bow\View\Engine;
 use Bow\Application\Exception\ApplicationException;
 use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\View\EngineAbstract;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
 
 class TwigEngine extends EngineAbstract
 {
-    /**
-     * The template engine instance
-     *
-     * @var \Twig\Environment
-     */
-    private \Twig\Environment $template;
-
     /**
      * The engine name
      *
      * @var string
      */
     protected string $name = 'twig';
+    /**
+     * The template engine instance
+     *
+     * @var Environment
+     */
+    private Environment $template;
 
     /**
      * TwigEngine constructor.
      *
      * @param array $config
-     * @return \Twig\Environment
+     * @return Environment
      * @throws ApplicationException
      */
     public function __construct(array $config)
     {
         $this->config = $config;
 
-        $loader = new \Twig\Loader\FilesystemLoader($config['path']);
+        $loader = new FilesystemLoader($config['path']);
 
         $additional_options = $config['additional_options'] ?? [];
 
@@ -51,7 +53,7 @@ class TwigEngine extends EngineAbstract
             }
         }
 
-        $this->template = new \Twig\Environment($loader, $env);
+        $this->template = new Environment($loader, $env);
 
         // Add variable in global scope in the Twig use case
         $configuration_loader = ConfigurationLoader::getInstance();
@@ -61,7 +63,7 @@ class TwigEngine extends EngineAbstract
         // Add function in global scope in Twig use case
         foreach (EngineAbstract::HELPERS as $helper) {
             $this->template->addFunction(
-                new \Twig\TwigFunction($helper, $helper)
+                new TwigFunction($helper, $helper)
             );
         }
     }
@@ -79,9 +81,9 @@ class TwigEngine extends EngineAbstract
     /**
      * The get engine instance
      *
-     * @return \Twig\Environment
+     * @return Environment
      */
-    public function getEngine(): \Twig\Environment
+    public function getEngine(): Environment
     {
         return $this->template;
     }

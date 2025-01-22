@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Translate;
 
-use Iterator;
+use BadMethodCallException;
 use Bow\Support\Arraydotify;
+use Iterator;
 
 class Translator
 {
@@ -92,11 +93,24 @@ class Translator
     }
 
     /**
+     * Make singleton translation
+     *
+     * @param string $key
+     * @param array $data
+     *
+     * @return string
+     */
+    public static function single(string $key, array $data = []): string
+    {
+        return static::translate($key, $data);
+    }
+
+    /**
      * Allows translation
      *
-     * @param  string $key
-     * @param  array  $data
-     * @param  bool   $plural
+     * @param string $key
+     * @param array $data
+     * @param bool $plural
      *
      * @return string
      */
@@ -147,16 +161,22 @@ class Translator
     }
 
     /**
-     * Make singleton translation
+     * Str formatter
      *
-     * @param string $key
-     * @param array $data
-     *
+     * @param string $str
+     * @param array $values
      * @return string
      */
-    public static function single(string $key, array $data = []): string
+    private static function format(string $str, array $values = []): string
     {
-        return static::translate($key, $data);
+        foreach ($values as $key => $value) {
+            if (is_array($value) || is_object($value) || $value instanceof Iterator) {
+                $value = json_encode($value);
+            }
+            $str = preg_replace('/{\s*' . $key . '\s*\}/', (string)$value, $str);
+        }
+
+        return $str;
     }
 
     /**
@@ -169,25 +189,6 @@ class Translator
     public static function plural(string $key, array $data = []): string
     {
         return static::translate($key, $data, true);
-    }
-
-    /**
-     * Str formatter
-     *
-     * @param  string $str
-     * @param  array $values
-     * @return string
-     */
-    private static function format(string $str, array $values = []): string
-    {
-        foreach ($values as $key => $value) {
-            if (is_array($value) || is_object($value) || $value instanceof Iterator) {
-                $value = json_encode($value);
-            }
-            $str = preg_replace('/{\s*' . $key . '\s*\}/', (string) $value, $str);
-        }
-
-        return $str;
     }
 
     /**
@@ -213,8 +214,8 @@ class Translator
     /**
      * __call
      *
-     * @param  string $name
-     * @param  array $arguments
+     * @param string $name
+     * @param array $arguments
      * @return string
      */
     public function __call(string $name, array $arguments)
@@ -223,6 +224,6 @@ class Translator
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \BadMethodCallException('Undefined method ' . $name);
+        throw new BadMethodCallException('Undefined method ' . $name);
     }
 }

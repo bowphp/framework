@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
-use Bow\Mail\Message;
 use Bow\Mail\Exception\MailException;
+use Bow\Mail\Message;
 use InvalidArgumentException;
 
 class NativeDriver implements MailDriverInterface
@@ -63,9 +63,9 @@ class NativeDriver implements MailDriverInterface
     /**
      * Implement send email
      *
-     * @param  Message $message
-     * @throws InvalidArgumentException
+     * @param Message $message
      * @return bool
+     * @throws InvalidArgumentException
      */
     public function send(Message $message): bool
     {
@@ -102,6 +102,6 @@ class NativeDriver implements MailDriverInterface
         // Send email use the php native function
         $status = @mail($to, $message->getSubject(), $message->getMessage(), $headers);
 
-        return (bool) $status;
+        return (bool)$status;
     }
 }

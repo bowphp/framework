@@ -86,6 +86,29 @@ class S3Service implements ServiceInterface
     }
 
     /**
+     * Put other file content in given file
+     *
+     * @param string $file
+     * @param string $content
+     * @param array $options
+     *
+     * @return bool
+     */
+    public function put(string $file, string $content, array $options = []): bool
+    {
+        $options = is_string($options)
+            ? ['visibility' => $options]
+            : (array)$options;
+
+        return (bool)$this->client->putObject([
+            'Bucket' => $this->config['bucket'],
+            'Key' => $file,
+            'Body' => $content,
+            "Visibility" => $options["visibility"] ?? 'public'
+        ]);
+    }
+
+    /**
      * Add content after the contents of the file
      *
      * @param string $file
@@ -102,10 +125,30 @@ class S3Service implements ServiceInterface
     }
 
     /**
+     * Recover the contents of the file
+     *
+     * @param string $file
+     * @return ?string
+     */
+    public function get(string $file): ?string
+    {
+        $result = $this->client->getObject([
+            'Bucket' => $this->config['bucket'],
+            'Key' => $file
+        ]);
+
+        if (isset($result["Body"])) {
+            return $result["Body"]->getContents();
+        }
+
+        return null;
+    }
+
+    /**
      * Add content before the contents of the file
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @param string $content
      * @return bool
      * @throws
      */
@@ -119,46 +162,9 @@ class S3Service implements ServiceInterface
     }
 
     /**
-     * Put other file content in given file
-     *
-     * @param string $file
-     * @param string $content
-     * @param array $options
-     *
-     * @return bool
-     */
-    public function put(string $file, string $content, array $options = []): bool
-    {
-        $options = is_string($options)
-            ? ['visibility' => $options]
-            : (array) $options;
-
-        return (bool) $this->client->putObject([
-            'Bucket' => $this->config['bucket'],
-            'Key'    => $file,
-            'Body'   => $content,
-            "Visibility" => $options["visibility"] ?? 'public'
-        ]);
-    }
-
-    /**
-     * Delete file or directory
-     *
-     * @param string $file
-     * @return bool
-     */
-    public function delete(string $file): bool
-    {
-        return (bool) $this->client->deleteObject([
-            'Bucket' => $this->config['bucket'],
-            'Key' => $file
-        ]);
-    }
-
-    /**
      * List the files of a folder passed as a parameter
      *
-     * @param  string $dirname
+     * @param string $dirname
      * @return array
      */
     public function files(string $dirname): array
@@ -173,12 +179,12 @@ class S3Service implements ServiceInterface
     /**
      * List the folder of a folder passed as a parameter
      *
-     * @param  string $dirname
+     * @param string $dirname
      * @return array
      */
     public function directories(string $dirname): array
     {
-        $buckets = (array) $this->client->listBuckets();
+        $buckets = (array)$this->client->listBuckets();
 
         return array_map(fn($bucket) => $bucket["Name"], $buckets);
     }
@@ -201,23 +207,19 @@ class S3Service implements ServiceInterface
     }
 
     /**
-     * Recover the contents of the file
+     * Renames or moves a source file to a target file.
      *
-     * @param  string $file
-     * @return ?string
+     * @param string $source
+     * @param string $target
+     * @return bool
      */
-    public function get(string $file): ?string
+    public function move(string $source, string $target): bool
     {
-        $result = $this->client->getObject([
-            'Bucket' => $this->config['bucket'],
-            'Key' => $file
-        ]);
+        $this->copy($source, $target);
 
-        if (isset($result["Body"])) {
-            return $result["Body"]->getContents();
-        }
+        $this->delete($source);
 
-        return null;
+        return true;
     }
 
     /**
@@ -237,19 +239,17 @@ class S3Service implements ServiceInterface
     }
 
     /**
-     * Renames or moves a source file to a target file.
+     * Delete file or directory
      *
-     * @param string $source
-     * @param string $target
+     * @param string $file
      * @return bool
      */
-    public function move(string $source, string $target): bool
+    public function delete(string $file): bool
     {
-        $this->copy($source, $target);
-
-        $this->delete($source);
-
-        return true;
+        return (bool)$this->client->deleteObject([
+            'Bucket' => $this->config['bucket'],
+            'Key' => $file
+        ]);
     }
 
     /**
@@ -260,7 +260,7 @@ class S3Service implements ServiceInterface
      */
     public function exists(string $file): bool
     {
-        return (bool) $this->get($file);
+        return (bool)$this->get($file);
     }
 
     /**

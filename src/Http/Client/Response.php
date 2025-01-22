@@ -9,32 +9,29 @@ use CurlHandle;
 class Response
 {
     /**
+     * Define the request content
+     *
+     * @var string|null
+     */
+    public ?string $content = null;
+    /**
      * The error message
      *
      * @var ?string
      */
     private ?string $error_message = null;
-
     /**
      * The error number
      *
      * @var int
      */
     private int $errer_number;
-
     /**
      * The headers
      *
      * @var array
      */
     private array $headers = [];
-
-    /**
-     * Define the request content
-     *
-     * @var string|null
-     */
-    public ?string $content = null;
 
     /**
      * Parser constructor.
@@ -51,13 +48,13 @@ class Response
     }
 
     /**
-     * Get response content
+     * Get response content as json
      *
-     * @return ?string
+     * @return array
      */
-    public function getContent(): ?string
+    public function toArray(): array
     {
-        return $this->content;
+        return $this->toJson(true);
     }
 
     /**
@@ -74,13 +71,13 @@ class Response
     }
 
     /**
-     * Get response content as json
+     * Get response content
      *
-     * @return array
+     * @return ?string
      */
-    public function toArray(): array
+    public function getContent(): ?string
     {
-        return $this->toJson(true);
+        return $this->content;
     }
 
     /**
@@ -94,16 +91,6 @@ class Response
     }
 
     /**
-     * Get the response code
-     *
-     * @return ?int
-     */
-    public function getCode(): ?int
-    {
-        return $this->headers['http_code'] ?? null;
-    }
-
-    /**
      * Alias of getCode
      *
      * @return ?int
@@ -114,13 +101,13 @@ class Response
     }
 
     /**
-     * Check if status code is successful
+     * Get the response code
      *
-     * @return bool
+     * @return ?int
      */
-    public function isSuccessful(): bool
+    public function getCode(): ?int
     {
-        return $this->getCode() === 200 || $this->getCode() === 201;
+        return $this->headers['http_code'] ?? null;
     }
 
     /**
@@ -131,6 +118,16 @@ class Response
     public function isFailed(): bool
     {
         return !$this->isSuccessful();
+    }
+
+    /**
+     * Check if status code is successful
+     *
+     * @return bool
+     */
+    public function isSuccessful(): bool
+    {
+        return $this->getCode() === 200 || $this->getCode() === 201;
     }
 
     /**

@@ -23,28 +23,28 @@ class Resource
      */
     private static array $routes = [
         [
-            'url'    => '/',
-            'call'   => 'index',
+            'url' => '/',
+            'call' => 'index',
             'method' => 'get'
         ],
         [
-            'url'    => '/',
-            'call'   => 'store',
+            'url' => '/',
+            'call' => 'store',
             'method' => 'post'
         ],
         [
-            'url'    => '/:id',
-            'call'   => 'show',
+            'url' => '/:id',
+            'call' => 'show',
             'method' => 'get'
         ],
         [
-            'url'    => '/:id',
-            'call'   => 'update',
+            'url' => '/:id',
+            'call' => 'update',
             'method' => 'put'
         ],
         [
-            'url'    => '/:id',
-            'call'   => 'destroy',
+            'url' => '/:id',
+            'call' => 'destroy',
             'method' => 'delete'
         ]
     ];
@@ -96,9 +96,9 @@ class Resource
 
         // Association of defined criteria
         if (isset($where[$definition['call']])) {
-            $route->where((array) $where[$definition['call']]);
+            $route->where((array)$where[$definition['call']]);
         } else {
-            $route->where((array) $where);
+            $route->where((array)$where);
         }
     }
 }

@@ -17,7 +17,7 @@ trait RegexRule
      */
     protected function compileRegex(string $key, string|int|float $masque): void
     {
-        if (!preg_match("/^regex:(.+)+$/", (string) $masque, $match)) {
+        if (!preg_match("/^regex:(.+)+$/", (string)$masque, $match)) {
             return;
         }
 

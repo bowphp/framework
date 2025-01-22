@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Database\Collection;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
+use Bow\Database\Collection;
 use Bow\Database\Exception\QueryBuilderException;
 
 class BelongsToMany extends Relation
@@ -16,8 +16,8 @@ class BelongsToMany extends Relation
      *
      * @param Model $related
      * @param Model $parent
-     * @param string  $foreign_key
-     * @param string  $local_key
+     * @param string $foreign_key
+     * @param string $local_key
      */
     public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
     {

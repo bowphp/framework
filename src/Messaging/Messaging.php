@@ -4,8 +4,8 @@ namespace Bow\Messaging;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Message;
-use Bow\Messaging\Channel\MailChannel;
 use Bow\Messaging\Channel\DatabaseChannel;
+use Bow\Messaging\Channel\MailChannel;
 
 abstract class Messaging
 {
@@ -18,14 +18,6 @@ abstract class Messaging
         "mail" => MailChannel::class,
         "database" => DatabaseChannel::class,
     ];
-
-    /**
-     * Returns the available channels to be used
-     *
-     * @param Model $notifiable
-     * @return array
-     */
-    abstract public function channels(Model $notifiable): array;
 
     /**
      * Send notification to mail
@@ -77,4 +69,12 @@ abstract class Messaging
             }
         }
     }
+
+    /**
+     * Returns the available channels to be used
+     *
+     * @param Model $notifiable
+     * @return array
+     */
+    abstract public function channels(Model $notifiable): array;
 }

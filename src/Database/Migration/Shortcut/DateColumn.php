@@ -27,6 +27,19 @@ trait DateColumn
     }
 
     /**
+     * Add timestamp column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     * @throws SQLGeneratorException
+     */
+    public function addTimestamp(string $column, array $attribute = []): SQLGenerator
+    {
+        return $this->addColumn($column, 'timestamp', $attribute);
+    }
+
+    /**
      * Add date column
      *
      * @param string $column
@@ -63,19 +76,6 @@ trait DateColumn
     public function addYear(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'year', $attribute);
-    }
-
-    /**
-     * Add timestamp column
-     *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
-     * @throws SQLGeneratorException
-     */
-    public function addTimestamp(string $column, array $attribute = []): SQLGenerator
-    {
-        return $this->addColumn($column, 'timestamp', $attribute);
     }
 
     /**

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Validation;
 
-use Bow\Http\Request;
 use BadMethodCallException;
-use Bow\Validation\Exception\ValidationException;
+use Bow\Http\Request;
 use Bow\Validation\Exception\AuthorizationException;
+use Bow\Validation\Exception\ValidationException;
 
 abstract class RequestValidation
 {
@@ -63,30 +63,6 @@ abstract class RequestValidation
     }
 
     /**
-     * The rules list
-     *
-     * @return array
-     */
-    protected function rules(): array
-    {
-        return [
-            // Your rules
-        ];
-    }
-
-    /**
-     * The allowed validation key
-     *
-     * @return array
-     */
-    protected function keys(): array
-    {
-        return [
-            '*'
-        ];
-    }
-
-    /**
      * The define the user authorization level
      *
      * @return bool
@@ -97,13 +73,14 @@ abstract class RequestValidation
     }
 
     /**
-     * The define the user custom message
+     * When the user does not have the authorization to launch this request
+     * This is hook the method that can watch them for make an action
      *
-     * @return array
+     * @throws AuthorizationException
      */
-    protected function messages(): array
+    protected function authorizationFailAction()
     {
-        return [];
+        //
     }
 
     /**
@@ -119,14 +96,47 @@ abstract class RequestValidation
     }
 
     /**
-     * When the user does not have the authorization to launch this request
-     * This is hook the method that can watch them for make an action
+     * The allowed validation key
      *
-     * @throws AuthorizationException
+     * @return array
      */
-    protected function authorizationFailAction()
+    protected function keys(): array
     {
-        //
+        return [
+            '*'
+        ];
+    }
+
+    /**
+     * The rules list
+     *
+     * @return array
+     */
+    protected function rules(): array
+    {
+        return [
+            // Your rules
+        ];
+    }
+
+    /**
+     * The define the user custom message
+     *
+     * @return array
+     */
+    protected function messages(): array
+    {
+        return [];
+    }
+
+    /**
+     * Check if the query
+     *
+     * @return boolean
+     */
+    protected function fails()
+    {
+        return $this->validate->fails();
     }
 
     /**
@@ -142,13 +152,42 @@ abstract class RequestValidation
     }
 
     /**
-     * Check if the query
+     * Throws an exception
      *
-     * @return boolean
+     * @throws ValidationException;
      */
-    protected function fails()
+    protected function throwError(): void
     {
-        return $this->validate->fails();
+        $this->validate->throwError();
+    }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return Request
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (method_exists($this->request, $name)) {
+            return call_user_func_array([$this->request, $name], $arguments);
+        }
+
+        throw new BadMethodCallException(
+            'The method ' . $name . ' does not defined.'
+        );
+    }
+
+    /**
+     * __get
+     *
+     * @param string $name
+     * @return string
+     */
+    public function __get(string $name)
+    {
+        return $this->request->$name;
     }
 
     /**
@@ -199,44 +238,5 @@ abstract class RequestValidation
     protected function getRequest(): Request
     {
         return $this->request;
-    }
-
-    /**
-     * Throws an exception
-     *
-     * @throws ValidationException;
-     */
-    protected function throwError(): void
-    {
-        $this->validate->throwError();
-    }
-
-    /**
-     * __call
-     *
-     * @param string $name
-     * @param  array  $arguments
-     * @return Request
-     */
-    public function __call(string $name, array $arguments)
-    {
-        if (method_exists($this->request, $name)) {
-            return call_user_func_array([$this->request, $name], $arguments);
-        }
-
-        throw new BadMethodCallException(
-            'The method ' . $name . ' does not defined.'
-        );
-    }
-
-    /**
-     * __get
-     *
-     * @param string $name
-     * @return string
-     */
-    public function __get(string $name)
-    {
-        return $this->request->$name;
     }
 }

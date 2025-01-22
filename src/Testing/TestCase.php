@@ -4,41 +4,31 @@ declare(strict_types=1);
 
 namespace Bow\Testing;
 
+use BadMethodCallException;
 use Bow\Http\Client\HttpClient;
+use Exception;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 class TestCase extends PHPUnitTestCase
 {
-    /**
-     * The request attachment collection
-     *
-     * @var array
-     */
-    private array $attach = [];
-
     /**
      * The base url
      *
      * @var ?string
      */
     protected ?string $url = null;
-
+    /**
+     * The request attachment collection
+     *
+     * @var array
+     */
+    private array $attach = [];
     /**
      * The list of additional header
      *
      * @var array
      */
     private array $headers = [];
-
-    /**
-     * Get the base url
-     *
-     * @return string
-     */
-    private function getBaseUrl(): string
-    {
-        return $this->url ?? rtrim(app_env('APP_URL', 'http://127.0.0.1:5000'));
-    }
 
     /**
      * Add attachment
@@ -86,7 +76,7 @@ class TestCase extends PHPUnitTestCase
      * @param string $url
      * @param array $param
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function get(string $url, array $param = []): Response
     {
@@ -98,12 +88,22 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
+     * Get the base url
+     *
+     * @return string
+     */
+    private function getBaseUrl(): string
+    {
+        return $this->url ?? rtrim(app_env('APP_URL', 'http://127.0.0.1:5000'));
+    }
+
+    /**
      * Post Request
      *
      * @param string $url
      * @param array $param
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function post(string $url, array $param = []): Response
     {
@@ -119,29 +119,12 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Put Request
-     *
-     * @param string $url
-     * @param array $param
-     * @return Response
-     * @throws \Exception
-     */
-    public function put(string $url, array $param = []): Response
-    {
-        $http = new HttpClient($this->getBaseUrl());
-
-        $http->addHeaders($this->headers);
-
-        return new Response($http->put($url, $param));
-    }
-
-    /**
      * Delete Request
      *
      * @param string $url
      * @param array $param
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete(string $url, array $param = []): Response
     {
@@ -153,12 +136,29 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
+     * Put Request
+     *
+     * @param string $url
+     * @param array $param
+     * @return Response
+     * @throws Exception
+     */
+    public function put(string $url, array $param = []): Response
+    {
+        $http = new HttpClient($this->getBaseUrl());
+
+        $http->addHeaders($this->headers);
+
+        return new Response($http->put($url, $param));
+    }
+
+    /**
      * Patch Request
      *
      * @param string $url
      * @param array $param
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function patch(string $url, array $param = []): Response
     {
@@ -174,7 +174,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @param string $method
      * @param string $url
-     * @param array  $params
+     * @param array $params
      * @return Response
      */
     public function visit(string $method, string $url, array $params = []): Response
@@ -182,7 +182,7 @@ class TestCase extends PHPUnitTestCase
         $method = strtolower($method);
 
         if (!method_exists($this, $method)) {
-            throw new \BadMethodCallException(
+            throw new BadMethodCallException(
                 'The HTTP [' . $method . '] method does not exists.'
             );
         }

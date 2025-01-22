@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Application\Exception;
 
-use JetBrains\PhpStorm\NoReturn;
-use PDOException;
-use Bow\View\View;
 use Bow\Http\Exception\HttpException;
 use Bow\Validation\Exception\ValidationException;
+use Bow\View\View;
+use JetBrains\PhpStorm\NoReturn;
+use PDOException;
 use Policier\Exception\TokenExpiredException;
 use Policier\Exception\TokenInvalidException;
 

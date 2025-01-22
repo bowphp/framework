@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\Http;
 
-use Bow\Support\Str;
-use Bow\Session\Session;
-use Bow\Http\UploadedFile;
-use Bow\Support\Collection;
 use Bow\Auth\Authentication;
+use Bow\Http\Exception\BadRequestException;
+use Bow\Session\Session;
+use Bow\Support\Collection;
+use Bow\Support\Str;
 use Bow\Validation\Validate;
 use Bow\Validation\Validator;
-use Bow\Http\Exception\BadRequestException;
+use Throwable;
 
 class Request
 {
@@ -51,6 +51,17 @@ class Request
     private bool $capture = false;
 
     /**
+     * Check if file exists
+     *
+     * @param mixed $file
+     * @return bool
+     */
+    public static function hasFile(mixed $file): bool
+    {
+        return isset($_FILES[$file]);
+    }
+
+    /**
      * Request constructor
      *
      * @return mixed
@@ -68,7 +79,7 @@ class Request
         if ($this->getHeader('content-type') == 'application/json') {
             try {
                 $data = json_decode(file_get_contents("php://input"), true, 1024, JSON_THROW_ON_ERROR);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 throw new BadRequestException(
                     "The request json payload is invalid: " . $e->getMessage(),
                 );
@@ -80,7 +91,7 @@ class Request
             }
         }
 
-        $this->input = array_merge((array) $data, $_GET);
+        $this->input = array_merge((array)$data, $_GET);
 
         foreach ($this->input as $key => $value) {
             if (is_string($value) && strlen($value) == 0) {
@@ -91,6 +102,98 @@ class Request
         }
 
         $this->capture = true;
+    }
+
+    /**
+     * Get Request header
+     *
+     * @param string $key
+     * @return ?string
+     */
+    public function getHeader(string $key): ?string
+    {
+        $key = str_replace('-', '_', strtoupper($key));
+
+        if ($this->hasHeader($key)) {
+            return $_SERVER[$key];
+        }
+
+        if ($this->hasHeader('HTTP_' . $key)) {
+            return $_SERVER['HTTP_' . $key];
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if a header exists.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function hasHeader(string $key): bool
+    {
+        return isset($_SERVER[strtoupper($key)]);
+    }
+
+    /**
+     * Check if the query is of type PUT
+     *
+     * @return bool
+     */
+    public function isPut(): bool
+    {
+        return $this->method() == 'PUT' || $this->get('_method') == 'PUT';
+    }
+
+    /**
+     * Returns the method of the request.
+     *
+     * @return string|null
+     */
+    public function method(): ?string
+    {
+        $method = $_SERVER['REQUEST_METHOD'] ?? null;
+
+        if ($method !== 'POST') {
+            return $method;
+        }
+
+        if (array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
+            if (in_array($_SERVER['HTTP_X_HTTP_METHOD'], ['PUT', 'DELETE'])) {
+                $method = $_SERVER['HTTP_X_HTTP_METHOD'];
+            }
+        }
+
+        return $method;
+    }
+
+    /**
+     * Retrieve a value or a collection of values.
+     *
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public function get(string $key, mixed $default = null): mixed
+    {
+        $value = $this->input[$key] ?? $default;
+
+        if (is_callable($value)) {
+            return $value();
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get the request ID
+     *
+     * @return string|int
+     */
+    public function getId(): string|int
+    {
+        return $this->id;
     }
 
     /**
@@ -105,16 +208,6 @@ class Request
     }
 
     /**
-     * Get the request ID
-     *
-     * @return string|int
-     */
-    public function getId(): string|int
-    {
-        return $this->id;
-    }
-
-    /**
      * Alias of getId
      *
      * @return string|int
@@ -122,20 +215,6 @@ class Request
     public function id(): string|int
     {
         return $this->id;
-    }
-
-    /**
-     * Singletons loader
-     *
-     * @return Request
-     */
-    public static function getInstance(): Request
-    {
-        if (static::$instance === null) {
-            static::$instance = new Request();
-        }
-
-        return static::$instance;
     }
 
     /**
@@ -157,34 +236,6 @@ class Request
     public function all(): array
     {
         return $this->input;
-    }
-
-    /**
-     * Get uri send by client.
-     *
-     * @return string
-     */
-    public function path(): string
-    {
-        $position = strpos($_SERVER['REQUEST_URI'], '?');
-
-        if ($position) {
-            $uri = substr($_SERVER['REQUEST_URI'], 0, $position);
-        } else {
-            $uri = $_SERVER['REQUEST_URI'];
-        }
-
-        return $uri;
-    }
-
-    /**
-     * Get the host name of the server.
-     *
-     * @return string
-     */
-    public function hostname(): string
-    {
-        return $_SERVER['HTTP_HOST'];
     }
 
     /**
@@ -218,6 +269,34 @@ class Request
     }
 
     /**
+     * Get the host name of the server.
+     *
+     * @return string
+     */
+    public function hostname(): string
+    {
+        return $_SERVER['HTTP_HOST'];
+    }
+
+    /**
+     * Get uri send by client.
+     *
+     * @return string
+     */
+    public function path(): string
+    {
+        $position = strpos($_SERVER['REQUEST_URI'], '?');
+
+        if ($position) {
+            $uri = substr($_SERVER['REQUEST_URI'], 0, $position);
+        } else {
+            $uri = $_SERVER['REQUEST_URI'];
+        }
+
+        return $uri;
+    }
+
+    /**
      * Get path sent by client.
      *
      * @return string
@@ -225,28 +304,6 @@ class Request
     public function time(): string
     {
         return $_SESSION['REQUEST_TIME'];
-    }
-
-    /**
-     * Returns the method of the request.
-     *
-     * @return string|null
-     */
-    public function method(): ?string
-    {
-        $method = $_SERVER['REQUEST_METHOD'] ?? null;
-
-        if ($method !== 'POST') {
-            return $method;
-        }
-
-        if (array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
-            if (in_array($_SERVER['HTTP_X_HTTP_METHOD'], ['PUT', 'DELETE'])) {
-                $method = $_SERVER['HTTP_X_HTTP_METHOD'];
-            }
-        }
-
-        return $method;
     }
 
     /**
@@ -267,16 +324,6 @@ class Request
     public function isGet(): bool
     {
         return $this->method() == 'GET';
-    }
-
-    /**
-     * Check if the query is of type PUT
-     *
-     * @return bool
-     */
-    public function isPut(): bool
-    {
-        return $this->method() == 'PUT' || $this->get('_method') == 'PUT';
     }
 
     /**
@@ -322,21 +369,10 @@ class Request
     }
 
     /**
-     * Check if file exists
-     *
-     * @param mixed $file
-     * @return bool
-     */
-    public static function hasFile(mixed $file): bool
-    {
-        return isset($_FILES[$file]);
-    }
-
-    /**
      * Get previous request data
      *
-     * @param  string $key
-     * @param  mixed $fullback
+     * @param string $key
+     * @param mixed $fullback
      * @return mixed
      */
     public function old(string $key, mixed $fullback): mixed
@@ -344,6 +380,20 @@ class Request
         $old = Session::getInstance()->get('__bow.old', []);
 
         return $old[$key] ?? $fullback;
+    }
+
+    /**
+     * Singletons loader
+     *
+     * @return Request
+     */
+    public static function getInstance(): Request
+    {
+        if (static::$instance === null) {
+            static::$instance = new Request();
+        }
+
+        return static::$instance;
     }
 
     /**
@@ -380,7 +430,7 @@ class Request
      */
     public function is(string $match): bool
     {
-        return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->path());
+        return (bool)preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->path());
     }
 
     /**
@@ -391,7 +441,17 @@ class Request
      */
     public function isReferer(string $match): bool
     {
-        return (bool) preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->referer());
+        return (bool)preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->referer());
+    }
+
+    /**
+     * Get the source of the current request.
+     *
+     * @return string
+     */
+    public function referer(): string
+    {
+        return $_SERVER['HTTP_REFERER'] ?? '/';
     }
 
     /**
@@ -412,16 +472,6 @@ class Request
     public function port(): ?string
     {
         return $_SERVER['REMOTE_PORT'] ?? null;
-    }
-
-    /**
-     * Get the source of the current request.
-     *
-     * @return string
-     */
-    public function referer(): string
-    {
-        return $_SERVER['HTTP_REFERER'] ?? '/';
     }
 
     /**
@@ -471,6 +521,16 @@ class Request
     }
 
     /**
+     * Check if the secure protocol
+     *
+     * @return mixed
+     */
+    public function isSecure(): bool
+    {
+        return $this->isProtocol('https');
+    }
+
+    /**
      * Check the protocol of the request
      *
      * @param string $protocol
@@ -479,16 +539,6 @@ class Request
     public function isProtocol(string $protocol): bool
     {
         return $this->scheme() == $protocol;
-    }
-
-    /**
-     * Check if the secure protocol
-     *
-     * @return mixed
-     */
-    public function isSecure(): bool
-    {
-        return $this->isProtocol('https');
     }
 
     /**
@@ -508,38 +558,6 @@ class Request
         }
 
         return $headers;
-    }
-
-    /**
-     * Get Request header
-     *
-     * @param string $key
-     * @return ?string
-     */
-    public function getHeader(string $key): ?string
-    {
-        $key = str_replace('-', '_', strtoupper($key));
-
-        if ($this->hasHeader($key)) {
-            return $_SERVER[$key];
-        }
-
-        if ($this->hasHeader('HTTP_' . $key)) {
-            return $_SERVER['HTTP_' . $key];
-        }
-
-        return null;
-    }
-
-    /**
-     * Check if a header exists.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function hasHeader(string $key): bool
-    {
-        return isset($_SERVER[strtoupper($key)]);
     }
 
     /**
@@ -582,24 +600,6 @@ class Request
     public function cookie(string $property = null): string|array|object|null
     {
         return cookie($property);
-    }
-
-    /**
-     * Retrieve a value or a collection of values.
-     *
-     * @param string $key
-     * @param mixed|null $default
-     * @return mixed
-     */
-    public function get(string $key, mixed $default = null): mixed
-    {
-        $value = $this->input[$key] ?? $default;
-
-        if (is_callable($value)) {
-            return $value();
-        }
-
-        return $value;
     }
 
     /**
@@ -651,7 +651,7 @@ class Request
     /**
      * Validate incoming data
      *
-     * @param  array $rule
+     * @param array $rule
      * @return Validate
      */
     public function validate(array $rule): Validate
@@ -683,6 +683,16 @@ class Request
     }
 
     /**
+     * Get the shared value in request bags
+     *
+     * @return array
+     */
+    public function getBags(): array
+    {
+        return $this->bags;
+    }
+
+    /**
      * Set the shared value in request bags
      *
      * @param array $bags
@@ -691,16 +701,6 @@ class Request
     public function setBags(array $bags): void
     {
         $this->bags = $bags;
-    }
-
-    /**
-     * Get the shared value in request bags
-     *
-     * @return array
-     */
-    public function getBags(): array
-    {
-        return $this->bags;
     }
 
     /**

@@ -22,6 +22,16 @@ class UploadedFile
     }
 
     /**
+     * The is `getExtension` alias
+     *
+     * @return string
+     */
+    public function extension(): string
+    {
+        return $this->getExtension();
+    }
+
+    /**
      * Get the file extension
      *
      * @return ?string
@@ -38,16 +48,6 @@ class UploadedFile
         );
 
         return strtolower($extension);
-    }
-
-    /**
-     * The is `getExtension` alias
-     *
-     * @return string
-     */
-    public function extension(): string
-    {
-        return $this->getExtension();
     }
 
     /**
@@ -85,20 +85,6 @@ class UploadedFile
     }
 
     /**
-     * Get the main name of the file
-     *
-     * @return ?string
-     */
-    public function getBasename(): ?string
-    {
-        if (!isset($this->file['name'])) {
-            return null;
-        }
-
-        return basename($this->file['name']);
-    }
-
-    /**
      * Get the filename
      *
      * @return ?string
@@ -123,19 +109,9 @@ class UploadedFile
     }
 
     /**
-     * Get the file hash name
-     *
-     * @return string
-     */
-    public function getHashName(): string
-    {
-        return strtolower(hash('sha256', $this->getBasename())) . '.' . $this->getExtension();
-    }
-
-    /**
      * Move the uploader file to a directory.
      *
-     * @param  string $to
+     * @param string $to
      * @param  ?string $filename
      * @return bool
      * @throws
@@ -156,6 +132,30 @@ class UploadedFile
 
         $resolve = rtrim($to, '/') . '/' . $filename;
 
-        return (bool) move_uploaded_file($this->file['tmp_name'], $resolve);
+        return (bool)move_uploaded_file($this->file['tmp_name'], $resolve);
+    }
+
+    /**
+     * Get the file hash name
+     *
+     * @return string
+     */
+    public function getHashName(): string
+    {
+        return strtolower(hash('sha256', $this->getBasename())) . '.' . $this->getExtension();
+    }
+
+    /**
+     * Get the main name of the file
+     *
+     * @return ?string
+     */
+    public function getBasename(): ?string
+    {
+        if (!isset($this->file['name'])) {
+            return null;
+        }
+
+        return basename($this->file['name']);
     }
 }

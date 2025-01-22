@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
-use Bow\Support\Collection as SupportCollection;
 use Bow\Database\Barry\Model;
+use Bow\Support\Collection as SupportCollection;
 
 class Collection extends SupportCollection
 {
@@ -32,20 +32,6 @@ class Collection extends SupportCollection
     /**
      * @inheritdoc
      */
-    public function toArray(): array
-    {
-        $arr = [];
-
-        foreach ($this->storage as $value) {
-            $arr[] = $value->toArray();
-        }
-
-        return $arr;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function toJson(int $option = 0): string
     {
         $data = [];
@@ -55,6 +41,20 @@ class Collection extends SupportCollection
         }
 
         return json_encode($data, $option = 0);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function toArray(): array
+    {
+        $arr = [];
+
+        foreach ($this->storage as $value) {
+            $arr[] = $value->toArray();
+        }
+
+        return $arr;
     }
 
     /**

@@ -4,29 +4,15 @@ declare(strict_types=1);
 
 namespace Bow\Queue;
 
-use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
+use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
 use ErrorException;
 
 class Connection
 {
-    /**
-     * The configuration array
-     *
-     * @var array
-     */
-    private array $config;
-
-    /**
-     * The configuration array
-     *
-     * @var ?string
-     */
-    private ?string $connection = null;
-
     /**
      * The supported connection
      *
@@ -38,6 +24,18 @@ class Connection
         "database" => DatabaseAdapter::class,
         "sync" => SyncAdapter::class,
     ];
+    /**
+     * The configuration array
+     *
+     * @var array
+     */
+    private array $config;
+    /**
+     * The configuration array
+     *
+     * @var ?string
+     */
+    private ?string $connection = null;
 
     /**
      * Configuration of worker connection
@@ -84,22 +82,6 @@ class Connection
     }
 
     /**
-     * Get the define adapter
-     *
-     * @return QueueAdapter
-     */
-    public function getAdapter(): QueueAdapter
-    {
-        $driver = $this->connection ?: $this->config["default"];
-
-        $connection = $this->config["connections"][$driver];
-
-        $queue = new static::$connections[$driver]();
-
-        return $queue->configure($connection);
-    }
-
-    /**
      * __call
      *
      * @param string $name
@@ -118,5 +100,21 @@ class Connection
         $class = get_class($adapter);
 
         throw new ErrorException("Call to undefined method {$class}->{$name}()");
+    }
+
+    /**
+     * Get the define adapter
+     *
+     * @return QueueAdapter
+     */
+    public function getAdapter(): QueueAdapter
+    {
+        $driver = $this->connection ?: $this->config["default"];
+
+        $connection = $this->config["connections"][$driver];
+
+        $queue = new static::$connections[$driver]();
+
+        return $queue->configure($connection);
     }
 }

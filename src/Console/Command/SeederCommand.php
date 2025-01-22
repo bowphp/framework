@@ -8,9 +8,10 @@ use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 use Bow\Console\Traits\ConsoleTrait;
+use Bow\Database\Barry\Model;
 use Bow\Database\Database;
 use Bow\Support\Str;
-use ErrorException;
+use Exception;
 use JetBrains\PhpStorm\NoReturn;
 
 class SeederCommand extends AbstractCommand
@@ -57,6 +58,43 @@ class SeederCommand extends AbstractCommand
     }
 
     /**
+     * Make Seeder
+     *
+     * @param string $seed_filename
+     * @return void
+     */
+    private function make(string $seed_filename): void
+    {
+        $seeds = require $seed_filename;
+
+        $seed_collection = array_merge($seeds);
+
+        // Get the database connexion
+        $connection = $this->arg->getParameters()->get('--connection', config("database.default"));
+
+        try {
+            $connection = Database::connection($connection);
+
+            foreach ($seed_collection as $table => $seed) {
+                if (class_exists($table)) {
+                    $instance = app($table);
+                    if ($instance instanceof Model) {
+                        $table = $instance->getTable();
+                    }
+                }
+
+                $result = $connection->table($table)->insert($seed);
+
+                echo Color::green("$result seed" . ($result > 1 ? 's' : '') . " on $table table\n");
+            }
+        } catch (Exception $e) {
+            echo Color::red($e->getMessage());
+
+            exit(1);
+        }
+    }
+
+    /**
      * Launch targeted seeding
      *
      * @param string|null $seeder_name
@@ -79,42 +117,5 @@ class SeederCommand extends AbstractCommand
         $this->make(
             $this->setting->getSeederDirectory() . "/{$seeder_name}.php"
         );
-    }
-
-    /**
-     * Make Seeder
-     *
-     * @param string $seed_filename
-     * @return void
-     */
-    private function make(string $seed_filename): void
-    {
-        $seeds = require $seed_filename;
-
-        $seed_collection = array_merge($seeds);
-
-        // Get the database connexion
-        $connection = $this->arg->getParameters()->get('--connection', config("database.default"));
-
-        try {
-            $connection = Database::connection($connection);
-
-            foreach ($seed_collection as $table => $seed) {
-                if (class_exists($table, true)) {
-                    $instance = app($table);
-                    if ($instance instanceof \Bow\Database\Barry\Model) {
-                        $table = $instance->getTable();
-                    }
-                }
-
-                $result = $connection->table($table)->insert($seed);
-
-                echo Color::green("$result seed" . ($result > 1 ? 's' : '') . " on $table table\n");
-            }
-        } catch (\Exception $e) {
-            echo Color::red($e->getMessage());
-
-            exit(1);
-        }
     }
 }

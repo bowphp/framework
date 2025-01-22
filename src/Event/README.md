@@ -17,7 +17,8 @@ Event::on("email.sent", function (array $payload) {
 Event::emit("email.sent", ["name" => "Franck DAKIA"]);
 ```
 
-NB: Is recommanded to write all event listener into simple class and define the event to the app Kernel file in boot method.
+NB: Is recommanded to write all event listener into simple class and define the event to the app Kernel file in boot
+method.
 
 ```php
 use App\Models\Activity;

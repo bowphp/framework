@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
-use Bow\Database\Exception\ConnectionException;
-use Bow\Database\Exception\QueryBuilderException;
-use Carbon\Carbon;
-use Bow\Support\Str;
+use ArrayAccess;
+use BadMethodCallException;
+use Bow\Database\Barry\Concerns\Relationship;
+use Bow\Database\Barry\Traits\ArrayAccessTrait;
+use Bow\Database\Barry\Traits\EventTrait;
+use Bow\Database\Barry\Traits\SerializableTrait;
 use Bow\Database\Collection;
 use Bow\Database\Database as DB;
-use Bow\Database\Barry\Traits\EventTrait;
-use Bow\Database\Barry\Concerns\Relationship;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\NotFoundException;
-use Bow\Database\Barry\Traits\ArrayAccessTrait;
-use Bow\Database\Barry\Traits\SerializableTrait;
+use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\Pagination;
+use Bow\Support\Str;
+use Carbon\Carbon;
+use JsonSerializable;
+use ReflectionClass;
 
 /**
  * @method select(array|string[] $select)
@@ -24,7 +28,7 @@ use Bow\Database\Pagination;
  * @method where(string $column, mixed $value)
  * @method orderBy(string $latest, string $string)
  */
-abstract class Model implements \ArrayAccess, \JsonSerializable
+abstract class Model implements ArrayAccess, JsonSerializable
 {
     use Relationship;
     use EventTrait;
@@ -32,75 +36,65 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     use SerializableTrait;
 
     /**
+     * The query builder instance
+     *
+     * @var ?Builder
+     */
+    protected static ?Builder $builder = null;
+    /**
      * The hidden field
      *
      * @var array
      */
     protected array $hidden = [];
-
     /**
      * Enable the timestamps support
      *
      * @var bool
      */
     protected bool $timestamps = true;
-
     /**
      * Define the table prefix
      *
      * @var string
      */
     protected string $prefix = '';
-
     /**
      * Enable the autoincrement support
      *
      * @var bool
      */
     protected bool $auto_increment = true;
-
     /**
      * Enable the soft deletion
      *
      * @var bool
      */
     protected bool $soft_delete = false;
-
     /**
      * Defines the column where the query construct will use for the last query
      *
      * @var string
      */
     protected string $latest = 'created_at';
-
     /**
      * Defines the created_at column name
      *
      * @var string
      */
     protected string $created_at = 'created_at';
-
     /**
      * Defines the created_at column name
      *
      * @var string
      */
     protected string $updated_at = 'updated_at';
-
     /**
      * The table columns listing
      *
      * @var array
      */
     protected array $attributes = [];
-
-    /**
-     * The table columns listing, initialize in first query
-     *
-     * @var array
-     */
-    private array $original = [];
-
     /**
      * The date mutation
      *
@@ -142,13 +136,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @var ?string
      */
     protected ?string $connection = null;
-
     /**
-     * The query builder instance
+     * The table columns listing, initialize in first query
      *
-     * @var ?Builder
+     * @var array
      */
-    protected static ?Builder $builder = null;
+    private array $original = [];
 
     /**
      * Model constructor.
@@ -162,6 +155,63 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->original = $attributes;
 
         $this->table = static::query()->getTable();
+    }
+
+    /**
+     * Get the table name.
+     *
+     * @return string
+     */
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    /**
+     * Initialize the connection
+     *
+     * @return Builder
+     * @throws
+     */
+    public static function query(): Builder
+    {
+        if (
+            static::$builder instanceof Builder
+            && static::$builder->getModel() == static::class
+        ) {
+            if (DB::getConnectionName() == static::$builder->getAdapterName()) {
+                return static::$builder;
+            }
+        }
+
+        // Reflection action
+        $reflection = new ReflectionClass(static::class);
+
+        $properties = $reflection->getDefaultProperties();
+
+        if (!isset($properties['table']) || $properties['table'] == null) {
+            $parts = explode('\\', static::class);
+            $table = Str::lower(Str::snake(Str::plural(end($parts))));
+        } else {
+            $table = $properties['table'];
+        }
+
+        // Check the connection parameter before apply
+        if (isset($properties['connection'])) {
+            DB::connection($properties['connection']);
+        }
+
+        // Check the prefix parameter before apply
+        $prefix = $properties['prefix'] ?? DB::getConnectionAdapter()->getTablePrefix();
+
+        // Set the table prefix
+        $table = $prefix . $table;
+
+        static::$builder = new Builder($table, DB::getConnectionAdapter());
+        static::$builder->setPrefix($prefix);
+        static::$builder->setModel(static::class);
+
+        return static::$builder;
     }
 
     /**
@@ -181,9 +231,25 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Set connection point
+     *
+     * @param string $name
+     * @return Builder
+     * @throws ConnectionException
+     */
+    public function setConnection(string $name): Builder
+    {
+        $this->connection = $name;
+
+        DB::connection($name);
+
+        return static::query();
+    }
+
+    /**
      * Get all records
      *
-     * @param  array $columns
+     * @param array $columns
      *
      * @return Collection
      */
@@ -199,16 +265,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Get first rows
-     *
-     * @return Model|null
-     */
-    public static function first(): ?Model
-    {
-        return static::query()->first();
-    }
-
-    /**
      * Get latest
      *
      * @return Model|null
@@ -221,27 +277,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * find
+     * Get first rows
      *
-     * @param  mixed $id
-     * @param  array $select
-     * @return Collection|static|null
+     * @return Model|null
      */
-    public static function find(
-        int|string|array $id,
-        array $select = ['*']
-    ): Collection|Model|null {
-        $id = (array) $id;
-
-        $model = new static();
-        $model->select($select);
-        $model->whereIn($model->primary_key, $id);
-
-        if (count($id) != 1) {
-            return $model->get();
-        }
-
-        return $model->first();
+    public static function first(): ?Model
+    {
+        return static::query()->first();
     }
 
     /**
@@ -268,9 +310,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @return Collection|Model|null
      */
     public static function findAndDelete(
-        int | string | array $id,
-        array $select = ['*']
-    ): Collection|Model|null {
+        int|string|array $id,
+        array            $select = ['*']
+    ): Collection|Model|null
+    {
         $model = static::find($id, $select);
 
         if (is_null($model)) {
@@ -288,15 +331,84 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * find
+     *
+     * @param mixed $id
+     * @param array $select
+     * @return Collection|static|null
+     */
+    public static function find(
+        int|string|array $id,
+        array            $select = ['*']
+    ): Collection|Model|null
+    {
+        $id = (array)$id;
+
+        $model = new static();
+        $model->select($select);
+        $model->whereIn($model->primary_key, $id);
+
+        if (count($id) != 1) {
+            return $model->get();
+        }
+
+        return $model->first();
+    }
+
+    /**
+     * Delete a record
+     *
+     * @return int
+     * @throws
+     */
+    public function delete(): int
+    {
+        $primary_key_value = $this->getKeyValue();
+
+        $model = static::query();
+
+        if ($primary_key_value == null) {
+            return 0;
+        }
+
+        if (!$model->exists($this->primary_key, $primary_key_value)) {
+            return 0;
+        }
+
+        // Fire the deleting event
+        $this->fireEvent('model.deleting');
+
+        // We apply the delete action
+        $deleted = $model->where($this->primary_key, $primary_key_value)->delete();
+
+        // Fire the deleted event if there are affected row
+        if ($deleted) {
+            $this->fireEvent('model.deleted');
+        }
+
+        return $deleted;
+    }
+
+    /**
+     * Retrieves the primary key value
+     *
+     * @return mixed
+     */
+    public function getKeyValue(): mixed
+    {
+        return $this->original[$this->primary_key] ?? $this->attributes[$this->primary_key] ?? null;
+    }
+
+    /**
      * Find information by id or throws an
      * exception in data box not found
      *
-     * @param  mixed $id
+     * @param mixed $id
      * @param array $select
      * @return Model
      * @throws NotFoundException
      */
-    public static function findOrFail(int | string $id, array $select = ['*']): Model
+    public static function findOrFail(int|string $id, array $select = ['*']): Model
     {
         $result = static::find($id, $select);
 
@@ -344,6 +456,169 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $model->save();
 
         return $model;
+    }
+
+    /**
+     * Save aliases on insert action
+     *
+     * @return int
+     * @throws
+     */
+    public function save(): int
+    {
+        $builder = static::query();
+
+        // Get the current primary key value
+        $primary_key_value = $this->getKeyValue();
+
+        // If primary key value is null, we are going to start the creation of new row
+        if (is_null($primary_key_value)) {
+            return $this->writeRows($builder);
+        }
+
+        $primary_key_value = $this->transtypeKeyValue($primary_key_value);
+
+        // Check the existent in database
+        if (!$builder->exists($this->primary_key, $primary_key_value)) {
+            return $this->writeRows($builder);
+        }
+
+        // We set the primary key value
+        $this->original[$this->primary_key] = $primary_key_value;
+
+        $update_data = array_filter($this->attributes, function ($value, $key) {
+            return !array_key_exists($key, $this->original) || $this->original[$key] !== $value;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        // When the update data is empty, we load the original data
+        if (count($update_data) == 0) {
+            $update_data = $this->original;
+        }
+
+        // Fire the updating event
+        $this->fireEvent('model.updating');
+
+        // Execute update model
+        $updated = $builder->where($this->primary_key, $primary_key_value)->update($update_data);
+
+        // Fire the updated event if there are affected row
+        if ($updated) {
+            $this->fireEvent('model.updated');
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Create the new row
+     *
+     * @param Builder $builder
+     * @return int
+     */
+    private function writeRows(Builder $builder): int
+    {
+        // Fire the creating event
+        $this->fireEvent('model.creating');
+
+        $primary_key_value = $this->getKeyValue();
+
+        // Insert information in the database
+        $row_affected = $builder->insert($this->attributes);
+
+        // We get a last insertion id value
+        if (static::$builder->getAdapterName() == 'pgsql') {
+            if ($this->auto_increment) {
+                $sequence = $this->table . "_" . $this->primary_key . '_seq';
+                $primary_key_value = static::$builder->getPdo()->lastInsertId($sequence);
+            }
+        } else {
+            $primary_key_value = static::$builder->getPdo()->lastInsertId();
+        }
+
+        if ((int)$primary_key_value == 0) {
+            $primary_key_value = $this->attributes[$this->primary_key] ?? null;
+        }
+
+        $primary_key_value = !is_numeric($primary_key_value) ? $primary_key_value : (int)$primary_key_value;
+
+        // Set the primary key value
+        $this->attributes[$this->primary_key] = $primary_key_value;
+        $this->original = $this->attributes;
+
+        if ($row_affected == 1) {
+            $this->fireEvent('model.created');
+        }
+
+        return $row_affected;
+    }
+
+    /**
+     * Trans-type the primary key value
+     *
+     * @param mixed $primary_key_value
+     * @return string|int|float
+     */
+    private function transtypeKeyValue(mixed $primary_key_value): string|int|float
+    {
+        // Transtype value to the define primary key type
+        if ($this->primary_key_type == 'int') {
+            return (int)$primary_key_value;
+        }
+
+        if ($this->primary_key_type == 'float' || $this->primary_key_type == 'double') {
+            return (float)$primary_key_value;
+        }
+
+        return (string)$primary_key_value;
+    }
+
+    /**
+     * Delete a record
+     *
+     * @param array $attributes
+     * @return int|bool
+     * @throws
+     */
+    public function update(array $attributes): int|bool
+    {
+        $primary_key_value = $this->getKeyValue();
+
+        // return 0 if the primary key is not define for update
+        if ($primary_key_value == null) {
+            return false;
+        }
+
+        $model = static::query();
+
+        // We set the primary key value
+        $this->original[$this->primary_key] = $primary_key_value;
+
+        $data_for_updating = $attributes;
+
+        if (count($this->original) > 0) {
+            $data_for_updating = array_filter($attributes, function ($value, $key) {
+                return array_key_exists($key, $this->original) || $this->original[$key] !== $value;
+            }, ARRAY_FILTER_USE_BOTH);
+        }
+
+        // Fire the updating event
+        $this->fireEvent('model.updating');
+
+        // When the data for updating list is empty, we load the original data
+        if (count($data_for_updating) == 0) {
+            $this->fireEvent('model.updated');
+            return true;
+        }
+
+        // We update the model data right now
+        $updated = $model->where($this->primary_key, $primary_key_value)->update($data_for_updating);
+
+        // Fire the updated event if there are affected row
+        if ($updated) {
+            $this->fireEvent('model.updated');
+        }
+
+        return $updated;
     }
 
     /**
@@ -438,250 +713,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Initialize the connection
-     *
-     * @return Builder
-     * @throws
-     */
-    public static function query(): Builder
-    {
-        if (
-            static::$builder instanceof Builder
-            && static::$builder->getModel() == static::class
-        ) {
-            if (DB::getConnectionName() == static::$builder->getAdapterName()) {
-                return static::$builder;
-            }
-        }
-
-        // Reflection action
-        $reflection = new \ReflectionClass(static::class);
-
-        $properties = $reflection->getDefaultProperties();
-
-        if (!isset($properties['table']) || $properties['table'] == null) {
-            $parts = explode('\\', static::class);
-            $table = Str::lower(Str::snake(Str::plural(end($parts))));
-        } else {
-            $table = $properties['table'];
-        }
-
-        // Check the connection parameter before apply
-        if (isset($properties['connection'])) {
-            DB::connection($properties['connection']);
-        }
-
-        // Check the prefix parameter before apply
-        $prefix = $properties['prefix'] ?? DB::getConnectionAdapter()->getTablePrefix();
-
-        // Set the table prefix
-        $table = $prefix . $table;
-
-        static::$builder = new Builder($table, DB::getConnectionAdapter());
-        static::$builder->setPrefix($prefix);
-        static::$builder->setModel(static::class);
-
-        return static::$builder;
-    }
-
-    /**
-     * Create the new row
-     *
-     * @param Builder $builder
-     * @return int
-     */
-    private function writeRows(Builder $builder): int
-    {
-        // Fire the creating event
-        $this->fireEvent('model.creating');
-
-        $primary_key_value = $this->getKeyValue();
-
-        // Insert information in the database
-        $row_affected = $builder->insert($this->attributes);
-
-        // We get a last insertion id value
-        if (static::$builder->getAdapterName() == 'pgsql') {
-            if ($this->auto_increment) {
-                $sequence = $this->table . "_" . $this->primary_key . '_seq';
-                $primary_key_value = static::$builder->getPdo()->lastInsertId($sequence);
-            }
-        } else {
-            $primary_key_value = static::$builder->getPdo()->lastInsertId();
-        }
-
-        if ((int) $primary_key_value == 0) {
-            $primary_key_value = $this->attributes[$this->primary_key] ?? null;
-        }
-
-        $primary_key_value = !is_numeric($primary_key_value) ? $primary_key_value : (int) $primary_key_value;
-
-        // Set the primary key value
-        $this->attributes[$this->primary_key] = $primary_key_value;
-        $this->original = $this->attributes;
-
-        if ($row_affected == 1) {
-            $this->fireEvent('model.created');
-        }
-
-        return $row_affected;
-    }
-
-    /**
-     * Save aliases on insert action
-     *
-     * @return int
-     * @throws
-     */
-    public function save(): int
-    {
-        $builder = static::query();
-
-        // Get the current primary key value
-        $primary_key_value = $this->getKeyValue();
-
-        // If primary key value is null, we are going to start the creation of new row
-        if (is_null($primary_key_value)) {
-            return $this->writeRows($builder);
-        }
-
-        $primary_key_value = $this->transtypeKeyValue($primary_key_value);
-
-        // Check the existent in database
-        if (!$builder->exists($this->primary_key, $primary_key_value)) {
-            return $this->writeRows($builder);
-        }
-
-        // We set the primary key value
-        $this->original[$this->primary_key] = $primary_key_value;
-
-        $update_data = array_filter($this->attributes, function ($value, $key) {
-            return !array_key_exists($key, $this->original) || $this->original[$key] !== $value;
-        }, ARRAY_FILTER_USE_BOTH);
-
-        // When the update data is empty, we load the original data
-        if (count($update_data) == 0) {
-            $update_data = $this->original;
-        }
-
-        // Fire the updating event
-        $this->fireEvent('model.updating');
-
-        // Execute update model
-        $updated = $builder->where($this->primary_key, $primary_key_value)->update($update_data);
-
-        // Fire the updated event if there are affected row
-        if ($updated) {
-            $this->fireEvent('model.updated');
-        }
-
-        return $updated;
-    }
-
-    /**
-     * Trans-type the primary key value
-     *
-     * @param mixed $primary_key_value
-     * @return string|int|float
-     */
-    private function transtypeKeyValue(mixed $primary_key_value): string|int|float
-    {
-        // Transtype value to the define primary key type
-        if ($this->primary_key_type == 'int') {
-            return (int) $primary_key_value;
-        }
-
-        if ($this->primary_key_type == 'float' || $this->primary_key_type == 'double') {
-            return (float) $primary_key_value;
-        }
-
-        return (string) $primary_key_value;
-    }
-
-    /**
-     * Delete a record
-     *
-     * @param array $attributes
-     * @return int|bool
-     * @throws
-     */
-    public function update(array $attributes): int|bool
-    {
-        $primary_key_value = $this->getKeyValue();
-
-        // return 0 if the primary key is not define for update
-        if ($primary_key_value == null) {
-            return false;
-        }
-
-        $model = static::query();
-
-        // We set the primary key value
-        $this->original[$this->primary_key] = $primary_key_value;
-
-        $data_for_updating = $attributes;
-
-        if (count($this->original) > 0) {
-            $data_for_updating = array_filter($attributes, function ($value, $key) {
-                return array_key_exists($key, $this->original) || $this->original[$key] !== $value;
-            }, ARRAY_FILTER_USE_BOTH);
-        }
-
-        // Fire the updating event
-        $this->fireEvent('model.updating');
-
-        // When the data for updating list is empty, we load the original data
-        if (count($data_for_updating) == 0) {
-            $this->fireEvent('model.updated');
-            return true;
-        }
-
-        // We update the model data right now
-        $updated = $model->where($this->primary_key, $primary_key_value)->update($data_for_updating);
-
-        // Fire the updated event if there are affected row
-        if ($updated) {
-            $this->fireEvent('model.updated');
-        }
-
-        return $updated;
-    }
-
-    /**
-     * Delete a record
-     *
-     * @return int
-     * @throws
-     */
-    public function delete(): int
-    {
-        $primary_key_value = $this->getKeyValue();
-
-        $model = static::query();
-
-        if ($primary_key_value == null) {
-            return 0;
-        }
-
-        if (!$model->exists($this->primary_key, $primary_key_value)) {
-            return 0;
-        }
-
-        // Fire the deleting event
-        $this->fireEvent('model.deleting');
-
-        // We apply the delete action
-        $deleted = $model->where($this->primary_key, $primary_key_value)->delete();
-
-        // Fire the deleted event if there are affected row
-        if ($deleted) {
-            $this->fireEvent('model.deleted');
-        }
-
-        return $deleted;
-    }
-
-    /**
      * Delete Active Record by column name
      *
      * @param string $column
@@ -697,13 +728,24 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Retrieves the primary key value
+     * __callStatic
      *
+     * @param string $name
+     * @param array $arguments
      * @return mixed
      */
-    public function getKeyValue(): mixed
+    public static function __callStatic(string $name, array $arguments)
     {
-        return $this->original[$this->primary_key] ?? $this->attributes[$this->primary_key] ?? null;
+        $model = static::query();
+
+        if (method_exists($model, $name)) {
+            return call_user_func_array([$model, $name], $arguments);
+        }
+
+        throw new BadMethodCallException(
+            'method ' . $name . ' is not defined.',
+            E_ERROR
+        );
     }
 
     /**
@@ -737,17 +779,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $this->setAttribute($this->updated_at, date('Y-m-d H:i:s'));
         }
 
-        return (bool) $this->save();
-    }
-
-    /**
-     * Assign values to class attributes
-     *
-     * @param array $attributes
-     */
-    public function setAttributes(array $attributes): void
-    {
-        $this->attributes = $attributes;
+        return (bool)$this->save();
     }
 
     /**
@@ -762,22 +794,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Set connection point
-     *
-     * @param string $name
-     * @return Builder
-     * @throws ConnectionException
-     */
-    public function setConnection(string $name): Builder
-    {
-        $this->connection = $name;
-
-        DB::connection($name);
-
-        return static::query();
-    }
-
-    /**
      * Retrieves the list of attributes.
      *
      * @return array
@@ -788,36 +804,24 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Assign values to class attributes
+     *
+     * @param array $attributes
+     */
+    public function setAttributes(array $attributes): void
+    {
+        $this->attributes = $attributes;
+    }
+
+    /**
      * Allows you to recover an attribute
      *
-     * @param  string $key
+     * @param string $key
      * @return mixed|null
      */
     public function getAttribute(string $key): mixed
     {
         return $this->attributes[$key] ?? null;
-    }
-
-    /**
-     * Lists of mutable properties
-     *
-     * @return array
-     */
-    private function mutableDateAttributes(): array
-    {
-        return array_merge($this->dates, [
-            $this->created_at, $this->updated_at, 'expired_at', 'logged_at', 'signed_at'
-        ]);
-    }
-
-    /**
-     * Get the table name.
-     *
-     * @return string
-     */
-    public function getTable(): string
-    {
-        return $this->table;
     }
 
     /**
@@ -833,20 +837,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Returns the data
-     *
-     * @return string
-     */
-    public function toJson(): string
-    {
-        $data = array_filter($this->attributes, function ($key) {
-            return !in_array($key, $this->hidden);
-        }, ARRAY_FILTER_USE_KEY);
-
-        return json_encode($data);
-    }
-
-    /**
      * @inheritDoc
      */
     public function jsonSerialize(): array
@@ -859,7 +849,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * __get
      *
-     * @param  string $name
+     * @param string $name
      * @return mixed
      */
     public function __get(string $name): mixed
@@ -889,20 +879,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 return new Carbon($value);
             }
             if ($type === "int") {
-                return (int) $value;
+                return (int)$value;
             }
             if ($type === "float") {
-                return (float) $value;
+                return (float)$value;
             }
             if ($type === "double") {
-                return (double) $value;
+                return (double)$value;
             }
             if ($type === "json") {
                 if (is_array($value)) {
-                    return (object) $value;
+                    return (object)$value;
                 }
                 if (is_object($value)) {
-                    return (object) $value;
+                    return (object)$value;
                 }
                 return json_decode(
                     $value,
@@ -913,10 +903,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             if ($type === "array") {
                 if (is_array($value)) {
-                    return (array) $value;
+                    return (array)$value;
                 }
                 if (is_object($value)) {
-                    return (array) $value;
+                    return (array)$value;
                 }
                 return json_decode(
                     $value,
@@ -942,6 +932,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Lists of mutable properties
+     *
+     * @return array
+     */
+    private function mutableDateAttributes(): array
+    {
+        return array_merge($this->dates, [
+            $this->created_at, $this->updated_at, 'expired_at', 'logged_at', 'signed_at'
+        ]);
+    }
+
+    /**
      * __toString
      *
      * @return string
@@ -952,10 +954,24 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Returns the data
+     *
+     * @return string
+     */
+    public function toJson(): string
+    {
+        $data = array_filter($this->attributes, function ($key) {
+            return !in_array($key, $this->hidden);
+        }, ARRAY_FILTER_USE_KEY);
+
+        return json_encode($data);
+    }
+
+    /**
      * __call
      *
      * @param string $name
-     * @param  array  $arguments
+     * @param array $arguments
      * @return mixed
      */
     public function __call(string $name, array $arguments = [])
@@ -966,28 +982,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return call_user_func_array([$model, $name], $arguments);
         }
 
-        throw new \BadMethodCallException(
-            'method ' . $name . ' is not defined.',
-            E_ERROR
-        );
-    }
-
-    /**
-     * __callStatic
-     *
-     * @param  string $name
-     * @param  array  $arguments
-     * @return mixed
-     */
-    public static function __callStatic(string $name, array $arguments)
-    {
-        $model = static::query();
-
-        if (method_exists($model, $name)) {
-            return call_user_func_array([$model, $name], $arguments);
-        }
-
-        throw new \BadMethodCallException(
+        throw new BadMethodCallException(
             'method ' . $name . ' is not defined.',
             E_ERROR
         );

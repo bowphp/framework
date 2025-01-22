@@ -6,7 +6,7 @@ namespace Bow\Storage\Service;
 
 use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\FilesystemInterface;
-use InvalidArgumentException;
+use RuntimeException;
 
 class DiskFilesystemService implements FilesystemInterface
 {
@@ -96,27 +96,42 @@ class DiskFilesystemService implements FilesystemInterface
         // We try to create the directory
         $this->makeDirectory($dirname);
 
-        return (bool) file_put_contents($file, $content);
+        return (bool)file_put_contents($file, $content);
     }
 
     /**
-     * Add content after the contents of the file
+     * Resolves file path.
+     * Give the absolute path of a path
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @return string
+     */
+    public function path(string $file): string
+    {
+        if (preg_match('#^' . $this->base_directory . '#', $file)) {
+            return $file;
+        }
+
+        return rtrim($this->base_directory, '/') . '/' . ltrim($file, '/');
+    }
+
+    /**
+     * Create a directory
      *
+     * @param string $dirname
+     * @param int $mode
      * @return bool
      */
-    public function append(string $file, string $content): bool
+    public function makeDirectory(string $dirname, int $mode = 0777): bool
     {
-        return (bool) file_put_contents($file, $content, FILE_APPEND);
+        return @mkdir($dirname, $mode, true);
     }
 
     /**
      * Add content before the contents of the file
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @param string $content
      *
      * @return bool
      * @throws
@@ -131,9 +146,135 @@ class DiskFilesystemService implements FilesystemInterface
     }
 
     /**
+     * Add content after the contents of the file
+     *
+     * @param string $file
+     * @param string $content
+     *
+     * @return bool
+     */
+    public function append(string $file, string $content): bool
+    {
+        return (bool)file_put_contents($file, $content, FILE_APPEND);
+    }
+
+    /**
+     * List the files of a folder passed as a parameter
+     *
+     * @param string $dirname
+     *
+     * @return array
+     */
+    public function files(string $dirname): array
+    {
+        $dirname = $this->path($dirname);
+
+        $directory_contents = glob($dirname . "/*");
+
+        return array_filter($directory_contents, fn($file) => filetype($file) == "file");
+    }
+
+    /**
+     * List the folder of a folder passed as a parameter
+     *
+     * @param string $dirname
+     * @return array
+     */
+    public function directories(string $dirname): array
+    {
+        return glob($this->path($dirname) . "/*", GLOB_ONLYDIR);
+    }
+
+    /**
+     * Renames or moves a source file to a target file.
+     *
+     * @param string $source
+     * @param string $target
+     * @return bool
+     */
+    public function move(string $source, string $target): bool
+    {
+        $this->copy($source, $target);
+
+        $this->delete($source);
+
+        return true;
+    }
+
+    /**
+     * Copy the contents of a source file to a target file.
+     *
+     * @param string $source
+     * @param string $target
+     * @return bool
+     */
+    public function copy(string $source, string $target): bool
+    {
+        if (!$this->exists($source)) {
+            throw new RuntimeException("$source does not exist.", E_ERROR);
+        }
+
+        if (!$this->exists($target)) {
+            $this->makeDirectory(dirname($target));
+        }
+
+        return (bool)file_put_contents($target, $this->get($source));
+    }
+
+    /**
+     * Check the existence of a file or directory
+     *
+     * @param string $file
+     * @return bool
+     */
+    public function exists(string $file): bool
+    {
+        return $this->isFile($file) || $this->isDirectory($file);
+    }
+
+    /**
+     * isFile alias of is_file.
+     *
+     * @param string $file
+     * @return bool
+     */
+    public function isFile(string $file): bool
+    {
+        return is_file($this->path($file));
+    }
+
+    /**
+     * isDirectory alias of is_dir.
+     *
+     * @param string $dirname
+     * @return bool
+     */
+    public function isDirectory(string $dirname): bool
+    {
+        return is_dir($this->path($dirname));
+    }
+
+    /**
+     * Recover the contents of the file
+     *
+     * @param string $file
+     * @return string|null
+     */
+    public function get(string $file): ?string
+    {
+        $file = $this->path($file);
+
+        if (!(is_file($file) && stream_is_local($file))) {
+            return null;
+        }
+
+        return file_get_contents($file);
+    }
+
+    /**
      * Delete file or directory
      *
-     * @param  string $file
+     * @param string $file
      *
      * @return bool
      */
@@ -143,7 +284,7 @@ class DiskFilesystemService implements FilesystemInterface
 
         if (!is_dir($file)) {
             if (is_file($file)) {
-                return (bool) @unlink($file);
+                return (bool)@unlink($file);
             }
         }
 
@@ -157,110 +298,7 @@ class DiskFilesystemService implements FilesystemInterface
             }
         }
 
-        return (bool) @rmdir($file);
-    }
-
-    /**
-     * List the files of a folder passed as a parameter
-     *
-     * @param  string $dirname
-     *
-     * @return array
-     */
-    public function files(string $dirname): array
-    {
-        $dirname = $this->path($dirname);
-
-        $directory_contents = glob($dirname . "/*");
-
-        return array_filter($directory_contents, fn ($file) => filetype($file) == "file");
-    }
-
-    /**
-     * List the folder of a folder passed as a parameter
-     *
-     * @param  string $dirname
-     * @return array
-     */
-    public function directories(string $dirname): array
-    {
-        return glob($this->path($dirname) . "/*", GLOB_ONLYDIR);
-    }
-
-    /**
-     * Create a directory
-     *
-     * @param  string $dirname
-     * @param  int $mode
-     * @return bool
-     */
-    public function makeDirectory(string $dirname, int $mode = 0777): bool
-    {
-        return @mkdir($dirname, $mode, true);
-    }
-
-    /**
-     * Recover the contents of the file
-     *
-     * @param string $filename
-     * @return string|null
-     */
-    public function get(string $filename): ?string
-    {
-        $filename = $this->path($filename);
-
-        if (!(is_file($filename) && stream_is_local($filename))) {
-            return null;
-        }
-
-        return file_get_contents($filename);
-    }
-
-    /**
-     * Copy the contents of a source file to a target file.
-     *
-     * @param  string $target
-     * @param  string $source
-     * @return bool
-     */
-    public function copy(string $target, string $source): bool
-    {
-        if (!$this->exists($target)) {
-            throw new \RuntimeException("$target does not exist.", E_ERROR);
-        }
-
-        if (!$this->exists($source)) {
-            $this->makeDirectory(dirname($source));
-        }
-
-        return (bool) file_put_contents($source, $this->get($target));
-    }
-
-    /**
-     * Renames or moves a source file to a target file.
-     *
-     * @param string $target
-     * @param string $source
-     * @return bool
-     */
-    public function move(string $target, string $source): bool
-    {
-        $this->copy($target, $source);
-
-        $this->delete($target);
-
-        return true;
-    }
-
-    /**
-     * Check the existence of a file or directory
-     *
-     * @param string $filename
-     * @return bool
-     */
-    public function exists(string $filename): bool
-    {
-        return $this->isFile($filename) || $this->isDirectory($filename);
+        return (bool)@rmdir($file);
     }
 
     /**
@@ -276,43 +314,5 @@ class DiskFilesystemService implements FilesystemInterface
         }
 
         return null;
-    }
-
-    /**
-     * isFile alias of is_file.
-     *
-     * @param string $filename
-     * @return bool
-     */
-    public function isFile(string $filename): bool
-    {
-        return is_file($this->path($filename));
-    }
-
-    /**
-     * isDirectory alias of is_dir.
-     *
-     * @param string $dirname
-     * @return bool
-     */
-    public function isDirectory(string $dirname): bool
-    {
-        return is_dir($this->path($dirname));
-    }
-
-    /**
-     * Resolves file path.
-     * Give the absolute path of a path
-     *
-     * @param string $filename
-     * @return string
-     */
-    public function path(string $filename): string
-    {
-        if (preg_match('#^' . $this->base_directory . '#', $filename)) {
-            return $filename;
-        }
-
-        return rtrim($this->base_directory, '/') . '/' . ltrim($filename, '/');
     }
 }

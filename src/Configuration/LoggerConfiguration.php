@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Bow\Configuration;
 
+use Bow\Contracts\ResponseInterface;
+use Bow\Database\Barry\Model;
+use Bow\Support\Collection;
 use Bow\View\View;
 use Exception;
-use Monolog\Logger;
-use Bow\Support\Collection;
-use Whoops\Handler\Handler;
-use Bow\Database\Barry\Model;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\FirePHPHandler;
-use Whoops\Handler\CallbackHandler;
-use Bow\Contracts\ResponseInterface;
 use Iterator;
+use Monolog\Handler\FirePHPHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Whoops\Handler\CallbackHandler;
+use Whoops\Handler\Handler;
 use Whoops\Handler\PrettyPageHandler;
+use Whoops\Run;
 
 class LoggerConfiguration extends Configuration
 {
@@ -39,11 +40,26 @@ class LoggerConfiguration extends Configuration
     }
 
     /**
-     * @inheritdoc
+     * Loader file logger via Monolog
+     *
+     * @param string $log_dir
+     * @param string $name
+     * @return Logger
+     * @throws Exception
      */
-    public function run(): void
+    private function loadFileLogger(string $log_dir, string $name): Logger
     {
-        $this->container->make('logger');
+        $monolog = new Logger($name);
+
+        $monolog->pushHandler(
+            new StreamHandler($log_dir . '/bow-' . date('Y-m-d') . '.log', Logger::DEBUG)
+        );
+
+        $monolog->pushHandler(
+            new FirePHPHandler()
+        );
+
+        return $monolog;
     }
 
     /**
@@ -55,7 +71,7 @@ class LoggerConfiguration extends Configuration
      */
     private function loadFrontLogger(Logger $monolog, $error_handler): void
     {
-        $whoops = new \Whoops\Run();
+        $whoops = new Run();
 
         if (app_env('APP_DEBUG')) {
             $whoops->pushHandler(new PrettyPageHandler());
@@ -93,25 +109,10 @@ class LoggerConfiguration extends Configuration
     }
 
     /**
-     * Loader file logger via Monolog
-     *
-     * @param string $log_dir
-     * @param string $name
-     * @return Logger
-     * @throws Exception
+     * @inheritdoc
      */
-    private function loadFileLogger(string $log_dir, string $name): Logger
+    public function run(): void
     {
-        $monolog = new Logger($name);
-
-        $monolog->pushHandler(
-            new StreamHandler($log_dir . '/bow-' . date('Y-m-d') . '.log', Logger::DEBUG)
-        );
-
-        $monolog->pushHandler(
-            new FirePHPHandler()
-        );
-
-        return $monolog;
+        $this->container->make('logger');
     }
 }

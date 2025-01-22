@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Bow\Container;
 
-use Closure;
-use ReflectionClass;
-use Bow\Http\Request;
-use ReflectionFunction;
-use ReflectionException;
-use Bow\Support\Collection;
-use Bow\Database\Barry\Model;
-use InvalidArgumentException;
 use Bow\Contracts\ResponseInterface;
+use Bow\Database\Barry\Model;
+use Bow\Http\Request;
 use Bow\Router\Exception\RouterException;
+use Bow\Support\Collection;
+use Closure;
+use InvalidArgumentException;
+use Iterator;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
 
 class Action
 {
@@ -22,28 +23,24 @@ class Action
         'integer', 'double', 'float', 'callable',
         'object', 'stdclass', '\closure', 'closure'
     ];
-
-    /**
-     * The list of namespaces defined in the application
-     *
-     * @var array
-     */
-    private array $namespaces;
-
-    /**
-     * The list of middleware loads in the application
-     *
-     * @var array
-     */
-    private array $middlewares;
-
     /**
      * The Action instance
      *
      * @var ?Action
      */
     private static ?Action $instance = null;
-
+    /**
+     * The list of namespaces defined in the application
+     *
+     * @var array
+     */
+    private array $namespaces;
+    /**
+     * The list of middleware loads in the application
+     *
+     * @var array
+     */
+    private array $middlewares;
     /**
      * The Dispatcher instance
      *
@@ -84,16 +81,6 @@ class Action
     }
 
     /**
-     * Retrieves Action instance
-     *
-     * @return Action
-     */
-    public static function getInstance(): Action
-    {
-        return static::$instance;
-    }
-
-    /**
      * Add a middleware to the list
      *
      * @param array $middlewares
@@ -102,7 +89,7 @@ class Action
      */
     public function pushMiddleware(array $middlewares, bool $end = false): void
     {
-        $middlewares = (array) $middlewares;
+        $middlewares = (array)$middlewares;
 
         if ($end) {
             $this->middlewares = array_merge($this->middlewares, $middlewares);
@@ -119,7 +106,7 @@ class Action
      */
     public function pushNamespace(array|string $namespace): void
     {
-        $namespace = (array) $namespace;
+        $namespace = (array)$namespace;
 
         $this->namespaces = array_merge($this->namespaces, $namespace);
     }
@@ -135,7 +122,7 @@ class Action
      */
     public function call(callable|string|array $actions, ?array $param = null): mixed
     {
-        $param = (array) $param;
+        $param = (array)$param;
 
         /**
          * We execute the action define as a string
@@ -158,7 +145,7 @@ class Action
          * and extracting the middleware
          */
         if (isset($actions['middleware'])) {
-            $middlewares = (array) $actions['middleware'];
+            $middlewares = (array)$actions['middleware'];
 
             unset($actions['middleware']);
         }
@@ -182,7 +169,7 @@ class Action
          * with the action and extracting the controller
          */
         if (isset($actions['controller'])) {
-            $actions = (array) $actions['controller'];
+            $actions = (array)$actions['controller'];
         }
 
         /**
@@ -242,7 +229,7 @@ class Action
             case is_array($response):
             case is_object($response):
             case is_iterable($response):
-            case $response instanceof \Iterator:
+            case $response instanceof Iterator:
             case $response instanceof ResponseInterface:
                 return $response;
             case $response instanceof Model || $response instanceof Collection:
@@ -273,6 +260,156 @@ class Action
         }
 
         return $this->dispatchControllers($functions, $param);
+    }
+
+    /**
+     * Retrieves Action instance
+     *
+     * @return Action
+     */
+    public static function getInstance(): Action
+    {
+        return static::$instance;
+    }
+
+    /**
+     * Load the controllers defined as string
+     *
+     * @param string $controller_name
+     * @return array|null
+     * @throws ReflectionException
+     */
+    public function controller(string $controller_name): ?array
+    {
+        $parts = preg_split('/::|@/', $controller_name);
+
+        if (count($parts) == 1) {
+            $parts[1] = '__invoke';
+        }
+
+        list($class, $method) = $parts;
+
+        if (!class_exists($class)) {
+            $class = sprintf('%s\\%s', $this->namespaces['controller'], ucfirst($class));
+        }
+
+        $injections = $this->injector($class, $method);
+        $controller = (new ReflectionClass($class));
+        $constructor = $controller->getConstructor();
+
+        $controller_injections = [];
+        if (!is_null($constructor)) {
+            $controller_injections = $this->getInjectParameters($constructor->getParameters());
+        }
+
+        $instance = $controller->newInstanceArgs($controller_injections);
+
+        return [
+            'action' => [$instance, $method],
+            'injection' => $injections
+        ];
+    }
+
+    /**
+     * Make any class injection
+     *
+     * @param string $classname
+     * @param ?string $method
+     * @return array
+     * @throws ReflectionException
+     */
+    public function injector(string $classname, ?string $method = null): array
+    {
+        $reflection = new ReflectionClass($classname);
+
+        if (is_null($method)) {
+            $method = "__invoke";
+        }
+
+        $parameters = $reflection->getMethod($method)->getParameters();
+
+        return $this->getInjectParameters($parameters);
+    }
+
+    /**
+     * Get all parameters define by user in method injectable
+     *
+     * @param array $parameters
+     * @return array
+     * @throws ReflectionException
+     */
+    private function getInjectParameters(array $parameters): array
+    {
+        $params = [];
+
+        foreach ($parameters as $parameter) {
+            $class = $parameter->getType();
+
+            if (is_null($class)) {
+                continue;
+            }
+
+            $param = $this->getInjectParameter($class);
+
+            if (is_null($param)) {
+                continue;
+            }
+
+            $params[] = $param;
+        }
+
+        return $params;
+    }
+
+    /**
+     * Get injectable parameter
+     *
+     * @param mixed $class
+     * @return ?object
+     * @throws ReflectionException
+     */
+    private function getInjectParameter(mixed $class): ?object
+    {
+        $class_name = $class->getName();
+
+        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
+            return null;
+        }
+
+        if (!class_exists($class_name)) {
+            throw new InvalidArgumentException(
+                sprintf('class %s not exists', $class_name)
+            );
+        }
+
+        if (method_exists($class_name, 'getInstance')) {
+            return $class_name::getInstance();
+        }
+
+        $reflection = new ReflectionClass($class_name);
+
+        $args = [];
+        if ($reflection->isInstantiable() && $reflection->getConstructor()) {
+            $args = $this->injector($class_name, '__construct');
+        }
+
+        return (new ReflectionClass($class_name))->newInstanceArgs($args);
+    }
+
+    /**
+     * Injection for closure
+     *
+     * @param Closure|callable $closure
+     * @return array
+     * @throws
+     */
+    public function injectorForClosure(Closure|callable $closure): array
+    {
+        $reflection = new ReflectionFunction($closure);
+
+        return $this->getInjectParameters(
+            $reflection->getParameters()
+        );
     }
 
     /**
@@ -347,44 +484,6 @@ class Action
     }
 
     /**
-     * Load the controllers defined as string
-     *
-     * @param string $controller_name
-     * @return array|null
-     * @throws ReflectionException
-     */
-    public function controller(string $controller_name): ?array
-    {
-        $parts = preg_split('/::|@/', $controller_name);
-
-        if (count($parts) == 1) {
-            $parts[1] = '__invoke';
-        }
-
-        list($class, $method) = $parts;
-
-        if (!class_exists($class, true)) {
-            $class = sprintf('%s\\%s', $this->namespaces['controller'], ucfirst($class));
-        }
-
-        $injections = $this->injector($class, $method);
-        $controller = (new ReflectionClass($class));
-        $constructor = $controller->getConstructor();
-
-        $controller_injections = [];
-        if (!is_null($constructor)) {
-            $controller_injections = $this->getInjectParameters($constructor->getParameters());
-        }
-
-        $instance = $controller->newInstanceArgs($controller_injections);
-
-        return [
-            'action' => [$instance, $method],
-            'injection' => $injections
-        ];
-    }
-
-    /**
      * Load the closure define as action
      *
      * @param Closure $closure
@@ -403,107 +502,5 @@ class Action
             'action' => $closure,
             'injection' => $injections
         ];
-    }
-
-    /**
-     * Make any class injection
-     *
-     * @param string $classname
-     * @param ?string $method
-     * @return array
-     * @throws ReflectionException
-     */
-    public function injector(string $classname, ?string $method = null): array
-    {
-        $reflection = new ReflectionClass($classname);
-
-        if (is_null($method)) {
-            $method = "__invoke";
-        }
-
-        $parameters = $reflection->getMethod($method)->getParameters();
-
-        return $this->getInjectParameters($parameters);
-    }
-
-    /**
-     * Injection for closure
-     *
-     * @param Closure|callable $closure
-     * @return array
-     * @throws
-     */
-    public function injectorForClosure(Closure|callable $closure): array
-    {
-        $reflection = new ReflectionFunction($closure);
-
-        return $this->getInjectParameters(
-            $reflection->getParameters()
-        );
-    }
-
-    /**
-     * Get all parameters define by user in method injectable
-     *
-     * @param array $parameters
-     * @return array
-     * @throws ReflectionException
-     */
-    private function getInjectParameters(array $parameters): array
-    {
-        $params = [];
-
-        foreach ($parameters as $parameter) {
-            $class = $parameter->getType();
-
-            if (is_null($class)) {
-                continue;
-            }
-
-            $param = $this->getInjectParameter($class);
-
-            if (is_null($param)) {
-                continue;
-            }
-
-            $params[] = $param;
-        }
-
-        return $params;
-    }
-
-    /**
-     * Get injectable parameter
-     *
-     * @param mixed $class
-     * @return ?object
-     * @throws ReflectionException
-     */
-    private function getInjectParameter(mixed $class): ?object
-    {
-        $class_name = $class->getName();
-
-        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
-            return null;
-        }
-
-        if (!class_exists($class_name)) {
-            throw new InvalidArgumentException(
-                sprintf('class %s not exists', $class_name)
-            );
-        }
-
-        if (method_exists($class_name, 'getInstance')) {
-            return $class_name::getInstance();
-        }
-
-        $reflection = new ReflectionClass($class_name);
-
-        $args = [];
-        if ($reflection->isInstantiable() && $reflection->getConstructor()) {
-            $args = $this->injector($class_name, '__construct');
-        }
-
-        return (new ReflectionClass($class_name))->newInstanceArgs($args);
     }
 }

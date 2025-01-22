@@ -63,14 +63,6 @@ class PHPEngine extends EngineAbstract
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getEngine(): mixed
-    {
-        throw new RuntimeException("This method cannot work for PHP native engine");
-    }
-
-    /**
      * include the execute filename
      *
      * @param string $filename
@@ -83,5 +75,13 @@ class PHPEngine extends EngineAbstract
         require $filename;
 
         return ob_get_clean();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEngine(): mixed
+    {
+        throw new RuntimeException("This method cannot work for PHP native engine");
     }
 }

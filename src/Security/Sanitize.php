@@ -10,7 +10,7 @@ class Sanitize
      * To clean the data
      *
      * @param mixed $data
-     * @param bool  $secure
+     * @param bool $secure
      * @return mixed
      */
     public static function make(mixed $data, bool $secure = false): mixed
@@ -23,13 +23,13 @@ class Sanitize
 
         if (is_numeric($data)) {
             if (is_int($data)) {
-                return (int) $data;
+                return (int)$data;
             }
             if (is_float($data)) {
-                return (float) $data;
+                return (float)$data;
             }
             if (is_double($data)) {
-                return (double) $data;
+                return (double)$data;
             }
             return $data;
         }
@@ -61,7 +61,7 @@ class Sanitize
     /**
      * Allows you to clean a string of characters
      *
-     * @param  string $data
+     * @param string $data
      * @return string
      */
     public static function data(string $data): string
@@ -72,7 +72,7 @@ class Sanitize
     /**
      * Allows you to clean a string of characters
      *
-     * @param  string $data
+     * @param string $data
      * @return string
      */
     public static function secure(string $data): string

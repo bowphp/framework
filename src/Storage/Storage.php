@@ -6,7 +6,6 @@ namespace Bow\Storage;
 
 use BadMethodCallException;
 use Bow\Storage\Contracts\FilesystemInterface;
-use InvalidArgumentException;
 use Bow\Storage\Exception\DiskNotFoundException;
 use Bow\Storage\Exception\ServiceConfigurationNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
@@ -14,6 +13,7 @@ use Bow\Storage\Service\DiskFilesystemService;
 use Bow\Storage\Service\FTPService;
 use Bow\Storage\Service\S3Service;
 use ErrorException;
+use InvalidArgumentException;
 
 class Storage
 {
@@ -40,34 +40,6 @@ class Storage
         'ftp' => FTPService::class,
         's3' => S3Service::class,
     ];
-
-    /**
-     * Mount disk
-     *
-     * @param string|null $disk
-     *
-     * @return DiskFilesystemService
-     * @throws DiskNotFoundException
-     */
-    public static function disk(?string $disk = null): DiskFilesystemService
-    {
-        // Use the default disk as fallback
-        if (is_null($disk)) {
-            if (! is_null(static::$disk)) {
-                return static::$disk;
-            }
-
-            $disk = static::$config['disk']['mount'];
-        }
-
-        if (!isset(static::$config['disk']['path'][$disk])) {
-            throw new DiskNotFoundException('The ' . $disk . ' disk is not define.');
-        }
-
-        $config = static::$config['disk']['path'][$disk];
-
-        return static::$disk = new DiskFilesystemService($config);
-    }
 
     /**
      * Mount service
@@ -110,23 +82,6 @@ class Storage
     }
 
     /**
-     * Push a new service who implement
-     * the Bow\Storage\Contracts\ServiceInterface
-     *
-     * @param array $drivers
-     */
-    public static function pushService(array $drivers): void
-    {
-        foreach ($drivers as $driver => $handler) {
-            if (isset(static::$available_services_drivers[$driver])) {
-                throw new InvalidArgumentException("The $driver is already define");
-            }
-
-            static::$available_services_drivers[$driver] = $handler;
-        }
-    }
-
-    /**
      * Configure Storage
      *
      * @param array $config
@@ -145,26 +100,48 @@ class Storage
     }
 
     /**
-     * __call
+     * Mount disk
      *
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     * @throws ErrorException
+     * @param string|null $disk
+     *
+     * @return DiskFilesystemService
+     * @throws DiskNotFoundException
      */
-    public function __call(string $name, array $arguments = [])
+    public static function disk(?string $disk = null): DiskFilesystemService
     {
-        if (is_null(static::$disk)) {
-            throw new ErrorException(
-                "Unable to get storage instance before configuration"
-            );
+        // Use the default disk as fallback
+        if (is_null($disk)) {
+            if (!is_null(static::$disk)) {
+                return static::$disk;
+            }
+
+            $disk = static::$config['disk']['mount'];
         }
 
-        if (method_exists(static::$disk, $name)) {
-            return call_user_func_array([static::$disk, $name], $arguments);
+        if (!isset(static::$config['disk']['path'][$disk])) {
+            throw new DiskNotFoundException('The ' . $disk . ' disk is not define.');
         }
 
-        throw new BadMethodCallException("unkdown $name method");
+        $config = static::$config['disk']['path'][$disk];
+
+        return static::$disk = new DiskFilesystemService($config);
+    }
+
+    /**
+     * Push a new service who implement
+     * the Bow\Storage\Contracts\ServiceInterface
+     *
+     * @param array $drivers
+     */
+    public static function pushService(array $drivers): void
+    {
+        foreach ($drivers as $driver => $handler) {
+            if (isset(static::$available_services_drivers[$driver])) {
+                throw new InvalidArgumentException("The $driver is already define");
+            }
+
+            static::$available_services_drivers[$driver] = $handler;
+        }
     }
 
     /**
@@ -190,5 +167,28 @@ class Storage
         throw new BadMethodCallException(
             "The method $name is not defined"
         );
+    }
+
+    /**
+     * __call
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     * @throws ErrorException
+     */
+    public function __call(string $name, array $arguments = [])
+    {
+        if (is_null(static::$disk)) {
+            throw new ErrorException(
+                "Unable to get storage instance before configuration"
+            );
+        }
+
+        if (method_exists(static::$disk, $name)) {
+            return call_user_func_array([static::$disk, $name], $arguments);
+        }
+
+        throw new BadMethodCallException("unkdown $name method");
     }
 }

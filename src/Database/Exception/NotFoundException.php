@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Database\Exception;
 
-class NotFoundException extends \ErrorException
+use ErrorException;
+
+class NotFoundException extends ErrorException
 {
     // Empty
 }

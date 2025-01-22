@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
-class Arraydotify implements \ArrayAccess
+use ArrayAccess;
+
+class Arraydotify implements ArrayAccess
 {
     /**
      * The array collection
@@ -34,15 +36,31 @@ class Arraydotify implements \ArrayAccess
     }
 
     /**
-     * Update the original data
+     * Dotify action
      *
-     * @return void
+     * @param array $items
+     * @param string $prepend
+     * @return array
      */
-    private function updateOrigin(): void
+    private function dotify(array $items, string $prepend = ''): array
     {
-        foreach ($this->items as $key => $value) {
-            $this->dataSet($this->origin, $key, $value);
+        $dot = [];
+
+        foreach ($items as $key => $value) {
+            if (!(is_array($value) || is_object($value))) {
+                $dot[$prepend . $key] = $value;
+                continue;
+            }
+
+            $value = (array)$value;
+
+            $dot = array_merge($dot, $this->dotify(
+                $value,
+                $prepend . $key . '.'
+            ));
         }
+
+        return $dot;
     }
 
     /**
@@ -57,56 +75,29 @@ class Arraydotify implements \ArrayAccess
     }
 
     /**
-     * Dotify action
-     *
-     * @param array  $items
-     * @param string $prepend
-     * @return array
+     * @inheritDoc
      */
-    private function dotify(array $items, string $prepend = ''): array
+    public function offsetGet($offset): mixed
     {
-        $dot = [];
-
-        foreach ($items as $key => $value) {
-            if (!(is_array($value) || is_object($value))) {
-                $dot[$prepend . $key] = $value;
-                continue;
-            }
-
-            $value = (array) $value;
-
-            $dot = array_merge($dot, $this->dotify(
-                $value,
-                $prepend . $key . '.'
-            ));
+        if (!$this->offsetExists($offset)) {
+            return null;
         }
 
-        return $dot;
+        return $this->items[$offset] ?? $this->find($this->origin, $offset);
     }
 
     /**
-     * Transform the dot access to array access
-     *
-     * @param mixed  $array
-     * @param string $key
-     * @param mixed  $value
-     * @return void
+     * @inheritDoc
      */
-    private function dataSet(mixed &$array, string $key, mixed $value): void
+    public function offsetExists($offset): bool
     {
-        $keys = explode('.', $key);
-
-        while (count($keys) > 1) {
-            $key = array_shift($keys);
-
-            if (!isset($array[$key]) || !is_array($array[$key])) {
-                $array[$key] = [];
-            }
-
-            $array = &$array[$key];
+        if (isset($this->items[$offset])) {
+            return true;
         }
 
-        $array[array_shift($keys)] = $value;
+        $array = $this->find($this->origin, $offset);
+
+        return (is_array($array) && !empty($array));
     }
 
     /**
@@ -152,32 +143,6 @@ class Arraydotify implements \ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetExists($offset): bool
-    {
-        if (isset($this->items[$offset])) {
-            return true;
-        }
-
-        $array = $this->find($this->origin, $offset);
-
-        return (is_array($array) && !empty($array));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function offsetGet($offset): mixed
-    {
-        if (!$this->offsetExists($offset)) {
-            return null;
-        }
-
-        return $this->items[$offset] ?? $this->find($this->origin, $offset);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function offsetSet($offset, $value): void
     {
         $this->items[$offset] = $value;
@@ -185,6 +150,43 @@ class Arraydotify implements \ArrayAccess
         $this->items = $this->dotify($this->items);
 
         $this->updateOrigin();
+    }
+
+    /**
+     * Update the original data
+     *
+     * @return void
+     */
+    private function updateOrigin(): void
+    {
+        foreach ($this->items as $key => $value) {
+            $this->dataSet($this->origin, $key, $value);
+        }
+    }
+
+    /**
+     * Transform the dot access to array access
+     *
+     * @param mixed $array
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
+    private function dataSet(mixed &$array, string $key, mixed $value): void
+    {
+        $keys = explode('.', $key);
+
+        while (count($keys) > 1) {
+            $key = array_shift($keys);
+
+            if (!isset($array[$key]) || !is_array($array[$key])) {
+                $array[$key] = [];
+            }
+
+            $array = &$array[$key];
+        }
+
+        $array[array_shift($keys)] = $value;
     }
 
     /**

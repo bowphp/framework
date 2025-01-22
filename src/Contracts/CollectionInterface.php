@@ -9,7 +9,7 @@ interface CollectionInterface
     /**
      * Check for existence of a key in the session collection
      *
-     * @param  string|int $key
+     * @param string|int $key
      * @return bool
      */
     public function has(string|int $key): bool;
@@ -24,8 +24,8 @@ interface CollectionInterface
     /**
      * Allows to recover a value or value collection.
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
     public function get(mixed $key, mixed $default = null): mixed;
@@ -33,9 +33,9 @@ interface CollectionInterface
     /**
      * Add an entry to the collection
      *
-     * @param  string|int $key
-     * @param  mixed $data
-     * @param  bool  $next
+     * @param string|int $key
+     * @param mixed $data
+     * @param bool $next
      * @return CollectionInterface
      */
     public function add(string|int $key, mixed $data, bool $next = false): mixed;
@@ -52,8 +52,8 @@ interface CollectionInterface
     /**
      * Modify an entry in the collection
      *
-     * @param  string $key
-     * @param  mixed  $value
+     * @param string $key
+     * @param mixed $value
      * @return CollectionInterface
      */
     public function set(string $key, mixed $value): mixed;

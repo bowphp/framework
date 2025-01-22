@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Router;
 
-use Bow\Container\Action;
 use Bow\Configuration\Loader;
+use Bow\Container\Action;
 
 class Route
 {
@@ -85,16 +85,6 @@ class Route
     }
 
     /**
-     * Get the path of the current road
-     *
-     * @return string
-     */
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    /**
      * Get the action executed on the current route
      *
      * @return mixed
@@ -107,12 +97,12 @@ class Route
     /**
      * Add middleware
      *
-     * @param  array|string $middleware
+     * @param array|string $middleware
      * @return Route
      */
     public function middleware(array|string $middleware): Route
     {
-        $middleware = (array) $middleware;
+        $middleware = (array)$middleware;
 
         if (!is_array($this->cb)) {
             $this->cb = [
@@ -123,7 +113,7 @@ class Route
             return $this;
         }
 
-        $this->cb['middleware'] = !isset($this->cb['middleware']) ? $middleware : array_merge((array) $this->cb['middleware'], $middleware);
+        $this->cb['middleware'] = !isset($this->cb['middleware']) ? $middleware : array_merge((array)$this->cb['middleware'], $middleware);
 
         return $this;
     }
@@ -163,7 +153,7 @@ class Route
                 continue;
             }
 
-            $tmp = (int) $this->match[$key];
+            $tmp = (int)$this->match[$key];
             $this->params[$value] = $tmp;
             $this->match[$key] = $tmp;
         }
@@ -181,7 +171,7 @@ class Route
     {
         $this->name = $name;
 
-        $routes = (array) $this->config['app.routes'];
+        $routes = (array)$this->config['app.routes'];
 
         $this->config['app.routes'] = array_merge(
             $routes,
@@ -189,6 +179,16 @@ class Route
         );
 
         return $this;
+    }
+
+    /**
+     * Get the path of the current road
+     *
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->path;
     }
 
     /**
@@ -226,7 +226,7 @@ class Route
      * Lets check if the url of the query is
      * conform to that defined by the router
      *
-     * @param  string $uri
+     * @param string $uri
      * @return bool
      */
     public function match(string $uri): bool
@@ -278,7 +278,7 @@ class Route
 
         $tmp_path = $this->path;
 
-        $this->keys = (array) end($match);
+        $this->keys = (array)end($match);
 
         // Association of criteria personalized.
         foreach ($this->keys as $key) {

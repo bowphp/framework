@@ -190,17 +190,6 @@ class Setting
     }
 
     /**
-     * Set the bootstrap files
-     *
-     * @param  array $bootstrap
-     * @return void
-     */
-    public function setBootstrap(array $bootstrap): void
-    {
-        $this->bootstrap = $bootstrap;
-    }
-
-    /**
      * Set the server file
      *
      * @param string $serve_filename
@@ -209,28 +198,6 @@ class Setting
     public function setServerFilename(string $serve_filename): void
     {
         $this->serve_filename = $serve_filename;
-    }
-
-    /**
-     * Set the public directory
-     *
-     * @param string $public_directory
-     * @return void
-     */
-    public function setPublicDirectory(string $public_directory): void
-    {
-        $this->public_directory = $public_directory;
-    }
-
-    /**
-     * Set the config directory
-     *
-     * @param string $config_directory
-     * @return void
-     */
-    public function setConfigDirectory(string $config_directory): void
-    {
-        $this->config_directory = $config_directory;
     }
 
     /**
@@ -245,83 +212,6 @@ class Setting
     }
 
     /**
-     * Set the component directory
-     *
-     * @param string $component_directory
-     * @return void
-     */
-    public function setComponentDirectory(string $component_directory): void
-    {
-        $this->component_directory = $component_directory;
-    }
-
-    /**
-     * Set the migration directory
-     *
-     * @param string $migration_directory
-     * @return void
-     */
-    public function setMigrationDirectory(string $migration_directory): void
-    {
-        $this->migration_directory = $migration_directory;
-    }
-
-    /**
-     * Set the seeder directory
-     *
-     * @param string $seeder_directory
-     * @return void
-     */
-    public function setSeederDirectory(string $seeder_directory): void
-    {
-        $this->seeder_directory = $seeder_directory;
-    }
-
-    /**
-     * Set the controller directory
-     *
-     * @param string $controller_directory
-     * @return void
-     */
-    public function setControllerDirectory(string $controller_directory): void
-    {
-        $this->controller_directory = $controller_directory;
-    }
-
-    /**
-     * Set the validation directory
-     *
-     * @param string $validation_directory
-     * @return void
-     */
-    public function setValidationDirectory(string $validation_directory): void
-    {
-        $this->validation_directory = $validation_directory;
-    }
-
-    /**
-     * Set the middleware directory
-     *
-     * @param string $middleware_directory
-     * @return void
-     */
-    public function setMiddlewareDirectory(string $middleware_directory): void
-    {
-        $this->middleware_directory = $middleware_directory;
-    }
-
-    /**
-     * Set the messaging directory
-     *
-     * @param string $messaging_directory
-     * @return void
-     */
-    public function setMessagingDirectory(string $messaging_directory): void
-    {
-        $this->messaging_directory = $messaging_directory;
-    }
-
-    /**
      * Set the application directory
      *
      * @param string $app_directory
@@ -333,91 +223,13 @@ class Setting
     }
 
     /**
-     * Set the model directory
+     * Get the namespaces
      *
-     * @param string $model_directory
-     * @return void
+     * @return array
      */
-    public function setModelDirectory(string $model_directory): void
+    public function getNamespaces(): array
     {
-        $this->model_directory = $model_directory;
-    }
-
-    /**
-     * Set the var directory
-     *
-     * @param string $var_directory
-     * @return void
-     */
-    public function setVarDirectory(string $var_directory): void
-    {
-        $this->var_directory = $var_directory;
-    }
-
-    /**
-     * Set the exception directory
-     *
-     * @param string $exception_directory
-     * @return void
-     */
-    public function setExceptionDirectory(string $exception_directory): void
-    {
-        $this->exception_directory = $exception_directory;
-    }
-
-    /**
-     * Set the service directory
-     *
-     * @param string $service_directory
-     * @return void
-     */
-    public function setServiceDirectory(string $service_directory): void
-    {
-        $this->service_directory = $service_directory;
-    }
-
-    /**
-     * Set the producer directory
-     *
-     * @param string $producer_directory
-     * @return void
-     */
-    public function setProducerDirectory(string $producer_directory): void
-    {
-        $this->producer_directory = $producer_directory;
-    }
-
-    /**
-     * Set the command directory
-     *
-     * @param string $command_directory
-     * @return void
-     */
-    public function setCommandDirectory(string $command_directory): void
-    {
-        $this->command_directory = $command_directory;
-    }
-
-    /**
-     * Set the event directory
-     *
-     * @param string $event_directory
-     * @return void
-     */
-    public function setEventDirectory(string $event_directory): void
-    {
-        $this->event_directory = $event_directory;
-    }
-
-    /**
-     * Set the event listener directory
-     *
-     * @param string $event_listener_directory
-     * @return void
-     */
-    public function setEventListenerDirectory(string $event_listener_directory): void
-    {
-        $this->event_listener_directory = $event_listener_directory;
+        return $this->namespaces;
     }
 
     /**
@@ -434,16 +246,6 @@ class Setting
     }
 
     /**
-     * Get the namespaces
-     *
-     * @return array
-     */
-    public function getNamespaces(): array
-    {
-        return $this->namespaces;
-    }
-
-    /**
      * Get the var directory
      *
      * @return string
@@ -451,6 +253,17 @@ class Setting
     public function getVarDirectory(): string
     {
         return $this->var_directory;
+    }
+
+    /**
+     * Set the var directory
+     *
+     * @param string $var_directory
+     * @return void
+     */
+    public function setVarDirectory(string $var_directory): void
+    {
+        $this->var_directory = $var_directory;
     }
 
     /**
@@ -464,6 +277,17 @@ class Setting
     }
 
     /**
+     * Set the component directory
+     *
+     * @param string $component_directory
+     * @return void
+     */
+    public function setComponentDirectory(string $component_directory): void
+    {
+        $this->component_directory = $component_directory;
+    }
+
+    /**
      * Get the config directory
      *
      * @return string
@@ -471,6 +295,17 @@ class Setting
     public function getConfigDirectory(): string
     {
         return $this->config_directory;
+    }
+
+    /**
+     * Set the config directory
+     *
+     * @param string $config_directory
+     * @return void
+     */
+    public function setConfigDirectory(string $config_directory): void
+    {
+        $this->config_directory = $config_directory;
     }
 
     /**
@@ -494,6 +329,17 @@ class Setting
     }
 
     /**
+     * Set the migration directory
+     *
+     * @param string $migration_directory
+     * @return void
+     */
+    public function setMigrationDirectory(string $migration_directory): void
+    {
+        $this->migration_directory = $migration_directory;
+    }
+
+    /**
      * Get the seeder directory
      *
      * @return string
@@ -501,6 +347,17 @@ class Setting
     public function getSeederDirectory(): string
     {
         return $this->seeder_directory;
+    }
+
+    /**
+     * Set the seeder directory
+     *
+     * @param string $seeder_directory
+     * @return void
+     */
+    public function setSeederDirectory(string $seeder_directory): void
+    {
+        $this->seeder_directory = $seeder_directory;
     }
 
     /**
@@ -514,6 +371,17 @@ class Setting
     }
 
     /**
+     * Set the validation directory
+     *
+     * @param string $validation_directory
+     * @return void
+     */
+    public function setValidationDirectory(string $validation_directory): void
+    {
+        $this->validation_directory = $validation_directory;
+    }
+
+    /**
      * Get the service directory
      *
      * @return string
@@ -521,6 +389,17 @@ class Setting
     public function getServiceDirectory(): string
     {
         return $this->service_directory;
+    }
+
+    /**
+     * Set the service directory
+     *
+     * @param string $service_directory
+     * @return void
+     */
+    public function setServiceDirectory(string $service_directory): void
+    {
+        $this->service_directory = $service_directory;
     }
 
     /**
@@ -534,6 +413,17 @@ class Setting
     }
 
     /**
+     * Set the producer directory
+     *
+     * @param string $producer_directory
+     * @return void
+     */
+    public function setProducerDirectory(string $producer_directory): void
+    {
+        $this->producer_directory = $producer_directory;
+    }
+
+    /**
      * Get the command directory
      *
      * @return string
@@ -541,6 +431,17 @@ class Setting
     public function getCommandDirectory(): string
     {
         return $this->command_directory;
+    }
+
+    /**
+     * Set the command directory
+     *
+     * @param string $command_directory
+     * @return void
+     */
+    public function setCommandDirectory(string $command_directory): void
+    {
+        $this->command_directory = $command_directory;
     }
 
     /**
@@ -554,6 +455,17 @@ class Setting
     }
 
     /**
+     * Set the event directory
+     *
+     * @param string $event_directory
+     * @return void
+     */
+    public function setEventDirectory(string $event_directory): void
+    {
+        $this->event_directory = $event_directory;
+    }
+
+    /**
      * Get the event listener directory
      *
      * @return string
@@ -561,6 +473,17 @@ class Setting
     public function getEventListenerDirectory(): string
     {
         return $this->event_listener_directory;
+    }
+
+    /**
+     * Set the event listener directory
+     *
+     * @param string $event_listener_directory
+     * @return void
+     */
+    public function setEventListenerDirectory(string $event_listener_directory): void
+    {
+        $this->event_listener_directory = $event_listener_directory;
     }
 
     /**
@@ -574,6 +497,17 @@ class Setting
     }
 
     /**
+     * Set the middleware directory
+     *
+     * @param string $middleware_directory
+     * @return void
+     */
+    public function setMiddlewareDirectory(string $middleware_directory): void
+    {
+        $this->middleware_directory = $middleware_directory;
+    }
+
+    /**
      * Get the messaging directory
      *
      * @return string
@@ -581,6 +515,17 @@ class Setting
     public function getMessagingDirectory(): string
     {
         return $this->messaging_directory;
+    }
+
+    /**
+     * Set the messaging directory
+     *
+     * @param string $messaging_directory
+     * @return void
+     */
+    public function setMessagingDirectory(string $messaging_directory): void
+    {
+        $this->messaging_directory = $messaging_directory;
     }
 
     /**
@@ -594,6 +539,17 @@ class Setting
     }
 
     /**
+     * Set the model directory
+     *
+     * @param string $model_directory
+     * @return void
+     */
+    public function setModelDirectory(string $model_directory): void
+    {
+        $this->model_directory = $model_directory;
+    }
+
+    /**
      * Get the controller directory
      *
      * @return string
@@ -601,6 +557,17 @@ class Setting
     public function getControllerDirectory(): string
     {
         return $this->controller_directory;
+    }
+
+    /**
+     * Set the controller directory
+     *
+     * @param string $controller_directory
+     * @return void
+     */
+    public function setControllerDirectory(string $controller_directory): void
+    {
+        $this->controller_directory = $controller_directory;
     }
 
     /**
@@ -634,6 +601,17 @@ class Setting
     }
 
     /**
+     * Set the bootstrap files
+     *
+     * @param array $bootstrap
+     * @return void
+     */
+    public function setBootstrap(array $bootstrap): void
+    {
+        $this->bootstrap = $bootstrap;
+    }
+
+    /**
      * Get the local server file
      *
      * @return string
@@ -654,6 +632,17 @@ class Setting
     }
 
     /**
+     * Set the public directory
+     *
+     * @param string $public_directory
+     * @return void
+     */
+    public function setPublicDirectory(string $public_directory): void
+    {
+        $this->public_directory = $public_directory;
+    }
+
+    /**
      * Get the exception directory
      *
      * @return string
@@ -661,5 +650,16 @@ class Setting
     public function getExceptionDirectory(): string
     {
         return $this->exception_directory;
+    }
+
+    /**
+     * Set the exception directory
+     *
+     * @param string $exception_directory
+     * @return void
+     */
+    public function setExceptionDirectory(string $exception_directory): void
+    {
+        $this->exception_directory = $exception_directory;
     }
 }

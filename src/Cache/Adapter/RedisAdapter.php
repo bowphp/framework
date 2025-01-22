@@ -2,8 +2,8 @@
 
 namespace Bow\Cache\Adapter;
 
-use Redis;
 use Bow\Database\Redis as RedisStore;
+use Redis;
 
 class RedisAdapter implements CacheAdapterInterface
 {
@@ -47,6 +47,20 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
+    public function addMany(array $data): bool
+    {
+        $return = true;
+
+        foreach ($data as $attribute => $value) {
+            $return = $this->add($attribute, $value);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function add(string $key, mixed $data, ?int $time = null): bool
     {
         $options = [];
@@ -72,20 +86,6 @@ class RedisAdapter implements CacheAdapterInterface
     public function set(string $key, mixed $data, ?int $time = null): bool
     {
         return $this->add($key, $data, $time);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addMany(array $data): bool
-    {
-        $return = true;
-
-        foreach ($data as $attribute => $value) {
-            $return = $this->add($attribute, $value);
-        }
-
-        return $return;
     }
 
     /**
@@ -123,6 +123,14 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
+    public function has(string $key): bool
+    {
+        return $this->redis->exists($key);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function addTime(string $key, int $time): bool
     {
         return $this->redis->expire($key, $time);
@@ -142,14 +150,6 @@ class RedisAdapter implements CacheAdapterInterface
     public function forget(string $key): bool
     {
         return $this->redis->del($key);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function has(string $key): bool
-    {
-        return $this->redis->exists($key);
     }
 
     /**

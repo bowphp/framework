@@ -19,7 +19,8 @@
         "ext-ftp": "*",
         "ext-openssl": "*",
         "ext-pcntl": "*",
-        "ext-readline": "*"
+        "ext-readline": "*",
+        "ext-pdo": "*"
     },
     "require-dev": {
         "pda/pheanstalk": "^5.0",

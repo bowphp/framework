@@ -40,7 +40,7 @@ class Crypto
     /**
      * Encrypt data
      *
-     * @param  string $data
+     * @param string $data
      * @return string|bool
      */
     public static function encrypt(string $data): string|bool

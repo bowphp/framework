@@ -137,6 +137,29 @@ class SQLGenerator
     }
 
     /**
+     * Compose sql instruction
+     *
+     * @param string $name
+     * @param array $description
+     * @return string
+     * @throws SQLGeneratorException
+     */
+    private function composeAddColumn(string $name, array $description): string
+    {
+        if (isset($attribute['size']) && in_array($description["attribute"]["type"], ['blob', 'json', 'character'])) {
+            $type = strtoupper($description["attribute"]["type"]);
+            throw new SQLGeneratorException("Cannot define size for $type type");
+        }
+
+        return match ($this->adapter) {
+            "sqlite" => $this->composeAddSqliteColumn($name, $description),
+            "mysql" => $this->composeAddMysqlColumn($name, $description),
+            "pgsql" => $this->composeAddPgsqlColumn($name, $description),
+            default => throw new SQLGeneratorException("Unknown adapter '{$this->adapter}'"),
+        };
+    }
+
+    /**
      * Change a column in the table
      *
      * @param string $name
@@ -287,29 +310,6 @@ class SQLGenerator
     }
 
     /**
-     * Compose sql instruction
-     *
-     * @param string $name
-     * @param array $description
-     * @return string
-     * @throws SQLGeneratorException
-     */
-    private function composeAddColumn(string $name, array $description): string
-    {
-        if (isset($attribute['size']) && in_array($description["attribute"]["type"], ['blob', 'json', 'character'])) {
-            $type = strtoupper($description["attribute"]["type"]);
-            throw new SQLGeneratorException("Cannot define size for $type type");
-        }
-
-        return match ($this->adapter) {
-            "sqlite" => $this->composeAddSqliteColumn($name, $description),
-            "mysql" => $this->composeAddMysqlColumn($name, $description),
-            "pgsql" => $this->composeAddPgsqlColumn($name, $description),
-            default => throw new SQLGeneratorException("Unknown adapter '{$this->adapter}'"),
-        };
-    }
-
-    /**
      * Set the scope
      *
      * @param string $scope
@@ -344,10 +344,10 @@ class SQLGenerator
     public function normalizeOfType(string $type): string
     {
         return match (true) {
-            (bool) in_array($this->adapter, ["mysql", "pgsql"]) => $type,
-            (bool) preg_match('/int|float|double/', $type) => 'integer',
-            (bool) preg_match('/float|double/', $type) => 'real',
-            (bool) preg_match('/^(text|char|string)$/i', $type) => 'text',
+            (bool)in_array($this->adapter, ["mysql", "pgsql"]) => $type,
+            (bool)preg_match('/int|float|double/', $type) => 'integer',
+            (bool)preg_match('/float|double/', $type) => 'real',
+            (bool)preg_match('/^(text|char|string)$/i', $type) => 'text',
             default => $type,
         };
     }

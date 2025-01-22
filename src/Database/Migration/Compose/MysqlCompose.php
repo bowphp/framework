@@ -55,7 +55,7 @@ trait MysqlCompose
 
         // Add column size
         if (in_array($raw_type, ['ENUM', 'CHECK'])) {
-            $check = (array) $size;
+            $check = (array)$size;
             $check = "'" . implode("', '", $check) . "'";
             $type = sprintf('%s(%s)', $type, $check);
         }
@@ -89,7 +89,7 @@ trait MysqlCompose
 
         // Add default value
         if (!is_null($default)) {
-            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM', 'TEXT'])) {
+            if (in_array($raw_type, ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR', 'CHARACTER', 'ENUM', 'TEXT'])) {
                 $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
                 $default = $default ? 'true' : 'false';
@@ -124,7 +124,7 @@ trait MysqlCompose
      */
     private function dropColumnForMysql(string $name): void
     {
-        $names = (array) $name;
+        $names = (array)$name;
 
         foreach ($names as $name) {
             $this->sqls[] = trim(sprintf('DROP COLUMN `%s`', $name));

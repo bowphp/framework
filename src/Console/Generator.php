@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Console;
 
 use Bow\Console\Traits\ConsoleTrait;
+use Bow\Support\Str;
 
 class Generator
 {
@@ -37,6 +38,18 @@ class Generator
     }
 
     /**
+     * Check if controller exists
+     *
+     * @return bool
+     */
+    public function fileExists(): bool
+    {
+        $this->filenameIsValid($this->name);
+
+        return file_exists($this->getPath()) || is_dir($this->base_directory . "/" . $this->name);
+    }
+
+    /**
      * Check if filename is valid
      *
      * @param string|null $filename
@@ -48,18 +61,6 @@ class Generator
 
             exit(1);
         }
-    }
-
-    /**
-     * Check if controller exists
-     *
-     * @return bool
-     */
-    public function fileExists(): bool
-    {
-        $this->filenameIsValid($this->name);
-
-        return file_exists($this->getPath()) || is_dir($this->base_directory . "/" . $this->name);
     }
 
     /**
@@ -109,7 +110,7 @@ class Generator
 
         // Transform class to match the PSR-2 standard
         $classname = ucfirst(
-            \Bow\Support\Str::camel(basename($this->name))
+            Str::camel(basename($this->name))
         );
 
         // Create the stub parsed content
@@ -118,7 +119,7 @@ class Generator
             'className' => $classname
         ], $data));
 
-        return (bool) file_put_contents($this->getPath(), $template);
+        return (bool)file_put_contents($this->getPath(), $template);
     }
 
     /**
@@ -133,7 +134,7 @@ class Generator
         $content = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
 
         foreach ($data as $key => $value) {
-            $content = str_replace('{' . $key . '}', (string) $value, $content);
+            $content = str_replace('{' . $key . '}', (string)$value, $content);
         }
 
         return $content;

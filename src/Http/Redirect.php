@@ -9,32 +9,29 @@ use Bow\Contracts\ResponseInterface;
 class Redirect implements ResponseInterface
 {
     /**
+     * The Redirect instance
+     *
+     * @var ?Redirect
+     */
+    private static ?Redirect $instance = null;
+    /**
      * The Request instance
      *
      * @var Request
      */
     private Request $request;
-
     /**
      * The redirect targets
      *
      * @var string
      */
     private string $to;
-
     /**
      * The Response instance
      *
      * @var Response
      */
     private Response $response;
-
-    /**
-     * The Redirect instance
-     *
-     * @var ?Redirect
-     */
-    private static ?Redirect $instance = null;
 
     /**
      * Redirect constructor.
@@ -94,27 +91,11 @@ class Redirect implements ResponseInterface
     }
 
     /**
-     * Redirect to another URL
-     *
-     * @param string $path
-     * @param int $status
-     * @return Redirect
-     */
-    public function to(string $path, int $status = 302): Redirect
-    {
-        $this->to = $path;
-
-        $this->response->status($status);
-
-        return $this;
-    }
-
-    /**
      * Redirect with route definition
      *
-     * @param  string $name
-     * @param  array  $data
-     * @param  bool  $absolute
+     * @param string $name
+     * @param array $data
+     * @param bool $absolute
      * @return Redirect
      */
     public function route(string $name, array $data = [], bool $absolute = false): Redirect
@@ -133,6 +114,22 @@ class Redirect implements ResponseInterface
     public function back(int $status = 302): Redirect
     {
         $this->to($this->request->referer(), $status);
+
+        return $this;
+    }
+
+    /**
+     * Redirect to another URL
+     *
+     * @param string $path
+     * @param int $status
+     * @return Redirect
+     */
+    public function to(string $path, int $status = 302): Redirect
+    {
+        $this->to = $path;
+
+        $this->response->status($status);
 
         return $this;
     }

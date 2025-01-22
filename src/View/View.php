@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\View;
 
-use Tintin\Tintin;
 use BadMethodCallException;
 use Bow\Contracts\ResponseInterface;
+use Bow\View\Engine\PHPEngine;
+use Bow\View\Engine\TwigEngine;
 use Bow\View\Exception\ViewException;
+use Tintin\Bow\TintinEngine;
+use Tintin\Tintin;
+use Twig\Environment;
 
 class View implements ResponseInterface
 {
@@ -45,15 +49,15 @@ class View implements ResponseInterface
      * @var array
      */
     private static array $engines = [
-        'tintin' => \Tintin\Bow\TintinEngine::class,
-        'twig' => \Bow\View\Engine\TwigEngine::class,
-        'php' => \Bow\View\Engine\PHPEngine::class,
+        'tintin' => TintinEngine::class,
+        'twig' => TwigEngine::class,
+        'php' => PHPEngine::class,
     ];
 
     /**
      * View constructor.
      *
-     * @param  array $config
+     * @param array $config
      * @return  void
      * @throws ViewException
      */
@@ -92,25 +96,10 @@ class View implements ResponseInterface
     }
 
     /**
-     * Get the view singleton instance
-     *
-     * @return View
-     * @throws
-     */
-    public static function getInstance(): View
-    {
-        if (!static::$instance instanceof View) {
-            static::$instance = new View(static::$config);
-        }
-
-        return static::$instance;
-    }
-
-    /**
      * Parse the view
      *
-     * @param  string $viewname
-     * @param  array  $data
+     * @param string $viewname
+     * @param array $data
      * @return View
      */
     public static function parse(string $view, array $data = []): View
@@ -133,11 +122,75 @@ class View implements ResponseInterface
     }
 
     /**
+     * Get the view singleton instance
+     *
+     * @return View
+     * @throws
+     */
+    public static function getInstance(): View
+    {
+        if (!static::$instance instanceof View) {
+            static::$instance = new View(static::$config);
+        }
+
+        return static::$instance;
+    }
+
+    /**
+     * Add a template engine
+     *
+     * @param string $name
+     * @param string $engine
+     * @return bool
+     * @throws ViewException
+     */
+    public static function pushEngine(string $name, string $engine): bool
+    {
+        if (array_key_exists($name, static::$engines)) {
+            return true;
+        }
+
+        if (!class_exists($engine)) {
+            throw new ViewException(
+                sprintf('%s does not exists.', $engine)
+            );
+        }
+
+        static::$engines[$name] = $engine;
+
+        return true;
+    }
+
+    /**
+     * __callStatic
+     *
+     * @param string $name
+     * @param array $arguments
+     *
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        if (static::$instance instanceof View) {
+            if (method_exists(static::$instance, $name)) {
+                return call_user_func_array(
+                    [static::$instance, $name],
+                    $arguments
+                );
+            }
+        }
+
+        throw new BadMethodCallException(
+            sprintf('%s method does not exists.', $name)
+        );
+    }
+
+    /**
      * Get the engine
      *
-     * @return Tintin|\Twig\Environment
+     * @return Tintin|Environment
      */
-    public function getEngine(): \Twig\Environment|Tintin
+    public function getEngine(): Environment|Tintin
     {
         return static::$template->getEngine();
     }
@@ -168,31 +221,6 @@ class View implements ResponseInterface
         static::$config['extension'] = $extension;
 
         return static::getInstance();
-    }
-
-    /**
-     * Add a template engine
-     *
-     * @param string $name
-     * @param string $engine
-     * @return bool
-     * @throws ViewException
-     */
-    public static function pushEngine(string $name, string $engine): bool
-    {
-        if (array_key_exists($name, static::$engines)) {
-            return true;
-        }
-
-        if (!class_exists($engine)) {
-            throw new ViewException(
-                sprintf('%s does not exists.', $engine)
-            );
-        }
-
-        static::$engines[$name] = $engine;
-
-        return true;
     }
 
     /**
@@ -236,30 +264,6 @@ class View implements ResponseInterface
     public function __toString()
     {
         return static::$content;
-    }
-
-    /**
-     * __callStatic
-     *
-     * @param string $name
-     * @param array $arguments
-     *
-     * @return mixed
-     */
-    public static function __callStatic($name, $arguments)
-    {
-        if (static::$instance instanceof View) {
-            if (method_exists(static::$instance, $name)) {
-                return call_user_func_array(
-                    [static::$instance, $name],
-                    $arguments
-                );
-            }
-        }
-
-        throw new BadMethodCallException(
-            sprintf('%s method does not exists.', $name)
-        );
     }
 
     /**

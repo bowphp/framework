@@ -39,14 +39,14 @@ class Listener
     /**
      * Launch the listener function
      *
-     * @param  array $data
+     * @param array $data
      * @return mixed
      */
     public function call(array $data = []): mixed
     {
         $callable = $this->callable;
 
-        if (is_string($callable) && class_exists($callable, true)) {
+        if (is_string($callable) && class_exists($callable)) {
             $instance = app($callable);
             if ($instance instanceof EventListener) {
                 if ($instance instanceof EventShouldQueue) {

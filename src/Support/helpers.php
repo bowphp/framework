@@ -1,52 +1,55 @@
 <?php
 
 use Bow\Auth\Auth;
+use Bow\Auth\Exception\AuthenticationException;
+use Bow\Auth\Guards\GuardContract;
+use Bow\Cache\Cache;
 use Bow\Configuration\Loader;
+use Bow\Container\Capsule;
+use Bow\Database\Barry\Model;
+use Bow\Database\Database as DB;
 use Bow\Database\Exception\ConnectionException;
+use Bow\Database\QueryBuilder;
+use Bow\Event\Event;
+use Bow\Http\Exception\HttpException;
+use Bow\Http\HttpStatus;
+use Bow\Http\Redirect;
+use Bow\Http\Request;
+use Bow\Http\Response;
+use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Mail;
+use Bow\Queue\ProducerService;
+use Bow\Security\Crypto;
+use Bow\Security\Hash;
+use Bow\Security\Sanitize;
+use Bow\Security\Tokenize;
+use Bow\Session\Cookie;
+use Bow\Session\Exception\SessionException;
+use Bow\Session\Session;
 use Bow\Storage\Exception\DiskNotFoundException;
 use Bow\Storage\Exception\ServiceConfigurationNotFoundException;
 use Bow\Storage\Exception\ServiceNotFoundException;
+use Bow\Storage\Service\DiskFilesystemService;
 use Bow\Storage\Service\FTPService;
 use Bow\Storage\Service\S3Service;
+use Bow\Storage\Storage;
+use Bow\Support\Collection;
+use Bow\Support\Env;
+use Bow\Support\Str;
+use Bow\Support\Util;
+use Bow\Translate\Translator;
+use Bow\Validation\Validate;
+use Bow\Validation\Validator;
 use Bow\View\View;
 use Carbon\Carbon;
 use Monolog\Logger;
-use Bow\Event\Event;
-use Bow\Support\Env;
-use Bow\Support\Str;
-use Bow\Http\Request;
-use Bow\Support\Util;
-use Bow\Http\Redirect;
-use Bow\Http\Response;
-use Bow\Security\Hash;
-use Bow\Session\Cookie;
-use Bow\Http\HttpStatus;
-use Bow\Security\Crypto;
-use Bow\Session\Session;
-use Bow\Storage\Storage;
-use Bow\Container\Capsule;
-use Bow\Security\Sanitize;
-use Bow\Security\Tokenize;
-use Bow\Support\Collection;
-use Bow\Validation\Validate;
-use Bow\Database\Barry\Model;
-use Bow\Translate\Translator;
-use Bow\Validation\Validator;
-use Bow\Queue\ProducerService;
-use Bow\Database\Database as DB;
-use Bow\Auth\Guards\GuardContract;
-use Bow\Http\Exception\HttpException;
-use Bow\Mail\Contracts\MailDriverInterface;
-use Bow\Storage\Exception\ResourceException;
-use Bow\Storage\Service\DiskFilesystemService;
 
 if (!function_exists('app')) {
     /**
      * Application container
      *
-     * @param  ?string  $key
-     * @param  array $setting
+     * @param  ?string $key
+     * @param array $setting
      * @return mixed
      */
     function app(?string $key = null, array $setting = []): mixed
@@ -162,9 +165,9 @@ if (!function_exists('view')) {
     /**
      * View alias of View::parse
      *
-     * @param string    $template
+     * @param string $template
      * @param array|int $data
-     * @param int       $code
+     * @param int $code
      * @return View
      */
     function view(string $template, int|array $data = [], int $code = 200): View
@@ -192,7 +195,7 @@ if (!function_exists('table')) {
      * @throws ConnectionException
      * @deprecated
      */
-    function table(string $name, string $connexion = null): \Bow\Database\QueryBuilder
+    function table(string $name, string $connexion = null): QueryBuilder
     {
         if (is_string($connexion)) {
             db($connexion);
@@ -225,7 +228,7 @@ if (!function_exists('db_table')) {
      * @return Bow\Database\QueryBuilder
      * @throws ConnectionException
      */
-    function db_table(string $name, string $connexion = null): \Bow\Database\QueryBuilder
+    function db_table(string $name, string $connexion = null): QueryBuilder
     {
         if (is_string($connexion)) {
             db($connexion);
@@ -241,8 +244,8 @@ if (!function_exists('db_select')) {
      *
      * db_select('SELECT * FROM users');
      *
-     * @param string   $sql
-     * @param array    $data
+     * @param string $sql
+     * @param array $data
      * @return int|array|stdClass
      */
     function db_select(string $sql, array $data = []): array|int|stdClass
@@ -255,8 +258,8 @@ if (!function_exists('db_select_one')) {
     /**
      * Launches SELECT SQL Queries
      *
-     * @param string   $sql
-     * @param array    $data
+     * @param string $sql
+     * @param array $data
      * @return int|array|StdClass
      */
     function db_select_one(string $sql, array $data = []): array|int|StdClass
@@ -269,8 +272,8 @@ if (!function_exists('db_insert')) {
     /**
      * Launches INSERT SQL Queries
      *
-     * @param string   $sql
-     * @param array    $data
+     * @param string $sql
+     * @param array $data
      * @return int
      */
     function db_insert(string $sql, array $data = []): int
@@ -283,7 +286,7 @@ if (!function_exists('db_delete')) {
     /**
      * Launches DELETE type SQL queries
      *
-     * @param string   $sql
+     * @param string $sql
      * @param array $data
      * @return int
      */
@@ -298,7 +301,7 @@ if (!function_exists('db_update')) {
      * Launches UPDATE SQL Queries
      *
      * @param string $sql
-     * @param array  $data
+     * @param array $data
      * @return int
      */
     function db_update(string $sql, array $data = []): int
@@ -354,6 +357,7 @@ if (!function_exists('create_csrf_token')) {
      *
      * @param int|null $time
      * @return ?array
+     * @throws SessionException
      */
     function create_csrf_token(int $time = null): ?array
     {
@@ -367,10 +371,11 @@ if (!function_exists('csrf_token')) {
      *
      * @return string
      * @throws HttpException
+     * @throws SessionException
      */
     function csrf_token(): string
     {
-        $csrf = (array) create_csrf_token();
+        $csrf = (array)create_csrf_token();
 
         if (count($csrf) == 0) {
             throw new HttpException(
@@ -388,11 +393,11 @@ if (!function_exists('csrf_field')) {
      * Get the input csrf field
      *
      * @return string
-     * @throws HttpException
+     * @throws HttpException|SessionException
      */
     function csrf_field(): string
     {
-        $csrf = (array) create_csrf_token();
+        $csrf = (array)create_csrf_token();
 
         if (count($csrf) == 0) {
             throw new HttpException(
@@ -420,7 +425,7 @@ if (!function_exists('method_field')) {
     }
 }
 
-if (!function_exists('generate_token_csrf')) {
+if (!function_exists('gen_csrf_token')) {
     /**
      * Generate token string
      *
@@ -436,9 +441,10 @@ if (!function_exists('verify_csrf')) {
     /**
      * Check the token value
      *
-     * @param  string $token
-     * @param  bool   $strict
+     * @param string $token
+     * @param bool $strict
      * @return bool
+     * @throws SessionException
      */
     function verify_csrf(string $token, bool $strict = false): bool
     {
@@ -452,6 +458,7 @@ if (!function_exists('csrf_time_is_expired')) {
      *
      * @param string|null $time
      * @return bool
+     * @throws SessionException
      */
     function csrf_time_is_expired(string $time = null): bool
     {
@@ -463,9 +470,9 @@ if (!function_exists('json')) {
     /**
      * Make json response
      *
-     * @param  array|object $data
-     * @param  int   $code
-     * @param  array $headers
+     * @param array|object $data
+     * @param int $code
+     * @param array $headers
      * @return string
      */
     function json(array|object $data, int $code = 200, array $headers = []): string
@@ -478,9 +485,9 @@ if (!function_exists('download')) {
     /**
      * Download file
      *
-     * @param string      $file
+     * @param string $file
      * @param null|string $filename
-     * @param array       $headers
+     * @param array $headers
      * @return string
      */
     function download(string $file, ?string $filename = null, array $headers = []): string
@@ -493,7 +500,7 @@ if (!function_exists('set_status_code')) {
     /**
      * Set status code
      *
-     * @param  int $code
+     * @param int $code
      * @return mixed
      */
     function set_status_code(int $code): mixed
@@ -506,7 +513,7 @@ if (!function_exists('sanitize')) {
     /**
      * Sanitize data
      *
-     * @param  mixed $data
+     * @param mixed $data
      * @return mixed
      */
     function sanitize(mixed $data): mixed
@@ -523,7 +530,7 @@ if (!function_exists('secure')) {
     /**
      * Secure data with sanitize it
      *
-     * @param  mixed $data
+     * @param mixed $data
      * @return mixed
      */
     function secure(mixed $data): mixed
@@ -554,7 +561,7 @@ if (!function_exists('get_header')) {
     /**
      * Get http header
      *
-     * @param  string $key
+     * @param string $key
      * @return string|null
      */
     function get_header(string $key): ?string
@@ -628,7 +635,7 @@ if (!function_exists('set_pdo')) {
     /**
      * Set PDO instance
      *
-     * @param  PDO $pdo
+     * @param PDO $pdo
      * @return PDO
      */
     function set_pdo(PDO $pdo): PDO
@@ -644,7 +651,7 @@ if (!function_exists('collect')) {
     /**
      * Create new Collection instance
      *
-     * @param  array $data
+     * @param array $data
      * @return Collection
      */
     function collect(array $data = []): Collection
@@ -657,7 +664,7 @@ if (!function_exists('encrypt')) {
     /**
      * Encrypt data
      *
-     * @param  string $data
+     * @param string $data
      * @return string
      */
     function encrypt(string $data): string
@@ -670,7 +677,7 @@ if (!function_exists('decrypt')) {
     /**
      * Decrypt data
      *
-     * @param  string $data
+     * @param string $data
      * @return string
      */
     function decrypt(string $data): string
@@ -683,10 +690,9 @@ if (!function_exists('db_transaction')) {
     /**
      * Start Database transaction
      *
-     * @param callable|null $cb
      * @return void
      */
-    function db_transaction(callable $cb = null): void
+    function db_transaction(): void
     {
         DB::startTransaction();
     }
@@ -755,6 +761,7 @@ if (!function_exists('flash')) {
      * @param string $key
      * @param string $message
      * @return mixed
+     * @throws SessionException
      */
     function flash(string $key, string $message): mixed
     {
@@ -773,10 +780,11 @@ if (!function_exists('email')) {
      * @return MailDriverInterface|bool
      */
     function email(
-        string $view = null,
-        array $data = [],
+        string   $view = null,
+        array    $data = [],
         callable $cb = null
-    ): MailDriverInterface|bool {
+    ): MailDriverInterface|bool
+    {
         if ($view === null) {
             return Mail::getInstance();
         }
@@ -808,6 +816,7 @@ if (!function_exists('session')) {
      * @param array|string|null $value
      * @param mixed $default
      * @return mixed
+     * @throws SessionException
      */
     function session(array|string $value = null, mixed $default = null): mixed
     {
@@ -839,9 +848,10 @@ if (!function_exists('cookie')) {
      */
     function cookie(
         string $key = null,
-        mixed $data = null,
-        int $expiration = 3600
-    ): string|array|object|null {
+        mixed  $data = null,
+        int    $expiration = 3600
+    ): string|array|object|null
+    {
         if ($key === null) {
             return Cookie::all();
         }
@@ -858,9 +868,9 @@ if (!function_exists('validator')) {
     /**
      * Validate the information on the well-defined criterion
      *
-     * @param  array $inputs
-     * @param  array $rules
-     * @param  array $messages
+     * @param array $inputs
+     * @param array $rules
+     * @param array $messages
      * @return Validate
      */
     function validator(array $inputs, array $rules, array $messages = []): Validate
@@ -873,9 +883,9 @@ if (!function_exists('route')) {
     /**
      * Get Route by name
      *
-     * @param  string $name
-     * @param  bool|array  $data
-     * @param  bool  $absolute
+     * @param string $name
+     * @param bool|array $data
+     * @param bool $absolute
      * @return string
      */
     function route(string $name, bool|array $data = [], bool $absolute = false): string
@@ -888,7 +898,7 @@ if (!function_exists('route')) {
         $url = config('app.routes.' . $name);
 
         if (is_null($url)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The route named ' . $name . ' does not define.',
                 E_USER_ERROR
             );
@@ -981,7 +991,7 @@ if (!function_exists('cache')) {
      */
     function cache(string $key = null, mixed $value = null, int $ttl = null): mixed
     {
-        $instance = \Bow\Cache\Cache::getInstance();
+        $instance = Cache::getInstance();
 
         if ($key === null) {
             return $instance;
@@ -1024,8 +1034,8 @@ if (!function_exists('app_hash')) {
     /**
      * Alias on the class Hash.
      *
-     * @param  string $data
-     * @param  mixed  $hash_value
+     * @param string $data
+     * @param mixed $hash_value
      * @return bool|string
      */
     function app_hash(string $data, string $hash_value = null): bool|string
@@ -1042,10 +1052,10 @@ if (!function_exists('bow_hash')) {
     /**
      * Alias on the class Hash.
      *
-     * @deprecated
-     * @param  string $data
-     * @param  mixed  $hash_value
+     * @param string $data
+     * @param mixed $hash_value
      * @return bool|string
+     * @deprecated
      */
     function bow_hash(string $data, string $hash_value = null): bool|string
     {
@@ -1064,9 +1074,10 @@ if (!function_exists('app_trans')) {
      */
     function app_trans(
         string $key = null,
-        array $data = [],
-        bool $choose = false
-    ): string|Translator {
+        array  $data = [],
+        bool   $choose = false
+    ): string|Translator
+    {
         if (is_null($key)) {
             return Translator::getInstance();
         }
@@ -1091,9 +1102,10 @@ if (!function_exists('t')) {
      */
     function t(
         string $key,
-        array $data = [],
-        bool $choose = false
-    ): string|Translator {
+        array  $data = [],
+        bool   $choose = false
+    ): string|Translator
+    {
         return app_trans($key, $data, $choose);
     }
 }
@@ -1109,9 +1121,10 @@ if (!function_exists('__')) {
      */
     function __(
         string $key,
-        array $data = [],
-        bool $choose = false
-    ): string|Translator {
+        array  $data = [],
+        bool   $choose = false
+    ): string|Translator
+    {
         return app_trans($key, $data, $choose);
     }
 }
@@ -1151,7 +1164,7 @@ if (!function_exists('app_abort')) {
     /**
      * Abort bow execution
      *
-     * @param int    $code
+     * @param int $code
      * @param string $message
      * @return Response
      * @throws HttpException
@@ -1177,10 +1190,11 @@ if (!function_exists('app_abort_if')) {
      * @throws HttpException
      */
     function app_abort_if(
-        bool $boolean,
-        int $code,
+        bool   $boolean,
+        int    $code,
         string $message = ''
-    ): Response|null {
+    ): Response|null
+    {
         if ($boolean) {
             return app_abort($code, $message);
         }
@@ -1209,7 +1223,7 @@ if (!function_exists('app_in_debug')) {
      */
     function app_in_debug(): bool
     {
-        return (bool) app_env('APP_DEBUG');
+        return (bool)app_env('APP_DEBUG');
     }
 }
 
@@ -1245,8 +1259,29 @@ if (!function_exists('auth')) {
      *
      * @param string|null $guard
      * @return GuardContract
+     * @throws AuthenticationException
      */
     function auth(string $guard = null): GuardContract
+    {
+        $auth = Auth::getInstance();
+
+        if (is_null($guard)) {
+            return $auth;
+        }
+
+        return $auth->guard($guard);
+    }
+}
+
+if (!function_exists('app_auth')) {
+    /**
+     * Recovery of the guard
+     *
+     * @param string|null $guard
+     * @return GuardContract
+     * @throws AuthenticationException
+     */
+    function app_auth(string $guard = null): GuardContract
     {
         $auth = Auth::getInstance();
 
@@ -1270,12 +1305,25 @@ if (!function_exists('logger')) {
     }
 }
 
+if (!function_exists('app_logger')) {
+    /**
+     * Log error message
+     *
+     * @return Logger
+     */
+    function app_logger(): Logger
+    {
+        return app('logger');
+    }
+}
+
+
 if (!function_exists('str_slug')) {
     /**
      * Slugify
      *
-     * @param  string $str
-     * @param  string $sep
+     * @param string $str
+     * @param string $sep
      * @return string
      */
     function str_slug(string $str, string $sep = '-'): string
@@ -1329,7 +1377,6 @@ if (!function_exists('str_is_slug')) {
      *
      * @param string $slug
      * @return string
-     * @throws ErrorException
      */
     function str_is_slug(string $slug): string
     {
@@ -1379,7 +1426,7 @@ if (!function_exists('str_is_upper')) {
 
 if (!function_exists('str_is_alpha_num')) {
     /**
-     * Check if string is alpha numeric
+     * Check if string is alphanumeric
      *
      * @param string $slug
      * @return bool
@@ -1404,7 +1451,7 @@ if (!function_exists('str_shuffle_words')) {
     }
 }
 
-if (!function_exists('str_wordify')) {
+if (!function_exists('str_wordily')) {
     /**
      * Return the array contains the word of the passed string
      *
@@ -1412,20 +1459,20 @@ if (!function_exists('str_wordify')) {
      * @param string $sep
      * @return array
      */
-    function str_wordify(string $words, string $sep = ''): array
+    function str_wordily(string $words, string $sep = ''): array
     {
         return Str::wordily($words, $sep);
     }
 }
 
-if (!function_exists('str_plurial')) {
+if (!function_exists('str_plural')) {
     /**
-     * Transform text to plurial
+     * Transform text to str_plural
      *
      * @param string $slug
      * @return string
      */
-    function str_plurial(string $slug): string
+    function str_plural(string $slug): string
     {
         return Str::plural($slug);
     }
@@ -1438,7 +1485,7 @@ if (!function_exists('str_camel')) {
      * @param string $slug
      * @return string
      */
-    function str_camel($slug): string
+    function str_camel(string $slug): string
     {
         return Str::camel($slug);
     }
@@ -1533,7 +1580,7 @@ if (!function_exists('db_seed')) {
      */
     function db_seed(string $name, array $data = []): int|array
     {
-        if (class_exists($name, true)) {
+        if (class_exists($name)) {
             $instance = app($name);
 
             if ($instance instanceof Model) {
@@ -1545,7 +1592,7 @@ if (!function_exists('db_seed')) {
         $filename = rtrim(config('app.seeder_path'), '/') . '/' . $name . '.php';
 
         if (!file_exists($filename)) {
-            throw new \ErrorException('[' . $name . '] seeder file not found');
+            throw new ErrorException('[' . $name . '] seeder file not found');
         }
 
         $seeds = require $filename;
@@ -1553,7 +1600,7 @@ if (!function_exists('db_seed')) {
         $collections = [];
 
         foreach ($seeds as $table => $payload) {
-            if (class_exists($table, true)) {
+            if (class_exists($table)) {
                 $instance = app($table);
                 if ($instance instanceof Model) {
                     $table = $instance->getTable();
@@ -1567,11 +1614,11 @@ if (!function_exists('db_seed')) {
     }
 }
 
-if (! function_exists('is_blank')) {
+if (!function_exists('is_blank')) {
     /**
      * Determine if the given value is "blank".
      *
-     * @param  mixed  $value
+     * @param mixed $value
      * @return bool
      */
     function is_blank(mixed $value): bool

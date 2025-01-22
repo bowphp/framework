@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Bow\Session\Driver;
 
+use Bow\Database\Database;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
-use Bow\Database\Database;
+use SessionHandlerInterface;
 
-class DatabaseDriver implements \SessionHandlerInterface
+class DatabaseDriver implements SessionHandlerInterface
 {
     use DurationTrait;
 
@@ -72,6 +73,16 @@ class DatabaseDriver implements \SessionHandlerInterface
     }
 
     /**
+     * Get session QueryBuilder instance
+     *
+     * @return QueryBuilder
+     */
+    private function sessions(): QueryBuilder
+    {
+        return Database::table($this->table);
+    }
+
+    /**
      * Garbage collector for cleans old sessions
      *
      * @param int $max_lifetime
@@ -129,11 +140,11 @@ class DatabaseDriver implements \SessionHandlerInterface
     public function write(string $id, string $data): bool
     {
         // When create the new session record
-        if (! $this->sessions()->where('id', $id)->exists()) {
+        if (!$this->sessions()->where('id', $id)->exists()) {
             $insert = $this->sessions()
                 ->insert($this->data($id, $data));
 
-            return (bool) $insert;
+            return (bool)$insert;
         }
 
         // Update the session information
@@ -142,7 +153,7 @@ class DatabaseDriver implements \SessionHandlerInterface
             'id' => $id
         ]);
 
-        return (bool) $update;
+        return (bool)$update;
     }
 
     /**
@@ -160,15 +171,5 @@ class DatabaseDriver implements \SessionHandlerInterface
             'data' => $session_data,
             'ip' => $this->ip
         ];
-    }
-
-    /**
-     * Get session QueryBuilder instance
-     *
-     * @return QueryBuilder
-     */
-    private function sessions(): QueryBuilder
-    {
-        return Database::table($this->table);
     }
 }

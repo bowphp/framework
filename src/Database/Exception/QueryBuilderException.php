@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Database\Exception;
 
-class QueryBuilderException extends \ErrorException
+use ErrorException;
+
+class QueryBuilderException extends ErrorException
 {
     // Empty
 }

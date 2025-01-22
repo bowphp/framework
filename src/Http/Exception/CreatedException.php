@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Http\Exception;
 
-use Bow\Http\Exception\HttpException;
-
 class CreatedException extends HttpException
 {
     /**

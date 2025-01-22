@@ -6,6 +6,9 @@ namespace Bow\Console\Command;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
+use Psy\Configuration;
+use Psy\Shell;
+use Psy\VersionUpdater\Checker;
 
 class ReplCommand extends AbstractCommand
 {
@@ -21,7 +24,7 @@ class ReplCommand extends AbstractCommand
         if (is_string($include)) {
             $bootstraps = array_merge(
                 $this->setting->getBootstrap(),
-                (array) $include
+                (array)$include
             );
 
             $this->setting->setBootstrap($bootstraps);
@@ -33,8 +36,8 @@ class ReplCommand extends AbstractCommand
             return;
         }
 
-        $config = new \Psy\Configuration();
-        $config->setUpdateCheck(\Psy\VersionUpdater\Checker::NEVER);
+        $config = new Configuration();
+        $config->setUpdateCheck(Checker::NEVER);
 
         // Load the custom prompt
         $prompt = $this->arg->getParameter('--prompt', '(bow) >>');
@@ -42,7 +45,7 @@ class ReplCommand extends AbstractCommand
 
         $config->theme()->setPrompt($prompt);
 
-        $shell = new \Psy\Shell($config);
+        $shell = new Shell($config);
 
         $shell->setIncludes($this->setting->getBootstrap());
         $shell->run();

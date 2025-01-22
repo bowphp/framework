@@ -81,7 +81,7 @@ trait ConstraintColumn
      */
     public function dropForeign(string|array $name, bool $as_raw = false): SQLGenerator
     {
-        $names = (array) $name;
+        $names = (array)$name;
 
         foreach ($names as $name) {
             if (!$as_raw) {
@@ -128,7 +128,7 @@ trait ConstraintColumn
      */
     public function dropIndex(string $name): SQLGenerator
     {
-        $names = (array) $name;
+        $names = (array)$name;
 
         foreach ($names as $name) {
             if ($this->adapter === 'pgsql') {
@@ -184,7 +184,7 @@ trait ConstraintColumn
      */
     public function dropUnique(string $name): SQLGenerator
     {
-        $names = (array) $name;
+        $names = (array)$name;
 
         foreach ($names as $name) {
             if ($this->adapter === 'pgsql') {

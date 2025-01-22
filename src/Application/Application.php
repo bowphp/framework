@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Bow\Application;
 
 use Bow\Application\Exception\ApplicationException;
-use Bow\Container\Capsule;
-use Bow\Container\Action;
 use Bow\Configuration\Loader;
+use Bow\Container\Action;
+use Bow\Container\Capsule;
 use Bow\Contracts\ResponseInterface;
 use Bow\Http\Exception\BadRequestException;
 use Bow\Http\Exception\HttpException;
@@ -15,33 +15,30 @@ use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Router\Exception\RouterException;
 use Bow\Router\Resource;
-use Bow\Router\Router;
 use Bow\Router\Route;
+use Bow\Router\Router;
 use ReflectionException;
 
 class Application extends Router
 {
-    /**
-     * The Capsule instance
-     *
-     * @var Capsule
-     */
-    private Capsule $capsule;
-
-    /**
-     * The booting flag
-     *
-     * @var bool
-     */
-    private bool $booted = false;
-
     /**
      * The Application instance
      *
      * @var ?Application
      */
     private static ?Application $instance = null;
-
+    /**
+     * The Capsule instance
+     *
+     * @var Capsule
+     */
+    private Capsule $capsule;
+    /**
+     * The booting flag
+     *
+     * @var bool
+     */
+    private bool $booted = false;
     /**
      * The HTTP Request
      *
@@ -101,61 +98,6 @@ class Application extends Router
     public function getContainer(): Capsule
     {
         return $this->capsule;
-    }
-
-    /**
-     * Configuration Association
-     *
-     * @param Loader $config
-     * @return void
-     */
-    public function bind(Loader $config): void
-    {
-        $this->config = $config;
-
-        if (is_string($config['app']['root'])) {
-            $this->setBaseRoute($config['app']['root']);
-        }
-
-        // We activate the auto csrf switcher
-        $this->setAutoCsrf($config['app']['auto_csrf'] ?? false);
-
-        $this->capsule->instance('config', $config);
-
-        $this->boot();
-    }
-
-    /**
-     * Boot the application
-     *
-     * @return void
-     */
-    private function boot(): void
-    {
-        if ($this->booted) {
-            return;
-        }
-
-        $this->config->boot();
-
-        $this->booted = true;
-    }
-
-    /**
-     * Build the application
-     *
-     * @param Request $request
-     * @param Response $response
-     * @return Application
-     * @throws BadRequestException
-     */
-    public static function make(Request $request, Response $response): Application
-    {
-        if (is_null(static::$instance)) {
-            static::$instance = new Application($request, $response);
-        }
-
-        return static::$instance;
     }
 
     /**
@@ -329,6 +271,23 @@ class Application extends Router
     }
 
     /**
+     * Build the application
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return Application
+     * @throws BadRequestException
+     */
+    public static function make(Request $request, Response $response): Application
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new Application($request, $response);
+        }
+
+        return static::$instance;
+    }
+
+    /**
      * Abort application
      *
      * @param int $code
@@ -380,6 +339,44 @@ class Application extends Router
         $this->capsule->bind($name, $callable);
 
         return $this;
+    }
+
+    /**
+     * Configuration Association
+     *
+     * @param Loader $config
+     * @return void
+     */
+    public function bind(Loader $config): void
+    {
+        $this->config = $config;
+
+        if (is_string($config['app']['root'])) {
+            $this->setBaseRoute($config['app']['root']);
+        }
+
+        // We activate the auto csrf switcher
+        $this->setAutoCsrf((bool)($config['app']['auto_csrf'] ?? false));
+
+        $this->capsule->instance('config', $config);
+
+        $this->boot();
+    }
+
+    /**
+     * Boot the application
+     *
+     * @return void
+     */
+    private function boot(): void
+    {
+        if ($this->booted) {
+            return;
+        }
+
+        $this->config->boot();
+
+        $this->booted = true;
     }
 
     /**

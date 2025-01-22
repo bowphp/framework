@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
 use ErrorException;
 use Generator as PHPGenerator;
+use IteratorAggregate;
+use JsonSerializable;
 
-class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \ArrayAccess
+class Collection implements Countable, JsonSerializable, IteratorAggregate, ArrayAccess
 {
     /**
      * The collection store
@@ -51,25 +56,6 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
-     * Check existence of a key in the session collection
-     *
-     * @param  int|string $key
-     * @param  bool   $strict
-     * @return bool
-     */
-    public function has(int|string $key, bool $strict = false): bool
-    {
-        // When $strict is true, he check $key not how a key but a value.
-        $isset = isset($this->storage[$key]);
-
-        if ($isset) {
-            $isset = !($strict === true) || !empty($this->storage[$key]);
-        }
-
-        return $isset;
-    }
-
-    /**
      * Check if a collection is empty.
      *
      * @return bool
@@ -90,33 +76,13 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
-     * Allows to recover a value or value collection.
+     * Length of the collection
      *
-     * @param int|string|null $key
-     * @param mixed $default
-     * @return mixed
+     * @return int
      */
-    public function get(int|string $key = null, mixed $default = null): mixed
+    public function length(): int
     {
-        if (is_null($key)) {
-            return $this->storage;
-        }
-
-        if ($this->has($key)) {
-            return $this->storage[$key] == null
-                ? $default
-                : $this->storage[$key];
-        }
-
-        if ($default !== null) {
-            if (is_callable($default)) {
-                return call_user_func($default);
-            }
-
-            return $default;
-        }
-
-        return null;
+        return count($this->storage);
     }
 
     /**
@@ -194,36 +160,22 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
-     * Delete an entry in the collection
+     * Check existence of a key in the session collection
      *
-     * @param string $key
-     * @return Collection
+     * @param int|string $key
+     * @param bool $strict
+     * @return bool
      */
-    public function delete(string $key): Collection
+    public function has(int|string $key, bool $strict = false): bool
     {
-        unset($this->storage[$key]);
+        // When $strict is true, he check $key not how a key but a value.
+        $isset = isset($this->storage[$key]);
 
-        return $this;
-    }
-
-    /**
-     * Modify an entry in the collection or the addition if not
-     *
-     * @param string $key
-     * @param mixed  $value
-     * @return mixed
-     */
-    public function set(string $key, mixed $value): mixed
-    {
-        if ($this->has($key)) {
-            $old = $this->storage[$key];
-            $this->storage[$key] = $value;
-            return $old;
+        if ($isset) {
+            $isset = !($strict === true) || !empty($this->storage[$key]);
         }
 
-        $this->storage[$key] = $value;
-
-        return null;
+        return $isset;
     }
 
     /**
@@ -268,6 +220,46 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
+     * Returns the elements of the collection in table format
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        $collection = [];
+
+        $this->recursive(
+            $this->storage,
+            function ($value, $key) use (&$collection) {
+                if (is_object($value)) {
+                    $collection[$key] = (array)$value;
+                } else {
+                    $collection[$key] = $value;
+                }
+            }
+        );
+
+        return $collection;
+    }
+
+    /**
+     * Recursive walk of a table or object
+     *
+     * @param array $data
+     * @param callable $cb
+     */
+    private function recursive(array $data, callable $cb): void
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+                $this->recursive((array)$value, $cb);
+            } else {
+                $cb($value, $key);
+            }
+        }
+    }
+
+    /**
      * Map
      *
      * @param callable $cb
@@ -309,7 +301,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
      * Fill storage
      *
      * @param mixed $data
-     * @param int   $offset
+     * @param int $offset
      * @return array
      */
     public function fill(mixed $data, int $offset): array
@@ -392,17 +384,6 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
-     * Max
-     *
-     * @param ?callable $cb
-     * @return int|float
-     */
-    public function min(?callable $cb = null): float|int
-    {
-        return $this->aggregate('min', $cb);
-    }
-
-    /**
      * Aggregate Execute max|min
      *
      * @param callable|null $cb
@@ -432,9 +413,20 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
+     * Max
+     *
+     * @param ?callable $cb
+     * @return int|float
+     */
+    public function min(?callable $cb = null): float|int
+    {
+        return $this->aggregate('min', $cb);
+    }
+
+    /**
      * Returns the key list and return an instance of Collection.
      *
-     * @param  array $except
+     * @param array $except
      * @return Collection
      */
     public function excepts(array $except): Collection
@@ -456,7 +448,7 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * Ignore the key that is given to it and return an instance of Collection.
      *
-     * @param  array $ignores
+     * @param array $ignores
      * @return Collection
      */
     public function ignores(array $ignores): Collection
@@ -488,9 +480,9 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * Update an existing value in the collection
      *
-     * @param  string|integer $key
-     * @param  mixed $data
-     * @param  bool $override
+     * @param string|integer $key
+     * @param mixed $data
+     * @param bool $override
      * @return bool
      */
     public function update(mixed $key, mixed $data, bool $override = false): bool
@@ -522,39 +514,18 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     public function yieldify(): PHPGenerator
     {
         foreach ($this->storage as $key => $value) {
-            yield (object) [
+            yield (object)[
                 'value' => $value,
                 'key' => $key,
                 'done' => false
             ];
         }
 
-        yield (object) [
+        yield (object)[
             'value' => null,
             'key' => null,
             'done' => true
         ];
-    }
-
-    /**
-     * Get the data in JSON format
-     *
-     * @param  int $option
-     * @return string
-     */
-    public function toJson(int $option = 0): string
-    {
-        return json_encode($this->storage, $option);
-    }
-
-    /**
-     * Length of the collection
-     *
-     * @return int
-     */
-    public function length(): int
-    {
-        return count($this->storage);
     }
 
     /**
@@ -580,29 +551,6 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
-     * Returns the elements of the collection in table format
-     *
-     * @return array
-     */
-    public function toArray(): array
-    {
-        $collection = [];
-
-        $this->recursive(
-            $this->storage,
-            function ($value, $key) use (&$collection) {
-                if (is_object($value)) {
-                    $collection[$key] = (array) $value;
-                } else {
-                    $collection[$key] = $value;
-                }
-            }
-        );
-
-        return $collection;
-    }
-
-    /**
      * Returns the elements of the collection
      *
      * @return array
@@ -615,8 +563,8 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * Add after the last item in the collection
      *
-     * @param  mixed $value
-     * @param  int|string $key
+     * @param mixed $value
+     * @param int|string $key
      * @return Collection
      */
     public function push(mixed $value, mixed $key = null): Collection
@@ -628,23 +576,6 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
         }
 
         return $this;
-    }
-
-    /**
-     * Recursive walk of a table or object
-     *
-     * @param array  $data
-     * @param callable $cb
-     */
-    private function recursive(array $data, callable $cb): void
-    {
-        foreach ($data as $key => $value) {
-            if (is_array($value) || is_object($value)) {
-                $this->recursive((array) $value, $cb);
-            } else {
-                $cb($value, $key);
-            }
-        }
     }
 
     /**
@@ -671,6 +602,36 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
+     * Allows to recover a value or value collection.
+     *
+     * @param int|string|null $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function get(int|string $key = null, mixed $default = null): mixed
+    {
+        if (is_null($key)) {
+            return $this->storage;
+        }
+
+        if ($this->has($key)) {
+            return $this->storage[$key] == null
+                ? $default
+                : $this->storage[$key];
+        }
+
+        if ($default !== null) {
+            if (is_callable($default)) {
+                return call_user_func($default);
+            }
+
+            return $default;
+        }
+
+        return null;
+    }
+
+    /**
      * __isset
      *
      * @param mixed $name
@@ -693,6 +654,19 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     }
 
     /**
+     * Delete an entry in the collection
+     *
+     * @param string $key
+     * @return Collection
+     */
+    public function delete(string $key): Collection
+    {
+        unset($this->storage[$key]);
+
+        return $this;
+    }
+
+    /**
      * __toString
      *
      * @return string
@@ -700,6 +674,17 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     public function __toString()
     {
         return $this->toJson();
+    }
+
+    /**
+     * Get the data in JSON format
+     *
+     * @param int $option
+     * @return string
+     */
+    public function toJson(int $option = 0): string
+    {
+        return json_encode($this->storage, $option);
     }
 
     /**
@@ -715,11 +700,11 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     /**
      * getIterator
      *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
-    public function getIterator(): \ArrayIterator
+    public function getIterator(): ArrayIterator
     {
-        return new \ArrayIterator($this->storage);
+        return new ArrayIterator($this->storage);
     }
 
     /**
@@ -754,6 +739,26 @@ class Collection implements \Countable, \JsonSerializable, \IteratorAggregate, \
     public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->set($offset, $value);
+    }
+
+    /**
+     * Modify an entry in the collection or the addition if not
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+    public function set(string $key, mixed $value): mixed
+    {
+        if ($this->has($key)) {
+            $old = $this->storage[$key];
+            $this->storage[$key] = $value;
+            return $old;
+        }
+
+        $this->storage[$key] = $value;
+
+        return null;
     }
 
     /**

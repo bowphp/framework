@@ -97,7 +97,7 @@ abstract class AbstractConnection
      */
     public function getConfig(): array
     {
-        return (array) $this->config;
+        return (array)$this->config;
     }
 
     /**
@@ -151,7 +151,7 @@ abstract class AbstractConnection
     public function bind(PDOStatement $pdo_statement, array $bindings = []): PDOStatement
     {
         foreach ($bindings as $key => $value) {
-            if (is_null($value) || strtolower((string) $value) === 'null') {
+            if (is_null($value) || strtolower((string)$value) === 'null') {
                 $pdo_statement->bindValue(
                     ':' . $key,
                     $value,
@@ -172,11 +172,11 @@ abstract class AbstractConnection
              * - XSS
              */
             if (is_int($value)) {
-                $value = (int) $value;
+                $value = (int)$value;
             } elseif (is_float($value)) {
-                $value = (float) $value;
+                $value = (float)$value;
             } elseif (is_double($value)) {
-                $value = (float) $value;
+                $value = (float)$value;
             } elseif (is_resource($value)) {
                 $param = PDO::PARAM_LOB;
             } else {

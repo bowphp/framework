@@ -6,6 +6,7 @@ namespace Bow\Http;
 
 use Bow\Contracts\ResponseInterface;
 use Bow\View\View;
+use stdClass;
 
 class Response implements ResponseInterface
 {
@@ -88,16 +89,6 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Get response message
-     *
-     * @return ?string
-     */
-    public function getContent(): ?string
-    {
-        return (string) $this->content;
-    }
-
-    /**
      * Get status code
      *
      * @return int
@@ -108,59 +99,9 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Get headers
-     *
-     * @return array
-     */
-    public function getHeaders(): array
-    {
-        return $this->headers;
-    }
-
-    /**
-     * Get response message
-     *
-     * @param string $content
-     * @return Response
-     */
-    public function setContent(string $content): Response
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
-    /**
-     * Get headers
-     *
-     * @param array $headers
-     * @return Response
-     */
-    public function withHeaders(array $headers): Response
-    {
-        $this->headers = $headers;
-
-        return $this;
-    }
-
-    /**
-     * Add http header
-     *
-     * @param  string $key
-     * @param  string $value
-     * @return Response
-     */
-    public function addHeader(string $key, string $value): Response
-    {
-        $this->headers[$key] = $value;
-
-        return $this;
-    }
-
-    /**
      * Add http headers
      *
-     * @param  array $headers
+     * @param array $headers
      * @return Response
      */
     public function addHeaders(array $headers): Response
@@ -173,16 +114,17 @@ class Response implements ResponseInterface
     /**
      * Download the given file as an argument
      *
-     * @param string  $file
+     * @param string $file
      * @param ?string $filename
-     * @param array   $headers
+     * @param array $headers
      * @return string
      */
     public function download(
-        string $file,
+        string  $file,
         ?string $filename = null,
-        array $headers = []
-    ): string {
+        array   $headers = []
+    ): string
+    {
         $type = mime_content_type($file);
 
         if (is_null($filename)) {
@@ -195,7 +137,7 @@ class Response implements ResponseInterface
         $this->addHeader('Content-Type', $type);
 
         $file_size = filesize($file);
-        $this->addHeader('Content-Length', (string) (is_int($file_size) ? $file_size : ''));
+        $this->addHeader('Content-Length', (string)(is_int($file_size) ? $file_size : ''));
         $this->addHeader('Content-Encoding', 'base64');
 
         // We put the new headers
@@ -210,18 +152,15 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Modify http headers
+     * Add http header
      *
-     * @param int $code
-     * @return mixed
+     * @param string $key
+     * @param string $value
+     * @return Response
      */
-    public function status(int $code): Response
+    public function addHeader(string $key, string $value): Response
     {
-        $this->code = $code;
-
-        if (in_array($code, HttpStatus::getCodes(), true)) {
-            @header('HTTP/1.1 ' . $code . ' ' . HttpStatus::getMessage($code), $this->override, $code);
-        }
+        $this->headers[$key] = $value;
 
         return $this;
     }
@@ -250,11 +189,86 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Get headers
+     *
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    /**
+     * Get response message
+     *
+     * @return ?string
+     */
+    public function getContent(): ?string
+    {
+        return (string)$this->content;
+    }
+
+    /**
+     * Get response message
+     *
+     * @param string $content
+     * @return Response
+     */
+    public function setContent(string $content): Response
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+
+    /**
+     * Modify http headers
+     *
+     * @param int $code
+     * @return mixed
+     */
+    public function status(int $code): Response
+    {
+        $this->code = $code;
+
+        if (in_array($code, HttpStatus::getCodes(), true)) {
+            @header('HTTP/1.1 ' . $code . ' ' . HttpStatus::getMessage($code), $this->override, $code);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Equivalent to an echo, except that it ends the application
+     *
+     * @param mixed $data
+     * @param int $code
+     * @param array $headers
+     * @return string
+     */
+    public function send(mixed $data, int $code = 200, array $headers = []): string
+    {
+        if (is_array($data) || $data instanceof stdClass || is_object($data)) {
+            return $this->json($data, $code, $headers);
+        }
+
+        $this->code = $code;
+
+        foreach ($headers as $key => $value) {
+            $this->addHeader($key, $value);
+        }
+
+        $this->content = $data;
+
+        return $this->buildHttpResponse();
+    }
+
+    /**
      * JSON response
      *
-     * @param  mixed $data
+     * @param mixed $data
      * @param int $code
-     * @param  array $headers
+     * @param array $headers
      * @return string
      */
     public function json(mixed $data, int $code = 200, array $headers = []): string
@@ -272,37 +286,12 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Equivalent to an echo, except that it ends the application
-     *
-     * @param  mixed $data
-     * @param  int  $code
-     * @param  array  $headers
-     * @return string
-     */
-    public function send(mixed $data, int $code = 200, array $headers = []): string
-    {
-        if (is_array($data) || $data instanceof \stdClass || is_object($data)) {
-            return $this->json($data, $code, $headers);
-        }
-
-        $this->code = $code;
-
-        foreach ($headers as $key => $value) {
-            $this->addHeader($key, $value);
-        }
-
-        $this->content = $data;
-
-        return $this->buildHttpResponse();
-    }
-
-    /**
      * Make view rendering
      *
-     * @param  string $template
-     * @param  array $data
-     * @param  int $code
-     * @param  array $headers
+     * @param string $template
+     * @param array $data
+     * @param int $code
+     * @param array $headers
      * @return string
      * @throws
      */
@@ -317,6 +306,19 @@ class Response implements ResponseInterface
         $this->content = $view->getContent();
 
         return $this->buildHttpResponse();
+    }
+
+    /**
+     * Get headers
+     *
+     * @param array $headers
+     * @return Response
+     */
+    public function withHeaders(array $headers): Response
+    {
+        $this->headers = $headers;
+
+        return $this;
     }
 
     /**

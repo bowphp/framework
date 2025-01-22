@@ -12,46 +12,41 @@ use ReflectionClass;
 class Capsule implements ArrayAccess
 {
     /**
+     * Represents the instance of Capsule
+     *
+     * @var ?Capsule
+     */
+    private static ?Capsule $instance = null;
+    /**
      * The container register for bind by alias
      *
      * @var array
      */
     private array $registers = [];
-
     /**
      * The container register for instance
      *
      * @var array
      */
     private array $instances = [];
-
     /**
      * The container factory maker
      *
      * @var array
      */
     private array $factories = [];
-
     /**
      * Represents a cache collector
      *
      * @var array
      */
     private array $key = [];
-
     /**
      * Represents the compilation parameters
      *
      * @var array
      */
     private array $parameters = [];
-
-    /**
-     * Represents the instance of Capsule
-     *
-     * @var ?Capsule
-     */
-    private static ?Capsule $instance = null;
 
     /**
      * Get instance of Capsule
@@ -65,6 +60,69 @@ class Capsule implements ArrayAccess
         }
 
         return static::$instance;
+    }
+
+    /**
+     * Compilation with parameter
+     *
+     * @param string $key
+     * @param array $parameters
+     * @return mixed
+     * @throws
+     */
+    public function makeWith(string $key, array $parameters = []): mixed
+    {
+        $this->parameters = $parameters;
+
+        $resolved = $this->resolve($key);
+
+        $this->parameters = [];
+
+        return $resolved;
+    }
+
+    /**
+     * Instantiate a class by its key
+     *
+     * @param string $key
+     * @return mixed
+     * @throws
+     */
+    private function resolve(string $key): mixed
+    {
+        $reflection = new ReflectionClass($key);
+
+        if (!$reflection->isInstantiable()) {
+            return $key;
+        }
+
+        $constructor = $reflection->getConstructor();
+
+        if (!$constructor) {
+            return $reflection->newInstance();
+        }
+
+        $parameters = $constructor->getParameters();
+
+        $parameters_lists = [];
+
+        foreach ($parameters as $parameter) {
+            if ($parameter->isDefaultValueAvailable()) {
+                $parameters_lists[] = $parameter->getDefaultValue();
+                continue;
+            }
+            if (!$parameter->isOptional()) {
+                $parameters_lists[] = $this->make($parameter->getType()->getName());
+            }
+        }
+
+        if (!empty($this->parameters)) {
+            $parameters_lists = $this->parameters;
+
+            $this->parameters = [];
+        }
+
+        return $reflection->newInstanceArgs($parameters_lists);
     }
 
     /**
@@ -103,29 +161,10 @@ class Capsule implements ArrayAccess
         }
 
         if (method_exists($this->registers[$key], '__invoke')) {
-            return  $this->instances[$key] = $this->registers[$key]();
+            return $this->instances[$key] = $this->registers[$key]();
         }
 
         return null;
-    }
-
-    /**
-     * Compilation with parameter
-     *
-     * @param string $key
-     * @param array $parameters
-     * @return mixed
-     * @throws
-     */
-    public function makeWith(string $key, array $parameters = []): mixed
-    {
-        $this->parameters = $parameters;
-
-        $resolved = $this->resolve($key);
-
-        $this->parameters = [];
-
-        return $resolved;
     }
 
     /**
@@ -176,50 +215,6 @@ class Capsule implements ArrayAccess
         $this->instances[$key] = $instance;
 
         return $this;
-    }
-
-    /**
-     * Instantiate a class by its key
-     *
-     * @param string $key
-     * @return mixed
-     * @throws
-     */
-    private function resolve(string $key): mixed
-    {
-        $reflection = new ReflectionClass($key);
-
-        if (!$reflection->isInstantiable()) {
-            return $key;
-        }
-
-        $constructor = $reflection->getConstructor();
-
-        if (!$constructor) {
-            return $reflection->newInstance();
-        }
-
-        $parameters = $constructor->getParameters();
-
-        $parameters_lists = [];
-
-        foreach ($parameters as $parameter) {
-            if ($parameter->isDefaultValueAvailable()) {
-                $parameters_lists[] = $parameter->getDefaultValue();
-                continue;
-            }
-            if (!$parameter->isOptional()) {
-                $parameters_lists[] = $this->make($parameter->getType()->getName());
-            }
-        }
-
-        if (!empty($this->parameters)) {
-            $parameters_lists = $this->parameters;
-
-            $this->parameters = [];
-        }
-
-        return $reflection->newInstanceArgs($parameters_lists);
     }
 
     /**

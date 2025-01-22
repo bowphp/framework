@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Auth;
 
+use Bow\Auth\Exception\AuthenticationException;
+use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Guards\JwtGuard;
 use Bow\Auth\Guards\SessionGuard;
-use Bow\Auth\Guards\GuardContract;
-use Bow\Auth\Exception\AuthenticationException;
 use ErrorException;
 
 class Auth
@@ -52,16 +52,6 @@ class Auth
     }
 
     /**
-     * Get Auth Instance
-     *
-     * @return ?GuardContract
-     */
-    public static function getInstance(): ?GuardContract
-    {
-        return static::$instance;
-    }
-
-    /**
      * Check if user is authenticated
      *
      * @param null|string $guard
@@ -94,6 +84,16 @@ class Auth
             static::$instance = new JwtGuard($provider, $guard);
         }
 
+        return static::$instance;
+    }
+
+    /**
+     * Get Auth Instance
+     *
+     * @return ?GuardContract
+     */
+    public static function getInstance(): ?GuardContract
+    {
         return static::$instance;
     }
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Bow\Cache\Adapter;
 
 use Bow\Support\Str;
-use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class FilesystemAdapter implements CacheAdapterInterface
 {
@@ -34,8 +34,16 @@ class FilesystemAdapter implements CacheAdapterInterface
         $this->directory = $config["path"];
 
         if (!is_dir($this->directory)) {
-            @mkdir($this->directory, 0777);
+            @mkdir($this->directory);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function set(string $key, mixed $data, ?int $time = null): bool
+    {
+        return $this->add($key, $data, $time);
     }
 
     /**
@@ -53,18 +61,25 @@ class FilesystemAdapter implements CacheAdapterInterface
 
         $meta['content'] = $content;
 
-        return (bool) file_put_contents(
+        return (bool)file_put_contents(
             $this->makeHashFilename($key, true),
             serialize($meta)
         );
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function set(string $key, mixed $data, ?int $time = null): bool
+    private function makeHashFilename(string $key, bool $make_group_directory = false): string
     {
-        return $this->add($key, $data, $time);
+        $hash = hash('sha256', '/bow_' . $key);
+
+        $group = Str::slice($hash, 0, 2);
+
+        if ($make_group_directory) {
+            if (!is_dir($this->directory . '/' . $group)) {
+                @mkdir($this->directory . '/' . $group);
+            }
+        }
+
+        return $this->directory . '/' . $group . '/' . $hash;
     }
 
     /**
@@ -96,7 +111,7 @@ class FilesystemAdapter implements CacheAdapterInterface
 
         $meta['content'] = $content;
 
-        return (bool) file_put_contents(
+        return (bool)file_put_contents(
             $this->makeHashFilename($key, true),
             serialize($meta)
         );
@@ -125,7 +140,7 @@ class FilesystemAdapter implements CacheAdapterInterface
             $cache['content'] .= $content;
         }
 
-        return (bool) file_put_contents(
+        return (bool)file_put_contents(
             $this->makeHashFilename($key),
             serialize($cache)
         );
@@ -168,6 +183,16 @@ class FilesystemAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
+    public function has(string $key): bool
+    {
+        $filename = $this->makeHashFilename($key);
+
+        return (bool)@file_exists($filename);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function addTime(string $key, int $time): bool
     {
         $this->with_meta = true;
@@ -186,7 +211,7 @@ class FilesystemAdapter implements CacheAdapterInterface
             $cache['__bow_meta']['expire_at'] += $time;
         }
 
-        return (bool) file_put_contents(
+        return (bool)file_put_contents(
             $this->makeHashFilename($key),
             serialize($cache)
         );
@@ -207,7 +232,7 @@ class FilesystemAdapter implements CacheAdapterInterface
             return false;
         }
 
-        return (int) $cache['__bow_meta']['expire_at'];
+        return (int)$cache['__bow_meta']['expire_at'];
     }
 
     /**
@@ -221,7 +246,7 @@ class FilesystemAdapter implements CacheAdapterInterface
             return false;
         }
 
-        $result = (bool) @unlink($filename);
+        $result = (bool)@unlink($filename);
         $parts = explode('/', $filename);
         array_pop($parts);
 
@@ -232,16 +257,6 @@ class FilesystemAdapter implements CacheAdapterInterface
         }
 
         return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function has(string $key): bool
-    {
-        $filename = $this->makeHashFilename($key);
-
-        return (bool) @file_exists($filename);
     }
 
     /**
@@ -279,20 +294,5 @@ class FilesystemAdapter implements CacheAdapterInterface
                 unlink($file->getRealPath());
             }
         }
-    }
-
-    private function makeHashFilename(string $key, bool $make_group_directory = false): string
-    {
-        $hash = hash('sha256', '/bow_' . $key);
-
-        $group = Str::slice($hash, 0, 2);
-
-        if ($make_group_directory) {
-            if (!is_dir($this->directory . '/' . $group)) {
-                @mkdir($this->directory . '/' . $group);
-            }
-        }
-
-        return $this->directory . '/' . $group . '/' . $hash;
     }
 }

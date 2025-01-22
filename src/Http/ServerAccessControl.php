@@ -26,6 +26,25 @@ class ServerAccessControl
     }
 
     /**
+     * Active Access-control-Allow-Origin
+     *
+     * @param array $excepted
+     * @return ServerAccessControl
+     * @throws
+     */
+    public function allowOrigin(array $excepted): ServerAccessControl
+    {
+        if (count($excepted) == 0) {
+            throw new ServerAccessControlException(
+                'Waiting for a data table.' . gettype($excepted) . ' given.',
+                E_USER_ERROR
+            );
+        }
+
+        return $this->push('Access-Control-Allow-Origin', implode(', ', $excepted));
+    }
+
+    /**
      * The access control
      *
      * @param string $allow
@@ -44,28 +63,9 @@ class ServerAccessControl
     }
 
     /**
-     * Active Access-control-Allow-Origin
-     *
-     * @param  array $excepted
-     * @return ServerAccessControl
-     * @throws
-     */
-    public function allowOrigin(array $excepted): ServerAccessControl
-    {
-        if (count($excepted) == 0) {
-            throw new ServerAccessControlException(
-                'Waiting for a data table.' . gettype($excepted) . ' given.',
-                E_USER_ERROR
-            );
-        }
-
-        return $this->push('Access-Control-Allow-Origin', implode(', ', $excepted));
-    }
-
-    /**
      * Active Access-control-Allow-Methods
      *
-     * @param  array $excepted
+     * @param array $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
@@ -84,7 +84,7 @@ class ServerAccessControl
     /**
      * Active Access-control-Allow-Headers
      *
-     * @param  array $excepted
+     * @param array $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
@@ -110,7 +110,7 @@ class ServerAccessControl
     /**
      * Active Access-control-Max-Age
      *
-     * @param  float|int $excepted
+     * @param float|int $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
@@ -123,13 +123,13 @@ class ServerAccessControl
             );
         }
 
-        return $this->push('Access-Control-Max-Age', (string) $excepted);
+        return $this->push('Access-Control-Max-Age', (string)$excepted);
     }
 
     /**
      * Active Access-control-Expose-Headers
      *
-     * @param  array $excepted
+     * @param array $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
