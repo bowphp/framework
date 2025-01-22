@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Session\Driver;
 
-class ArrayDriver implements \SessionHandlerInterface
+use SessionHandlerInterface;
+
+class ArrayDriver implements SessionHandlerInterface
 {
     use DurationTrait;
 
@@ -26,19 +28,6 @@ class ArrayDriver implements \SessionHandlerInterface
     }
 
     /**
-     * Destroy session information
-     *
-     * @param string $id
-     * @return bool
-     */
-    public function destroy(string $id): bool
-    {
-        unset($this->sessions[$id]);
-
-        return true;
-    }
-
-    /**
      * Garbage collector
      *
      * @param int $max_lifetime
@@ -53,6 +42,19 @@ class ArrayDriver implements \SessionHandlerInterface
         }
 
         return 1;
+    }
+
+    /**
+     * Destroy session information
+     *
+     * @param string $id
+     * @return bool
+     */
+    public function destroy(string $id): bool
+    {
+        unset($this->sessions[$id]);
+
+        return true;
     }
 
     /**

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Bow\Database\Barry;
 
 use Bow\Database\Collection;
+use Bow\Database\Exception\ModelException;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
-use Bow\Database\Exception\ModelException;
 
 class Builder extends QueryBuilder
 {
@@ -34,11 +34,11 @@ class Builder extends QueryBuilder
 
         // Create the model associate to the query builder with query result
         if (!is_array($data)) {
-            return new $this->model((array) $data);
+            return new $this->model((array)$data);
         }
 
         foreach ($data as $key => $value) {
-            $data[$key] = new $this->model((array) $value);
+            $data[$key] = new $this->model((array)$value);
         }
 
         return new Collection($data);
@@ -66,20 +66,7 @@ class Builder extends QueryBuilder
             $column = (new $this->model())->getKey();
         }
 
-        return $this->whereIn($column, (array) $value)->count() > 0;
-    }
-
-    /**
-     * Set model
-     *
-     * @param string $model
-     * @return Builder
-     */
-    public function setModel(string $model): Builder
-    {
-        $this->model = $model;
-
-        return $this;
+        return $this->whereIn($column, (array)$value)->count() > 0;
     }
 
     /**
@@ -94,6 +81,19 @@ class Builder extends QueryBuilder
             throw new ModelException("The model is not define");
         }
 
-        return (string) $this->model;
+        return (string)$this->model;
+    }
+
+    /**
+     * Set model
+     *
+     * @param string $model
+     * @return Builder
+     */
+    public function setModel(string $model): Builder
+    {
+        $this->model = $model;
+
+        return $this;
     }
 }

@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Bow\Session;
 
+use BadMethodCallException;
 use Bow\Contracts\CollectionInterface;
 use Bow\Security\Crypto;
+use Bow\Session\Driver\ArrayDriver;
+use Bow\Session\Driver\DatabaseDriver;
+use Bow\Session\Driver\FilesystemDriver;
 use Bow\Session\Exception\SessionException;
 use InvalidArgumentException;
+use stdClass;
 
 class Session implements CollectionInterface
 {
@@ -24,25 +29,22 @@ class Session implements CollectionInterface
         "cookie" => "__bow.cookie.secure",
         "cache" => "__bow.session.key.cache"
     ];
-
-    /**
-     * The session available driver
-     *
-     * @var array
-     */
-    private array $driver = [
-        'database' => \Bow\Session\Driver\DatabaseDriver::class,
-        'array' => \Bow\Session\Driver\ArrayDriver::class,
-        'file' => \Bow\Session\Driver\FilesystemDriver::class,
-    ];
-
     /**
      * The instance of Session
      *
      * @var ?Session
      */
     private static ?Session $instance = null;
-
+    /**
+     * The session available driver
+     *
+     * @var array
+     */
+    private array $driver = [
+        'database' => DatabaseDriver::class,
+        'array' => ArrayDriver::class,
+        'file' => FilesystemDriver::class,
+    ];
     /**
      * The session configuration
      *
@@ -104,6 +106,25 @@ class Session implements CollectionInterface
     }
 
     /**
+     * Generate session
+     *
+     * @throws SessionException
+     */
+    public function regenerate(): void
+    {
+        $this->flush();
+        $this->start();
+    }
+
+    /**
+     * Allows you to empty the session
+     */
+    public function flush(): void
+    {
+        session_destroy();
+    }
+
+    /**
      * Session starter.
      *
      * @return bool
@@ -128,21 +149,6 @@ class Session implements CollectionInterface
         $this->initializeInternalSessionStorage();
 
         return $started;
-    }
-
-    /**
-     * Start session natively
-     *
-     * @return bool
-     * @throws SessionException
-     */
-    private function boot(): bool
-    {
-        if (!headers_sent()) {
-            return @session_start();
-        }
-
-        throw new SessionException('Headers already sent. Cannot start session.');
     }
 
     /**
@@ -195,6 +201,47 @@ class Session implements CollectionInterface
     }
 
     /**
+     * Generate session ID
+     *
+     * @return string
+     */
+    private function generateId(): string
+    {
+        return Crypto::encrypt(uniqid(microtime()));
+    }
+
+    /**
+     * Set session cookie params
+     *
+     * @return void
+     */
+    private function setCookieParameters(): void
+    {
+        session_set_cookie_params(
+            (int)$this->config["lifetime"],
+            $this->config["path"],
+            $this->config['domain'],
+            $this->config["secure"],
+            $this->config["httponly"]
+        );
+    }
+
+    /**
+     * Start session natively
+     *
+     * @return bool
+     * @throws SessionException
+     */
+    private function boot(): bool
+    {
+        if (!headers_sent()) {
+            return @session_start();
+        }
+
+        throw new SessionException('Headers already sent. Cannot start session.');
+    }
+
+    /**
      * Load internal session
      *
      * @return void
@@ -202,7 +249,7 @@ class Session implements CollectionInterface
     private function initializeInternalSessionStorage(): void
     {
         if (!isset($_SESSION[static::CORE_SESSION_KEY['csrf']])) {
-            $_SESSION[static::CORE_SESSION_KEY['csrf']] = new \stdClass();
+            $_SESSION[static::CORE_SESSION_KEY['csrf']] = new stdClass();
         }
 
         if (!isset($_SESSION[static::CORE_SESSION_KEY['cache']])) {
@@ -223,62 +270,15 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Set session cookie params
+     * Allows checking for the existence of a key in the session collection
      *
-     * @return void
-     */
-    private function setCookieParameters(): void
-    {
-        session_set_cookie_params(
-            (int) $this->config["lifetime"],
-            $this->config["path"],
-            $this->config['domain'],
-            $this->config["secure"],
-            $this->config["httponly"]
-        );
-    }
-
-    /**
-     * Generate session ID
-     *
-     * @return string
-     */
-    private function generateId(): string
-    {
-        return Crypto::encrypt(uniqid(microtime(false)));
-    }
-
-    /**
-     * Generate session
-     *
+     * @param string $key
+     * @return bool
      * @throws SessionException
      */
-    public function regenerate(): void
+    public function exists(string $key): bool
     {
-        $this->flush();
-        $this->start();
-    }
-
-    /**
-     * Allows to filter user defined variables
-     * and those used by the framework.
-     *
-     * @return array
-     * @throws SessionException
-     */
-    private function filter(): array
-    {
-        $arr = [];
-
-        $this->start();
-
-        foreach ($_SESSION as $key => $value) {
-            if (!array_key_exists($key, static::CORE_SESSION_KEY)) {
-                $arr[$key] = $value;
-            }
-        }
-
-        return $arr;
+        return $this->has($key, true);
     }
 
     /**
@@ -311,32 +311,20 @@ class Session implements CollectionInterface
         $value = $cache[$key] ?? null;
 
         if (!is_null($value)) {
-            return count((array) $value) > 0;
+            return count((array)$value) > 0;
         }
 
         $value = $flash[$key] ?? null;
 
         if (!is_null($value)) {
-            return count((array) $value) > 0;
+            return count((array)$value) > 0;
         }
 
         if (isset($_SESSION[$key])) {
-            return count((array) $_SESSION[$key]) > 0;
+            return count((array)$_SESSION[$key]) > 0;
         }
 
         return false;
-    }
-
-    /**
-     * Allows checking for the existence of a key in the session collection
-     *
-     * @param string $key
-     * @return bool
-     * @throws SessionException
-     */
-    public function exists($key): bool
-    {
-        return $this->has($key, true);
     }
 
     /**
@@ -348,6 +336,28 @@ class Session implements CollectionInterface
     public function isEmpty(): bool
     {
         return empty($this->filter());
+    }
+
+    /**
+     * Allows to filter user defined variables
+     * and those used by the framework.
+     *
+     * @return array
+     * @throws SessionException
+     */
+    private function filter(): array
+    {
+        $arr = [];
+
+        $this->start();
+
+        foreach ($_SESSION as $key => $value) {
+            if (!array_key_exists($key, static::CORE_SESSION_KEY)) {
+                $arr[$key] = $value;
+            }
+        }
+
+        return $arr;
     }
 
     /**
@@ -378,6 +388,49 @@ class Session implements CollectionInterface
     }
 
     /**
+     * Add flash data
+     * After the data recovery is automatic deleted
+     *
+     * @param string|int $key
+     * @param mixed $message
+     * @return mixed
+     * @throws SessionException
+     */
+    public function flash(string|int $key, ?string $message = null): mixed
+    {
+        $this->start();
+
+        if ($message != null) {
+            $_SESSION[static::CORE_SESSION_KEY['flash']][$key] = $message;
+
+            return true;
+        }
+
+        $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
+
+        $content = $flash[$key] ?? null;
+
+        $tmp = array_filter($flash, function ($i) use ($key) {
+            return $i != $key;
+        }, ARRAY_FILTER_USE_KEY);
+
+        $_SESSION[static::CORE_SESSION_KEY['flash']] = $tmp;
+
+        return $content;
+    }
+
+    /**
+     * The add alias
+     *
+     * @throws SessionException
+     * @see Session::add
+     */
+    public function put(string|int $key, mixed $value, $next = false): mixed
+    {
+        return $this->add($key, $value, $next);
+    }
+
+    /**
      * Add an entry to the collection
      *
      * @param string|int $key
@@ -396,7 +449,7 @@ class Session implements CollectionInterface
             return $_SESSION[$key] = $data;
         }
 
-        if (! $this->has($key)) {
+        if (!$this->has($key)) {
             $_SESSION[$key] = [];
         }
 
@@ -407,17 +460,6 @@ class Session implements CollectionInterface
         $_SESSION[$key] = array_merge($_SESSION[$key], [$data]);
 
         return $data;
-    }
-
-    /**
-     * The add alias
-     *
-     * @throws SessionException
-     * @see \Bow\Session\Session::add
-     */
-    public function put(string|int $key, mixed $value, $next = false): mixed
-    {
-        return $this->add($key, $value, $next);
     }
 
     /**
@@ -469,8 +511,6 @@ class Session implements CollectionInterface
     {
         $this->start();
 
-        $old = null;
-
         $_SESSION[static::CORE_SESSION_KEY['cache']][$key] = true;
 
         if (!$this->has($key)) {
@@ -487,39 +527,7 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Add flash data
-     * After the data recovery is automatic deleted
-     *
-     * @param string|int $key
-     * @param mixed $message
-     * @return mixed
-     * @throws SessionException
-     */
-    public function flash(string|int $key, ?string $message = null): mixed
-    {
-        $this->start();
-
-        if ($message != null) {
-            $_SESSION[static::CORE_SESSION_KEY['flash']][$key] = $message;
-
-            return true;
-        }
-
-        $flash = $_SESSION[static::CORE_SESSION_KEY['flash']];
-
-        $content = $flash[$key] ?? null;
-
-        $tmp = array_filter($flash, function ($i) use ($key) {
-            return $i != $key;
-        }, ARRAY_FILTER_USE_KEY);
-
-        $_SESSION[static::CORE_SESSION_KEY['flash']] = $tmp;
-
-        return $content;
-    }
-
-    /**
-     * Returns the list of session data as a array.
+     * Returns the list of session data as an array.
      *
      * @return array
      * @throws SessionException
@@ -557,21 +565,13 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Allows you to empty the session
-     */
-    public function flush(): void
-    {
-        session_destroy();
-    }
-
-    /**
      * Returns the list of session data as a toObject.
      *
      * @return array
      */
     public function toObject(): array
     {
-        throw new \BadMethodCallException("Bad method called");
+        throw new BadMethodCallException("Bad method called");
     }
 
     /**

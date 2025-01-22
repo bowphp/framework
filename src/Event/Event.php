@@ -6,6 +6,7 @@ namespace Bow\Event;
 
 use Bow\Event\Contracts\AppEvent;
 use ErrorException;
+use RuntimeException;
 
 class Event
 {
@@ -58,6 +59,19 @@ class Event
     }
 
     /**
+     * Check whether an event is already recorded at least once.
+     *
+     * @param string $event
+     * @return bool
+     */
+    public static function bound(string $event): bool
+    {
+        $once = static::$events['__bow.once.event'] ?? [];
+
+        return array_key_exists($event, $once) || array_key_exists($event, static::$events);
+    }
+
+    /**
      * Associate a single listener to an event
      *
      * @param string $event
@@ -97,10 +111,10 @@ class Event
             return $listener->call($data);
         }
 
-        $events = (array) static::$events[$event_name];
+        $events = (array)static::$events[$event_name];
 
         // Execute each listener
-        collect($events)->each(fn (Listener $listener) => $listener->call($data));
+        collect($events)->each(fn(Listener $listener) => $listener->call($data));
 
         return true;
     }
@@ -118,19 +132,6 @@ class Event
                 static::$events['__bow.once.event'][$event]
             );
         }
-    }
-
-    /**
-     * Check whether an event is already recorded at least once.
-     *
-     * @param  string $event
-     * @return bool
-     */
-    public static function bound(string $event): bool
-    {
-        $once = static::$events['__bow.once.event'] ?? [];
-
-        return array_key_exists($event, $once) || array_key_exists($event, static::$events);
     }
 
     /**
@@ -153,6 +154,6 @@ class Event
             return call_user_func_array([static::$instance, $name], $arguments);
         }
 
-        throw new \RuntimeException('The method ' . $name . ' There is no');
+        throw new RuntimeException('The method ' . $name . ' There is no');
     }
 }

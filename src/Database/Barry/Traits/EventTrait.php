@@ -9,19 +9,6 @@ use Bow\Support\Str;
 trait EventTrait
 {
     /**
-     * Get event name
-     *
-     * @param string $event
-     * @return string
-     */
-    private static function formatEventName(string $event): string
-    {
-        $class_name = str_replace('\\', '', strtolower(Str::snake(static::class)));
-
-        return sprintf("%s.%s", $class_name, strtolower($event));
-    }
-
-    /**
      * Fire event
      *
      * @param string $event
@@ -33,5 +20,18 @@ trait EventTrait
         if (event()->bound($env)) {
             event()->emit($env, $this);
         }
+    }
+
+    /**
+     * Get event name
+     *
+     * @param string $event
+     * @return string
+     */
+    private static function formatEventName(string $event): string
+    {
+        $class_name = str_replace('\\', '', strtolower(Str::snake(static::class)));
+
+        return sprintf("%s.%s", $class_name, strtolower($event));
     }
 }

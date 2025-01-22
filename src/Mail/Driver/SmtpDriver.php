@@ -87,16 +87,16 @@ class SmtpDriver implements MailDriverInterface
         $this->url = $config['hostname'];
         $this->username = $config['username'];
         $this->password = $config['password'];
-        $this->secure = (bool) $config['ssl'];
-        $this->tls = (bool) $config['tls'];
-        $this->timeout = (int) $config['timeout'];
-        $this->port = (int) $config['port'];
+        $this->secure = (bool)$config['ssl'];
+        $this->tls = (bool)$config['tls'];
+        $this->timeout = (int)$config['timeout'];
+        $this->port = (int)$config['port'];
     }
 
     /**
      * Start sending mail
      *
-     * @param  Message $message
+     * @param Message $message
      * @return bool
      * @throws SocketException
      * @throws ErrorException
@@ -149,7 +149,7 @@ class SmtpDriver implements MailDriverInterface
             $error = false;
         }
 
-        return (bool) $error;
+        return (bool)$error;
     }
 
 
@@ -177,7 +177,7 @@ class SmtpDriver implements MailDriverInterface
         }
 
         $this->sock = $sock;
-        stream_set_timeout($this->sock, $this->timeout, 0);
+        stream_set_timeout($this->sock, $this->timeout);
         $code = $this->read();
 
         // The client sends this command to the SMTP server to identify
@@ -185,7 +185,7 @@ class SmtpDriver implements MailDriverInterface
         // The domain name or IP address of the SMTP client is usually sent as an argument
         // together with the command (e.g. “EHLO client.example.com”).
         $client_host = isset($_SERVER['HTTP_HOST'])
-            && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
         if ($code == 220) {
             $code = $this->write('EHLO ' . $client_host, 250, 'HELO');
@@ -215,23 +215,6 @@ class SmtpDriver implements MailDriverInterface
     }
 
     /**
-     * Disconnection
-     *
-     * @return int|string|null
-     * @throws ErrorException
-     */
-    private function disconnect(): int|string|null
-    {
-        $r = $this->write('QUIT');
-
-        fclose($this->sock);
-
-        $this->sock = null;
-
-        return $r;
-    }
-
-    /**
      * Read the current connection stream.
      *
      * @return int
@@ -252,17 +235,17 @@ class SmtpDriver implements MailDriverInterface
             }
         }
 
-        return (int) $s;
+        return (int)$s;
     }
 
     /**
      * Start an SMTP command
      *
      * @param string $command
-     * @param ?int    $code
-     * @param ?string   $message
-     * @throws SmtpException
+     * @param ?int $code
+     * @param ?string $message
      * @return int|null
+     * @throws SmtpException
      */
     private function write(string $command, ?int $code = null, ?string $message = null): ?int
     {
@@ -282,7 +265,7 @@ class SmtpDriver implements MailDriverInterface
 
         $response = $this->read();
 
-        if (!in_array($response, (array) $code)) {
+        if (!in_array($response, (array)$code)) {
             throw new SmtpException(
                 sprintf('SMTP server did not accept %s with code [%s]', $message, $response),
                 E_ERROR
@@ -290,5 +273,22 @@ class SmtpDriver implements MailDriverInterface
         }
 
         return $response;
+    }
+
+    /**
+     * Disconnection
+     *
+     * @return int|string|null
+     * @throws ErrorException
+     */
+    private function disconnect(): int|string|null
+    {
+        $r = $this->write('QUIT');
+
+        fclose($this->sock);
+
+        $this->sock = null;
+
+        return $r;
     }
 }

@@ -16,6 +16,36 @@ class Cookie
     private static array $is_decrypt = [];
 
     /**
+     * Check if a collection is empty.
+     *
+     * @return bool
+     */
+    public static function isEmpty(): bool
+    {
+        return empty($_COOKIE);
+    }
+
+    /**
+     * Allows you to retrieve a value or collection of cookie value.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        if (static::has($key)) {
+            return Crypto::decrypt($_COOKIE[$key]);
+        }
+
+        if (is_callable($default)) {
+            return $default();
+        }
+
+        return $default;
+    }
+
+    /**
      * Check for existence of a key in the session collection
      *
      * @param string $key
@@ -38,36 +68,6 @@ class Cookie
     }
 
     /**
-     * Check if a collection is empty.
-     *
-     * @return bool
-     */
-    public static function isEmpty(): bool
-    {
-        return empty($_COOKIE);
-    }
-
-    /**
-     * Allows you to retrieve a value or collection of cookie value.
-     *
-     * @param string $key
-     * @param mixed  $default
-     * @return mixed
-     */
-    public static function get(string $key, mixed $default = null): mixed
-    {
-        if (static::has($key)) {
-            return Crypto::decrypt($_COOKIE[$key]);
-        }
-
-        if (is_callable($default)) {
-            return $default();
-        }
-
-        return $default;
-    }
-
-    /**
      * Return all values of COOKIE
      *
      * @return array
@@ -79,32 +79,6 @@ class Cookie
         }
 
         return $_COOKIE;
-    }
-
-    /**
-     * Add a value to the cookie table.
-     *
-     * @param int|string $key
-     * @param mixed      $data
-     * @param int $expiration
-     * @return bool
-     */
-    public static function set(
-        int|string $key,
-        mixed $data,
-        int $expiration = 3600,
-    ): bool {
-        $data = Crypto::encrypt(json_encode($data));
-
-        return setcookie(
-            $key,
-            $data,
-            time() + $expiration,
-            config('session.path'),
-            config('session.domain'),
-            config('session.secure'),
-            config('session.httponly')
-        );
     }
 
     /**
@@ -132,5 +106,32 @@ class Cookie
         unset($_COOKIE[$key]);
 
         return $old;
+    }
+
+    /**
+     * Add a value to the cookie table.
+     *
+     * @param int|string $key
+     * @param mixed $data
+     * @param int $expiration
+     * @return bool
+     */
+    public static function set(
+        int|string $key,
+        mixed      $data,
+        int        $expiration = 3600,
+    ): bool
+    {
+        $data = Crypto::encrypt(json_encode($data));
+
+        return setcookie(
+            $key,
+            $data,
+            time() + $expiration,
+            config('session.path'),
+            config('session.domain'),
+            config('session.secure'),
+            config('session.httponly')
+        );
     }
 }

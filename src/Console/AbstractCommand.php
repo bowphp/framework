@@ -10,7 +10,7 @@ abstract class AbstractCommand
 {
     use ConsoleTrait;
 
-     /**
+    /**
      * Store dirname
      *
      * @var Setting
@@ -24,7 +24,7 @@ abstract class AbstractCommand
      */
     protected array $namespaces;
 
-     /**
+    /**
      * The Arg Option instance
      *
      * @var Argument

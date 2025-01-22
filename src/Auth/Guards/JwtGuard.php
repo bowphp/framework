@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Bow\Auth\Guards;
 
+use Bow\Auth\Authentication;
+use Bow\Auth\Exception\AuthenticationException;
+use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
 use Exception;
 use Policier\Policier;
-use Bow\Auth\Authentication;
-use Bow\Auth\Traits\LoginUserTrait;
-use Bow\Auth\Exception\AuthenticationException;
 use Policier\Token;
 
 class JwtGuard extends GuardContract
@@ -113,6 +113,52 @@ class JwtGuard extends GuardContract
     }
 
     /**
+     * Get the Policier instance
+     *
+     * @return Policier
+     * @throws Exception
+     */
+    private function getPolicier(): Policier
+    {
+        if (!class_exists(Policier::class)) {
+            throw new Exception('Please install bowphp/policier: composer require bowphp/policier');
+        }
+
+        $policier = Policier::getInstance();
+
+        if (is_null($policier)) {
+            throw new Exception('Please load the \Policier\Bow\PolicierConfiguration::class configuration.');
+        }
+
+        $config = (array)config('policier');
+
+        if (!isset($config['signkey'])) {
+            throw new Exception('Please set the signkey.');
+        }
+
+        return $policier;
+    }
+
+    /**
+     * Make direct login
+     *
+     * @param Authentication $user
+     * @return bool
+     * @throws Exception
+     */
+    public function login(Authentication $user): bool
+    {
+        $attributes = array_merge($user->customJwtAttributes(), [
+            "id" => $user->getAuthenticateUserId(),
+            "logged" => true
+        ]);
+
+        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), $attributes);
+
+        return true;
+    }
+
+    /**
      * Check if user is guest
      *
      * @return bool
@@ -158,25 +204,6 @@ class JwtGuard extends GuardContract
     }
 
     /**
-     * Make direct login
-     *
-     * @param Authentication $user
-     * @return bool
-     * @throws Exception
-     */
-    public function login(Authentication $user): bool
-    {
-        $attributes = array_merge($user->customJwtAttributes(), [
-            "id" => $user->getAuthenticateUserId(),
-            "logged" => true
-        ]);
-
-        $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), $attributes);
-
-        return true;
-    }
-
-    /**
      * Destruct token
      *
      * @return bool
@@ -199,32 +226,5 @@ class JwtGuard extends GuardContract
         }
 
         return $this->token->get('id');
-    }
-
-    /**
-     * Get the Policier instance
-     *
-     * @return Policier
-     * @throws Exception
-     */
-    private function getPolicier(): Policier
-    {
-        if (!class_exists(Policier::class)) {
-            throw new Exception('Please install bowphp/policier: composer require bowphp/policier');
-        }
-
-        $policier = Policier::getInstance();
-
-        if (is_null($policier)) {
-            throw new Exception('Please load the \Policier\Bow\PolicierConfiguration::class configuration.');
-        }
-
-        $config = (array) config('policier');
-
-        if (!isset($config['signkey'])) {
-            throw new Exception('Please set the signkey.');
-        }
-
-        return $policier;
     }
 }

@@ -20,7 +20,7 @@ trait StringRule
     {
         $error = false;
 
-        if (!preg_match("/^required$/", (string) $masque, $match)) {
+        if (!preg_match("/^required$/", (string)$masque, $match)) {
             return;
         }
 
@@ -54,7 +54,7 @@ trait StringRule
      */
     protected function compileRequiredIf(string $key, string $masque): void
     {
-        if (!preg_match("/^required_if:(.+)+$/", (string) $masque, $match)) {
+        if (!preg_match("/^required_if:(.+)+$/", (string)$masque, $match)) {
             return;
         }
 
@@ -200,7 +200,7 @@ trait StringRule
             return;
         }
 
-        $length = (int) end($match);
+        $length = (int)end($match);
 
         if (Str::len($this->inputs[$key]) == $length) {
             return;
@@ -322,7 +322,7 @@ trait StringRule
             return;
         }
 
-        $length = (int) end($match);
+        $length = (int)end($match);
 
         if (Str::len($this->inputs[$key]) >= $length) {
             return;
@@ -357,7 +357,7 @@ trait StringRule
             return;
         }
 
-        $length = (int) end($match);
+        $length = (int)end($match);
 
         if (Str::len($this->inputs[$key]) <= $length) {
             return;
@@ -391,7 +391,7 @@ trait StringRule
             return;
         }
 
-        $value = (string) end($match);
+        $value = (string)end($match);
 
         if ($this->inputs[$key] == $value) {
             return;

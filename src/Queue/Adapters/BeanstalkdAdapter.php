@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
+use Bow\Queue\ProducerService;
 use ErrorException;
+use Pheanstalk\Contract\PheanstalkPublisherInterface;
+use Pheanstalk\Pheanstalk;
+use Pheanstalk\Values\Timeout;
 use Pheanstalk\Values\TubeName;
 use RuntimeException;
-use Pheanstalk\Pheanstalk;
-use Bow\Queue\ProducerService;
-use Pheanstalk\Contract\PheanstalkPublisherInterface;
+use Throwable;
 
 class BeanstalkdAdapter extends QueueAdapter
 {
@@ -35,7 +37,7 @@ class BeanstalkdAdapter extends QueueAdapter
         $this->pheanstalk = Pheanstalk::create(
             $config["hostname"],
             $config["port"],
-            $config["timeout"] ? new \Pheanstalk\Values\Timeout($config["timeout"]) : null,
+            $config["timeout"] ? new Timeout($config["timeout"]) : null,
         );
 
         if (isset($config["queue"])) {
@@ -55,7 +57,7 @@ class BeanstalkdAdapter extends QueueAdapter
     {
         $queue = new TubeName($this->getQueue($queue));
 
-        return (int) $this->pheanstalk->statsTube($queue)->currentJobsReady;
+        return (int)$this->pheanstalk->statsTube($queue)->currentJobsReady;
     }
 
     /**
@@ -67,7 +69,7 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function push(ProducerService $producer): void
     {
-        $queues = (array) cache("beanstalkd:queues");
+        $queues = (array)cache("beanstalkd:queues");
 
         if (!in_array($producer->getQueue(), $queues)) {
             $queues[] = $producer->getQueue();
@@ -83,6 +85,22 @@ class BeanstalkdAdapter extends QueueAdapter
             $producer->getDelay(),
             $producer->getRetry()
         );
+    }
+
+    /**
+     * Get the priority
+     *
+     * @param int $priority
+     * @return int
+     */
+    public function getPriority(int $priority): int
+    {
+        return match ($priority) {
+            $priority > 2 => 4294967295,
+            1 => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
+            0 => 0,
+            default => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
+        };
     }
 
     /**
@@ -109,7 +127,7 @@ class BeanstalkdAdapter extends QueueAdapter
             $this->pheanstalk->touch($job);
             $this->sleep(2);
             $this->pheanstalk->delete($job);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Write the error log
             error_log($e->getMessage());
             app('logger')->error($e->getMessage(), $e->getTrace());
@@ -145,7 +163,7 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function flush(?string $queue = null): void
     {
-        $queues = (array) $queue;
+        $queues = (array)$queue;
 
         if (count($queues) == 0) {
             $queues = cache("beanstalkd:queues");
@@ -158,21 +176,5 @@ class BeanstalkdAdapter extends QueueAdapter
                 $this->pheanstalk->delete($job);
             }
         }
-    }
-
-    /**
-     * Get the priority
-     *
-     * @param int $priority
-     * @return int
-     */
-    public function getPriority(int $priority): int
-    {
-        return match ($priority) {
-            $priority > 2 => 4294967295,
-            1 => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
-            0 => 0,
-            default => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
-        };
     }
 }

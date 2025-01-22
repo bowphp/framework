@@ -6,6 +6,7 @@ namespace Bow\Mail;
 
 use Bow\Mail\Exception\MailException;
 use Bow\Support\Str;
+use InvalidArgumentException;
 
 class Message
 {
@@ -117,6 +118,16 @@ class Message
     }
 
     /**
+     * Change the value of the boundary
+     *
+     * @param string $boundary
+     */
+    protected function setBoundary(string $boundary): void
+    {
+        $this->boundary = $boundary;
+    }
+
+    /**
      * Add personal headers
      *
      * @param string $key
@@ -143,21 +154,6 @@ class Message
     }
 
     /**
-     * Define the receiver in list
-     *
-     * @param array $recipients
-     * @return $this
-     */
-    public function toList(array $recipients): Message
-    {
-        foreach ($recipients as $name => $to) {
-            $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
-        }
-
-        return $this;
-    }
-
-    /**
      * Format the email receiver
      *
      * @param string $email
@@ -176,10 +172,25 @@ class Message
         }
 
         if (!Str::isMail($email)) {
-            throw new \InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
+            throw new InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
         }
 
         return [$name, $email];
+    }
+
+    /**
+     * Define the receiver in list
+     *
+     * @param array $recipients
+     * @return $this
+     */
+    public function toList(array $recipients): Message
+    {
+        foreach ($recipients as $name => $to) {
+            $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
+        }
+
+        return $this;
     }
 
     /**
@@ -255,25 +266,12 @@ class Message
     /**
      * Define the type of content in text/html
      *
-     * @param  string $html
+     * @param string $html
      * @return Message
      */
     public function html(string $html): Message
     {
         return $this->type($html, "text/html");
-    }
-
-    /**
-     * Add message body
-     *
-     * @param string $text
-     * @return Message
-     */
-    public function text(string $text): Message
-    {
-        $this->type($text, "text/plain");
-
-        return $this;
     }
 
     /**
@@ -288,6 +286,19 @@ class Message
         $this->type = $type;
 
         $this->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * Add message body
+     *
+     * @param string $text
+     * @return Message
+     */
+    public function text(string $text): Message
+    {
+        $this->type($text, "text/plain");
 
         return $this;
     }
@@ -343,16 +354,6 @@ class Message
     }
 
     /**
-     * Change the value of the boundary
-     *
-     * @param string $boundary
-     */
-    protected function setBoundary(string $boundary): void
-    {
-        $this->boundary = $boundary;
-    }
-
-    /**
      * Add Return-Path
      *
      * @param string $mail
@@ -378,28 +379,15 @@ class Message
      */
     public function addPriority(int $priority): Message
     {
-        $this->headers[] = "X-Priority: " . (int) $priority;
+        $this->headers[] = "X-Priority: " . (int)$priority;
 
         return $this;
     }
 
     /**
-     * Edit the mail message
-     *
      * @param string $message
      * @param string $type
-     */
-    public function setMessage(string $message, string $type = 'text/html'): void
-    {
-        $this->type = $type;
-
-        $this->message = $message;
-    }
-
-    /**
      * @see setMessage
-     * @param string $message
-     * @param string $type
      */
     public function message(string $message, string $type = 'text/html'): void
     {
@@ -454,6 +442,19 @@ class Message
     public function getMessage(): ?string
     {
         return $this->message;
+    }
+
+    /**
+     * Edit the mail message
+     *
+     * @param string $message
+     * @param string $type
+     */
+    public function setMessage(string $message, string $type = 'text/html'): void
+    {
+        $this->type = $type;
+
+        $this->message = $message;
     }
 
     /**

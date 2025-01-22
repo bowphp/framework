@@ -4,59 +4,52 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
-use Bow\Database\Barry\Model;
 use Bow\Database\QueryBuilder;
 
 abstract class Relation
 {
-    /**
-     * The foreign key of the parent model.
-     *
-     * @var string
-     */
-    protected string $foreign_key;
-
-    /**
-     * The associated key on the parent model.
-     *
-     * @var string
-     */
-    protected string $local_key;
-
-    /**
-     * The parent model instance
-     *
-     * @var Model
-     */
-    protected Model $parent;
-
-    /**
-     * The related model instance
-     *
-     * @var Model
-     */
-    protected Model $related;
-
-    /**
-     * The Bow Query builder
-     *
-     * @var QueryBuilder
-     */
-    protected QueryBuilder $query;
-
     /**
      * Indicates whether the relation is adding constraints.
      *
      * @var bool
      */
     protected static bool $has_constraints = true;
-
     /**
      * Indicate whether the relationships use a pivot table.*.
      *
      * @var bool
      */
     protected static bool $has_pivot = false;
+    /**
+     * The foreign key of the parent model.
+     *
+     * @var string
+     */
+    protected string $foreign_key;
+    /**
+     * The associated key on the parent model.
+     *
+     * @var string
+     */
+    protected string $local_key;
+    /**
+     * The parent model instance
+     *
+     * @var Model
+     */
+    protected Model $parent;
+    /**
+     * The related model instance
+     *
+     * @var Model
+     */
+    protected Model $related;
+    /**
+     * The Bow Query builder
+     *
+     * @var QueryBuilder
+     */
+    protected QueryBuilder $query;
 
     /**
      * Relation Contractor
@@ -76,6 +69,13 @@ abstract class Relation
             $this->addConstraints();
         }
     }
+
+    /**
+     * Set the base constraints on the relation query.
+     *
+     * @return void
+     */
+    abstract public function addConstraints(): void;
 
     /**
      * Get the parent model.
@@ -106,7 +106,7 @@ abstract class Relation
      */
     public function __call(string $method, array $args = [])
     {
-        $result = call_user_func_array([$this->query, $method], (array) $args);
+        $result = call_user_func_array([$this->query, $method], (array)$args);
 
         if ($result === $this->query) {
             return $this;
@@ -134,11 +134,4 @@ abstract class Relation
      * @return mixed
      */
     abstract public function getResults(): mixed;
-
-    /**
-     * Set the base constraints on the relation query.
-     *
-     * @return void
-     */
-    abstract public function addConstraints(): void;
 }

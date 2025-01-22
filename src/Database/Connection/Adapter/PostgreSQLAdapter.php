@@ -4,25 +4,24 @@ declare(strict_types=1);
 
 namespace Bow\Database\Connection\Adapter;
 
-use PDO;
-use InvalidArgumentException;
 use Bow\Database\Connection\AbstractConnection;
+use InvalidArgumentException;
+use PDO;
 
 class PostgreSQLAdapter extends AbstractConnection
 {
-    /**
-     * The connexion nane
-     *
-     * @var ?string
-     */
-    protected ?string $name = 'pgsql';
-
     /**
      * Default PORT
      *
      * @var int
      */
     public const PORT = 5432;
+    /**
+     * The connexion nane
+     *
+     * @var ?string
+     */
+    protected ?string $name = 'pgsql';
 
     /**
      * MysqlAdapter constructor.
@@ -49,7 +48,7 @@ class PostgreSQLAdapter extends AbstractConnection
             $port = '';
         } else {
             $hostname = $this->config['hostname'] ?? null;
-            $port = (string) ($this->config['port'] ?? self::PORT);
+            $port = (string)($this->config['port'] ?? self::PORT);
         }
 
         // Check the existence of database definition
@@ -58,7 +57,7 @@ class PostgreSQLAdapter extends AbstractConnection
         }
 
         // Formatting connection parameters
-        $dsn  = sprintf("pgsql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
+        $dsn = sprintf("pgsql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
 
         if (isset($this->config['sslmode'])) {
             $dsn .= ';sslmode=' . $this->config['sslmode'];

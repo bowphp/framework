@@ -18,6 +18,20 @@ class Tokenize
     private static int $expire_at;
 
     /**
+     * Get a csrf token generate
+     *
+     * @param int|null $time
+     * @return ?array
+     * @throws SessionException
+     */
+    public static function csrf(int $time = null): ?array
+    {
+        static::makeCsrfToken($time);
+
+        return Session::getInstance()->get('__bow.csrf');
+    }
+
+    /**
      * Csrf token creator
      *
      * @param int|null $time
@@ -54,51 +68,11 @@ class Tokenize
      */
     public static function make(): string
     {
-        $salt = date('Y-m-d H:i:s', time() - 10000) . uniqid((string) rand(), true);
+        $salt = date('Y-m-d H:i:s', time() - 10000) . uniqid((string)rand(), true);
 
         $token = base64_encode(base64_encode(openssl_random_pseudo_bytes(6)) . $salt);
 
         return Str::slice(hash('sha256', $token), 1, 62);
-    }
-
-    /**
-     * Get a csrf token generate
-     *
-     * @param int|null $time
-     * @return ?array
-     * @throws SessionException
-     */
-    public static function csrf(int $time = null): ?array
-    {
-        static::makeCsrfToken($time);
-
-        return Session::getInstance()->get('__bow.csrf');
-    }
-
-    /**
-     * Check if the token expires
-     *
-     * @param int|null $time
-     * @return bool
-     * @throws SessionException
-     */
-    public static function csrfExpired(int $time = null): bool
-    {
-        if (Session::getInstance()->has('__bow.csrf')) {
-            return false;
-        }
-
-        if ($time === null) {
-            $time = time();
-        }
-
-        $csrf = Session::getInstance()->get('__bow.csrf');
-
-        if ($csrf['expire_at'] >= (int) $time) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -128,6 +102,32 @@ class Tokenize
         }
 
         return $status;
+    }
+
+    /**
+     * Check if the token expires
+     *
+     * @param int|null $time
+     * @return bool
+     * @throws SessionException
+     */
+    public static function csrfExpired(int $time = null): bool
+    {
+        if (Session::getInstance()->has('__bow.csrf')) {
+            return false;
+        }
+
+        if ($time === null) {
+            $time = time();
+        }
+
+        $csrf = Session::getInstance()->get('__bow.csrf');
+
+        if ($csrf['expire_at'] >= (int)$time) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

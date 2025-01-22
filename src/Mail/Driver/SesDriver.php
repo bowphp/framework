@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Bow\Mail\Driver;
 
 use Aws\Ses\SesClient;
-use Bow\Mail\Message;
 use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Message;
 
 class SesDriver implements MailDriverInterface
 {
     /**
-    * The SES Instance
-    *
-    * @var SesClient
-    */
+     * The SES Instance
+     *
+     * @var SesClient
+     */
     private SesClient $ses;
 
     /**
@@ -25,11 +25,11 @@ class SesDriver implements MailDriverInterface
     private bool $config_set = false;
 
     /**
-    * SesDriver constructor
-    *
-    * @param array $config
-    * @return void
-    */
+     * SesDriver constructor
+     *
+     * @param array $config
+     * @return void
+     */
     public function __construct(private array $config)
     {
         $this->config_set = $this->config["config_set"] ?? false;
@@ -94,6 +94,6 @@ class SesDriver implements MailDriverInterface
 
         $result = $this->ses->sendEmail($email);
 
-        return (bool) $result;
+        return (bool)$result;
     }
 }

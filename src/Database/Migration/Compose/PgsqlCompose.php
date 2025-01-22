@@ -107,7 +107,7 @@ trait PgsqlCompose
 
         // Add default value
         if (!is_null($default)) {
-            $strings = ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR',  'CHARACTER', 'ENUM', 'CHECK', 'TEXT'];
+            $strings = ['VARCHAR', 'LONG VARCHAR', 'STRING', 'CHAR', 'CHARACTER', 'ENUM', 'CHECK', 'TEXT'];
             if (in_array($raw_type, $strings)) {
                 $default = "'" . addcslashes($default, "'") . "'";
             } elseif (is_bool($default)) {
@@ -132,21 +132,6 @@ trait PgsqlCompose
     }
 
     /**
-     * Drop Column action with pgsql
-     *
-     * @param string $name
-     * @return void
-     */
-    private function dropColumnForPgsql(string $name): void
-    {
-        $names = (array) $name;
-
-        foreach ($names as $name) {
-            $this->sqls[] = trim(sprintf('DROP COLUMN %s', $name));
-        }
-    }
-
-    /**
      * Format the CHECK in ENUM
      *
      * @param string $name
@@ -157,7 +142,7 @@ trait PgsqlCompose
     private function formatCheckOrEnum(string $name, string $type, array $attribute): string
     {
         if ($type == "ENUM") {
-            $size = (array) $attribute['size'];
+            $size = (array)$attribute['size'];
             $size = "'" . implode("', '", $size) . "'";
             $table = preg_replace("/(ies)$/", "y", $this->table);
             $table = preg_replace("/(s)$/", "", $table);
@@ -188,7 +173,7 @@ trait PgsqlCompose
             return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparison, $value);
         }
 
-        $value = (array) $value;
+        $value = (array)$value;
 
         if (count($value) > 1) {
             $comparison = "IN";
@@ -206,5 +191,20 @@ trait PgsqlCompose
         $value = end($value);
 
         return sprintf('TEXT CHECK ("%s" %s %s)', $column, $comparison, $value);
+    }
+
+    /**
+     * Drop Column action with pgsql
+     *
+     * @param string $name
+     * @return void
+     */
+    private function dropColumnForPgsql(string $name): void
+    {
+        $names = (array)$name;
+
+        foreach ($names as $name) {
+            $this->sqls[] = trim(sprintf('DROP COLUMN %s', $name));
+        }
     }
 }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Http\Client;
 
+use BadFunctionCallException;
 use CurlHandle;
+use Exception;
 
 class HttpClient
 {
@@ -51,7 +53,7 @@ class HttpClient
     public function __construct(?string $base_url = null)
     {
         if (!function_exists('curl_init')) {
-            throw new \BadFunctionCallException('cURL php is require.');
+            throw new BadFunctionCallException('cURL php is require.');
         }
 
         if (!is_null($base_url)) {
@@ -76,7 +78,7 @@ class HttpClient
      * @param string $url
      * @param array $data
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function get(string $url, array $data = []): Response
     {
@@ -95,12 +97,76 @@ class HttpClient
     }
 
     /**
+     * Reset always connection
+     *
+     * @param string $url
+     * @return void
+     */
+    private function init(string $url): void
+    {
+        if (!is_null($this->base_url)) {
+            $url = $this->base_url . "/" . trim($url, "/");
+        }
+
+        $this->ch = curl_init(trim($url, "/"));
+    }
+
+    /**
+     * Set Curl CURLOPT_RETURNTRANSFER option
+     *
+     * @return void
+     */
+    private function applyCommonOptions(): void
+    {
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($this->ch, CURLOPT_AUTOREFERER, true);
+    }
+
+    /**
+     * Execute request
+     *
+     * @return string
+     * @throws Exception
+     */
+    private function execute(): string
+    {
+        if ($this->headers) {
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
+        }
+
+        $content = curl_exec($this->ch);
+        $errno = curl_errno($this->ch);
+
+        $this->close();
+
+        if ($content === false) {
+            throw new HttpClientException(
+                curl_strerror($errno),
+                $errno
+            );
+        }
+
+        return $content;
+    }
+
+    /**
+     * Close connection
+     *
+     * @return void
+     */
+    private function close(): void
+    {
+        curl_close($this->ch);
+    }
+
+    /**
      * Make post requester
      *
      * @param string $url
      * @param array $data
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function post(string $url, array $data = []): Response
     {
@@ -127,12 +193,33 @@ class HttpClient
     }
 
     /**
+     * Add fields
+     *
+     * @param array $data
+     * @return void
+     */
+    private function addFields(array $data): void
+    {
+        if (count($data) == 0) {
+            return;
+        }
+
+        if ($this->accept_json) {
+            $payload = json_encode($data);
+        } else {
+            $payload = http_build_query($data);
+        }
+
+        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $payload);
+    }
+
+    /**
      * Make put requester
      *
      * @param string $url
      * @param array $data
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function put(string $url, array $data = []): Response
     {
@@ -153,7 +240,7 @@ class HttpClient
      * @param string $url
      * @param array $data
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete(string $url, array $data = []): Response
     {
@@ -176,24 +263,7 @@ class HttpClient
      */
     public function addAttach(string|array $attach): HttpClient
     {
-        $this->attach = (array) $attach;
-
-        return $this;
-    }
-
-    /**
-     * Add additional header
-     *
-     * @param array $headers
-     * @return HttpClient
-     */
-    public function addHeaders(array $headers): HttpClient
-    {
-        foreach ($headers as $key => $value) {
-            if (!in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers))) {
-                $this->headers[] = $key . ': ' . $value;
-            }
-        }
+        $this->attach = (array)$attach;
 
         return $this;
     }
@@ -226,87 +296,19 @@ class HttpClient
     }
 
     /**
-     * Reset always connection
+     * Add additional header
      *
-     * @param string $url
-     * @return void
+     * @param array $headers
+     * @return HttpClient
      */
-    private function init(string $url): void
+    public function addHeaders(array $headers): HttpClient
     {
-        if (!is_null($this->base_url)) {
-            $url = $this->base_url . "/" . trim($url, "/");
+        foreach ($headers as $key => $value) {
+            if (!in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers))) {
+                $this->headers[] = $key . ': ' . $value;
+            }
         }
 
-        $this->ch = curl_init(trim($url, "/"));
-    }
-
-    /**
-     * Add fields
-     *
-     * @param array $data
-     * @return void
-     */
-    private function addFields(array $data): void
-    {
-        if (count($data) == 0) {
-            return;
-        }
-
-        if ($this->accept_json) {
-            $payload = json_encode($data);
-        } else {
-            $payload = http_build_query($data);
-        }
-
-        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $payload);
-    }
-
-    /**
-     * Close connection
-     *
-     * @return void
-     */
-    private function close(): void
-    {
-        curl_close($this->ch);
-    }
-
-    /**
-     * Execute request
-     *
-     * @return string
-     * @throws \Exception
-     */
-    private function execute(): string
-    {
-        if ($this->headers) {
-            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
-        }
-
-        $content = curl_exec($this->ch);
-        $errno = curl_errno($this->ch);
-
-        $this->close();
-
-        if ($content === false) {
-            throw new HttpClientException(
-                curl_strerror($errno),
-                $errno
-            );
-        }
-
-        return $content;
-    }
-
-    /**
-     * Set Curl CURLOPT_RETURNTRANSFER option
-     *
-     * @return void
-     */
-    private function applyCommonOptions(): void
-    {
-        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($this->ch, CURLOPT_AUTOREFERER, true);
+        return $this;
     }
 }

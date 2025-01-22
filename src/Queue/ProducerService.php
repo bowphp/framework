@@ -101,38 +101,6 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer retry
-     *
-     * @return int
-     */
-    final public function getRetry(): int
-    {
-        return $this->retry;
-    }
-
-    /**
-     * Get the producer queue
-     *
-     * @return string
-     */
-    final public function getQueue(): string
-    {
-        return $this->queue;
-    }
-
-    /**
-     * Get the producer delay
-     *
-     * @return int
-     */
-    final public function getDelay(): int
-    {
-        return $this->delay;
-    }
-
-
-
-    /**
      * Set the producer attempts
      *
      * @param int $attempts
@@ -141,6 +109,16 @@ abstract class ProducerService
     public function setAttempts(int $attempts): void
     {
         $this->attempts = $attempts;
+    }
+
+    /**
+     * Get the producer retry
+     *
+     * @return int
+     */
+    final public function getRetry(): int
+    {
+        return $this->retry;
     }
 
     /**
@@ -155,6 +133,16 @@ abstract class ProducerService
     }
 
     /**
+     * Get the producer queue
+     *
+     * @return string
+     */
+    final public function getQueue(): string
+    {
+        return $this->queue;
+    }
+
+    /**
      * Set the producer queue
      *
      * @param string $queue
@@ -163,6 +151,16 @@ abstract class ProducerService
     final public function setQueue(string $queue): void
     {
         $this->queue = $queue;
+    }
+
+    /**
+     * Get the producer delay
+     *
+     * @return int
+     */
+    final public function getDelay(): int
+    {
+        return $this->delay;
     }
 
     /**

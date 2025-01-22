@@ -16,6 +16,6 @@ trait DurationTrait
     {
         $lifetime = !is_null($max_lifetime) ? $max_lifetime : (config('session.lifetime') * 60);
 
-        return date('Y-m-d H:i:s', time() + (int) $lifetime);
+        return date('Y-m-d H:i:s', time() + (int)$lifetime);
     }
 }

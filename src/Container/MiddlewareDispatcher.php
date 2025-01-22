@@ -9,15 +9,13 @@ use Bow\Http\Request;
 class MiddlewareDispatcher
 {
     /**
-     * @var array
-     */
-    private array $middlewares = [];
-
-    /**
      * @var int
      */
     private const PIPE_EMPTY = 1;
-
+    /**
+     * @var array
+     */
+    private array $middlewares = [];
     /**
      * @var int
      */

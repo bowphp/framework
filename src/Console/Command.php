@@ -4,7 +4,31 @@ declare(strict_types=1);
 
 namespace Bow\Console;
 
+use Bow\Console\Command\AppEventCommand;
+use Bow\Console\Command\ClearCommand;
+use Bow\Console\Command\ConfigurationCommand;
+use Bow\Console\Command\ConsoleCommand;
+use Bow\Console\Command\ControllerCommand;
+use Bow\Console\Command\EventListenerCommand;
+use Bow\Console\Command\ExceptionCommand;
+use Bow\Console\Command\GenerateCacheCommand;
+use Bow\Console\Command\GenerateKeyCommand;
+use Bow\Console\Command\GenerateQueueCommand;
+use Bow\Console\Command\GenerateResourceControllerCommand;
+use Bow\Console\Command\GenerateSessionCommand;
+use Bow\Console\Command\MessagingCommand;
+use Bow\Console\Command\MiddlewareCommand;
+use Bow\Console\Command\MigrationCommand;
+use Bow\Console\Command\ModelCommand;
+use Bow\Console\Command\ProducerCommand;
+use Bow\Console\Command\ReplCommand;
+use Bow\Console\Command\SeederCommand;
+use Bow\Console\Command\ServerCommand;
+use Bow\Console\Command\ServiceCommand;
+use Bow\Console\Command\ValidationCommand;
+use Bow\Console\Command\WorkerCommand;
 use Bow\Support\Str;
+use ErrorException;
 
 class Command extends AbstractCommand
 {
@@ -14,40 +38,40 @@ class Command extends AbstractCommand
      * @var array
      */
     private array $command = [
-        "clear" => \Bow\Console\Command\ClearCommand::class,
-        "migration" => \Bow\Console\Command\MigrationCommand::class,
-        "seeder" => \Bow\Console\Command\SeederCommand::class,
+        "clear" => ClearCommand::class,
+        "migration" => MigrationCommand::class,
+        "seeder" => SeederCommand::class,
         "add" => [
-            "controller" => \Bow\Console\Command\ControllerCommand::class,
-            "configuration" => \Bow\Console\Command\ConfigurationCommand::class,
-            "exception" => \Bow\Console\Command\ExceptionCommand::class,
-            "middleware" => \Bow\Console\Command\MiddlewareCommand::class,
-            "migration" => \Bow\Console\Command\MigrationCommand::class,
-            "model" => \Bow\Console\Command\ModelCommand::class,
-            "seeder" => \Bow\Console\Command\SeederCommand::class,
-            "service" => \Bow\Console\Command\ServiceCommand::class,
-            "validation" => \Bow\Console\Command\ValidationCommand::class,
-            "event" => \Bow\Console\Command\AppEventCommand::class,
-            "listener" => \Bow\Console\Command\EventListenerCommand::class,
-            "producer" => \Bow\Console\Command\ProducerCommand::class,
-            "command" => \Bow\Console\Command\ConsoleCommand::class,
-            "messaging" => \Bow\Console\Command\MessagingCommand::class,
+            "controller" => ControllerCommand::class,
+            "configuration" => ConfigurationCommand::class,
+            "exception" => ExceptionCommand::class,
+            "middleware" => MiddlewareCommand::class,
+            "migration" => MigrationCommand::class,
+            "model" => ModelCommand::class,
+            "seeder" => SeederCommand::class,
+            "service" => ServiceCommand::class,
+            "validation" => ValidationCommand::class,
+            "event" => AppEventCommand::class,
+            "listener" => EventListenerCommand::class,
+            "producer" => ProducerCommand::class,
+            "command" => ConsoleCommand::class,
+            "messaging" => MessagingCommand::class,
         ],
         "generator" => [
-            "key" => \Bow\Console\Command\GenerateKeyCommand::class,
-            "resource" => \Bow\Console\Command\GenerateResourceControllerCommand::class,
-            "session-table" => \Bow\Console\Command\GenerateSessionCommand::class,
-            "queue-table" => \Bow\Console\Command\GenerateQueueCommand::class,
-            "cache-table" => \Bow\Console\Command\GenerateCacheCommand::class,
-            "notification-table" => \Bow\Console\Command\GenerateCacheCommand::class,
+            "key" => GenerateKeyCommand::class,
+            "resource" => GenerateResourceControllerCommand::class,
+            "session-table" => GenerateSessionCommand::class,
+            "queue-table" => GenerateQueueCommand::class,
+            "cache-table" => GenerateCacheCommand::class,
+            "notification-table" => GenerateCacheCommand::class,
         ],
         "runner" => [
-            "console" => \Bow\Console\Command\ReplCommand::class,
-            "server" => \Bow\Console\Command\ServerCommand::class,
-            "worker" => \Bow\Console\Command\WorkerCommand::class,
+            "console" => ReplCommand::class,
+            "server" => ServerCommand::class,
+            "worker" => WorkerCommand::class,
         ],
         "flush" => [
-            "worker" => \Bow\Console\Command\WorkerCommand::class,
+            "worker" => WorkerCommand::class,
         ],
     ];
 
@@ -58,7 +82,7 @@ class Command extends AbstractCommand
      * @param string $command
      * @param array $rest
      * @return mixed
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function call(string $command, string $action, ...$rest): mixed
     {

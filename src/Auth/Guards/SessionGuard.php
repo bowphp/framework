@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Bow\Auth\Guards;
 
-use Bow\Security\Hash;
-use Bow\Session\Exception\SessionException;
-use Bow\Session\Session;
 use Bow\Auth\Authentication;
 use Bow\Auth\Exception\AuthenticationException;
 use Bow\Auth\Traits\LoginUserTrait;
+use Bow\Security\Hash;
+use Bow\Session\Exception\SessionException;
+use Bow\Session\Session;
 
 class SessionGuard extends GuardContract
 {
@@ -69,6 +69,17 @@ class SessionGuard extends GuardContract
     }
 
     /**
+     * Check if user is authenticated
+     *
+     * @return bool
+     * @throws AuthenticationException|SessionException
+     */
+    public function check(): bool
+    {
+        return $this->getSession()->exists($this->session_key);
+    }
+
+    /**
      * Get the session instance
      *
      * @return Session
@@ -88,17 +99,6 @@ class SessionGuard extends GuardContract
     }
 
     /**
-     * Check if user is authenticated
-     *
-     * @return bool
-     * @throws AuthenticationException|SessionException
-     */
-    public function check(): bool
-    {
-        return $this->getSession()->exists($this->session_key);
-    }
-
-    /**
      * Check if user is guest
      *
      * @return bool
@@ -107,17 +107,6 @@ class SessionGuard extends GuardContract
     public function guest(): bool
     {
         return !$this->check();
-    }
-
-    /**
-     * Check if user is authenticated
-     *
-     * @return ?Authentication
-     * @throws AuthenticationException|SessionException
-     */
-    public function user(): ?Authentication
-    {
-        return $this->getSession()->get($this->session_key);
     }
 
     /**
@@ -162,5 +151,16 @@ class SessionGuard extends GuardContract
         }
 
         return $user->getAuthenticateUserId();
+    }
+
+    /**
+     * Check if user is authenticated
+     *
+     * @return ?Authentication
+     * @throws AuthenticationException|SessionException
+     */
+    public function user(): ?Authentication
+    {
+        return $this->getSession()->get($this->session_key);
     }
 }

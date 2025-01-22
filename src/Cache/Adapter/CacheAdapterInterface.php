@@ -35,8 +35,8 @@ interface CacheAdapterInterface
     /**
      * Adds a cache that will persist
      *
-     * @param  string $key  The cache key
-     * @param  mixed  $data
+     * @param string $key The cache key
+     * @param mixed $data
      * @return bool
      */
     public function forever(string $key, mixed $data): bool;
@@ -44,8 +44,8 @@ interface CacheAdapterInterface
     /**
      * Add new enter in the cache system
      *
-     * @param  string $key  The cache key
-     * @param  mixed  $data
+     * @param string $key The cache key
+     * @param mixed $data
      * @return bool
      */
     public function push(string $key, array $data): bool;
@@ -53,8 +53,8 @@ interface CacheAdapterInterface
     /**
      * Retrieve an entry in the cache
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
     public function get(string $key, mixed $default = null): mixed;
@@ -62,8 +62,8 @@ interface CacheAdapterInterface
     /**
      * Increase the cache expiration time
      *
-     * @param  string $key
-     * @param  int    $time
+     * @param string $key
+     * @param int $time
      * @return bool
      */
     public function addTime(string $key, int $time): bool;
@@ -71,7 +71,7 @@ interface CacheAdapterInterface
     /**
      * Retrieves the cache expiration time
      *
-     * @param  string $key
+     * @param string $key
      * @return int|bool|string
      */
     public function timeOf(string $key): int|bool|string;
@@ -79,7 +79,7 @@ interface CacheAdapterInterface
     /**
      * Delete an entry in the cache
      *
-     * @param  string $key
+     * @param string $key
      * @return bool
      */
     public function forget(string $key): bool;
@@ -87,7 +87,7 @@ interface CacheAdapterInterface
     /**
      * Check for an entry in the cache.
      *
-     * @param  string $key
+     * @param string $key
      * @return bool
      */
     public function has(string $key): bool;
@@ -95,7 +95,7 @@ interface CacheAdapterInterface
     /**
      * Check if the cache has expired
      *
-     * @param  string $key
+     * @param string $key
      * @return bool
      */
     public function expired(string $key): bool;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Database\Migration\Shortcut;
 
-use Bow\Database\Migration\SQLGenerator;
 use Bow\Database\Exception\SQLGeneratorException;
+use Bow\Database\Migration\SQLGenerator;
 
 trait MixedColumn
 {
@@ -20,6 +20,29 @@ trait MixedColumn
     public function addBoolean(string $column, array $attribute = []): SQLGenerator
     {
         return $this->addColumn($column, 'boolean', $attribute);
+    }
+
+    /**
+     * Add UUID column
+     *
+     * @param string $column
+     * @param array $attribute
+     * @return SQLGenerator
+     * @throws SQLGeneratorException
+     */
+    public function addUuidPrimary(string $column, array $attribute = []): SQLGenerator
+    {
+        $attribute['primary'] = true;
+
+        if (isset($attribute['increment'])) {
+            throw new SQLGeneratorException("Cannot define the increment for uuid.");
+        }
+
+        if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
+            $attribute['default'] = 'uuid_generate_v4()';
+        }
+
+        return $this->addUuid($column, $attribute);
     }
 
     /**
@@ -52,29 +75,6 @@ trait MixedColumn
         }
 
         return $this->addColumn($column, 'uuid', $attribute);
-    }
-
-    /**
-     * Add UUID column
-     *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
-     * @throws SQLGeneratorException
-     */
-    public function addUuidPrimary(string $column, array $attribute = []): SQLGenerator
-    {
-        $attribute['primary'] = true;
-
-        if (isset($attribute['increment'])) {
-            throw new SQLGeneratorException("Cannot define the increment for uuid.");
-        }
-
-        if (!isset($attribute['default']) && $this->adapter === 'pgsql') {
-            $attribute['default'] = 'uuid_generate_v4()';
-        }
-
-        return $this->addUuid($column, $attribute);
     }
 
     /**
@@ -193,6 +193,28 @@ trait MixedColumn
         $this->verifyCheckAttribute($attribute);
 
         return $this->addColumn($column, 'check', $attribute);
+    }
+
+    /**
+     * @throws SQLGeneratorException
+     */
+    private function verifyCheckAttribute($attribute): void
+    {
+        if (!isset($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be define.");
+        }
+
+        if (!is_array($attribute['check'])) {
+            throw new SQLGeneratorException("The check values should be array.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
+
+        if (count($attribute['check']) === 0) {
+            throw new SQLGeneratorException("The check values cannot be empty.");
+        }
     }
 
     /**
@@ -350,27 +372,5 @@ trait MixedColumn
         $this->verifyCheckAttribute($attribute);
 
         return $this->changeColumn($column, 'check', $attribute);
-    }
-
-    /**
-     * @throws SQLGeneratorException
-     */
-    private function verifyCheckAttribute($attribute): void
-    {
-        if (!isset($attribute['check'])) {
-            throw new SQLGeneratorException("The check values should be define.");
-        }
-
-        if (!is_array($attribute['check'])) {
-            throw new SQLGeneratorException("The check values should be array.");
-        }
-
-        if (count($attribute['check']) === 0) {
-            throw new SQLGeneratorException("The check values cannot be empty.");
-        }
-
-        if (count($attribute['check']) === 0) {
-            throw new SQLGeneratorException("The check values cannot be empty.");
-        }
     }
 }

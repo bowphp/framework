@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Testing;
 
-use InvalidArgumentException;
 use Bow\Http\Client\Response as HttpClientResponse;
+use InvalidArgumentException;
+use JsonException;
 
 class Response
 {
@@ -36,6 +37,16 @@ class Response
     }
 
     /**
+     * Get the response content
+     *
+     * @return string
+     */
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    /**
      * Check if the content is json format
      *
      * @param string $message
@@ -58,7 +69,7 @@ class Response
      */
     public function assertExactJson(array $data, string $message = ''): Response
     {
-        $response = $this->toJson(true);
+        $response = $this->http_response->toJson(true);
 
         foreach ($response as $key => $value) {
             Assert::assertArrayHasKey($key, $data, $message);
@@ -113,6 +124,31 @@ class Response
     }
 
     /**
+     * Get the response content as array
+     *
+     * @return array|object
+     * @throws JsonException
+     */
+    public function toArray(): array|object
+    {
+        return json_decode($this->content, true, 1024, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Check if the content type is application/json
+     *
+     * @param string $message
+     *
+     * @return Response
+     */
+    public function assertContentTypeJson(string $message = ''): Response
+    {
+        $this->assertContentType('application/json', $message);
+
+        return $this;
+    }
+
+    /**
      * Check the content type
      *
      * @param string $content_type
@@ -129,20 +165,6 @@ class Response
             current(preg_split('/;(\s+)?/', $type)),
             $message
         );
-
-        return $this;
-    }
-
-    /**
-     * Check if the content type is application/json
-     *
-     * @param string $message
-     *
-     * @return Response
-     */
-    public function assertContentTypeJson(string $message = ''): Response
-    {
-        $this->assertContentType('application/json', $message);
 
         return $this;
     }
@@ -218,7 +240,7 @@ class Response
     }
 
     /**
-     * @param string $key
+     * @param string|int $key
      * @param string $value
      * @param string $message
      *
@@ -248,26 +270,6 @@ class Response
         Assert::assertContains($text, $this->content);
 
         return $this;
-    }
-
-    /**
-     * Get the response content
-     *
-     * @return string
-     */
-    public function getContent(): string
-    {
-        return $this->content;
-    }
-
-    /**
-     * Get the response content as array
-     *
-     * @return array|object
-     */
-    public function toArray(): array|object
-    {
-        return json_decode($this->content, true, 1024, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
     }
 
     /**

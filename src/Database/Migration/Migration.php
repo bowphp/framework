@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Bow\Database\Migration;
 
 use Bow\Console\Color;
+use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Database;
 use Bow\Database\Exception\ConnectionException;
-use Bow\Database\Migration\SQLGenerator;
 use Bow\Database\Exception\MigrationException;
-use Bow\Database\Connection\AbstractConnection;
+use Exception;
 
 abstract class Migration
 {
@@ -87,6 +87,38 @@ abstract class Migration
     }
 
     /**
+     * Get prefixed table name
+     *
+     * @param string $table
+     * @return string
+     */
+    final public function getTablePrefixed(string $table): string
+    {
+        return $this->adapter->getTablePrefix() . $table;
+    }
+
+    /**
+     * Execute direct sql query
+     *
+     * @param string $sql
+     * @return Migration
+     * @throws MigrationException
+     */
+    private function executeSqlQuery(string $sql): Migration
+    {
+        try {
+            Database::statement($sql);
+        } catch (Exception $exception) {
+            echo sprintf("%s %s\n", Color::red("▶"), $sql);
+            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
+        }
+
+        echo sprintf("%s %s\n", Color::green("▶"), $sql);
+
+        return $this;
+    }
+
+    /**
      * Drop table if he exists action
      *
      * @param string $table
@@ -137,7 +169,7 @@ abstract class Migration
         foreach ($generator->getCustomTypeQueries() as $sql) {
             try {
                 $this->executeSqlQuery($sql);
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 echo sprintf("%s\n", Color::yellow("Warning: " . $exception->getMessage()));
             }
         }
@@ -211,37 +243,5 @@ abstract class Migration
         $sql = sprintf('ALTER TABLE IF EXISTS %s RENAME TO %s', $table, $to);
 
         return $this->executeSqlQuery($sql);
-    }
-
-    /**
-     * Get prefixed table name
-     *
-     * @param string $table
-     * @return string
-     */
-    final public function getTablePrefixed(string $table): string
-    {
-        return $this->adapter->getTablePrefix() . $table;
-    }
-
-    /**
-     * Execute direct sql query
-     *
-     * @param string $sql
-     * @return Migration
-     * @throws MigrationException
-     */
-    private function executeSqlQuery(string $sql): Migration
-    {
-        try {
-            Database::statement($sql);
-        } catch (\Exception $exception) {
-            echo sprintf("%s %s\n", Color::red("▶"), $sql);
-            throw new MigrationException($exception->getMessage(), (int) $exception->getCode());
-        }
-
-        echo sprintf("%s %s\n", Color::green("▶"), $sql);
-
-        return $this;
     }
 }

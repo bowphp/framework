@@ -2,8 +2,6 @@
 
 namespace Bow\Mail;
 
-use Bow\Mail\Mail;
-use Bow\Mail\Message;
 use Bow\Queue\ProducerService;
 use Bow\View\View;
 use Throwable;
@@ -25,10 +23,11 @@ class MailQueueProducer extends ProducerService
      * @param Message $message
      */
     public function __construct(
-        string $view,
-        array $data,
+        string  $view,
+        array   $data,
         Message $message
-    ) {
+    )
+    {
         parent::__construct();
 
         $this->bags = [

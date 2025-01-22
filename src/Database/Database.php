@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
-use Bow\Security\Sanitize;
-use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Connection\AbstractConnection;
-use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Connection\Adapter\MysqlAdapter;
-use Bow\Database\Connection\Adapter\SqliteAdapter;
 use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
+use Bow\Database\Connection\Adapter\SqliteAdapter;
+use Bow\Database\Exception\ConnectionException;
+use Bow\Database\Exception\DatabaseException;
+use Bow\Security\Sanitize;
 use PDO;
 
 class Database
@@ -62,18 +62,6 @@ class Database
     }
 
     /**
-     * Returns the Database instance
-     *
-     * @return Database
-     */
-    public static function getInstance(): Database
-    {
-        static::verifyConnection();
-
-        return static::$instance;
-    }
-
-    /**
      * Connection, starts the connection on the DB
      *
      * @param ?string $name
@@ -120,6 +108,30 @@ class Database
     }
 
     /**
+     * Returns the Database instance
+     *
+     * @return Database
+     */
+    public static function getInstance(): Database
+    {
+        static::verifyConnection();
+
+        return static::$instance;
+    }
+
+    /**
+     * Starts the verification of the connection establishment
+     *
+     * @throws
+     */
+    private static function verifyConnection(): void
+    {
+        if (is_null(static::$adapter)) {
+            static::connection(static::$name);
+        }
+    }
+
+    /**
      * Get the connexion name
      *
      * @return string|null
@@ -144,8 +156,8 @@ class Database
     /**
      * Execute an UPDATE request
      *
-     * @param  string $sql_statement
-     * @param  array  $data
+     * @param string $sql_statement
+     * @param array $data
      * @return int
      */
     public static function update(string $sql_statement, array $data = []): int
@@ -160,10 +172,33 @@ class Database
     }
 
     /**
+     * Execute the request of type delete insert update
+     *
+     * @param string $sql_statement
+     * @param array $data
+     * @return int
+     */
+    private static function executePrepareQuery(string $sql_statement, array $data = []): int
+    {
+        $pdo_statement = static::$adapter
+            ->getConnection()
+            ->prepare($sql_statement);
+
+        static::$adapter->bind(
+            $pdo_statement,
+            Sanitize::make($data, true)
+        );
+
+        $pdo_statement->execute();
+
+        return $pdo_statement->rowCount();
+    }
+
+    /**
      * Execute a SELECT request
      *
-     * @param  string $sql_statement
-     * @param  array        $data
+     * @param string $sql_statement
+     * @param array $data
      * @return mixed|null
      */
     public static function select(string $sql_statement, array $data = []): mixed
@@ -199,8 +234,8 @@ class Database
     /**
      * Executes a select query and returns a single record
      *
-     * @param  string $sql_statement
-     * @param  array  $data
+     * @param string $sql_statement
+     * @param array $data
      * @return mixed|null
      */
     public static function selectOne(string $sql_statement, array $data = []): mixed
@@ -288,15 +323,15 @@ class Database
         static::verifyConnection();
 
         return static::$adapter
-            ->getConnection()
-            ->exec($sql_statement) === 0;
+                ->getConnection()
+                ->exec($sql_statement) === 0;
     }
 
     /**
      * Execute a delete request
      *
      * @param  $sql_statement
-     * @param  array        $data
+     * @param array $data
      * @return int
      */
     public static function delete(string $sql_statement, array $data = []): int
@@ -329,6 +364,29 @@ class Database
             $table,
             static::$adapter->getConnection()
         );
+    }
+
+    /**
+     * Starting the start of a transaction wrapper on top of the callback
+     *
+     * @param callable $callback
+     * @return mixed
+     */
+    public static function transaction(callable $callback): mixed
+    {
+        static::startTransaction();
+
+        try {
+            $result = call_user_func_array($callback, []);
+
+            static::commit();
+
+            return $result;
+        } catch (DatabaseException $e) {
+            static::rollback();
+
+            throw $e;
+        }
     }
 
     /**
@@ -378,41 +436,6 @@ class Database
     }
 
     /**
-     * Starting the start of a transaction wrapper on top of the callback
-     *
-     * @param callable $callback
-     * @return mixed
-     */
-    public static function transaction(callable $callback): mixed
-    {
-        static::startTransaction();
-
-        try {
-            $result = call_user_func_array($callback, []);
-
-            static::commit();
-
-            return $result;
-        } catch (DatabaseException $e) {
-            static::rollback();
-
-            throw $e;
-        }
-    }
-
-    /**
-     * Starts the verification of the connection establishment
-     *
-     * @throws
-     */
-    private static function verifyConnection(): void
-    {
-        if (is_null(static::$adapter)) {
-            static::connection(static::$name);
-        }
-    }
-
-    /**
      * Retrieves the identifier of the last record.
      *
      * @param  ?string $name
@@ -427,29 +450,6 @@ class Database
         }
 
         return static::$adapter->getConnection()->lastInsertId($name);
-    }
-
-    /**
-     * Execute the request of type delete insert update
-     *
-     * @param string $sql_statement
-     * @param array $data
-     * @return int
-     */
-    private static function executePrepareQuery(string $sql_statement, array $data = []): int
-    {
-        $pdo_statement = static::$adapter
-            ->getConnection()
-            ->prepare($sql_statement);
-
-        static::$adapter->bind(
-            $pdo_statement,
-            Sanitize::make($data, true)
-        );
-
-        $pdo_statement->execute();
-
-        return $pdo_statement->rowCount();
     }
 
     /**
@@ -478,7 +478,7 @@ class Database
      * __call
      *
      * @param string $method
-     * @param array  $arguments
+     * @param array $arguments
      * @return mixed
      * @throws DatabaseException|ErrorException
      */

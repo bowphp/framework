@@ -120,7 +120,7 @@ class Util
      * Data trainer. key => :value
      *
      * @param array $data
-     * @param bool  $byKey
+     * @param bool $byKey
      * @return array
      */
     public static function add2points(array $data, bool $byKey = false): array

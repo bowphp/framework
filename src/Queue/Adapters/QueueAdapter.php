@@ -64,7 +64,8 @@ abstract class QueueAdapter
      */
     public function serializeProducer(
         ProducerService $producer
-    ): string {
+    ): string
+    {
         return serialize($producer);
     }
 
@@ -76,7 +77,8 @@ abstract class QueueAdapter
      */
     public function unserializeProducer(
         string $producer
-    ): ProducerService {
+    ): ProducerService
+    {
         return unserialize($producer);
     }
 
@@ -123,6 +125,52 @@ abstract class QueueAdapter
     }
 
     /**
+     * Determine if "async" signals are supported.
+     *
+     * @return bool
+     */
+    protected function supportsAsyncSignals(): bool
+    {
+        return extension_loaded('pcntl');
+    }
+
+    /**
+     * Enable async signals for the process.
+     *
+     * @return void
+     */
+    protected function listenForSignals(): void
+    {
+        pcntl_async_signals(true);
+
+        pcntl_signal(SIGQUIT, fn() => error_log("bow worker exiting..."));
+        pcntl_signal(SIGTERM, fn() => error_log("bow worker exit..."));
+        pcntl_signal(SIGUSR2, fn() => error_log("bow worker restarting..."));
+        pcntl_signal(SIGCONT, fn() => error_log("bow worker continue..."));
+    }
+
+    /**
+     * Start the worker server
+     *
+     * @param ?string $queue
+     */
+    public function run(?string $queue = null): void
+    {
+        //
+    }
+
+    /**
+     * Determine if the timeout is reached
+     *
+     * @param int $timeout
+     * @return boolean
+     */
+    protected function timeoutReached(int $timeout): bool
+    {
+        return (time() - $this->start_time) >= $timeout;
+    }
+
+    /**
      * Kill the process.
      *
      * @param int $status
@@ -138,17 +186,6 @@ abstract class QueueAdapter
     }
 
     /**
-     * Determine if the timeout is reached
-     *
-     * @param int $timeout
-     * @return boolean
-     */
-    protected function timeoutReached(int $timeout): bool
-    {
-        return (time() - $this->start_time) >= $timeout;
-    }
-
-    /**
      * Determine if the memory is exceeded
      *
      * @param int $memory_timit
@@ -157,31 +194,6 @@ abstract class QueueAdapter
     private function memoryExceeded(int $memory_timit): bool
     {
         return (memory_get_usage() / 1024 / 1024) >= $memory_timit;
-    }
-
-    /**
-     * Enable async signals for the process.
-     *
-     * @return void
-     */
-    protected function listenForSignals(): void
-    {
-        pcntl_async_signals(true);
-
-        pcntl_signal(SIGQUIT, fn () => error_log("bow worker exiting..."));
-        pcntl_signal(SIGTERM, fn () => error_log("bow worker exit..."));
-        pcntl_signal(SIGUSR2, fn () => error_log("bow worker restarting..."));
-        pcntl_signal(SIGCONT, fn () => error_log("bow worker continue..."));
-    }
-
-    /**
-     * Determine if "async" signals are supported.
-     *
-     * @return bool
-     */
-    protected function supportsAsyncSignals(): bool
-    {
-        return extension_loaded('pcntl');
     }
 
     /**
@@ -218,6 +230,16 @@ abstract class QueueAdapter
     }
 
     /**
+     * Watch the queue name
+     *
+     * @param string $queue
+     */
+    public function setQueue(string $queue): void
+    {
+        //
+    }
+
+    /**
      * Generate the job id
      *
      * @return string
@@ -239,32 +261,12 @@ abstract class QueueAdapter
     }
 
     /**
-     * Start the worker server
-     *
-     * @param ?string $queue
-     */
-    public function run(?string $queue = null): void
-    {
-        //
-    }
-
-    /**
      * Flush the queue
      *
      * @param ?string $queue
      * @return void
      */
     public function flush(?string $queue = null): void
-    {
-        //
-    }
-
-    /**
-     * Watch the queue name
-     *
-     * @param string $queue
-     */
-    public function setQueue(string $queue): void
     {
         //
     }

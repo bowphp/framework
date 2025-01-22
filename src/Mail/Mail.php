@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Bow\Mail;
 
 use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Driver\NativeDriver;
+use Bow\Mail\Driver\SesDriver;
+use Bow\Mail\Driver\SmtpDriver;
 use Bow\Mail\Exception\MailException;
-use Bow\Mail\MailQueueProducer;
 use Bow\View\View;
+use ErrorException;
 
 /**
  * @method mixed view(string $template, array $data, callable $cb)
@@ -24,9 +27,9 @@ class Mail
      * @var array
      */
     private static array $drivers = [
-        'smtp' => \Bow\Mail\Driver\SmtpDriver::class,
-        'mail' => \Bow\Mail\Driver\NativeDriver::class,
-        'ses' => \Bow\Mail\Driver\SesDriver::class,
+        'smtp' => SmtpDriver::class,
+        'mail' => NativeDriver::class,
+        'ses' => SesDriver::class,
     ];
 
     /**
@@ -57,9 +60,9 @@ class Mail
     /**
      * Configure la classe Mail
      *
-     * @param  array $config
-     * @throws MailException
+     * @param array $config
      * @return MailDriverInterface
+     * @throws MailException
      */
     public static function configure(array $config = []): MailDriverInterface
     {
@@ -92,24 +95,6 @@ class Mail
     }
 
     /**
-     * Push new driver
-     *
-     * @param string $name
-     * @param string $class_name
-     * @return bool
-     */
-    public function pushDriver(string $name, string $class_name): bool
-    {
-        if (array_key_exists($name, static::$drivers)) {
-            return false;
-        }
-
-        static::$drivers[$name] = $class_name;
-
-        return true;
-    }
-
-    /**
      * Get mail instance
      *
      * @return MailDriverInterface
@@ -117,6 +102,30 @@ class Mail
     public static function getInstance(): MailDriverInterface
     {
         return static::$instance;
+    }
+
+    /**
+     * Send mail similar to the PHP mail function
+     *
+     * @param string|array $to
+     * @param string $subject
+     * @param string $data
+     * @param array $headers
+     * @return mixed
+     */
+    public static function raw(string|array $to, string $subject, string $data, array $headers = []): mixed
+    {
+        $to = (array)$to;
+
+        $message = new Message();
+
+        $message->toList($to)->subject($subject)->setMessage($data);
+
+        foreach ($headers as $key => $value) {
+            $message->addHeader($key, $value);
+        }
+
+        return static::$instance->send($message);
     }
 
     /**
@@ -140,30 +149,6 @@ class Mail
         $message->setMessage($content);
 
         call_user_func_array($cb, [$message]);
-
-        return static::$instance->send($message);
-    }
-
-    /**
-     * Send mail similar to the PHP mail function
-     *
-     * @param  string|array $to
-     * @param  string       $subject
-     * @param  string       $data
-     * @param  array        $headers
-     * @return mixed
-     */
-    public static function raw(string|array $to, string $subject, string $data, array $headers = []): mixed
-    {
-        $to = (array) $to;
-
-        $message = new Message();
-
-        $message->toList($to)->subject($subject)->setMessage($data);
-
-        foreach ($headers as $key => $value) {
-            $message->addHeader($key, $value);
-        }
 
         return static::$instance->send($message);
     }
@@ -282,12 +267,30 @@ class Mail
     }
 
     /**
+     * Push new driver
+     *
+     * @param string $name
+     * @param string $class_name
+     * @return bool
+     */
+    public function pushDriver(string $name, string $class_name): bool
+    {
+        if (array_key_exists($name, static::$drivers)) {
+            return false;
+        }
+
+        static::$drivers[$name] = $class_name;
+
+        return true;
+    }
+
+    /**
      * __call
      *
      * @param string $name
      * @param array $arguments
      * @return mixed
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function __call(string $name, array $arguments = [])
     {
@@ -295,7 +298,7 @@ class Mail
             return call_user_func_array([static::class, $name], $arguments);
         }
 
-        throw new \ErrorException(
+        throw new ErrorException(
             "This function $name does not existe",
             E_ERROR
         );

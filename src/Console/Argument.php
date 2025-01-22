@@ -97,10 +97,26 @@ class Argument
     }
 
     /**
+     * Initialize main command
+     *
+     * @param string $param
+     * @return void
+     */
+    private function initCommand(string $param): void
+    {
+        if (!preg_match('/^[a-z-]+[a-z]+:[a-z-]+[a-z]+$/', $param)) {
+            $this->command = $param;
+            $this->action = null;
+        } else {
+            [$this->command, $this->action] = explode(':', $param);
+        }
+    }
+
+    /**
      * Retrieves a parameter
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed $default
      * @return bool|string|null
      */
     public function getParameter(string $key, mixed $default = null): mixed
@@ -169,25 +185,9 @@ class Argument
     }
 
     /**
-     * Initialize main command
-     *
-     * @param string $param
-     * @return void
-     */
-    private function initCommand(string $param): void
-    {
-        if (!preg_match('/^[a-z-]+[a-z]+:[a-z-]+[a-z]+$/', $param)) {
-            $this->command = $param;
-            $this->action = null;
-        } else {
-            [$this->command, $this->action] = explode(':', $param);
-        }
-    }
-
-    /**
      * Read line
      *
-     * @param  string $message
+     * @param string $message
      * @return bool
      */
     public function readline(string $message): bool

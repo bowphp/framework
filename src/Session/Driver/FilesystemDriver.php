@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Session\Driver;
 
-class FilesystemDriver implements \SessionHandlerInterface
+use SessionHandlerInterface;
+
+class FilesystemDriver implements SessionHandlerInterface
 {
     use DurationTrait;
 
@@ -51,6 +53,17 @@ class FilesystemDriver implements \SessionHandlerInterface
     }
 
     /**
+     * Build the session file name
+     *
+     * @param string $session_id
+     * @return string
+     */
+    private function sessionFile(string $session_id): string
+    {
+        return $this->save_path . '/' . basename($session_id);
+    }
+
+    /**
      * Garbage collector
      *
      * @param int $maxlifetime
@@ -77,7 +90,7 @@ class FilesystemDriver implements \SessionHandlerInterface
     public function open(string $path, string $name): bool
     {
         if (!is_dir($this->save_path)) {
-            mkdir($this->save_path, 0777);
+            mkdir($this->save_path);
         }
 
         return true;
@@ -91,7 +104,7 @@ class FilesystemDriver implements \SessionHandlerInterface
      */
     public function read(string $session_id): string
     {
-        return (string) @file_get_contents($this->sessionFile($session_id));
+        return (string)@file_get_contents($this->sessionFile($session_id));
     }
 
     /**
@@ -106,16 +119,5 @@ class FilesystemDriver implements \SessionHandlerInterface
         $saved = @file_put_contents($this->sessionFile($session_id), $session_data);
 
         return $saved !== false;
-    }
-
-    /**
-     * Build the session file name
-     *
-     * @param string $session_id
-     * @return string
-     */
-    private function sessionFile(string $session_id): string
-    {
-        return $this->save_path . '/' . basename($session_id);
     }
 }

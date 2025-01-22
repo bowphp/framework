@@ -2,6 +2,8 @@
 
 namespace Bow\Database\Exception;
 
-class SQLGeneratorException extends \Exception
+use Exception;
+
+class SQLGeneratorException extends Exception
 {
 }

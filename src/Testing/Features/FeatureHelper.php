@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace Bow\Testing\Features;
 
+use Faker\Factory;
+use Faker\Generator;
+
 trait FeatureHelper
 {
     /**
      * Get fake instance
      *
      * @see https://github.com/fzaninotto/Faker for all documentation
-     * @return \Faker\Generator
+     * @return Generator
      */
-    public function faker(): \Faker\Generator
+    public function faker(): Generator
     {
         static $faker;
 
         if (is_null($faker)) {
-            $faker = \Faker\Factory::create();
+            $faker = Factory::create();
         }
 
         return $faker;

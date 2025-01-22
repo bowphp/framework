@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Bow\Configuration;
 
-use Bow\Event\Event;
-use Bow\Support\Env;
-use Bow\Container\Capsule;
-use Bow\Support\Arraydotify;
+use ArrayAccess;
 use Bow\Application\Exception\ApplicationException;
+use Bow\Container\Capsule;
+use Bow\Container\ContainerConfiguration;
+use Bow\Event\Event;
+use Bow\Session\SessionConfiguration;
+use Bow\Support\Arraydotify;
+use Bow\Support\Env;
 
-class Loader implements \ArrayAccess
+class Loader implements ArrayAccess
 {
     /**
      * @var ?Loader
@@ -84,6 +87,22 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Configuration Loader
+     *
+     * @param string $base_path
+     * @return Loader
+     * @throws
+     */
+    public static function configure(string $base_path): Loader
+    {
+        if (!static::$instance instanceof Loader) {
+            static::$instance = new static($base_path);
+        }
+
+        return static::$instance;
+    }
+
+    /**
      * Check if php running env is cli
      *
      * @return bool
@@ -104,22 +123,6 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * Configuration Loader
-     *
-     * @param string $base_path
-     * @return Loader
-     * @throws
-     */
-    public static function configure(string $base_path): Loader
-    {
-        if (!static::$instance instanceof Loader) {
-            static::$instance = new static($base_path);
-        }
-
-        return static::$instance;
-    }
-
-    /**
      * Middleware collection
      *
      * @return array
@@ -133,6 +136,18 @@ class Loader implements \ArrayAccess
         }
 
         return $this->middlewares;
+    }
+
+    /**
+     * Middleware collection
+     *
+     * @return array
+     */
+    public function middlewares(): array
+    {
+        return [
+            //
+        ];
     }
 
     /**
@@ -164,57 +179,6 @@ class Loader implements \ArrayAccess
     }
 
     /**
-     * Middleware collection
-     *
-     * @return array
-     */
-    public function middlewares(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    /**
-     * Load services
-     *
-     * @return array
-     */
-    public function configurations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    /**
-     * Load events
-     *
-     * @return array
-     */
-    public function events(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    /**
-     * Alias of singleton
-     *
-     * @return Loader
-     * @throws ApplicationException
-     */
-    public static function getInstance(): Loader
-    {
-        if (is_null(static::$instance)) {
-            throw new ApplicationException('The application did not load configurations.');
-        }
-
-        return static::$instance;
-    }
-
-    /**
      * Define if the configuration going to boot without session manager
      *
      * @return Loader
@@ -238,7 +202,7 @@ class Loader implements \ArrayAccess
         }
 
         $services = array_merge(
-            [\Bow\Container\ContainerConfiguration::class],
+            [ContainerConfiguration::class],
             $this->configurations(),
         );
 
@@ -248,11 +212,11 @@ class Loader implements \ArrayAccess
 
         // Configuration of services
         foreach ($services as $service) {
-            if ($this->without_session && $service === \Bow\Session\SessionConfiguration::class) {
+            if ($this->without_session && $service === SessionConfiguration::class) {
                 continue;
             }
 
-            if (!class_exists($service, true)) {
+            if (!class_exists($service)) {
                 continue;
             }
 
@@ -268,7 +232,7 @@ class Loader implements \ArrayAccess
 
         // Bind the define events
         foreach ($this->events() as $name => $handlers) {
-            $handlers = (array) $handlers;
+            $handlers = (array)$handlers;
             foreach ($handlers as $handler) {
                 Event::on($name, $handler);
             }
@@ -281,10 +245,49 @@ class Loader implements \ArrayAccess
     }
 
     /**
+     * Load services
+     *
+     * @return array
+     */
+    public function configurations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    /**
+     * Alias of singleton
+     *
+     * @return Loader
+     * @throws ApplicationException
+     */
+    public static function getInstance(): Loader
+    {
+        if (is_null(static::$instance)) {
+            throw new ApplicationException('The application did not load configurations.');
+        }
+
+        return static::$instance;
+    }
+
+    /**
+     * Load events
+     *
+     * @return array
+     */
+    public function events(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    /**
      * __invoke
      *
      * @param string $key
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed
      */
     public function __invoke(string $key, mixed $value = null): mixed

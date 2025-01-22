@@ -4,26 +4,25 @@ declare(strict_types=1);
 
 namespace Bow\Database\Connection\Adapter;
 
-use PDO;
+use Bow\Database\Connection\AbstractConnection;
 use Bow\Support\Str;
 use InvalidArgumentException;
-use Bow\Database\Connection\AbstractConnection;
+use PDO;
 
 class MysqlAdapter extends AbstractConnection
 {
-    /**
-     * The connexion nane
-     *
-     * @var ?string
-     */
-    protected ?string $name = 'mysql';
-
     /**
      * Default PORT
      *
      * @var int
      */
     public const PORT = 3306;
+    /**
+     * The connexion nane
+     *
+     * @var ?string
+     */
+    protected ?string $name = 'mysql';
 
     /**
      * MysqlAdapter constructor.
@@ -50,7 +49,7 @@ class MysqlAdapter extends AbstractConnection
             $port = '';
         } else {
             $hostname = $this->config['hostname'] ?? null;
-            $port = (string) ($this->config['port'] ?? self::PORT);
+            $port = (string)($this->config['port'] ?? self::PORT);
         }
 
         // Check the existence of database definition
@@ -59,7 +58,7 @@ class MysqlAdapter extends AbstractConnection
         }
 
         // Formatting connection parameters
-        $dsn  = sprintf("mysql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
+        $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
 
         $username = $this->config["username"];
         $password = $this->config["password"];

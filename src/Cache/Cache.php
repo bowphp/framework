@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Bow\Cache;
 
 use BadMethodCallException;
-use Bow\Cache\Adapter\RedisAdapter;
-use Bow\Cache\Adapter\FilesystemAdapter;
 use Bow\Cache\Adapter\CacheAdapterInterface;
 use Bow\Cache\Adapter\DatabaseAdapter;
+use Bow\Cache\Adapter\FilesystemAdapter;
+use Bow\Cache\Adapter\RedisAdapter;
 use ErrorException;
 use InvalidArgumentException;
 
@@ -56,24 +56,9 @@ class Cache
         }
 
         static::$config = $config;
-        $store = (array) $config["stores"][$config["default"]];
+        $store = (array)$config["stores"][$config["default"]];
 
         return static::store($store["driver"]);
-    }
-
-    /**
-     * Get the cache instance
-     *
-     * @return CacheAdapterInterface
-     * @throws ErrorException
-     */
-    public static function getInstance(): CacheAdapterInterface
-    {
-        if (is_null(static::$instance)) {
-            throw new ErrorException("Unable to get cache instance before configuration");
-        }
-
-        return static::$instance;
     }
 
     /**
@@ -93,6 +78,21 @@ class Cache
         $config = $stores[$store];
 
         static::$instance = new static::$adapters[$config["driver"]]($config);
+
+        return static::$instance;
+    }
+
+    /**
+     * Get the cache instance
+     *
+     * @return CacheAdapterInterface
+     * @throws ErrorException
+     */
+    public static function getInstance(): CacheAdapterInterface
+    {
+        if (is_null(static::$instance)) {
+            throw new ErrorException("Unable to get cache instance before configuration");
+        }
 
         return static::$instance;
     }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Bow\Database\Exception;
 
-class ConnectionException extends \ErrorException
+use ErrorException;
+
+class ConnectionException extends ErrorException
 {
     // Empty
 }

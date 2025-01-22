@@ -37,16 +37,6 @@ class Temporary
     }
 
     /**
-     * Check if the streaming is open
-     *
-     * @return bool
-     */
-    public function isOpen(): bool
-    {
-        return is_resource($this->stream);
-    }
-
-    /**
      * Open the streaming
      *
      * @return void
@@ -90,6 +80,16 @@ class Temporary
         if ($this->isOpen()) {
             fclose($this->stream);
         }
+    }
+
+    /**
+     * Check if the streaming is open
+     *
+     * @return bool
+     */
+    public function isOpen(): bool
+    {
+        return is_resource($this->stream);
     }
 
     /**

@@ -23,56 +23,6 @@ class Console
      * @var string
      */
     private const VERSION = '5.0';
-
-    /**
-     * The Setting instance
-     *
-     * @var Setting
-     */
-    private Setting $setting;
-
-    /**
-     * The COMMAND instance
-     *
-     * @var Command
-     */
-    private Command $command;
-
-    /**
-     * The Loader instance
-     *
-     * @var Loader
-     */
-    private Loader $kernel;
-
-    /**
-     * The custom command registers
-     *
-     * @var array
-     */
-    private static array $registers = [];
-
-    /**
-     * Defines if console booted
-     *
-     * @var bool
-     */
-    private bool $booted = false;
-
-    /**
-     * The Argument instance
-     *
-     * @return Argument
-     */
-    private Argument $arg;
-
-    /**
-     * The console instance
-     *
-     * @var ?Console
-     */
-    private static ?Console $instance = null;
-
     /**
      * The command list
      *
@@ -81,7 +31,6 @@ class Console
     private const COMMAND = [
         'add', 'migration', 'migrate', 'run', 'generate', 'gen', 'seed', 'help', 'launch', 'clear', 'flush'
     ];
-
     /**
      * The action list
      *
@@ -92,6 +41,48 @@ class Console
         'seeder', 'migration', 'configuration', 'service',
         'exception', 'event', 'producer', 'command', 'listener'
     ];
+    /**
+     * The custom command registers
+     *
+     * @var array
+     */
+    private static array $registers = [];
+    /**
+     * The console instance
+     *
+     * @var ?Console
+     */
+    private static ?Console $instance = null;
+    /**
+     * The Setting instance
+     *
+     * @var Setting
+     */
+    private Setting $setting;
+    /**
+     * The COMMAND instance
+     *
+     * @var Command
+     */
+    private Command $command;
+    /**
+     * The Loader instance
+     *
+     * @var Loader
+     */
+    private Loader $kernel;
+    /**
+     * Defines if console booted
+     *
+     * @var bool
+     */
+    private bool $booted = false;
+    /**
+     * The Argument instance
+     *
+     * @return Argument
+     */
+    private Argument $arg;
 
     /**
      * Bow constructor.
@@ -126,6 +117,19 @@ class Console
         }
 
         return static::$instance;
+    }
+
+    /**
+     * Add a custom order to the store from the web env
+     * This method work on web and cli env
+     *
+     * @param string $command
+     * @param callable|string $cb
+     * @return void
+     */
+    public static function register(string $command, callable|string $cb): void
+    {
+        static::$registers[$command] = $cb;
     }
 
     /**
@@ -232,227 +236,6 @@ class Console
             echo $e->getMessage();
             exit(1);
         }
-    }
-
-    /**
-     * Add a custom order to the store
-     * The method work only on cli env
-     *
-     * @param string $command
-     * @param callable|string $cb
-     * @return Console
-     */
-    public function addCommand(string $command, callable|string $cb): Console
-    {
-        static::$registers[$command] = $cb;
-
-        return $this;
-    }
-
-    /**
-     * Add a custom order to the store from the web env
-     * This method work on web and cli env
-     *
-     * @param string $command
-     * @param callable|string $cb
-     * @return void
-     */
-    public static function register(string $command, callable|string $cb): void
-    {
-        static::$registers[$command] = $cb;
-    }
-
-    /**
-     * Execute the define custom command
-     *
-     * @param string $command
-     * @return mixed
-     * @throws Exception
-     */
-    private function executeCustomCommand(string $command): mixed
-    {
-        try {
-            $classname = static::$registers[$command];
-
-            if (is_callable($classname)) {
-                return $classname($this->arg, $this->setting);
-            }
-
-            // Create the command instance
-            $instance = new $classname($this->setting, $this->arg);
-
-            return call_user_func_array([$instance, "process"], []);
-        } catch (Exception $exception) {
-            if (php_sapi_name() !== "cli") {
-                throw $exception;
-            }
-
-            echo Color::red($exception->getMessage());
-            echo Color::green($exception->getTraceAsString());
-
-            exit(1);
-        }
-    }
-
-    /**
-     * Launch a migration
-     *
-     * @return void
-     * @throws ErrorException
-     */
-    private function migration(): void
-    {
-        $action = $this->arg->getAction();
-
-        if (!in_array($action, ['migrate', 'rollback', 'reset'])) {
-            $this->throwFailsCommand('This action is not exists!', 'help migration');
-        }
-
-        $target = $this->arg->getTarget();
-
-        $this->command->call('migration', $action, $target);
-    }
-
-    /**
-     * Launch a migration
-     *
-     * @return void
-     * @throws ErrorException
-     */
-    private function migrate(): void
-    {
-        $action = $this->arg->getAction();
-
-        if (!is_null($action)) {
-            $this->throwFailsCommand('This action is not allow!', 'help migration');
-        }
-
-        $this->command->call('migration', 'migrate', null);
-    }
-
-    /**
-     * Create files
-     *
-     * @return void
-     * @throws ErrorException
-     */
-    private function add(): void
-    {
-        $action = $this->arg->getAction();
-
-        if (!in_array($action, static::ADD_ACTION)) {
-            $this->throwFailsCommand('This action is not exists', 'help add');
-        }
-
-        $target = $this->arg->getTarget();
-
-        if (is_null($target)) {
-            $this->throwFailsCommand('Please provide the filename', 'help add');
-        }
-
-        $this->command->call('add', $action, $target);
-    }
-
-    /**
-     * Launch seeding
-     *
-     * @return void
-     * @throws
-     */
-    private function seed(): void
-    {
-        $action = $this->arg->getAction();
-
-        if (!in_array($action, ['all', 'table'])) {
-            $this->throwFailsCommand('This action is not exists', 'help seed');
-        }
-
-        $target = $this->arg->getTarget();
-
-        if ($action == 'all') {
-            if ($target != null) {
-                $this->throwFailsCommand(
-                    'Bad command usage target is not allow in this case',
-                    'help seed'
-                );
-            }
-        }
-
-        $this->command->call('seeder', $action, $target);
-    }
-
-    /**
-     * Launch process
-     *
-     * @throws ErrorException
-     */
-    private function launch(): void
-    {
-        $action = $this->arg->getAction();
-
-        if (!in_array($action, ['server', 'console', 'worker'])) {
-            $this->throwFailsCommand('Bad command usage', 'help run');
-        }
-
-        $this->command->call('runner', $action, $this->arg->getTarget());
-    }
-
-    /**
-     * Allows to generate a resource on a controller
-     *
-     * @return void
-     * @throws ErrorException
-     */
-    private function generate(): void
-    {
-        $action = $this->arg->getAction();
-
-        if (!in_array($action, ['key', 'resource', 'session-table', 'cache-table', 'queue-table'])) {
-            $this->throwFailsCommand('This action is not exists', 'help generate');
-        }
-
-        $this->command->call('generator', $action, $this->arg->getTarget());
-    }
-
-    /**
-     * Alias of generate
-     *
-     * @return void
-     * @throws ErrorException
-     */
-    private function gen(): void
-    {
-        $this->generate();
-    }
-
-    /**
-     * Remove the caches
-     *
-     * @return void
-     * @throws ErrorException
-     */
-    private function clear(): void
-    {
-        $action = $this->arg->getAction();
-
-        $this->command->call('clear', "make", $action);
-    }
-
-    /**
-     * Flush the connections
-     *
-     * @return void
-     * @throws ErrorException
-     */
-    private function flush(): void
-    {
-        $action = $this->arg->getAction();
-
-        if ($action != 'worker') {
-            $this->throwFailsCommand('This action is not exists', 'help flush');
-        }
-
-        $this->command->call('flush', $action);
     }
 
     /**
@@ -658,5 +441,213 @@ U;
 
 USAGE;
         echo sprintf($version, Console::VERSION, PHP_VERSION);
+    }
+
+    /**
+     * Execute the define custom command
+     *
+     * @param string $command
+     * @return mixed
+     * @throws Exception
+     */
+    private function executeCustomCommand(string $command): mixed
+    {
+        try {
+            $classname = static::$registers[$command];
+
+            if (is_callable($classname)) {
+                return $classname($this->arg, $this->setting);
+            }
+
+            // Create the command instance
+            $instance = new $classname($this->setting, $this->arg);
+
+            return call_user_func_array([$instance, "process"], []);
+        } catch (Exception $exception) {
+            if (php_sapi_name() !== "cli") {
+                throw $exception;
+            }
+
+            echo Color::red($exception->getMessage());
+            echo Color::green($exception->getTraceAsString());
+
+            exit(1);
+        }
+    }
+
+    /**
+     * Add a custom order to the store
+     * The method work only on cli env
+     *
+     * @param string $command
+     * @param callable|string $cb
+     * @return Console
+     */
+    public function addCommand(string $command, callable|string $cb): Console
+    {
+        static::$registers[$command] = $cb;
+
+        return $this;
+    }
+
+    /**
+     * Launch a migration
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function migration(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, ['migrate', 'rollback', 'reset'])) {
+            $this->throwFailsCommand('This action is not exists!', 'help migration');
+        }
+
+        $target = $this->arg->getTarget();
+
+        $this->command->call('migration', $action, $target);
+    }
+
+    /**
+     * Launch a migration
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function migrate(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!is_null($action)) {
+            $this->throwFailsCommand('This action is not allow!', 'help migration');
+        }
+
+        $this->command->call('migration', 'migrate', null);
+    }
+
+    /**
+     * Create files
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function add(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, static::ADD_ACTION)) {
+            $this->throwFailsCommand('This action is not exists', 'help add');
+        }
+
+        $target = $this->arg->getTarget();
+
+        if (is_null($target)) {
+            $this->throwFailsCommand('Please provide the filename', 'help add');
+        }
+
+        $this->command->call('add', $action, $target);
+    }
+
+    /**
+     * Launch seeding
+     *
+     * @return void
+     * @throws
+     */
+    private function seed(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, ['all', 'table'])) {
+            $this->throwFailsCommand('This action is not exists', 'help seed');
+        }
+
+        $target = $this->arg->getTarget();
+
+        if ($action == 'all') {
+            if ($target != null) {
+                $this->throwFailsCommand(
+                    'Bad command usage target is not allow in this case',
+                    'help seed'
+                );
+            }
+        }
+
+        $this->command->call('seeder', $action, $target);
+    }
+
+    /**
+     * Launch process
+     *
+     * @throws ErrorException
+     */
+    private function launch(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, ['server', 'console', 'worker'])) {
+            $this->throwFailsCommand('Bad command usage', 'help run');
+        }
+
+        $this->command->call('runner', $action, $this->arg->getTarget());
+    }
+
+    /**
+     * Alias of generate
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function gen(): void
+    {
+        $this->generate();
+    }
+
+    /**
+     * Allows to generate a resource on a controller
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function generate(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, ['key', 'resource', 'session-table', 'cache-table', 'queue-table'])) {
+            $this->throwFailsCommand('This action is not exists', 'help generate');
+        }
+
+        $this->command->call('generator', $action, $this->arg->getTarget());
+    }
+
+    /**
+     * Remove the caches
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function clear(): void
+    {
+        $action = $this->arg->getAction();
+
+        $this->command->call('clear', "make", $action);
+    }
+
+    /**
+     * Flush the connections
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function flush(): void
+    {
+        $action = $this->arg->getAction();
+
+        if ($action != 'worker') {
+            $this->throwFailsCommand('This action is not exists', 'help flush');
+        }
+
+        $this->command->call('flush', $action);
     }
 }

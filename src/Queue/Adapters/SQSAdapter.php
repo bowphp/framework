@@ -4,8 +4,8 @@ namespace Bow\Queue\Adapters;
 
 use Aws\Exception\AwsException;
 use Aws\Sqs\SqsClient;
-use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\ProducerService;
+use ErrorException;
 use RuntimeException;
 
 class SQSAdapter extends QueueAdapter
@@ -91,7 +91,7 @@ class SQSAdapter extends QueueAdapter
 
         $attributes = $response->get('Attributes');
 
-        return (int) $attributes['ApproximateNumberOfMessages'];
+        return (int)$attributes['ApproximateNumberOfMessages'];
     }
 
     /**
@@ -99,7 +99,7 @@ class SQSAdapter extends QueueAdapter
      *
      * @param ?string $queue
      * @return void
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function run(?string $queue = null): void
     {

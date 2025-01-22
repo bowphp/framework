@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Bow\Validation;
 
 use Bow\Support\Str;
-use Bow\Validation\Rules\EmailRule;
 use Bow\Validation\Rules\DatabaseRule;
 use Bow\Validation\Rules\DatetimeRule;
+use Bow\Validation\Rules\EmailRule;
 use Bow\Validation\Rules\NumericRule;
 use Bow\Validation\Rules\RegexRule;
 use Bow\Validation\Rules\StringRule;

@@ -23,7 +23,7 @@ class GeneratorBasicTest extends \PHPUnit\Framework\TestCase
     public function test_generate_stub_without_data()
     {
         $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'CreateUserCommand');
-        $content = $generator->makeStubContent('command', []);
+        $content = $generator->makeStubContent('command');
 
         $this->assertNotNull($content);
         $this->assertMatchesRegularExpression("@\nnamespace\s\{baseNamespace\}\{namespace\};\n@", $content);

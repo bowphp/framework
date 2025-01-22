@@ -15,7 +15,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
     /**
      * Command used to set up the resource system.
      *
-     * @param  string $controller
+     * @param string $controller
      * @return void
      * @throws
      */
@@ -65,32 +65,6 @@ class GenerateResourceControllerCommand extends AbstractCommand
     }
 
     /**
-     * Create rest controller
-     *
-     * @param Generator $generator
-     * @param string $prefix
-     * @param string $controller
-     * @param string $model_namespace
-     *
-     * @return void
-     */
-    private function createResourceController(
-        Generator $generator,
-        string $prefix,
-        string $controller,
-        string $model_namespace = ''
-    ): void {
-        $generator->write('controller/rest', [
-            'modelNamespace' => $model_namespace,
-            'prefix' => $prefix,
-            'className' => $controller,
-            'baseNamespace' => $this->namespaces['controller'] ?? 'App\\Controllers'
-        ]);
-
-        echo Color::green('The controller Rest was well created.');
-    }
-
-    /**
      * Create the default view for rest Generation
      *
      * @param string $base_directory
@@ -108,5 +82,32 @@ class GenerateResourceControllerCommand extends AbstractCommand
 
             echo "$filename added\n";
         }
+    }
+
+    /**
+     * Create rest controller
+     *
+     * @param Generator $generator
+     * @param string $prefix
+     * @param string $controller
+     * @param string $model_namespace
+     *
+     * @return void
+     */
+    private function createResourceController(
+        Generator $generator,
+        string    $prefix,
+        string    $controller,
+        string    $model_namespace = ''
+    ): void
+    {
+        $generator->write('controller/rest', [
+            'modelNamespace' => $model_namespace,
+            'prefix' => $prefix,
+            'className' => $controller,
+            'baseNamespace' => $this->namespaces['controller'] ?? 'App\\Controllers'
+        ]);
+
+        echo Color::green('The controller Rest was well created.');
     }
 }

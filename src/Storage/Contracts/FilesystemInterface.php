@@ -23,8 +23,8 @@ interface FilesystemInterface
     /**
      * Write following a file specify
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @param string $content
      * @return bool
      */
     public function append(string $file, string $content): bool;
@@ -32,8 +32,8 @@ interface FilesystemInterface
     /**
      * Write to the beginning of a file specify
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @param string $content
      * @return bool
      * @throws
      */
@@ -42,8 +42,8 @@ interface FilesystemInterface
     /**
      * Put other file content in given file
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @param string $content
      * @return bool
      */
     public function put(string $file, string $content): bool;
@@ -51,7 +51,7 @@ interface FilesystemInterface
     /**
      * Delete file
      *
-     * @param  string $file
+     * @param string $file
      * @return bool
      */
     public function delete(string $file): bool;
@@ -59,7 +59,7 @@ interface FilesystemInterface
     /**
      * Alias sur readInDir
      *
-     * @param  string $dirname
+     * @param string $dirname
      * @return array
      */
     public function files(string $dirname): array;
@@ -67,7 +67,7 @@ interface FilesystemInterface
     /**
      * Read the contents of the file
      *
-     * @param  string $dirname
+     * @param string $dirname
      * @return array
      */
     public function directories(string $dirname): array;
@@ -75,8 +75,8 @@ interface FilesystemInterface
     /**
      * Create a directory
      *
-     * @param  string $dirname
-     * @param  int    $mode
+     * @param string $dirname
+     * @param int $mode
      * @return bool
      */
     public function makeDirectory(string $dirname, int $mode = 0777): bool;
@@ -84,7 +84,7 @@ interface FilesystemInterface
     /**
      * Get file content
      *
-     * @param  string $file
+     * @param string $file
      * @return ?string
      */
     public function get(string $file): ?string;
@@ -93,7 +93,7 @@ interface FilesystemInterface
      * Copy the contents of a source file to a target file.
      *
      * @param string $source
-     * @param  string $target
+     * @param string $target
      * @return bool
      */
     public function copy(string $source, string $target): bool;

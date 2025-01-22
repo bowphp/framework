@@ -7,53 +7,49 @@ namespace Bow\Storage\Service;
 use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\ServiceInterface;
 use Bow\Storage\Exception\ResourceException;
+use Exception;
+use FTP\Connection as FTPConnection;
 use InvalidArgumentException;
 use RuntimeException;
-use FTP\Connection as FTPConnection;
 
 class FTPService implements ServiceInterface
 {
-    /**
-     * The Service configuration
-     *
-     * @var array
-     */
-    private array $config;
-
-    /**
-     * Ftp connection
-     *
-     * @var ?FTPConnection
-     */
-    private ?FTPConnection $connection;
-
-    /**
-     * Transfer mode
-     *
-     * @var int
-     */
-    private int $transfer_mode = FTP_BINARY;
-
-    /**
-     * Whether to use the passive mode.
-     *
-     * @var bool
-     */
-    private bool $use_passive_mode = true;
-
     /**
      * The FTPService Instance
      *
      * @var ?FTPService
      */
     private static ?FTPService $instance = null;
-
     /**
      * Cache the directory contents to avoid redundant server calls.
      *
      * @var array
      */
     private static array $cached_directory_contents = [];
+    /**
+     * The Service configuration
+     *
+     * @var array
+     */
+    private array $config;
+    /**
+     * Ftp connection
+     *
+     * @var ?FTPConnection
+     */
+    private ?FTPConnection $connection;
+    /**
+     * Transfer mode
+     *
+     * @var int
+     */
+    private int $transfer_mode = FTP_BINARY;
+    /**
+     * Whether to use the passive mode.
+     *
+     * @var bool
+     */
+    private bool $use_passive_mode = true;
 
     /**
      * FTPService constructor
@@ -69,21 +65,6 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Configure service
-     *
-     * @param array $config
-     * @return FTPService
-     */
-    public static function configure(array $config): FTPService
-    {
-        if (is_null(static::$instance)) {
-            static::$instance = new FTPService($config);
-        }
-
-        return static::$instance;
-    }
-
-    /**
      * Connect to the FTP server.
      *
      * @return void
@@ -92,8 +73,8 @@ class FTPService implements ServiceInterface
     public function connect(): void
     {
         $host = $this->config['hostname'];
-        $port = (int) $this->config['port'];
-        $timeout = (int) $this->config['timeout'];
+        $port = (int)$this->config['port'];
+        $timeout = (int)$this->config['timeout'];
 
         if ($this->config['tls']) {
             $connection = ftp_ssl_connect($host, $port, $timeout);
@@ -113,16 +94,6 @@ class FTPService implements ServiceInterface
         $this->login();
         $this->changePath();
         $this->activePassiveMode();
-    }
-
-    /**
-     * Disconnect from the FTP server.
-     *
-     * @return void
-     */
-    public function disconnect(): void
-    {
-        $this->connection = null;
     }
 
     /**
@@ -154,6 +125,16 @@ class FTPService implements ServiceInterface
     }
 
     /**
+     * Disconnect from the FTP server.
+     *
+     * @return void
+     */
+    public function disconnect(): void
+    {
+        $this->connection = null;
+    }
+
+    /**
      * Change path.
      *
      * @param string|null $path
@@ -171,13 +152,35 @@ class FTPService implements ServiceInterface
     }
 
     /**
-     * Get ftp connection
+     * Set the connections to passive mode.
      *
-     * @return FTPConnection
+     * @throws RuntimeException
      */
-    public function getConnection(): FTPConnection
+    private function activePassiveMode(): void
     {
-        return $this->connection;
+        @ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
+
+        if (!ftp_pasv($this->connection, $this->use_passive_mode)) {
+            throw new RuntimeException(
+                'Could not set passive mode for connection: '
+                . $this->config['hostname'] . '::' . $this->config['port']
+            );
+        }
+    }
+
+    /**
+     * Configure service
+     *
+     * @param array $config
+     * @return FTPService
+     */
+    public static function configure(array $config): FTPService
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new FTPService($config);
+        }
+
+        return static::$instance;
     }
 
     /**
@@ -226,10 +229,33 @@ class FTPService implements ServiceInterface
     }
 
     /**
+     * Write stream
+     *
+     * @param string $file
+     * @param resource $resource
+     *
+     * @return bool
+     */
+    private function writeStream(string $file, mixed $resource): bool
+    {
+        return ftp_fput($this->getConnection(), $file, $resource, $this->transfer_mode);
+    }
+
+    /**
+     * Get ftp connection
+     *
+     * @return FTPConnection
+     */
+    public function getConnection(): FTPConnection
+    {
+        return $this->connection;
+    }
+
+    /**
      * Append content a file.
      *
-     * @param  string $file
-     * @param  string $content
+     * @param string $file
+     * @param string $content
      * @return bool
      */
     public function append(string $file, string $content): bool
@@ -245,7 +271,7 @@ class FTPService implements ServiceInterface
         $result = ftp_fput($this->getConnection(), $file, $stream, $this->transfer_mode, $size);
         fclose($stream);
 
-        return (bool) $result;
+        return (bool)$result;
     }
 
     /**
@@ -272,7 +298,59 @@ class FTPService implements ServiceInterface
 
         fclose($stream);
 
-        return (bool) $result;
+        return (bool)$result;
+    }
+
+    /**
+     * Get file content
+     *
+     * @param string $file
+     * @return ?string
+     * @throws ResourceException
+     */
+    public function get(string $file): ?string
+    {
+        if (!$stream = $this->readStream($file)) {
+            return null;
+        }
+
+        $contents = stream_get_contents($stream);
+
+        fclose($stream);
+
+        return $contents;
+    }
+
+    /**
+     * Read stream
+     *
+     * @param string $path
+     * @return mixed
+     * @throws ResourceException
+     */
+    private function readStream(string $path): mixed
+    {
+        try {
+            $stream = fopen('php://temp', 'w+b');
+
+            if (!$stream) {
+                return false;
+            }
+
+            $result = ftp_fget($this->getConnection(), $stream, $path, $this->transfer_mode);
+
+            rewind($stream);
+
+            if ($result) {
+                return $stream;
+            }
+
+            fclose($stream);
+
+            return false;
+        } catch (Exception $exception) {
+            throw new ResourceException(sprintf('"%s" not found.', $path));
+        }
     }
 
     /**
@@ -299,13 +377,13 @@ class FTPService implements ServiceInterface
 
         fclose($stream);
 
-        return (bool) $result;
+        return (bool)$result;
     }
 
     /**
      * List files in a directory
      *
-     * @param  string $dirname
+     * @param string $dirname
      * @return array
      */
     public function files(string $dirname = '.'): array
@@ -318,9 +396,63 @@ class FTPService implements ServiceInterface
     }
 
     /**
+     * List the directory content
+     *
+     * @param string $directory
+     * @return array
+     */
+    protected function listDirectoryContents(string $directory = '.'): array
+    {
+        if ($directory && (strpos($directory, '.') !== 0)) {
+            ftp_chdir($this->getConnection(), $directory);
+        }
+
+        $listing = @ftp_rawlist($this->getConnection(), '.') ?: [];
+
+        $this->changePath();
+
+        return $this->normalizeDirectoryListing($listing);
+    }
+
+    /**
+     * Normalize directory content listing
+     *
+     * @param array $listing
+     * @return array
+     */
+    private function normalizeDirectoryListing(array $listing): array
+    {
+        $normalizedListing = [];
+
+        foreach ($listing as $child) {
+            $chunks = preg_split("/\s+/", $child);
+
+            list(
+                $item['rights'],
+                $item['number'],
+                $item['user'],
+                $item['group'],
+                $item['size'],
+                $item['month'],
+                $item['day'],
+                $item['time'],
+                $item['name']
+                ) = $chunks;
+
+            $item['type'] = $chunks[0][0] === 'd' ? 'directory' : 'file';
+
+            array_splice($chunks, 0, 8);
+
+            $normalizedListing[implode(" ", $chunks)] = $item;
+        }
+
+        return $normalizedListing;
+    }
+
+    /**
      * List directories
      *
-     * @param  string $dirname
+     * @param string $dirname
      * @return array
      */
     public function directories(string $dirname = '.'): array
@@ -335,8 +467,8 @@ class FTPService implements ServiceInterface
     /**
      * Create a directory
      *
-     * @param  string $dirname
-     * @param  int $mode
+     * @param string $dirname
+     * @param int $mode
      * @return boolean
      */
     public function makeDirectory(string $dirname, int $mode = 0777): bool
@@ -380,27 +512,7 @@ class FTPService implements ServiceInterface
             return true;
         }
 
-        return (bool) ftp_mkdir($connection, $directory);
-    }
-
-    /**
-     * Get file content
-     *
-     * @param string $file
-     * @return ?string
-     * @throws ResourceException
-     */
-    public function get(string $file): ?string
-    {
-        if (!$stream = $this->readStream($file)) {
-            return null;
-        }
-
-        $contents = stream_get_contents($stream);
-
-        fclose($stream);
-
-        return $contents;
+        return (bool)ftp_mkdir($connection, $directory);
     }
 
     /**
@@ -432,23 +544,6 @@ class FTPService implements ServiceInterface
     public function move(string $source, string $target): bool
     {
         return ftp_rename($this->getConnection(), $source, $target);
-    }
-
-    /**
-     * Check that a file exists
-     *
-     * @param string $file
-     * @return bool
-     */
-    public function exists(string $file): bool
-    {
-        $listing = $this->listDirectoryContents();
-
-        $dirname_info = array_filter($listing, function ($item) use ($file) {
-            return $item['name'] === $file;
-        });
-
-        return count($dirname_info) !== 0;
     }
 
     /**
@@ -507,129 +602,30 @@ class FTPService implements ServiceInterface
     }
 
     /**
+     * Check that a file exists
+     *
+     * @param string $file
+     * @return bool
+     */
+    public function exists(string $file): bool
+    {
+        $listing = $this->listDirectoryContents();
+
+        $dirname_info = array_filter($listing, function ($item) use ($file) {
+            return $item['name'] === $file;
+        });
+
+        return count($dirname_info) !== 0;
+    }
+
+    /**
      * Delete file
      *
-     * @param  string $file
+     * @param string $file
      * @return bool
      */
     public function delete(string $file): bool
     {
         return ftp_delete($this->getConnection(), $file);
-    }
-
-    /**
-     * Write stream
-     *
-     * @param string $file
-     * @param resource $resource
-     *
-     * @return bool
-     */
-    private function writeStream(string $file, mixed $resource): bool
-    {
-        return ftp_fput($this->getConnection(), $file, $resource, $this->transfer_mode);
-    }
-
-    /**
-     * List the directory content
-     *
-     * @param string $directory
-     * @return array
-     */
-    protected function listDirectoryContents(string $directory = '.'): array
-    {
-        if ($directory && (strpos($directory, '.') !== 0)) {
-            ftp_chdir($this->getConnection(), $directory);
-        }
-
-        $listing = @ftp_rawlist($this->getConnection(), '.') ?: [];
-
-        $this->changePath();
-
-        return  $this->normalizeDirectoryListing($listing);
-    }
-
-    /**
-     * Normalize directory content listing
-     *
-     * @param array $listing
-     * @return array
-     */
-    private function normalizeDirectoryListing(array $listing): array
-    {
-        $normalizedListing = [];
-
-        foreach ($listing as $child) {
-            $chunks = preg_split("/\s+/", $child);
-
-            list(
-                $item['rights'],
-                $item['number'],
-                $item['user'],
-                $item['group'],
-                $item['size'],
-                $item['month'],
-                $item['day'],
-                $item['time'],
-                $item['name']
-            ) = $chunks;
-
-            $item['type'] = $chunks[0][0] === 'd' ? 'directory' : 'file';
-
-            array_splice($chunks, 0, 8);
-
-            $normalizedListing[implode(" ", $chunks)] = $item;
-        }
-
-        return $normalizedListing;
-    }
-
-    /**
-     * Read stream
-     *
-     * @param string $path
-     * @return mixed
-     * @throws ResourceException
-     */
-    private function readStream(string $path): mixed
-    {
-        try {
-            $stream = fopen('php://temp', 'w+b');
-
-            if (!$stream) {
-                return false;
-            }
-
-            $result = ftp_fget($this->getConnection(), $stream, $path, $this->transfer_mode);
-
-            rewind($stream);
-
-            if ($result) {
-                return $stream;
-            }
-
-            fclose($stream);
-
-            return false;
-        } catch (\Exception $exception) {
-            throw new ResourceException(sprintf('"%s" not found.', $path));
-        }
-    }
-
-    /**
-     * Set the connections to passive mode.
-     *
-     * @throws RuntimeException
-     */
-    private function activePassiveMode(): void
-    {
-        @ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
-
-        if (!ftp_pasv($this->connection, $this->use_passive_mode)) {
-            throw new RuntimeException(
-                'Could not set passive mode for connection: '
-                . $this->config['hostname'] . '::' . $this->config['port']
-            );
-        }
     }
 }

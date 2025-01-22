@@ -13,6 +13,7 @@ use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\Migration\SQLGenerator;
 use Bow\Database\QueryBuilder;
 use Bow\Support\Str;
+use ErrorException;
 use Exception;
 use JetBrains\PhpStorm\NoReturn;
 
@@ -27,28 +28,6 @@ class MigrationCommand extends AbstractCommand
     public function migrate(): void
     {
         $this->factory('up');
-    }
-
-    /**
-     * Rollback migration command
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function rollback(): void
-    {
-        $this->factory('rollback');
-    }
-
-    /**
-     * Reset migration command
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function reset(): void
-    {
-        $this->factory('reset');
     }
 
     /**
@@ -73,6 +52,118 @@ class MigrationCommand extends AbstractCommand
         $action = 'make' . strtoupper($type);
 
         $this->$action($migrations);
+    }
+
+    /**
+     * Get migration pattern
+     *
+     * @return array
+     */
+    private function getMigrationFiles(): array
+    {
+        $file_pattern = $this->setting->getMigrationDirectory() . strtolower("/*.php");
+
+        return glob($file_pattern);
+    }
+
+    /**
+     * Create the migration status table
+     *
+     * @return void
+     * @throws ConnectionException
+     */
+    private function createMigrationTable(): void
+    {
+        $connection = $this->arg->getParameter("--connection", config("database.default"));
+
+        Database::connection($connection);
+        $adapter = Database::getConnectionAdapter();
+
+        $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
+        $generator = new SQLGenerator(
+            $table,
+            $adapter->getName(),
+            'create'
+        );
+
+        $generator->addString('migration', ['unique' => true]);
+        $generator->addInteger('batch');
+        $generator->addDatetime('created_at', [
+            'default' => 'CURRENT_TIMESTAMP',
+            'nullable' => true
+        ]);
+
+        $sql = sprintf(
+            'CREATE TABLE IF NOT EXISTS %s (%s);',
+            $table,
+            $generator->make()
+        );
+
+        Database::statement($sql);
+    }
+
+    /**
+     * Reset migration command
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function reset(): void
+    {
+        $this->factory('reset');
+    }
+
+    /**
+     * Create a migration command
+     *
+     * @param string $model
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    public function generate(string $model): void
+    {
+        $create_at = date("YmdHis");
+        $filename = sprintf("Version%s%s", $create_at, ucfirst(Str::camel($model)));
+
+        $generator = new Generator(
+            $this->setting->getMigrationDirectory(),
+            $filename
+        );
+
+        $parameters = $this->arg->getParameters();
+
+        if ($parameters->has('--create') && $parameters->has('--table')) {
+            $this->throwFailsCommand('bad command', 'add help');
+        }
+
+        $type = "model/standard";
+
+        if ($parameters->has('--table')) {
+            if ($parameters->get('--table') === true) {
+                $this->throwFailsCommand('bad command option [--table=table]', 'add help');
+            }
+
+            $table = $parameters->get('--table');
+
+            $type = 'model/table';
+        } elseif ($parameters->has('--create')) {
+            if ($parameters->get('--create') === true) {
+                $this->throwFailsCommand('bad command option [--create=table]', 'add help');
+            }
+
+            $table = $parameters->get('--create');
+
+            $type = 'model/create';
+        }
+
+        $generator->write($type, [
+            'table' => $table ?? 'table_name',
+            'className' => $filename
+        ]);
+
+        // Print console information
+        echo Color::green('The migration file has been successfully created') . "\n";
     }
 
     /**
@@ -123,6 +214,100 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
+     * Get migration table
+     *
+     * @return QueryBuilder
+     * @throws ConnectionException
+     */
+    private function getMigrationTable(): QueryBuilder
+    {
+        $migration_status_table = config('database.migration', 'migrations');
+
+        return db_table($migration_status_table);
+    }
+
+    /**
+     * Check the migration existence
+     *
+     * @param string $migration
+     * @return bool
+     * @throws ConnectionException|QueryBuilderException
+     */
+    private function checkIfMigrationExist(string $migration): bool
+    {
+        $result = $this->getMigrationTable()
+            ->where('migration', $migration)
+            ->first();
+
+        return !is_null($result);
+    }
+
+    /**
+     * Throw migration exception
+     *
+     * @param Exception $exception
+     * @param string $migration
+     */
+    #[NoReturn] private function throwMigrationException(Exception $exception, string $migration): void
+    {
+        $this->printExceptionMessage(
+            $exception->getMessage(),
+            $migration
+        );
+    }
+
+    /**
+     * Print the error message
+     *
+     * @param string $message
+     * @param string $migration
+     * @return void
+     */
+    #[NoReturn] private function printExceptionMessage(string $message, string $migration): void
+    {
+        $message = Color::red($message);
+        $migration = Color::yellow($migration);
+
+        exit(sprintf("\nOn %s\n\n%s\n\n", $migration, $message));
+    }
+
+    /**
+     * Create migration status
+     *
+     * @param string $migration
+     * @return void
+     * @throws ConnectionException
+     */
+    private function createMigrationStatus(string $migration): void
+    {
+        $table = $this->getMigrationTable();
+
+        $table->insert([
+            'migration' => $migration,
+            'batch' => 1,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    /**
+     * Update migration status
+     *
+     * @param string $migration
+     * @param int $batch
+     * @return void
+     * @throws ConnectionException|QueryBuilderException
+     */
+    private function updateMigrationStatus(string $migration, int $batch): void
+    {
+        $table = $this->getMigrationTable();
+
+        $table->where('migration', $migration)->update([
+            'migration' => $migration,
+            'batch' => $batch
+        ]);
+    }
+
+    /**
      * Rollback migration
      *
      * @param array $migrations
@@ -149,7 +334,7 @@ class MigrationCommand extends AbstractCommand
             foreach ($migrations as $file => $migration) {
                 if (
                     !($value->batch == 1
-                    && $migration == $value->migration)
+                        && $migration == $value->migration)
                 ) {
                     continue;
                 }
@@ -182,6 +367,17 @@ class MigrationCommand extends AbstractCommand
 
         // Print console information
         echo Color::green('Migration rollback.');
+    }
+
+    /**
+     * Rollback migration command
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function rollback(): void
+    {
+        $this->factory('rollback');
     }
 
     /**
@@ -229,200 +425,5 @@ class MigrationCommand extends AbstractCommand
 
         // Print console information
         echo Color::green('Migration reset.');
-    }
-
-    /**
-     * Print the error message
-     *
-     * @param string $message
-     * @param string $migration
-     * @return void
-     */
-    #[NoReturn] private function printExceptionMessage(string $message, string $migration): void
-    {
-        $message = Color::red($message);
-        $migration = Color::yellow($migration);
-
-        exit(sprintf("\nOn %s\n\n%s\n\n", $migration, $message));
-    }
-
-    /**
-     * Throw migration exception
-     *
-     * @param Exception $exception
-     * @param string $migration
-     */
-    #[NoReturn] private function throwMigrationException(Exception $exception, string $migration): void
-    {
-        $this->printExceptionMessage(
-            $exception->getMessage(),
-            $migration
-        );
-    }
-
-    /**
-     * Create the migration status table
-     *
-     * @return void
-     * @throws ConnectionException
-     */
-    private function createMigrationTable(): void
-    {
-        $connection = $this->arg->getParameter("--connection", config("database.default"));
-
-        Database::connection($connection);
-        $adapter = Database::getConnectionAdapter();
-
-        $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
-        $generator = new SQLGenerator(
-            $table,
-            $adapter->getName(),
-            'create'
-        );
-
-        $generator->addString('migration', ['unique' => true]);
-        $generator->addInteger('batch');
-        $generator->addDatetime('created_at', [
-            'default' => 'CURRENT_TIMESTAMP',
-            'nullable' => true
-        ]);
-
-        $sql = sprintf(
-            'CREATE TABLE IF NOT EXISTS %s (%s);',
-            $table,
-            $generator->make()
-        );
-
-        Database::statement($sql);
-    }
-
-    /**
-     * Create migration status
-     *
-     * @param string $migration
-     * @return void
-     * @throws ConnectionException
-     */
-    private function createMigrationStatus(string $migration): void
-    {
-        $table = $this->getMigrationTable();
-
-        $table->insert([
-            'migration' => $migration,
-            'batch' => 1,
-            'created_at' => date('Y-m-d H:i:s')
-        ]);
-    }
-
-    /**
-     * Update migration status
-     *
-     * @param string $migration
-     * @param int $batch
-     * @return void
-     * @throws ConnectionException|QueryBuilderException
-     */
-    private function updateMigrationStatus(string $migration, int $batch): void
-    {
-        $table = $this->getMigrationTable();
-
-        $table->where('migration', $migration)->update([
-            'migration' => $migration,
-            'batch' => $batch
-        ]);
-    }
-
-    /**
-     * Check the migration existence
-     *
-     * @param string $migration
-     * @return bool
-     * @throws ConnectionException|QueryBuilderException
-     */
-    private function checkIfMigrationExist(string $migration): bool
-    {
-        $result = $this->getMigrationTable()
-            ->where('migration', $migration)
-            ->first();
-
-        return !is_null($result);
-    }
-
-    /**
-     * Get migration table
-     *
-     * @return QueryBuilder
-     * @throws ConnectionException
-     */
-    private function getMigrationTable(): QueryBuilder
-    {
-        $migration_status_table = config('database.migration', 'migrations');
-
-        return db_table($migration_status_table);
-    }
-
-    /**
-     * Get migration pattern
-     *
-     * @return array
-     */
-    private function getMigrationFiles(): array
-    {
-        $file_pattern = $this->setting->getMigrationDirectory() . strtolower("/*.php");
-
-        return glob($file_pattern);
-    }
-
-    /**
-     * Create a migration command
-     *
-     * @param string $model
-     *
-     * @return void
-     * @throws \ErrorException
-     */
-    public function generate(string $model): void
-    {
-        $create_at = date("YmdHis");
-        $filename = sprintf("Version%s%s", $create_at, ucfirst(Str::camel($model)));
-
-        $generator = new Generator(
-            $this->setting->getMigrationDirectory(),
-            $filename
-        );
-
-        $parameters = $this->arg->getParameters();
-
-        if ($parameters->has('--create') && $parameters->has('--table')) {
-            $this->throwFailsCommand('bad command', 'add help');
-        }
-
-        $type = "model/standard";
-
-        if ($parameters->has('--table')) {
-            if ($parameters->get('--table') === true) {
-                $this->throwFailsCommand('bad command option [--table=table]', 'add help');
-            }
-
-            $table = $parameters->get('--table');
-
-            $type = 'model/table';
-        } elseif ($parameters->has('--create')) {
-            if ($parameters->get('--create') === true) {
-                $this->throwFailsCommand('bad command option [--create=table]', 'add help');
-            }
-
-            $table = $parameters->get('--create');
-
-            $type = 'model/create';
-        }
-
-        $generator->write($type, [
-            'table' => $table ?? 'table_name',
-            'className' => $filename
-        ]);
-
-        // Print console information
-        echo Color::green('The migration file has been successfully created') . "\n";
     }
 }

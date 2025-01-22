@@ -4,38 +4,15 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
-use ErrorException;
 use ForceUTF8\Encoding;
 use Ramsey\Uuid\Uuid;
 
 class Str
 {
     /**
-     * upper case
-     *
-     * @param string $str
-     * @return string
-     */
-    public static function upper(string $str): string
-    {
-        return mb_strtoupper($str, 'UTF-8');
-    }
-
-    /**
-     * lower case
-     *
-     * @param string $str
-     * @return string
-     */
-    public static function lower(string $str): string
-    {
-        return mb_strtolower($str, 'UTF-8');
-    }
-
-    /**
      * camel
      *
-     * @param  string $str
+     * @param string $str
      * @return string
      */
     public static function camel(string $str): string
@@ -59,8 +36,8 @@ class Str
     /**
      * Snake case
      *
-     * @param  string $str
-     * @param  string $delimiter
+     * @param string $str
+     * @param string $delimiter
      * @return string
      */
     public static function snake(string $str, string $delimiter = '_'): string
@@ -72,6 +49,17 @@ class Str
         }, $str));
 
         return trim(preg_replace('/' . $delimiter . '{2,}/', $delimiter, $str), $delimiter);
+    }
+
+    /**
+     * lower case
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function lower(string $str): string
+    {
+        return mb_strtolower($str, 'UTF-8');
     }
 
     /**
@@ -117,29 +105,14 @@ class Str
     }
 
     /**
-     * split
+     * Len
      *
-     * @param string $pattern
      * @param string $str
-     * @param int|null $limit
-     * @return array
-     */
-    public static function split(string $pattern, string $str, ?int $limit = null): array
-    {
-        return mb_split($pattern, $str, $limit);
-    }
-
-    /**
-     * Get the string position
-     *
-     * @param string $search
-     * @param string $string
-     * @param int $offset
      * @return int
      */
-    public static function pos(string $search, string $string, int $offset = 0): int
+    public static function len(string $str): int
     {
-        return mb_strpos($string, $search, $offset, 'UTF-8');
+        return mb_strlen($str, 'UTF-8');
     }
 
     /**
@@ -155,7 +128,20 @@ class Str
             return true;
         }
 
-        return (bool) static::pos($search, $str);
+        return (bool)static::pos($search, $str);
+    }
+
+    /**
+     * Get the string position
+     *
+     * @param string $search
+     * @param string $string
+     * @param int $offset
+     * @return int
+     */
+    public static function pos(string $search, string $string, int $offset = 0): int
+    {
+        return mb_strpos($string, $search, $offset, 'UTF-8');
     }
 
     /**
@@ -183,17 +169,6 @@ class Str
     }
 
     /**
-     * Len
-     *
-     * @param string $str
-     * @return int
-     */
-    public static function len(string $str): int
-    {
-        return mb_strlen($str, 'UTF-8');
-    }
-
-    /**
      * Wordily
      *
      * @param string $str
@@ -203,6 +178,31 @@ class Str
     public static function wordily(string $str, string $sep = ' '): array
     {
         return static::split($sep, $str, static::count($sep, $str));
+    }
+
+    /**
+     * split
+     *
+     * @param string $pattern
+     * @param string $str
+     * @param int|null $limit
+     * @return array
+     */
+    public static function split(string $pattern, string $str, ?int $limit = null): array
+    {
+        return mb_split($pattern, $str, $limit);
+    }
+
+    /**
+     * Returns the number of characters in a string.
+     *
+     * @param string $pattern
+     * @param string $str
+     * @return int
+     */
+    public static function count(string $pattern, string $str): int
+    {
+        return count(explode($pattern, $str)) - 1;
     }
 
     /**
@@ -239,6 +239,18 @@ class Str
     }
 
     /**
+     * Alias of slugify
+     *
+     * @param string $str
+     * @param string $delimiter
+     * @return string
+     */
+    public static function slug(string $str, string $delimiter = '-'): string
+    {
+        return static::slugify($str, $delimiter);
+    }
+
+    /**
      * slugify slug creator using a simple chain.
      * eg: 'I am a string of character' => 'i-am-a-chain-of-character'
      *
@@ -258,15 +270,14 @@ class Str
     }
 
     /**
-     * Alias of slugify
+     * Alias of un-slugify
      *
      * @param string $str
-     * @param string $delimiter
      * @return string
      */
-    public static function slug(string $str, string $delimiter = '-'): string
+    public static function unSlug(string $str): string
     {
-        return static::slugify($str, $delimiter);
+        return static::unSlugify($str);
     }
 
     /**
@@ -278,17 +289,6 @@ class Str
     public static function unSlugify(string $str): string
     {
         return preg_replace('/[^a-z0-9]/', ' ', strtolower(trim(strip_tags($str))));
-    }
-
-    /**
-     * Alias of un-slugify
-     *
-     * @param string $str
-     * @return string
-     */
-    public static function unSlug(string $str): string
-    {
-        return static::unSlugify($str);
     }
 
     /**
@@ -307,7 +307,7 @@ class Str
             return false;
         }
 
-        return (bool) filter_var($email, FILTER_VALIDATE_EMAIL);
+        return (bool)filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
     /**
@@ -321,7 +321,7 @@ class Str
      */
     public static function isDomain(string $domain): bool
     {
-        return (bool) preg_match(
+        return (bool)preg_match(
             '/^((https?|ftps?|ssl|url|git):\/\/)?[a-zA-Z0-9-_.]+\.[a-z]{2,6}$/',
             $domain
         );
@@ -335,7 +335,7 @@ class Str
      */
     public static function isAlphaNum(string $str): bool
     {
-        return (bool) preg_match('/^[a-zA-Z0-9]+$/', $str);
+        return (bool)preg_match('/^[a-zA-Z0-9]+$/', $str);
     }
 
     /**
@@ -346,7 +346,7 @@ class Str
      */
     public static function isNumeric(string $str): bool
     {
-        return (bool) preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
+        return (bool)preg_match('/^[0-9]+(\.[0-9]+)?$/', $str);
     }
 
     /**
@@ -357,7 +357,7 @@ class Str
      */
     public static function isAlpha(string $str): bool
     {
-        return (bool) preg_match('/^[a-zA-Z]+$/', $str);
+        return (bool)preg_match('/^[a-zA-Z]+$/', $str);
     }
 
     /**
@@ -368,13 +368,13 @@ class Str
      */
     public static function isSlug(string $str): bool
     {
-        return (bool) preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
+        return (bool)preg_match('/^[a-z0-9-]+[a-z0-9]+$/', $str);
     }
 
     /**
      * Check if the string is in uppercase
      *
-     * @param  string $str
+     * @param string $str
      * @return bool
      */
     public static function isUpper(string $str): bool
@@ -383,26 +383,25 @@ class Str
     }
 
     /**
+     * upper case
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function upper(string $str): string
+    {
+        return mb_strtoupper($str, 'UTF-8');
+    }
+
+    /**
      * Check if the string is lowercase
      *
-     * @param  string $str
+     * @param string $str
      * @return bool
      */
     public static function isLower(string $str): bool
     {
         return static::lower($str) === $str;
-    }
-
-    /**
-     * Returns the number of characters in a string.
-     *
-     * @param string $pattern
-     * @param string $str
-     * @return int
-     */
-    public static function count(string $pattern, string $str): int
-    {
-        return count(explode($pattern, $str)) - 1;
     }
 
     /**
@@ -487,7 +486,7 @@ class Str
      * __call
      *
      * @param string $method
-     * @param  array  $arguments
+     * @param array $arguments
      * @return mixed
      */
     public function __call(string $method, array $arguments = [])
