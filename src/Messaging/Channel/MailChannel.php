@@ -17,8 +17,7 @@ class MailChannel implements ChannelInterface
      */
     public function __construct(
         private readonly Message $message
-    )
-    {
+    ) {
     }
 
     /**
