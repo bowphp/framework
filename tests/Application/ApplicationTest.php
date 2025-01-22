@@ -95,7 +95,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         // Response mock method
         $response->allows()->addHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status(200);
-        $response->allows()->send('work');
+        $response->allows()->send('work', 200);
 
         // Request mock method
         $request->allows()->method()->andReturns("GET");
