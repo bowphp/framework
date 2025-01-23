@@ -466,7 +466,7 @@ if (!function_exists('csrf_time_is_expired')) {
     }
 }
 
-if (!function_exists('json')) {
+if (!function_exists('response_json')) {
     /**
      * Make json response
      *
@@ -475,13 +475,13 @@ if (!function_exists('json')) {
      * @param array $headers
      * @return string
      */
-    function json(array|object $data, int $code = 200, array $headers = []): string
+    function response_json(array|object $data, int $code = 200, array $headers = []): string
     {
         return response()->json($data, $code, $headers);
     }
 }
 
-if (!function_exists('download')) {
+if (!function_exists('response_download')) {
     /**
      * Download file
      *
@@ -490,7 +490,7 @@ if (!function_exists('download')) {
      * @param array $headers
      * @return string
      */
-    function download(string $file, ?string $filename = null, array $headers = []): string
+    function response_download(string $file, ?string $filename = null, array $headers = []): string
     {
         return response()->download($file, $filename, $headers);
     }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Bow\Http;
 
-use Bow\Contracts\ResponseInterface;
-use Bow\View\View;
 use stdClass;
+use Bow\View\View;
+use Bow\Http\HttpStatus;
+use Bow\Http\ServerAccessControl;
+use Bow\Contracts\ResponseInterface;
 
 class Response implements ResponseInterface
 {
