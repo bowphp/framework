@@ -16,16 +16,16 @@ class DatabaseChannel implements ChannelInterface
     /**
      * Send the notification to database
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @return void
      */
-    public function send(Model $notifiable): void
+    public function send(Model $context): void
     {
         Database::table('notifications')->insert([
             'id' => str_uuid(),
             'data' => $this->database['data'],
-            'concern_id' => $notifiable->getKey(),
-            'concern_type' => get_class($notifiable),
+            'concern_id' => $context->getKey(),
+            'concern_type' => get_class($context),
             'type' => $this->database['type'],
         ]);
     }

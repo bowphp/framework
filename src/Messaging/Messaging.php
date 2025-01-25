@@ -3,7 +3,7 @@
 namespace Bow\Messaging;
 
 use Bow\Database\Barry\Model;
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 use Bow\Messaging\Channel\DatabaseChannel;
 use Bow\Messaging\Channel\MailChannel;
 
@@ -22,21 +22,21 @@ abstract class Messaging
     /**
      * Send notification to mail
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @return Message|null
      */
-    public function toMail(Model $notifiable): ?Message
+    public function toMail(Model $context): ?Envelop
     {
-        return new Message();
+        return null;
     }
 
     /**
      * Send notification to database
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @return array
      */
-    public function toDatabase(Model $notifiable): array
+    public function toDatabase(Model $context): array
     {
         return [];
     }
@@ -44,28 +44,28 @@ abstract class Messaging
     /**
      * Send notification to sms
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @return array
      */
-    public function toSms(Model $notifiable): array
+    public function toSms(Model $context): array
     {
         return [];
     }
 
     /**
      * Process the notification
-     * @param Model $notifiable
+     * @param Model $context
      * @return void
      */
-    final function process(Model $notifiable): void
+    final function process(Model $context): void
     {
-        $channels = $this->channels($notifiable);
+        $channels = $this->channels($context);
 
         foreach ($channels as $channel) {
             if (array_key_exists($channel, $this->channels)) {
-                $result = $this->{"to" . ucfirst($channel)}($notifiable);
+                $result = $this->{"to" . ucfirst($channel)}($context);
                 $target_channel = new $this->channels[$channel]($result);
-                $target_channel->send($notifiable);
+                $target_channel->send($context);
             }
         }
     }
@@ -73,8 +73,8 @@ abstract class Messaging
     /**
      * Returns the available channels to be used
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @return array
      */
-    abstract public function channels(Model $notifiable): array;
+    abstract public function channels(Model $context): array;
 }

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Bow\Mail\Contracts;
 
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 
 interface MailDriverInterface
 {
     /**
      * Send mail by any driver
      *
-     * @param Message $message
+     * @param Envelop $envelop
      * @return bool
      */
-    public function send(Message $message): bool;
+    public function send(Envelop $envelop): bool;
 }
