@@ -39,8 +39,10 @@ class Console
     private const ADD_ACTION = [
         'middleware', 'controller', 'model', 'validation',
         'seeder', 'migration', 'configuration', 'service',
-        'exception', 'event', 'producer', 'command', 'listener'
+        'exception', 'event', 'producer', 'command', 'listener',
+        'message'
     ];
+
     /**
      * The custom command registers
      *
@@ -281,7 +283,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:listener\033[00m        Create a new event listener
    \033[0;33madd:producer\033[00m        Create a new producer
    \033[0;33madd:command\033[00m         Create a new bow console command
-   \033[0;33madd:messaging\033[00m       Create a new bow messaging
+   \033[0;33madd:message\033[00m         Create a new bow messaging
 
  \033[0;32mMIGRATION\033[00m apply a migration in user model
    \033[0;33mmigration:migrate\033[00m   Make migration
@@ -337,7 +339,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                For create a new event listener
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:producer name             For create a new queue producer
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              For create a new bow console command
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:messaging name            For create a new bow messaging
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:message name              For create a new bow messaging
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
 
 U;
