@@ -1,12 +1,12 @@
 <?php
 
-namespace Bow\Mail;
+namespace Bow\Messaging;
 
+use Bow\Database\Barry\Model;
 use Bow\Queue\ProducerService;
-use Bow\View\View;
 use Throwable;
 
-class MailQueueProducer extends ProducerService
+class MessagingQueueProducer extends ProducerService
 {
     /**
      * The message bag
@@ -16,23 +16,20 @@ class MailQueueProducer extends ProducerService
     private array $bags = [];
 
     /**
-     * MailQueueProducer constructor
+     * MessagingQueueProducer constructor
      *
-     * @param string $view
-     * @param array $data
-     * @param Message $message
+     * @param Model $notifiable
+     * @param Messaging $message
      */
     public function __construct(
-        string $view,
-        array $data,
-        Message $message
+        Model $notifiable,
+        Messaging $message,
     ) {
         parent::__construct();
 
         $this->bags = [
-            "view" => $view,
-            "data" => $data,
             "message" => $message,
+            "notifiable" => $notifiable,
         ];
     }
 
@@ -43,13 +40,8 @@ class MailQueueProducer extends ProducerService
      */
     public function process(): void
     {
-        $message = $this->bags["message"];
-
-        $message->setMessage(
-            View::parse($this->bags["view"], $this->bags["data"])->getContent()
-        );
-
-        Mail::getInstance()->send($message);
+        $message = $this->bags['message'];
+        $message->process($this->bags['notifiable']);
     }
 
     /**

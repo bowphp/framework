@@ -6,9 +6,9 @@ use Bow\Configuration\LoggerConfiguration;
 use Bow\Mail\MailConfiguration;
 use Bow\Mail\MailQueueProducer;
 use Bow\Mail\Message;
+use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Queue\Connection as QueueConnection;
 use Bow\View\ViewConfiguration;
 
 class MailQueueTest extends PHPUnit\Framework\TestCase

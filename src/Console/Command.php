@@ -55,7 +55,7 @@ class Command extends AbstractCommand
             "listener" => EventListenerCommand::class,
             "producer" => ProducerCommand::class,
             "command" => ConsoleCommand::class,
-            "messaging" => MessagingCommand::class,
+            "message" => MessagingCommand::class,
         ],
         "generator" => [
             "key" => GenerateKeyCommand::class,

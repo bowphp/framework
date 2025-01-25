@@ -486,4 +486,18 @@ class Message
     {
         return $this->fromDefined;
     }
+
+    /**
+     * Set the view build
+     *
+     * @param string $view
+     * @param array $data
+     * @return $this
+     */
+    public function view(string $view, array $data = []): Message
+    {
+        $this->message(view($view, $data)->getContent());
+
+        return $this;
+    }
 }

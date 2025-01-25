@@ -161,7 +161,7 @@ class Mail
      * @param callable $cb
      * @return void
      */
-    public static function queue(string $template, array $data, callable $cb)
+    public static function queue(string $template, array $data, callable $cb): void
     {
         $message = new Message();
 
