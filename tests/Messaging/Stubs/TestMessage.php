@@ -3,7 +3,7 @@
 namespace Bow\Tests\Messaging\Stubs;
 
 use Bow\Database\Barry\Model;
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 use Bow\Messaging\Messaging;
 
 class TestMessage extends Messaging
@@ -13,9 +13,9 @@ class TestMessage extends Messaging
         return ['mail', 'database'];
     }
 
-    public function toMail(Model $context): Message
+    public function toMail(Model $context): Envelop
     {
-        return (new Message())
+        return (new Envelop())
             ->to('test@example.com')
             ->subject('Test Message')
             ->view('test-view');

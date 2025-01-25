@@ -3,7 +3,7 @@
 namespace Bow\Tests\Messaging;
 
 use Bow\Database\Barry\Model;
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 use Bow\Messaging\MessagingQueueProducer;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Tests\Messaging\Stubs\TestMessage;
@@ -129,7 +129,7 @@ class MessagingTest extends TestCase
 
         $mailMessage = $message->toMail($context);
 
-        $this->assertInstanceOf(Message::class, $mailMessage);
+        $this->assertInstanceOf(Envelop::class, $mailMessage);
         $this->assertEquals('test@example.com', $mailMessage->getTo());
         $this->assertEquals('Test Message', $mailMessage->getSubject());
     }
