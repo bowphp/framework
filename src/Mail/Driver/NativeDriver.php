@@ -6,7 +6,7 @@ namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Exception\MailException;
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 use InvalidArgumentException;
 
 class NativeDriver implements MailDriverInterface
@@ -35,7 +35,7 @@ class NativeDriver implements MailDriverInterface
         $this->config = $config;
 
         if (count($config) > 0) {
-            $this->from = $this->config["froms"][$config["default"]];
+            $this->from = $this->config["from"][$config["default"]];
         }
     }
 
@@ -63,30 +63,30 @@ class NativeDriver implements MailDriverInterface
     /**
      * Implement send email
      *
-     * @param Message $message
+     * @param Envelop $envelop
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function send(Message $message): bool
+    public function send(Envelop $envelop): bool
     {
-        if (empty($message->getTo()) || empty($message->getSubject()) || empty($message->getMessage())) {
+        if (empty($envelop->getTo()) || empty($envelop->getSubject()) || empty($envelop->getMessage())) {
             throw new InvalidArgumentException(
-                "An error has occurred. The sender or the message or object omits.",
+                "An error has occurred. The sender or the env$envelop or object omits.",
                 E_USER_ERROR
             );
         }
 
-        if (!$message->fromIsDefined()) {
+        if (!$envelop->fromIsDefined()) {
             if (isset($this->from["address"])) {
-                $message->from($this->from["address"], $this->from["name"] ?? null);
+                $envelop->from($this->from["address"], $this->from["name"] ?? null);
             }
         }
 
         $to = '';
 
-        $message->setDefaultHeader();
+        $envelop->setDefaultHeader();
 
-        foreach ($message->getTo() as $value) {
+        foreach ($envelop->getTo() as $value) {
             if ($value[0] !== null) {
                 $to .= $value[0] . ' <' . $value[1] . '>';
             } else {
@@ -94,13 +94,13 @@ class NativeDriver implements MailDriverInterface
             }
         }
 
-        $headers = $message->compileHeaders();
+        $headers = $envelop->compileHeaders();
 
-        $headers .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
-        $headers .= 'Content-Transfer-Encoding: 8bit' . Message::END;
+        $headers .= 'Content-Type: ' . $envelop->getType() . '; charset=' . $envelop->getCharset() . Envelop::END;
+        $headers .= 'Content-Transfer-Encoding: 8bit' . Envelop::END;
 
         // Send email use the php native function
-        $status = @mail($to, $message->getSubject(), $message->getMessage(), $headers);
+        $status = @mail($to, $envelop->getSubject(), $envelop->getMessage(), $headers);
 
         return (bool)$status;
     }

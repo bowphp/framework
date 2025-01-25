@@ -7,9 +7,8 @@ namespace Bow\Mail\Driver;
 use Bow\Mail\Contracts\MailDriverInterface;
 use Bow\Mail\Exception\SmtpException;
 use Bow\Mail\Exception\SocketException;
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 use ErrorException;
-use resource;
 
 class SmtpDriver implements MailDriverInterface
 {
@@ -96,25 +95,25 @@ class SmtpDriver implements MailDriverInterface
     /**
      * Start sending mail
      *
-     * @param Message $message
+     * @param Envelop $envelop
      * @return bool
      * @throws SocketException
      * @throws ErrorException
      */
-    public function send(Message $message): bool
+    public function send(Envelop $envelop): bool
     {
         $this->connection();
 
         $error = true;
 
         // SMTP command
-        if ($message->getFrom() !== null) {
-            $this->write('MAIL FROM: <' . $message->getFrom() . '>', 250);
+        if ($envelop->getFrom() !== null) {
+            $this->write('MAIL FROM: <' . $envelop->getFrom() . '>', 250);
         } elseif ($this->username !== null) {
             $this->write('MAIL FROM: <' . $this->username . '>', 250);
         }
 
-        foreach ($message->getTo() as $value) {
+        foreach ($envelop->getTo() as $value) {
             if ($value[0] !== null) {
                 $to = $value[0] . '<' . $value[1] . '>';
             } else {
@@ -124,15 +123,15 @@ class SmtpDriver implements MailDriverInterface
             $this->write('RCPT TO: ' . $to, 250);
         }
 
-        $message->setDefaultHeader();
+        $envelop->setDefaultHeader();
 
         $this->write('DATA', 354);
 
-        $data = 'Subject: ' . $message->getSubject() . Message::END;
-        $data .= $message->compileHeaders();
-        $data .= 'Content-Type: ' . $message->getType() . '; charset=' . $message->getCharset() . Message::END;
-        $data .= 'Content-Transfer-Encoding: 8bit' . Message::END;
-        $data .= Message::END . $message->getMessage() . Message::END;
+        $data = 'Subject: ' . $envelop->getSubject() . Envelop::END;
+        $data .= $envelop->compileHeaders();
+        $data .= 'Content-Type: ' . $envelop->getType() . '; charset=' . $envelop->getCharset() . Envelop::END;
+        $data .= 'Content-Transfer-Encoding: 8bit' . Envelop::END;
+        $data .= Envelop::END . $envelop->getMessage() . Envelop::END;
 
         $this->write($data);
 
@@ -243,17 +242,17 @@ class SmtpDriver implements MailDriverInterface
      *
      * @param string $command
      * @param ?int $code
-     * @param ?string $message
+     * @param ?string $envelop
      * @return int|null
      * @throws SmtpException
      */
-    private function write(string $command, ?int $code = null, ?string $message = null): ?int
+    private function write(string $command, ?int $code = null, ?string $envelop = null): ?int
     {
-        if ($message == null) {
-            $message = $command;
+        if ($envelop == null) {
+            $envelop = $command;
         }
 
-        $command = $command . Message::END;
+        $command = $command . Envelop::END;
 
         fwrite($this->sock, $command, strlen($command));
 
@@ -267,7 +266,7 @@ class SmtpDriver implements MailDriverInterface
 
         if (!in_array($response, (array)$code)) {
             throw new SmtpException(
-                sprintf('SMTP server did not accept %s with code [%s]', $message, $response),
+                sprintf('SMTP server did not accept %s with code [%s]', $envelop, $response),
                 E_ERROR
             );
         }

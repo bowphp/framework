@@ -6,7 +6,7 @@ namespace Bow\Mail\Driver;
 
 use Aws\Ses\SesClient;
 use Bow\Mail\Contracts\MailDriverInterface;
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 
 class SesDriver implements MailDriverInterface
 {
@@ -52,37 +52,37 @@ class SesDriver implements MailDriverInterface
     }
 
     /**
-     * Send message
+     * Send env$envelop
      *
-     * @param Message $message
+     * @param Envelop $envelop
      * @return bool
      */
-    public function send(Message $message): bool
+    public function send(Envelop $envelop): bool
     {
         $body = [];
 
-        if ($message->getType() == "text/html") {
+        if ($envelop->getType() == "text/html") {
             $type = "Html";
         } else {
             $type = "Text";
         }
 
         $body[$type] = [
-            'Charset' => $message->getCharset(),
-            'Data' => $message->getMessage(),
+            'Charset' => $envelop->getCharset(),
+            'Data' => $envelop->getMessage(),
         ];
 
         $subject = [
-            'Charset' => $message->getCharset(),
-            'Data' => $message->getSubject(),
+            'Charset' => $envelop->getCharset(),
+            'Data' => $envelop->getSubject(),
         ];
 
         $email = [
             'Destination' => [
-                'ToAddresses' => $message->getTo(),
+                'ToAddresses' => $envelop->getTo(),
             ],
-            'Source' => $message->getFrom(),
-            'Message' => [
+            'Source' => $envelop->getFrom(),
+            'Envelop' => [
                 'Body' => $body,
                 'Subject' => $subject,
             ],

@@ -3,6 +3,7 @@
 namespace {baseNamespace}{namespace};
 
 use Bow\Database\Barry\Model;
+use Bow\Mail\Envelop;
 use Bow\Messaging\Messaging;
 
 class {className} extends Messaging
@@ -22,11 +23,11 @@ class {className} extends Messaging
      * Send notification to mail
      *
      * @param Model $notifiable
-     * @return Message|null
+     * @return Envelop|null
      */
-    public function toMail(Model $notifiable): ?Message
+    public function toMail(Model $notifiable): ?Envelop
     {
-        return (new Message());
+        return (new Envelop());
     }
 
     /**

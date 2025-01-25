@@ -8,7 +8,7 @@ use Bow\Mail\Exception\MailException;
 use Bow\Support\Str;
 use InvalidArgumentException;
 
-class Message
+class Envelop
 {
     /**
      * The mail end of line
@@ -88,7 +88,7 @@ class Message
     private bool $fromDefined = false;
 
     /**
-     * Message Constructor.
+     * Envelop Constructor.
      *
      * @param bool $boundary
      */
@@ -144,9 +144,9 @@ class Message
      * @param string $to
      * @param ?string $name
      *
-     * @return Message
+     * @return Envelop
      */
-    public function to(string $to, ?string $name = null): Message
+    public function to(string $to, ?string $name = null): Envelop
     {
         $this->to[] = $this->formatEmail($to, $name);
 
@@ -184,7 +184,7 @@ class Message
      * @param array $recipients
      * @return $this
      */
-    public function toList(array $recipients): Message
+    public function toList(array $recipients): Envelop
     {
         foreach ($recipients as $name => $to) {
             $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
@@ -197,10 +197,10 @@ class Message
      * Add an attachment file
      *
      * @param string $file
-     * @return Message
+     * @return Envelop
      * @throws MailException
      */
-    public function addFile(string $file): Message
+    public function addFile(string $file): Envelop
     {
         if (!is_file($file)) {
             throw new MailException("The $file file was not found.", E_USER_ERROR);
@@ -240,9 +240,9 @@ class Message
      * Define the subject of the mail
      *
      * @param string $subject
-     * @return Message
+     * @return Envelop
      */
-    public function subject(string $subject): Message
+    public function subject(string $subject): Envelop
     {
         $this->subject = $subject;
 
@@ -254,9 +254,9 @@ class Message
      *
      * @param string $from
      * @param ?string $name
-     * @return Message
+     * @return Envelop
      */
-    public function from(string $from, ?string $name = null): Message
+    public function from(string $from, ?string $name = null): Envelop
     {
         $this->from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
 
@@ -267,9 +267,9 @@ class Message
      * Define the type of content in text/html
      *
      * @param string $html
-     * @return Message
+     * @return Envelop
      */
-    public function html(string $html): Message
+    public function html(string $html): Envelop
     {
         return $this->type($html, "text/html");
     }
@@ -279,9 +279,9 @@ class Message
      *
      * @param string $message
      * @param string $type
-     * @return Message
+     * @return Envelop
      */
-    private function type(string $message, string $type): Message
+    private function type(string $message, string $type): Envelop
     {
         $this->type = $type;
 
@@ -294,9 +294,9 @@ class Message
      * Add message body
      *
      * @param string $text
-     * @return Message
+     * @return Envelop
      */
-    public function text(string $text): Message
+    public function text(string $text): Envelop
     {
         $this->type($text, "text/plain");
 
@@ -309,9 +309,9 @@ class Message
      * @param string $mail
      * @param ?string $name
      *
-     * @return Message
+     * @return Envelop
      */
-    public function addBcc(string $mail, ?string $name = null): Message
+    public function addBcc(string $mail, ?string $name = null): Envelop
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -326,9 +326,9 @@ class Message
      * @param string $mail
      * @param ?string $name
      *
-     * @return Message
+     * @return Envelop
      */
-    public function addCc(string $mail, ?string $name = null): Message
+    public function addCc(string $mail, ?string $name = null): Envelop
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -342,9 +342,9 @@ class Message
      *
      * @param string $mail
      * @param ?string $name
-     * @return Message
+     * @return Envelop
      */
-    public function addReplyTo(string $mail, ?string $name = null): Message
+    public function addReplyTo(string $mail, ?string $name = null): Envelop
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -359,9 +359,9 @@ class Message
      * @param string $mail
      * @param ?string $name = null
      *
-     * @return Message
+     * @return Envelop
      */
-    public function addReturnPath(string $mail, ?string $name = null): Message
+    public function addReturnPath(string $mail, ?string $name = null): Envelop
     {
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
@@ -375,9 +375,9 @@ class Message
      *
      * @param int $priority
      *
-     * @return Message
+     * @return Envelop
      */
-    public function addPriority(int $priority): Message
+    public function addPriority(int $priority): Envelop
     {
         $this->headers[] = "X-Priority: " . (int)$priority;
 
@@ -387,7 +387,7 @@ class Message
     /**
      * @param string $message
      * @param string $type
-     * @see setMessage
+     * @see setEnvelop
      */
     public function message(string $message, string $type = 'text/html'): void
     {
@@ -494,7 +494,7 @@ class Message
      * @param array $data
      * @return $this
      */
-    public function view(string $view, array $data = []): Message
+    public function view(string $view, array $data = []): Envelop
     {
         $this->message(view($view, $data)->getContent());
 

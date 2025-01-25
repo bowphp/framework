@@ -117,15 +117,15 @@ class Mail
     {
         $to = (array)$to;
 
-        $message = new Message();
+        $envelop = new Envelop();
 
-        $message->toList($to)->subject($subject)->setMessage($data);
+        $envelop->toList($to)->subject($subject)->setMessage($data);
 
         foreach ($headers as $key => $value) {
-            $message->addHeader($key, $value);
+            $envelop->addHeader($key, $value);
         }
 
-        return static::$instance->send($message);
+        return static::$instance->send($envelop);
     }
 
     /**
@@ -145,16 +145,16 @@ class Mail
 
         $content = View::parse($view, $data)->getContent();
 
-        $message = new Message();
-        $message->setMessage($content);
+        $envelop = new Envelop();
+        $envelop->setMessage($content);
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        return static::$instance->send($message);
+        return static::$instance->send($envelop);
     }
 
     /**
-     * Send message on queue
+     * Send env on queue
      *
      * @param string $template
      * @param array $data
@@ -163,17 +163,17 @@ class Mail
      */
     public static function queue(string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         queue($producer);
     }
 
     /**
-     * Send message on specific queue
+     * Send env on specific queue
      *
      * @param string $queue
      * @param string $template
@@ -183,11 +183,11 @@ class Mail
      */
     public static function queueOn(string $queue, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setQueue($queue);
 
@@ -205,11 +205,11 @@ class Mail
      */
     public static function later(int $delay, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setDelay($delay);
 
@@ -228,11 +228,11 @@ class Mail
      */
     public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setQueue($queue);
         $producer->setDelay($delay);
