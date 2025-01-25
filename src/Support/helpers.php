@@ -1251,6 +1251,7 @@ if (!function_exists('auth')) {
     /**
      * Recovery of the guard
      *
+     * @deprecated
      * @param string|null $guard
      * @return GuardContract
      * @throws AuthenticationException
