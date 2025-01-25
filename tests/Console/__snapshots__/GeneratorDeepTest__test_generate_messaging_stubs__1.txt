@@ -1,11 +1,11 @@
 <?php
 
-namespace {baseNamespace}{namespace};
+namespace App\Messages;
 
 use Bow\Database\Barry\Model;
 use Bow\Messaging\Messaging;
 
-class {className} extends Messaging
+class WelcomeMessage extends Messaging
 {
     /**
      * Returns the available channels to be used

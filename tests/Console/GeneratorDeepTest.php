@@ -301,4 +301,21 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertMatchesRegularExpression('@public\sfunction\sstore\(Request\s\$request\)@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\sdestroy\(Request\s\$request,\smixed\s\$id\)@', $content);
     }
+
+    public function test_generate_messaging_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'WelcomeMessage');
+        $content = $generator->makeStubContent('messaging', [
+            "className" => "WelcomeMessage",
+            "baseNamespace" => "App\\",
+            "namespace" => "Messages"
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertMatchesRegularExpression('@\nclass\sWelcomeMessage\sextends\sMessaging\n@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\schannels\(Model\s\$notifiable\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\stoMail\(Model\s\$notifiable\)@', $content);
+        $this->assertMatchesRegularExpression('@public\sfunction\stoDatabase\(Model\s\$notifiable\)@', $content);
+    }
 }
