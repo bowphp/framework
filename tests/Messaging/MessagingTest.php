@@ -2,19 +2,17 @@
 
 namespace Bow\Tests\Messaging;
 
-use Bow\View\View;
-use Bow\Mail\Envelop;
 use Bow\Database\Barry\Model;
-use PHPUnit\Framework\TestCase;
+use Bow\Mail\Envelop;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Messaging\Stubs\TestMessage;
-use Bow\Queue\Connection as QueueConnection;
-use PHPUnit\Framework\MockObject\MockObject;
 use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
+use Bow\View\View;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 class MessagingTest extends TestCase
 {
-    private static QueueConnection $queueConnection;
     private MockObject|Model $context;
     private MockObject|TestMessage $message;
 
@@ -26,14 +24,6 @@ class MessagingTest extends TestCase
         $config = TestingConfiguration::getConfig();
 
         View::configure($config["view"]);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->context = new TestNotifiableModel();
-        $this->message = $this->createMock(TestMessage::class);
     }
 
     public function test_can_send_message_synchronously(): void
@@ -61,9 +51,10 @@ class MessagingTest extends TestCase
         $message = new TestMessage();
 
         $mailMessage = $message->toMail($context);
+        [$email] = $mailMessage->getTo();
 
         $this->assertInstanceOf(Envelop::class, $mailMessage);
-        $this->assertEquals('test@example.com', $mailMessage->getTo());
+        $this->assertEquals('test@example.com', $email[1]);
         $this->assertEquals('Test Message', $mailMessage->getSubject());
     }
 
@@ -123,5 +114,13 @@ class MessagingTest extends TestCase
         $this->assertEquals('123456789', $data['chat_id']);
         $this->assertEquals('Test Telegram message', $data['message']);
         $this->assertEquals('HTML', $data['parse_mode']);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->context = new TestNotifiableModel();
+        $this->message = $this->createMock(TestMessage::class);
     }
 }

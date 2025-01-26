@@ -91,6 +91,9 @@ class User extends Model
 
 - `mail` : Envoi par email
 - `database` : Stockage en base de données
+- `sms` : Envoi par SMS avec Twilio
+- `slack` : Envoi par Slack
+- `telegram` : Envoi par Telegram
 - Possibilité d'ajouter des canaux personnalisés
 
 ## Bonnes pratiques
@@ -99,3 +102,36 @@ class User extends Model
 2. Utilisez les files d'attente pour les notifications non urgentes
 3. Personnalisez les canaux en fonction du contexte
 4. Utilisez les vues pour les templates d'emails 
+
+## Exemple de configuration
+
+```mermaid 
+sequenceDiagram
+    participant User as Utilisateur
+    participant Model as Modèle (User)
+    participant Message as WelcomeMessage
+    participant Mail as Canal Email
+    participant DB as Canal Database
+    participant Services as Services (SMTP/BDD)
+
+    Note over User,Services: Envoi d'une notification de bienvenue
+    
+    User->>Model: sendMessage(new WelcomeMessage("Bienvenue!"))
+    Model->>Message: process(context)
+    Message->>Message: channels(context)
+    
+    par Canal Email
+        Message->>Mail: toMail(context)
+        Mail->>Services: Envoie via SMTP
+        Services-->>User: Email reçu
+    and Canal Database
+        Message->>DB: toDatabase(context)
+        DB->>Services: Sauvegarde notification
+        Services-->>User: Notification in-app
+    end
+
+    Note over User,Services: Envoi asynchrone
+    User->>Model: setMessageQueue(new WelcomeMessage())
+    Model->>Services: Ajout à la file d'attente
+    Services-->>Model: Confirmation
+```

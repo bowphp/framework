@@ -2,20 +2,21 @@
 
 namespace Bow\Tests\Queue;
 
-use Bow\Database\Barry\Model;
-use Bow\Mail\MailConfiguration;
-use Bow\View\ViewConfiguration;
-use PHPUnit\Framework\TestCase;
 use Bow\Cache\CacheConfiguration;
-use Bow\Queue\QueueConfiguration;
 use Bow\Configuration\EnvConfiguration;
-use Bow\Messaging\MessagingQueueProducer;
 use Bow\Configuration\LoggerConfiguration;
+use Bow\Database\Barry\Model;
+use Bow\Database\DatabaseConfiguration;
+use Bow\Mail\MailConfiguration;
+use Bow\Messaging\MessagingQueueProducer;
+use Bow\Queue\Connection as QueueConnection;
+use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Messaging\Stubs\TestMessage;
-use Bow\Queue\Connection as QueueConnection;
-use PHPUnit\Framework\MockObject\MockObject;
 use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
+use Bow\View\ViewConfiguration;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 class MessagingQueueTest extends TestCase
 {
@@ -27,6 +28,7 @@ class MessagingQueueTest extends TestCase
     {
         TestingConfiguration::withConfigurations([
             CacheConfiguration::class,
+            DatabaseConfiguration::class,
             QueueConfiguration::class,
             EnvConfiguration::class,
             LoggerConfiguration::class,
@@ -38,14 +40,6 @@ class MessagingQueueTest extends TestCase
         $config->boot();
 
         static::$connection = new QueueConnection($config["queue"]);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->context = $this->createMock(TestNotifiableModel::class);
-        $this->message = $this->createMock(TestMessage::class);
     }
 
     public function test_can_send_message_synchronously(): void
@@ -120,5 +114,13 @@ class MessagingQueueTest extends TestCase
         $adapter->push($producer);
 
         $this->context->sendMessageLaterOn($delay, $queue, $this->message);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->context = $this->createMock(TestNotifiableModel::class);
+        $this->message = $this->createMock(TestMessage::class);
     }
 }

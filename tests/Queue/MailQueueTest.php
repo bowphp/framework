@@ -2,27 +2,29 @@
 
 namespace Bow\Tests\Queue;
 
+use Bow\Cache\CacheConfiguration;
+use Bow\Configuration\EnvConfiguration;
+use Bow\Configuration\LoggerConfiguration;
+use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\Envelop;
 use Bow\Mail\MailConfiguration;
 use Bow\Mail\MailQueueProducer;
+use Bow\Queue\Connection as QueueConnection;
+use Bow\Queue\QueueConfiguration;
+use Bow\Tests\Config\TestingConfiguration;
 use Bow\View\ViewConfiguration;
 use PHPUnit\Framework\TestCase;
-use Bow\Cache\CacheConfiguration;
-use Bow\Queue\QueueConfiguration;
-use Bow\Configuration\EnvConfiguration;
-use Bow\Configuration\LoggerConfiguration;
-use Bow\Tests\Config\TestingConfiguration;
-use Bow\Queue\Connection as QueueConnection;
 
 class MailQueueTest extends TestCase
 {
-    private static $connection;
+    private static QueueConnection $connection;
 
     public static function setUpBeforeClass(): void
     {
         TestingConfiguration::withConfigurations([
             CacheConfiguration::class,
             QueueConfiguration::class,
+            DatabaseConfiguration::class,
             EnvConfiguration::class,
             LoggerConfiguration::class,
             MailConfiguration::class,
