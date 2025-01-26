@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Cache\Adapter;
+namespace Bow\Cache\Adapters;
 
 use Bow\Database\Database;
 use Bow\Database\Exception\ConnectionException;

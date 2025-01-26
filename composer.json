@@ -1,7 +1,10 @@
 {
     "name": "bowphp/framework",
     "description": "The bow PHP Framework",
-    "keywords": ["framework", "bow"],
+    "keywords": [
+        "framework",
+        "bow"
+    ],
     "license": "MIT",
     "support": {
         "issues": "https://github.com/bowphp/framework/issues",

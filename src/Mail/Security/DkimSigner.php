@@ -140,7 +140,7 @@ class DkimSigner
         $signedHeaders = implode(':', array_map('strtolower', array_keys($headers)));
 
         return "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d={$domain}; s={$selector};\r\n" .
-               "\tt=" . time() . "; bh={$bodyHash};\r\n" .
-               "\th={$signedHeaders}; b={$signature};";
+            "\tt=" . time() . "; bh={$bodyHash};\r\n" .
+            "\th={$signedHeaders}; b={$signature};";
     }
 }

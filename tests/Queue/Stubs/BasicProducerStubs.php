@@ -8,7 +8,8 @@ class BasicProducerStubs extends ProducerService
 {
     public function __construct(
         private string $connection
-    ) {
+    )
+    {
     }
 
     public function process(): void

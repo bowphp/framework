@@ -40,6 +40,7 @@ This method aims to execute an SQL transaction around a passed arrow function.
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
 ```
+
 Ref: #255
 
 ## 5.1.0 - 2023-06-07

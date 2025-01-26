@@ -28,11 +28,38 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @param string $name
+     */
+    public function createTestingTable(string $name)
+    {
+        $connection = Database::connection($name);
+
+        if ($name == 'pgsql') {
+            $sql = 'create table pets (id serial primary key, name varchar(255))';
+        }
+
+        if ($name == 'sqlite') {
+            $sql = 'create table pets (id integer not null primary key autoincrement, name varchar(255))';
+        }
+
+        if ($name == 'mysql') {
+            $sql = 'create table pets (id int not null primary key auto_increment, name varchar(255))';
+        }
+
+        $connection->statement('drop table if exists pets');
+        $connection->statement($sql);
+        $connection->insert('insert into pets(name) values(:name)', [
+            ['name' => 'Couli'], ['name' => 'Bobi']
+        ]);
+    }
+
+    /**
      * @dataProvider connectionNameProvider
      */
     public function test_take_method_and_the_result_should_be_the_instance_of_the_same_model(
         string $name
-    ) {
+    )
+    {
         $this->createTestingTable($name);
 
         $pet_model = new PetModelStub();
@@ -198,31 +225,5 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
     public function connectionNameProvider()
     {
         return [['mysql'], ['sqlite'], ['pgsql']];
-    }
-
-    /**
-     * @param string $name
-     */
-    public function createTestingTable(string $name)
-    {
-        $connection = Database::connection($name);
-
-        if ($name == 'pgsql') {
-            $sql = 'create table pets (id serial primary key, name varchar(255))';
-        }
-
-        if ($name == 'sqlite') {
-            $sql = 'create table pets (id integer not null primary key autoincrement, name varchar(255))';
-        }
-
-        if ($name == 'mysql') {
-            $sql = 'create table pets (id int not null primary key auto_increment, name varchar(255))';
-        }
-
-        $connection->statement('drop table if exists pets');
-        $connection->statement($sql);
-        $connection->insert('insert into pets(name) values(:name)', [
-            ['name' => 'Couli'], ['name' => 'Bobi']
-        ]);
     }
 }

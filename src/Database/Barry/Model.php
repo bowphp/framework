@@ -311,8 +311,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public static function findAndDelete(
         int|string|array $id,
-        array $select = ['*']
-    ): Collection|Model|null {
+        array            $select = ['*']
+    ): Collection|Model|null
+    {
         $model = static::find($id, $select);
 
         if (is_null($model)) {
@@ -338,8 +339,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public static function find(
         int|string|array $id,
-        array $select = ['*']
-    ): Collection|Model|null {
+        array            $select = ['*']
+    ): Collection|Model|null
+    {
         $id = (array)$id;
 
         $model = new static();

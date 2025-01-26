@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Mail;
 
-use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Adapters\NativeAdapter;
 use Bow\Mail\Adapters\SesAdapter;
 use Bow\Mail\Adapters\SmtpAdapter;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 use ErrorException;

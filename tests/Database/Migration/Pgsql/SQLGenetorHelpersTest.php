@@ -14,11 +14,6 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
      */
     private $generator;
 
-    protected function setUp(): void
-    {
-        $this->generator = new SQLGenerator('bow_tests', 'pgsql', 'create');
-    }
-
     /**
      * @dataProvider getStringTypesWithSize
      */
@@ -310,5 +305,10 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
             ["blob", "Blob", "bow"],
             ["json", "Json", "{}"],
         ];
+    }
+
+    protected function setUp(): void
+    {
+        $this->generator = new SQLGenerator('bow_tests', 'pgsql', 'create');
     }
 }

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Bow\Database;
 
 use Bow\Database\Connection\AbstractConnection;
-use Bow\Database\Connection\Adapter\MysqlAdapter;
-use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
-use Bow\Database\Connection\Adapter\SqliteAdapter;
+use Bow\Database\Connection\Adapters\MysqlAdapter;
+use Bow\Database\Connection\Adapters\PostgreSQLAdapter;
+use Bow\Database\Connection\Adapters\SqliteAdapter;
 use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Security\Sanitize;

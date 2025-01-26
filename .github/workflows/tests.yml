@@ -3,68 +3,68 @@ name: bowphp
 on: [ push, pull_request ]
 
 env:
-  FTP_HOST: localhost
-  FTP_USER: username
-  FTP_PASSWORD: password
-  FTP_PORT: 21
-  FTP_ROOT: /tmp
+    FTP_HOST: localhost
+    FTP_USER: username
+    FTP_PASSWORD: password
+    FTP_PORT: 21
+    FTP_ROOT: /tmp
 
 jobs:
-  lunix-tests:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        php: [8.1, 8.2, 8.3]
-        os: [ubuntu-latest]
-        stability: [prefer-lowest, prefer-stable]
+    lunix-tests:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                php: [ 8.1, 8.2, 8.3 ]
+                os: [ ubuntu-latest ]
+                stability: [ prefer-lowest, prefer-stable ]
 
-    name: PHP ${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
+        name: PHP ${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v2
 
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          host port: 3306
-          container port: 3306
-          character set server: 'utf8mb4'
-          collation server: 'utf8mb4_general_ci'
-          mysql version: '5.7'
-          mysql database: 'test_db'
-          mysql root password: 'password'
+            -   name: Setup MySQL
+                uses: mirromutth/mysql-action@v1.1
+                with:
+                    host port: 3306
+                    container port: 3306
+                    character set server: 'utf8mb4'
+                    collation server: 'utf8mb4_general_ci'
+                    mysql version: '5.7'
+                    mysql database: 'test_db'
+                    mysql root password: 'password'
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
-          coverage: none
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
+                    coverage: none
 
-      - run: docker run -p 21:21 -p 20:20 -p 12020:12020 -p 12021:12021 -p 12022:12022 -p 12023:12023 -p 12024:12024 -p 12025:12025 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp papacdev/vsftpd
-      - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
-      - run: docker run -p 6379:6379 -d --name redis redis
-      - run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
-      - run: docker run -d -p 11300:11300 schickling/beanstalkd
+            -   run: docker run -p 21:21 -p 20:20 -p 12020:12020 -p 12021:12021 -p 12022:12022 -p 12023:12023 -p 12024:12024 -p 12025:12025 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp papacdev/vsftpd
+            -   run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
+            -   run: docker run -p 6379:6379 -d --name redis redis
+            -   run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
+            -   run: docker run -d -p 11300:11300 schickling/beanstalkd
 
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v2
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+            -   name: Cache Composer packages
+                id: composer-cache
+                uses: actions/cache@v2
+                with:
+                    path: vendor
+                    key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
-      - name: Copy the php ini config
-        run: sudo cp php.dist.ini php.ini
+            -   name: Copy the php ini config
+                run: sudo cp php.dist.ini php.ini
 
-      - name: Install dependencies
-        run: sudo composer update --prefer-dist --no-interaction
+            -   name: Install dependencies
+                run: sudo composer update --prefer-dist --no-interaction
 
-      - name: Create test cache directory
-        run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
+            -   name: Create test cache directory
+                run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
-      - name: Run test suite
-        run: sudo composer run-script test
+            -   name: Run test suite
+                run: sudo composer run-script test

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bow\Cache\Adapter;
+namespace Bow\Cache\Adapters;
 
 use Bow\Support\Str;
 use RecursiveDirectoryIterator;

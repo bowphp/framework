@@ -20,16 +20,6 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         Storage::configure($config["storage"]);
     }
 
-    protected function setUp(): void
-    {
-        $this->ftp_service = Storage::service('ftp');
-    }
-
-    protected function tearDown(): void
-    {
-        $this->ftp_service->changePath();
-    }
-
     public function test_the_connection()
     {
         $this->assertInstanceOf(FTPService::class, $this->ftp_service);
@@ -53,6 +43,18 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
         $this->assertIsBool($result);
         $this->assertTrue($result);
+    }
+
+    private function createFile(FTPService $ftp_service, $filename, $content = '')
+    {
+        $uploaded_file = $this->getMockBuilder(\Bow\Http\UploadedFile::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $uploaded_file->method('getContent')->willReturn($content);
+        $uploaded_file->method('getFilename')->willReturn($filename);
+
+        return $ftp_service->store($uploaded_file, $filename);
     }
 
     public function test_file_should_not_be_existe()
@@ -179,15 +181,13 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(true);
     }
 
-    private function createFile(FTPService $ftp_service, $filename, $content = '')
+    protected function setUp(): void
     {
-        $uploaded_file = $this->getMockBuilder(\Bow\Http\UploadedFile::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->ftp_service = Storage::service('ftp');
+    }
 
-        $uploaded_file->method('getContent')->willReturn($content);
-        $uploaded_file->method('getFilename')->willReturn($filename);
-
-        return $ftp_service->store($uploaded_file, $filename);
+    protected function tearDown(): void
+    {
+        $this->ftp_service->changePath();
     }
 }

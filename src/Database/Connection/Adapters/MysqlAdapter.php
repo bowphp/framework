@@ -2,26 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Bow\Database\Connection\Adapter;
+namespace Bow\Database\Connection\Adapters;
 
 use Bow\Database\Connection\AbstractConnection;
+use Bow\Support\Str;
 use InvalidArgumentException;
 use PDO;
 
-class PostgreSQLAdapter extends AbstractConnection
+class MysqlAdapter extends AbstractConnection
 {
     /**
      * Default PORT
      *
      * @var int
      */
-    public const PORT = 5432;
+    public const PORT = 3306;
     /**
      * The connexion nane
      *
      * @var ?string
      */
-    protected ?string $name = 'pgsql';
+    protected ?string $name = 'mysql';
 
     /**
      * MysqlAdapter constructor.
@@ -43,7 +44,7 @@ class PostgreSQLAdapter extends AbstractConnection
     public function connection(): void
     {
         // Build of the mysql dsn
-        if (isset($this->config['socket']) && !is_null($this->config['socket']) && !empty($this->config['socket'])) {
+        if (isset($this->config['socket']) && !empty($this->config['socket'])) {
             $hostname = $this->config['socket'];
             $port = '';
         } else {
@@ -57,31 +58,7 @@ class PostgreSQLAdapter extends AbstractConnection
         }
 
         // Formatting connection parameters
-        $dsn = sprintf("pgsql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
-
-        if (isset($this->config['sslmode'])) {
-            $dsn .= ';sslmode=' . $this->config['sslmode'];
-        }
-
-        if (isset($this->config['sslrootcert'])) {
-            $dsn .= ';sslrootcert=' . $this->config['sslrootcert'];
-        }
-
-        if (isset($this->config['sslcert'])) {
-            $dsn .= ';sslcert=' . $this->config['sslcert'];
-        }
-
-        if (isset($this->config['sslkey'])) {
-            $dsn .= ';sslkey=' . $this->config['sslkey'];
-        }
-
-        if (isset($this->config['sslcrl'])) {
-            $dsn .= ';sslcrl=' . $this->config['sslcrl'];
-        }
-
-        if (isset($this->config['application_name'])) {
-            $dsn .= ';application_name=' . $this->config['application_name'];
-        }
+        $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
 
         $username = $this->config["username"];
         $password = $this->config["password"];
@@ -90,13 +67,11 @@ class PostgreSQLAdapter extends AbstractConnection
         $options = [
             PDO::ATTR_DEFAULT_FETCH_MODE => $this->config['fetch'] ?? $this->fetch,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . Str::upper($this->config["charset"]),
+            PDO::ATTR_ORACLE_NULLS => PDO::NULL_EMPTY_STRING
         ];
 
         // Build the PDO connection
         $this->pdo = new PDO($dsn, $username, $password, $options);
-
-        if ($this->config["charset"]) {
-            $this->pdo->query('SET NAMES \'' . $this->config["charset"] . '\'');
-        }
     }
 }

@@ -780,10 +780,11 @@ if (!function_exists('email')) {
      * @return MailAdapterInterface|bool
      */
     function email(
-        string $view = null,
-        array $data = [],
+        string   $view = null,
+        array    $data = [],
         callable $cb = null
-    ): MailAdapterInterface|bool {
+    ): MailAdapterInterface|bool
+    {
         if ($view === null) {
             return Mail::getInstance();
         }
@@ -847,9 +848,10 @@ if (!function_exists('cookie')) {
      */
     function cookie(
         string $key = null,
-        mixed $data = null,
-        int $expiration = 3600
-    ): string|array|object|null {
+        mixed  $data = null,
+        int    $expiration = 3600
+    ): string|array|object|null
+    {
         if ($key === null) {
             return Cookie::all();
         }
@@ -1072,9 +1074,10 @@ if (!function_exists('app_trans')) {
      */
     function app_trans(
         string $key = null,
-        array $data = [],
-        bool $choose = false
-    ): string|Translator {
+        array  $data = [],
+        bool   $choose = false
+    ): string|Translator
+    {
         if (is_null($key)) {
             return Translator::getInstance();
         }
@@ -1099,9 +1102,10 @@ if (!function_exists('t')) {
      */
     function t(
         string $key,
-        array $data = [],
-        bool $choose = false
-    ): string|Translator {
+        array  $data = [],
+        bool   $choose = false
+    ): string|Translator
+    {
         return app_trans($key, $data, $choose);
     }
 }
@@ -1117,9 +1121,10 @@ if (!function_exists('__')) {
      */
     function __(
         string $key,
-        array $data = [],
-        bool $choose = false
-    ): string|Translator {
+        array  $data = [],
+        bool   $choose = false
+    ): string|Translator
+    {
         return app_trans($key, $data, $choose);
     }
 }
@@ -1185,10 +1190,11 @@ if (!function_exists('app_abort_if')) {
      * @throws HttpException
      */
     function app_abort_if(
-        bool $boolean,
-        int $code,
+        bool   $boolean,
+        int    $code,
         string $message = ''
-    ): Response|null {
+    ): Response|null
+    {
         if ($boolean) {
             return app_abort($code, $message);
         }
@@ -1251,10 +1257,10 @@ if (!function_exists('auth')) {
     /**
      * Recovery of the guard
      *
-     * @deprecated
      * @param string|null $guard
      * @return GuardContract
      * @throws AuthenticationException
+     * @deprecated
      */
     function auth(string $guard = null): GuardContract
     {

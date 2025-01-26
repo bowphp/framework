@@ -64,7 +64,8 @@ abstract class QueueAdapter
      */
     public function serializeProducer(
         ProducerService $producer
-    ): string {
+    ): string
+    {
         return serialize($producer);
     }
 
@@ -76,7 +77,8 @@ abstract class QueueAdapter
      */
     public function unserializeProducer(
         string $producer
-    ): ProducerService {
+    ): ProducerService
+    {
         return unserialize($producer);
     }
 

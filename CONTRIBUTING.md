@@ -1,10 +1,10 @@
 # Contribution
 
 - [Contribution](#contribution)
-  - [Introduction](#introduction)
-  - [Cutting the project](#cutting-the-project)
-  - [How to make the commits](#how-to-make-the-commits)
-  - [Contact](#contact)
+    - [Introduction](#introduction)
+    - [Cutting the project](#cutting-the-project)
+    - [How to make the commits](#how-to-make-the-commits)
+    - [Contact](#contact)
 
 ## Introduction
 
@@ -14,14 +14,16 @@ To participate in the project you must:
 - Clone the project from your github `git clone account https://github.com/your-account/app`
 - Create a branch whose name will be the summary of your change `git branch branch-of-your-works`
 - Make a publication on your depot `git push origin branch-of-your-works`
-- Finally make a [pull-request](https://www.thinkful.com/learn/github-pull-request-tutorial/Keep-Tabs-on-the-Project#Time-to-Submit-Your-First-PR)
-
+- Finally make
+  a [pull-request](https://www.thinkful.com/learn/github-pull-request-tutorial/Keep-Tabs-on-the-Project#Time-to-Submit-Your-First-PR)
 
 ## Cutting the project
 
-The Bow framework project is split into a subproject. Then each participant will be able to participate on the section in which he feels the best.
+The Bow framework project is split into a subproject. Then each participant will be able to participate on the section
+in which he feels the best.
 
-Imagine that you are more comfortable with the construction of Routing. Just focus on `src/Routing`. Note that the sections have to be independent and therefore have the own configuration.
+Imagine that you are more comfortable with the construction of Routing. Just focus on `src/Routing`. Note that the
+sections have to be independent and therefore have the own configuration.
 
 ## How to make the commits
 
@@ -63,4 +65,5 @@ In case your modification affect more section? You give a message and a descript
 
 ## Contact
 
-Please, if there is a bug on the project please contact me by email or leave me a message on the [slack](https://bowphp.slack.com).
+Please, if there is a bug on the project please contact me by email or leave me a message on
+the [slack](https://bowphp.slack.com).

@@ -25,17 +25,6 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         Database::configure($config["database"]);
     }
 
-    protected function setUp(): void
-    {
-        $this->migration = new MigrationExtendedStub();
-        ob_start();
-    }
-
-    protected function tearDown(): void
-    {
-        ob_get_clean();
-    }
-
     /**
      * @dataProvider connectionNames
      */
@@ -130,5 +119,16 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         return [
             ['mysql'], ['sqlite'], ['pgsql']
         ];
+    }
+
+    protected function setUp(): void
+    {
+        $this->migration = new MigrationExtendedStub();
+        ob_start();
+    }
+
+    protected function tearDown(): void
+    {
+        ob_get_clean();
     }
 }

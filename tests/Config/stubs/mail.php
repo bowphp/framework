@@ -2,16 +2,16 @@
 
 return [
     'driver' => 'smtp',
-    'charset'  => 'utf8',
+    'charset' => 'utf8',
 
     'smtp' => [
         'hostname' => 'localhost',
         'username' => 'test@test.dev',
         'password' => null,
-        'port'     => 1025,
-        'tls'      => false,
-        'ssl'      => false,
-        'timeout'  => 150,
+        'port' => 1025,
+        'tls' => false,
+        'ssl' => false,
+        'timeout' => 150,
     ],
 
     'mail' => [

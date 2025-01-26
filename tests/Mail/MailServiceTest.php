@@ -12,14 +12,8 @@ use Bow\View\View;
 
 class MailServiceTest extends \PHPUnit\Framework\TestCase
 {
-    private ConfigurationLoader $config;
-
     private static string $sendmail_command;
-
-    protected function setUp(): void
-    {
-        $this->config = TestingConfiguration::getConfig();
-    }
+    private ConfigurationLoader $config;
 
     public static function setUpBeforeClass(): void
     {
@@ -110,7 +104,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
             return $this->markTestSkipped('Test have been skip because /usr/sbin/sendmail not found');
         }
 
-        $config = (array) $this->config["mail"];
+        $config = (array)$this->config["mail"];
         View::configure($this->config["view"]);
         Mail::configure([...$config, "driver" => "mail"]);
 
@@ -124,7 +118,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 
     public function test_send_mail_with_view_not_found_for_notive_driver()
     {
-        $config = (array) $this->config["mail"];
+        $config = (array)$this->config["mail"];
 
         View::configure($this->config["view"]);
         Mail::configure([...$config, "driver" => "mail"]);
@@ -136,5 +130,10 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
             $message->to('bow@bowphp.com');
             $message->subject('test email');
         });
+    }
+
+    protected function setUp(): void
+    {
+        $this->config = TestingConfiguration::getConfig();
     }
 }

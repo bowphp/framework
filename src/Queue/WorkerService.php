@@ -39,11 +39,12 @@ class WorkerService
      */
     #[NoReturn] public function run(
         string $queue = "default",
-        int $tries = 3,
-        int $sleep = 5,
-        int $timeout = 60,
-        int $memory = 128
-    ): void {
+        int    $tries = 3,
+        int    $sleep = 5,
+        int    $timeout = 60,
+        int    $memory = 128
+    ): void
+    {
         $this->connection->setQueue($queue);
         $this->connection->setTries($tries);
         $this->connection->setSleep($sleep);

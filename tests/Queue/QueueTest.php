@@ -2,7 +2,7 @@
 
 namespace Bow\Tests\Queue;
 
-use Bow\Cache\Adapter\RedisAdapter;
+use Bow\Cache\Adapters\RedisAdapter;
 use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
