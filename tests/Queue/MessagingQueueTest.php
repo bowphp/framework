@@ -44,17 +44,19 @@ class MessagingQueueTest extends TestCase
     {
         parent::setUp();
 
-        $this->context = new TestNotifiableModel();
+        $this->context = $this->createMock(TestNotifiableModel::class);
         $this->message = $this->createMock(TestMessage::class);
     }
 
     public function test_can_send_message_synchronously(): void
     {
+        $context = new TestNotifiableModel();
+
         $this->message->expects($this->once())
             ->method('process')
-            ->with($this->context);
+            ->with($context);
 
-        $this->context->sendMessage($this->message);
+        $context->sendMessage($this->message);
     }
 
     public function test_can_send_message_to_queue(): void
