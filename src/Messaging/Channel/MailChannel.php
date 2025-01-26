@@ -2,11 +2,10 @@
 
 namespace Bow\Messaging\Channel;
 
-use Bow\Mail\Mail;
-use Bow\Mail\Envelop;
-use Bow\Messaging\Messaging;
 use Bow\Database\Barry\Model;
+use Bow\Mail\Mail;
 use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Messaging;
 
 class MailChannel implements ChannelInterface
 {

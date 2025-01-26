@@ -2,8 +2,8 @@
 
 namespace Bow\Messaging\Contracts;
 
-use Bow\Messaging\Messaging;
 use Bow\Database\Barry\Model;
+use Bow\Messaging\Messaging;
 
 interface ChannelInterface
 {

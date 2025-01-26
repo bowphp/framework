@@ -4,7 +4,6 @@ namespace Bow\Tests\Console\Stubs;
 
 use Bow\Console\Console;
 use Bow\Console\Setting;
-use Bow\Tests\Console\Stubs\CustomCommand;
 
 class CustomCommandTest extends \PHPUnit\Framework\TestCase
 {

@@ -2,10 +2,12 @@
 
 namespace Bow\Messaging\Channel;
 
-use Twilio\Rest\Client;
-use Bow\Messaging\Messaging;
 use Bow\Database\Barry\Model;
 use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Messaging;
+use InvalidArgumentException;
+use Twilio\Exceptions\ConfigurationException;
+use Twilio\Rest\Client;
 
 class SmsChannel implements ChannelInterface
 {
@@ -22,7 +24,7 @@ class SmsChannel implements ChannelInterface
     /**
      * Constructor
      * 
-     * @throws \InvalidArgumentException When Twilio credentials are missing
+     * @throws InvalidArgumentException|ConfigurationException When Twilio credentials are missing
      */
     public function __construct()
     {
@@ -31,7 +33,7 @@ class SmsChannel implements ChannelInterface
         $this->from_number = config('messaging.twilio.from');
 
         if (!$account_sid || !$auth_token || !$this->from_number) {
-            throw new \InvalidArgumentException('Twilio credentials are required');
+            throw new InvalidArgumentException('Twilio credentials are required');
         }
 
         $this->client = new Client($account_sid, $auth_token);
@@ -69,13 +71,13 @@ class SmsChannel implements ChannelInterface
         $this->from_number = config('messaging.twilio.from');
 
         if (!$account_sid || !$auth_token || !$this->from_number) {
-            throw new \InvalidArgumentException('Twilio credentials are required');
+            throw new InvalidArgumentException('Twilio credentials are required');
         }
 
         $this->client = new Client($account_sid, $auth_token);
 
         if (!isset($data['to']) || !isset($data['message'])) {
-            throw new \InvalidArgumentException('The phone number and message are required');
+            throw new InvalidArgumentException('The phone number and message are required');
         }
 
         try {

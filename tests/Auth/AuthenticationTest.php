@@ -3,16 +3,16 @@
 namespace Bow\Tests\Auth;
 
 use Bow\Auth\Auth;
-use Bow\Security\Hash;
-use Policier\Policier;
-use Bow\Database\Database;
 use Bow\Auth\Authentication;
+use Bow\Auth\Exception\AuthenticationException;
+use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Guards\JwtGuard;
 use Bow\Auth\Guards\SessionGuard;
-use Bow\Auth\Guards\GuardContract;
+use Bow\Database\Database;
+use Bow\Security\Hash;
 use Bow\Tests\Auth\Stubs\UserModelStub;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Auth\Exception\AuthenticationException;
+use Policier\Policier;
 
 class AuthenticationTest extends \PHPUnit\Framework\TestCase
 {

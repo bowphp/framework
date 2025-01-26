@@ -2,9 +2,9 @@
 
 namespace Bow\Tests\Container;
 
-use StdClass;
 use Bow\Container\Capsule;
 use Bow\Tests\Container\Stubs\MyClass;
+use StdClass;
 
 class CapsuleTest extends \PHPUnit\Framework\TestCase
 {

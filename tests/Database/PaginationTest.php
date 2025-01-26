@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Bow\Database;
 
-use PHPUnit\Framework\TestCase;
 use Bow\Database\Pagination;
+use PHPUnit\Framework\TestCase;
 
 class PaginationTest extends TestCase
 {

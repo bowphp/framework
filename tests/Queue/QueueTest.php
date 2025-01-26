@@ -12,12 +12,11 @@ use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
-use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Queue\Stubs\PetModelStub;
 use Bow\Queue\Connection as QueueConnection;
-use Bow\Testing\KernelTesting;
-use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\BasicProducerStubs;
+use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Queue\Stubs\PetModelStub;
 
 class QueueTest extends \PHPUnit\Framework\TestCase
 {

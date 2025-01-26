@@ -2,10 +2,11 @@
 
 namespace Bow\Messaging\Channel;
 
-use GuzzleHttp\Client;
-use Bow\Messaging\Messaging;
 use Bow\Database\Barry\Model;
 use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Messaging;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 class SlackChannel implements ChannelInterface
 {
@@ -15,6 +16,7 @@ class SlackChannel implements ChannelInterface
      * @param Model $context
      * @param Messaging $message
      * @return void
+     * @throws GuzzleException
      */
     public function send(Model $context, Messaging $message): void
     {

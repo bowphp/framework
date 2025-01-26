@@ -2,8 +2,8 @@
 
 namespace Bow\Tests\Translate;
 
-use Bow\Translate\Translator;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\Translate\Translator;
 
 class TranslationTest extends \PHPUnit\Framework\TestCase
 {

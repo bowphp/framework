@@ -26,7 +26,7 @@ class Database
     /**
      * The singleton Database instance
      *
-     * @var Database
+     * @var ?Database
      */
     private static ?Database $instance = null;
 
@@ -40,7 +40,7 @@ class Database
     /**
      * Configuration
      *
-     * @var string
+     * @var ?string
      */
     private static ?string $name = null;
 
@@ -331,7 +331,7 @@ class Database
     /**
      * Execute a delete request
      *
-     * @param  $sql_statement
+     * @param string $sql_statement
      * @param array $data
      * @return int
      */
