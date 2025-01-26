@@ -98,7 +98,7 @@ abstract class Messaging
      * @param Model $context
      * @return void
      */
-    final function process(Model $context): void
+    public final function process(Model $context): void
     {
         $channels = $this->channels($context);
 

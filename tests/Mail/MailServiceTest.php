@@ -5,7 +5,6 @@ namespace Bow\Tests\Mail;
 use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Mail;
-use Bow\Mail\Message;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\View\Exception\ViewException;
 use Bow\View\View;

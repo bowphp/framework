@@ -16,7 +16,7 @@ return [
 
     'mail' => [
         'default' => 'contact',
-        'froms' => [
+        'from' => [
             'contact' => [
                 'address' => app_env('MAIL_FROM_EMAIL'),
                 'name' => app_env('MAIL_FROM_NAME')
