@@ -9,6 +9,9 @@ use Bow\Mail\Exception\SmtpException;
 use Bow\Mail\Exception\SocketException;
 use Bow\Mail\Envelop;
 use ErrorException;
+use Bow\Mail\Security\DkimSigner;
+use Bow\Mail\Security\SpfChecker;
+use Bow\Mail\Exception\MailException;
 
 class SmtpDriver implements MailDriverInterface
 {
@@ -69,6 +72,20 @@ class SmtpDriver implements MailDriverInterface
     private int $port = 25;
 
     /**
+     * The DKIM signer
+     *
+     * @var ?DkimSigner
+     */
+    private ?DkimSigner $dkimSigner = null;
+
+    /**
+     * The SPF checker
+     *
+     * @var ?SpfChecker
+     */
+    private ?SpfChecker $spfChecker = null;
+
+    /**
      * Smtp Constructor
      *
      * @param array $config
@@ -90,6 +107,14 @@ class SmtpDriver implements MailDriverInterface
         $this->tls = (bool)$config['tls'];
         $this->timeout = (int)$config['timeout'];
         $this->port = (int)$config['port'];
+
+        if (isset($config['dkim']) && $config['dkim']['enabled']) {
+            $this->dkimSigner = new DkimSigner($config['dkim']);
+        }
+
+        if (isset($config['spf']) && $config['spf']['enabled']) {
+            $this->spfChecker = new SpfChecker($config['spf']);
+        }
     }
 
     /**
@@ -102,6 +127,24 @@ class SmtpDriver implements MailDriverInterface
      */
     public function send(Envelop $envelop): bool
     {
+        // Validate SPF if enabled
+        if ($this->spfChecker !== null) {
+            $senderIp = $_SERVER['REMOTE_ADDR'] ?? '';
+            $senderEmail = $envelop->getFrom()[0][1] ?? '';
+            $senderHelo = gethostname();
+
+            $spfResult = $this->spfChecker->verify($senderIp, $senderEmail, $senderHelo);
+            if ($spfResult === 'fail') {
+                throw new MailException('SPF verification failed');
+            }
+        }
+
+        // Add DKIM signature if enabled
+        if ($this->dkimSigner !== null) {
+            $dkimHeader = $this->dkimSigner->sign($envelop);
+            $envelop->addHeader('DKIM-Signature', $dkimHeader);
+        }
+
         $this->connection();
 
         $error = true;
@@ -182,7 +225,7 @@ class SmtpDriver implements MailDriverInterface
         // The client sends this command to the SMTP server to identify
         // itself and initiate the SMTP conversation.
         // The domain name or IP address of the SMTP client is usually sent as an argument
-        // together with the command (e.g. “EHLO client.example.com”).
+        // together with the command (e.g. "EHLO client.example.com").
         $client_host = isset($_SERVER['HTTP_HOST'])
         && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
