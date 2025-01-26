@@ -2,14 +2,15 @@
 
 namespace Bow\Tests\Messaging;
 
-use Bow\Database\Barry\Model;
+use Bow\View\View;
 use Bow\Mail\Envelop;
-use Bow\Messaging\MessagingQueueProducer;
-use Bow\Queue\Connection as QueueConnection;
-use Bow\Tests\Messaging\Stubs\TestMessage;
-use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
-use PHPUnit\Framework\MockObject\MockObject;
+use Bow\Database\Barry\Model;
 use PHPUnit\Framework\TestCase;
+use Bow\Tests\Config\TestingConfiguration;
+use Bow\Tests\Messaging\Stubs\TestMessage;
+use Bow\Queue\Connection as QueueConnection;
+use PHPUnit\Framework\MockObject\MockObject;
+use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
 
 class MessagingTest extends TestCase
 {
@@ -22,14 +23,17 @@ class MessagingTest extends TestCase
         parent::setUpBeforeClass();
 
         // Initialize queue connection
-        static::$queueConnection = new QueueConnection([
-            'default' => 'sync',
-            'connections' => [
-                'sync' => [
-                    'driver' => 'sync'
-                ]
-            ]
-        ]);
+        $config = TestingConfiguration::getConfig();
+
+        View::configure($config["view"]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->context = new TestNotifiableModel();
+        $this->message = $this->createMock(TestMessage::class);
     }
 
     public function test_can_send_message_synchronously(): void
@@ -119,13 +123,5 @@ class MessagingTest extends TestCase
         $this->assertEquals('123456789', $data['chat_id']);
         $this->assertEquals('Test Telegram message', $data['message']);
         $this->assertEquals('HTML', $data['parse_mode']);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->context = $this->createMock(TestNotifiableModel::class);
-        $this->message = $this->createMock(TestMessage::class);
     }
 }
