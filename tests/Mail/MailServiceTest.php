@@ -4,6 +4,7 @@ namespace Bow\Tests\Mail;
 
 use Bow\Configuration\Loader as ConfigurationLoader;
 use Bow\Mail\Contracts\MailAdapterInterface;
+use Bow\Mail\Envelop;
 use Bow\Mail\Mail;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\View\Exception\ViewException;
@@ -48,8 +49,8 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         View::configure($this->config["view"]);
         Mail::configure($this->config["mail"]);
 
-        $response = Mail::send('mail', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
+        $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
         });
 
         $this->assertTrue($response);
@@ -63,9 +64,9 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');
 
-        Mail::send('mail_view_not_found', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
-            $message->subject('test email');
+        Mail::send('mail_view_not_found', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
+            $envelop->subject('test email');
         });
     }
 
@@ -107,9 +108,9 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         View::configure($this->config["view"]);
         Mail::configure([...$config, "driver" => "mail"]);
 
-        $response = Mail::send('mail', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
-            $message->subject('test email');
+        $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
+            $envelop->subject('test email');
         });
 
         $this->assertTrue($response);
@@ -125,9 +126,9 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');
 
-        Mail::send('mail_view_not_found', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
-            $message->subject('test email');
+        Mail::send('mail_view_not_found', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
+            $envelop->subject('test email');
         });
     }
 
