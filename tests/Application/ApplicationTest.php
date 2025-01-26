@@ -2,14 +2,14 @@
 
 namespace Bow\Tests\Application;
 
-use Mockery;
+use Bow\Application\Application;
+use Bow\Container\Capsule;
 use Bow\Http\Request;
 use Bow\Http\Response;
-use Bow\Container\Capsule;
-use Bow\Application\Application;
-use Bow\Testing\KernelTesting;
 use Bow\Router\Exception\RouterException;
+use Bow\Testing\KernelTesting;
 use Bow\Tests\Config\TestingConfiguration;
+use Mockery;
 
 class ApplicationTest extends \PHPUnit\Framework\TestCase
 {

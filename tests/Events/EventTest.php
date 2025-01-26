@@ -2,13 +2,13 @@
 
 namespace Bow\Tests\Events;
 
-use Bow\Event\Event;
 use Bow\Database\Database;
+use Bow\Event\Event;
 use Bow\Tests\Config\TestingConfiguration;
-use PHPUnit\Framework\Assert;
 use Bow\Tests\Events\Stubs\EventModelStub;
-use Bow\Tests\Events\Stubs\UserEventStub;
 use Bow\Tests\Events\Stubs\UserEventListenerStub;
+use Bow\Tests\Events\Stubs\UserEventStub;
+use PHPUnit\Framework\Assert;
 
 class EventTest extends \PHPUnit\Framework\TestCase
 {

@@ -2,12 +2,12 @@
 
 namespace Bow\Messaging;
 
-use Bow\Mail\Envelop;
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Channel\SmsChannel;
+use Bow\Mail\Envelop;
+use Bow\Messaging\Channel\DatabaseChannel;
 use Bow\Messaging\Channel\MailChannel;
 use Bow\Messaging\Channel\SlackChannel;
-use Bow\Messaging\Channel\DatabaseChannel;
+use Bow\Messaging\Channel\SmsChannel;
 use Bow\Messaging\Channel\TelegramChannel;
 
 abstract class Messaging

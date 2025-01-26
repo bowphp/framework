@@ -8,8 +8,8 @@ use Bow\Messaging\MessagingQueueProducer;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Tests\Messaging\Stubs\TestMessage;
 use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 class MessagingTest extends TestCase
 {

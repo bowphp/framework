@@ -3,7 +3,6 @@
 namespace Bow\Tests\Queue\Stubs;
 
 use Bow\Queue\ProducerService;
-use Bow\Tests\Queue\Stubs\PetModelStub;
 
 class ModelProducerStub extends ProducerService
 {

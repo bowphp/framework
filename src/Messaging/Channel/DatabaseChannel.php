@@ -2,18 +2,13 @@
 
 namespace Bow\Messaging\Channel;
 
-use Bow\Database\Database;
-use Bow\Messaging\Messaging;
 use Bow\Database\Barry\Model;
+use Bow\Database\Database;
 use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Messaging;
 
 class DatabaseChannel implements ChannelInterface
 {
-    public function __construct(
-        private readonly array $database
-    ) {
-    }
-
     /**
      * Send the notification to database
      *

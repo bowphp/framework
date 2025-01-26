@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Bow\Mail\Driver;
 
 use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Envelop;
+use Bow\Mail\Exception\MailException;
 use Bow\Mail\Exception\SmtpException;
 use Bow\Mail\Exception\SocketException;
-use Bow\Mail\Envelop;
-use ErrorException;
 use Bow\Mail\Security\DkimSigner;
 use Bow\Mail\Security\SpfChecker;
-use Bow\Mail\Exception\MailException;
+use ErrorException;
 
 class SmtpDriver implements MailDriverInterface
 {

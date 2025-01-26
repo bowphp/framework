@@ -2,10 +2,14 @@
 
 namespace Bow\Messaging\Channel;
 
-use GuzzleHttp\Client;
-use Bow\Messaging\Messaging;
 use Bow\Database\Barry\Model;
 use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Messaging;
+use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
+use RuntimeException;
 
 class TelegramChannel implements ChannelInterface
 {
@@ -17,14 +21,14 @@ class TelegramChannel implements ChannelInterface
     /**
      * Constructor
      * 
-     * @throws \InvalidArgumentException When Telegram bot token is missing
+     * @throws InvalidArgumentException When Telegram bot token is missing
      */
     public function __construct()
     {
         $this->botToken = config('messaging.telegram.bot_token');
 
         if (!$this->botToken) {
-            throw new \InvalidArgumentException('The Telegram bot token is required');
+            throw new InvalidArgumentException('The Telegram bot token is required');
         }
     }
 
@@ -34,6 +38,7 @@ class TelegramChannel implements ChannelInterface
      * @param Model $context
      * @param Messaging $message
      * @return void
+     * @throws GuzzleException
      */
     public function send(Model $context, Messaging $message): void
     {
@@ -44,7 +49,7 @@ class TelegramChannel implements ChannelInterface
         $data = $message->toTelegram($context);
 
         if (!isset($data['chat_id']) || !isset($data['message'])) {
-            throw new \InvalidArgumentException('The chat ID and message are required for Telegram');
+            throw new InvalidArgumentException('The chat ID and message are required for Telegram');
         }
 
         $client = new Client();
@@ -58,8 +63,8 @@ class TelegramChannel implements ChannelInterface
                     'parse_mode' => $data['parse_mode'] ?? 'HTML'
                 ]
             ]);
-        } catch (\Exception $e) {
-            throw new \RuntimeException('Error while sending Telegram message: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new RuntimeException('Error while sending Telegram message: ' . $e->getMessage());
         }
     }
 }

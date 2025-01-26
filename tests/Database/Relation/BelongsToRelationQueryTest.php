@@ -6,9 +6,9 @@ use Bow\Cache\Cache;
 use Bow\Database\Database;
 use Bow\Database\Migration\SQLGenerator;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Database\Stubs\PetModelStub;
-use Bow\Tests\Database\Stubs\PetMasterModelStub;
 use Bow\Tests\Database\Stubs\MigrationExtendedStub;
+use Bow\Tests\Database\Stubs\PetMasterModelStub;
+use Bow\Tests\Database\Stubs\PetModelStub;
 
 class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
 {
