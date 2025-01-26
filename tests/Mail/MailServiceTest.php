@@ -3,7 +3,7 @@
 namespace Bow\Tests\Mail;
 
 use Bow\Configuration\Loader as ConfigurationLoader;
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Mail;
 use Bow\Mail\Message;
 use Bow\Tests\Config\TestingConfiguration;
@@ -33,13 +33,13 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
     public function test_configuration_instance()
     {
         $mail = Mail::configure($this->config["mail"]);
-        $this->assertInstanceOf(MailDriverInterface::class, $mail);
+        $this->assertInstanceOf(MailAdapterInterface::class, $mail);
     }
 
     public function test_default_configuration_must_be_smtp_driver()
     {
         $mail = Mail::configure($this->config["mail"]);
-        $this->assertInstanceOf(\Bow\Mail\Driver\SmtpDriver::class, $mail);
+        $this->assertInstanceOf(\Bow\Mail\Adapters\SmtpAdapter::class, $mail);
     }
 
     public function test_send_mail_with_raw_content_for_stmp_driver()
@@ -82,7 +82,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $config['driver'] = 'mail';
 
         $mail_instance = Mail::configure($config);
-        $this->assertInstanceOf(\Bow\Mail\Driver\NativeDriver::class, $mail_instance);
+        $this->assertInstanceOf(\Bow\Mail\Adapters\NativeAdapter::class, $mail_instance);
     }
 
     public function test_send_mail_with_raw_content_for_notive_driver()

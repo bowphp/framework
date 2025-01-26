@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Mail;
 
-use Bow\Mail\Contracts\MailDriverInterface;
-use Bow\Mail\Driver\NativeDriver;
-use Bow\Mail\Driver\SesDriver;
-use Bow\Mail\Driver\SmtpDriver;
+use Bow\Mail\Contracts\MailAdapterInterface;
+use Bow\Mail\Adapters\NativeAdapter;
+use Bow\Mail\Adapters\SesAdapter;
+use Bow\Mail\Adapters\SmtpAdapter;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 use ErrorException;
@@ -27,17 +27,17 @@ class Mail
      * @var array
      */
     private static array $drivers = [
-        'smtp' => SmtpDriver::class,
-        'mail' => NativeDriver::class,
-        'ses' => SesDriver::class,
+        'smtp' => SmtpAdapter::class,
+        'mail' => NativeAdapter::class,
+        'ses' => SesAdapter::class,
     ];
 
     /**
      * The mail driver instance
      *
-     * @var ?MailDriverInterface
+     * @var ?MailAdapterInterface
      */
-    private static ?MailDriverInterface $instance = null;
+    private static ?MailAdapterInterface $instance = null;
 
     /**
      * The mail configuration
@@ -61,10 +61,10 @@ class Mail
      * Configure la classe Mail
      *
      * @param array $config
-     * @return MailDriverInterface
+     * @return MailAdapterInterface
      * @throws MailException
      */
-    public static function configure(array $config = []): MailDriverInterface
+    public static function configure(array $config = []): MailAdapterInterface
     {
         if (empty(static::$config)) {
             static::$config = $config;
@@ -97,9 +97,9 @@ class Mail
     /**
      * Get mail instance
      *
-     * @return MailDriverInterface
+     * @return MailAdapterInterface
      */
-    public static function getInstance(): MailDriverInterface
+    public static function getInstance(): MailAdapterInterface
     {
         return static::$instance;
     }
@@ -244,10 +244,10 @@ class Mail
      * Modify the smtp|mail|ses driver
      *
      * @param string $driver
-     * @return MailDriverInterface
+     * @return MailAdapterInterface
      * @throws MailException
      */
-    public static function setDriver(string $driver): MailDriverInterface
+    public static function setDriver(string $driver): MailAdapterInterface
     {
         if (static::$config == null) {
             throw new MailException(

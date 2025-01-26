@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bow\Mail\Driver;
+namespace Bow\Mail\Adapters;
 
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Envelop;
 use Bow\Mail\Exception\MailException;
 use InvalidArgumentException;
 
-class NativeDriver implements MailDriverInterface
+class NativeAdapter implements MailAdapterInterface
 {
     /**
      * The configuration
@@ -43,10 +43,10 @@ class NativeDriver implements MailDriverInterface
      * Switch on other define from
      *
      * @param string $from
-     * @return NativeDriver
+     * @return NativeAdapter
      * @throws MailException
      */
-    public function on(string $from): NativeDriver
+    public function on(string $from): NativeAdapter
     {
         if (!isset($this->config["froms"][$from])) {
             throw new MailException(

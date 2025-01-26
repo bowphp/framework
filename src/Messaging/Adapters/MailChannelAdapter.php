@@ -1,13 +1,13 @@
 <?php
 
-namespace Bow\Messaging\Channel;
+namespace Bow\Messaging\Adapters;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Mail;
-use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Contracts\ChannelAdapterInterface;
 use Bow\Messaging\Messaging;
 
-class MailChannel implements ChannelInterface
+class MailChannelAdapter implements ChannelAdapterInterface
 {
     /**
      * Send the notification to mail

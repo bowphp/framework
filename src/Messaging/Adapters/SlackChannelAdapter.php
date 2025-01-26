@@ -1,14 +1,14 @@
 <?php
 
-namespace Bow\Messaging\Channel;
+namespace Bow\Messaging\Adapters;
 
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Contracts\ChannelAdapterInterface;
 use Bow\Messaging\Messaging;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-class SlackChannel implements ChannelInterface
+class SlackChannelAdapter implements ChannelAdapterInterface
 {
     /**
      * Send message via Slack

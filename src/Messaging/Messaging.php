@@ -4,11 +4,11 @@ namespace Bow\Messaging;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Envelop;
-use Bow\Messaging\Channel\DatabaseChannel;
-use Bow\Messaging\Channel\MailChannel;
-use Bow\Messaging\Channel\SlackChannel;
-use Bow\Messaging\Channel\SmsChannel;
-use Bow\Messaging\Channel\TelegramChannel;
+use Bow\Messaging\Adapters\DatabaseChannelAdapter;
+use Bow\Messaging\Adapters\MailChannelAdapter;
+use Bow\Messaging\Adapters\SlackChannelAdapter;
+use Bow\Messaging\Adapters\SmsChannelAdapter;
+use Bow\Messaging\Adapters\TelegramChannelAdapter;
 
 abstract class Messaging
 {
@@ -18,11 +18,11 @@ abstract class Messaging
      * @var array
      */
     private static array $channels = [
-        "mail" => MailChannel::class,
-        "database" => DatabaseChannel::class,
-        "telegram" => TelegramChannel::class,
-        "slack" => SlackChannel::class,
-        "sms" => SmsChannel::class,
+        "mail" => MailChannelAdapter::class,
+        "database" => DatabaseChannelAdapter::class,
+        "telegram" => TelegramChannelAdapter::class,
+        "slack" => SlackChannelAdapter::class,
+        "sms" => SmsChannelAdapter::class,
     ];
 
     /**

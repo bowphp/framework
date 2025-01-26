@@ -6,7 +6,7 @@ namespace Bow\Mail\Contracts;
 
 use Bow\Mail\Envelop;
 
-interface MailDriverInterface
+interface MailAdapterInterface
 {
     /**
      * Send mail by any driver

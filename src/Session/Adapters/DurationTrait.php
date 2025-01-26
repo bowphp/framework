@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bow\Session\Driver;
+namespace Bow\Session\Adapters;
 
 trait DurationTrait
 {

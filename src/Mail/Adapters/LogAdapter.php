@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bow\Mail\Driver;
+namespace Bow\Mail\Adapters;
 
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Envelop;
 use Bow\Support\Str;
 
-class LogDriver implements MailDriverInterface
+class LogAdapter implements MailAdapterInterface
 {
     /**
      * The configuration
@@ -25,7 +25,7 @@ class LogDriver implements MailDriverInterface
     private string $path;
 
     /**
-     * LogDriver Constructor
+     * LogAdapter Constructor
      *
      * @param array $config
      */

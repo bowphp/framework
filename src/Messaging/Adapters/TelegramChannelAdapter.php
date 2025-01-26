@@ -1,9 +1,9 @@
 <?php
 
-namespace Bow\Messaging\Channel;
+namespace Bow\Messaging\Adapters;
 
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Contracts\ChannelAdapterInterface;
 use Bow\Messaging\Messaging;
 use Exception;
 use GuzzleHttp\Client;
@@ -11,7 +11,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use InvalidArgumentException;
 use RuntimeException;
 
-class TelegramChannel implements ChannelInterface
+class TelegramChannelAdapter implements ChannelAdapterInterface
 {
     /**
      * @var string
@@ -20,7 +20,7 @@ class TelegramChannel implements ChannelInterface
 
     /**
      * Constructor
-     * 
+     *
      * @throws InvalidArgumentException When Telegram bot token is missing
      */
     public function __construct()
