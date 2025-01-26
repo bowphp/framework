@@ -48,14 +48,14 @@ class NativeAdapter implements MailAdapterInterface
      */
     public function on(string $from): NativeAdapter
     {
-        if (!isset($this->config["froms"][$from])) {
+        if (!isset($this->config["from"][$from])) {
             throw new MailException(
                 "There are not entry for [$from]",
                 E_USER_ERROR
             );
         }
 
-        $this->from = $this->config["froms"][$from];
+        $this->from = $this->config["from"][$from];
 
         return $this;
     }
@@ -86,7 +86,10 @@ class NativeAdapter implements MailAdapterInterface
 
         $envelop->setDefaultHeader();
 
-        foreach ($envelop->getTo() as $value) {
+        foreach ($envelop->getTo() as $key => $value) {
+            if ($key > 0) {
+                $to .= ', ';
+            }
             if ($value[0] !== null) {
                 $to .= $value[0] . ' <' . $value[1] . '>';
             } else {
