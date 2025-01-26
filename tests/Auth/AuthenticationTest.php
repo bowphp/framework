@@ -100,7 +100,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($result);
 
-        $token = (string) $auth->getToken();
+        $token = (string)$auth->getToken();
         $user = $auth->user();
 
         $this->assertInstanceOf(Authentication::class, $user);
@@ -114,7 +114,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $auth = Auth::guard('api');
         $auth->login(UserModelStub::first());
 
-        $token = (string) $auth->getToken();
+        $token = (string)$auth->getToken();
         $user = $auth->user();
 
         $this->assertTrue($auth->check());

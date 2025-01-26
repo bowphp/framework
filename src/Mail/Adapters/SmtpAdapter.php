@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Bow\Mail\Driver;
+namespace Bow\Mail\Adapters;
 
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Envelop;
 use Bow\Mail\Exception\MailException;
 use Bow\Mail\Exception\SmtpException;
@@ -13,7 +13,7 @@ use Bow\Mail\Security\DkimSigner;
 use Bow\Mail\Security\SpfChecker;
 use ErrorException;
 
-class SmtpDriver implements MailDriverInterface
+class SmtpAdapter implements MailAdapterInterface
 {
     /**
      * Socket connection

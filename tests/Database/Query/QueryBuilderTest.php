@@ -36,7 +36,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -46,8 +46,16 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(QueryBuilder::class, $database->connection($name)->table('pets'));
     }
 
+    public function createTestingTable(string $name)
+    {
+        Database::connection($name)->statement('drop table if exists pets');
+        Database::connection($name)->statement(
+            'create table pets (id int primary key, name varchar(255))'
+        );
+    }
+
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -66,7 +74,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -78,16 +86,16 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
         $table->truncate();
 
         $r = $table->insert([
-            [ 'id' => 1, 'name' => 'Milou'],
-            [ 'id' => 2, 'name' => 'Foli'],
-            [ 'id' => 3, 'name' => 'Bob'],
+            ['id' => 1, 'name' => 'Milou'],
+            ['id' => 2, 'name' => 'Foli'],
+            ['id' => 3, 'name' => 'Bob'],
         ]);
 
         $this->assertEquals($r, 3);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -104,7 +112,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -118,7 +126,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -139,7 +147,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -153,7 +161,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -167,7 +175,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -181,7 +189,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -195,7 +203,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -209,7 +217,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -232,13 +240,5 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     public function connectionNameProvider()
     {
         return [['mysql'], ['sqlite'], ['pgsql']];
-    }
-
-    public function createTestingTable(string $name)
-    {
-        Database::connection($name)->statement('drop table if exists pets');
-        Database::connection($name)->statement(
-            'create table pets (id int primary key, name varchar(255))'
-        );
     }
 }

@@ -13,11 +13,6 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
      */
     private $generator;
 
-    protected function setUp(): void
-    {
-        $this->generator = new SQLGenerator('bow_tests', 'sqlite', 'create');
-    }
-
     /**
      * Test Add column action
      */
@@ -88,5 +83,10 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
             ["SmallInteger", 1],
             ["MediumInteger", 1],
         ];
+    }
+
+    protected function setUp(): void
+    {
+        $this->generator = new SQLGenerator('bow_tests', 'sqlite', 'create');
     }
 }

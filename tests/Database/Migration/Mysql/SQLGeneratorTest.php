@@ -13,11 +13,6 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
      */
     private $generator;
 
-    protected function setUp(): void
-    {
-        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
-    }
-
     /**
      * Test Add column action
      */
@@ -138,5 +133,10 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $sql = $this->generator->make();
 
         $this->assertEquals($sql, '`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    }
+
+    protected function setUp(): void
+    {
+        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
     }
 }

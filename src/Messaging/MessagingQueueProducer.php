@@ -22,9 +22,10 @@ class MessagingQueueProducer extends ProducerService
      * @param Messaging $message
      */
     public function __construct(
-        Model $context,
+        Model     $context,
         Messaging $message,
-    ) {
+    )
+    {
         parent::__construct();
 
         $this->bags = [

@@ -1,31 +1,31 @@
 version: "3"
 services:
-  db:
-    container_name: mysql
-    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=1073741824
-    image: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: test
-      MYSQL_USERNAME: travis
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-  ftp:
-    container_name: ftp-server
-    image: emilybache/vsftpd-server
-    ports:
-      - "21"
-    environment:
-      USER: bob
-      PASS: "12345"
-    volumes:
-      - "ftp_storage:/ftp/$USER"
-  mail:
-    container_name: mail
-    image: maildev/maildev
-    ports:
-      - "1025:25"
-      - "1080:80"
+    db:
+        container_name: mysql
+        command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=1073741824
+        image: mysql
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: test
+            MYSQL_USERNAME: travis
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ftp:
+        container_name: ftp-server
+        image: emilybache/vsftpd-server
+        ports:
+            - "21"
+        environment:
+            USER: bob
+            PASS: "12345"
+        volumes:
+            - "ftp_storage:/ftp/$USER"
+    mail:
+        container_name: mail
+        image: maildev/maildev
+        ports:
+            - "1025:25"
+            - "1080:80"
 
 volumes:
-  ftp_storage:
+    ftp_storage:

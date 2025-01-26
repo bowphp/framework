@@ -60,6 +60,14 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($result, 2);
     }
 
+    public function createTestingTable()
+    {
+        Database::statement('drop table if exists pets');
+        Database::statement(
+            'create table pets (id int primary key, name varchar(255))'
+        );
+    }
+
     /**
      * @dataProvider connectionNameProvider
      */
@@ -85,9 +93,9 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $this->createTestingTable();
 
         $result = $database->insert("insert into pets values(:id, :name);", [
-            [ "id" => 1, 'name' => 'Ploy'],
-            [ "id" => 2, 'name' => 'Cesar'],
-            [ "id" => 3, 'name' => 'Louis'],
+            ["id" => 1, 'name' => 'Ploy'],
+            ["id" => 2, 'name' => 'Cesar'],
+            ["id" => 3, 'name' => 'Louis'],
         ]);
 
         $this->assertEquals($result, 3);
@@ -276,13 +284,5 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $result = $database->statement('create table if not exists pets (id int primary key, name varchar(255))');
 
         $this->assertEquals(is_bool($result), true);
-    }
-
-    public function createTestingTable()
-    {
-        Database::statement('drop table if exists pets');
-        Database::statement(
-            'create table pets (id int primary key, name varchar(255))'
-        );
     }
 }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bow\Mail\Driver;
+namespace Bow\Mail\Adapters;
 
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Envelop;
 use Bow\Support\Str;
 
-class LogDriver implements MailDriverInterface
+class LogAdapter implements MailAdapterInterface
 {
     /**
      * The configuration
@@ -25,7 +25,7 @@ class LogDriver implements MailDriverInterface
     private string $path;
 
     /**
-     * LogDriver Constructor
+     * LogAdapter Constructor
      *
      * @param array $config
      */
@@ -54,12 +54,12 @@ class LogDriver implements MailDriverInterface
         $content .= $envelop->compileHeaders();
 
         $content .= "To: " . implode(', ', array_map(function ($to) {
-            return $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1];
-        }, $envelop->getTo())) . "\n";
+                return $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1];
+            }, $envelop->getTo())) . "\n";
 
         $content .= "Subject: " . $envelop->getSubject() . "\n";
         $content .= $envelop->getMessage();
 
-        return (bool) file_put_contents($filepath, $content);
+        return (bool)file_put_contents($filepath, $content);
     }
 }

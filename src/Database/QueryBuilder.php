@@ -240,10 +240,11 @@ class QueryBuilder implements JsonSerializable
      */
     public function where(
         string $column,
-        mixed $comparator = '=',
-        mixed $value = null,
+        mixed  $comparator = '=',
+        mixed  $value = null,
         string $boolean = 'and'
-    ): QueryBuilder {
+    ): QueryBuilder
+    {
 
         // We check here the applied comparator
         if (!static::isComparisonOperator($comparator) || is_null($value)) {
@@ -542,11 +543,12 @@ class QueryBuilder implements JsonSerializable
      * @return QueryBuilder
      */
     public function join(
-        string $table,
-        string $first,
-        mixed $comparator = '=',
+        string  $table,
+        string  $first,
+        mixed   $comparator = '=',
         ?string $second = null
-    ): QueryBuilder {
+    ): QueryBuilder
+    {
         $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
@@ -601,11 +603,12 @@ class QueryBuilder implements JsonSerializable
      * @throws QueryBuilderException
      */
     public function leftJoin(
-        string $table,
-        string $first,
-        mixed $comparator = '=',
+        string  $table,
+        string  $first,
+        mixed   $comparator = '=',
         ?string $second = null
-    ): QueryBuilder {
+    ): QueryBuilder
+    {
         $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
@@ -637,11 +640,12 @@ class QueryBuilder implements JsonSerializable
      * @throws QueryBuilderException
      */
     public function rightJoin(
-        string $table,
-        string $first,
-        mixed $comparator = '=',
+        string  $table,
+        string  $first,
+        mixed   $comparator = '=',
         ?string $second = null
-    ): QueryBuilder {
+    ): QueryBuilder
+    {
         $table = $this->getPrefix() . $table;
 
         if (is_null($this->join)) {
@@ -759,10 +763,11 @@ class QueryBuilder implements JsonSerializable
      */
     public function having(
         string $column,
-        mixed $comparator = '=',
-        $value = null,
-        $boolean = 'and'
-    ): QueryBuilder {
+        mixed  $comparator = '=',
+               $value = null,
+               $boolean = 'and'
+    ): QueryBuilder
+    {
         // We check here the applied comparator
         if (!$this->isComparisonOperator($comparator)) {
             $value = $comparator;
@@ -1170,7 +1175,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Delete Action
+     * Delete Compass
      *
      * @return int
      */
@@ -1198,7 +1203,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Action increment, add 1 by default to the specified field
+     * Compass increment, add 1 by default to the specified field
      *
      * @param string $column
      * @param int $step
@@ -1267,7 +1272,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Truncate Action, empty the table
+     * Truncate Compass, empty the table
      *
      * @return bool
      */
@@ -1301,7 +1306,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Insert Action
+     * Insert Compass
      *
      * The data to be inserted into the database.
      *
@@ -1357,7 +1362,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Drop Action, remove the table
+     * Drop Compass, remove the table
      *
      * @return mixed
      */

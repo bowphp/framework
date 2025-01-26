@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Bow\Cache;
 
 use BadMethodCallException;
-use Bow\Cache\Adapter\CacheAdapterInterface;
-use Bow\Cache\Adapter\DatabaseAdapter;
-use Bow\Cache\Adapter\FilesystemAdapter;
-use Bow\Cache\Adapter\RedisAdapter;
+use Bow\Cache\Adapters\CacheAdapterInterface;
+use Bow\Cache\Adapters\DatabaseAdapter;
+use Bow\Cache\Adapters\FilesystemAdapter;
+use Bow\Cache\Adapters\RedisAdapter;
 use ErrorException;
 use InvalidArgumentException;
 

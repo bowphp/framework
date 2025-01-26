@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bow\Mail\Driver;
+namespace Bow\Mail\Adapters;
 
 use Aws\Ses\SesClient;
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Envelop;
 
-class SesDriver implements MailDriverInterface
+class SesAdapter implements MailAdapterInterface
 {
     /**
      * The SES Instance
@@ -25,7 +25,7 @@ class SesDriver implements MailDriverInterface
     private bool $config_set = false;
 
     /**
-     * SesDriver constructor
+     * SesAdapter constructor
      *
      * @param array $config
      * @return void

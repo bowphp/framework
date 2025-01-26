@@ -17,7 +17,8 @@ class EventProducer extends ProducerService
     public function __construct(
         private readonly mixed $event,
         private readonly mixed $payload = null,
-    ) {
+    )
+    {
         parent::__construct();
     }
 

@@ -1,15 +1,15 @@
 <?php
 
-namespace Bow\Messaging\Channel;
+namespace Bow\Messaging\Adapters;
 
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Contracts\ChannelInterface;
+use Bow\Messaging\Contracts\ChannelAdapterInterface;
 use Bow\Messaging\Messaging;
 use InvalidArgumentException;
 use Twilio\Exceptions\ConfigurationException;
 use Twilio\Rest\Client;
 
-class SmsChannel implements ChannelInterface
+class SmsChannelAdapter implements ChannelAdapterInterface
 {
     /**
      * @var Client
@@ -23,7 +23,7 @@ class SmsChannel implements ChannelInterface
 
     /**
      * Constructor
-     * 
+     *
      * @throws InvalidArgumentException|ConfigurationException When Twilio credentials are missing
      */
     public function __construct()

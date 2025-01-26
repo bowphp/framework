@@ -11,18 +11,6 @@ class PaginationTest extends TestCase
 {
     private Pagination $pagination;
 
-    protected function setUp(): void
-    {
-        $this->pagination = new Pagination(
-            next: 2,
-            previous: 0,
-            total: 3,
-            perPage: 10,
-            current: 1,
-            data: collect(['item1', 'item2', 'item3'])
-        );
-    }
-
     public function test_next(): void
     {
         $this->assertSame(2, $this->pagination->next());
@@ -46,5 +34,17 @@ class PaginationTest extends TestCase
     public function test_total(): void
     {
         $this->assertSame(3, $this->pagination->total());
+    }
+
+    protected function setUp(): void
+    {
+        $this->pagination = new Pagination(
+            next: 2,
+            previous: 0,
+            total: 3,
+            perPage: 10,
+            current: 1,
+            data: collect(['item1', 'item2', 'item3'])
+        );
     }
 }

@@ -1,6 +1,7 @@
 # Bow Framework - Messaging System
 
-Le système de messaging de Bow Framework permet d'envoyer des notifications à travers différents canaux (email, base de données, etc.) de manière simple et flexible.
+Le système de messaging de Bow Framework permet d'envoyer des notifications à travers différents canaux (email, base de
+données, etc.) de manière simple et flexible.
 
 ## Utilisation basique
 

@@ -385,16 +385,6 @@ class Envelop
     }
 
     /**
-     * @param string $message
-     * @param string $type
-     * @see setEnvelop
-     */
-    public function message(string $message, string $type = 'text/html'): void
-    {
-        $this->setMessage($message, $type);
-    }
-
-    /**
      * Get the headers
      *
      * @return array
@@ -499,5 +489,17 @@ class Envelop
         $this->message(view($view, $data)->getContent());
 
         return $this;
+    }
+
+    /**
+     * Alias of setMessage
+     *
+     * @param string $message
+     * @param string $type
+     * @see setEnvelop
+     */
+    public function message(string $message, string $type = 'text/html'): void
+    {
+        $this->setMessage($message, $type);
     }
 }

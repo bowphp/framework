@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Bow\Session\Driver;
+namespace Bow\Session\Adapters;
 
 use SessionHandlerInterface;
 
-class ArrayDriver implements SessionHandlerInterface
+class ArrayAdapter implements SessionHandlerInterface
 {
     use DurationTrait;
 

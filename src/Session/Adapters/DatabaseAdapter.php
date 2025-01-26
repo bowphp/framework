@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bow\Session\Driver;
+namespace Bow\Session\Adapters;
 
 use Bow\Database\Database;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
 use SessionHandlerInterface;
 
-class DatabaseDriver implements SessionHandlerInterface
+class DatabaseAdapter implements SessionHandlerInterface
 {
     use DurationTrait;
 

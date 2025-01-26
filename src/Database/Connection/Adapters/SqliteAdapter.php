@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bow\Database\Connection\Adapter;
+namespace Bow\Database\Connection\Adapters;
 
 use Bow\Database\Connection\AbstractConnection;
 use InvalidArgumentException;

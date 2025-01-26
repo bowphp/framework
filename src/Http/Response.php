@@ -120,10 +120,11 @@ class Response implements ResponseInterface
      * @return string
      */
     public function download(
-        string $file,
+        string  $file,
         ?string $filename = null,
-        array $headers = []
-    ): string {
+        array   $headers = []
+    ): string
+    {
         $type = mime_content_type($file);
 
         if (is_null($filename)) {

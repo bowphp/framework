@@ -158,23 +158,6 @@ class SpfChecker
     }
 
     /**
-     * Check IPv6 mechanism
-     *
-     * @param string $mechanism
-     * @param string $ip
-     * @param string $qualifier
-     * @return string|null
-     */
-    private function checkIp6(string $mechanism, string $ip, string $qualifier): ?string
-    {
-        $range = substr($mechanism, 4);
-        if ($this->ipInRange($ip, $range)) {
-            return $this->getQualifierResult($qualifier);
-        }
-        return null;
-    }
-
-    /**
      * Check if IP is in range
      *
      * @param string $ip
@@ -191,6 +174,40 @@ class SpfChecker
             return ($ip2long & $mask) === ($subnet2long & $mask);
         }
         return $ip === $range;
+    }
+
+    /**
+     * Get result based on qualifier
+     *
+     * @param string $qualifier
+     * @return string
+     */
+    private function getQualifierResult(string $qualifier): string
+    {
+        return match ($qualifier) {
+            '+' => 'pass',
+            '-' => 'fail',
+            '~' => 'softfail',
+            '?' => 'neutral',
+            default => 'neutral'
+        };
+    }
+
+    /**
+     * Check IPv6 mechanism
+     *
+     * @param string $mechanism
+     * @param string $ip
+     * @param string $qualifier
+     * @return string|null
+     */
+    private function checkIp6(string $mechanism, string $ip, string $qualifier): ?string
+    {
+        $range = substr($mechanism, 4);
+        if ($this->ipInRange($ip, $range)) {
+            return $this->getQualifierResult($qualifier);
+        }
+        return null;
     }
 
     /**
@@ -234,22 +251,5 @@ class SpfChecker
             }
         }
         return null;
-    }
-
-    /**
-     * Get result based on qualifier
-     *
-     * @param string $qualifier
-     * @return string
-     */
-    private function getQualifierResult(string $qualifier): string
-    {
-        return match ($qualifier) {
-            '+' => 'pass',
-            '-' => 'fail',
-            '~' => 'softfail',
-            '?' => 'neutral',
-            default => 'neutral'
-        };
     }
 }

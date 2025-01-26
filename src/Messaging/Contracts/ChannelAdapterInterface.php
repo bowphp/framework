@@ -5,7 +5,7 @@ namespace Bow\Messaging\Contracts;
 use Bow\Database\Barry\Model;
 use Bow\Messaging\Messaging;
 
-interface ChannelInterface
+interface ChannelAdapterInterface
 {
     /**
      * Send a message through the channel

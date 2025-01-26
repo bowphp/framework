@@ -96,10 +96,11 @@ class GenerateResourceControllerCommand extends AbstractCommand
      */
     private function createResourceController(
         Generator $generator,
-        string $prefix,
-        string $controller,
-        string $model_namespace = ''
-    ): void {
+        string    $prefix,
+        string    $controller,
+        string    $model_namespace = ''
+    ): void
+    {
         $generator->write('controller/rest', [
             'modelNamespace' => $model_namespace,
             'prefix' => $prefix,
