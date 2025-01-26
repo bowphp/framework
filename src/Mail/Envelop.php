@@ -142,53 +142,16 @@ class Envelop
     /**
      * Define the receiver
      *
-     * @param string $to
-     * @param ?string $name
+     * @param string|array $to
      *
      * @return Envelop
      */
-    public function to(string $to, ?string $name = null): Envelop
+    public function to(string|array $to): Envelop
     {
-        $this->to[] = $this->formatEmail($to, $name);
+        $recipients = (array) $to;
 
-        return $this;
-    }
-
-    /**
-     * Format the email receiver
-     *
-     * @param string $email
-     * @param ?string $name
-     * @return array
-     */
-    private function formatEmail(string $email, ?string $name = null): array
-    {
-        /**
-         * Organization of the list of senders
-         */
-        if (!is_string($name) && preg_match('/^(.+)\s+<(.*)>\z$/', $email, $matches)) {
-            array_shift($matches);
-            $name = $matches[0];
-            $email = $matches[1];
-        }
-
-        if (!Str::isMail($email)) {
-            throw new InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
-        }
-
-        return [$name, $email];
-    }
-
-    /**
-     * Define the receiver in list
-     *
-     * @param array $recipients
-     * @return $this
-     */
-    public function toList(array $recipients): Envelop
-    {
-        foreach ($recipients as $name => $to) {
-            $this->to[] = $this->formatEmail($to, !is_int($name) ? $name : null);
+        foreach ($recipients as $to) {
+            $this->to[] = $this->formatEmail($to);
         }
 
         return $this;
@@ -273,22 +236,6 @@ class Envelop
     public function html(string $html): Envelop
     {
         return $this->type($html, "text/html");
-    }
-
-    /**
-     * Add message body and set message type
-     *
-     * @param string $message
-     * @param string $type
-     * @return Envelop
-     */
-    private function type(string $message, string $type): Envelop
-    {
-        $this->type = $type;
-
-        $this->message = $message;
-
-        return $this;
     }
 
     /**
@@ -502,5 +449,46 @@ class Envelop
     public function message(string $message, string $type = 'text/html'): void
     {
         $this->setMessage($message, $type);
+    }
+
+    /**
+     * Format the email receiver
+     *
+     * @param string $email
+     * @return array
+     */
+    private function formatEmail(string $email): array
+    {
+        /**
+         * Organization of the list of senders
+         */
+        $name = null;
+        if (preg_match('/^(.+)\s+<(.*)>\z$/', $email, $matches)) {
+            array_shift($matches);
+            $name = $matches[0];
+            $email = $matches[1];
+        }
+
+        if (!Str::isMail($email)) {
+            throw new InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
+        }
+
+        return [$name, $email];
+    }
+
+    /**
+     * Add message body and set message type
+     *
+     * @param string $message
+     * @param string $type
+     * @return Envelop
+     */
+    private function type(string $message, string $type): Envelop
+    {
+        $this->type = $type;
+
+        $this->message = $message;
+
+        return $this;
     }
 }
