@@ -34,7 +34,8 @@
         "bowphp/policier": "^3.0",
         "mockery/mockery": "^1.5",
         "spatie/phpunit-snapshot-assertions": "^4.2",
-        "predis/predis": "^2.1"
+        "predis/predis": "^2.1",
+        "twilio/sdk": "^8.3"
     },
     "authors": [
         {

@@ -2,10 +2,13 @@
 
 namespace Bow\Messaging;
 
-use Bow\Database\Barry\Model;
 use Bow\Mail\Envelop;
-use Bow\Messaging\Channel\DatabaseChannel;
+use Bow\Database\Barry\Model;
+use Bow\Messaging\Channel\SmsChannel;
 use Bow\Messaging\Channel\MailChannel;
+use Bow\Messaging\Channel\SlackChannel;
+use Bow\Messaging\Channel\DatabaseChannel;
+use Bow\Messaging\Channel\TelegramChannel;
 
 abstract class Messaging
 {
@@ -14,16 +17,32 @@ abstract class Messaging
      *
      * @var array
      */
-    private array $channels = [
+    private static array $channels = [
         "mail" => MailChannel::class,
         "database" => DatabaseChannel::class,
+        "telegram" => TelegramChannel::class,
+        "slack" => SlackChannel::class,
+        "sms" => SmsChannel::class,
     ];
+
+    /**
+     * Push channels to the messaging
+     *
+     * @param array $channels
+     * @return array
+     */
+    public static function pushChannels(array $channels): array
+    {
+        static::$channels = array_merge(static::$channels, $channels);
+
+        return self::$channels;
+    }
 
     /**
      * Send notification to mail
      *
      * @param Model $context
-     * @return Message|null
+     * @return Envelop|null
      */
     public function toMail(Model $context): ?Envelop
     {
@@ -45,9 +64,31 @@ abstract class Messaging
      * Send notification to sms
      *
      * @param Model $context
-     * @return array
+     * @return array{to: string, message: string}
      */
     public function toSms(Model $context): array
+    {
+        return [];
+    }
+
+    /**
+     * Send notification to slack
+     *
+     * @param Model $context
+     * @return array{webhook_url: ?string, content: array}
+     */
+    public function toSlack(Model $context): array
+    {
+        return [];
+    }
+
+    /**
+     * Send notification to telegram
+     *
+     * @param Model $context
+     * @return array{message: string, chat_id: string, parse_mode: string}
+     */
+    public function toTelegram(Model $context): array
     {
         return [];
     }
@@ -62,9 +103,8 @@ abstract class Messaging
         $channels = $this->channels($context);
 
         foreach ($channels as $channel) {
-            if (array_key_exists($channel, $this->channels)) {
-                $result = $this->{"to" . ucfirst($channel)}($context);
-                $target_channel = new $this->channels[$channel]($result);
+            if (array_key_exists($channel, static::$channels)) {
+                $target_channel = new static::$channels[$channel]();
                 $target_channel->send($context);
             }
         }

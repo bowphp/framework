@@ -2,8 +2,9 @@
 
 namespace Bow\Messaging\Channel;
 
-use Bow\Database\Barry\Model;
 use Bow\Database\Database;
+use Bow\Messaging\Messaging;
+use Bow\Database\Barry\Model;
 use Bow\Messaging\Contracts\ChannelInterface;
 
 class DatabaseChannel implements ChannelInterface
@@ -17,16 +18,22 @@ class DatabaseChannel implements ChannelInterface
      * Send the notification to database
      *
      * @param Model $context
-     * @return void
+     * @param Messaging $message
      */
-    public function send(Model $context): void
+    public function send(Model $context, Messaging $message): void
     {
+        if (!method_exists($message, 'toDatabase')) {
+            return;
+        }
+
+        $database = $message->toDatabase($context);
+
         Database::table('notifications')->insert([
             'id' => str_uuid(),
-            'data' => $this->database['data'],
+            'data' => $database['data'],
             'concern_id' => $context->getKey(),
             'concern_type' => get_class($context),
-            'type' => $this->database['type'],
+            'type' => $database['type'],
         ]);
     }
 }

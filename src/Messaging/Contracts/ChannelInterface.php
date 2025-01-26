@@ -2,15 +2,17 @@
 
 namespace Bow\Messaging\Contracts;
 
+use Bow\Messaging\Messaging;
 use Bow\Database\Barry\Model;
 
 interface ChannelInterface
 {
     /**
-     * Send the notification
+     * Send a message through the channel
      *
-     * @param Model $notifiable
+     * @param Model $context
+     * @param Messaging $message
      * @return void
      */
-    public function send(Model $notifiable): void;
+    public function send(Model $context, Messaging $message): void;
 }

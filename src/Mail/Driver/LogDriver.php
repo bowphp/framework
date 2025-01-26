@@ -52,8 +52,8 @@ class LogDriver implements MailDriverInterface
 
         $content = "Date: " . date('r') . "\n";
         $content .= $envelop->compileHeaders();
-    
-        $content .= "To: " . implode(', ', array_map(function($to) {
+
+        $content .= "To: " . implode(', ', array_map(function ($to) {
             return $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1];
         }, $envelop->getTo())) . "\n";
 
@@ -62,4 +62,4 @@ class LogDriver implements MailDriverInterface
 
         return (bool) file_put_contents($filepath, $content);
     }
-} 
+}

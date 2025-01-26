@@ -36,13 +36,13 @@ class DkimSigner
         $privateKey = $this->loadPrivateKey();
         $headers = $this->getHeadersToSign($envelop);
         $bodyHash = $this->hashBody($envelop->getMessage());
-        
+
         $stringToSign = $this->buildSignatureString($headers, $bodyHash);
         $signature = '';
-        
+
         openssl_sign($stringToSign, $signature, $privateKey, OPENSSL_ALGO_SHA256);
         $signature = base64_encode($signature);
-        
+
         return $this->buildDkimHeader($headers, $signature, $bodyHash);
     }
 
@@ -86,7 +86,7 @@ class DkimSigner
      */
     private function formatAddresses(array $addresses): string
     {
-        return implode(', ', array_map(function($address) {
+        return implode(', ', array_map(function ($address) {
             return $address[0] ? "{$address[0]} <{$address[1]}>" : $address[1];
         }, $addresses));
     }
@@ -102,7 +102,7 @@ class DkimSigner
         // Canonicalize body according to DKIM rules
         $body = preg_replace('/\r\n\s+/', ' ', $body);
         $body = trim($body) . "\r\n";
-        
+
         return base64_encode(hash('sha256', $body, true));
     }
 
@@ -140,7 +140,7 @@ class DkimSigner
         $signedHeaders = implode(':', array_map('strtolower', array_keys($headers)));
 
         return "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d={$domain}; s={$selector};\r\n" .
-               "\tt=". time() . "; bh={$bodyHash};\r\n" .
+               "\tt=" . time() . "; bh={$bodyHash};\r\n" .
                "\th={$signedHeaders}; b={$signature};";
     }
-} 
+}
