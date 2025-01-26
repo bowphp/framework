@@ -58,8 +58,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
      */
     public function test_take_method_and_the_result_should_be_the_instance_of_the_same_model(
         string $name
-    )
-    {
+    ) {
         $this->createTestingTable($name);
 
         $pet_model = new PetModelStub();

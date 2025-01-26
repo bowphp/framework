@@ -57,8 +57,7 @@ trait Serializes
      */
     protected function getPropertyValue(
         ReflectionProperty $property
-    ): mixed
-    {
+    ): mixed {
         return $property->getValue($this);
     }
 

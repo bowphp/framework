@@ -8,9 +8,8 @@ class MixedProducerStub extends ProducerService
 {
     public function __construct(
         private ServiceStub $service,
-        private string      $connection
-    )
-    {
+        private string $connection
+    ) {
     }
 
     public function process(): void

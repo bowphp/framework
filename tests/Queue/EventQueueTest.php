@@ -1,18 +1,21 @@
 <?php
 
-use Bow\Cache\CacheConfiguration;
-use Bow\Configuration\EnvConfiguration;
-use Bow\Configuration\LoggerConfiguration;
+namespace Bow\Tests\Queue;
+
+use Bow\Queue\Connection;
 use Bow\Event\EventProducer;
 use Bow\Mail\MailConfiguration;
-use Bow\Queue\Connection;
+use Bow\View\ViewConfiguration;
+use PHPUnit\Framework\TestCase;
+use Bow\Cache\CacheConfiguration;
 use Bow\Queue\QueueConfiguration;
+use Bow\Configuration\EnvConfiguration;
+use Bow\Tests\Events\Stubs\UserEventStub;
+use Bow\Configuration\LoggerConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Events\Stubs\UserEventListenerStub;
-use Bow\Tests\Events\Stubs\UserEventStub;
-use Bow\View\ViewConfiguration;
 
-class EventQueueTest extends \PHPUnit\Framework\TestCase
+class EventQueueTest extends TestCase
 {
     private static $connection;
 

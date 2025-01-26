@@ -1,16 +1,20 @@
 <?php
 
-use Bow\Cache\CacheConfiguration;
-use Bow\Configuration\EnvConfiguration;
-use Bow\Configuration\LoggerConfiguration;
+namespace Bow\Tests\Queue;
+
+use Bow\Mail\Envelop;
 use Bow\Mail\MailConfiguration;
 use Bow\Mail\MailQueueProducer;
-use Bow\Queue\Connection as QueueConnection;
-use Bow\Queue\QueueConfiguration;
-use Bow\Tests\Config\TestingConfiguration;
 use Bow\View\ViewConfiguration;
+use PHPUnit\Framework\TestCase;
+use Bow\Cache\CacheConfiguration;
+use Bow\Queue\QueueConfiguration;
+use Bow\Configuration\EnvConfiguration;
+use Bow\Configuration\LoggerConfiguration;
+use Bow\Tests\Config\TestingConfiguration;
+use Bow\Queue\Connection as QueueConnection;
 
-class MailQueueTest extends PHPUnit\Framework\TestCase
+class MailQueueTest extends TestCase
 {
     private static $connection;
 
@@ -32,10 +36,10 @@ class MailQueueTest extends PHPUnit\Framework\TestCase
 
     public function testQueueMail()
     {
-        $message = new Message();
-        $message->to("bow@bow.org");
-        $message->subject("hello from bow");
-        $producer = new MailQueueProducer("email", [], $message);
+        $envelop = new Envelop();
+        $envelop->to("bow@bow.org");
+        $envelop->subject("hello from bow");
+        $producer = new MailQueueProducer("email", [], $envelop);
 
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
 

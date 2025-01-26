@@ -23,11 +23,10 @@ class MailQueueProducer extends ProducerService
      * @param Envelop $message
      */
     public function __construct(
-        string  $view,
-        array   $data,
+        string $view,
+        array $data,
         Envelop $envelop
-    )
-    {
+    ) {
         parent::__construct();
 
         $this->bags = [

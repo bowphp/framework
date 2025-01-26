@@ -8,14 +8,13 @@ use Bow\Support\Collection as SupportCollection;
 class Pagination
 {
     public function __construct(
-        private readonly int                                  $next,
-        private readonly int                                  $previous,
-        private readonly int                                  $total,
-        private readonly int                                  $perPage,
-        private readonly int                                  $current,
+        private readonly int $next,
+        private readonly int $previous,
+        private readonly int $total,
+        private readonly int $perPage,
+        private readonly int $current,
         private readonly SupportCollection|DatabaseCollection $data
-    )
-    {
+    ) {
     }
 
     public function next(): int

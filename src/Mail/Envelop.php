@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Mail;
 
-use Bow\Mail\Exception\MailException;
+use Bow\View\View;
 use Bow\Support\Str;
 use InvalidArgumentException;
+use Bow\Mail\Exception\MailException;
 
 class Envelop
 {
@@ -486,7 +487,7 @@ class Envelop
      */
     public function view(string $view, array $data = []): Envelop
     {
-        $this->message(view($view, $data)->getContent());
+        $this->message(View::parse($view, $data)->getContent());
 
         return $this;
     }

@@ -18,7 +18,7 @@ class TestMessage extends Messaging
         return (new Envelop())
             ->to('test@example.com')
             ->subject('Test Message')
-            ->view('test-view');
+            ->view('email');
     }
 
     public function toDatabase(Model $context): array

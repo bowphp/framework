@@ -8,9 +8,8 @@ class ModelProducerStub extends ProducerService
 {
     public function __construct(
         private PetModelStub $pet,
-        private string       $connection
-    )
-    {
+        private string $connection
+    ) {
         $this->pet = $pet;
         $this->connection = $connection;
     }

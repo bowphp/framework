@@ -2,23 +2,24 @@
 
 namespace Bow\Tests\Queue;
 
-use Bow\Cache\Adapters\RedisAdapter;
-use Bow\Cache\CacheConfiguration;
-use Bow\Configuration\EnvConfiguration;
-use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\Database;
-use Bow\Database\DatabaseConfiguration;
-use Bow\Queue\Adapters\BeanstalkdAdapter;
-use Bow\Queue\Adapters\DatabaseAdapter;
+use PHPUnit\Framework\TestCase;
+use Bow\Cache\CacheConfiguration;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
-use Bow\Queue\Connection as QueueConnection;
-use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Queue\Stubs\BasicProducerStubs;
-use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Cache\Adapters\RedisAdapter;
+use Bow\Configuration\EnvConfiguration;
+use Bow\Database\DatabaseConfiguration;
+use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Tests\Queue\Stubs\PetModelStub;
+use Bow\Queue\Adapters\BeanstalkdAdapter;
+use Bow\Configuration\LoggerConfiguration;
+use Bow\Tests\Config\TestingConfiguration;
+use Bow\Queue\Connection as QueueConnection;
+use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Queue\Stubs\BasicProducerStubs;
 
-class QueueTest extends \PHPUnit\Framework\TestCase
+class QueueTest extends TestCase
 {
     private static $connection;
 
