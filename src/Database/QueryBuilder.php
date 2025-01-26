@@ -1175,7 +1175,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Delete Action
+     * Delete Compass
      *
      * @return int
      */
@@ -1203,7 +1203,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Action increment, add 1 by default to the specified field
+     * Compass increment, add 1 by default to the specified field
      *
      * @param string $column
      * @param int $step
@@ -1272,7 +1272,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Truncate Action, empty the table
+     * Truncate Compass, empty the table
      *
      * @return bool
      */
@@ -1306,7 +1306,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Insert Action
+     * Insert Compass
      *
      * The data to be inserted into the database.
      *
@@ -1362,7 +1362,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Drop Action, remove the table
+     * Drop Compass, remove the table
      *
      * @return mixed
      */

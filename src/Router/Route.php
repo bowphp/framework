@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Bow\Router;
 
 use Bow\Configuration\Loader;
-use Bow\Container\Action;
+use Bow\Container\Compass;
 
 class Route
 {
@@ -158,7 +158,7 @@ class Route
             $this->match[$key] = $tmp;
         }
 
-        return Action::getInstance()->call($this->cb, $this->match);
+        return Compass::getInstance()->call($this->cb, $this->match);
     }
 
     /**

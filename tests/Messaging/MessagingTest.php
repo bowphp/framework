@@ -32,14 +32,6 @@ class MessagingTest extends TestCase
         ]);
     }
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->context = $this->createMock(TestNotifiableModel::class);
-        $this->message = $this->createMock(TestMessage::class);
-    }
-
     public function test_can_send_message_synchronously(): void
     {
         $this->message->expects($this->once())
@@ -190,5 +182,13 @@ class MessagingTest extends TestCase
         $this->assertEquals('123456789', $data['chat_id']);
         $this->assertEquals('Test Telegram message', $data['message']);
         $this->assertEquals('HTML', $data['parse_mode']);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->context = $this->createMock(TestNotifiableModel::class);
+        $this->message = $this->createMock(TestMessage::class);
     }
 }

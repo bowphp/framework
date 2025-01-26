@@ -492,6 +492,8 @@ class Envelop
     }
 
     /**
+     * Alias of setMessage
+     *
      * @param string $message
      * @param string $type
      * @see setEnvelop

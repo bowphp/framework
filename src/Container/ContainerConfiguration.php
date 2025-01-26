@@ -24,7 +24,7 @@ class ContainerConfiguration extends Configuration
         $this->container->bind('action', function () use ($config) {
             $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
 
-            return Action::configure($config->namespaces(), $middlewares);
+            return Compass::configure($config->namespaces(), $middlewares);
         });
     }
 

@@ -16,7 +16,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
 
-class Action
+class Compass
 {
     private const INJECTION_EXCEPTION_TYPE = [
         'string', 'array', 'bool', 'int',
@@ -24,11 +24,11 @@ class Action
         'object', 'stdclass', '\closure', 'closure'
     ];
     /**
-     * The Action instance
+     * The Compass instance
      *
-     * @var ?Action
+     * @var ?Compass
      */
-    private static ?Action $instance = null;
+    private static ?Compass $instance = null;
     /**
      * The list of namespaces defined in the application
      *
@@ -49,7 +49,7 @@ class Action
     private MiddlewareDispatcher $dispatcher;
 
     /**
-     * Action constructor
+     * Compass constructor
      *
      * @param array $namespaces
      * @param array $middlewares
@@ -64,17 +64,17 @@ class Action
     }
 
     /**
-     * Action configuration
+     * Compass configuration
      *
      * @param array $namespaces
      * @param array $middlewares
      *
      * @return static
      */
-    public static function configure(array $namespaces, array $middlewares): Action
+    public static function configure(array $namespaces, array $middlewares): Compass
     {
         if (is_null(static::$instance)) {
-            static::$instance = new Action($namespaces, $middlewares);
+            static::$instance = new Compass($namespaces, $middlewares);
         }
 
         return static::$instance;
@@ -263,11 +263,11 @@ class Action
     }
 
     /**
-     * Retrieves Action instance
+     * Retrieves Compass instance
      *
-     * @return Action
+     * @return Compass
      */
-    public static function getInstance(): Action
+    public static function getInstance(): Compass
     {
         return static::$instance;
     }
@@ -372,7 +372,7 @@ class Action
     {
         $class_name = $class->getName();
 
-        if (in_array(strtolower($class_name), Action::INJECTION_EXCEPTION_TYPE)) {
+        if (in_array(strtolower($class_name), Compass::INJECTION_EXCEPTION_TYPE)) {
             return null;
         }
 
