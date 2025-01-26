@@ -65,7 +65,7 @@ class SpfChecker
     private function getSpfRecord(string $domain): ?string
     {
         $records = dns_get_record($domain, DNS_TXT);
-        
+
         foreach ($records as $record) {
             if (strpos($record['txt'] ?? '', 'v=spf1') === 0) {
                 return $record['txt'];
@@ -244,7 +244,7 @@ class SpfChecker
      */
     private function getQualifierResult(string $qualifier): string
     {
-        return match($qualifier) {
+        return match ($qualifier) {
             '+' => 'pass',
             '-' => 'fail',
             '~' => 'softfail',
@@ -252,4 +252,4 @@ class SpfChecker
             default => 'neutral'
         };
     }
-} 
+}

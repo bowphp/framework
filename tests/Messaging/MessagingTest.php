@@ -52,13 +52,13 @@ class MessagingTest extends TestCase
     public function test_can_send_message_to_queue(): void
     {
         $producer = new MessagingQueueProducer($this->context, $this->message);
-        
+
         // Verify that the producer is created with correct parameters
         $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-        
+
         // Push to queue and verify
         static::$queueConnection->getAdapter()->push($producer);
-        
+
         $this->context->setMessageQueue($this->message);
     }
 
@@ -66,15 +66,15 @@ class MessagingTest extends TestCase
     {
         $queue = 'high-priority';
         $producer = new MessagingQueueProducer($this->context, $this->message);
-        
+
         // Verify that the producer is created with correct parameters
         $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-        
+
         // Push to specific queue and verify
         $adapter = static::$queueConnection->getAdapter();
         $adapter->setQueue($queue);
         $adapter->push($producer);
-        
+
         $this->context->sendMessageQueueOn($queue, $this->message);
     }
 
@@ -82,15 +82,15 @@ class MessagingTest extends TestCase
     {
         $delay = 3600;
         $producer = new MessagingQueueProducer($this->context, $this->message);
-        
+
         // Verify that the producer is created with correct parameters
         $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-        
+
         // Push to queue and verify
         $adapter = static::$queueConnection->getAdapter();
         $adapter->setSleep($delay);
         $adapter->push($producer);
-        
+
         $this->context->sendMessageLater($delay, $this->message);
     }
 
@@ -99,16 +99,16 @@ class MessagingTest extends TestCase
         $delay = 3600;
         $queue = 'delayed-notifications';
         $producer = new MessagingQueueProducer($this->context, $this->message);
-        
+
         // Verify that the producer is created with correct parameters
         $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-        
+
         // Push to specific queue with delay and verify
         $adapter = static::$queueConnection->getAdapter();
         $adapter->setQueue($queue);
         $adapter->setSleep($delay);
         $adapter->push($producer);
-        
+
         $this->context->sendMessageLaterOn($delay, $queue, $this->message);
     }
 
@@ -119,7 +119,7 @@ class MessagingTest extends TestCase
 
         $channels = $message->channels($context);
 
-        $this->assertEquals(['mail', 'database'], $channels);
+        $this->assertEquals(['mail', 'database', 'slack', 'sms', 'telegram'], $channels);
     }
 
     public function test_message_can_send_to_mail(): void
@@ -146,5 +146,49 @@ class MessagingTest extends TestCase
         $this->assertArrayHasKey('data', $data);
         $this->assertEquals('test_message', $data['type']);
         $this->assertEquals('Test message content', $data['data']['message']);
+    }
+
+    public function test_message_can_send_to_slack(): void
+    {
+        $context = new TestNotifiableModel();
+        $message = new TestMessage();
+
+        $data = $message->toSlack($context);
+
+        $this->assertIsArray($data);
+        $this->assertArrayHasKey('webhook_url', $data);
+        $this->assertArrayHasKey('content', $data);
+        $this->assertEquals('https://hooks.slack.com/services/test', $data['webhook_url']);
+        $this->assertEquals('Test message for Slack', $data['content']['text']);
+    }
+
+    public function test_message_can_send_to_sms(): void
+    {
+        $context = new TestNotifiableModel();
+        $message = new TestMessage();
+
+        $data = $message->toSms($context);
+
+        $this->assertIsArray($data);
+        $this->assertArrayHasKey('to', $data);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('+1234567890', $data['to']);
+        $this->assertEquals('Test SMS message', $data['message']);
+    }
+
+    public function test_message_can_send_to_telegram(): void
+    {
+        $context = new TestNotifiableModel();
+        $message = new TestMessage();
+
+        $data = $message->toTelegram($context);
+
+        $this->assertIsArray($data);
+        $this->assertArrayHasKey('chat_id', $data);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertArrayHasKey('parse_mode', $data);
+        $this->assertEquals('123456789', $data['chat_id']);
+        $this->assertEquals('Test Telegram message', $data['message']);
+        $this->assertEquals('HTML', $data['parse_mode']);
     }
 }

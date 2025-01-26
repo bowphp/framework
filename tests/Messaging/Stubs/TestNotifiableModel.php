@@ -8,4 +8,4 @@ use Bow\Messaging\CanSendMessage;
 class TestNotifiableModel extends Model
 {
     use CanSendMessage;
-} 
+}
