@@ -118,10 +118,9 @@ class Cookie
      */
     public static function set(
         int|string $key,
-        mixed      $data,
-        int        $expiration = 3600,
-    ): bool
-    {
+        mixed $data,
+        int $expiration = 3600,
+    ): bool {
         $data = Crypto::encrypt(json_encode($data));
 
         return setcookie(
