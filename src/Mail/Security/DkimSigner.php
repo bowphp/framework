@@ -49,7 +49,7 @@ class DkimSigner
     /**
      * Load the private key
      *
-     * @return resource
+     * @return mixed
      */
     private function loadPrivateKey()
     {
