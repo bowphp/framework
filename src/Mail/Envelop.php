@@ -473,7 +473,7 @@ class Envelop
             throw new InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
         }
 
-        return [$name, $email];
+        return [is_null($name) ? $email : $name, $email];
     }
 
     /**

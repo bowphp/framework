@@ -79,7 +79,7 @@ class SesAdapter implements MailAdapterInterface
 
         $email = [
             'Destination' => [
-                'ToAddresses' => $envelop->getTo(),
+                'ToAddresses' => array_map(fn ($value) => $value[0] !== null ? $value[0] . ' <' . $value[1] . '>' : '<' . $value[1] . '>', $envelop->getTo()),
             ],
             'Source' => $envelop->getFrom(),
             'Envelop' => [
