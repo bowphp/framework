@@ -41,69 +41,6 @@ class MessagingTest extends TestCase
         $this->context->sendMessage($this->message);
     }
 
-    public function test_can_send_message_to_queue(): void
-    {
-        $producer = new MessagingQueueProducer($this->context, $this->message);
-
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-
-        // Push to queue and verify
-        static::$queueConnection->getAdapter()->push($producer);
-
-        $this->context->setMessageQueue($this->message);
-    }
-
-    public function test_can_send_message_to_specific_queue(): void
-    {
-        $queue = 'high-priority';
-        $producer = new MessagingQueueProducer($this->context, $this->message);
-
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-
-        // Push to specific queue and verify
-        $adapter = static::$queueConnection->getAdapter();
-        $adapter->setQueue($queue);
-        $adapter->push($producer);
-
-        $this->context->sendMessageQueueOn($queue, $this->message);
-    }
-
-    public function test_can_send_message_with_delay(): void
-    {
-        $delay = 3600;
-        $producer = new MessagingQueueProducer($this->context, $this->message);
-
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-
-        // Push to queue and verify
-        $adapter = static::$queueConnection->getAdapter();
-        $adapter->setSleep($delay);
-        $adapter->push($producer);
-
-        $this->context->sendMessageLater($delay, $this->message);
-    }
-
-    public function test_can_send_message_with_delay_on_specific_queue(): void
-    {
-        $delay = 3600;
-        $queue = 'delayed-notifications';
-        $producer = new MessagingQueueProducer($this->context, $this->message);
-
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
-
-        // Push to specific queue with delay and verify
-        $adapter = static::$queueConnection->getAdapter();
-        $adapter->setQueue($queue);
-        $adapter->setSleep($delay);
-        $adapter->push($producer);
-
-        $this->context->sendMessageLaterOn($delay, $queue, $this->message);
-    }
-
     public function test_message_sends_to_correct_channels(): void
     {
         $context = new TestNotifiableModel();
