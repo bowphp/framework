@@ -473,7 +473,7 @@ class Envelop
             throw new InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
         }
 
-        return [is_null($name) ? $email : $name, $email];
+        return [$name, $email];
     }
 
     /**
@@ -490,5 +490,19 @@ class Envelop
         $this->message = $message;
 
         return $this;
+    }
+
+    public function composeTo()
+    {
+        $to = '';
+        foreach ($this->getTo() as $value) {
+            if ($value[0] !== null) {
+                $to .= $value[0] . ' <' . $value[1] . '>';
+            } else {
+                $to .= '<' . $value[1] . '>';
+            }
+
+            $this->write('RCPT TO: ' . $to, 250);
+        }
     }
 }

@@ -8,13 +8,11 @@ use Bow\Database\Barry\Model;
 use PHPUnit\Framework\TestCase;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Messaging\Stubs\TestMessage;
-use Bow\Queue\Connection as QueueConnection;
 use PHPUnit\Framework\MockObject\MockObject;
 use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
 
 class MessagingTest extends TestCase
 {
-    private static QueueConnection $queueConnection;
     private MockObject|Model $context;
     private MockObject|TestMessage $message;
 
@@ -61,9 +59,10 @@ class MessagingTest extends TestCase
         $message = new TestMessage();
 
         $mailMessage = $message->toMail($context);
+        [$email] = $mailMessage->getTo();
 
         $this->assertInstanceOf(Envelop::class, $mailMessage);
-        $this->assertEquals('test@example.com', $mailMessage->getTo());
+        $this->assertEquals('test@example.com', $email[1]);
         $this->assertEquals('Test Message', $mailMessage->getSubject());
     }
 

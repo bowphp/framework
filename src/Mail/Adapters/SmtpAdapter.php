@@ -130,7 +130,7 @@ class SmtpAdapter implements MailAdapterInterface
         // Validate SPF if enabled
         if ($this->spfChecker !== null) {
             $senderIp = $_SERVER['REMOTE_ADDR'] ?? '';
-            $senderEmail = $envelop->getFrom()[0][1] ?? '';
+            $senderEmail = $envelop->getFrom();
             $senderHelo = gethostname();
 
             $spfResult = $this->spfChecker->verify($senderIp, $senderEmail, $senderHelo);
@@ -158,7 +158,7 @@ class SmtpAdapter implements MailAdapterInterface
 
         foreach ($envelop->getTo() as $value) {
             if ($value[0] !== null) {
-                $to = $value[0] . '<' . $value[1] . '>';
+                $to = $value[0] . ' <' . $value[1] . '>';
             } else {
                 $to = '<' . $value[1] . '>';
             }
