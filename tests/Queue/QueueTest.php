@@ -2,22 +2,22 @@
 
 namespace Bow\Tests\Queue;
 
-use Bow\Database\Database;
-use PHPUnit\Framework\TestCase;
+use Bow\Cache\Adapters\RedisAdapter;
 use Bow\Cache\CacheConfiguration;
+use Bow\Configuration\EnvConfiguration;
+use Bow\Configuration\LoggerConfiguration;
+use Bow\Database\Database;
+use Bow\Database\DatabaseConfiguration;
+use Bow\Queue\Adapters\BeanstalkdAdapter;
+use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
-use Bow\Cache\Adapters\RedisAdapter;
-use Bow\Configuration\EnvConfiguration;
-use Bow\Database\DatabaseConfiguration;
-use Bow\Queue\Adapters\DatabaseAdapter;
-use Bow\Tests\Queue\Stubs\PetModelStub;
-use Bow\Queue\Adapters\BeanstalkdAdapter;
-use Bow\Configuration\LoggerConfiguration;
-use Bow\Tests\Config\TestingConfiguration;
 use Bow\Queue\Connection as QueueConnection;
-use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\BasicProducerStubs;
+use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Queue\Stubs\PetModelStub;
+use PHPUnit\Framework\TestCase;
 
 class QueueTest extends TestCase
 {
@@ -103,7 +103,7 @@ class QueueTest extends TestCase
      * @param string $connection
      * @return void
      */
-    public function test_push_service_adapter_with_model($connection)
+    public function test_push_service_adapter_with_model(string $connection)
     {
         $adapter = static::$connection->setConnection($connection)->getAdapter();
         $pet = new PetModelStub(["name" => "Filou"]);
@@ -134,7 +134,7 @@ class QueueTest extends TestCase
             ["beanstalkd"],
             ["database"],
             ["sync"],
-            // ["sqs"],
+            ["sqs"],
             // ["redis"],
             // ["rabbitmq"]
         ];

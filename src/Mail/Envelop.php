@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Mail;
 
-use Bow\View\View;
-use Bow\Support\Str;
-use InvalidArgumentException;
 use Bow\Mail\Exception\MailException;
+use Bow\Support\Str;
+use Bow\View\View;
+use InvalidArgumentException;
 
 class Envelop
 {
@@ -148,13 +148,38 @@ class Envelop
      */
     public function to(string|array $to): Envelop
     {
-        $recipients = (array) $to;
+        $recipients = (array)$to;
 
         foreach ($recipients as $to) {
             $this->to[] = $this->formatEmail($to);
         }
 
         return $this;
+    }
+
+    /**
+     * Format the email receiver
+     *
+     * @param string $email
+     * @return array
+     */
+    private function formatEmail(string $email): array
+    {
+        /**
+         * Organization of the list of senders
+         */
+        $name = null;
+        if (preg_match('/^(.+)\s+<(.*)>\z$/', $email, $matches)) {
+            array_shift($matches);
+            $name = $matches[0];
+            $email = $matches[1];
+        }
+
+        if (!Str::isMail($email)) {
+            throw new InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
+        }
+
+        return [$name, $email];
     }
 
     /**
@@ -236,6 +261,22 @@ class Envelop
     public function html(string $html): Envelop
     {
         return $this->type($html, "text/html");
+    }
+
+    /**
+     * Add message body and set message type
+     *
+     * @param string $message
+     * @param string $type
+     * @return Envelop
+     */
+    private function type(string $message, string $type): Envelop
+    {
+        $this->type = $type;
+
+        $this->message = $message;
+
+        return $this;
     }
 
     /**
@@ -343,16 +384,6 @@ class Envelop
     }
 
     /**
-     * Get the list of receivers
-     *
-     * @return array
-     */
-    public function getTo(): array
-    {
-        return $this->to;
-    }
-
-    /**
      * Get the subject of the email
      *
      * @return ?string
@@ -451,47 +482,6 @@ class Envelop
         $this->setMessage($message, $type);
     }
 
-    /**
-     * Format the email receiver
-     *
-     * @param string $email
-     * @return array
-     */
-    private function formatEmail(string $email): array
-    {
-        /**
-         * Organization of the list of senders
-         */
-        $name = null;
-        if (preg_match('/^(.+)\s+<(.*)>\z$/', $email, $matches)) {
-            array_shift($matches);
-            $name = $matches[0];
-            $email = $matches[1];
-        }
-
-        if (!Str::isMail($email)) {
-            throw new InvalidArgumentException("$email is not valid email.", E_USER_ERROR);
-        }
-
-        return [$name, $email];
-    }
-
-    /**
-     * Add message body and set message type
-     *
-     * @param string $message
-     * @param string $type
-     * @return Envelop
-     */
-    private function type(string $message, string $type): Envelop
-    {
-        $this->type = $type;
-
-        $this->message = $message;
-
-        return $this;
-    }
-
     public function composeTo()
     {
         $to = '';
@@ -504,5 +494,15 @@ class Envelop
 
             $this->write('RCPT TO: ' . $to, 250);
         }
+    }
+
+    /**
+     * Get the list of receivers
+     *
+     * @return array
+     */
+    public function getTo(): array
+    {
+        return $this->to;
     }
 }
