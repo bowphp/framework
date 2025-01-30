@@ -111,7 +111,7 @@ class UploadedFile
     /**
      * Move the uploader file to a directory.
      *
-     * @param string $to
+     * @param  string  $to
      * @param  ?string $filename
      * @return bool
      * @throws

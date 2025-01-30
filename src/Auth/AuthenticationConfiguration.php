@@ -14,9 +14,12 @@ class AuthenticationConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind('auth', function () use ($config) {
-            return Auth::configure($config['auth']);
-        });
+        $this->container->bind(
+            'auth',
+            function () use ($config) {
+                return Auth::configure($config['auth']);
+            }
+        );
     }
 
     /**

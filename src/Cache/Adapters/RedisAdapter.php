@@ -17,7 +17,7 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * RedisAdapter constructor.
      *
-     * @param array $config
+     * @param  array $config
      * @return void
      */
     public function __construct(array $config)
@@ -34,7 +34,7 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * Ping the redis service
      *
-     * @param ?string $message
+     * @param  ?string $message
      * @return RedisAdapter
      */
     public function ping(?string $message = null): RedisAdapter

@@ -42,7 +42,7 @@ class LogAdapter implements MailAdapterInterface
     /**
      * Implement send email
      *
-     * @param Envelop $envelop
+     * @param  Envelop $envelop
      * @return bool
      */
     public function send(Envelop $envelop): bool
@@ -53,9 +53,15 @@ class LogAdapter implements MailAdapterInterface
         $content = "Date: " . date('r') . "\n";
         $content .= $envelop->compileHeaders();
 
-        $content .= "To: " . implode(', ', array_map(function ($to) {
-                return $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1];
-        }, $envelop->getTo())) . "\n";
+        $content .= "To: " . implode(
+            ', ',
+            array_map(
+                function ($to) {
+                    return $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1];
+                },
+                $envelop->getTo()
+            )
+        ) . "\n";
 
         $content .= "Subject: " . $envelop->getSubject() . "\n";
         $content .= $envelop->getMessage();

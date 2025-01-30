@@ -12,7 +12,7 @@ class DatabaseChannelAdapter implements ChannelAdapterInterface
     /**
      * Send the notification to database
      *
-     * @param Model $context
+     * @param Model     $context
      * @param Messaging $message
      */
     public function send(Model $context, Messaging $message): void
@@ -23,12 +23,14 @@ class DatabaseChannelAdapter implements ChannelAdapterInterface
 
         $database = $message->toDatabase($context);
 
-        Database::table('notifications')->insert([
+        Database::table(config('messaging.notification.table') ?? 'notifications')->insert(
+            [
             'id' => str_uuid(),
             'data' => $database['data'],
             'concern_id' => $context->getKey(),
             'concern_type' => get_class($context),
-            'type' => $database['type'],
-        ]);
+            'type' => $database['type'] ?? 'notification',
+            ]
+        );
     }
 }

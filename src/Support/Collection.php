@@ -130,7 +130,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Chunk the storage content
      *
-     * @param int $chunk
+     * @param  int $chunk
      * @return Collection
      */
     public function chunk(int $chunk): Collection
@@ -141,7 +141,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * To retrieve a value or value collection form instance of collection.
      *
-     * @param string $key
+     * @param  string $key
      * @return Collection
      */
     public function collectify(string $key): Collection
@@ -162,8 +162,8 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Check existence of a key in the session collection
      *
-     * @param int|string $key
-     * @param bool $strict
+     * @param  int|string $key
+     * @param  bool       $strict
      * @return bool
      */
     public function has(int|string $key, bool $strict = false): bool
@@ -193,7 +193,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Merge the collection with a painting or other collection
      *
-     * @param Collection|array $array
+     * @param  Collection|array $array
      * @return Collection
      * @throws ErrorException
      */
@@ -245,7 +245,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Recursive walk of a table or object
      *
-     * @param array $data
+     * @param array    $data
      * @param callable $cb
      */
     private function recursive(array $data, callable $cb): void
@@ -262,7 +262,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Map
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @return Collection
      */
     public function map(callable $cb): Collection
@@ -281,7 +281,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Filter
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @return Collection
      */
     public function filter(callable $cb): Collection
@@ -300,8 +300,8 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Fill storage
      *
-     * @param mixed $data
-     * @param int $offset
+     * @param  mixed $data
+     * @param  int   $offset
      * @return array
      */
     public function fill(mixed $data, int $offset): array
@@ -320,16 +320,19 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Reduce
      *
-     * @param callable $cb
-     * @param mixed|null $next
+     * @param  callable   $cb
+     * @param  mixed|null $next
      * @return Collection
      */
     public function reduce(callable $cb, mixed $next = null): Collection
     {
         foreach ($this->storage as $key => $current) {
-            $next = call_user_func_array($cb, [
+            $next = call_user_func_array(
+                $cb,
+                [
                 $next, $current, $key, $this->storage
-            ]);
+                ]
+            );
         }
 
         return $this;
@@ -338,7 +341,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Implode
      *
-     * @param string $sep
+     * @param  string $sep
      * @return string
      */
     public function implode(string $sep): string
@@ -349,7 +352,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Sum
      *
-     * @param callable|null $cb
+     * @param  callable|null $cb
      * @return int|float
      */
     public function sum(?callable $cb = null): int|float
@@ -375,7 +378,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Max
      *
-     * @param ?callable $cb
+     * @param  ?callable $cb
      * @return int|float
      */
     public function max(?callable $cb = null): int|float
@@ -386,8 +389,8 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Aggregate Execute max|min
      *
-     * @param callable|null $cb
-     * @param string $type
+     * @param  callable|null $cb
+     * @param  string        $type
      * @return int|float
      */
     private function aggregate(string $type, ?callable $cb = null): float|int
@@ -415,7 +418,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Max
      *
-     * @param ?callable $cb
+     * @param  ?callable $cb
      * @return int|float
      */
     public function min(?callable $cb = null): float|int
@@ -426,7 +429,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Returns the key list and return an instance of Collection.
      *
-     * @param array $except
+     * @param  array $except
      * @return Collection
      */
     public function excepts(array $except): Collection
@@ -448,7 +451,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Ignore the key that is given to it and return an instance of Collection.
      *
-     * @param array $ignores
+     * @param  array $ignores
      * @return Collection
      */
     public function ignores(array $ignores): Collection
@@ -480,9 +483,9 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Update an existing value in the collection
      *
-     * @param string|integer $key
-     * @param mixed $data
-     * @param bool $override
+     * @param  string|integer $key
+     * @param  mixed          $data
+     * @param  bool           $override
      * @return bool
      */
     public function update(mixed $key, mixed $data, bool $override = false): bool
@@ -563,8 +566,8 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Add after the last item in the collection
      *
-     * @param mixed $value
-     * @param int|string $key
+     * @param  mixed      $value
+     * @param  int|string $key
      * @return Collection
      */
     public function push(mixed $value, mixed $key = null): Collection
@@ -581,7 +584,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * __get
      *
-     * @param mixed $name
+     * @param  mixed $name
      * @return mixed
      */
     public function __get(mixed $name)
@@ -592,8 +595,8 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * __set
      *
-     * @param mixed $name
-     * @param mixed $value
+     * @param  mixed $name
+     * @param  mixed $value
      * @return void
      */
     public function __set(mixed $name, mixed $value)
@@ -604,11 +607,11 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Allows to recover a value or value collection.
      *
-     * @param int|string|null $key
-     * @param mixed $default
+     * @param  int|string|null $key
+     * @param  mixed           $default
      * @return mixed
      */
-    public function get(int|string $key = null, mixed $default = null): mixed
+    public function get(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->storage;
@@ -634,7 +637,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * __isset
      *
-     * @param mixed $name
+     * @param  mixed $name
      * @return bool
      */
     public function __isset(mixed $name)
@@ -645,7 +648,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * __unset
      *
-     * @param mixed $name
+     * @param  mixed $name
      * @return void
      */
     public function __unset(mixed $name)
@@ -656,7 +659,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Delete an entry in the collection
      *
-     * @param string $key
+     * @param  string $key
      * @return Collection
      */
     public function delete(string $key): Collection
@@ -679,7 +682,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Get the data in JSON format
      *
-     * @param int $option
+     * @param  int $option
      * @return string
      */
     public function toJson(int $option = 0): string
@@ -710,7 +713,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * offsetExists
      *
-     * @param mixed $offset
+     * @param  mixed $offset
      * @return bool
      */
     public function offsetExists(mixed $offset): bool
@@ -721,7 +724,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * offsetGet
      *
-     * @param mixed $offset
+     * @param  mixed $offset
      * @return mixed
      */
     public function offsetGet(mixed $offset): mixed
@@ -732,8 +735,8 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * offsetSet
      *
-     * @param mixed $offset
-     * @param mixed $value
+     * @param  mixed $offset
+     * @param  mixed $value
      * @return void
      */
     public function offsetSet(mixed $offset, mixed $value): void
@@ -744,8 +747,8 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * Modify an entry in the collection or the addition if not
      *
-     * @param string $key
-     * @param mixed $value
+     * @param  string $key
+     * @param  mixed  $value
      * @return mixed
      */
     public function set(string $key, mixed $value): mixed
@@ -764,7 +767,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
     /**
      * offsetUnset
      *
-     * @param mixed $offset
+     * @param  mixed $offset
      * @return void
      */
     public function offsetUnset(mixed $offset): void

@@ -10,9 +10,9 @@ use Bow\Security\Sanitize;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Exception\ConnectionException;
-use Bow\Database\Connection\Adapter\MysqlAdapter;
-use Bow\Database\Connection\Adapter\SqliteAdapter;
-use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
+use Bow\Database\Connection\Adapters\MysqlAdapter;
+use Bow\Database\Connection\Adapters\SqliteAdapter;
+use Bow\Database\Connection\Adapters\PostgreSQLAdapter;
 
 class Database
 {
@@ -65,7 +65,7 @@ class Database
     /**
      * Connection, starts the connection on the DB
      *
-     * @param ?string $name
+     * @param  ?string $name
      * @return ?Database
      * @throws ConnectionException
      */
@@ -157,8 +157,8 @@ class Database
     /**
      * Execute an UPDATE request
      *
-     * @param string $sql_statement
-     * @param array $data
+     * @param  string $sql_statement
+     * @param  array  $data
      * @return int
      */
     public static function update(string $sql_statement, array $data = []): int
@@ -175,8 +175,8 @@ class Database
     /**
      * Execute the request of type delete insert update
      *
-     * @param string $sql_statement
-     * @param array $data
+     * @param  string $sql_statement
+     * @param  array  $data
      * @return int
      */
     private static function executePrepareQuery(string $sql_statement, array $data = []): int
@@ -198,8 +198,8 @@ class Database
     /**
      * Execute a SELECT request
      *
-     * @param string $sql_statement
-     * @param array $data
+     * @param  string $sql_statement
+     * @param  array  $data
      * @return mixed|null
      */
     public static function select(string $sql_statement, array $data = []): mixed
@@ -235,8 +235,8 @@ class Database
     /**
      * Executes a select query and returns a single record
      *
-     * @param string $sql_statement
-     * @param array $data
+     * @param  string $sql_statement
+     * @param  array  $data
      * @return mixed|null
      */
     public static function selectOne(string $sql_statement, array $data = []): mixed
@@ -267,8 +267,8 @@ class Database
     /**
      * Execute an insert query
      *
-     * @param string $sql_statement
-     * @param array $data
+     * @param  string $sql_statement
+     * @param  array  $data
      * @return int
      */
     public static function insert(string $sql_statement, array $data = []): int
@@ -316,7 +316,7 @@ class Database
     /**
      * Executes a request of type DROP | CREATE TABLE | TRUNCATE | ALTER Builder
      *
-     * @param string $sql_statement
+     * @param  string $sql_statement
      * @return bool
      */
     public static function statement(string $sql_statement): bool
@@ -324,15 +324,15 @@ class Database
         static::verifyConnection();
 
         return static::$adapter
-                ->getConnection()
-                ->exec($sql_statement) === 0;
+            ->getConnection()
+            ->exec($sql_statement) === 0;
     }
 
     /**
      * Execute a delete request
      *
-     * @param string $sql_statement
-     * @param array $data
+     * @param  string $sql_statement
+     * @param  array  $data
      * @return int
      */
     public static function delete(string $sql_statement, array $data = []): int
@@ -352,7 +352,7 @@ class Database
     /**
      * Load the query builder factory on the table name
      *
-     * @param string $table
+     * @param  string $table
      * @return QueryBuilder
      */
     public static function table(string $table): QueryBuilder
@@ -370,7 +370,7 @@ class Database
     /**
      * Starting the start of a transaction wrapper on top of the callback
      *
-     * @param callable $callback
+     * @param  callable $callback
      * @return mixed
      */
     public static function transaction(callable $callback): mixed
@@ -478,8 +478,8 @@ class Database
     /**
      * __call
      *
-     * @param string $method
-     * @param array $arguments
+     * @param  string $method
+     * @param  array  $arguments
      * @return mixed
      * @throws DatabaseException|ErrorException
      */

@@ -78,9 +78,9 @@ class Command extends AbstractCommand
     /**
      * The call command
      *
-     * @param string $action
-     * @param string $command
-     * @param array $rest
+     * @param  string $action
+     * @param  string $command
+     * @param  array  $rest
      * @return mixed
      * @throws ErrorException
      */

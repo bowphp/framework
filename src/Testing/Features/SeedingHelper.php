@@ -11,8 +11,8 @@ trait SeedingHelper
     /**
      * Seed alias
      *
-     * @param string $seeder
-     * @param array $data
+     * @param  string $seeder
+     * @param  array  $data
      * @return int
      * @throws ErrorException
      */

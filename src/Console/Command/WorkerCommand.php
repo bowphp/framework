@@ -12,7 +12,7 @@ class WorkerCommand extends AbstractCommand
     /**
      * The run server command
      *
-     * @param string|null $connection
+     * @param  string|null $connection
      * @return void
      */
     public function run(?string $connection = null): void
@@ -47,7 +47,7 @@ class WorkerCommand extends AbstractCommand
     /**
      * Flush the queue
      *
-     * @param ?string $connection
+     * @param  ?string $connection
      * @return void
      */
     public function flush(?string $connection = null)

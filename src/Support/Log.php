@@ -15,8 +15,8 @@ class Log
     /**
      * Log
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return void
      */
     public static function __callStatic(string $name, array $arguments = [])

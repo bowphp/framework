@@ -49,7 +49,7 @@ class Mail
     /**
      * Mail constructor
      *
-     * @param array $config
+     * @param  array $config
      * @throws MailException
      */
     public function __construct(array $config = [])
@@ -60,7 +60,7 @@ class Mail
     /**
      * Configure la classe Mail
      *
-     * @param array $config
+     * @param  array $config
      * @return MailAdapterInterface
      * @throws MailException
      */
@@ -107,10 +107,10 @@ class Mail
     /**
      * Send mail similar to the PHP mail function
      *
-     * @param string|array $to
-     * @param string $subject
-     * @param string $data
-     * @param array $headers
+     * @param  string|array $to
+     * @param  string       $subject
+     * @param  string       $data
+     * @param  array        $headers
      * @return mixed
      */
     public static function raw(string|array $to, string $subject, string $data, array $headers = []): mixed
@@ -131,9 +131,9 @@ class Mail
     /**
      * The method thad send the configured mail
      *
-     * @param string $view
-     * @param callable|array $data
-     * @param callable|null $cb
+     * @param  string         $view
+     * @param  callable|array $data
+     * @param  callable|null  $cb
      * @return bool
      */
     public static function send(string $view, callable|array $data, ?callable $cb = null): bool
@@ -156,9 +156,9 @@ class Mail
     /**
      * Send env on queue
      *
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function queue(string $template, array $data, callable $cb): void
@@ -175,10 +175,10 @@ class Mail
     /**
      * Send env on specific queue
      *
-     * @param string $queue
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  string   $queue
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function queueOn(string $queue, string $template, array $data, callable $cb): void
@@ -197,10 +197,10 @@ class Mail
     /**
      * Send mail later
      *
-     * @param integer $delay
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  integer  $delay
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function later(int $delay, string $template, array $data, callable $cb): void
@@ -219,11 +219,11 @@ class Mail
     /**
      * Send mail later on specific queue
      *
-     * @param integer $delay
-     * @param string $queue
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  integer  $delay
+     * @param  string   $queue
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb): void
@@ -243,7 +243,7 @@ class Mail
     /**
      * Modify the smtp|mail|ses driver
      *
-     * @param string $driver
+     * @param  string $driver
      * @return MailAdapterInterface
      * @throws MailException
      */
@@ -269,8 +269,8 @@ class Mail
     /**
      * Push new driver
      *
-     * @param string $name
-     * @param string $class_name
+     * @param  string $name
+     * @param  string $class_name
      * @return bool
      */
     public function pushDriver(string $name, string $class_name): bool
@@ -287,8 +287,8 @@ class Mail
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      * @throws ErrorException
      */

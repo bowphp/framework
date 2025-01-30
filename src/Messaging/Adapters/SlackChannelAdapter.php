@@ -13,8 +13,8 @@ class SlackChannelAdapter implements ChannelAdapterInterface
     /**
      * Send message via Slack
      *
-     * @param Model $context
-     * @param Messaging $message
+     * @param  Model     $context
+     * @param  Messaging $message
      * @return void
      * @throws GuzzleException
      */
@@ -39,12 +39,15 @@ class SlackChannelAdapter implements ChannelAdapterInterface
         $client = new Client();
 
         try {
-            $client->post($webhook_url, [
+            $client->post(
+                $webhook_url,
+                [
                 'json' => $data['content'],
                 'headers' => [
                     'Content-Type' => 'application/json'
                 ]
-            ]);
+                ]
+            );
         } catch (\Exception $e) {
             throw new \RuntimeException('Error while sending Slack message: ' . $e->getMessage());
         }

@@ -9,8 +9,8 @@ trait MysqlCompose
     /**
      * Compose sql statement for mysql
      *
-     * @param string $name
-     * @param array $description
+     * @param  string $name
+     * @param  array  $description
      * @return string
      * @throws SQLGeneratorException
      */
@@ -119,7 +119,7 @@ trait MysqlCompose
     /**
      * Drop Column action with mysql
      *
-     * @param string $name
+     * @param  string $name
      * @return void
      */
     private function dropColumnForMysql(string $name): void

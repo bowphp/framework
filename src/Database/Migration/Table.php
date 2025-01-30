@@ -101,7 +101,7 @@ class Table
     /**
      * Add a raw column definition
      *
-     * @param string $definition
+     * @param  string $definition
      * @return Table
      */
     public function addRaw(string $definition): Table
@@ -114,9 +114,9 @@ class Table
     /**
      * Add new column in the table
      *
-     * @param string $name
-     * @param string $type
-     * @param array $attribute
+     * @param  string $name
+     * @param  string $type
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -139,8 +139,8 @@ class Table
     /**
      * Compose sql instruction
      *
-     * @param string $name
-     * @param array $description
+     * @param  string $name
+     * @param  array  $description
      * @return string
      * @throws SQLGeneratorException
      */
@@ -162,9 +162,9 @@ class Table
     /**
      * Change a column in the table
      *
-     * @param string $name
-     * @param string $type
-     * @param array $attribute
+     * @param  string $name
+     * @param  string $type
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -183,8 +183,8 @@ class Table
     /**
      * Rename a column in the table
      *
-     * @param string $name
-     * @param string $new
+     * @param  string $name
+     * @param  string $new
      * @return Table
      */
     public function renameColumn(string $name, string $new): Table
@@ -207,7 +207,7 @@ class Table
     /**
      * Drop table column
      *
-     * @param string $name
+     * @param  string $name
      * @return Table
      */
     public function dropColumn(string $name): Table
@@ -226,7 +226,7 @@ class Table
     /**
      * Set the engine
      *
-     * @param string $engine
+     * @param  string $engine
      * @return void
      */
     public function withEngine(string $engine): void
@@ -247,7 +247,7 @@ class Table
     /**
      * Set the collation
      *
-     * @param string $collation
+     * @param  string $collation
      * @return void
      */
     public function withCollation(string $collation): void
@@ -268,7 +268,7 @@ class Table
     /**
      * Set the charset
      *
-     * @param string $charset
+     * @param  string $charset
      * @return void
      */
     public function withCharset(string $charset): void
@@ -299,7 +299,7 @@ class Table
     /**
      * Set the define table name
      *
-     * @param string $table
+     * @param  string $table
      * @return string
      */
     public function setTable(string $table): string
@@ -312,7 +312,7 @@ class Table
     /**
      * Set the scope
      *
-     * @param string $scope
+     * @param  string $scope
      * @return Table
      */
     public function setScope(string $scope): Table
@@ -325,7 +325,7 @@ class Table
     /**
      * Set the adapter
      *
-     * @param string $adapter
+     * @param  string $adapter
      * @return Table
      */
     public function setAdapter(string $adapter): Table
@@ -338,7 +338,7 @@ class Table
     /**
      * Normalize the data type
      *
-     * @param string $type
+     * @param  string $type
      * @return string
      */
     public function normalizeOfType(string $type): string

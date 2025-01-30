@@ -2,14 +2,15 @@
 
 namespace Bow\Tests\Messaging;
 
-use Bow\Database\Barry\Model;
+use Bow\View\View;
 use Bow\Mail\Envelop;
+use Bow\Database\Database;
+use Bow\Database\Barry\Model;
+use PHPUnit\Framework\TestCase;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Messaging\Stubs\TestMessage;
-use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
-use Bow\View\View;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
 
 class MessagingTest extends TestCase
 {
@@ -22,6 +23,7 @@ class MessagingTest extends TestCase
 
         // Initialize queue connection
         $config = TestingConfiguration::getConfig();
+        Database::configure($config["database"]);
 
         View::configure($config["view"]);
     }

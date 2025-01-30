@@ -42,8 +42,8 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     /**
      * Send message via SMS
      *
-     * @param Model $context
-     * @param Messaging $message
+     * @param  Model     $context
+     * @param  Messaging $message
      * @return void
      */
     public function send(Model $context, Messaging $message): void
@@ -58,8 +58,8 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     /**
      * Send the message via SMS using Twilio
      *
-     * @param Model $context
-     * @param Messaging $message
+     * @param  Model     $context
+     * @param  Messaging $message
      * @return void
      */
     private function sendWithTwilio(Model $context, Messaging $message): void
@@ -81,10 +81,13 @@ class SmsChannelAdapter implements ChannelAdapterInterface
         }
 
         try {
-            $this->client->messages->create($data['to'], [
+            $this->client->messages->create(
+                $data['to'],
+                [
                 'from' => $this->from_number,
                 'body' => $data['message']
-            ]);
+                ]
+            );
         } catch (\Exception $e) {
             throw new \RuntimeException('Error while sending SMS: ' . $e->getMessage());
         }

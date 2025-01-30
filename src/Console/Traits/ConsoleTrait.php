@@ -12,11 +12,11 @@ trait ConsoleTrait
     /**
      * Throw fails command
      *
-     * @param string $message
-     * @param string|null $command
+     * @param  string      $message
+     * @param  string|null $command
      * @return void
      */
-    #[NoReturn] protected function throwFailsCommand(string $message, ?string $command = null): void
+    protected function throwFailsCommand(string $message, ?string $command = null): void
     {
         echo Color::red($message) . "\n";
 

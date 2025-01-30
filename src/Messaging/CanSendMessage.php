@@ -7,7 +7,7 @@ trait CanSendMessage
     /**
      * Send message from authenticate user
      *
-     * @param Messaging $message
+     * @param  Messaging $message
      * @return void
      */
     public function sendMessage(Messaging $message): void
@@ -18,7 +18,7 @@ trait CanSendMessage
     /**
      * Send message on queue
      *
-     * @param Messaging $message
+     * @param  Messaging $message
      * @return void
      */
     public function setMessageQueue(Messaging $message): void
@@ -31,8 +31,8 @@ trait CanSendMessage
     /**
      * Send message on specific queue
      *
-     * @param string $queue
-     * @param Messaging $message
+     * @param  string    $queue
+     * @param  Messaging $message
      * @return void
      */
     public function sendMessageQueueOn(string $queue, Messaging $message): void
@@ -47,8 +47,8 @@ trait CanSendMessage
     /**
      * Send mail later
      *
-     * @param integer $delay
-     * @param Messaging $message
+     * @param  integer   $delay
+     * @param  Messaging $message
      * @return void
      */
     public function sendMessageLater(int $delay, Messaging $message): void
@@ -63,9 +63,9 @@ trait CanSendMessage
     /**
      * Send mail later on specific queue
      *
-     * @param integer $delay
-     * @param string $queue
-     * @param Messaging $message
+     * @param  integer   $delay
+     * @param  string    $queue
+     * @param  Messaging $message
      * @return void
      */
     public function sendMessageLaterOn(int $delay, string $queue, Messaging $message): void

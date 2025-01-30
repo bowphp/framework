@@ -13,10 +13,10 @@ class ControllerCommand extends AbstractCommand
     /**
      * The add controller command
      *
-     * @param string $controller
+     * @param  string $controller
      * @return void
      */
-    #[NoReturn] public function generate(string $controller): void
+    public function generate(string $controller): void
     {
         $generator = new Generator(
             $this->setting->getControllerDirectory(),

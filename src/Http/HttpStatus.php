@@ -125,7 +125,7 @@ final class HttpStatus
     /**
      * Get the message
      *
-     * @param int $code
+     * @param  int $code
      * @return string
      */
     public static function getMessage(int $code): string

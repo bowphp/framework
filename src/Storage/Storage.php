@@ -44,7 +44,7 @@ class Storage
     /**
      * Mount service
      *
-     * @param string $service
+     * @param  string $service
      * @return FTPService|S3Service
      * @throws ServiceConfigurationNotFoundException
      * @throws ServiceNotFoundException
@@ -54,26 +54,32 @@ class Storage
         $config = static::$config['services'][$service] ?? null;
 
         if (is_null($config)) {
-            throw (new ServiceConfigurationNotFoundException(sprintf(
-                '"%s" configuration not found.',
-                $service
-            )))->setService($service);
+            throw (new ServiceConfigurationNotFoundException(
+                sprintf(
+                    '"%s" configuration not found.',
+                    $service
+                )
+            ))->setService($service);
         }
 
         $driver = $config["driver"] ?? null;
 
         if (is_null($driver)) {
-            throw (new ServiceNotFoundException(sprintf(
-                '"%s" driver is not support.',
-                $driver
-            )))->setService($service);
+            throw (new ServiceNotFoundException(
+                sprintf(
+                    '"%s" driver is not support.',
+                    $driver
+                )
+            ))->setService($service);
         }
 
         if (!array_key_exists($driver, self::$available_services_drivers)) {
-            throw (new ServiceNotFoundException(sprintf(
-                '"%s" is not registered as a service.',
-                $driver
-            )))->setService($service);
+            throw (new ServiceNotFoundException(
+                sprintf(
+                    '"%s" is not registered as a service.',
+                    $driver
+                )
+            ))->setService($service);
         }
 
         $service_class = static::$available_services_drivers[$driver];
@@ -84,7 +90,7 @@ class Storage
     /**
      * Configure Storage
      *
-     * @param array $config
+     * @param  array $config
      * @return FilesystemInterface
      * @throws
      */
@@ -147,8 +153,8 @@ class Storage
     /**
      * __callStatic
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      * @throws ErrorException
      */
@@ -172,8 +178,8 @@ class Storage
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      * @throws ErrorException
      */

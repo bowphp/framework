@@ -26,9 +26,9 @@ class SpfChecker
     /**
      * Verify SPF record for a sender
      *
-     * @param string $ip
-     * @param string $sender
-     * @param string $helo
+     * @param  string $ip
+     * @param  string $sender
+     * @param  string $helo
      * @return string
      */
     public function verify(string $ip, string $sender, string $helo): string
@@ -48,7 +48,7 @@ class SpfChecker
     /**
      * Extract domain from email address
      *
-     * @param string $email
+     * @param  string $email
      * @return string
      */
     private function extractDomain(string $email): string
@@ -59,7 +59,7 @@ class SpfChecker
     /**
      * Get SPF record for domain
      *
-     * @param string $domain
+     * @param  string $domain
      * @return string|null
      */
     private function getSpfRecord(string $domain): ?string
@@ -78,10 +78,10 @@ class SpfChecker
     /**
      * Evaluate SPF record
      *
-     * @param string $spfRecord
-     * @param string $ip
-     * @param string $domain
-     * @param string $helo
+     * @param  string $spfRecord
+     * @param  string $ip
+     * @param  string $domain
+     * @param  string $helo
      * @return string
      */
     private function evaluateSpf(string $spfRecord, string $ip, string $domain, string $helo): string
@@ -102,10 +102,10 @@ class SpfChecker
     /**
      * Check SPF mechanism
      *
-     * @param string $mechanism
-     * @param string $ip
-     * @param string $domain
-     * @param string $helo
+     * @param  string $mechanism
+     * @param  string $ip
+     * @param  string $domain
+     * @param  string $helo
      * @return string|null
      */
     private function checkMechanism(string $mechanism, string $ip, string $domain, string $helo): ?string
@@ -143,9 +143,9 @@ class SpfChecker
     /**
      * Check IPv4 mechanism
      *
-     * @param string $mechanism
-     * @param string $ip
-     * @param string $qualifier
+     * @param  string $mechanism
+     * @param  string $ip
+     * @param  string $qualifier
      * @return string|null
      */
     private function checkIp4(string $mechanism, string $ip, string $qualifier): ?string
@@ -160,8 +160,8 @@ class SpfChecker
     /**
      * Check if IP is in range
      *
-     * @param string $ip
-     * @param string $range
+     * @param  string $ip
+     * @param  string $range
      * @return bool
      */
     private function ipInRange(string $ip, string $range): bool
@@ -179,7 +179,7 @@ class SpfChecker
     /**
      * Get result based on qualifier
      *
-     * @param string $qualifier
+     * @param  string $qualifier
      * @return string
      */
     private function getQualifierResult(string $qualifier): string
@@ -196,9 +196,9 @@ class SpfChecker
     /**
      * Check IPv6 mechanism
      *
-     * @param string $mechanism
-     * @param string $ip
-     * @param string $qualifier
+     * @param  string $mechanism
+     * @param  string $ip
+     * @param  string $qualifier
      * @return string|null
      */
     private function checkIp6(string $mechanism, string $ip, string $qualifier): ?string
@@ -213,10 +213,10 @@ class SpfChecker
     /**
      * Check A record mechanism
      *
-     * @param string $mechanism
-     * @param string $ip
-     * @param string $domain
-     * @param string $qualifier
+     * @param  string $mechanism
+     * @param  string $ip
+     * @param  string $domain
+     * @param  string $qualifier
      * @return string|null
      */
     private function checkA(string $mechanism, string $ip, string $domain, string $qualifier): ?string
@@ -233,10 +233,10 @@ class SpfChecker
     /**
      * Check MX record mechanism
      *
-     * @param string $mechanism
-     * @param string $ip
-     * @param string $domain
-     * @param string $qualifier
+     * @param  string $mechanism
+     * @param  string $ip
+     * @param  string $domain
+     * @param  string $qualifier
      * @return string|null
      */
     private function checkMx(string $mechanism, string $ip, string $domain, string $qualifier): ?string

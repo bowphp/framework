@@ -125,8 +125,8 @@ class Console
      * Add a custom order to the store from the web env
      * This method work on web and cli env
      *
-     * @param string $command
-     * @param callable|string $cb
+     * @param  string          $command
+     * @param  callable|string $cb
      * @return void
      */
     public static function register(string $command, callable|string $cb): void
@@ -137,7 +137,7 @@ class Console
     /**
      * Bind kernel
      *
-     * @param Loader $kernel
+     * @param  Loader $kernel
      * @return void
      */
     public function bind(Loader $kernel): void
@@ -173,7 +173,7 @@ class Console
 
         // Run all bootstraps files
         foreach ($this->setting->getBootstrap() as $item) {
-            require $item;
+            include $item;
         }
 
         // Get the argument command
@@ -201,7 +201,7 @@ class Console
     /**
      * Calls a command
      *
-     * @param string|null $command
+     * @param  string|null $command
      * @return mixed
      * @throws ErrorException
      * @throws Exception
@@ -243,7 +243,7 @@ class Console
     /**
      * Display global help or helper command.
      *
-     * @param string|null $command
+     * @param  string|null $command
      * @return int
      */
     private function help(?string $command = null): int
@@ -377,7 +377,7 @@ U;
                 break;
 
             case 'run': // phpcs:disable
-                echo <<<U
+            echo <<<U
 \n\033[0;32mrun\033[00m for launch repl and local server\n
     [option]
     run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
@@ -448,7 +448,7 @@ USAGE;
     /**
      * Execute the define custom command
      *
-     * @param string $command
+     * @param  string $command
      * @return mixed
      * @throws Exception
      */
@@ -481,8 +481,8 @@ USAGE;
      * Add a custom order to the store
      * The method work only on cli env
      *
-     * @param string $command
-     * @param callable|string $cb
+     * @param  string          $command
+     * @param  callable|string $cb
      * @return Console
      */
     public function addCommand(string $command, callable|string $cb): Console

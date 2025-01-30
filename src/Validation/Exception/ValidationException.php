@@ -19,7 +19,7 @@ class ValidationException extends HttpException
      * ValidationException constructor
      *
      * @param string $message
-     * @param array $errors
+     * @param array  $errors
      * @param string $status
      */
     public function __construct(

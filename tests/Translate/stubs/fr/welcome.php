@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'message' => 'bow framework',
+    'message' => 'Bow framework',
     'user' => [
         'name' => 'Franck'
     ],

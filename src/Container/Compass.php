@@ -87,8 +87,8 @@ class Compass
     /**
      * Add a middleware to the list
      *
-     * @param array $middlewares
-     * @param bool $end
+     * @param  array $middlewares
+     * @param  bool  $end
      * @return void
      */
     public function pushMiddleware(array $middlewares, bool $end = false): void
@@ -105,7 +105,7 @@ class Compass
     /**
      * Adding a namespace to the list
      *
-     * @param array|string $namespace
+     * @param  array|string $namespace
      * @return void
      */
     public function pushNamespace(array|string $namespace): void
@@ -118,8 +118,8 @@ class Compass
     /**
      * Callback launcher
      *
-     * @param callable|string|array $actions
-     * @param ?array $param
+     * @param  callable|string|array $actions
+     * @param  ?array                $param
      * @return mixed
      * @throws RouterException
      * @throws ReflectionException
@@ -279,7 +279,7 @@ class Compass
     /**
      * Load the controllers defined as string
      *
-     * @param string $controller_name
+     * @param  string $controller_name
      * @return array|null
      * @throws ReflectionException
      */
@@ -317,8 +317,8 @@ class Compass
     /**
      * Make any class injection
      *
-     * @param string $classname
-     * @param ?string $method
+     * @param  string  $classname
+     * @param  ?string $method
      * @return array
      * @throws ReflectionException
      */
@@ -338,7 +338,7 @@ class Compass
     /**
      * Get all parameters define by user in method injectable
      *
-     * @param array $parameters
+     * @param  array $parameters
      * @return array
      * @throws ReflectionException
      */
@@ -368,7 +368,7 @@ class Compass
     /**
      * Get injectable parameter
      *
-     * @param mixed $class
+     * @param  mixed $class
      * @return ?object
      * @throws ReflectionException
      */
@@ -403,7 +403,7 @@ class Compass
     /**
      * Injection for closure
      *
-     * @param Closure|callable $closure
+     * @param  Closure|callable $closure
      * @return array
      * @throws
      */
@@ -419,8 +419,8 @@ class Compass
     /**
      * Execution of define controller
      *
-     * @param array $functions
-     * @param array $params
+     * @param  array $functions
+     * @param  array $params
      * @return mixed
      */
     private function dispatchControllers(array $functions, array $params): mixed
@@ -455,8 +455,8 @@ class Compass
     /**
      * Successively launches a function list.
      *
-     * @param array|callable|string $function
-     * @param array $arguments
+     * @param  array|callable|string $function
+     * @param  array                 $arguments
      * @return mixed
      * @throws ReflectionException
      */
@@ -490,7 +490,7 @@ class Compass
     /**
      * Load the closure define as action
      *
-     * @param Closure $closure
+     * @param  Closure $closure
      * @return array|null
      */
     public function closure(Closure $closure): ?array

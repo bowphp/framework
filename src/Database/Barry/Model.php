@@ -217,7 +217,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Set the connection
      *
-     * @param string $name
+     * @param  string $name
      * @return Model
      * @throws ConnectionException
      */
@@ -233,7 +233,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Set connection point
      *
-     * @param string $name
+     * @param  string $name
      * @return Builder
      * @throws ConnectionException
      */
@@ -279,9 +279,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Get first rows
      *
-     * @return array|object
+     * @return array|object|null
      */
-    public static function first(): array|object
+    public static function first(): array|object|null
     {
         return static::query()->first();
     }
@@ -289,8 +289,8 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * retrieve by column name
      *
-     * @param string $column
-     * @param mixed $value
+     * @param  string $column
+     * @param  mixed  $value
      * @return Collection
      */
     public static function retrieveBy(string $column, mixed $value): Collection
@@ -332,8 +332,8 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * retrieve
      *
-     * @param mixed $id
-     * @param array $select
+     * @param  mixed $id
+     * @param  array $select
      * @return array|object|null
      */
     public static function retrieve(
@@ -401,8 +401,8 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * retrieve information by id or throws an
      * exception in data box not found
      *
-     * @param mixed $id
-     * @param array $select
+     * @param  mixed $id
+     * @param  array $select
      * @return array|object
      * @throws NotFoundException
      */
@@ -420,7 +420,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Create a persist information
      *
-     * @param array $data
+     * @param  array $data
      * @return Model
      */
     public static function create(array $data): Model
@@ -428,10 +428,13 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $model = new static();
 
         if ($model->timestamps) {
-            $data = array_merge($data, [
+            $data = array_merge(
+                $data,
+                [
                 $model->created_at => date('Y-m-d H:i:s'),
                 $model->updated_at => date('Y-m-d H:i:s')
-            ]);
+                ]
+            );
         }
 
         // Check if the primary key exist on updating data
@@ -443,15 +446,17 @@ abstract class Model implements ArrayAccess, JsonSerializable
                 $id_value = [$model->primary_key => null];
                 $data = array_merge($id_value, $data);
             } elseif ($model->primary_key_type == 'string') {
-                $data = array_merge([
+                $data = array_merge(
+                    [
                     $model->primary_key => ''
-                ], $data);
+                    ],
+                    $data
+                );
             }
         }
 
         // Override the olds model attributes
         $model->setAttributes($data);
-        $model->persist();
 
         return $model;
     }
@@ -484,9 +489,13 @@ abstract class Model implements ArrayAccess, JsonSerializable
         // We set the primary key value
         $this->original[$this->primary_key] = $primary_key_value;
 
-        $update_data = array_filter($this->attributes, function ($value, $key) {
-            return !array_key_exists($key, $this->original) || $this->original[$key] !== $value;
-        }, ARRAY_FILTER_USE_BOTH);
+        $update_data = array_filter(
+            $this->attributes,
+            function ($value, $key) {
+                return !array_key_exists($key, $this->original) || $this->original[$key] !== $value;
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
 
         // When the update data is empty, we load the original data
         if (count($update_data) == 0) {
@@ -510,7 +519,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Create the new row
      *
-     * @param Builder $builder
+     * @param  Builder $builder
      * @return int
      */
     private function writeRows(Builder $builder): int
@@ -553,7 +562,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Trans-type the primary key value
      *
-     * @param mixed $primary_key_value
+     * @param  mixed $primary_key_value
      * @return string|int|float
      */
     private function transtypeKeyValue(mixed $primary_key_value): string|int|float
@@ -573,7 +582,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Delete a record
      *
-     * @param array $attributes
+     * @param  array $attributes
      * @return int|bool
      * @throws
      */
@@ -594,9 +603,13 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $data_for_updating = $attributes;
 
         if (count($this->original) > 0) {
-            $data_for_updating = array_filter($attributes, function ($value, $key) {
-                return array_key_exists($key, $this->original) || $this->original[$key] !== $value;
-            }, ARRAY_FILTER_USE_BOTH);
+            $data_for_updating = array_filter(
+                $attributes,
+                function ($value, $key) {
+                    return array_key_exists($key, $this->original) || $this->original[$key] !== $value;
+                },
+                ARRAY_FILTER_USE_BOTH
+            );
         }
 
         // Fire the updating event
@@ -622,9 +635,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Pagination configuration
      *
-     * @param int $page_number
-     * @param int $current
-     * @param int|null $chunk
+     * @param  int      $page_number
+     * @param  int      $current
+     * @param  int|null $chunk
      * @return Pagination
      */
     public static function paginate(int $page_number, int $current = 0, ?int $chunk = null): Pagination
@@ -635,7 +648,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Allows to associate listener
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @throws
      */
     public static function deleted(callable $cb): void
@@ -648,7 +661,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Allows to associate listener
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @throws
      */
     public static function deleting(callable $cb): void
@@ -661,7 +674,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Allows to associate a listener
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @throws
      */
     public static function creating(callable $cb): void
@@ -674,7 +687,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Allows to associate a listener
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @throws
      */
     public static function created(callable $cb): void
@@ -687,7 +700,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Allows to associate a listener
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @throws
      */
     public static function updating(callable $cb): void
@@ -700,7 +713,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Allows to associate a listener
      *
-     * @param callable $cb
+     * @param  callable $cb
      * @throws
      */
     public static function updated(callable $cb): void
@@ -713,8 +726,8 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Delete Active Record by column name
      *
-     * @param string $column
-     * @param mixed $value
+     * @param  string $column
+     * @param  mixed  $value
      * @return int
      * @throws QueryBuilderException
      */
@@ -728,8 +741,8 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * __callStatic
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      */
     public static function __callStatic(string $name, array $arguments)
@@ -814,7 +827,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Allows you to recover an attribute
      *
-     * @param string $key
+     * @param  string $key
      * @return mixed|null
      */
     public function getAttribute(string $key): mixed
@@ -829,9 +842,13 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function toArray(): array
     {
-        return array_filter($this->attributes, function ($key) {
-            return !in_array($key, $this->hidden);
-        }, ARRAY_FILTER_USE_KEY);
+        return array_filter(
+            $this->attributes,
+            function ($key) {
+                return !in_array($key, $this->hidden);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**
@@ -839,15 +856,19 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return array_filter($this->attributes, function ($key) {
-            return !in_array($key, $this->hidden);
-        }, ARRAY_FILTER_USE_KEY);
+        return array_filter(
+            $this->attributes,
+            function ($key) {
+                return !in_array($key, $this->hidden);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**
      * __get
      *
-     * @param string $name
+     * @param  string $name
      * @return mixed
      */
     public function __get(string $name): mixed
@@ -922,7 +943,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * __set
      *
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function __set(string $name, mixed $value)
     {
@@ -936,9 +957,12 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     private function mutableDateAttributes(): array
     {
-        return array_merge($this->dates, [
+        return array_merge(
+            $this->dates,
+            [
             $this->created_at, $this->updated_at, 'expired_at', 'logged_at', 'signed_at'
-        ]);
+            ]
+        );
     }
 
     /**
@@ -958,9 +982,13 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function toJson(): string
     {
-        $data = array_filter($this->attributes, function ($key) {
-            return !in_array($key, $this->hidden);
-        }, ARRAY_FILTER_USE_KEY);
+        $data = array_filter(
+            $this->attributes,
+            function ($key) {
+                return !in_array($key, $this->hidden);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
 
         return json_encode($data);
     }
@@ -968,8 +996,8 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      */
     public function __call(string $name, array $arguments = [])

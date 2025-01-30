@@ -42,7 +42,7 @@ class NativeAdapter implements MailAdapterInterface
     /**
      * Switch on other define from
      *
-     * @param string $from
+     * @param  string $from
      * @return NativeAdapter
      * @throws MailException
      */
@@ -63,7 +63,7 @@ class NativeAdapter implements MailAdapterInterface
     /**
      * Implement send email
      *
-     * @param Envelop $envelop
+     * @param  Envelop $envelop
      * @return bool
      * @throws InvalidArgumentException
      */

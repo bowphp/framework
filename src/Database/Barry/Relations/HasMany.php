@@ -14,10 +14,10 @@ class HasMany extends Relation
     /**
      * Create a new belongs to relationship instance.
      *
-     * @param Model $related
-     * @param Model $parent
-     * @param string $foreign_key
-     * @param string $local_key
+     * @param  Model  $related
+     * @param  Model  $parent
+     * @param  string $foreign_key
+     * @param  string $local_key
      * @throws QueryBuilderException
      */
     public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)

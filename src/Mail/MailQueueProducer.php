@@ -18,8 +18,8 @@ class MailQueueProducer extends ProducerService
     /**
      * MailQueueProducer constructor
      *
-     * @param string $view
-     * @param array $data
+     * @param string  $view
+     * @param array   $data
      * @param Envelop $message
      */
     public function __construct(
@@ -55,7 +55,7 @@ class MailQueueProducer extends ProducerService
     /**
      * Send the processing exception
      *
-     * @param Throwable $e
+     * @param  Throwable $e
      * @return void
      */
     public function onException(Throwable $e): void

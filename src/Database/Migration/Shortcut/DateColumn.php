@@ -12,8 +12,8 @@ trait DateColumn
     /**
      * Add datetime column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -29,8 +29,8 @@ trait DateColumn
     /**
      * Add timestamp column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -42,8 +42,8 @@ trait DateColumn
     /**
      * Add date column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -55,8 +55,8 @@ trait DateColumn
     /**
      * Add time column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -68,8 +68,8 @@ trait DateColumn
     /**
      * Add year column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -102,8 +102,8 @@ trait DateColumn
     /**
      * Change datetime column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -119,8 +119,8 @@ trait DateColumn
     /**
      * Change date column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -132,8 +132,8 @@ trait DateColumn
     /**
      * Change time column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -145,8 +145,8 @@ trait DateColumn
     /**
      * Change year column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -158,8 +158,8 @@ trait DateColumn
     /**
      * Change timestamp column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */

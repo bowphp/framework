@@ -46,7 +46,7 @@ abstract class Configuration
     /**
      * Create and configure the server or package
      *
-     * @param Loader $config
+     * @param  Loader $config
      * @return void
      */
     abstract public function create(Loader $config): void;

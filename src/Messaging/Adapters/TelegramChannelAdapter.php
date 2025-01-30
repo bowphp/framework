@@ -35,8 +35,8 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
     /**
      * Envoyer le message via Telegram
      *
-     * @param Model $context
-     * @param Messaging $message
+     * @param  Model     $context
+     * @param  Messaging $message
      * @return void
      * @throws GuzzleException
      */
@@ -56,13 +56,16 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
         $endpoint = "https://api.telegram.org/bot{$this->botToken}/sendMessage";
 
         try {
-            $client->post($endpoint, [
+            $client->post(
+                $endpoint,
+                [
                 'json' => [
                     'chat_id' => $data['chat_id'],
                     'text' => $data['message'],
                     'parse_mode' => $data['parse_mode'] ?? 'HTML'
                 ]
-            ]);
+                ]
+            );
         } catch (Exception $e) {
             throw new RuntimeException('Error while sending Telegram message: ' . $e->getMessage());
         }

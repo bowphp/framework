@@ -11,7 +11,7 @@ interface MailAdapterInterface
     /**
      * Send mail by any driver
      *
-     * @param Envelop $envelop
+     * @param  Envelop $envelop
      * @return bool
      */
     public function send(Envelop $envelop): bool;

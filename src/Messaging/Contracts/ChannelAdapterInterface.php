@@ -10,8 +10,8 @@ interface ChannelAdapterInterface
     /**
      * Send a message through the channel
      *
-     * @param Model $context
-     * @param Messaging $message
+     * @param  Model     $context
+     * @param  Messaging $message
      * @return void
      */
     public function send(Model $context, Messaging $message): void;

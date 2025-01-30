@@ -14,10 +14,10 @@ class ValidationCommand extends AbstractCommand
     /**
      * Add validation
      *
-     * @param string $validation
+     * @param  string $validation
      * @return void
      */
-    #[NoReturn] public function generate(string $validation): void
+    public function generate(string $validation): void
     {
         $generator = new Generator(
             $this->setting->getValidationDirectory(),

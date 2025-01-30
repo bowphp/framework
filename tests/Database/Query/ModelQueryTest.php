@@ -147,6 +147,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
         $next_id = PetModelStub::all()->count() + 1;
 
         $insert_result = PetModelStub::create(['name' => 'Tor']);
+        $insert_result->persist();
         $select_result = PetModelStub::retrieveBy('id', $next_id)->first();
 
         $this->assertInstanceOf(PetModelStub::class, $insert_result);

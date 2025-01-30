@@ -51,7 +51,7 @@ abstract class GuardContract
     /**
      * Logout
      *
-     * @param Authentication $user
+     * @param  Authentication $user
      * @return bool
      */
     abstract public function login(Authentication $user): bool;
@@ -66,7 +66,7 @@ abstract class GuardContract
     /**
      * Check if user is authenticated
      *
-     * @param array $credentials
+     * @param  array $credentials
      * @return bool
      */
     abstract public function attempts(array $credentials): bool;
@@ -84,11 +84,11 @@ abstract class GuardContract
     /**
      * Load the guard
      *
-     * @param string|null $guard
+     * @param  string|null $guard
      * @return GuardContract
      * @throws AuthenticationException
      */
-    public function guard(string $guard = null): GuardContract
+    public function guard(?string $guard = null): GuardContract
     {
         if ($guard) {
             $this->guard = $guard;

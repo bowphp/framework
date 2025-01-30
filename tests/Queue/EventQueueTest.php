@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 class EventQueueTest extends TestCase
 {
-    private static $connection;
+    private static Connection $connection;
 
     public static function setUpBeforeClass(): void
     {

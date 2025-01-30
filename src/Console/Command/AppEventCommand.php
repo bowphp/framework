@@ -13,10 +13,10 @@ class AppEventCommand extends AbstractCommand
     /**
      * Add event
      *
-     * @param string $event
+     * @param  string $event
      * @return void
      */
-    #[NoReturn] public function generate(string $event): void
+    public function generate(string $event): void
     {
         $generator = new Generator(
             $this->setting->getEventDirectory(),

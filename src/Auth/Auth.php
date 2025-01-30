@@ -36,7 +36,7 @@ class Auth
     /**
      * Configure Auth system
      *
-     * @param array $config
+     * @param  array $config
      * @return ?GuardContract
      * @throws AuthenticationException
      */
@@ -54,7 +54,7 @@ class Auth
     /**
      * Check if user is authenticated
      *
-     * @param null|string $guard
+     * @param  null|string $guard
      * @return GuardContract
      * @throws AuthenticationException
      */
@@ -100,8 +100,8 @@ class Auth
     /**
      * __callStatic
      *
-     * @param string $method
-     * @param array $params
+     * @param  string $method
+     * @param  array  $params
      * @return ?GuardContract
      * @throws ErrorException
      */

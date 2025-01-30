@@ -28,7 +28,7 @@ class DkimSigner
     /**
      * Sign the email with DKIM
      *
-     * @param Envelop $envelop
+     * @param  Envelop $envelop
      * @return string
      */
     public function sign(Envelop $envelop): string
@@ -61,7 +61,7 @@ class DkimSigner
     /**
      * Get headers to sign
      *
-     * @param Envelop $envelop
+     * @param  Envelop $envelop
      * @return array
      */
     private function getHeadersToSign(Envelop $envelop): array
@@ -81,20 +81,26 @@ class DkimSigner
     /**
      * Format email addresses
      *
-     * @param array $addresses
+     * @param  array $addresses
      * @return string
      */
     private function formatAddresses(array $addresses): string
     {
-        return implode(', ', array_map(function ($address) {
-            return $address[0] ? "{$address[0]} <{$address[1]}>" : $address[1];
-        }, $addresses));
+        return implode(
+            ', ',
+            array_map(
+                function ($address) {
+                    return $address[0] ? "{$address[0]} <{$address[1]}>" : $address[1];
+                },
+                $addresses
+            )
+        );
     }
 
     /**
      * Hash the message body
      *
-     * @param string $body
+     * @param  string $body
      * @return string
      */
     private function hashBody(string $body): string
@@ -109,8 +115,8 @@ class DkimSigner
     /**
      * Build the string to sign
      *
-     * @param array $headers
-     * @param string $bodyHash
+     * @param  array  $headers
+     * @param  string $bodyHash
      * @return string
      */
     private function buildSignatureString(array $headers, string $bodyHash): string
@@ -128,9 +134,9 @@ class DkimSigner
     /**
      * Build the DKIM header
      *
-     * @param array $headers
-     * @param string $signature
-     * @param string $bodyHash
+     * @param  array  $headers
+     * @param  string $signature
+     * @param  string $bodyHash
      * @return string
      */
     private function buildDkimHeader(array $headers, string $signature, string $bodyHash): string

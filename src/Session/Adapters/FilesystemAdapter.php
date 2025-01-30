@@ -40,7 +40,7 @@ class FilesystemAdapter implements SessionHandlerInterface
     /**
      * Destroy session information
      *
-     * @param string $id
+     * @param  string $id
      * @return bool
      */
     public function destroy(string $id): bool
@@ -55,7 +55,7 @@ class FilesystemAdapter implements SessionHandlerInterface
     /**
      * Build the session file name
      *
-     * @param string $session_id
+     * @param  string $session_id
      * @return string
      */
     private function sessionFile(string $session_id): string
@@ -66,7 +66,7 @@ class FilesystemAdapter implements SessionHandlerInterface
     /**
      * Garbage collector
      *
-     * @param int $maxlifetime
+     * @param  int $maxlifetime
      * @return int|false
      */
     public function gc(int $maxlifetime): int|false
@@ -83,8 +83,8 @@ class FilesystemAdapter implements SessionHandlerInterface
     /**
      * When the session start
      *
-     * @param string $path
-     * @param string $name
+     * @param  string $path
+     * @param  string $name
      * @return bool
      */
     public function open(string $path, string $name): bool
@@ -99,7 +99,7 @@ class FilesystemAdapter implements SessionHandlerInterface
     /**
      * Read the session information
      *
-     * @param string $session_id
+     * @param  string $session_id
      * @return string
      */
     public function read(string $session_id): string
@@ -110,8 +110,8 @@ class FilesystemAdapter implements SessionHandlerInterface
     /**
      * Write session information
      *
-     * @param string $session_id
-     * @param string $session_data
+     * @param  string $session_id
+     * @param  string $session_data
      * @return bool
      */
     public function write(string $session_id, string $session_data): bool

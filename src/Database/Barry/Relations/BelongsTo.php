@@ -14,8 +14,8 @@ class BelongsTo extends Relation
     /**
      * Create a new belongs to relationship instance.
      *
-     * @param Model $related
-     * @param Model $parent
+     * @param Model  $related
+     * @param Model  $parent
      * @param string $foreign_key
      * @param string $local_key
      */

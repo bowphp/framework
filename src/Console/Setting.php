@@ -181,7 +181,7 @@ class Setting
     /**
      * Command constructor.
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return void
      */
     public function __construct(string $dirname)
@@ -192,7 +192,7 @@ class Setting
     /**
      * Set the server file
      *
-     * @param string $serve_filename
+     * @param  string $serve_filename
      * @return void
      */
     public function setServerFilename(string $serve_filename): void
@@ -203,7 +203,7 @@ class Setting
     /**
      * Set the package configuration directory
      *
-     * @param string $configuration_directory
+     * @param  string $configuration_directory
      * @return void
      */
     public function setPackageDirectory(string $configuration_directory): void
@@ -214,7 +214,7 @@ class Setting
     /**
      * Set the application directory
      *
-     * @param string $app_directory
+     * @param  string $app_directory
      * @return void
      */
     public function setApplicationDirectory(string $app_directory): void
@@ -235,7 +235,7 @@ class Setting
     /**
      * Set the namespaces
      *
-     * @param array $namespaces
+     * @param  array $namespaces
      * @return void
      */
     public function setNamespaces(array $namespaces): void
@@ -258,7 +258,7 @@ class Setting
     /**
      * Set the var directory
      *
-     * @param string $var_directory
+     * @param  string $var_directory
      * @return void
      */
     public function setVarDirectory(string $var_directory): void
@@ -279,7 +279,7 @@ class Setting
     /**
      * Set the component directory
      *
-     * @param string $component_directory
+     * @param  string $component_directory
      * @return void
      */
     public function setComponentDirectory(string $component_directory): void
@@ -300,7 +300,7 @@ class Setting
     /**
      * Set the config directory
      *
-     * @param string $config_directory
+     * @param  string $config_directory
      * @return void
      */
     public function setConfigDirectory(string $config_directory): void
@@ -331,7 +331,7 @@ class Setting
     /**
      * Set the migration directory
      *
-     * @param string $migration_directory
+     * @param  string $migration_directory
      * @return void
      */
     public function setMigrationDirectory(string $migration_directory): void
@@ -352,7 +352,7 @@ class Setting
     /**
      * Set the seeder directory
      *
-     * @param string $seeder_directory
+     * @param  string $seeder_directory
      * @return void
      */
     public function setSeederDirectory(string $seeder_directory): void
@@ -373,7 +373,7 @@ class Setting
     /**
      * Set the validation directory
      *
-     * @param string $validation_directory
+     * @param  string $validation_directory
      * @return void
      */
     public function setValidationDirectory(string $validation_directory): void
@@ -394,7 +394,7 @@ class Setting
     /**
      * Set the service directory
      *
-     * @param string $service_directory
+     * @param  string $service_directory
      * @return void
      */
     public function setServiceDirectory(string $service_directory): void
@@ -415,7 +415,7 @@ class Setting
     /**
      * Set the producer directory
      *
-     * @param string $producer_directory
+     * @param  string $producer_directory
      * @return void
      */
     public function setProducerDirectory(string $producer_directory): void
@@ -436,7 +436,7 @@ class Setting
     /**
      * Set the command directory
      *
-     * @param string $command_directory
+     * @param  string $command_directory
      * @return void
      */
     public function setCommandDirectory(string $command_directory): void
@@ -457,7 +457,7 @@ class Setting
     /**
      * Set the event directory
      *
-     * @param string $event_directory
+     * @param  string $event_directory
      * @return void
      */
     public function setEventDirectory(string $event_directory): void
@@ -478,7 +478,7 @@ class Setting
     /**
      * Set the event listener directory
      *
-     * @param string $event_listener_directory
+     * @param  string $event_listener_directory
      * @return void
      */
     public function setEventListenerDirectory(string $event_listener_directory): void
@@ -499,7 +499,7 @@ class Setting
     /**
      * Set the middleware directory
      *
-     * @param string $middleware_directory
+     * @param  string $middleware_directory
      * @return void
      */
     public function setMiddlewareDirectory(string $middleware_directory): void
@@ -520,7 +520,7 @@ class Setting
     /**
      * Set the messaging directory
      *
-     * @param string $messaging_directory
+     * @param  string $messaging_directory
      * @return void
      */
     public function setMessagingDirectory(string $messaging_directory): void
@@ -541,7 +541,7 @@ class Setting
     /**
      * Set the model directory
      *
-     * @param string $model_directory
+     * @param  string $model_directory
      * @return void
      */
     public function setModelDirectory(string $model_directory): void
@@ -562,7 +562,7 @@ class Setting
     /**
      * Set the controller directory
      *
-     * @param string $controller_directory
+     * @param  string $controller_directory
      * @return void
      */
     public function setControllerDirectory(string $controller_directory): void
@@ -603,7 +603,7 @@ class Setting
     /**
      * Set the bootstrap files
      *
-     * @param array $bootstrap
+     * @param  array $bootstrap
      * @return void
      */
     public function setBootstrap(array $bootstrap): void
@@ -634,7 +634,7 @@ class Setting
     /**
      * Set the public directory
      *
-     * @param string $public_directory
+     * @param  string $public_directory
      * @return void
      */
     public function setPublicDirectory(string $public_directory): void
@@ -655,7 +655,7 @@ class Setting
     /**
      * Set the exception directory
      *
-     * @param string $exception_directory
+     * @param  string $exception_directory
      * @return void
      */
     public function setExceptionDirectory(string $exception_directory): void

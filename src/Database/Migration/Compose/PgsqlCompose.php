@@ -26,8 +26,8 @@ trait PgsqlCompose
     /**
      * Compose sql statement for pgsql
      *
-     * @param string $name
-     * @param array $description
+     * @param  string $name
+     * @param  array  $description
      * @return string
      * @throws SQLGeneratorException
      */
@@ -134,9 +134,9 @@ trait PgsqlCompose
     /**
      * Format the CHECK in ENUM
      *
-     * @param string $name
-     * @param string $type
-     * @param array $attribute
+     * @param  string $name
+     * @param  string $type
+     * @param  array  $attribute
      * @return string
      */
     private function formatCheckOrEnum(string $name, string $type, array $attribute): string
@@ -196,7 +196,7 @@ trait PgsqlCompose
     /**
      * Drop Column action with pgsql
      *
-     * @param string $name
+     * @param  string $name
      * @return void
      */
     private function dropColumnForPgsql(string $name): void

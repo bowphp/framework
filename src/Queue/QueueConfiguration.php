@@ -15,9 +15,12 @@ class QueueConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind('queue', function () use ($config) {
-            return new QueueConnection($config["worker"] ?? $config["queue"]);
-        });
+        $this->container->bind(
+            'queue',
+            function () use ($config) {
+                return new QueueConnection($config["worker"] ?? $config["queue"]);
+            }
+        );
     }
 
     /**

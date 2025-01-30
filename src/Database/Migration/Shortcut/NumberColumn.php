@@ -12,8 +12,8 @@ trait NumberColumn
     /**
      * Add float column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -25,8 +25,8 @@ trait NumberColumn
     /**
      * Add double column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -38,7 +38,7 @@ trait NumberColumn
     /**
      * Add double primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -50,7 +50,7 @@ trait NumberColumn
     /**
      * Add float primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -62,7 +62,7 @@ trait NumberColumn
     /**
      * Add increment primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -74,8 +74,8 @@ trait NumberColumn
     /**
      * Add integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -87,7 +87,7 @@ trait NumberColumn
     /**
      * Add integer primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -99,7 +99,7 @@ trait NumberColumn
     /**
      * Add big increment primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -111,8 +111,8 @@ trait NumberColumn
     /**
      * Add tiny integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -124,8 +124,8 @@ trait NumberColumn
     /**
      * Add Big integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -137,8 +137,8 @@ trait NumberColumn
     /**
      * Add Medium integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -150,7 +150,7 @@ trait NumberColumn
     /**
      * Add Medium integer column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -162,8 +162,8 @@ trait NumberColumn
     /**
      * Add small integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -175,7 +175,7 @@ trait NumberColumn
     /**
      * Add Smallint integer column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -187,8 +187,8 @@ trait NumberColumn
     /**
      * Change float column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -200,8 +200,8 @@ trait NumberColumn
     /**
      * Change double column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -213,7 +213,7 @@ trait NumberColumn
     /**
      * Change double primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -225,7 +225,7 @@ trait NumberColumn
     /**
      * Change float primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -237,7 +237,7 @@ trait NumberColumn
     /**
      * Change increment primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -249,8 +249,8 @@ trait NumberColumn
     /**
      * Change integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -262,7 +262,7 @@ trait NumberColumn
     /**
      * Change integer primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -274,7 +274,7 @@ trait NumberColumn
     /**
      * Change big increment primary column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -286,8 +286,8 @@ trait NumberColumn
     /**
      * Change tiny integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -299,8 +299,8 @@ trait NumberColumn
     /**
      * Change Big integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -312,8 +312,8 @@ trait NumberColumn
     /**
      * Change Medium integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -325,7 +325,7 @@ trait NumberColumn
     /**
      * Change Medium integer column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -337,8 +337,8 @@ trait NumberColumn
     /**
      * Change Small integer column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -350,7 +350,7 @@ trait NumberColumn
     /**
      * Change Small integer column
      *
-     * @param string $column
+     * @param  string $column
      * @return Table
      * @throws SQLGeneratorException
      */

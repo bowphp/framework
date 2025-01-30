@@ -47,7 +47,7 @@ abstract class Migration
     /**
      * Switch connection
      *
-     * @param string $name
+     * @param  string $name
      * @return Migration
      * @throws ConnectionException
      */
@@ -73,7 +73,7 @@ abstract class Migration
     /**
      * Drop table action
      *
-     * @param string $table
+     * @param  string $table
      * @return Migration
      * @throws MigrationException
      */
@@ -89,7 +89,7 @@ abstract class Migration
     /**
      * Get prefixed table name
      *
-     * @param string $table
+     * @param  string $table
      * @return string
      */
     final public function getTablePrefixed(string $table): string
@@ -100,7 +100,7 @@ abstract class Migration
     /**
      * Execute direct sql query
      *
-     * @param string $sql
+     * @param  string $sql
      * @return Migration
      * @throws MigrationException
      */
@@ -121,7 +121,7 @@ abstract class Migration
     /**
      * Drop table if he exists action
      *
-     * @param string $table
+     * @param  string $table
      * @return Migration
      * @throws MigrationException
      */
@@ -141,8 +141,8 @@ abstract class Migration
     /**
      * Function of creation of a new table in the database.
      *
-     * @param string $table
-     * @param callable $cb
+     * @param  string   $table
+     * @param  callable $cb
      * @return Migration
      * @throws MigrationException
      */
@@ -150,9 +150,12 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        call_user_func_array($cb, [
+        call_user_func_array(
+            $cb,
+            [
             $generator = new Table($table, $this->adapter->getName(), 'create')
-        ]);
+            ]
+        );
 
         if ($this->adapter->getName() == 'mysql') {
             $engine = sprintf(' ENGINE=%s', strtoupper($generator->getEngine()));
@@ -181,8 +184,8 @@ abstract class Migration
     /**
      * Alter table action.
      *
-     * @param string $table
-     * @param callable $cb
+     * @param  string   $table
+     * @param  callable $cb
      * @return Migration
      * @throws MigrationException
      */
@@ -190,9 +193,12 @@ abstract class Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        call_user_func_array($cb, [
+        call_user_func_array(
+            $cb,
+            [
             $generator = new Table($table, $this->adapter->getName(), 'alter')
-        ]);
+            ]
+        );
 
         if ($this->adapter->getName() === 'pgsql') {
             $sql = sprintf('ALTER TABLE %s %s;', $table, $generator->make());
@@ -206,7 +212,7 @@ abstract class Migration
     /**
      * Add SQL query
      *
-     * @param string $sql
+     * @param  string $sql
      * @return Migration
      * @throws MigrationException
      */
@@ -218,8 +224,8 @@ abstract class Migration
     /**
      * Rename table
      *
-     * @param string $table
-     * @param string $to
+     * @param  string $table
+     * @param  string $to
      * @return Migration
      * @throws MigrationException
      */
@@ -233,8 +239,8 @@ abstract class Migration
     /**
      * Rename table if exists
      *
-     * @param string $table
-     * @param string $to
+     * @param  string $table
+     * @param  string $to
      * @return Migration
      * @throws MigrationException
      */

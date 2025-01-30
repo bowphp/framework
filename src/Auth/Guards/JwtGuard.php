@@ -33,8 +33,8 @@ class JwtGuard extends GuardContract
     /**
      * JwtGuard constructor.
      *
-     * @param array $provider
-     * @param string $guard
+     * @param  array  $provider
+     * @param  string $guard
      * @throws AuthenticationException
      */
     public function __construct(array $provider, string $guard)
@@ -50,7 +50,7 @@ class JwtGuard extends GuardContract
     /**
      * Check if user is authenticated
      *
-     * @param array $credentials
+     * @param  array $credentials
      * @return bool
      * @throws AuthenticationException
      * @throws Exception
@@ -142,16 +142,19 @@ class JwtGuard extends GuardContract
     /**
      * Make direct login
      *
-     * @param Authentication $user
+     * @param  Authentication $user
      * @return bool
      * @throws Exception
      */
     public function login(Authentication $user): bool
     {
-        $attributes = array_merge($user->customJwtAttributes(), [
+        $attributes = array_merge(
+            $user->customJwtAttributes(),
+            [
             "id" => $user->getAuthenticateUserId(),
             "logged" => true
-        ]);
+            ]
+        );
 
         $this->token = $this->getPolicier()->encode($user->getAuthenticateUserId(), $attributes);
 

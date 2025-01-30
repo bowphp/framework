@@ -160,7 +160,7 @@ class Envelop
     /**
      * Format the email receiver
      *
-     * @param string $email
+     * @param  string $email
      * @return array
      */
     private function formatEmail(string $email): array
@@ -185,7 +185,7 @@ class Envelop
     /**
      * Add an attachment file
      *
-     * @param string $file
+     * @param  string $file
      * @return Envelop
      * @throws MailException
      */
@@ -228,7 +228,7 @@ class Envelop
     /**
      * Define the subject of the mail
      *
-     * @param string $subject
+     * @param  string $subject
      * @return Envelop
      */
     public function subject(string $subject): Envelop
@@ -241,8 +241,8 @@ class Envelop
     /**
      * Define the sender of the mail
      *
-     * @param string $from
-     * @param ?string $name
+     * @param  string  $from
+     * @param  ?string $name
      * @return Envelop
      */
     public function from(string $from, ?string $name = null): Envelop
@@ -255,7 +255,7 @@ class Envelop
     /**
      * Define the type of content in text/html
      *
-     * @param string $html
+     * @param  string $html
      * @return Envelop
      */
     public function html(string $html): Envelop
@@ -266,8 +266,8 @@ class Envelop
     /**
      * Add message body and set message type
      *
-     * @param string $message
-     * @param string $type
+     * @param  string $message
+     * @param  string $type
      * @return Envelop
      */
     private function type(string $message, string $type): Envelop
@@ -282,7 +282,7 @@ class Envelop
     /**
      * Add message body
      *
-     * @param string $text
+     * @param  string $text
      * @return Envelop
      */
     public function text(string $text): Envelop
@@ -295,7 +295,7 @@ class Envelop
     /**
      * Adds blind carbon copy
      *
-     * @param string $mail
+     * @param string  $mail
      * @param ?string $name
      *
      * @return Envelop
@@ -312,7 +312,7 @@ class Envelop
     /**
      * Add carbon copy
      *
-     * @param string $mail
+     * @param string  $mail
      * @param ?string $name
      *
      * @return Envelop
@@ -329,8 +329,8 @@ class Envelop
     /**
      * Add Reply-To
      *
-     * @param string $mail
-     * @param ?string $name
+     * @param  string  $mail
+     * @param  ?string $name
      * @return Envelop
      */
     public function addReplyTo(string $mail, ?string $name = null): Envelop
@@ -345,7 +345,7 @@ class Envelop
     /**
      * Add Return-Path
      *
-     * @param string $mail
+     * @param string  $mail
      * @param ?string $name = null
      *
      * @return Envelop
@@ -459,8 +459,8 @@ class Envelop
     /**
      * Set the view build
      *
-     * @param string $view
-     * @param array $data
+     * @param  string $view
+     * @param  array  $data
      * @return $this
      */
     public function view(string $view, array $data = []): Envelop
@@ -475,7 +475,7 @@ class Envelop
      *
      * @param string $message
      * @param string $type
-     * @see setEnvelop
+     * @see   setEnvelop
      */
     public function message(string $message, string $type = 'text/html'): void
     {

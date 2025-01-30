@@ -53,9 +53,9 @@ class Resource
      * Make rest
      *
      * @param string $url
-     * @param mixed $controller
-     * @param array $where
-     * @param array $ignore_method
+     * @param mixed  $controller
+     * @param array  $where
+     * @param array  $ignore_method
      */
     public static function make(string $url, mixed $controller, array $where = [], array $ignore_method = []): void
     {
@@ -73,10 +73,10 @@ class Resource
     /**
      * Bind routing
      *
-     * @param string $url
-     * @param mixed $controller
-     * @param array $definition
-     * @param array $where
+     * @param  string $url
+     * @param  mixed  $controller
+     * @param  array  $definition
+     * @param  array  $where
      * @throws
      */
     private static function bind(string $url, mixed $controller, array $definition, array $where): void

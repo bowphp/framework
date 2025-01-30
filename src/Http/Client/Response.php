@@ -37,7 +37,7 @@ class Response
      * Parser constructor.
      *
      * @param CurlHandle $ch
-     * @param ?string $content
+     * @param ?string    $content
      */
     public function __construct(CurlHandle &$ch, ?string $content = null)
     {
@@ -60,7 +60,7 @@ class Response
     /**
      * Get response content as json
      *
-     * @param bool|null $associative
+     * @param  bool|null $associative
      * @return object|array
      */
     public function toJson(?bool $associative = null): object|array

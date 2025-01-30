@@ -74,10 +74,10 @@ class Router
     /**
      * Router constructor
      *
-     * @param string $method
+     * @param string  $method
      * @param ?string $magic_method
-     * @param string $base_route
-     * @param array $middlewares
+     * @param string  $base_route
+     * @param array   $middlewares
      */
     protected function __construct(
         string $method,
@@ -105,7 +105,7 @@ class Router
      * Set auto CSRF status
      * Note: Disable only you run on test env
      *
-     * @param bool $auto_csrf
+     * @param  bool $auto_csrf
      * @return void
      */
     public function setAutoCsrf(bool $auto_csrf): void
@@ -116,8 +116,8 @@ class Router
     /**
      * Add a prefix on the roads
      *
-     * @param string $prefix
-     * @param callable $cb
+     * @param  string   $prefix
+     * @param  callable $cb
      * @return Router
      * @throws
      */
@@ -141,7 +141,7 @@ class Router
     /**
      * Route mapper
      *
-     * @param array $definition
+     * @param  array $definition
      * @throws RouterException
      */
     public function route(array $definition): void
@@ -186,9 +186,9 @@ class Router
     /**
      * Add other HTTP verbs [PUT, DELETE, UPDATE, HEAD, PATCH]
      *
-     * @param string|array $methods
-     * @param string $path
-     * @param callable|array|string $cb
+     * @param  string|array          $methods
+     * @param  string                $path
+     * @param  callable|array|string $cb
      * @return Route
      */
     private function pushHttpVerb(string|array $methods, string $path, callable|string|array $cb): Route
@@ -211,9 +211,9 @@ class Router
     /**
      * Start loading a route.
      *
-     * @param string|array $methods
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string|array          $methods
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     private function routeLoader(string|array $methods, string $path, callable|string|array $cb): Route
@@ -250,7 +250,7 @@ class Router
     /**
      * Allows to associate a global middleware on a route
      *
-     * @param array|string $middlewares
+     * @param  array|string $middlewares
      * @return Router
      */
     public function middleware(array|string $middlewares): Router
@@ -271,8 +271,8 @@ class Router
      *
      * GET, POST, DELETE, PUT, OPTIONS, PATCH
      *
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      * @throws
      */
@@ -286,8 +286,8 @@ class Router
     /**
      * Add a GET route
      *
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     public function get(string $path, callable|string|array $cb): Route
@@ -298,8 +298,8 @@ class Router
     /**
      * Add a POST route
      *
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     public function post(string $path, callable|string|array $cb): Route
@@ -320,8 +320,8 @@ class Router
     /**
      * Add a DELETE route
      *
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     public function delete(string $path, callable|string|array $cb): Route
@@ -332,8 +332,8 @@ class Router
     /**
      * Add a PUT route
      *
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     public function put(string $path, callable|string|array $cb): Route
@@ -344,8 +344,8 @@ class Router
     /**
      * Add a PATCH route
      *
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     public function patch(string $path, callable|string|array $cb): Route
@@ -356,8 +356,8 @@ class Router
     /**
      * Add a OPTIONS route
      *
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     public function options(string $path, callable|string|array $cb): Route
@@ -369,8 +369,8 @@ class Router
      * Launch a callback function for each HTTP error code.
      * When the define code match with response code.
      *
-     * @param int $code
-     * @param callable|array|string $cb
+     * @param  int                   $code
+     * @param  callable|array|string $cb
      * @return Router
      */
     public function code(int $code, callable|array|string $cb): Router
@@ -383,9 +383,9 @@ class Router
     /**
      * Match route de tout type de method
      *
-     * @param array $methods
-     * @param string $path
-     * @param callable|string|array $cb
+     * @param  array                 $methods
+     * @param  string                $path
+     * @param  callable|string|array $cb
      * @return Route
      */
     public function match(array $methods, string $path, callable|string|array $cb): Route

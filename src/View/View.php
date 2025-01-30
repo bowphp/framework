@@ -57,8 +57,8 @@ class View implements ResponseInterface
     /**
      * View constructor.
      *
-     * @param array $config
-     * @return  void
+     * @param  array $config
+     * @return void
      * @throws ViewException
      */
     public function __construct(array $config)
@@ -87,7 +87,7 @@ class View implements ResponseInterface
     /**
      * Load view configuration
      *
-     * @param array $config
+     * @param  array $config
      * @return void
      */
     public static function configure(array $config): void
@@ -98,8 +98,8 @@ class View implements ResponseInterface
     /**
      * Parse the view
      *
-     * @param string $viewname
-     * @param array $data
+     * @param  string $viewname
+     * @param  array  $data
      * @return View
      */
     public static function parse(string $view, array $data = []): View
@@ -139,8 +139,8 @@ class View implements ResponseInterface
     /**
      * Add a template engine
      *
-     * @param string $name
-     * @param string $engine
+     * @param  string $name
+     * @param  string $engine
      * @return bool
      * @throws ViewException
      */
@@ -165,7 +165,7 @@ class View implements ResponseInterface
      * __callStatic
      *
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @return mixed
      */
@@ -198,7 +198,7 @@ class View implements ResponseInterface
     /**
      * Set Engine
      *
-     * @param string $engine
+     * @param  string $engine
      * @return View
      */
     public function setEngine(string $engine): View
@@ -211,7 +211,7 @@ class View implements ResponseInterface
     }
 
     /**
-     * @param string $extension
+     * @param  string $extension
      * @return View
      */
     public function setExtension(string $extension): View
@@ -248,7 +248,7 @@ class View implements ResponseInterface
     /**
      * Check if the define file exists
      *
-     * @param string $filename
+     * @param  string $filename
      * @return bool
      */
     public function fileExists(string $filename): bool
@@ -270,7 +270,7 @@ class View implements ResponseInterface
      * __call
      *
      * @param string $method
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @return mixed
      */

@@ -26,10 +26,9 @@ trait ArrayAccessTrait
     /**
      * _offsetExists
      *
-     * @param mixed $offset
+     * @param  mixed $offset
      * @return bool
-     * @see http://php.net/manual/fr/class.arrayaccess.php
-     *
+     * @see    http://php.net/manual/fr/class.arrayaccess.php
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -51,7 +50,7 @@ trait ArrayAccessTrait
     /**
      * _offsetGet
      *
-     * @param mixed $offset
+     * @param  mixed $offset
      * @return mixed|null
      *
      * @see http://php.net/manual/fr/class.arrayaccess.php

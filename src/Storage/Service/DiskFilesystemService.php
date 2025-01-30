@@ -51,13 +51,13 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Function to upload a file
      *
-     * @param UploadedFile $file
+     * @param UploadedFile      $file
      * @param string|array|null $location
-     * @param array $option
+     * @param array             $option
      *
      * @return array|bool|string
      */
-    public function store(UploadedFile $file, string|array $location = null, array $option = []): array|bool|string
+    public function store(UploadedFile $file, $location = null, array $option = []): array|bool|string
     {
         if (is_array($location)) {
             $option = $location;
@@ -103,7 +103,7 @@ class DiskFilesystemService implements FilesystemInterface
      * Resolves file path.
      * Give the absolute path of a path
      *
-     * @param string $file
+     * @param  string $file
      * @return string
      */
     public function path(string $file): string
@@ -118,8 +118,8 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Create a directory
      *
-     * @param string $dirname
-     * @param int $mode
+     * @param  string $dirname
+     * @param  int    $mode
      * @return bool
      */
     public function makeDirectory(string $dirname, int $mode = 0777): bool
@@ -177,7 +177,7 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * List the folder of a folder passed as a parameter
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public function directories(string $dirname): array
@@ -188,8 +188,8 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Renames or moves a source file to a target file.
      *
-     * @param string $source
-     * @param string $target
+     * @param  string $source
+     * @param  string $target
      * @return bool
      */
     public function move(string $source, string $target): bool
@@ -204,8 +204,8 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Copy the contents of a source file to a target file.
      *
-     * @param string $source
-     * @param string $target
+     * @param  string $source
+     * @param  string $target
      * @return bool
      */
     public function copy(string $source, string $target): bool
@@ -224,7 +224,7 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Check the existence of a file or directory
      *
-     * @param string $file
+     * @param  string $file
      * @return bool
      */
     public function exists(string $file): bool
@@ -235,7 +235,7 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * isFile alias of is_file.
      *
-     * @param string $file
+     * @param  string $file
      * @return bool
      */
     public function isFile(string $file): bool
@@ -246,7 +246,7 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * isDirectory alias of is_dir.
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return bool
      */
     public function isDirectory(string $dirname): bool
@@ -257,7 +257,7 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * Recover the contents of the file
      *
-     * @param string $file
+     * @param  string $file
      * @return string|null
      */
     public function get(string $file): ?string
@@ -304,7 +304,7 @@ class DiskFilesystemService implements FilesystemInterface
     /**
      * The file extension
      *
-     * @param string $filename
+     * @param  string $filename
      * @return string|null
      */
     public function extension(string $filename): ?string

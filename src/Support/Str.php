@@ -12,7 +12,7 @@ class Str
     /**
      * camel
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public static function camel(string $str): string
@@ -36,17 +36,23 @@ class Str
     /**
      * Snake case
      *
-     * @param string $str
-     * @param string $delimiter
+     * @param  string $str
+     * @param  string $delimiter
      * @return string
      */
     public static function snake(string $str, string $delimiter = '_'): string
     {
         $str = preg_replace('/\s+/u', $delimiter, $str);
 
-        $str = static::lower(preg_replace_callback('/([A-Z])/u', function ($math) use ($delimiter) {
-            return $delimiter . static::lower($math[1]);
-        }, $str));
+        $str = static::lower(
+            preg_replace_callback(
+                '/([A-Z])/u',
+                function ($math) use ($delimiter) {
+                    return $delimiter . static::lower($math[1]);
+                },
+                $str
+            )
+        );
 
         return trim(preg_replace('/' . $delimiter . '{2,}/', $delimiter, $str), $delimiter);
     }
@@ -54,7 +60,7 @@ class Str
     /**
      * lower case
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public static function lower(string $str): string
@@ -65,7 +71,7 @@ class Str
     /**
      * Get str plural
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public static function plural(string $str): string
@@ -84,9 +90,9 @@ class Str
     /**
      * slice
      *
-     * @param string $str
-     * @param int $start
-     * @param int|null $length
+     * @param  string   $str
+     * @param  int      $start
+     * @param  int|null $length
      * @return string
      */
     public static function slice(string $str, int $start, ?int $length = null): string
@@ -107,7 +113,7 @@ class Str
     /**
      * Len
      *
-     * @param string $str
+     * @param  string $str
      * @return int
      */
     public static function len(string $str): int
@@ -118,8 +124,8 @@ class Str
     /**
      * Contains
      *
-     * @param string $search
-     * @param string $str
+     * @param  string $search
+     * @param  string $str
      * @return bool
      */
     public static function contains(string $search, string $str): bool
@@ -134,9 +140,9 @@ class Str
     /**
      * Get the string position
      *
-     * @param string $search
-     * @param string $string
-     * @param int $offset
+     * @param  string $search
+     * @param  string $string
+     * @param  int    $offset
      * @return int
      */
     public static function pos(string $search, string $string, int $offset = 0): int
@@ -147,9 +153,9 @@ class Str
     /**
      * replace
      *
-     * @param string $pattern
-     * @param string $replaceBy
-     * @param string $str
+     * @param  string $pattern
+     * @param  string $replaceBy
+     * @param  string $str
      * @return string
      */
     public static function replace(string $pattern, string $replaceBy, string $str): string
@@ -160,7 +166,7 @@ class Str
     /**
      * capitalize
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public static function capitalize(string $str): string
@@ -171,8 +177,8 @@ class Str
     /**
      * Wordily
      *
-     * @param string $str
-     * @param string $sep
+     * @param  string $str
+     * @param  string $sep
      * @return array
      */
     public static function wordily(string $str, string $sep = ' '): array
@@ -183,9 +189,9 @@ class Str
     /**
      * split
      *
-     * @param string $pattern
-     * @param string $str
-     * @param int|null $limit
+     * @param  string   $pattern
+     * @param  string   $str
+     * @param  int|null $limit
      * @return array
      */
     public static function split(string $pattern, string $str, ?int $limit = null): array
@@ -196,8 +202,8 @@ class Str
     /**
      * Returns the number of characters in a string.
      *
-     * @param string $pattern
-     * @param string $str
+     * @param  string $pattern
+     * @param  string $str
      * @return int
      */
     public static function count(string $pattern, string $str): int
@@ -208,8 +214,8 @@ class Str
     /**
      * Lists the string of characters in a specified number
      *
-     * @param string $str
-     * @param int $number
+     * @param  string $str
+     * @param  int    $number
      * @return string
      */
     public static function repeat(string $str, int $number): string
@@ -220,7 +226,7 @@ class Str
     /**
      * Randomize
      *
-     * @param int $size
+     * @param  int $size
      * @return string
      */
     public static function random(int $size = 16): string
@@ -241,8 +247,8 @@ class Str
     /**
      * Alias of slugify
      *
-     * @param string $str
-     * @param string $delimiter
+     * @param  string $str
+     * @param  string $delimiter
      * @return string
      */
     public static function slug(string $str, string $delimiter = '-'): string
@@ -254,8 +260,8 @@ class Str
      * slugify slug creator using a simple chain.
      * eg: 'I am a string of character' => 'i-am-a-chain-of-character'
      *
-     * @param string $str
-     * @param string $delimiter
+     * @param  string $str
+     * @param  string $delimiter
      * @return string
      */
     public static function slugify(string $str, string $delimiter = '-'): string
@@ -272,7 +278,7 @@ class Str
     /**
      * Alias of un-slugify
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public static function unSlug(string $str): string
@@ -283,7 +289,7 @@ class Str
     /**
      * un-slugify, Lets you undo a slug
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public static function unSlugify(string $str): string
@@ -296,7 +302,7 @@ class Str
      *
      * eg: example@email.com => true
      *
-     * @param string $email
+     * @param  string $email
      * @return bool
      */
     public static function isMail(string $email): bool
@@ -316,7 +322,7 @@ class Str
      * eg: http://example.com => true
      * eg: http:/example.com => false
      *
-     * @param string $domain
+     * @param  string $domain
      * @return bool
      */
     public static function isDomain(string $domain): bool
@@ -330,7 +336,7 @@ class Str
     /**
      * Check if the string is in alphanumeric
      *
-     * @param string $str
+     * @param  string $str
      * @return bool
      */
     public static function isAlphaNum(string $str): bool
@@ -341,7 +347,7 @@ class Str
     /**
      * Check if the string is in numeric
      *
-     * @param string $str
+     * @param  string $str
      * @return bool
      */
     public static function isNumeric(string $str): bool
@@ -352,7 +358,7 @@ class Str
     /**
      * Check if the string is in alpha
      *
-     * @param string $str
+     * @param  string $str
      * @return bool
      */
     public static function isAlpha(string $str): bool
@@ -363,7 +369,7 @@ class Str
     /**
      * Check if the string is in slug format
      *
-     * @param string $str
+     * @param  string $str
      * @return bool
      */
     public static function isSlug(string $str): bool
@@ -374,7 +380,7 @@ class Str
     /**
      * Check if the string is in uppercase
      *
-     * @param string $str
+     * @param  string $str
      * @return bool
      */
     public static function isUpper(string $str): bool
@@ -385,7 +391,7 @@ class Str
     /**
      * upper case
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public static function upper(string $str): string
@@ -396,7 +402,7 @@ class Str
     /**
      * Check if the string is lowercase
      *
-     * @param string $str
+     * @param  string $str
      * @return bool
      */
     public static function isLower(string $str): bool
@@ -407,8 +413,8 @@ class Str
     /**
      * Returns a determined number of words in a string.
      *
-     * @param string $words
-     * @param int $len
+     * @param  string $words
+     * @param  int    $len
      * @return string
      */
     public static function words(string $words, int $len): string
@@ -431,7 +437,7 @@ class Str
     /**
      * Returns a string of words whose words are mixed.
      *
-     * @param string $words
+     * @param  string $words
      * @return string
      */
     public static function shuffleWords(string $words): string
@@ -474,7 +480,7 @@ class Str
     /**
      * Enables to force the encoding in utf-8
      *
-     * @param string $garbled_utf8_string
+     * @param  string $garbled_utf8_string
      * @return string
      */
     public static function fixUTF8(string $garbled_utf8_string): string
@@ -485,8 +491,8 @@ class Str
     /**
      * __call
      *
-     * @param string $method
-     * @param array $arguments
+     * @param  string $method
+     * @param  array  $arguments
      * @return mixed
      */
     public function __call(string $method, array $arguments = [])

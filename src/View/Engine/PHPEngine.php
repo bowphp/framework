@@ -19,7 +19,7 @@ class PHPEngine extends EngineAbstract
     /**
      * PHPEngine constructor.
      *
-     * @param array $config
+     * @param  array $config
      * @return void
      */
     public function __construct(array $config)
@@ -65,14 +65,14 @@ class PHPEngine extends EngineAbstract
     /**
      * include the execute filename
      *
-     * @param string $filename
+     * @param  string $filename
      * @return string
      */
     private function includeFile(string $filename): string
     {
         ob_start();
 
-        require $filename;
+        include $filename;
 
         return ob_get_clean();
     }

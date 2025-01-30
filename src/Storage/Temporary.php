@@ -25,7 +25,7 @@ class Temporary
     /**
      * Temporary Constructor
      *
-     * @param string $lock_filename
+     * @param  string $lock_filename
      * @return void
      * @throws ResourceException
      */

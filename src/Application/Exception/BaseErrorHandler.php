@@ -17,8 +17,8 @@ class BaseErrorHandler
     /**
      * Render view as response
      *
-     * @param string $view
-     * @param array $data
+     * @param  string $view
+     * @param  array  $data
      * @return string
      */
     protected function render(string $view, array $data = []): string
@@ -29,11 +29,11 @@ class BaseErrorHandler
     /**
      * Send the json as response
      *
-     * @param $exception
-     * @param mixed|null $code
+     * @param  $exception
+     * @param  mixed|null $code
      * @return void
      */
-    #[NoReturn] protected function json($exception, mixed $code = null): void
+    protected function json($exception, mixed $code = null): void
     {
         if ($exception instanceof TokenInvalidException) {
             $code = 'TOKEN_INVALID';

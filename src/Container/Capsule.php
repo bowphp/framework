@@ -65,8 +65,8 @@ class Capsule implements ArrayAccess
     /**
      * Compilation with parameter
      *
-     * @param string $key
-     * @param array $parameters
+     * @param  string $key
+     * @param  array  $parameters
      * @return mixed
      * @throws
      */
@@ -84,7 +84,7 @@ class Capsule implements ArrayAccess
     /**
      * Instantiate a class by its key
      *
-     * @param string $key
+     * @param  string $key
      * @return mixed
      * @throws
      */
@@ -128,7 +128,7 @@ class Capsule implements ArrayAccess
     /**
      * Make the
      *
-     * @param string $key
+     * @param  string $key
      * @return mixed
      * @throws
      */
@@ -170,8 +170,8 @@ class Capsule implements ArrayAccess
     /**
      * Add to register
      *
-     * @param string $key
-     * @param callable $value
+     * @param  string   $key
+     * @param  callable $value
      * @return Capsule
      */
     public function bind(string $key, callable $value): Capsule
@@ -186,8 +186,8 @@ class Capsule implements ArrayAccess
     /**
      * Register the instance of a class
      *
-     * @param string $key
-     * @param Closure|callable $value
+     * @param  string           $key
+     * @param  Closure|callable $value
      * @return Capsule
      */
     public function factory(string $key, Closure|callable $value): Capsule
@@ -200,8 +200,8 @@ class Capsule implements ArrayAccess
     /**
      * Saves the instance of a class
      *
-     * @param string $key
-     * @param mixed $instance
+     * @param  string $key
+     * @param  mixed  $instance
      * @return Capsule
      */
     public function instance(string $key, mixed $instance): Capsule

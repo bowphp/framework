@@ -64,7 +64,7 @@ class HttpClient
     /**
      * Set the base url
      *
-     * @param string $url
+     * @param  string $url
      * @return void
      */
     public function setBaseUrl(string $url): void
@@ -75,8 +75,8 @@ class HttpClient
     /**
      * Make get requester
      *
-     * @param string $url
-     * @param array $data
+     * @param  string $url
+     * @param  array  $data
      * @return Response
      * @throws Exception
      */
@@ -99,7 +99,7 @@ class HttpClient
     /**
      * Reset always connection
      *
-     * @param string $url
+     * @param  string $url
      * @return void
      */
     private function init(string $url): void
@@ -163,8 +163,8 @@ class HttpClient
     /**
      * Make post requester
      *
-     * @param string $url
-     * @param array $data
+     * @param  string $url
+     * @param  array  $data
      * @return Response
      * @throws Exception
      */
@@ -195,7 +195,7 @@ class HttpClient
     /**
      * Add fields
      *
-     * @param array $data
+     * @param  array $data
      * @return void
      */
     private function addFields(array $data): void
@@ -216,8 +216,8 @@ class HttpClient
     /**
      * Make put requester
      *
-     * @param string $url
-     * @param array $data
+     * @param  string $url
+     * @param  array  $data
      * @return Response
      * @throws Exception
      */
@@ -237,8 +237,8 @@ class HttpClient
     /**
      * Make put requester
      *
-     * @param string $url
-     * @param array $data
+     * @param  string $url
+     * @param  array  $data
      * @return Response
      * @throws Exception
      */
@@ -258,7 +258,7 @@ class HttpClient
     /**
      * Attach new file
      *
-     * @param string|array $attach
+     * @param  string|array $attach
      * @return HttpClient
      */
     public function addAttach(string|array $attach): HttpClient
@@ -271,7 +271,7 @@ class HttpClient
     /**
      * Set the user agent
      *
-     * @param string $user_agent
+     * @param  string $user_agent
      * @return HttpClient
      */
     public function setUserAgent(string $user_agent): HttpClient
@@ -298,7 +298,7 @@ class HttpClient
     /**
      * Add additional header
      *
-     * @param array $headers
+     * @param  array $headers
      * @return HttpClient
      */
     public function addHeaders(array $headers): HttpClient

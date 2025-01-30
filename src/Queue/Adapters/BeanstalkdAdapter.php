@@ -25,7 +25,7 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Configure Beanstalkd driver
      *
-     * @param array $config
+     * @param  array $config
      * @return mixed
      */
     public function configure(array $config): BeanstalkdAdapter
@@ -50,7 +50,7 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Get the size of the queue.
      *
-     * @param string|null $queue
+     * @param  string|null $queue
      * @return int
      */
     public function size(?string $queue = null): int
@@ -63,7 +63,7 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param ProducerService $producer
+     * @param  ProducerService $producer
      * @return void
      * @throws ErrorException
      */
@@ -90,7 +90,7 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Get the priority
      *
-     * @param int $priority
+     * @param  int $priority
      * @return int
      */
     public function getPriority(int $priority): int
@@ -106,11 +106,11 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Run the worker
      *
-     * @param string|null $queue
+     * @param  string|null $queue
      * @return void
      * @throws ErrorException
      */
-    public function run(string $queue = null): void
+    public function run(?string $queue = null): void
     {
         // we want jobs from define queue only.
         $queue = $this->getQueue($queue);
@@ -130,7 +130,7 @@ class BeanstalkdAdapter extends QueueAdapter
         } catch (Throwable $e) {
             // Write the error log
             error_log($e->getMessage());
-            app('logger')->error($e->getMessage(), $e->getTrace());
+            logger()->error($e->getMessage(), $e->getTrace());
             cache("job:failed:" . $job->getId(), $job->getData());
 
             // Check if producer has been loaded
@@ -157,7 +157,7 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Flush the queue
      *
-     * @param string|null $queue
+     * @param  string|null $queue
      * @return void
      * @throws ErrorException
      */

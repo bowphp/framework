@@ -120,7 +120,7 @@ class SmtpAdapter implements MailAdapterInterface
     /**
      * Start sending mail
      *
-     * @param Envelop $envelop
+     * @param  Envelop $envelop
      * @return bool
      * @throws SocketException
      * @throws ErrorException
@@ -151,7 +151,7 @@ class SmtpAdapter implements MailAdapterInterface
 
         // SMTP command
         if ($envelop->getFrom() !== null) {
-            $this->write('MAIL FROM: <' . $envelop->getFrom() . '>', 250);
+            $this->write('MAIL FROM: ' . $envelop->getFrom(), 250);
         } elseif ($this->username !== null) {
             $this->write('MAIL FROM: <' . $this->username . '>', 250);
         }
@@ -283,9 +283,9 @@ class SmtpAdapter implements MailAdapterInterface
     /**
      * Start an SMTP command
      *
-     * @param string $command
-     * @param ?int $code
-     * @param ?string $envelop
+     * @param  string  $command
+     * @param  ?int    $code
+     * @param  ?string $envelop
      * @return int|null
      * @throws SmtpException
      */

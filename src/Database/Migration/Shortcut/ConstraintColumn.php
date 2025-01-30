@@ -11,8 +11,8 @@ trait ConstraintColumn
     /**
      * Add Foreign KEY constraints
      *
-     * @param string $name
-     * @param array $attributes
+     * @param  string $name
+     * @param  array  $attributes
      * @return Table
      */
     public function addForeign(string $name, array $attributes = []): Table
@@ -75,8 +75,8 @@ trait ConstraintColumn
     /**
      * Drop constraints column;
      *
-     * @param string|array $name
-     * @param bool $as_raw
+     * @param  string|array $name
+     * @param  bool         $as_raw
      * @return Table
      */
     public function dropForeign(string|array $name, bool $as_raw = false): Table
@@ -100,7 +100,7 @@ trait ConstraintColumn
     /**
      * Add table index;
      *
-     * @param string $name
+     * @param  string $name
      * @return Table
      */
     public function addIndex(string $name): Table
@@ -123,7 +123,7 @@ trait ConstraintColumn
     /**
      * Drop table index;
      *
-     * @param string $name
+     * @param  string $name
      * @return Table
      */
     public function dropIndex(string $name): Table
@@ -156,7 +156,7 @@ trait ConstraintColumn
     /**
      * Add table unique;
      *
-     * @param string $name
+     * @param  string $name
      * @return Table
      */
     public function addUnique(string $name): Table
@@ -179,7 +179,7 @@ trait ConstraintColumn
     /**
      * Drop table unique;
      *
-     * @param string $name
+     * @param  string $name
      * @return Table
      */
     public function dropUnique(string $name): Table

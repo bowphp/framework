@@ -88,8 +88,8 @@ class Generator
     /**
      * Write file
      *
-     * @param string $type
-     * @param array $data
+     * @param  string $type
+     * @param  array  $data
      * @return bool
      */
     public function write(string $type, array $data = []): bool
@@ -114,10 +114,16 @@ class Generator
         );
 
         // Create the stub parsed content
-        $template = $this->makeStubContent($type, array_merge([
-            'namespace' => $namespace,
-            'className' => $classname
-        ], $data));
+        $template = $this->makeStubContent(
+            $type,
+            array_merge(
+                [
+                'namespace' => $namespace,
+                'className' => $classname
+                ],
+                $data
+            )
+        );
 
         return (bool)file_put_contents($this->getPath(), $template);
     }
@@ -125,8 +131,8 @@ class Generator
     /**
      * Stub render
      *
-     * @param string $type
-     * @param array $data
+     * @param  string $type
+     * @param  array  $data
      * @return string
      */
     public function makeStubContent(string $type, array $data = []): string

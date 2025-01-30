@@ -14,10 +14,10 @@ class ProducerCommand extends AbstractCommand
     /**
      * Add producer
      *
-     * @param string $producer
+     * @param  string $producer
      * @return void
      */
-    #[NoReturn] public function generate(string $producer): void
+    public function generate(string $producer): void
     {
         $generator = new Generator(
             $this->setting->getProducerDirectory(),

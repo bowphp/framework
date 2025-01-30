@@ -13,7 +13,7 @@ class KernelTesting extends ConfigurationLoader
     /**
      * Set the loading configuration
      *
-     * @param array $configurations
+     * @param  array $configurations
      * @return void
      */
     public static function withConfigurations(array $configurations): void
@@ -24,7 +24,7 @@ class KernelTesting extends ConfigurationLoader
     /**
      * Set the loading events
      *
-     * @param array $events
+     * @param  array $events
      * @return void
      */
     public static function withEvents(array $events): void
@@ -35,7 +35,7 @@ class KernelTesting extends ConfigurationLoader
     /**
      * Set the loading middlewares
      *
-     * @param array $middlewares
+     * @param  array $middlewares
      * @return void
      */
     public static function withMiddlewares(array $middlewares): void

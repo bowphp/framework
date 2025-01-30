@@ -12,8 +12,8 @@ class MailChannelAdapter implements ChannelAdapterInterface
     /**
      * Send the notification to mail
      *
-     * @param Model $context
-     * @param Messaging $message
+     * @param  Model     $context
+     * @param  Messaging $message
      * @return void
      */
     public function send(Model $context, Messaging $message): void

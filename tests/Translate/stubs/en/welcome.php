@@ -3,7 +3,7 @@
 return [
     'message' => 'Bow framework',
     'user' => [
-        'name' => 'Frank'
+        'name' => 'Franck'
     ],
     'plurial' => 'User|Users',
     'hello' => 'Hello {name}'

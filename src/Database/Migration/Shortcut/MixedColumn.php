@@ -12,8 +12,8 @@ trait MixedColumn
     /**
      * Add BOOLEAN column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -25,8 +25,8 @@ trait MixedColumn
     /**
      * Add UUID column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -48,8 +48,8 @@ trait MixedColumn
     /**
      * Add UUID column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -80,8 +80,8 @@ trait MixedColumn
     /**
      * Add BINARY column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -93,8 +93,8 @@ trait MixedColumn
     /**
      * Add TINYBLOB column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -106,8 +106,8 @@ trait MixedColumn
     /**
      * Add LONGBLOB column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -119,8 +119,8 @@ trait MixedColumn
     /**
      * Add MEDIUMBLOB column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -132,8 +132,8 @@ trait MixedColumn
     /**
      * Add ip column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -145,8 +145,8 @@ trait MixedColumn
     /**
      * Add mac column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -158,8 +158,8 @@ trait MixedColumn
     /**
      * Add enum column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -183,8 +183,8 @@ trait MixedColumn
     /**
      * Add check column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -220,8 +220,8 @@ trait MixedColumn
     /**
      * Change boolean column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -233,8 +233,8 @@ trait MixedColumn
     /**
      * Change UUID column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -259,8 +259,8 @@ trait MixedColumn
     /**
      * Change BLOB column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -272,8 +272,8 @@ trait MixedColumn
     /**
      * Change TINYBLOB column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -285,8 +285,8 @@ trait MixedColumn
     /**
      * Change MEDIUMBLOB column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -298,8 +298,8 @@ trait MixedColumn
     /**
      * Change TINYBLOB column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -311,8 +311,8 @@ trait MixedColumn
     /**
      * Change ip column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -324,8 +324,8 @@ trait MixedColumn
     /**
      * Change mac column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -337,8 +337,8 @@ trait MixedColumn
     /**
      * Change enum column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -362,8 +362,8 @@ trait MixedColumn
     /**
      * Change check column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */

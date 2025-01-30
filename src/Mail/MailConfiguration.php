@@ -14,9 +14,12 @@ class MailConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind('mail', function () use ($config) {
-            return Mail::configure($config['mail']);
-        });
+        $this->container->bind(
+            'mail',
+            function () use ($config) {
+                return Mail::configure($config['mail']);
+            }
+        );
     }
 
     /**

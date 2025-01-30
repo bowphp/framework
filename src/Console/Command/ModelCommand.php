@@ -13,7 +13,7 @@ class ModelCommand extends AbstractCommand
     /**
      * Add Model
      *
-     * @param string $model
+     * @param  string $model
      * @return void
      */
     public function generate(string $model): void

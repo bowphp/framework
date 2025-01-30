@@ -23,7 +23,7 @@ class SeederCommand extends AbstractCommand
      *
      * @param string $seeder
      */
-    #[NoReturn] public function generate(string $seeder): void
+    public function generate(string $seeder): void
     {
         $seeder = Str::plural($seeder);
 
@@ -60,12 +60,12 @@ class SeederCommand extends AbstractCommand
     /**
      * Make Seeder
      *
-     * @param string $seed_filename
+     * @param  string $seed_filename
      * @return void
      */
     private function make(string $seed_filename): void
     {
-        $seeds = require $seed_filename;
+        $seeds = include $seed_filename;
 
         $seed_collection = array_merge($seeds);
 
@@ -97,7 +97,7 @@ class SeederCommand extends AbstractCommand
     /**
      * Launch targeted seeding
      *
-     * @param string|null $seeder_name
+     * @param  string|null $seeder_name
      * @return void
      */
     public function table(?string $seeder_name = null): void

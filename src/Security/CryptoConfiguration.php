@@ -14,11 +14,14 @@ class CryptoConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind('security', function () use ($config) {
-            Crypto::setkey($config['security.key'], $config['security.cipher']);
+        $this->container->bind(
+            'security',
+            function () use ($config) {
+                Crypto::setkey($config['security.key'], $config['security.cipher']);
 
-            return Crypto::class;
-        });
+                return Crypto::class;
+            }
+        );
     }
 
     /**

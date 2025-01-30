@@ -37,7 +37,7 @@ class DatabaseAdapter implements SessionHandlerInterface
     /**
      * Database constructor
      *
-     * @param array $options
+     * @param array  $options
      * @param string $ip
      */
     public function __construct(array $options, string $ip)
@@ -60,7 +60,7 @@ class DatabaseAdapter implements SessionHandlerInterface
     /**
      * Destroy session information
      *
-     * @param string $id
+     * @param  string $id
      * @return bool
      * @throws QueryBuilderException
      */
@@ -85,7 +85,7 @@ class DatabaseAdapter implements SessionHandlerInterface
     /**
      * Garbage collector for cleans old sessions
      *
-     * @param int $max_lifetime
+     * @param  int $max_lifetime
      * @return int|false
      * @throws QueryBuilderException
      */
@@ -101,8 +101,8 @@ class DatabaseAdapter implements SessionHandlerInterface
     /**
      * When the session start
      *
-     * @param string $path
-     * @param string $name
+     * @param  string $path
+     * @param  string $name
      * @return bool
      */
     public function open(string $path, string $name): bool
@@ -113,7 +113,7 @@ class DatabaseAdapter implements SessionHandlerInterface
     /**
      * Read the session information
      *
-     * @param string $session_id
+     * @param  string $session_id
      * @return string
      * @throws QueryBuilderException
      */
@@ -132,8 +132,8 @@ class DatabaseAdapter implements SessionHandlerInterface
     /**
      * Write session information
      *
-     * @param string $id
-     * @param string $data
+     * @param  string $id
+     * @param  string $data
      * @return bool
      * @throws QueryBuilderException
      */
@@ -148,10 +148,12 @@ class DatabaseAdapter implements SessionHandlerInterface
         }
 
         // Update the session information
-        $update = $this->sessions()->where('id', $id)->update([
+        $update = $this->sessions()->where('id', $id)->update(
+            [
             'data' => $data,
             'id' => $id
-        ]);
+            ]
+        );
 
         return (bool)$update;
     }
@@ -159,8 +161,8 @@ class DatabaseAdapter implements SessionHandlerInterface
     /**
      * Get the insert data
      *
-     * @param string $session_id
-     * @param string $session_data
+     * @param  string $session_id
+     * @param  string $session_data
      * @return array
      */
     private function data(string $session_id, string $session_data): array

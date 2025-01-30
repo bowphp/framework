@@ -62,7 +62,7 @@ class Redirect implements ResponseInterface
     /**
      * Redirection with the query information
      *
-     * @param array $data
+     * @param  array $data
      * @return Redirect
      */
     public function withInput(array $data = []): Redirect
@@ -79,8 +79,8 @@ class Redirect implements ResponseInterface
     /**
      * Redirection with define flash information
      *
-     * @param string $key
-     * @param mixed $value
+     * @param  string $key
+     * @param  mixed  $value
      * @return Redirect
      */
     public function withFlash(string $key, mixed $value): Redirect
@@ -93,9 +93,9 @@ class Redirect implements ResponseInterface
     /**
      * Redirect with route definition
      *
-     * @param string $name
-     * @param array $data
-     * @param bool $absolute
+     * @param  string $name
+     * @param  array  $data
+     * @param  bool   $absolute
      * @return Redirect
      */
     public function route(string $name, array $data = [], bool $absolute = false): Redirect
@@ -108,7 +108,7 @@ class Redirect implements ResponseInterface
     /**
      * Redirect on the previous URL
      *
-     * @param int $status
+     * @param  int $status
      * @return Redirect
      */
     public function back(int $status = 302): Redirect
@@ -121,8 +121,8 @@ class Redirect implements ResponseInterface
     /**
      * Redirect to another URL
      *
-     * @param string $path
-     * @param int $status
+     * @param  string $path
+     * @param  int    $status
      * @return Redirect
      */
     public function to(string $path, int $status = 302): Redirect

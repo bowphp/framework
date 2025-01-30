@@ -12,8 +12,8 @@ trait TextColumn
     /**
      * Add string column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -25,8 +25,8 @@ trait TextColumn
     /**
      * Add json column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -38,8 +38,8 @@ trait TextColumn
     /**
      * Add character column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -51,8 +51,8 @@ trait TextColumn
     /**
      * Add longtext column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -64,8 +64,8 @@ trait TextColumn
     /**
      * Add text column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -77,8 +77,8 @@ trait TextColumn
     /**
      * Add blob column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -90,8 +90,8 @@ trait TextColumn
     /**
      * Change string column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -103,8 +103,8 @@ trait TextColumn
     /**
      * Change json column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -116,8 +116,8 @@ trait TextColumn
     /**
      * Change character column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -129,8 +129,8 @@ trait TextColumn
     /**
      * Change longtext column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -142,8 +142,8 @@ trait TextColumn
     /**
      * Change text column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */
@@ -155,8 +155,8 @@ trait TextColumn
     /**
      * Change blob column
      *
-     * @param string $column
-     * @param array $attribute
+     * @param  string $column
+     * @param  array  $attribute
      * @return Table
      * @throws SQLGeneratorException
      */

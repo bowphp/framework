@@ -28,7 +28,7 @@ class Redis
     /**
      * RedisAdapter constructor.
      *
-     * @param array $config
+     * @param  array $config
      * @return mixed
      */
     public function __construct(array $config)
@@ -88,9 +88,9 @@ class Redis
     /**
      * Set value on Redis
      *
-     * @param string $key
-     * @param mixed $data
-     * @param integer|null $time
+     * @param  string       $key
+     * @param  mixed        $data
+     * @param  integer|null $time
      * @return boolean
      */
     public static function set(string $key, mixed $data, ?int $time = null): bool
@@ -133,8 +133,8 @@ class Redis
     /**
      * Get the value from Redis
      *
-     * @param string $key
-     * @param mixed $default
+     * @param  string $key
+     * @param  mixed  $default
      * @return mixed
      */
     public static function get(string $key, mixed $default = null): mixed
@@ -155,7 +155,7 @@ class Redis
     /**
      * Get the php-redis client
      *
-     * @see https://github.com/phpredis/phpredis
+     * @see    https://github.com/phpredis/phpredis
      * @return RedisClient
      */
     public static function getClient(): RedisClient

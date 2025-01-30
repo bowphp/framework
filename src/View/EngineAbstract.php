@@ -67,7 +67,7 @@ abstract class EngineAbstract
      * Make template rendering
      *
      * @param string $filename
-     * @param array $data
+     * @param array  $data
      *
      * @return string
      */
@@ -93,7 +93,7 @@ abstract class EngineAbstract
     /**
      * Check if the define file exists
      *
-     * @param string $filename
+     * @param  string $filename
      * @return bool
      */
     public function fileExists(string $filename): bool
@@ -106,7 +106,7 @@ abstract class EngineAbstract
     /**
      * Normalize the file
      *
-     * @param string $filename
+     * @param  string $filename
      * @return string
      */
     private function normalizeFilename(string $filename): string
@@ -117,8 +117,8 @@ abstract class EngineAbstract
     /**
      * Check the parsed file
      *
-     * @param string $filename
-     * @param bool $extended
+     * @param  string $filename
+     * @param  bool   $extended
      * @return string
      * @throws ViewException
      */

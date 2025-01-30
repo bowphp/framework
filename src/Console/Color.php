@@ -9,7 +9,7 @@ class Color
     /**
      * Red message with '[danger]' prefix
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function danger(string $message): string
@@ -20,7 +20,7 @@ class Color
     /**
      * Red message
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function red(string $message): string
@@ -31,7 +31,7 @@ class Color
     /**
      * Blue message with '[info]' prefix
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function info(string $message): string
@@ -42,7 +42,7 @@ class Color
     /**
      * Blue message
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function blue(string $message): string
@@ -53,7 +53,7 @@ class Color
     /**
      * Yellow message with '[warning]' prefix
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function warning(string $message): string
@@ -64,7 +64,7 @@ class Color
     /**
      * Yellow message
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function yellow(string $message): string
@@ -75,7 +75,7 @@ class Color
     /**
      * Green message with '[success]' prefix
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function success(string $message): string
@@ -86,7 +86,7 @@ class Color
     /**
      * Green message
      *
-     * @param string $message
+     * @param  string $message
      * @return string
      */
     public static function green(string $message): string

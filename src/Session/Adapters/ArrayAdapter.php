@@ -30,7 +30,7 @@ class ArrayAdapter implements SessionHandlerInterface
     /**
      * Garbage collector
      *
-     * @param int $max_lifetime
+     * @param  int $max_lifetime
      * @return int|false
      */
     public function gc(int $max_lifetime): int|false
@@ -47,7 +47,7 @@ class ArrayAdapter implements SessionHandlerInterface
     /**
      * Destroy session information
      *
-     * @param string $id
+     * @param  string $id
      * @return bool
      */
     public function destroy(string $id): bool
@@ -60,8 +60,8 @@ class ArrayAdapter implements SessionHandlerInterface
     /**
      * When the session start
      *
-     * @param string $path
-     * @param string $name
+     * @param  string $path
+     * @param  string $name
      * @return bool
      */
     public function open(string $path, string $name): bool
@@ -74,7 +74,7 @@ class ArrayAdapter implements SessionHandlerInterface
     /**
      * Read the session information
      *
-     * @param string $id
+     * @param  string $id
      * @return string
      */
     public function read(string $id): string
@@ -89,8 +89,8 @@ class ArrayAdapter implements SessionHandlerInterface
     /**
      * Write session information
      *
-     * @param string $id
-     * @param string $data
+     * @param  string $id
+     * @param  string $data
      * @return bool
      */
     public function write(string $id, string $data): bool

@@ -25,25 +25,28 @@ class LoggerConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind('logger', function () use ($config) {
-            $monolog = $this->loadFileLogger(
-                realpath($config['storage.log']),
-                $config['app.name'] ?? 'Bow'
-            );
+        $this->container->bind(
+            'logger',
+            function () use ($config) {
+                $monolog = $this->loadFileLogger(
+                    realpath($config['storage.log']),
+                    $config['app.name'] ?? 'Bow'
+                );
 
-            if (php_sapi_name() != "cli") {
-                $this->loadFrontLogger($monolog, $config['app.error_handle']);
+                if (php_sapi_name() != "cli") {
+                    $this->loadFrontLogger($monolog, $config['app.error_handle']);
+                }
+
+                return $monolog;
             }
-
-            return $monolog;
-        });
+        );
     }
 
     /**
      * Loader file logger via Monolog
      *
-     * @param string $log_dir
-     * @param string $name
+     * @param  string $log_dir
+     * @param  string $name
      * @return Logger
      * @throws Exception
      */
@@ -65,8 +68,8 @@ class LoggerConfiguration extends Configuration
     /**
      * Loader view logger
      *
-     * @param Logger $monolog
-     * @param $error_handler
+     * @param  Logger $monolog
+     * @param  $error_handler
      * @return void
      */
     private function loadFrontLogger(Logger $monolog, $error_handler): void

@@ -63,8 +63,8 @@ class Response implements ResponseInterface
      * Response constructor.
      *
      * @param string $content
-     * @param int $code
-     * @param array $headers
+     * @param int    $code
+     * @param array  $headers
      */
     private function __construct(string $content = '', int $code = 200, array $headers = [])
     {
@@ -101,7 +101,7 @@ class Response implements ResponseInterface
     /**
      * Add http headers
      *
-     * @param array $headers
+     * @param  array $headers
      * @return Response
      */
     public function addHeaders(array $headers): Response
@@ -114,9 +114,9 @@ class Response implements ResponseInterface
     /**
      * Download the given file as an argument
      *
-     * @param string $file
-     * @param ?string $filename
-     * @param array $headers
+     * @param  string  $file
+     * @param  ?string $filename
+     * @param  array   $headers
      * @return string
      */
     public function download(
@@ -153,8 +153,8 @@ class Response implements ResponseInterface
     /**
      * Add http header
      *
-     * @param string $key
-     * @param string $value
+     * @param  string $key
+     * @param  string $value
      * @return Response
      */
     public function addHeader(string $key, string $value): Response
@@ -210,7 +210,7 @@ class Response implements ResponseInterface
     /**
      * Get response message
      *
-     * @param string $content
+     * @param  string $content
      * @return Response
      */
     public function setContent(string $content): Response
@@ -223,7 +223,7 @@ class Response implements ResponseInterface
     /**
      * Modify http headers
      *
-     * @param int $code
+     * @param  int $code
      * @return mixed
      */
     public function status(int $code): Response
@@ -240,9 +240,9 @@ class Response implements ResponseInterface
     /**
      * Equivalent to an echo, except that it ends the application
      *
-     * @param mixed $data
-     * @param int $code
-     * @param array $headers
+     * @param  mixed $data
+     * @param  int   $code
+     * @param  array $headers
      * @return string
      */
     public function send(mixed $data, int $code = 200, array $headers = []): string
@@ -265,9 +265,9 @@ class Response implements ResponseInterface
     /**
      * JSON response
      *
-     * @param mixed $data
-     * @param int $code
-     * @param array $headers
+     * @param  mixed $data
+     * @param  int   $code
+     * @param  array $headers
      * @return string
      */
     public function json(mixed $data, int $code = 200, array $headers = []): string
@@ -287,10 +287,10 @@ class Response implements ResponseInterface
     /**
      * Make view rendering
      *
-     * @param string $template
-     * @param array $data
-     * @param int $code
-     * @param array $headers
+     * @param  string $template
+     * @param  array  $data
+     * @param  int    $code
+     * @param  array  $headers
      * @return string
      * @throws
      */
@@ -310,7 +310,7 @@ class Response implements ResponseInterface
     /**
      * Get headers
      *
-     * @param array $headers
+     * @param  array $headers
      * @return Response
      */
     public function withHeaders(array $headers): Response

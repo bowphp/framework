@@ -14,8 +14,8 @@ trait DatabaseRule
      *
      * [exists:table,column] Check that the contents of a table field exist
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      * @throws QueryBuilderException
      */
@@ -30,9 +30,9 @@ trait DatabaseRule
 
         $exists = count($parts) == 1
             ? Database::table($parts[0])
-                ->where($key, $this->inputs[$key])->exists()
+            ->where($key, $this->inputs[$key])->exists()
             : Database::table($parts[0])
-                ->where($parts[1], $this->inputs[$key])->exists();
+            ->where($parts[1], $this->inputs[$key])->exists();
 
         if (!$exists) {
             $this->last_message = $this->lexical('exists', $key);
@@ -51,8 +51,8 @@ trait DatabaseRule
      *
      * [!exists:table,column] Checks that the contents of the field of a table do not exist
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      * @throws QueryBuilderException
      */
@@ -67,9 +67,9 @@ trait DatabaseRule
 
         $exists = count($parts) == 1
             ? Database::table($parts[0])
-                ->where($key, $this->inputs[$key])->exists()
+            ->where($key, $this->inputs[$key])->exists()
             : Database::table($parts[0])
-                ->where($parts[1], $this->inputs[$key])->exists();
+            ->where($parts[1], $this->inputs[$key])->exists();
 
         if ($exists) {
             $this->last_message = $this->lexical('not_exists', $key);
@@ -88,8 +88,8 @@ trait DatabaseRule
      *
      * [unique:table,column] Check that the contents of the field of a table is a single value
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      * @throws QueryBuilderException
      */

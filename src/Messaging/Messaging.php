@@ -28,7 +28,7 @@ abstract class Messaging
     /**
      * Push channels to the messaging
      *
-     * @param array $channels
+     * @param  array $channels
      * @return array
      */
     public static function pushChannels(array $channels): array
@@ -41,7 +41,7 @@ abstract class Messaging
     /**
      * Send notification to mail
      *
-     * @param Model $context
+     * @param  Model $context
      * @return Envelop|null
      */
     public function toMail(Model $context): ?Envelop
@@ -52,7 +52,7 @@ abstract class Messaging
     /**
      * Send notification to database
      *
-     * @param Model $context
+     * @param  Model $context
      * @return array
      */
     public function toDatabase(Model $context): array
@@ -63,7 +63,7 @@ abstract class Messaging
     /**
      * Send notification to sms
      *
-     * @param Model $context
+     * @param  Model $context
      * @return array{to: string, message: string}
      */
     public function toSms(Model $context): array
@@ -74,7 +74,7 @@ abstract class Messaging
     /**
      * Send notification to slack
      *
-     * @param Model $context
+     * @param  Model $context
      * @return array{webhook_url: ?string, content: array}
      */
     public function toSlack(Model $context): array
@@ -85,7 +85,7 @@ abstract class Messaging
     /**
      * Send notification to telegram
      *
-     * @param Model $context
+     * @param  Model $context
      * @return array{message: string, chat_id: string, parse_mode: string}
      */
     public function toTelegram(Model $context): array
@@ -95,7 +95,8 @@ abstract class Messaging
 
     /**
      * Process the notification
-     * @param Model $context
+     *
+     * @param  Model $context
      * @return void
      */
     public function process(Model $context): void
@@ -113,7 +114,7 @@ abstract class Messaging
     /**
      * Returns the available channels to be used
      *
-     * @param Model $context
+     * @param  Model $context
      * @return array
      */
     abstract public function channels(Model $context): array;

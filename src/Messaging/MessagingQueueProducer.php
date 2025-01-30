@@ -18,7 +18,7 @@ class MessagingQueueProducer extends ProducerService
     /**
      * MessagingQueueProducer constructor
      *
-     * @param Model $context
+     * @param Model     $context
      * @param Messaging $message
      */
     public function __construct(
@@ -47,7 +47,7 @@ class MessagingQueueProducer extends ProducerService
     /**
      * Send the processing exception
      *
-     * @param Throwable $e
+     * @param  Throwable $e
      * @return void
      */
     public function onException(Throwable $e): void

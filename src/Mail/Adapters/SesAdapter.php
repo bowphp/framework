@@ -27,7 +27,7 @@ class SesAdapter implements MailAdapterInterface
     /**
      * SesAdapter constructor
      *
-     * @param array $config
+     * @param  array $config
      * @return void
      */
     public function __construct(private array $config)
@@ -54,7 +54,7 @@ class SesAdapter implements MailAdapterInterface
     /**
      * Send env$envelop
      *
-     * @param Envelop $envelop
+     * @param  Envelop $envelop
      * @return bool
      */
     public function send(Envelop $envelop): bool

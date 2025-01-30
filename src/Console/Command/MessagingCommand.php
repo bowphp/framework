@@ -14,10 +14,10 @@ class MessagingCommand extends AbstractCommand
     /**
      * Generate session
      *
-     * @param string $messaging
+     * @param  string $messaging
      * @return void
      */
-    #[NoReturn] public function generate(string $messaging): void
+    public function generate(string $messaging): void
     {
         $generator = new Generator(
             $this->setting->getMessagingDirectory(),
