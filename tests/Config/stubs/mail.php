@@ -5,7 +5,7 @@ return [
     'charset' => 'utf8',
 
     'smtp' => [
-        'hostname' => 'localhost',
+        'hostname' => '192.168.1.3',
         'username' => 'test@test.dev',
         'password' => null,
         'port' => 1025,

@@ -4,6 +4,7 @@ namespace Bow\Tests\Application;
 
 use Bow\Application\Application;
 use Bow\Container\Capsule;
+use Bow\Http\Exception\BadRequestException;
 use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Router\Exception\RouterException;
@@ -87,6 +88,11 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $app->send();
     }
 
+    /**
+     * @throws BadRequestException
+     * @throws \ReflectionException
+     * @throws RouterException
+     */
     public function test_send_application_with_matched_route()
     {
         $response = Mockery::mock(Response::class);

@@ -151,7 +151,7 @@ class SmtpAdapter implements MailAdapterInterface
 
         // SMTP command
         if ($envelop->getFrom() !== null) {
-            $this->write('MAIL FROM: <' . $envelop->getFrom() . '>', 250);
+            $this->write('MAIL FROM: ' . $envelop->getFrom(), 250);
         } elseif ($this->username !== null) {
             $this->write('MAIL FROM: <' . $this->username . '>', 250);
         }

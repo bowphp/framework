@@ -279,9 +279,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Get first rows
      *
-     * @return array|object
+     * @return array|object|null
      */
-    public static function first(): array|object
+    public static function first(): array|object|null
     {
         return static::query()->first();
     }
@@ -451,7 +451,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
         // Override the olds model attributes
         $model->setAttributes($data);
-        $model->persist();
 
         return $model;
     }
