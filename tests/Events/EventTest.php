@@ -50,7 +50,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
             'id' => 3,
             'name' => 'Filou'
         ]);
-        $this->assertEquals($event->save(), 1);
+        $this->assertEquals($event->persiste(), 1);
         $this->assertEquals('created', file_get_contents(static::$cache_filename));
     }
 
@@ -58,7 +58,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
     {
         $pet = EventModelStub::connection("mysql")->first();
         $pet->name = 'Loulou';
-        $this->assertEquals($pet->save(), 1);
+        $this->assertEquals($pet->persiste(), 1);
         $this->assertEquals('updated', file_get_contents(static::$cache_filename));
     }
 

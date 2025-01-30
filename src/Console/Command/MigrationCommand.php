@@ -10,7 +10,7 @@ use Bow\Console\Generator;
 use Bow\Database\Database;
 use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\QueryBuilderException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 use Bow\Database\QueryBuilder;
 use Bow\Support\Str;
 use ErrorException;
@@ -80,7 +80,7 @@ class MigrationCommand extends AbstractCommand
         $adapter = Database::getConnectionAdapter();
 
         $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
-        $generator = new SQLGenerator(
+        $generator = new Table(
             $table,
             $adapter->getName(),
             'create'

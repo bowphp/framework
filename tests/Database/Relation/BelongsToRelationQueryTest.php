@@ -4,7 +4,7 @@ namespace Bow\Tests\Database\Relation;
 
 use Bow\Cache\Cache;
 use Bow\Database\Database;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Database\Stubs\MigrationExtendedStub;
 use Bow\Tests\Database\Stubs\PetMasterModelStub;
@@ -19,7 +19,7 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         Cache::configure($config["cache"]);
     }
 
-    public function connectionNames()
+    public function connectionNames(): array
     {
         return [
             ['mysql'], ['sqlite'], ['pgsql']
@@ -50,16 +50,16 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('didi', $master->name);
     }
 
-    public function executeMigration(string $name)
+    public function executeMigration(string $name): void
     {
         $migration = new MigrationExtendedStub();
         $migration->connection($name)->dropIfExists("pets");
         $migration->connection($name)->dropIfExists("pet_masters");
-        $migration->connection($name)->create("pet_masters", function (SQLGenerator $table) {
+        $migration->connection($name)->create("pet_masters", function (Table $table) {
             $table->addIncrement("id");
             $table->addString("name");
         });
-        $migration->connection($name)->create("pets", function (SQLGenerator $table) {
+        $migration->connection($name)->create("pets", function (Table $table) {
             $table->addIncrement("id");
             $table->addString("name");
             $table->addInteger("master_id");

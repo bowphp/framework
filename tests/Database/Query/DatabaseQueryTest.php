@@ -3,6 +3,7 @@
 namespace Bow\Tests\Database\Query;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Tests\Config\TestingConfiguration;
 
 class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
@@ -21,7 +22,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public function connectionNameProvider()
+    public function connectionNameProvider(): array
     {
         return [['mysql'], ['sqlite'], ['pgsql']];
     }
@@ -29,6 +30,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider connectionNameProvider
      * @param string $name
+     * @throws ConnectionException
      */
     public function test_instance_of_database(string $name)
     {
@@ -37,6 +39,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_get_database_connection(string $name)
     {
@@ -49,6 +52,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_simple_insert_table(string $name)
     {
@@ -60,7 +64,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($result, 2);
     }
 
-    public function createTestingTable()
+    public function createTestingTable(): void
     {
         Database::statement('drop table if exists pets');
         Database::statement(
@@ -70,6 +74,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_array_insert_table(string $name)
     {
@@ -86,8 +91,9 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
-    public function test_array_multile_insert_table(string $name)
+    public function test_array_multiple_insert_table(string $name)
     {
         $database = Database::connection($name);
         $this->createTestingTable();
@@ -103,6 +109,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_select_table(string $name)
     {
@@ -116,6 +123,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_select_table_and_check_item_length(string $name)
     {
@@ -135,6 +143,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_select_with_get_one_element_table(string $name)
     {
@@ -150,6 +159,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_select_with_not_get_element_table(string $name)
     {
@@ -164,6 +174,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_select_one_table(string $name)
     {
@@ -180,6 +191,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_update_table(string $name)
     {
@@ -197,6 +209,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_delete_table(string $name)
     {
@@ -214,6 +227,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_transaction_table(string $name)
     {
@@ -232,6 +246,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_rollback_table(string $name)
     {
@@ -262,8 +277,9 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
-    public function test_stement_table(string $name)
+    public function test_statement_table(string $name)
     {
         $database = Database::connection($name);
         $this->createTestingTable();
@@ -275,8 +291,9 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
-    public function test_stement_table_2(string $name)
+    public function test_statement_table_2(string $name)
     {
         $database = Database::connection($name);
         $this->createTestingTable();

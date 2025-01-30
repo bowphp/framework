@@ -3,16 +3,16 @@
 namespace Bow\Tests\Database\Migration\Mysql;
 
 use Bow\Database\Exception\SQLGeneratorException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * The sql generator
      *
-     * @var SQLGenerator
+     * @var Table
      */
-    private $generator;
+    private Table $generator;
 
     /**
      * @dataProvider getStringTypesWithSize
@@ -232,6 +232,6 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
+        $this->generator = new Table('bow_tests', 'mysql', 'create');
     }
 }

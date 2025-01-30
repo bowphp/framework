@@ -11,7 +11,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
     /**
      * @var FTPService
      */
-    private $ftp_service;
+    private FTPService $ftp_service;
 
     public static function setUpBeforeClass(): void
     {
@@ -45,7 +45,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($result);
     }
 
-    private function createFile(FTPService $ftp_service, $filename, $content = '')
+    private function createFile(FTPService $ftp_service, $filename, $content = ''): bool
     {
         $uploaded_file = $this->getMockBuilder(\Bow\Http\UploadedFile::class)
             ->disableOriginalConstructor()

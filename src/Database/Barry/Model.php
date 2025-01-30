@@ -279,21 +279,21 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Get first rows
      *
-     * @return Model|null
+     * @return array|object
      */
-    public static function first(): ?Model
+    public static function first(): array|object
     {
         return static::query()->first();
     }
 
     /**
-     * Find by column name
+     * retrieve by column name
      *
      * @param string $column
      * @param mixed $value
      * @return Collection
      */
-    public static function findBy(string $column, mixed $value): Collection
+    public static function retrieveBy(string $column, mixed $value): Collection
     {
         $model = new static();
         $model->where($column, $value);
@@ -302,18 +302,18 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Find information and delete it
+     * retrieve information and delete it
      *
      * @param mixed $id
      * @param array $select
      *
      * @return Collection|Model|null
      */
-    public static function findAndDelete(
+    public static function retrieveAndDelete(
         int|string|array $id,
         array $select = ['*']
     ): Collection|Model|null {
-        $model = static::find($id, $select);
+        $model = static::retrieve($id, $select);
 
         if (is_null($model)) {
             return null;
@@ -330,17 +330,17 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * find
+     * retrieve
      *
      * @param mixed $id
      * @param array $select
-     * @return Collection|static|null
+     * @return array|object|null
      */
-    public static function find(
+    public static function retrieve(
         int|string|array $id,
         array $select = ['*']
-    ): Collection|Model|null {
-        $id = (array)$id;
+    ): array|object|null {
+        $id = (array) $id;
 
         $model = new static();
         $model->select($select);
@@ -398,17 +398,17 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Find information by id or throws an
+     * retrieve information by id or throws an
      * exception in data box not found
      *
      * @param mixed $id
      * @param array $select
-     * @return Model
+     * @return array|object
      * @throws NotFoundException
      */
-    public static function findOrFail(int|string $id, array $select = ['*']): Model
+    public static function retrieveOrFail(int|string $id, array $select = ['*']): array|object
     {
-        $result = static::find($id, $select);
+        $result = static::retrieve($id, $select);
 
         if (is_null($result)) {
             throw new NotFoundException('No recordings found at ' . $id . '.');
@@ -451,18 +451,18 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
         // Override the olds model attributes
         $model->setAttributes($data);
-        $model->save();
+        $model->persiste();
 
         return $model;
     }
 
     /**
-     * Save aliases on insert action
+     * Persiste aliases on insert action
      *
      * @return int
      * @throws
      */
-    public function save(): int
+    public function persiste(): int
     {
         $builder = static::query();
 
@@ -777,7 +777,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
             $this->setAttribute($this->updated_at, date('Y-m-d H:i:s'));
         }
 
-        return (bool)$this->save();
+        return (bool)$this->persiste();
     }
 
     /**
