@@ -16,7 +16,7 @@ class ModelProducerStub extends ProducerService
 
     public function process(): void
     {
-        $this->pet->save();
+        $this->pet->persist();
 
         file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$this->connection}_queue_pet_model_stub.txt", $this->pet->toJson());
 

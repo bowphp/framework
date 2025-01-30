@@ -169,7 +169,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
         $pet = PetModelStub::first();
         $pet->name = "Lofi";
-        $pet->save();
+        $pet->persist();
 
         $this->assertNotEquals($pet->name, 'Couli');
         $this->assertInstanceOf(PetModelStub::class, $pet);

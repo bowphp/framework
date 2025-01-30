@@ -43,7 +43,7 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
     {
         $this->executeMigration($name);
 
-        $pet = PetModelStub::connection($name)->find(1);
+        $pet = PetModelStub::connection($name)->retrieve(1);
         $master = $pet->master;
 
         $this->assertInstanceOf(PetMasterModelStub::class, $master);

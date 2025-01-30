@@ -17,7 +17,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_sum(Collection $collection)
@@ -26,7 +26,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_max(Collection $collection)
@@ -35,7 +35,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_min(Collection $collection)
@@ -44,7 +44,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_count(Collection $collection)
@@ -53,7 +53,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_pop(Collection $collection)
@@ -62,7 +62,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_shift(Collection $collection)
@@ -71,7 +71,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_reserve(Collection $collection)
@@ -80,7 +80,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_generator(Collection $collection)
@@ -91,7 +91,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_json(Collection $collection)
@@ -100,7 +100,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_excepts(Collection $collection)
@@ -109,7 +109,7 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $collection
+     * @param Collection $collection
      * @depends test_get_instance
      */
     public function test_push(Collection $collection)

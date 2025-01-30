@@ -451,18 +451,18 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
         // Override the olds model attributes
         $model->setAttributes($data);
-        $model->persiste();
+        $model->persist();
 
         return $model;
     }
 
     /**
-     * Persiste aliases on insert action
+     * persist aliases on insert action
      *
      * @return int
      * @throws
      */
-    public function persiste(): int
+    public function persist(): int
     {
         $builder = static::query();
 
@@ -777,7 +777,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
             $this->setAttribute($this->updated_at, date('Y-m-d H:i:s'));
         }
 
-        return (bool)$this->persiste();
+        return (bool) $this->persist();
     }
 
     /**
