@@ -16,7 +16,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
-     * @param Database $database
+     * @param string $name
      */
     public function test_go_current_pagination(string $name)
     {
@@ -32,7 +32,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($result->next(), 2);
     }
 
-    public function createTestingTable(string $name)
+    public function createTestingTable(string $name): void
     {
         $connection = Database::connection($name);
         $connection->statement('drop table if exists pets');
@@ -45,7 +45,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
-     * @param Database $database
+     * @param string $name
      */
     public function test_go_next_2_pagination(string $name)
     {
@@ -63,7 +63,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
-     * @param Database $database
+     * @param string $name
      */
     public function test_go_next_3_pagination(string $name)
     {
@@ -82,7 +82,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public function connectionNameProvider()
+    public function connectionNameProvider(): array
     {
         return [['mysql'], ['sqlite'], ['pgsql']];
     }

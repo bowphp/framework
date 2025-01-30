@@ -6,7 +6,7 @@ namespace Bow\Database\Migration;
 
 use Bow\Database\Exception\SQLGeneratorException;
 
-class SQLGenerator
+class Table
 {
     use Shortcut\NumberColumn;
     use Shortcut\MixedColumn;
@@ -69,7 +69,7 @@ class SQLGenerator
     private string $charset;
 
     /**
-     * SQLGenerator constructor
+     * Table constructor
      *
      * @param string $table
      * @param string $adapter
@@ -102,9 +102,9 @@ class SQLGenerator
      * Add a raw column definition
      *
      * @param string $definition
-     * @return SQLGenerator
+     * @return Table
      */
-    public function addRaw(string $definition): SQLGenerator
+    public function addRaw(string $definition): Table
     {
         $this->sqls[] = $definition;
 
@@ -117,10 +117,10 @@ class SQLGenerator
      * @param string $name
      * @param string $type
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addColumn(string $name, string $type, array $attribute = []): SQLGenerator
+    public function addColumn(string $name, string $type, array $attribute = []): Table
     {
         if ($this->scope == 'alter') {
             $command = 'ADD COLUMN';
@@ -165,10 +165,10 @@ class SQLGenerator
      * @param string $name
      * @param string $type
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeColumn(string $name, string $type, array $attribute = []): SQLGenerator
+    public function changeColumn(string $name, string $type, array $attribute = []): Table
     {
         $command = 'MODIFY COLUMN';
 
@@ -185,9 +185,9 @@ class SQLGenerator
      *
      * @param string $name
      * @param string $new
-     * @return SQLGenerator
+     * @return Table
      */
-    public function renameColumn(string $name, string $new): SQLGenerator
+    public function renameColumn(string $name, string $new): Table
     {
         if (!in_array($this->adapter, ['mysql', 'pgsql'])) {
             $this->renameColumnOnSqlite($name, $new);
@@ -208,9 +208,9 @@ class SQLGenerator
      * Drop table column
      *
      * @param string $name
-     * @return SQLGenerator
+     * @return Table
      */
-    public function dropColumn(string $name): SQLGenerator
+    public function dropColumn(string $name): Table
     {
         if ($this->adapter === 'mysql') {
             $this->dropColumnForMysql($name);
@@ -313,9 +313,9 @@ class SQLGenerator
      * Set the scope
      *
      * @param string $scope
-     * @return SQLGenerator
+     * @return Table
      */
-    public function setScope(string $scope): SQLGenerator
+    public function setScope(string $scope): Table
     {
         $this->scope = $scope;
 
@@ -326,9 +326,9 @@ class SQLGenerator
      * Set the adapter
      *
      * @param string $adapter
-     * @return SQLGenerator
+     * @return Table
      */
-    public function setAdapter(string $adapter): SQLGenerator
+    public function setAdapter(string $adapter): Table
     {
         $this->adapter = $adapter;
 

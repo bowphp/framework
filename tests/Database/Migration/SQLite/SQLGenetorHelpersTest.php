@@ -2,16 +2,16 @@
 
 namespace Bow\Tests\Database\Migration\SQLite;
 
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * The sql generator
      *
-     * @var SQLGenerator
+     * @var Table
      */
-    private $generator;
+    private Table $generator;
 
     /**
      * Test Add column action
@@ -87,6 +87,6 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->generator = new SQLGenerator('bow_tests', 'sqlite', 'create');
+        $this->generator = new Table('bow_tests', 'sqlite', 'create');
     }
 }

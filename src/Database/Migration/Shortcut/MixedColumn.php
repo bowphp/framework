@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Bow\Database\Migration\Shortcut;
 
 use Bow\Database\Exception\SQLGeneratorException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 trait MixedColumn
 {
@@ -14,10 +14,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addBoolean(string $column, array $attribute = []): SQLGenerator
+    public function addBoolean(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'boolean', $attribute);
     }
@@ -27,10 +27,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addUuidPrimary(string $column, array $attribute = []): SQLGenerator
+    public function addUuidPrimary(string $column, array $attribute = []): Table
     {
         $attribute['primary'] = true;
 
@@ -50,10 +50,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addUuid(string $column, array $attribute = []): SQLGenerator
+    public function addUuid(string $column, array $attribute = []): Table
     {
         if (isset($attribute['increment'])) {
             throw new SQLGeneratorException(
@@ -82,10 +82,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addBinary(string $column, array $attribute = []): SQLGenerator
+    public function addBinary(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'binary', $attribute);
     }
@@ -95,10 +95,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addTinyBlob(string $column, array $attribute = []): SQLGenerator
+    public function addTinyBlob(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'tinyblob', $attribute);
     }
@@ -108,10 +108,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addLongBlob(string $column, array $attribute = []): SQLGenerator
+    public function addLongBlob(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'longblob', $attribute);
     }
@@ -121,10 +121,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addMediumBlob(string $column, array $attribute = []): SQLGenerator
+    public function addMediumBlob(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'mediumblob', $attribute);
     }
@@ -134,10 +134,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addIpAddress(string $column, array $attribute = []): SQLGenerator
+    public function addIpAddress(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'ip', $attribute);
     }
@@ -147,10 +147,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addMacAddress(string $column, array $attribute = []): SQLGenerator
+    public function addMacAddress(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'mac', $attribute);
     }
@@ -160,10 +160,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addEnum(string $column, array $attribute = []): SQLGenerator
+    public function addEnum(string $column, array $attribute = []): Table
     {
         if (!isset($attribute['size'])) {
             throw new SQLGeneratorException("The enum values should be define!");
@@ -185,10 +185,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addCheck(string $column, array $attribute = []): SQLGenerator
+    public function addCheck(string $column, array $attribute = []): Table
     {
         $this->verifyCheckAttribute($attribute);
 
@@ -222,10 +222,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeBoolean(string $column, array $attribute = []): SQLGenerator
+    public function changeBoolean(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'boolean', $attribute);
     }
@@ -235,10 +235,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeUuid(string $column, array $attribute = []): SQLGenerator
+    public function changeUuid(string $column, array $attribute = []): Table
     {
         if (isset($attribute['size'])) {
             throw new SQLGeneratorException("Cannot define size to uuid type");
@@ -261,10 +261,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeBinary(string $column, array $attribute = []): SQLGenerator
+    public function changeBinary(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'binary', $attribute);
     }
@@ -274,10 +274,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeLongBlob(string $column, array $attribute = []): SQLGenerator
+    public function changeLongBlob(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'longblob', $attribute);
     }
@@ -287,10 +287,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeMediumBlob(string $column, array $attribute = []): SQLGenerator
+    public function changeMediumBlob(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'mediumblob', $attribute);
     }
@@ -300,10 +300,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeTinyBlob(string $column, array $attribute = []): SQLGenerator
+    public function changeTinyBlob(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'tinyblob', $attribute);
     }
@@ -313,10 +313,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeIpAddress(string $column, array $attribute = []): SQLGenerator
+    public function changeIpAddress(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'ip', $attribute);
     }
@@ -326,10 +326,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeMacAddress(string $column, array $attribute = []): SQLGenerator
+    public function changeMacAddress(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'mac', $attribute);
     }
@@ -339,10 +339,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeEnum(string $column, array $attribute = []): SQLGenerator
+    public function changeEnum(string $column, array $attribute = []): Table
     {
         if (!isset($attribute['size'])) {
             throw new SQLGeneratorException("The enum values should be define!");
@@ -364,10 +364,10 @@ trait MixedColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeCheck(string $column, array $attribute = []): SQLGenerator
+    public function changeCheck(string $column, array $attribute = []): Table
     {
         $this->verifyCheckAttribute($attribute);
 

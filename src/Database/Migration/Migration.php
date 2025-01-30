@@ -151,7 +151,7 @@ abstract class Migration
         $table = $this->getTablePrefixed($table);
 
         call_user_func_array($cb, [
-            $generator = new SQLGenerator($table, $this->adapter->getName(), 'create')
+            $generator = new Table($table, $this->adapter->getName(), 'create')
         ]);
 
         if ($this->adapter->getName() == 'mysql') {
@@ -191,7 +191,7 @@ abstract class Migration
         $table = $this->getTablePrefixed($table);
 
         call_user_func_array($cb, [
-            $generator = new SQLGenerator($table, $this->adapter->getName(), 'alter')
+            $generator = new Table($table, $this->adapter->getName(), 'alter')
         ]);
 
         if ($this->adapter->getName() === 'pgsql') {

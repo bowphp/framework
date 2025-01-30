@@ -5,7 +5,7 @@ namespace Bow\Tests\Database\Migration;
 use Bow\Database\Database;
 use Bow\Database\Exception\MigrationException;
 use Bow\Database\Migration\Migration;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Database\Stubs\MigrationExtendedStub;
 use Exception;
@@ -17,7 +17,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
      *
      * @var Migration
      */
-    private $migration;
+    private Migration $migration;
 
     public static function setUpBeforeClass(): void
     {
@@ -56,7 +56,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             $this->expectException(MigrationException::class);
         }
 
-        $status = $this->migration->connection($name)->create('bow_testing', function (SQLGenerator $generator) {
+        $status = $this->migration->connection($name)->create('bow_testing', function (Table $generator) {
             $generator->addColumn('id', 'string', ['size' => 225, 'primary' => true]);
             $generator->addColumn('name', 'typenotfound', ['size' => 225]); // Sqlite tranform the unknown type to NULL type
             $generator->addColumn('lastname', 'string', ['size' => 225]);
@@ -74,7 +74,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_create_success(string $name)
     {
         Database::connection($name)->statement("drop table if exists bow_testing;");
-        $status = $this->migration->connection($name)->create('bow_testing', function (SQLGenerator $generator) use ($name) {
+        $status = $this->migration->connection($name)->create('bow_testing', function (Table $generator) use ($name) {
             $generator->addColumn('id', 'string', ['size' => 225, 'primary' => true]);
             $generator->addColumn('name', 'string', ['size' => 225]);
             $generator->addColumn('lastname', 'string', ['size' => 225]);
@@ -93,7 +93,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_alter_success(string $name)
     {
         $this->migration->connection($name)->addSql('create table if not exists bow_testing (name varchar(255));');
-        $status = $this->migration->connection($name)->alter('bow_testing', function (SQLGenerator $generator) {
+        $status = $this->migration->connection($name)->alter('bow_testing', function (Table $generator) {
             $generator->dropColumn('name');
             $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
         });
@@ -107,7 +107,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_alter_fail(string $name)
     {
         $this->expectException(MigrationException::class);
-        $this->migration->connection($name)->alter('bow_testing', function (SQLGenerator $generator) {
+        $this->migration->connection($name)->alter('bow_testing', function (Table $generator) {
             $generator->dropColumn('name');
             $generator->dropColumn('lastname');
             $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);

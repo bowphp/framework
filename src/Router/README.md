@@ -55,4 +55,4 @@ sequenceDiagram
     Note right of Router: $app->post('/users', [UserController::class, 'store'])
 ```
 
-Is very enjoyful api
+Is very joyful api

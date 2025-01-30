@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Bow\Database\Migration\Shortcut;
 
 use Bow\Database\Exception\SQLGeneratorException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 trait NumberColumn
 {
@@ -14,10 +14,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addFloat(string $column, array $attribute = []): SQLGenerator
+    public function addFloat(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'float', $attribute);
     }
@@ -27,10 +27,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addDouble(string $column, array $attribute = []): SQLGenerator
+    public function addDouble(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'double', $attribute);
     }
@@ -39,10 +39,10 @@ trait NumberColumn
      * Add double primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addDoublePrimary(string $column): SQLGenerator
+    public function addDoublePrimary(string $column): Table
     {
         return $this->addColumn($column, 'double', ['primary' => true]);
     }
@@ -51,10 +51,10 @@ trait NumberColumn
      * Add float primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addFloatPrimary(string $column): SQLGenerator
+    public function addFloatPrimary(string $column): Table
     {
         return $this->addColumn($column, 'float', ['primary' => true]);
     }
@@ -63,10 +63,10 @@ trait NumberColumn
      * Add increment primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addIncrement(string $column): SQLGenerator
+    public function addIncrement(string $column): Table
     {
         return $this->addColumn($column, 'int', ['primary' => true, 'increment' => true]);
     }
@@ -76,10 +76,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addInteger(string $column, array $attribute = []): SQLGenerator
+    public function addInteger(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'int', $attribute);
     }
@@ -88,10 +88,10 @@ trait NumberColumn
      * Add integer primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addIntegerPrimary(string $column): SQLGenerator
+    public function addIntegerPrimary(string $column): Table
     {
         return $this->addColumn($column, 'int', ['primary' => true]);
     }
@@ -100,10 +100,10 @@ trait NumberColumn
      * Add big increment primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addBigIncrement(string $column): SQLGenerator
+    public function addBigIncrement(string $column): Table
     {
         return $this->addColumn($column, 'bigint', ['primary' => true, 'increment' => true]);
     }
@@ -113,10 +113,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addTinyInteger(string $column, array $attribute = []): SQLGenerator
+    public function addTinyInteger(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'tinyint', $attribute);
     }
@@ -126,10 +126,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addBigInteger(string $column, array $attribute = []): SQLGenerator
+    public function addBigInteger(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'bigint', $attribute);
     }
@@ -139,10 +139,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addMediumInteger(string $column, array $attribute = []): SQLGenerator
+    public function addMediumInteger(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'mediumint', $attribute);
     }
@@ -151,10 +151,10 @@ trait NumberColumn
      * Add Medium integer column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addMediumIncrement(string $column): SQLGenerator
+    public function addMediumIncrement(string $column): Table
     {
         return $this->addColumn($column, 'mediumint', ['primary' => true, 'increment' => true]);
     }
@@ -164,10 +164,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addSmallInteger(string $column, array $attribute = []): SQLGenerator
+    public function addSmallInteger(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'smallint', $attribute);
     }
@@ -176,10 +176,10 @@ trait NumberColumn
      * Add Smallint integer column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addSmallIntegerIncrement(string $column): SQLGenerator
+    public function addSmallIntegerIncrement(string $column): Table
     {
         return $this->addColumn($column, 'smallint', ['primary' => true, 'increment' => true]);
     }
@@ -189,10 +189,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeFloat(string $column, array $attribute = []): SQLGenerator
+    public function changeFloat(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'float', $attribute);
     }
@@ -202,10 +202,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeDouble(string $column, array $attribute = []): SQLGenerator
+    public function changeDouble(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'double', $attribute);
     }
@@ -214,10 +214,10 @@ trait NumberColumn
      * Change double primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeDoublePrimary(string $column): SQLGenerator
+    public function changeDoublePrimary(string $column): Table
     {
         return $this->changeColumn($column, 'double', ['primary' => true]);
     }
@@ -226,10 +226,10 @@ trait NumberColumn
      * Change float primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeFloatPrimary(string $column): SQLGenerator
+    public function changeFloatPrimary(string $column): Table
     {
         return $this->changeColumn($column, 'float', ['primary' => true]);
     }
@@ -238,10 +238,10 @@ trait NumberColumn
      * Change increment primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeIncrement(string $column): SQLGenerator
+    public function changeIncrement(string $column): Table
     {
         return $this->changeColumn($column, 'int', ['primary' => true, 'increment' => true]);
     }
@@ -251,10 +251,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeInteger(string $column, array $attribute = []): SQLGenerator
+    public function changeInteger(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'int', $attribute);
     }
@@ -263,10 +263,10 @@ trait NumberColumn
      * Change integer primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeIntegerPrimary(string $column): SQLGenerator
+    public function changeIntegerPrimary(string $column): Table
     {
         return $this->changeColumn($column, 'int', ['primary' => true]);
     }
@@ -275,10 +275,10 @@ trait NumberColumn
      * Change big increment primary column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeBigIncrement(string $column): SQLGenerator
+    public function changeBigIncrement(string $column): Table
     {
         return $this->changeColumn($column, 'bigint', ['primary' => true, 'increment' => true]);
     }
@@ -288,10 +288,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeTinyInteger(string $column, array $attribute = []): SQLGenerator
+    public function changeTinyInteger(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'tinyint', $attribute);
     }
@@ -301,10 +301,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeBigInteger(string $column, array $attribute = []): SQLGenerator
+    public function changeBigInteger(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'bigint', $attribute);
     }
@@ -314,10 +314,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeMediumInteger(string $column, array $attribute = []): SQLGenerator
+    public function changeMediumInteger(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'mediumint', $attribute);
     }
@@ -326,10 +326,10 @@ trait NumberColumn
      * Change Medium integer column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeMediumIncrement(string $column): SQLGenerator
+    public function changeMediumIncrement(string $column): Table
     {
         return $this->changeColumn($column, 'mediumint', ['primary' => true, 'increment' => true]);
     }
@@ -339,10 +339,10 @@ trait NumberColumn
      *
      * @param string $column
      * @param array $attribute
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeSmallInteger(string $column, array $attribute = []): SQLGenerator
+    public function changeSmallInteger(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'smallint', $attribute);
     }
@@ -351,10 +351,10 @@ trait NumberColumn
      * Change Small integer column
      *
      * @param string $column
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeSmallIntegerPrimary(string $column): SQLGenerator
+    public function changeSmallIntegerPrimary(string $column): Table
     {
         return $this->changeColumn($column, 'smallint', ['primary' => true, 'increment' => true]);
     }

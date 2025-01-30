@@ -1,4 +1,18 @@
-<phpunit colors="true" bootstrap="tests/bootstrap.php">
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd" 
+    colors="true" 
+    bootstrap="tests/bootstrap.php" 
+    verbose="true" 
+    failOnRisky="true" 
+    failOnWarning="true" 
+    convertErrorsToExceptions="true" 
+    convertNoticesToExceptions="true" 
+    convertWarningsToExceptions="true" 
+    stopOnFailure="false" 
+    executionOrder="random" 
+    resolveDependencies="true">
     <testsuite name="Bow Framework">
         <directory suffix=".php">tests/</directory>
         <exclude>./tests/SessionTest.php</exclude>
@@ -15,5 +29,17 @@
         <env name="FTP_USERNAME" value="username"/>
         <env name="FTP_PORT" value="21"/>
         <env name="FTP_ROOT" value="."/>
+        <ini name="error_reporting" value="-1"/>
+        <ini name="display_errors" value="On"/>
+        <ini name="display_startup_errors" value="On"/>
     </php>
+    <coverage>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>tests</directory>
+        </exclude>
+    </coverage>
 </phpunit>

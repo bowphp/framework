@@ -23,24 +23,28 @@ class Compass
         'integer', 'double', 'float', 'callable',
         'object', 'stdclass', '\closure', 'closure'
     ];
+
     /**
      * The Compass instance
      *
      * @var ?Compass
      */
     private static ?Compass $instance = null;
+
     /**
      * The list of namespaces defined in the application
      *
      * @var array
      */
     private array $namespaces;
+
     /**
      * The list of middleware loads in the application
      *
      * @var array
      */
     private array $middlewares;
+
     /**
      * The Dispatcher instance
      *

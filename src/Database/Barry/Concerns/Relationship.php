@@ -8,6 +8,7 @@ use Bow\Database\Barry\Relations\BelongsTo;
 use Bow\Database\Barry\Relations\BelongsToMany;
 use Bow\Database\Barry\Relations\HasMany;
 use Bow\Database\Barry\Relations\HasOne;
+use Bow\Database\Exception\QueryBuilderException;
 
 trait Relationship
 {
@@ -80,6 +81,7 @@ trait Relationship
      * @param string|null $primary_key
      * @param string|null $foreign_key
      * @return HasMany
+     * @throws QueryBuilderException
      */
     public function hasMany(
         string $related,

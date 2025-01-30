@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Bow\Database;
+namespace Bow\Tests\Database;
 
 use Bow\Database\Pagination;
 use PHPUnit\Framework\TestCase;
