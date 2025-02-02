@@ -81,7 +81,7 @@ class QueueTest extends TestCase
      * @param string $connection
      * @return void
      */
-    public function test_push_service_adapter($connection)
+    public function test_push_service_adapter(string $connection)
     {
         $adapter = static::$connection->setConnection($connection)->getAdapter();
         $filename = TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt";
