@@ -231,9 +231,13 @@ class S3Service implements ServiceInterface
      */
     public function copy(string $source, string $target): bool
     {
-        $result = $this->get($source);
+        $content = $this->get($source);
+        
+        if($content === null){
+            return false;
+        }
 
-        $this->put($target, $result["Body"]);
+        $this->put($target, $content);
 
         return true;
     }
