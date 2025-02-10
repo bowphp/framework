@@ -20,19 +20,19 @@ class MailQueueProducer extends ProducerService
      *
      * @param string $view
      * @param array $data
-     * @param Message $message
+     * @param Envelop $message
      */
     public function __construct(
         string $view,
         array $data,
-        Message $message
+        Envelop $envelop
     ) {
         parent::__construct();
 
         $this->bags = [
             "view" => $view,
             "data" => $data,
-            "message" => $message,
+            "envelop" => $envelop,
         ];
     }
 
@@ -43,13 +43,13 @@ class MailQueueProducer extends ProducerService
      */
     public function process(): void
     {
-        $message = $this->bags["message"];
+        $envelop = $this->bags["envelop"];
 
-        $message->setMessage(
+        $envelop->setMessage(
             View::parse($this->bags["view"], $this->bags["data"])->getContent()
         );
 
-        Mail::getInstance()->send($message);
+        Mail::getInstance()->send($envelop);
     }
 
     /**

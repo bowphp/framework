@@ -21,7 +21,7 @@ class TestingConfiguration
      * @param array $configurations
      * @return void
      */
-    public static function withConfigurations(array $configurations)
+    public static function withConfigurations(array $configurations): void
     {
         KernelTesting::withConfigurations($configurations);
     }
@@ -32,7 +32,7 @@ class TestingConfiguration
      * @param array $middlewares
      * @return void
      */
-    public static function withMiddlewares(array $middlewares)
+    public static function withMiddlewares(array $middlewares): void
     {
         KernelTesting::withMiddlewares($middlewares);
     }

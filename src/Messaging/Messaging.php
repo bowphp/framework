@@ -3,9 +3,12 @@
 namespace Bow\Messaging;
 
 use Bow\Database\Barry\Model;
-use Bow\Mail\Message;
-use Bow\Messaging\Channel\DatabaseChannel;
-use Bow\Messaging\Channel\MailChannel;
+use Bow\Mail\Envelop;
+use Bow\Messaging\Adapters\DatabaseChannelAdapter;
+use Bow\Messaging\Adapters\MailChannelAdapter;
+use Bow\Messaging\Adapters\SlackChannelAdapter;
+use Bow\Messaging\Adapters\SmsChannelAdapter;
+use Bow\Messaging\Adapters\TelegramChannelAdapter;
 
 abstract class Messaging
 {
@@ -14,29 +17,45 @@ abstract class Messaging
      *
      * @var array
      */
-    private array $channels = [
-        "mail" => MailChannel::class,
-        "database" => DatabaseChannel::class,
+    private static array $channels = [
+        "mail" => MailChannelAdapter::class,
+        "database" => DatabaseChannelAdapter::class,
+        "telegram" => TelegramChannelAdapter::class,
+        "slack" => SlackChannelAdapter::class,
+        "sms" => SmsChannelAdapter::class,
     ];
+
+    /**
+     * Push channels to the messaging
+     *
+     * @param array $channels
+     * @return array
+     */
+    public static function pushChannels(array $channels): array
+    {
+        static::$channels = array_merge(static::$channels, $channels);
+
+        return self::$channels;
+    }
 
     /**
      * Send notification to mail
      *
-     * @param Model $notifiable
-     * @return Message|null
+     * @param Model $context
+     * @return Envelop|null
      */
-    public function toMail(Model $notifiable): ?Message
+    public function toMail(Model $context): ?Envelop
     {
-        return new Message();
+        return null;
     }
 
     /**
      * Send notification to database
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @return array
      */
-    public function toDatabase(Model $notifiable): array
+    public function toDatabase(Model $context): array
     {
         return [];
     }
@@ -44,28 +63,49 @@ abstract class Messaging
     /**
      * Send notification to sms
      *
-     * @param Model $notifiable
-     * @return array
+     * @param Model $context
+     * @return array{to: string, message: string}
      */
-    public function toSms(Model $notifiable): array
+    public function toSms(Model $context): array
+    {
+        return [];
+    }
+
+    /**
+     * Send notification to slack
+     *
+     * @param Model $context
+     * @return array{webhook_url: ?string, content: array}
+     */
+    public function toSlack(Model $context): array
+    {
+        return [];
+    }
+
+    /**
+     * Send notification to telegram
+     *
+     * @param Model $context
+     * @return array{message: string, chat_id: string, parse_mode: string}
+     */
+    public function toTelegram(Model $context): array
     {
         return [];
     }
 
     /**
      * Process the notification
-     * @param Model $notifiable
+     * @param Model $context
      * @return void
      */
-    final function process(Model $notifiable): void
+    public function process(Model $context): void
     {
-        $channels = $this->channels($notifiable);
+        $channels = $this->channels($context);
 
         foreach ($channels as $channel) {
-            if (array_key_exists($channel, $this->channels)) {
-                $result = $this->{"to" . ucfirst($channel)}($notifiable);
-                $target_channel = new $this->channels[$channel]($result);
-                $target_channel->send($notifiable);
+            if (array_key_exists($channel, static::$channels)) {
+                $target_channel = new static::$channels[$channel]();
+                $target_channel->send($context);
             }
         }
     }
@@ -73,8 +113,8 @@ abstract class Messaging
     /**
      * Returns the available channels to be used
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @return array
      */
-    abstract public function channels(Model $notifiable): array;
+    abstract public function channels(Model $context): array;
 }

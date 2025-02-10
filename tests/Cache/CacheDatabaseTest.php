@@ -40,8 +40,8 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
     public function test_add_with_callback_cache()
     {
-        $result = Cache::add('lastname', fn () => 'Franck');
-        $result = $result && Cache::add('age', fn () => 25, 20000);
+        $result = Cache::add('lastname', fn() => 'Franck');
+        $result = $result && Cache::add('age', fn() => 25, 20000);
 
         $this->assertEquals($result, true);
     }

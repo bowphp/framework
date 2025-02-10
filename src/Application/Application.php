@@ -6,8 +6,8 @@ namespace Bow\Application;
 
 use Bow\Application\Exception\ApplicationException;
 use Bow\Configuration\Loader;
-use Bow\Container\Action;
 use Bow\Container\Capsule;
+use Bow\Container\Compass;
 use Bow\Contracts\ResponseInterface;
 use Bow\Http\Exception\BadRequestException;
 use Bow\Http\Exception\HttpException;
@@ -182,7 +182,7 @@ class Application extends Router
             );
         }
 
-        $response = Action::getInstance()->execute($this->error_code[404], []);
+        $response = Compass::getInstance()->execute($this->error_code[404], []);
 
         $this->sendResponse($response, 404);
 

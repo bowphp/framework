@@ -18,18 +18,18 @@ class MessagingQueueProducer extends ProducerService
     /**
      * MessagingQueueProducer constructor
      *
-     * @param Model $notifiable
+     * @param Model $context
      * @param Messaging $message
      */
     public function __construct(
-        Model $notifiable,
+        Model $context,
         Messaging $message,
     ) {
         parent::__construct();
 
         $this->bags = [
             "message" => $message,
-            "notifiable" => $notifiable,
+            "context" => $context,
         ];
     }
 
@@ -41,7 +41,7 @@ class MessagingQueueProducer extends ProducerService
     public function process(): void
     {
         $message = $this->bags['message'];
-        $message->process($this->bags['notifiable']);
+        $message->process($this->bags['context']);
     }
 
     /**

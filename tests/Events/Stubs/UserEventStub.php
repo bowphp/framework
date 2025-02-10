@@ -2,8 +2,8 @@
 
 namespace Bow\Tests\Events\Stubs;
 
-use Bow\Event\Dispatchable;
 use Bow\Event\Contracts\AppEvent;
+use Bow\Event\Dispatchable;
 
 class UserEventStub implements AppEvent
 {

@@ -3,23 +3,17 @@
 namespace Bow\Tests\Mail;
 
 use Bow\Configuration\Loader as ConfigurationLoader;
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
+use Bow\Mail\Envelop;
 use Bow\Mail\Mail;
-use Bow\Mail\Message;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\View\Exception\ViewException;
 use Bow\View\View;
 
 class MailServiceTest extends \PHPUnit\Framework\TestCase
 {
-    private ConfigurationLoader $config;
-
     private static string $sendmail_command;
-
-    protected function setUp(): void
-    {
-        $this->config = TestingConfiguration::getConfig();
-    }
+    private ConfigurationLoader $config;
 
     public static function setUpBeforeClass(): void
     {
@@ -33,13 +27,13 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
     public function test_configuration_instance()
     {
         $mail = Mail::configure($this->config["mail"]);
-        $this->assertInstanceOf(MailDriverInterface::class, $mail);
+        $this->assertInstanceOf(MailAdapterInterface::class, $mail);
     }
 
     public function test_default_configuration_must_be_smtp_driver()
     {
         $mail = Mail::configure($this->config["mail"]);
-        $this->assertInstanceOf(\Bow\Mail\Driver\SmtpDriver::class, $mail);
+        $this->assertInstanceOf(\Bow\Mail\Adapters\SmtpAdapter::class, $mail);
     }
 
     public function test_send_mail_with_raw_content_for_stmp_driver()
@@ -55,8 +49,8 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         View::configure($this->config["view"]);
         Mail::configure($this->config["mail"]);
 
-        $response = Mail::send('mail', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
+        $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
         });
 
         $this->assertTrue($response);
@@ -70,9 +64,9 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');
 
-        Mail::send('mail_view_not_found', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
-            $message->subject('test email');
+        Mail::send('mail_view_not_found', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
+            $envelop->subject('test email');
         });
     }
 
@@ -82,7 +76,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $config['driver'] = 'mail';
 
         $mail_instance = Mail::configure($config);
-        $this->assertInstanceOf(\Bow\Mail\Driver\NativeDriver::class, $mail_instance);
+        $this->assertInstanceOf(\Bow\Mail\Adapters\NativeAdapter::class, $mail_instance);
     }
 
     public function test_send_mail_with_raw_content_for_notive_driver()
@@ -110,13 +104,13 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
             return $this->markTestSkipped('Test have been skip because /usr/sbin/sendmail not found');
         }
 
-        $config = (array) $this->config["mail"];
+        $config = (array)$this->config["mail"];
         View::configure($this->config["view"]);
         Mail::configure([...$config, "driver" => "mail"]);
 
-        $response = Mail::send('mail', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
-            $message->subject('test email');
+        $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
+            $envelop->subject('test email');
         });
 
         $this->assertTrue($response);
@@ -124,7 +118,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 
     public function test_send_mail_with_view_not_found_for_notive_driver()
     {
-        $config = (array) $this->config["mail"];
+        $config = (array)$this->config["mail"];
 
         View::configure($this->config["view"]);
         Mail::configure([...$config, "driver" => "mail"]);
@@ -132,9 +126,14 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('The view [mail_view_not_found.twig] does not exists.');
 
-        Mail::send('mail_view_not_found', ['name' => "papac"], function (Message $message) {
-            $message->to('bow@bowphp.com');
-            $message->subject('test email');
+        Mail::send('mail_view_not_found', ['name' => "papac"], function (Envelop $envelop) {
+            $envelop->to('bow@bowphp.com');
+            $envelop->subject('test email');
         });
+    }
+
+    protected function setUp(): void
+    {
+        $this->config = TestingConfiguration::getConfig();
     }
 }

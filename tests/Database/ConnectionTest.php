@@ -2,12 +2,12 @@
 
 namespace Bow\Tests\Database;
 
-use Bow\Tests\Config\TestingConfiguration;
-use Bow\Database\Connection\AbstractConnection;
-use Bow\Database\Connection\Adapter\MysqlAdapter;
-use Bow\Database\Connection\Adapter\SqliteAdapter;
 use Bow\Configuration\Loader as ConfigurationLoader;
-use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
+use Bow\Database\Connection\AbstractConnection;
+use Bow\Database\Connection\Adapters\MysqlAdapter;
+use Bow\Database\Connection\Adapters\PostgreSQLAdapter;
+use Bow\Database\Connection\Adapters\SqliteAdapter;
+use Bow\Tests\Config\TestingConfiguration;
 
 class ConnectionTest extends \PHPUnit\Framework\TestCase
 {

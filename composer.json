@@ -1,7 +1,10 @@
 {
     "name": "bowphp/framework",
     "description": "The bow PHP Framework",
-    "keywords": ["framework", "bow"],
+    "keywords": [
+        "framework",
+        "bow"
+    ],
     "license": "MIT",
     "support": {
         "issues": "https://github.com/bowphp/framework/issues",
@@ -34,7 +37,9 @@
         "bowphp/policier": "^3.0",
         "mockery/mockery": "^1.5",
         "spatie/phpunit-snapshot-assertions": "^4.2",
-        "predis/predis": "^2.1"
+        "predis/predis": "^2.1",
+        "twilio/sdk": "^8.3",
+        "bowphp/slack-webhook": "^1.0"
     },
     "authors": [
         {

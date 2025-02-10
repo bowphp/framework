@@ -16,7 +16,7 @@ use Bow\Http\HttpStatus;
 use Bow\Http\Redirect;
 use Bow\Http\Request;
 use Bow\Http\Response;
-use Bow\Mail\Contracts\MailDriverInterface;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Mail;
 use Bow\Queue\ProducerService;
 use Bow\Security\Crypto;
@@ -777,13 +777,13 @@ if (!function_exists('email')) {
      * @param null|string $view
      * @param array $data
      * @param callable|null $cb
-     * @return MailDriverInterface|bool
+     * @return MailAdapterInterface|bool
      */
     function email(
         string $view = null,
         array $data = [],
         callable $cb = null
-    ): MailDriverInterface|bool {
+    ): MailAdapterInterface|bool {
         if ($view === null) {
             return Mail::getInstance();
         }
@@ -1251,10 +1251,10 @@ if (!function_exists('auth')) {
     /**
      * Recovery of the guard
      *
-     * @deprecated
      * @param string|null $guard
      * @return GuardContract
      * @throws AuthenticationException
+     * @deprecated
      */
     function auth(string $guard = null): GuardContract
     {

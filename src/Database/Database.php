@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Bow\Database;
 
 use Bow\Database\Connection\AbstractConnection;
-use Bow\Database\Connection\Adapter\MysqlAdapter;
-use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
-use Bow\Database\Connection\Adapter\SqliteAdapter;
+use Bow\Database\Connection\Adapters\MysqlAdapter;
+use Bow\Database\Connection\Adapters\PostgreSQLAdapter;
+use Bow\Database\Connection\Adapters\SqliteAdapter;
 use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Security\Sanitize;
+use ErrorException;
 use PDO;
 
 class Database
@@ -25,7 +26,7 @@ class Database
     /**
      * The singleton Database instance
      *
-     * @var Database
+     * @var ?Database
      */
     private static ?Database $instance = null;
 
@@ -39,7 +40,7 @@ class Database
     /**
      * Configuration
      *
-     * @var string
+     * @var ?string
      */
     private static ?string $name = null;
 
@@ -330,7 +331,7 @@ class Database
     /**
      * Execute a delete request
      *
-     * @param  $sql_statement
+     * @param string $sql_statement
      * @param array $data
      * @return int
      */

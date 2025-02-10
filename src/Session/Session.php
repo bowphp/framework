@@ -7,9 +7,9 @@ namespace Bow\Session;
 use BadMethodCallException;
 use Bow\Contracts\CollectionInterface;
 use Bow\Security\Crypto;
-use Bow\Session\Driver\ArrayDriver;
-use Bow\Session\Driver\DatabaseDriver;
-use Bow\Session\Driver\FilesystemDriver;
+use Bow\Session\Adapters\ArrayAdapter;
+use Bow\Session\Adapters\DatabaseAdapter;
+use Bow\Session\Adapters\FilesystemAdapter;
 use Bow\Session\Exception\SessionException;
 use InvalidArgumentException;
 use stdClass;
@@ -41,9 +41,9 @@ class Session implements CollectionInterface
      * @var array
      */
     private array $driver = [
-        'database' => DatabaseDriver::class,
-        'array' => ArrayDriver::class,
-        'file' => FilesystemDriver::class,
+        'database' => DatabaseAdapter::class,
+        'array' => ArrayAdapter::class,
+        'file' => FilesystemAdapter::class,
     ];
     /**
      * The session configuration

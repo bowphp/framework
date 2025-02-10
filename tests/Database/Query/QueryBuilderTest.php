@@ -3,6 +3,8 @@
 namespace Bow\Tests\Database\Query;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\ConnectionException;
+use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
 use Bow\Tests\Config\TestingConfiguration;
 
@@ -36,7 +38,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param Database $database
      */
@@ -46,10 +48,20 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(QueryBuilder::class, $database->connection($name)->table('pets'));
     }
 
+    public function createTestingTable(string $name): void
+    {
+        Database::connection($name)->statement('drop table if exists pets');
+        Database::connection($name)->statement(
+            'create table pets (id int primary key, name varchar(255))'
+        );
+    }
+
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
      */
     public function test_insert_by_passing_a_array(string $name, Database $database)
     {
@@ -66,11 +78,13 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
      */
-    public function test_insert_by_passing_a_mutilple_array(string $name, Database $database)
+    public function test_insert_by_passing_a_multiple_array(string $name, Database $database)
     {
         $this->createTestingTable($name);
         $table = $database->connection($name)->table('pets');
@@ -78,18 +92,20 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
         $table->truncate();
 
         $r = $table->insert([
-            [ 'id' => 1, 'name' => 'Milou'],
-            [ 'id' => 2, 'name' => 'Foli'],
-            [ 'id' => 3, 'name' => 'Bob'],
+            ['id' => 1, 'name' => 'Milou'],
+            ['id' => 2, 'name' => 'Foli'],
+            ['id' => 3, 'name' => 'Bob'],
         ]);
 
         $this->assertEquals($r, 3);
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
      */
     public function test_select_rows(string $name, Database $database)
     {
@@ -104,9 +120,11 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
      */
     public function test_select_chain_rows(string $name, Database $database)
     {
@@ -118,9 +136,11 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
      */
     public function test_select_first_chain_rows(string $name, Database $database)
     {
@@ -139,9 +159,12 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
+     * @throws QueryBuilderException
      */
     public function test_where_in_chain_rows(string $name, Database $database)
     {
@@ -153,9 +176,11 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
      */
     public function test_where_null_chain_rows(string $name, Database $database)
     {
@@ -167,9 +192,12 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
+     * @throws QueryBuilderException
      */
     public function test_where_between_chain_rows(string $name, Database $database)
     {
@@ -181,9 +209,11 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
      */
     public function test_where_not_between_chain_rows(string $name, Database $database)
     {
@@ -195,9 +225,12 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
+     * @throws QueryBuilderException
      */
     public function test_where_not_null_chain_rows(string $name, Database $database)
     {
@@ -209,9 +242,12 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends test_get_database_connection
+     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
+     * @param string $name
      * @param Database $database
+     * @throws ConnectionException
+     * @throws QueryBuilderException
      */
     public function test_where_chain_rows(string $name, Database $database)
     {
@@ -229,16 +265,8 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public function connectionNameProvider()
+    public function connectionNameProvider(): array
     {
         return [['mysql'], ['sqlite'], ['pgsql']];
-    }
-
-    public function createTestingTable(string $name)
-    {
-        Database::connection($name)->statement('drop table if exists pets');
-        Database::connection($name)->statement(
-            'create table pets (id int primary key, name varchar(255))'
-        );
     }
 }

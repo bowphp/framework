@@ -2,24 +2,21 @@
 
 namespace Bow\Tests\Database\Migration\Mysql;
 
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Exception\SQLGeneratorException;
+use Bow\Database\Migration\Table;
 
 class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * The sql generator
      *
-     * @var SQLGenerator
+     * @var Table
      */
-    private $generator;
-
-    protected function setUp(): void
-    {
-        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
-    }
+    private Table $generator;
 
     /**
      * Test Add column action
+     * @throws SQLGeneratorException
      */
     public function test_add_column_sql_statement()
     {
@@ -138,5 +135,10 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $sql = $this->generator->make();
 
         $this->assertEquals($sql, '`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    }
+
+    protected function setUp(): void
+    {
+        $this->generator = new Table('bow_tests', 'mysql', 'create');
     }
 }

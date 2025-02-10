@@ -3,21 +3,16 @@
 namespace Bow\Tests\Database\Migration\Mysql;
 
 use Bow\Database\Exception\SQLGeneratorException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * The sql generator
      *
-     * @var SQLGenerator
+     * @var Table
      */
-    private $generator;
-
-    protected function setUp(): void
-    {
-        $this->generator = new SQLGenerator('bow_tests', 'mysql', 'create');
-    }
+    private Table $generator;
 
     /**
      * @dataProvider getStringTypesWithSize
@@ -170,6 +165,7 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
         $sql = $this->generator->{"change$method"}('name', ['unique' => true])->make();
         $this->assertEquals($sql, "MODIFY COLUMN `name` {$type} UNIQUE NOT NULL");
     }
+
     /**
      * Test Add column action
      * @dataProvider getNumberTypes
@@ -232,5 +228,10 @@ class SQLGenetorHelpersTest extends \PHPUnit\Framework\TestCase
             ["blob", "Blob", "bow"],
             ["json", "Json", "{}"],
         ];
+    }
+
+    protected function setUp(): void
+    {
+        $this->generator = new Table('bow_tests', 'mysql', 'create');
     }
 }

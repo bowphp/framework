@@ -18,21 +18,21 @@ class QueryBuilder implements JsonSerializable
     /**
      * The table name
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $table = null;
 
     /**
      * Select statement collector
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $select = null;
 
     /**
      * Where statement collector
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $where = null;
 
@@ -46,49 +46,49 @@ class QueryBuilder implements JsonSerializable
     /**
      * Join statement collector
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $join = null;
 
     /**
      * Limit statement collector
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $limit = null;
 
     /**
      * Group statement collector
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $group = null;
 
     /**
      * Having statement collector
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $having = null;
 
     /**
      * Order By statement collector
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $order = null;
 
     /**
      * Define the table as
      *
-     * @var string
+     * @var ?string
      */
     protected ?string $as = null;
 
     /**
      * The PDO instance
      *
-     * @var PDO
+     * @var ?PDO
      */
     protected ?PDO $connection = null;
 
@@ -1170,7 +1170,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Delete Action
+     * Delete Compass
      *
      * @return int
      */
@@ -1198,7 +1198,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Action increment, add 1 by default to the specified field
+     * Compass increment, add 1 by default to the specified field
      *
      * @param string $column
      * @param int $step
@@ -1267,7 +1267,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Truncate Action, empty the table
+     * Truncate Compass, empty the table
      *
      * @return bool
      */
@@ -1301,7 +1301,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Insert Action
+     * Insert Compass
      *
      * The data to be inserted into the database.
      *
@@ -1357,7 +1357,7 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * Drop Action, remove the table
+     * Drop Compass, remove the table
      *
      * @return mixed
      */

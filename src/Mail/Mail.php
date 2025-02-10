@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Mail;
 
-use Bow\Mail\Contracts\MailDriverInterface;
-use Bow\Mail\Driver\NativeDriver;
-use Bow\Mail\Driver\SesDriver;
-use Bow\Mail\Driver\SmtpDriver;
+use Bow\Mail\Adapters\NativeAdapter;
+use Bow\Mail\Adapters\SesAdapter;
+use Bow\Mail\Adapters\SmtpAdapter;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 use ErrorException;
@@ -27,17 +27,17 @@ class Mail
      * @var array
      */
     private static array $drivers = [
-        'smtp' => SmtpDriver::class,
-        'mail' => NativeDriver::class,
-        'ses' => SesDriver::class,
+        'smtp' => SmtpAdapter::class,
+        'mail' => NativeAdapter::class,
+        'ses' => SesAdapter::class,
     ];
 
     /**
      * The mail driver instance
      *
-     * @var ?MailDriverInterface
+     * @var ?MailAdapterInterface
      */
-    private static ?MailDriverInterface $instance = null;
+    private static ?MailAdapterInterface $instance = null;
 
     /**
      * The mail configuration
@@ -61,10 +61,10 @@ class Mail
      * Configure la classe Mail
      *
      * @param array $config
-     * @return MailDriverInterface
+     * @return MailAdapterInterface
      * @throws MailException
      */
-    public static function configure(array $config = []): MailDriverInterface
+    public static function configure(array $config = []): MailAdapterInterface
     {
         if (empty(static::$config)) {
             static::$config = $config;
@@ -97,9 +97,9 @@ class Mail
     /**
      * Get mail instance
      *
-     * @return MailDriverInterface
+     * @return MailAdapterInterface
      */
-    public static function getInstance(): MailDriverInterface
+    public static function getInstance(): MailAdapterInterface
     {
         return static::$instance;
     }
@@ -117,15 +117,15 @@ class Mail
     {
         $to = (array)$to;
 
-        $message = new Message();
+        $envelop = new Envelop();
 
-        $message->toList($to)->subject($subject)->setMessage($data);
+        $envelop->to($to)->subject($subject)->setMessage($data);
 
         foreach ($headers as $key => $value) {
-            $message->addHeader($key, $value);
+            $envelop->addHeader($key, $value);
         }
 
-        return static::$instance->send($message);
+        return static::$instance->send($envelop);
     }
 
     /**
@@ -145,16 +145,16 @@ class Mail
 
         $content = View::parse($view, $data)->getContent();
 
-        $message = new Message();
-        $message->setMessage($content);
+        $envelop = new Envelop();
+        $envelop->setMessage($content);
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        return static::$instance->send($message);
+        return static::$instance->send($envelop);
     }
 
     /**
-     * Send message on queue
+     * Send env on queue
      *
      * @param string $template
      * @param array $data
@@ -163,17 +163,17 @@ class Mail
      */
     public static function queue(string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         queue($producer);
     }
 
     /**
-     * Send message on specific queue
+     * Send env on specific queue
      *
      * @param string $queue
      * @param string $template
@@ -183,11 +183,11 @@ class Mail
      */
     public static function queueOn(string $queue, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setQueue($queue);
 
@@ -205,11 +205,11 @@ class Mail
      */
     public static function later(int $delay, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setDelay($delay);
 
@@ -228,11 +228,11 @@ class Mail
      */
     public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setQueue($queue);
         $producer->setDelay($delay);
@@ -244,10 +244,10 @@ class Mail
      * Modify the smtp|mail|ses driver
      *
      * @param string $driver
-     * @return MailDriverInterface
+     * @return MailAdapterInterface
      * @throws MailException
      */
-    public static function setDriver(string $driver): MailDriverInterface
+    public static function setDriver(string $driver): MailAdapterInterface
     {
         if (static::$config == null) {
             throw new MailException(

@@ -3,21 +3,16 @@
 namespace Bow\Tests\Database\Migration\Pgsql;
 
 use Bow\Database\Exception\SQLGeneratorException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * The sql generator
      *
-     * @var SQLGenerator
+     * @var Table
      */
-    private $generator;
-
-    protected function setUp(): void
-    {
-        $this->generator = new SQLGenerator('bow_tests', 'pgsql', 'create');
-    }
+    private Table $generator;
 
     /**
      * Test Add column action
@@ -145,5 +140,10 @@ class SQLGeneratorTest extends \PHPUnit\Framework\TestCase
         $sql = $this->generator->make();
 
         $this->assertEquals($sql, '"created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    }
+
+    protected function setUp(): void
+    {
+        $this->generator = new Table('bow_tests', 'pgsql', 'create');
     }
 }

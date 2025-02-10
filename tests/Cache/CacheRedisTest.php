@@ -7,14 +7,6 @@ use Bow\Tests\Config\TestingConfiguration;
 
 class CacheRedisTest extends \PHPUnit\Framework\TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $config = TestingConfiguration::getConfig();
-        Cache::configure($config["cache"]);
-        Cache::store("redis");
-    }
-
     public function test_create_cache()
     {
         $result = Cache::add('name', 'Dakia');
@@ -29,8 +21,8 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
 
     public function test_add_with_callback_cache()
     {
-        $result = Cache::add('lastname', fn () => 'Franck');
-        $result = $result && Cache::add('age', fn () => 25, 20000);
+        $result = Cache::add('lastname', fn() => 'Franck');
+        $result = $result && Cache::add('age', fn() => 25, 20000);
 
         $this->assertEquals($result, true);
     }
@@ -157,5 +149,13 @@ class CacheRedisTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNull(Cache::get('name'));
         $this->assertNull(Cache::get('first_name'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $config = TestingConfiguration::getConfig();
+        Cache::configure($config["cache"]);
+        Cache::store("redis");
     }
 }

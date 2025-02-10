@@ -3,6 +3,7 @@
 namespace Bow\Tests\Database\Query;
 
 use Bow\Database\Database;
+use Bow\Database\Exception\ConnectionException;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Database\Stubs\PetModelStub;
 
@@ -28,7 +29,35 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @param string $name
+     * @throws ConnectionException
+     */
+    public function createTestingTable(string $name): void
+    {
+        $connection = Database::connection($name);
+
+        if ($name == 'pgsql') {
+            $sql = 'create table pets (id serial primary key, name varchar(255))';
+        }
+
+        if ($name == 'sqlite') {
+            $sql = 'create table pets (id integer not null primary key autoincrement, name varchar(255))';
+        }
+
+        if ($name == 'mysql') {
+            $sql = 'create table pets (id int not null primary key auto_increment, name varchar(255))';
+        }
+
+        $connection->statement('drop table if exists pets');
+        $connection->statement($sql);
+        $connection->insert('insert into pets(name) values(:name)', [
+            ['name' => 'Couli'], ['name' => 'Bobi']
+        ]);
+    }
+
+    /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_take_method_and_the_result_should_be_the_instance_of_the_same_model(
         string $name
@@ -43,6 +72,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_instance_off_collection(string $name)
     {
@@ -67,6 +97,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_count_simple(string $name)
     {
@@ -79,6 +110,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_count_selected(string $name)
     {
@@ -92,6 +124,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_count_selected_with_collection_count(string $name)
     {
@@ -105,6 +138,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_insert_by_create_method(string $name)
     {
@@ -113,7 +147,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
         $next_id = PetModelStub::all()->count() + 1;
 
         $insert_result = PetModelStub::create(['name' => 'Tor']);
-        $select_result = PetModelStub::findBy('id', $next_id)->first();
+        $insert_result->persist();
+        $select_result = PetModelStub::retrieveBy('id', $next_id)->first();
 
         $this->assertInstanceOf(PetModelStub::class, $insert_result);
         $this->assertInstanceOf(PetModelStub::class, $select_result);
@@ -127,6 +162,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
     public function test_save(string $name)
     {
@@ -134,7 +170,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
         $pet = PetModelStub::first();
         $pet->name = "Lofi";
-        $pet->save();
+        $pet->persist();
 
         $this->assertNotEquals($pet->name, 'Couli');
         $this->assertInstanceOf(PetModelStub::class, $pet);
@@ -142,36 +178,39 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
-    public function test_find_should_not_be_empty(string $name)
+    public function test_retrieve_should_not_be_empty(string $name)
     {
         $this->createTestingTable($name);
 
-        $pet = PetModelStub::find(1);
+        $pet = PetModelStub::retrieve(1);
 
         $this->assertEquals($pet->name, 'Couli');
     }
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
-    public function test_find_result_should_be_empty(string $name)
+    public function test_retrieve_result_should_be_empty(string $name)
     {
         $this->createTestingTable($name);
 
-        $pet = PetModelStub::find(100);
+        $pet = PetModelStub::retrieve(100);
 
         $this->assertNull($pet);
     }
 
     /**
      * @dataProvider connectionNameProvider
+     * @throws ConnectionException
      */
-    public function test_findby_result_should_not_be_empty(string $name)
+    public function test_retrieve_by_result_should_not_be_empty(string $name)
     {
         $this->createTestingTable($name);
 
-        $result = PetModelStub::findBy('id', 1);
+        $result = PetModelStub::retrieveBy('id', 1);
         $pet = $result->first();
 
         $this->assertNotEquals($result->count(), 0);
@@ -182,11 +221,11 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider connectionNameProvider
      */
-    public function test_find_by_method_should_be_empty(string $name)
+    public function test_retrieve_by_method_should_be_empty(string $name)
     {
         $this->createTestingTable($name);
 
-        $result = PetModelStub::findBy('id', 100);
+        $result = PetModelStub::retrieveBy('id', 100);
         $pet = $result->first();
 
         $this->assertNull($pet);
@@ -195,34 +234,8 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public function connectionNameProvider()
+    public function connectionNameProvider(): array
     {
         return [['mysql'], ['sqlite'], ['pgsql']];
-    }
-
-    /**
-     * @param string $name
-     */
-    public function createTestingTable(string $name)
-    {
-        $connection = Database::connection($name);
-
-        if ($name == 'pgsql') {
-            $sql = 'create table pets (id serial primary key, name varchar(255))';
-        }
-
-        if ($name == 'sqlite') {
-            $sql = 'create table pets (id integer not null primary key autoincrement, name varchar(255))';
-        }
-
-        if ($name == 'mysql') {
-            $sql = 'create table pets (id int not null primary key auto_increment, name varchar(255))';
-        }
-
-        $connection->statement('drop table if exists pets');
-        $connection->statement($sql);
-        $connection->insert('insert into pets(name) values(:name)', [
-            ['name' => 'Couli'], ['name' => 'Bobi']
-        ]);
     }
 }

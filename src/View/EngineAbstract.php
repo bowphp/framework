@@ -104,6 +104,17 @@ abstract class EngineAbstract
     }
 
     /**
+     * Normalize the file
+     *
+     * @param string $filename
+     * @return string
+     */
+    private function normalizeFilename(string $filename): string
+    {
+        return preg_replace('/@|\./', '/', $filename) . '.' . trim($this->config['extension'], '.');
+    }
+
+    /**
      * Check the parsed file
      *
      * @param string $filename
@@ -128,16 +139,5 @@ abstract class EngineAbstract
         }
 
         return $extended ? $normalized_filename : $filename;
-    }
-
-    /**
-     * Normalize the file
-     *
-     * @param string $filename
-     * @return string
-     */
-    private function normalizeFilename(string $filename): string
-    {
-        return preg_replace('/@|\./', '/', $filename) . '.' . trim($this->config['extension'], '.');
     }
 }

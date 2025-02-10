@@ -10,7 +10,7 @@ Bow Framework's mail system is very simple email delivery system with support:
 Let's show a little exemple:
 
 ```php
-use Bow\Mail\Message;
+use Bow\Mail\Envelop;
 
 email('view.template', function (Message $message) {
     $message->to("papac@bowphp.com");

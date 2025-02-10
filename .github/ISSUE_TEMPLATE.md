@@ -5,7 +5,7 @@ If you would like to propose new Bow features, please make a pull request, or op
 - Version: #.#.#
 - Tintin Version: #.#.#
 - PHP Version: #.#.#
-- Database Driver & Version: Mysql|Sqlite
+- Database Adapters & Version: Mysql|Sqlite
 
 ### Description
 

@@ -3,7 +3,6 @@
 namespace Bow\Tests\Database\Stubs;
 
 use Bow\Database\Barry\Relations\HasMany;
-use Bow\Tests\Database\Stubs\PetModelStub;
 
 class PetMasterModelStub extends \Bow\Database\Barry\Model
 {

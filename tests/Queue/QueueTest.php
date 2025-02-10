@@ -2,7 +2,7 @@
 
 namespace Bow\Tests\Queue;
 
-use Bow\Cache\Adapter\RedisAdapter;
+use Bow\Cache\Adapters\RedisAdapter;
 use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
@@ -12,14 +12,14 @@ use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
-use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Queue\Stubs\PetModelStub;
 use Bow\Queue\Connection as QueueConnection;
-use Bow\Testing\KernelTesting;
-use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\BasicProducerStubs;
+use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Queue\Stubs\PetModelStub;
+use PHPUnit\Framework\TestCase;
 
-class QueueTest extends \PHPUnit\Framework\TestCase
+class QueueTest extends TestCase
 {
     private static $connection;
 
@@ -81,7 +81,7 @@ class QueueTest extends \PHPUnit\Framework\TestCase
      * @param string $connection
      * @return void
      */
-    public function test_push_service_adapter($connection)
+    public function test_push_service_adapter(string $connection)
     {
         $adapter = static::$connection->setConnection($connection)->getAdapter();
         $filename = TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt";
@@ -103,7 +103,7 @@ class QueueTest extends \PHPUnit\Framework\TestCase
      * @param string $connection
      * @return void
      */
-    public function test_push_service_adapter_with_model($connection)
+    public function test_push_service_adapter_with_model(string $connection)
     {
         $adapter = static::$connection->setConnection($connection)->getAdapter();
         $pet = new PetModelStub(["name" => "Filou"]);
@@ -134,7 +134,7 @@ class QueueTest extends \PHPUnit\Framework\TestCase
             ["beanstalkd"],
             ["database"],
             ["sync"],
-            // ["sqs"],
+            ["sqs"],
             // ["redis"],
             // ["rabbitmq"]
         ];
