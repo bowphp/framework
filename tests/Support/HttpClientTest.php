@@ -13,7 +13,7 @@ class HttpClientTest extends TestCase
 
         $response = $http->get("https://www.oogle.com");
 
-        $this->assertEquals($response->statusCode(), 525);
+        $this->assertEquals($response->statusCode(), 503);
     }
 
     public function test_get_method_with_custom_headers()
