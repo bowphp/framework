@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Bow\Database;
 
-use Bow\Database\Connection\AbstractConnection;
-use Bow\Database\Connection\Adapter\MysqlAdapter;
-use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
-use Bow\Database\Connection\Adapter\SqliteAdapter;
-use Bow\Database\Exception\ConnectionException;
-use Bow\Database\Exception\DatabaseException;
-use Bow\Security\Sanitize;
 use PDO;
+use ErrorException;
+use Bow\Security\Sanitize;
+use Bow\Database\Exception\DatabaseException;
+use Bow\Database\Connection\AbstractConnection;
+use Bow\Database\Exception\ConnectionException;
+use Bow\Database\Connection\Adapter\MysqlAdapter;
+use Bow\Database\Connection\Adapter\SqliteAdapter;
+use Bow\Database\Connection\Adapter\PostgreSQLAdapter;
 
 class Database
 {
