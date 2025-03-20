@@ -10,7 +10,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
     public static function setUpBeforeClass(): void
     {
         $config = TestingConfiguration::getConfig();
-
+        
         View::configure($config["view"]);
     }
 

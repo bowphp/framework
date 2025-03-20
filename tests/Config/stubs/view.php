@@ -11,7 +11,7 @@ return [
     'cache' => TESTING_RESOURCE_BASE_DIRECTORY . '/cache',
 
     // Le repertoire des vues.
-    'path' => __DIR__ . '/../../View/stubs',
+    'path' => realpath(__DIR__ . '/../../View/stubs'),
 
     'additionnal_options' => [
         'auto_reload' => true
