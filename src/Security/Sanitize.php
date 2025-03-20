@@ -9,8 +9,8 @@ class Sanitize
     /**
      * To clean the data
      *
-     * @param mixed $data
-     * @param bool $secure
+     * @param  mixed $data
+     * @param  bool  $secure
      * @return mixed
      */
     public static function make(mixed $data, bool $secure = false): mixed
@@ -61,7 +61,7 @@ class Sanitize
     /**
      * Allows you to clean a string of characters
      *
-     * @param string $data
+     * @param  string $data
      * @return string
      */
     public static function data(string $data): string
@@ -72,7 +72,7 @@ class Sanitize
     /**
      * Allows you to clean a string of characters
      *
-     * @param string $data
+     * @param  string $data
      * @return string
      */
     public static function secure(string $data): string

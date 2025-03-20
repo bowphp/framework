@@ -24,8 +24,8 @@ class MiddlewareDispatcher
     /**
      * Add a middleware to the runtime collection
      *
-     * @param string|callable $middleware
-     * @param array $params
+     * @param  string|callable $middleware
+     * @param  array           $params
      * @return MiddlewareDispatcher
      */
     public function pipe(string|callable $middleware, array $params = []): MiddlewareDispatcher
@@ -42,8 +42,8 @@ class MiddlewareDispatcher
     /**
      * Start the middleware running process
      *
-     * @param Request $request
-     * @param array $args
+     * @param  Request $request
+     * @param  array   $args
      * @return mixed
      */
     public function process(Request $request, array ...$args): mixed

@@ -10,7 +10,7 @@ use Bow\Console\Generator;
 use Bow\Database\Database;
 use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\QueryBuilderException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 use Bow\Database\QueryBuilder;
 use Bow\Support\Str;
 use ErrorException;
@@ -33,7 +33,7 @@ class MigrationCommand extends AbstractCommand
     /**
      * Create a migration in both directions
      *
-     * @param string $type
+     * @param  string $type
      * @return void
      * @throws Exception
      */
@@ -80,7 +80,7 @@ class MigrationCommand extends AbstractCommand
         $adapter = Database::getConnectionAdapter();
 
         $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
-        $generator = new SQLGenerator(
+        $generator = new Table(
             $table,
             $adapter->getName(),
             'create'
@@ -88,10 +88,13 @@ class MigrationCommand extends AbstractCommand
 
         $generator->addString('migration', ['unique' => true]);
         $generator->addInteger('batch');
-        $generator->addDatetime('created_at', [
+        $generator->addDatetime(
+            'created_at',
+            [
             'default' => 'CURRENT_TIMESTAMP',
             'nullable' => true
-        ]);
+            ]
+        );
 
         $sql = sprintf(
             'CREATE TABLE IF NOT EXISTS %s (%s);',
@@ -157,10 +160,13 @@ class MigrationCommand extends AbstractCommand
             $type = 'model/create';
         }
 
-        $generator->write($type, [
+        $generator->write(
+            $type,
+            [
             'table' => $table ?? 'table_name',
             'className' => $filename
-        ]);
+            ]
+        );
 
         // Print console information
         echo Color::green('The migration file has been successfully created') . "\n";
@@ -169,7 +175,7 @@ class MigrationCommand extends AbstractCommand
     /**
      * Up migration
      *
-     * @param array $migrations
+     * @param  array $migrations
      * @return void
      * @throws ConnectionException
      * @throws QueryBuilderException
@@ -192,7 +198,7 @@ class MigrationCommand extends AbstractCommand
             }
 
             // Include the migration file
-            require $file;
+            include $file;
 
             try {
                 // Up migration
@@ -229,7 +235,7 @@ class MigrationCommand extends AbstractCommand
     /**
      * Check the migration existence
      *
-     * @param string $migration
+     * @param  string $migration
      * @return bool
      * @throws ConnectionException|QueryBuilderException
      */
@@ -246,9 +252,9 @@ class MigrationCommand extends AbstractCommand
      * Throw migration exception
      *
      * @param Exception $exception
-     * @param string $migration
+     * @param string    $migration
      */
-    #[NoReturn] private function throwMigrationException(Exception $exception, string $migration): void
+    private function throwMigrationException(Exception $exception, string $migration): void
     {
         $this->printExceptionMessage(
             $exception->getMessage(),
@@ -259,11 +265,11 @@ class MigrationCommand extends AbstractCommand
     /**
      * Print the error message
      *
-     * @param string $message
-     * @param string $migration
+     * @param  string $message
+     * @param  string $migration
      * @return void
      */
-    #[NoReturn] private function printExceptionMessage(string $message, string $migration): void
+    private function printExceptionMessage(string $message, string $migration): void
     {
         $message = Color::red($message);
         $migration = Color::yellow($migration);
@@ -274,7 +280,7 @@ class MigrationCommand extends AbstractCommand
     /**
      * Create migration status
      *
-     * @param string $migration
+     * @param  string $migration
      * @return void
      * @throws ConnectionException
      */
@@ -282,18 +288,20 @@ class MigrationCommand extends AbstractCommand
     {
         $table = $this->getMigrationTable();
 
-        $table->insert([
+        $table->insert(
+            [
             'migration' => $migration,
             'batch' => 1,
             'created_at' => date('Y-m-d H:i:s')
-        ]);
+            ]
+        );
     }
 
     /**
      * Update migration status
      *
-     * @param string $migration
-     * @param int $batch
+     * @param  string $migration
+     * @param  int    $batch
      * @return void
      * @throws ConnectionException|QueryBuilderException
      */
@@ -301,16 +309,18 @@ class MigrationCommand extends AbstractCommand
     {
         $table = $this->getMigrationTable();
 
-        $table->where('migration', $migration)->update([
+        $table->where('migration', $migration)->update(
+            [
             'migration' => $migration,
             'batch' => $batch
-        ]);
+            ]
+        );
     }
 
     /**
      * Rollback migration
      *
-     * @param array $migrations
+     * @param  array $migrations
      * @return void
      * @throws ConnectionException
      * @throws QueryBuilderException
@@ -334,13 +344,13 @@ class MigrationCommand extends AbstractCommand
             foreach ($migrations as $file => $migration) {
                 if (
                     !($value->batch == 1
-                        && $migration == $value->migration)
+                    && $migration == $value->migration)
                 ) {
                     continue;
                 }
 
                 // Include the migration file
-                require $file;
+                include $file;
 
                 // Rollback migration
                 try {
@@ -383,7 +393,7 @@ class MigrationCommand extends AbstractCommand
     /**
      * Reset migration
      *
-     * @param array $migrations
+     * @param  array $migrations
      * @return void
      * @throws ConnectionException
      * @throws QueryBuilderException
@@ -410,7 +420,7 @@ class MigrationCommand extends AbstractCommand
                 }
 
                 // Include the migration file
-                require $file;
+                include $file;
 
                 // Rollback migration
                 try {

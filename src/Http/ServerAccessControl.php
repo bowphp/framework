@@ -28,7 +28,7 @@ class ServerAccessControl
     /**
      * Active Access-control-Allow-Origin
      *
-     * @param array $excepted
+     * @param  array $excepted
      * @return ServerAccessControl
      * @throws
      */
@@ -47,8 +47,8 @@ class ServerAccessControl
     /**
      * The access control
      *
-     * @param string $allow
-     * @param string|null $excepted
+     * @param  string      $allow
+     * @param  string|null $excepted
      * @return $this
      */
     private function push(string $allow, ?string $excepted = null): ServerAccessControl
@@ -65,7 +65,7 @@ class ServerAccessControl
     /**
      * Active Access-control-Allow-Methods
      *
-     * @param array $excepted
+     * @param  array $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
@@ -84,7 +84,7 @@ class ServerAccessControl
     /**
      * Active Access-control-Allow-Headers
      *
-     * @param array $excepted
+     * @param  array $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
@@ -110,7 +110,7 @@ class ServerAccessControl
     /**
      * Active Access-control-Max-Age
      *
-     * @param float|int $excepted
+     * @param  float|int $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */
@@ -129,7 +129,7 @@ class ServerAccessControl
     /**
      * Active Access-control-Expose-Headers
      *
-     * @param array $excepted
+     * @param  array $excepted
      * @return ServerAccessControl
      * @throws ServerAccessControlException
      */

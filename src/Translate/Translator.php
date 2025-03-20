@@ -36,7 +36,7 @@ class Translator
      *
      * @param string $lang
      * @param string $directory
-     * @param bool $auto_detected
+     * @param bool   $auto_detected
      */
     public function __construct(string $lang, string $directory, bool $auto_detected = false)
     {
@@ -96,7 +96,7 @@ class Translator
      * Make singleton translation
      *
      * @param string $key
-     * @param array $data
+     * @param array  $data
      *
      * @return string
      */
@@ -109,8 +109,8 @@ class Translator
      * Allows translation
      *
      * @param string $key
-     * @param array $data
-     * @param bool $plural
+     * @param array  $data
+     * @param bool   $plural
      *
      * @return string
      */
@@ -128,7 +128,7 @@ class Translator
             return $key;
         }
 
-        $contents = require $translation_filename;
+        $contents = include $translation_filename;
 
         if (!is_array($contents)) {
             return $key;
@@ -163,8 +163,8 @@ class Translator
     /**
      * Str formatter
      *
-     * @param string $str
-     * @param array $values
+     * @param  string $str
+     * @param  array  $values
      * @return string
      */
     private static function format(string $str, array $values = []): string
@@ -182,8 +182,8 @@ class Translator
     /**
      * Make plural translation
      *
-     * @param string $key
-     * @param array $data
+     * @param  string $key
+     * @param  array  $data
      * @return string
      */
     public static function plural(string $key, array $data = []): string
@@ -214,8 +214,8 @@ class Translator
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return string
      */
     public function __call(string $name, array $arguments)

@@ -53,7 +53,7 @@ class Request
     /**
      * Check if file exists
      *
-     * @param mixed $file
+     * @param  mixed $file
      * @return bool
      */
     public static function hasFile(mixed $file): bool
@@ -107,7 +107,7 @@ class Request
     /**
      * Get Request header
      *
-     * @param string $key
+     * @param  string $key
      * @return ?string
      */
     public function getHeader(string $key): ?string
@@ -128,7 +128,7 @@ class Request
     /**
      * Check if a header exists.
      *
-     * @param string $key
+     * @param  string $key
      * @return bool
      */
     public function hasHeader(string $key): bool
@@ -171,8 +171,8 @@ class Request
     /**
      * Retrieve a value or a collection of values.
      *
-     * @param string $key
-     * @param mixed|null $default
+     * @param  string     $key
+     * @param  mixed|null $default
      * @return mixed
      */
     public function get(string $key, mixed $default = null): mixed
@@ -199,7 +199,7 @@ class Request
     /**
      * Set the request id
      *
-     * @param string|int $id
+     * @param  string|int $id
      * @return void
      */
     public function setId(string|int $id): void
@@ -220,7 +220,7 @@ class Request
     /**
      * Check if key is existing
      *
-     * @param string $key
+     * @param  string $key
      * @return bool
      */
     public function has(string $key): bool
@@ -339,7 +339,7 @@ class Request
     /**
      * Load the factory for FILES
      *
-     * @param string $key
+     * @param  string $key
      * @return UploadedFile|Collection|null
      */
     public function file(string $key): UploadedFile|Collection|null
@@ -356,13 +356,15 @@ class Request
         $collect = [];
 
         foreach ($files['name'] as $key => $name) {
-            $collect[] = new UploadedFile([
+            $collect[] = new UploadedFile(
+                [
                 'name' => $name,
                 'type' => $files['type'][$key],
                 'size' => $files['size'][$key],
                 'error' => $files['error'][$key],
                 'tmp_name' => $files['tmp_name'][$key],
-            ]);
+                ]
+            );
         }
 
         return new Collection($collect);
@@ -371,8 +373,8 @@ class Request
     /**
      * Get previous request data
      *
-     * @param string $key
-     * @param mixed $fullback
+     * @param  string $key
+     * @param  mixed  $fullback
      * @return mixed
      */
     public function old(string $key, mixed $fullback): mixed
@@ -425,7 +427,7 @@ class Request
     /**
      * Check if a url matches with the pattern
      *
-     * @param string $match
+     * @param  string $match
      * @return bool
      */
     public function is(string $match): bool
@@ -436,7 +438,7 @@ class Request
     /**
      * Check if a url matches with the pattern
      *
-     * @param string $match
+     * @param  string $match
      * @return bool
      */
     public function isReferer(string $match): bool
@@ -533,7 +535,7 @@ class Request
     /**
      * Check the protocol of the request
      *
-     * @param string $protocol
+     * @param  string $protocol
      * @return mixed
      */
     public function isProtocol(string $protocol): bool
@@ -583,21 +585,21 @@ class Request
     /**
      * Get auth user information
      *
-     * @param string|null $guard
+     * @param  string|null $guard
      * @return Authentication|null
      */
     public function user(?string $guard = null): ?Authentication
     {
-        return auth($guard)->user();
+        return app_auth($guard)->user();
     }
 
     /**
      * Get cookie
      *
-     * @param string|null $property
+     * @param  string|null $property
      * @return string|array|object|null
      */
-    public function cookie(string $property = null): string|array|object|null
+    public function cookie(?string $property = null): string|array|object|null
     {
         return cookie($property);
     }
@@ -605,7 +607,7 @@ class Request
     /**
      * Retrieves the values contained in the exception table
      *
-     * @param array $exceptions
+     * @param  array $exceptions
      * @return array
      */
     public function only(array $exceptions = []): array
@@ -628,7 +630,7 @@ class Request
     /**
      * Retrieves the rest of values
      *
-     * @param array $ignores
+     * @param  array $ignores
      * @return array
      */
     public function ignore(array $ignores = []): array
@@ -651,7 +653,7 @@ class Request
     /**
      * Validate incoming data
      *
-     * @param array $rule
+     * @param  array $rule
      * @return Validate
      */
     public function validate(array $rule): Validate
@@ -662,8 +664,8 @@ class Request
     /**
      * Set the shared value in request bags
      *
-     * @param string $name
-     * @param mixed $value
+     * @param  string $name
+     * @param  mixed  $value
      * @return void
      */
     public function setBag(string $name, mixed $value): void
@@ -674,7 +676,7 @@ class Request
     /**
      * Get the shared value in request bags
      *
-     * @param string $name
+     * @param  string $name
      * @return mixed
      */
     public function getBag(string $name): mixed
@@ -695,7 +697,7 @@ class Request
     /**
      * Set the shared value in request bags
      *
-     * @param array $bags
+     * @param  array $bags
      * @return void
      */
     public function setBags(array $bags): void
@@ -706,7 +708,7 @@ class Request
     /**
      * __call
      *
-     * @param $property
+     * @param  $property
      * @return mixed
      */
     public function __get($property)

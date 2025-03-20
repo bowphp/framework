@@ -51,7 +51,7 @@ class Loader implements ArrayAccess
     private bool $without_session = false;
 
     /**
-     * @param string $base_path
+     * @param  string $base_path
      * @throws
      */
     private function __construct(string $base_path)
@@ -89,7 +89,7 @@ class Loader implements ArrayAccess
     /**
      * Configuration Loader
      *
-     * @param string $base_path
+     * @param  string $base_path
      * @return Loader
      * @throws
      */
@@ -286,8 +286,8 @@ class Loader implements ArrayAccess
     /**
      * __invoke
      *
-     * @param string $key
-     * @param mixed $value
+     * @param  string $key
+     * @param  mixed  $value
      * @return mixed
      */
     public function __invoke(string $key, mixed $value = null): mixed

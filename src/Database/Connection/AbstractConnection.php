@@ -77,7 +77,7 @@ abstract class AbstractConnection
     /**
      * Sets the data recovery mode.
      *
-     * @param int $fetch
+     * @param  int $fetch
      * @return void
      */
     public function setFetchMode(int $fetch): void
@@ -144,7 +144,7 @@ abstract class AbstractConnection
      * Executes PDOStatement::bindValue on an instance of
      *
      * @param PDOStatement $pdo_statement
-     * @param array $bindings
+     * @param array        $bindings
      *
      * @return PDOStatement
      */

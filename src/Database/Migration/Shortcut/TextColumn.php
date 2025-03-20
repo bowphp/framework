@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Bow\Database\Migration\Shortcut;
 
 use Bow\Database\Exception\SQLGeneratorException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 trait TextColumn
 {
     /**
      * Add string column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addString(string $column, array $attribute = []): SQLGenerator
+    public function addString(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'string', $attribute);
     }
@@ -25,12 +25,12 @@ trait TextColumn
     /**
      * Add json column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addJson(string $column, array $attribute = []): SQLGenerator
+    public function addJson(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'json', $attribute);
     }
@@ -38,12 +38,12 @@ trait TextColumn
     /**
      * Add character column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addChar(string $column, array $attribute = []): SQLGenerator
+    public function addChar(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'char', $attribute);
     }
@@ -51,12 +51,12 @@ trait TextColumn
     /**
      * Add longtext column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addLongtext(string $column, array $attribute = []): SQLGenerator
+    public function addLongtext(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'longtext', $attribute);
     }
@@ -64,12 +64,12 @@ trait TextColumn
     /**
      * Add text column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addText(string $column, array $attribute = []): SQLGenerator
+    public function addText(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'text', $attribute);
     }
@@ -77,12 +77,12 @@ trait TextColumn
     /**
      * Add blob column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addBlob(string $column, array $attribute = []): SQLGenerator
+    public function addBlob(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'blob', $attribute);
     }
@@ -90,12 +90,12 @@ trait TextColumn
     /**
      * Change string column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeString(string $column, array $attribute = []): SQLGenerator
+    public function changeString(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'string', $attribute);
     }
@@ -103,12 +103,12 @@ trait TextColumn
     /**
      * Change json column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeJson(string $column, array $attribute = []): SQLGenerator
+    public function changeJson(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'json', $attribute);
     }
@@ -116,12 +116,12 @@ trait TextColumn
     /**
      * Change character column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeChar(string $column, array $attribute = []): SQLGenerator
+    public function changeChar(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'char', $attribute);
     }
@@ -129,12 +129,12 @@ trait TextColumn
     /**
      * Change longtext column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeLongtext(string $column, array $attribute = []): SQLGenerator
+    public function changeLongtext(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'longtext', $attribute);
     }
@@ -142,12 +142,12 @@ trait TextColumn
     /**
      * Change text column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeText(string $column, array $attribute = []): SQLGenerator
+    public function changeText(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'text', $attribute);
     }
@@ -155,12 +155,12 @@ trait TextColumn
     /**
      * Change blob column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeBlob(string $column, array $attribute = []): SQLGenerator
+    public function changeBlob(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'blob', $attribute);
     }

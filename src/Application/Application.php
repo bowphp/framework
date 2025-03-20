@@ -6,8 +6,8 @@ namespace Bow\Application;
 
 use Bow\Application\Exception\ApplicationException;
 use Bow\Configuration\Loader;
-use Bow\Container\Action;
 use Bow\Container\Capsule;
+use Bow\Container\Compass;
 use Bow\Contracts\ResponseInterface;
 use Bow\Http\Exception\BadRequestException;
 use Bow\Http\Exception\HttpException;
@@ -70,8 +70,8 @@ class Application extends Router
     /**
      * Application constructor
      *
-     * @param Request $request
-     * @param Response $response
+     * @param  Request  $request
+     * @param  Response $response
      * @throws BadRequestException
      */
     public function __construct(Request $request, Response $response)
@@ -182,7 +182,7 @@ class Application extends Router
             );
         }
 
-        $response = Action::getInstance()->execute($this->error_code[404], []);
+        $response = Compass::getInstance()->execute($this->error_code[404], []);
 
         $this->sendResponse($response, 404);
 
@@ -192,8 +192,8 @@ class Application extends Router
     /**
      * Send the answer to the customer
      *
-     * @param mixed $response
-     * @param int $code
+     * @param  mixed $response
+     * @param  int   $code
      * @return void
      */
     private function sendResponse(mixed $response, int $code = 200): void
@@ -219,9 +219,9 @@ class Application extends Router
     /**
      * Make the REST API base on route and resource controller.
      *
-     * @param string $url
-     * @param string|array $controller_name
-     * @param array $where
+     * @param  string       $url
+     * @param  string|array $controller_name
+     * @param  array        $where
      * @return Application
      *
      * @throws ApplicationException
@@ -273,8 +273,8 @@ class Application extends Router
     /**
      * Build the application
      *
-     * @param Request $request
-     * @param Response $response
+     * @param  Request  $request
+     * @param  Response $response
      * @return Application
      * @throws BadRequestException
      */
@@ -290,9 +290,9 @@ class Application extends Router
     /**
      * Abort application
      *
-     * @param int $code
-     * @param string $message
-     * @param array $headers
+     * @param  int    $code
+     * @param  string $message
+     * @param  array  $headers
      * @return void
      *
      * @throws HttpException
@@ -315,8 +315,8 @@ class Application extends Router
     /**
      * Build dependence
      *
-     * @param ?string $name
-     * @param ?callable $callable
+     * @param  ?string   $name
+     * @param  ?callable $callable
      * @return mixed
      * @throws ApplicationException
      */
@@ -344,7 +344,7 @@ class Application extends Router
     /**
      * Configuration Association
      *
-     * @param Loader $config
+     * @param  Loader $config
      * @return void
      */
     public function bind(Loader $config): void
@@ -384,7 +384,7 @@ class Application extends Router
      *
      * This point method on the container system
      *
-     * @param array $params
+     * @param  array $params
      * @return mixed
      * @throws ApplicationException
      */

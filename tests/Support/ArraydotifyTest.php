@@ -33,11 +33,6 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         ]
     ];
 
-    protected function setUp(): void
-    {
-        $this->dot = new \Bow\Support\Arraydotify(['code' => $this->collection]);
-    }
-
     public function test_get_normal()
     {
         $this->assertTrue(is_array($this->dot['code']));
@@ -77,5 +72,10 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         unset($this->dot['code.location']);
 
         $this->assertTrue(isset($this->dot['code.location']));
+    }
+
+    protected function setUp(): void
+    {
+        $this->dot = new \Bow\Support\Arraydotify(['code' => $this->collection]);
     }
 }

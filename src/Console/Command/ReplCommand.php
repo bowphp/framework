@@ -24,7 +24,7 @@ class ReplCommand extends AbstractCommand
         if (is_string($include)) {
             $bootstraps = array_merge(
                 $this->setting->getBootstrap(),
-                (array)$include
+                (array) $include
             );
 
             $this->setting->setBootstrap($bootstraps);

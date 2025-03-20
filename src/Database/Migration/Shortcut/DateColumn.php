@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Bow\Database\Migration\Shortcut;
 
 use Bow\Database\Exception\SQLGeneratorException;
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 trait DateColumn
 {
     /**
      * Add datetime column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addDatetime(string $column, array $attribute = []): SQLGenerator
+    public function addDatetime(string $column, array $attribute = []): Table
     {
         if ($this->adapter == 'pgsql') {
             return $this->addTimestamp($column, $attribute);
@@ -29,12 +29,12 @@ trait DateColumn
     /**
      * Add timestamp column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addTimestamp(string $column, array $attribute = []): SQLGenerator
+    public function addTimestamp(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'timestamp', $attribute);
     }
@@ -42,12 +42,12 @@ trait DateColumn
     /**
      * Add date column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addDate(string $column, array $attribute = []): SQLGenerator
+    public function addDate(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'date', $attribute);
     }
@@ -55,12 +55,12 @@ trait DateColumn
     /**
      * Add time column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addTime(string $column, array $attribute = []): SQLGenerator
+    public function addTime(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'time', $attribute);
     }
@@ -68,12 +68,12 @@ trait DateColumn
     /**
      * Add year column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addYear(string $column, array $attribute = []): SQLGenerator
+    public function addYear(string $column, array $attribute = []): Table
     {
         return $this->addColumn($column, 'year', $attribute);
     }
@@ -81,10 +81,10 @@ trait DateColumn
     /**
      * Add default timestamps
      *
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function addTimestamps(): SQLGenerator
+    public function addTimestamps(): Table
     {
         if ($this->adapter == 'pgsql') {
             $this->addTimestamp('created_at', ['default' => 'CURRENT_TIMESTAMP']);
@@ -102,12 +102,12 @@ trait DateColumn
     /**
      * Change datetime column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeDatetime(string $column, array $attribute = []): SQLGenerator
+    public function changeDatetime(string $column, array $attribute = []): Table
     {
         if ($this->adapter == 'pgsql') {
             return $this->addTimestamp($column, $attribute);
@@ -119,12 +119,12 @@ trait DateColumn
     /**
      * Change date column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeDate(string $column, array $attribute = []): SQLGenerator
+    public function changeDate(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'date', $attribute);
     }
@@ -132,12 +132,12 @@ trait DateColumn
     /**
      * Change time column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeTime(string $column, array $attribute = []): SQLGenerator
+    public function changeTime(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'time', $attribute);
     }
@@ -145,12 +145,12 @@ trait DateColumn
     /**
      * Change year column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeYear(string $column, array $attribute = []): SQLGenerator
+    public function changeYear(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'year', $attribute);
     }
@@ -158,12 +158,12 @@ trait DateColumn
     /**
      * Change timestamp column
      *
-     * @param string $column
-     * @param array $attribute
-     * @return SQLGenerator
+     * @param  string $column
+     * @param  array  $attribute
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeTimestamp(string $column, array $attribute = []): SQLGenerator
+    public function changeTimestamp(string $column, array $attribute = []): Table
     {
         return $this->changeColumn($column, 'timestamp', $attribute);
     }
@@ -171,10 +171,10 @@ trait DateColumn
     /**
      * Change default timestamps
      *
-     * @return SQLGenerator
+     * @return Table
      * @throws SQLGeneratorException
      */
-    public function changeTimestamps(): SQLGenerator
+    public function changeTimestamps(): Table
     {
         if ($this->adapter == 'sqlite') {
             $this->changeColumn('created_at', 'text', ['default' => 'CURRENT_TIMESTAMP']);

@@ -13,10 +13,10 @@ class ConsoleCommand extends AbstractCommand
     /**
      * Add service
      *
-     * @param string $service
+     * @param  string $service
      * @return void
      */
-    #[NoReturn] public function generate(string $service): void
+    public function generate(string $service): void
     {
         $generator = new Generator(
             $this->setting->getCommandDirectory(),

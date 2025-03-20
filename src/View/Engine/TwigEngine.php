@@ -29,7 +29,7 @@ class TwigEngine extends EngineAbstract
     /**
      * TwigEngine constructor.
      *
-     * @param array $config
+     * @param  array $config
      * @return Environment
      * @throws ApplicationException
      */

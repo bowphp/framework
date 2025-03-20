@@ -33,7 +33,7 @@ class TestCase extends PHPUnitTestCase
     /**
      * Add attachment
      *
-     * @param array $attach
+     * @param  array $attach
      * @return TestCase
      */
     public function attach(array $attach): TestCase
@@ -46,7 +46,7 @@ class TestCase extends PHPUnitTestCase
     /**
      * Specify the additional headers
      *
-     * @param array $headers
+     * @param  array $headers
      * @return TestCase
      */
     public function withHeaders(array $headers): TestCase
@@ -59,8 +59,8 @@ class TestCase extends PHPUnitTestCase
     /**
      * Specify the additional header
      *
-     * @param string $key
-     * @param string $value
+     * @param  string $key
+     * @param  string $value
      * @return TestCase
      */
     public function withHeader(string $key, string $value): TestCase
@@ -73,8 +73,8 @@ class TestCase extends PHPUnitTestCase
     /**
      * Get request
      *
-     * @param string $url
-     * @param array $param
+     * @param  string $url
+     * @param  array  $param
      * @return Response
      * @throws Exception
      */
@@ -100,8 +100,8 @@ class TestCase extends PHPUnitTestCase
     /**
      * Post Request
      *
-     * @param string $url
-     * @param array $param
+     * @param  string $url
+     * @param  array  $param
      * @return Response
      * @throws Exception
      */
@@ -121,16 +121,19 @@ class TestCase extends PHPUnitTestCase
     /**
      * Delete Request
      *
-     * @param string $url
-     * @param array $param
+     * @param  string $url
+     * @param  array  $param
      * @return Response
      * @throws Exception
      */
     public function delete(string $url, array $param = []): Response
     {
-        $param = array_merge([
+        $param = array_merge(
+            [
             '_method' => 'DELETE'
-        ], $param);
+            ],
+            $param
+        );
 
         return $this->put($url, $param);
     }
@@ -138,8 +141,8 @@ class TestCase extends PHPUnitTestCase
     /**
      * Put Request
      *
-     * @param string $url
-     * @param array $param
+     * @param  string $url
+     * @param  array  $param
      * @return Response
      * @throws Exception
      */
@@ -155,16 +158,19 @@ class TestCase extends PHPUnitTestCase
     /**
      * Patch Request
      *
-     * @param string $url
-     * @param array $param
+     * @param  string $url
+     * @param  array  $param
      * @return Response
      * @throws Exception
      */
     public function patch(string $url, array $param = []): Response
     {
-        $param = array_merge([
+        $param = array_merge(
+            [
             '_method' => 'PATCH'
-        ], $param);
+            ],
+            $param
+        );
 
         return $this->put($url, $param);
     }
@@ -172,9 +178,9 @@ class TestCase extends PHPUnitTestCase
     /**
      * Initialize Response action
      *
-     * @param string $method
-     * @param string $url
-     * @param array $params
+     * @param  string $method
+     * @param  string $url
+     * @param  array  $params
      * @return Response
      */
     public function visit(string $method, string $url, array $params = []): Response

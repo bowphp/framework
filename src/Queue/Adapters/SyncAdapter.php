@@ -18,7 +18,7 @@ class SyncAdapter extends QueueAdapter
     /**
      * Configure SyncAdapter driver
      *
-     * @param array $config
+     * @param  array $config
      * @return mixed
      */
     public function configure(array $config): SyncAdapter
@@ -31,7 +31,7 @@ class SyncAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param ProducerService $producer
+     * @param  ProducerService $producer
      * @return void
      */
     public function push(ProducerService $producer): void

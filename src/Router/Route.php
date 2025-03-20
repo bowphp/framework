@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Bow\Router;
 
 use Bow\Configuration\Loader;
-use Bow\Container\Action;
+use Bow\Container\Compass;
 
 class Route
 {
@@ -69,7 +69,7 @@ class Route
      * Route constructor
      *
      * @param string $path
-     * @param mixed $cb
+     * @param mixed  $cb
      *
      * @throws
      */
@@ -97,7 +97,7 @@ class Route
     /**
      * Add middleware
      *
-     * @param array|string $middleware
+     * @param  array|string $middleware
      * @return Route
      */
     public function middleware(array|string $middleware): Route
@@ -121,11 +121,11 @@ class Route
     /**
      * Add the url rules
      *
-     * @param array|string $where
-     * @param string|null $regex_constraint
+     * @param  array|string $where
+     * @param  string|null  $regex_constraint
      * @return Route
      */
-    public function where(array|string $where, string $regex_constraint = null): Route
+    public function where(array|string $where, ?string $regex_constraint = null): Route
     {
         $other_rule = is_array($where) ? $where : [$where => $regex_constraint];
 
@@ -158,13 +158,13 @@ class Route
             $this->match[$key] = $tmp;
         }
 
-        return Action::getInstance()->call($this->cb, $this->match);
+        return Compass::getInstance()->call($this->cb, $this->match);
     }
 
     /**
      * To give a name to the road
      *
-     * @param string $name
+     * @param  string $name
      * @return Route
      */
     public function name(string $name): Route
@@ -214,7 +214,7 @@ class Route
     /**
      * Get a parameter element
      *
-     * @param string $key
+     * @param  string $key
      * @return ?string
      */
     public function getParameter(string $key): ?string
@@ -226,7 +226,7 @@ class Route
      * Lets check if the url of the query is
      * conform to that defined by the router
      *
-     * @param string $uri
+     * @param  string $uri
      * @return bool
      */
     public function match(string $uri): bool
@@ -302,8 +302,8 @@ class Route
     /**
      * Check the url for the search
      *
-     * @param string $path
-     * @param string $uri
+     * @param  string $path
+     * @param  string $uri
      * @return bool
      */
     private function checkRequestUri(string $path, string $uri): bool

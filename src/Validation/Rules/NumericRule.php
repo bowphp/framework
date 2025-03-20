@@ -11,8 +11,8 @@ trait NumericRule
      *
      * [number] Check that the contents of the field is a number
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileNumber(string $key, string $masque): void
@@ -40,8 +40,8 @@ trait NumericRule
      *
      * [int] Check that the contents of the field is an integer number
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileInt(string $key, string $masque): void
@@ -69,8 +69,8 @@ trait NumericRule
      *
      * [float] Check that the field content is a float number
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileFloat(string $key, string $masque): void

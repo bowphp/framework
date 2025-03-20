@@ -12,7 +12,7 @@ class ClearCommand extends AbstractCommand
     /**
      * Clear cache
      *
-     * @param string $action
+     * @param  string $action
      * @return void
      */
     public function make(string $action): void
@@ -80,7 +80,7 @@ class ClearCommand extends AbstractCommand
     /**
      * Delete file
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return void
      */
     private function unlinks(string $dirname): void

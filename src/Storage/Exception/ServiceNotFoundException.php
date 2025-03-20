@@ -18,7 +18,7 @@ class ServiceNotFoundException extends ErrorException
     /**
      * Set the service name
      *
-     * @param string $service_name
+     * @param  string $service_name
      * @return ServiceNotFoundException
      */
     public function setService(string $service_name): ServiceNotFoundException

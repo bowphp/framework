@@ -12,7 +12,7 @@ trait FeatureHelper
     /**
      * Get fake instance
      *
-     * @see https://github.com/fzaninotto/Faker for all documentation
+     * @see    https://github.com/fzaninotto/Faker for all documentation
      * @return Generator
      */
     public function faker(): Generator

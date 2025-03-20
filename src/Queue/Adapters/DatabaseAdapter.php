@@ -21,7 +21,7 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Configure Beanstalkd driver
      *
-     * @param array $config
+     * @param  array $config
      * @return mixed
      */
     public function configure(array $config): DatabaseAdapter
@@ -34,7 +34,7 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Get the size of the queue.
      *
-     * @param string|null $queue
+     * @param  string|null $queue
      * @return int
      * @throws QueryBuilderException
      */
@@ -48,12 +48,13 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param ProducerService $producer
+     * @param  ProducerService $producer
      * @return void
      */
     public function push(ProducerService $producer): void
     {
-        $this->table->insert([
+        $this->table->insert(
+            [
             "id" => $this->generateId(),
             "queue" => $this->getQueue(),
             "payload" => base64_encode($this->serializeProducer($producer)),
@@ -62,18 +63,19 @@ class DatabaseAdapter extends QueueAdapter
             "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
             "reserved_at" => null,
             "created_at" => date("Y-m-d H:i:s"),
-        ]);
+            ]
+        );
     }
 
     /**
      * Run the worker
      *
-     * @param string|null $queue
+     * @param  string|null $queue
      * @return void
      * @throws QueryBuilderException
      * @throws ErrorException
      */
-    public function run(string $queue = null): void
+    public function run(?string $queue = null): void
     {
         // we want jobs from define queue only.
         $queue = $this->getQueue($queue);
@@ -94,9 +96,11 @@ class DatabaseAdapter extends QueueAdapter
                     if (!is_null($job->reserved_at) && strtotime($job->reserved_at) < time()) {
                         continue;
                     }
-                    $this->table->where("id", $job->id)->update([
+                    $this->table->where("id", $job->id)->update(
+                        [
                         "status" => "processing",
-                    ]);
+                        ]
+                    );
                     $this->execute($producer, $job);
                     continue;
                 }
@@ -118,20 +122,24 @@ class DatabaseAdapter extends QueueAdapter
 
                 // Check if the job should be deleted
                 if ($producer->jobShouldBeDelete() || $job->attempts <= 0) {
-                    $this->table->where("id", $job->id)->update([
+                    $this->table->where("id", $job->id)->update(
+                        [
                         "status" => "failed",
-                    ]);
+                        ]
+                    );
                     $this->sleep(1);
                     continue;
                 }
 
                 // Check if the job should be retried
-                $this->table->where("id", $job->id)->update([
+                $this->table->where("id", $job->id)->update(
+                    [
                     "status" => "reserved",
                     "attempts" => $job->attempts - 1,
                     "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
                     "reserved_at" => date("Y-m-d H:i:s", time() + $producer->getRetry())
-                ]);
+                    ]
+                );
 
                 $this->sleep(1);
             }
@@ -141,23 +149,25 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Process the next job on the queue.
      *
-     * @param ProducerService $producer
-     * @param mixed $job
+     * @param  ProducerService $producer
+     * @param  mixed           $job
      * @throws QueryBuilderException
      */
     private function execute(ProducerService $producer, mixed $job): void
     {
         call_user_func([$producer, "process"]);
-        $this->table->where("id", $job->id)->update([
+        $this->table->where("id", $job->id)->update(
+            [
             "status" => "done"
-        ]);
+            ]
+        );
         $this->sleep($this->sleep ?? 5);
     }
 
     /**
      * Flush the queue table
      *
-     * @param ?string $queue
+     * @param  ?string $queue
      * @return void
      * @throws QueryBuilderException
      */

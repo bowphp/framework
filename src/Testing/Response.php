@@ -49,7 +49,7 @@ class Response
     /**
      * Check if the content is json format
      *
-     * @param string $message
+     * @param  string $message
      * @return Response
      */
     public function assertJson(string $message = ''): Response
@@ -63,8 +63,8 @@ class Response
      * Check if the content is json format and the parsed data is
      * some to the content
      *
-     * @param array $data
-     * @param string $message
+     * @param  array  $data
+     * @param  string $message
      * @return Response
      */
     public function assertExactJson(array $data, string $message = ''): Response
@@ -214,8 +214,8 @@ class Response
     /**
      * Check the status code
      *
-     * @param int $code
-     * @param string $message
+     * @param  int    $code
+     * @param  string $message
      * @return Response
      */
     public function assertStatus(int $code, string $message = ''): Response
@@ -226,8 +226,8 @@ class Response
     }
 
     /**
-     * @param string $key
-     * @param string $message
+     * @param  string $key
+     * @param  string $message
      * @return Response
      */
     public function assertKeyExists(string $key, string $message = ''): Response
@@ -241,8 +241,8 @@ class Response
 
     /**
      * @param string|int $key
-     * @param string $value
-     * @param string $message
+     * @param string     $value
+     * @param string     $message
      *
      * @return Response
      */
@@ -262,7 +262,7 @@ class Response
     /**
      * Check if the content contains the parsed text
      *
-     * @param string $text
+     * @param  string $text
      * @return Response
      */
     public function assertContains(string $text): Response
@@ -275,8 +275,8 @@ class Response
     /**
      * __call
      *
-     * @param string $method
-     * @param array $params
+     * @param  string $method
+     * @param  array  $params
      * @return mixed
      */
     public function __call(string $method, array $params = [])

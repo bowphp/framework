@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Bow\Database\Migration\Shortcut;
 
-use Bow\Database\Migration\SQLGenerator;
+use Bow\Database\Migration\Table;
 
 trait ConstraintColumn
 {
     /**
      * Add Foreign KEY constraints
      *
-     * @param string $name
-     * @param array $attributes
-     * @return SQLGenerator
+     * @param  string $name
+     * @param  array  $attributes
+     * @return Table
      */
-    public function addForeign(string $name, array $attributes = []): SQLGenerator
+    public function addForeign(string $name, array $attributes = []): Table
     {
         if ($this->scope == 'alter') {
             $command = 'ADD CONSTRAINT';
@@ -75,11 +75,11 @@ trait ConstraintColumn
     /**
      * Drop constraints column;
      *
-     * @param string|array $name
-     * @param bool $as_raw
-     * @return SQLGenerator
+     * @param  string|array $name
+     * @param  bool         $as_raw
+     * @return Table
      */
-    public function dropForeign(string|array $name, bool $as_raw = false): SQLGenerator
+    public function dropForeign(string|array $name, bool $as_raw = false): Table
     {
         $names = (array)$name;
 
@@ -100,10 +100,10 @@ trait ConstraintColumn
     /**
      * Add table index;
      *
-     * @param string $name
-     * @return SQLGenerator
+     * @param  string $name
+     * @return Table
      */
-    public function addIndex(string $name): SQLGenerator
+    public function addIndex(string $name): Table
     {
         if ($this->scope == 'alter') {
             $command = 'ADD INDEX';
@@ -123,10 +123,10 @@ trait ConstraintColumn
     /**
      * Drop table index;
      *
-     * @param string $name
-     * @return SQLGenerator
+     * @param  string $name
+     * @return Table
      */
-    public function dropIndex(string $name): SQLGenerator
+    public function dropIndex(string $name): Table
     {
         $names = (array)$name;
 
@@ -144,9 +144,9 @@ trait ConstraintColumn
     /**
      * Drop primary column;
      *
-     * @return SQLGenerator
+     * @return Table
      */
-    public function dropPrimary(): SQLGenerator
+    public function dropPrimary(): Table
     {
         $this->sqls[] = 'DROP PRIMARY KEY';
 
@@ -156,10 +156,10 @@ trait ConstraintColumn
     /**
      * Add table unique;
      *
-     * @param string $name
-     * @return SQLGenerator
+     * @param  string $name
+     * @return Table
      */
-    public function addUnique(string $name): SQLGenerator
+    public function addUnique(string $name): Table
     {
         if ($this->scope == 'alter') {
             $command = 'ADD UNIQUE';
@@ -179,10 +179,10 @@ trait ConstraintColumn
     /**
      * Drop table unique;
      *
-     * @param string $name
-     * @return SQLGenerator
+     * @param  string $name
+     * @return Table
      */
-    public function dropUnique(string $name): SQLGenerator
+    public function dropUnique(string $name): Table
     {
         $names = (array)$name;
 

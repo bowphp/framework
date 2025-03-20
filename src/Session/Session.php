@@ -7,9 +7,9 @@ namespace Bow\Session;
 use BadMethodCallException;
 use Bow\Contracts\CollectionInterface;
 use Bow\Security\Crypto;
-use Bow\Session\Driver\ArrayDriver;
-use Bow\Session\Driver\DatabaseDriver;
-use Bow\Session\Driver\FilesystemDriver;
+use Bow\Session\Adapters\ArrayAdapter;
+use Bow\Session\Adapters\DatabaseAdapter;
+use Bow\Session\Adapters\FilesystemAdapter;
 use Bow\Session\Exception\SessionException;
 use InvalidArgumentException;
 use stdClass;
@@ -41,9 +41,9 @@ class Session implements CollectionInterface
      * @var array
      */
     private array $driver = [
-        'database' => DatabaseDriver::class,
-        'array' => ArrayDriver::class,
-        'file' => FilesystemDriver::class,
+        'database' => DatabaseAdapter::class,
+        'array' => ArrayAdapter::class,
+        'file' => FilesystemAdapter::class,
     ];
     /**
      * The session configuration
@@ -55,7 +55,7 @@ class Session implements CollectionInterface
     /**
      * Session constructor.
      *
-     * @param array $config
+     * @param  array $config
      * @throws SessionException
      */
     private function __construct(array $config)
@@ -69,20 +69,23 @@ class Session implements CollectionInterface
         }
 
         // We merge configuration
-        $this->config = array_merge([
+        $this->config = array_merge(
+            [
             'name' => 'Bow',
             'path' => '/',
             'domain' => null,
             'secure' => false,
             'httponly' => false,
             'save_path' => null,
-        ], $config);
+            ],
+            $config
+        );
     }
 
     /**
      * Configure session instance
      *
-     * @param array $config
+     * @param  array $config
      * @return Session
      * @throws SessionException
      */
@@ -272,7 +275,7 @@ class Session implements CollectionInterface
     /**
      * Allows checking for the existence of a key in the session collection
      *
-     * @param string $key
+     * @param  string $key
      * @return bool
      * @throws SessionException
      */
@@ -284,8 +287,8 @@ class Session implements CollectionInterface
     /**
      * Allows checking for the existence of a key in the session collection
      *
-     * @param string|int $key
-     * @param bool $strict
+     * @param  string|int $key
+     * @param  bool       $strict
      * @return bool
      * @throws SessionException
      */
@@ -363,8 +366,8 @@ class Session implements CollectionInterface
     /**
      * Retrieves a value or value collection.
      *
-     * @param string $key
-     * @param mixed $default
+     * @param  string $key
+     * @param  mixed  $default
      * @return mixed
      * @throws SessionException
      */
@@ -391,8 +394,8 @@ class Session implements CollectionInterface
      * Add flash data
      * After the data recovery is automatic deleted
      *
-     * @param string|int $key
-     * @param mixed $message
+     * @param  string|int $key
+     * @param  mixed      $message
      * @return mixed
      * @throws SessionException
      */
@@ -410,9 +413,13 @@ class Session implements CollectionInterface
 
         $content = $flash[$key] ?? null;
 
-        $tmp = array_filter($flash, function ($i) use ($key) {
-            return $i != $key;
-        }, ARRAY_FILTER_USE_KEY);
+        $tmp = array_filter(
+            $flash,
+            function ($i) use ($key) {
+                return $i != $key;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
 
         $_SESSION[static::CORE_SESSION_KEY['flash']] = $tmp;
 
@@ -423,7 +430,7 @@ class Session implements CollectionInterface
      * The add alias
      *
      * @throws SessionException
-     * @see Session::add
+     * @see    Session::add
      */
     public function put(string|int $key, mixed $value, $next = false): mixed
     {
@@ -433,9 +440,9 @@ class Session implements CollectionInterface
     /**
      * Add an entry to the collection
      *
-     * @param string|int $key
-     * @param mixed $data
-     * @param boolean $next
+     * @param  string|int $key
+     * @param  mixed      $data
+     * @param  boolean    $next
      * @return mixed
      * @throws InvalidArgumentException|SessionException
      */
@@ -502,7 +509,7 @@ class Session implements CollectionInterface
      * set
      *
      * @param string|int $key
-     * @param mixed $value
+     * @param mixed      $value
      *
      * @return mixed
      * @throws SessionException
@@ -539,6 +546,7 @@ class Session implements CollectionInterface
 
     /**
      * Empty the flash system.
+     *
      * @throws SessionException
      */
     public function clearFlash(): void

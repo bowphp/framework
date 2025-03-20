@@ -16,7 +16,7 @@ class ResponseException extends HttpException
     /**
      * Set the http code
      *
-     * @param int $code
+     * @param  int $code
      * @return void
      */
     public function setCode(int $code)

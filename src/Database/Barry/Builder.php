@@ -21,7 +21,7 @@ class Builder extends QueryBuilder
     /**
      * Get information
      *
-     * @param array $columns
+     * @param  array $columns
      * @return Model|Collection|null
      */
     public function get(array $columns = []): Model|Collection|null
@@ -47,8 +47,8 @@ class Builder extends QueryBuilder
     /**
      * Check if rows exists
      *
-     * @param string|null $column
-     * @param mixed $value
+     * @param  string|null $column
+     * @param  mixed       $value
      * @return bool
      * @throws QueryBuilderException
      */
@@ -87,7 +87,7 @@ class Builder extends QueryBuilder
     /**
      * Set model
      *
-     * @param string $model
+     * @param  string $model
      * @return Builder
      */
     public function setModel(string $model): Builder

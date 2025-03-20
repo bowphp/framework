@@ -7,12 +7,6 @@ use Bow\Tests\Config\TestingConfiguration;
 
 class RedisTest extends \PHPUnit\Framework\TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $config = TestingConfiguration::getConfig();
-    }
-
     public function test_create_cache()
     {
         $result = Redis::get('name', 'Dakia');
@@ -26,5 +20,11 @@ class RedisTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNull(Redis::get('name'));
         $this->assertEquals(Redis::get('lastname'), "papac");
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $config = TestingConfiguration::getConfig();
     }
 }

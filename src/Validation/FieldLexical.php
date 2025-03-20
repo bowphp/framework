@@ -11,8 +11,8 @@ trait FieldLexical
     /**
      * Get error debugging information
      *
-     * @param string $key
-     * @param string|array|int|float $value
+     * @param  string                 $key
+     * @param  string|array|int|float $value
      * @return ?string
      */
     private function lexical(string $key, string|array|int|float $value): ?string
@@ -48,8 +48,8 @@ trait FieldLexical
     /**
      * Normalize beneficiaries
      *
-     * @param array $attribute
-     * @param string $lexical
+     * @param  array  $attribute
+     * @param  string $lexical
      * @return string
      */
     private function parseAttribute(array $attribute, string $lexical): ?string
@@ -67,8 +67,8 @@ trait FieldLexical
     /**
      * Parse the translate content
      *
-     * @param string $key
-     * @param array $data
+     * @param  string $key
+     * @param  array  $data
      * @return string
      */
     private function parseFromTranslate(string $key, array $data)

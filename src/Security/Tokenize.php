@@ -20,7 +20,7 @@ class Tokenize
     /**
      * Get a csrf token generate
      *
-     * @param int|null $time
+     * @param  int|null $time
      * @return ?array
      * @throws SessionException
      */
@@ -34,7 +34,7 @@ class Tokenize
     /**
      * Csrf token creator
      *
-     * @param int|null $time
+     * @param  int|null $time
      * @return bool
      * @throws SessionException
      */
@@ -50,11 +50,14 @@ class Tokenize
 
         $token = static::make();
 
-        Session::getInstance()->add('__bow.csrf', [
+        Session::getInstance()->add(
+            '__bow.csrf',
+            [
             'token' => $token,
             'expire_at' => time() + static::$expire_at,
             'field' => '<input type="hidden" name="_token" value="' . $token . '"/>'
-        ]);
+            ]
+        );
 
         Session::getInstance()->add('_token', $token);
 
@@ -78,8 +81,8 @@ class Tokenize
     /**
      * Check if csrf token is valid
      *
-     * @param string $token
-     * @param bool $strict
+     * @param  string $token
+     * @param  bool   $strict
      * @return bool
      * @throws SessionException
      */
@@ -107,7 +110,7 @@ class Tokenize
     /**
      * Check if the token expires
      *
-     * @param int|null $time
+     * @param  int|null $time
      * @return bool
      * @throws SessionException
      */

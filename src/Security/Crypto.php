@@ -25,7 +25,7 @@ class Crypto
     /**
      * Set the key
      *
-     * @param string $key
+     * @param string      $key
      * @param string|null $cipher
      */
     public static function setKey(string $key, ?string $cipher = null): void
@@ -40,7 +40,7 @@ class Crypto
     /**
      * Encrypt data
      *
-     * @param string $data
+     * @param  string $data
      * @return string|bool
      */
     public static function encrypt(string $data): string|bool

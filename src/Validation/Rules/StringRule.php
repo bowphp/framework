@@ -12,8 +12,8 @@ trait StringRule
     /**
      * Compile Required Rule
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileRequired(string $key, string $masque): void
@@ -47,8 +47,8 @@ trait StringRule
     /**
      * Compile Required Rule
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      * @throws ValidationException
      */
@@ -99,8 +99,8 @@ trait StringRule
     /**
      * Compile Empty Rule
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileEmpty(string $key, string $masque): void
@@ -122,8 +122,8 @@ trait StringRule
      *
      * [alphanum] Check that the field content is an alphanumeric string
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileAlphaNum(string $key, string $masque): void
@@ -151,8 +151,8 @@ trait StringRule
      *
      * [in:(value, ...)] Check that the contents of the field are equal to the defined value
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileIn(string $key, string $masque): void
@@ -171,10 +171,13 @@ trait StringRule
             return;
         }
 
-        $this->last_message = $this->lexical('in', [
+        $this->last_message = $this->lexical(
+            'in',
+            [
             'attribute' => $key,
             'value' => implode(", ", $values)
-        ]);
+            ]
+        );
 
         $this->fails = true;
 
@@ -190,8 +193,8 @@ trait StringRule
      * [size:value] Check that the contents of the field is a number
      * of character equal to the defined value
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileSize(string $key, string $masque): void
@@ -208,10 +211,13 @@ trait StringRule
 
         $this->fails = true;
 
-        $this->last_message = $this->lexical('size', [
+        $this->last_message = $this->lexical(
+            'size',
+            [
             'attribute' => $key,
             'length' => $length
-        ]);
+            ]
+        );
 
         $this->errors[$key][] = [
             "masque" => $masque,
@@ -224,8 +230,8 @@ trait StringRule
      *
      * [lower] Check that the content of the field is a string in miniscule
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileLower(string $key, string $masque): void
@@ -253,8 +259,8 @@ trait StringRule
      *
      * [upper] Check that the contents of the field is a string in uppercase
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileUpper(string $key, string $masque): void
@@ -282,8 +288,8 @@ trait StringRule
      *
      * [alpha] Check that the field content is an alpha
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileAlpha(string $key, string $masque): void
@@ -312,8 +318,8 @@ trait StringRule
      * [min:value] Check that the content of the field is a number of
      * minimal character following the defined value
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileMin(string $key, string $masque): void
@@ -330,10 +336,13 @@ trait StringRule
 
         $this->fails = true;
 
-        $this->last_message = $this->lexical('min', [
+        $this->last_message = $this->lexical(
+            'min',
+            [
             'attribute' => $key,
             'length' => $length
-        ]);
+            ]
+        );
 
         $this->errors[$key][] = [
             "masque" => $masque,
@@ -347,8 +356,8 @@ trait StringRule
      * [max:value] Check that the content of the field is a number of
      * maximum character following the defined value
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileMax(string $key, string $masque): void
@@ -365,10 +374,13 @@ trait StringRule
 
         $this->fails = true;
 
-        $this->last_message = $this->lexical('max', [
+        $this->last_message = $this->lexical(
+            'max',
+            [
             'attribute' => $key,
             'length' => $length
-        ]);
+            ]
+        );
 
         $this->errors[$key][] = [
             "masque" => $masque,
@@ -381,8 +393,8 @@ trait StringRule
      *
      * [same:value] Check that the field contents are equal to the mask value
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileSame(string $key, string $masque): void
@@ -397,10 +409,13 @@ trait StringRule
             return;
         }
 
-        $this->last_message = $this->lexical('same', [
+        $this->last_message = $this->lexical(
+            'same',
+            [
             'attribute' => $key,
             'value' => $value
-        ]);
+            ]
+        );
 
         $this->fails = true;
         $this->errors[$key][] = [

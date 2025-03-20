@@ -44,7 +44,7 @@ abstract class QueueAdapter
     /**
      * Make adapter configuration
      *
-     * @param array $config
+     * @param  array $config
      * @return QueueAdapter
      */
     abstract public function configure(array $config): QueueAdapter;
@@ -59,7 +59,7 @@ abstract class QueueAdapter
     /**
      * Create producer serialization
      *
-     * @param ProducerService $producer
+     * @param  ProducerService $producer
      * @return string
      */
     public function serializeProducer(
@@ -71,7 +71,7 @@ abstract class QueueAdapter
     /**
      * Create producer unserialize
      *
-     * @param string $producer
+     * @param  string $producer
      * @return ProducerService
      */
     public function unserializeProducer(
@@ -83,7 +83,7 @@ abstract class QueueAdapter
     /**
      * Sleep the process
      *
-     * @param int $seconds
+     * @param  int $seconds
      * @return void
      */
     public function sleep(int $seconds): void
@@ -98,11 +98,11 @@ abstract class QueueAdapter
     /**
      * Launch the worker
      *
-     * @param integer $timeout
-     * @param integer $memory
+     * @param  integer $timeout
+     * @param  integer $memory
      * @return void
      */
-    #[NoReturn] final public function work(int $timeout, int $memory): void
+    final public function work(int $timeout, int $memory): void
     {
         [$this->start_time, $jobs_processed] = [hrtime(true) / 1e9, 0];
 
@@ -160,7 +160,7 @@ abstract class QueueAdapter
     /**
      * Determine if the timeout is reached
      *
-     * @param int $timeout
+     * @param  int $timeout
      * @return boolean
      */
     protected function timeoutReached(int $timeout): bool
@@ -171,10 +171,10 @@ abstract class QueueAdapter
     /**
      * Kill the process.
      *
-     * @param int $status
+     * @param  int $status
      * @return void
      */
-    #[NoReturn] public function kill(int $status = 0): void
+    public function kill(int $status = 0): void
     {
         if (extension_loaded('posix')) {
             posix_kill(getmypid(), SIGKILL);
@@ -186,7 +186,7 @@ abstract class QueueAdapter
     /**
      * Determine if the memory is exceeded
      *
-     * @param int $memory_timit
+     * @param  int $memory_timit
      * @return boolean
      */
     private function memoryExceeded(int $memory_timit): bool
@@ -197,7 +197,7 @@ abstract class QueueAdapter
     /**
      * Set job tries
      *
-     * @param int $tries
+     * @param  int $tries
      * @return void
      */
     public function setTries(int $tries): void
@@ -208,7 +208,7 @@ abstract class QueueAdapter
     /**
      * Set sleep time
      *
-     * @param int $sleep
+     * @param  int $sleep
      * @return void
      */
     public function setSleep(int $sleep): void
@@ -250,7 +250,7 @@ abstract class QueueAdapter
     /**
      * Get the queue size
      *
-     * @param string $queue
+     * @param  string $queue
      * @return int
      */
     public function size(string $queue): int
@@ -261,7 +261,7 @@ abstract class QueueAdapter
     /**
      * Flush the queue
      *
-     * @param ?string $queue
+     * @param  ?string $queue
      * @return void
      */
     public function flush(?string $queue = null): void

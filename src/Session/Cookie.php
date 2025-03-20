@@ -28,8 +28,8 @@ class Cookie
     /**
      * Allows you to retrieve a value or collection of cookie value.
      *
-     * @param string $key
-     * @param mixed $default
+     * @param  string $key
+     * @param  mixed  $default
      * @return mixed
      */
     public static function get(string $key, mixed $default = null): mixed
@@ -48,8 +48,8 @@ class Cookie
     /**
      * Check for existence of a key in the session collection
      *
-     * @param string $key
-     * @param bool $strict
+     * @param  string $key
+     * @param  bool   $strict
      * @return bool
      */
     public static function has(string $key, bool $strict = false): bool
@@ -84,7 +84,7 @@ class Cookie
     /**
      * Delete an entry in the table
      *
-     * @param string $key
+     * @param  string $key
      * @return string|bool|null
      */
     public static function remove(string $key): string|bool|null
@@ -111,9 +111,9 @@ class Cookie
     /**
      * Add a value to the cookie table.
      *
-     * @param int|string $key
-     * @param mixed $data
-     * @param int $expiration
+     * @param  int|string $key
+     * @param  mixed      $data
+     * @param  int        $expiration
      * @return bool
      */
     public static function set(

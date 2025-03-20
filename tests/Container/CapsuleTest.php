@@ -2,9 +2,9 @@
 
 namespace Bow\Tests\Container;
 
-use StdClass;
 use Bow\Container\Capsule;
 use Bow\Tests\Container\Stubs\MyClass;
+use StdClass;
 
 class CapsuleTest extends \PHPUnit\Framework\TestCase
 {
@@ -17,8 +17,8 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
     {
         static::$capsule = new Capsule();
         static::$capsule->factory('\Bow\Support\Collection', fn() => new \Bow\Support\Collection());
-        static::$capsule->bind('std-class', fn () => new StdClass());
-        static::$capsule->bind('my-class', fn (Capsule $container) => new MyClass($container['\Bow\Support\Collection']));
+        static::$capsule->bind('std-class', fn() => new StdClass());
+        static::$capsule->bind('my-class', fn(Capsule $container) => new MyClass($container['\Bow\Support\Collection']));
         static::$capsule->instance("my-class-instance", new MyClass(new \Bow\Support\Collection()));
     }
 

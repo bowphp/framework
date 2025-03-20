@@ -11,8 +11,8 @@ trait DatetimeRule
      *
      * [date] Check that the field's content is a valid date
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileDate(string $key, string $masque): void
@@ -40,8 +40,8 @@ trait DatetimeRule
      *
      * [datetime] Check that the contents of the field is a valid date time
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileDateTime(string $key, string $masque): void

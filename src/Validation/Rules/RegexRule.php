@@ -11,8 +11,8 @@ trait RegexRule
      *
      * Check that the contents of the field with a regular expression
      *
-     * @param string $key
-     * @param string|int|float $masque
+     * @param  string           $key
+     * @param  string|int|float $masque
      * @return void
      */
     protected function compileRegex(string $key, string|int|float $masque): void

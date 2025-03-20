@@ -13,7 +13,7 @@ trait LoginUserTrait
     /**
      * Make login
      *
-     * @param array $credentials
+     * @param  array $credentials
      * @return ?Authentication
      * @throws AuthenticationException
      */
@@ -45,8 +45,8 @@ trait LoginUserTrait
     /**
      * Get user by key
      *
-     * @param string $key
-     * @param float|int|string $value
+     * @param  string           $key
+     * @param  float|int|string $value
      * @return Model|null
      */
     private function getUserBy(string $key, float|int|string $value): ?Authentication

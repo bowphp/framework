@@ -2,8 +2,8 @@
 
 namespace Bow\Tests\Translate;
 
-use Bow\Translate\Translator;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\Translate\Translator;
 
 class TranslationTest extends \PHPUnit\Framework\TestCase
 {
@@ -15,7 +15,7 @@ class TranslationTest extends \PHPUnit\Framework\TestCase
 
     public function test_fr_welcome_message()
     {
-        $this->assertEquals(Translator::translate('welcome.message'), 'bow framework');
+        $this->assertEquals(Translator::translate('welcome.message'), 'Bow framework');
     }
 
     public function test_fr_user_name()
@@ -47,7 +47,7 @@ class TranslationTest extends \PHPUnit\Framework\TestCase
     public function test_en_user_name()
     {
         Translator::setLocale("en");
-        $this->assertEquals(Translator::translate('welcome.user.name'), 'Frank');
+        $this->assertEquals(Translator::translate('welcome.user.name'), 'Franck');
     }
 
     public function test_en_plurial()

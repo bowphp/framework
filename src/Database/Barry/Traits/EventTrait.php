@@ -25,7 +25,7 @@ trait EventTrait
     /**
      * Get event name
      *
-     * @param string $event
+     * @param  string $event
      * @return string
      */
     private static function formatEventName(string $event): string

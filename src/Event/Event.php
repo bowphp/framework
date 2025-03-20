@@ -41,9 +41,9 @@ class Event
     /**
      * addEventListener
      *
-     * @param string $event
+     * @param string          $event
      * @param callable|string $fn
-     * @param int $priority
+     * @param int             $priority
      */
     public static function on(string $event, callable|string $fn, int $priority = 0): void
     {
@@ -53,15 +53,18 @@ class Event
 
         static::$events[$event][] = new Listener($fn, $priority);
 
-        uasort(static::$events[$event], function (Listener $first_listener, Listener $second_listener) {
-            return $first_listener->getPriority() < $second_listener->getPriority();
-        });
+        uasort(
+            static::$events[$event],
+            function (Listener $first_listener, Listener $second_listener) {
+                return $first_listener->getPriority() < $second_listener->getPriority();
+            }
+        );
     }
 
     /**
      * Check whether an event is already recorded at least once.
      *
-     * @param string $event
+     * @param  string $event
      * @return bool
      */
     public static function bound(string $event): bool
@@ -74,9 +77,9 @@ class Event
     /**
      * Associate a single listener to an event
      *
-     * @param string $event
+     * @param string                $event
      * @param callable|array|string $fn
-     * @param int $priority
+     * @param int                   $priority
      */
     public static function once(string $event, callable|array|string $fn, int $priority = 0): void
     {
@@ -86,7 +89,7 @@ class Event
     /**
      * Dispatch event
      *
-     * @param string|AppEvent $event
+     * @param  string|AppEvent $event
      * @return bool|null
      * @throws EventException
      */
@@ -137,8 +140,8 @@ class Event
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      * @throws ErrorException
      */

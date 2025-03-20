@@ -32,7 +32,7 @@ class SessionGuard extends GuardContract
     /**
      * SessionGuard constructor.
      *
-     * @param array $provider
+     * @param array  $provider
      * @param string $guard
      */
     public function __construct(array $provider, string $guard)
@@ -45,7 +45,7 @@ class SessionGuard extends GuardContract
     /**
      * Check if user is authenticated
      *
-     * @param array $credentials
+     * @param  array $credentials
      * @return bool
      * @throws AuthenticationException|SessionException
      */
@@ -112,7 +112,7 @@ class SessionGuard extends GuardContract
     /**
      * Make direct login
      *
-     * @param mixed $user
+     * @param  mixed $user
      * @return bool
      * @throws AuthenticationException|SessionException
      */

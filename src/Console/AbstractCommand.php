@@ -34,8 +34,8 @@ abstract class AbstractCommand
     /**
      * AbstractCommand constructor
      *
-     * @param Setting $setting
-     * @param Argument $arg
+     * @param  Setting  $setting
+     * @param  Argument $arg
      * @return void
      */
     public function __construct(Setting $setting, Argument $arg)

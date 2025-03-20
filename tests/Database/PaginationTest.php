@@ -2,26 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Bow\Database;
+namespace Bow\Tests\Database;
 
-use PHPUnit\Framework\TestCase;
 use Bow\Database\Pagination;
+use PHPUnit\Framework\TestCase;
 
 class PaginationTest extends TestCase
 {
     private Pagination $pagination;
-
-    protected function setUp(): void
-    {
-        $this->pagination = new Pagination(
-            next: 2,
-            previous: 0,
-            total: 3,
-            perPage: 10,
-            current: 1,
-            data: collect(['item1', 'item2', 'item3'])
-        );
-    }
 
     public function test_next(): void
     {
@@ -46,5 +34,17 @@ class PaginationTest extends TestCase
     public function test_total(): void
     {
         $this->assertSame(3, $this->pagination->total());
+    }
+
+    protected function setUp(): void
+    {
+        $this->pagination = new Pagination(
+            next: 2,
+            previous: 0,
+            total: 3,
+            perPage: 10,
+            current: 1,
+            data: collect(['item1', 'item2', 'item3'])
+        );
     }
 }

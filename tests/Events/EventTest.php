@@ -2,13 +2,13 @@
 
 namespace Bow\Tests\Events;
 
-use Bow\Event\Event;
 use Bow\Database\Database;
+use Bow\Event\Event;
 use Bow\Tests\Config\TestingConfiguration;
-use PHPUnit\Framework\Assert;
 use Bow\Tests\Events\Stubs\EventModelStub;
-use Bow\Tests\Events\Stubs\UserEventStub;
 use Bow\Tests\Events\Stubs\UserEventListenerStub;
+use Bow\Tests\Events\Stubs\UserEventStub;
+use PHPUnit\Framework\Assert;
 
 class EventTest extends \PHPUnit\Framework\TestCase
 {
@@ -50,7 +50,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
             'id' => 3,
             'name' => 'Filou'
         ]);
-        $this->assertEquals($event->save(), 1);
+        $this->assertEquals($event->persist(), 1);
         $this->assertEquals('created', file_get_contents(static::$cache_filename));
     }
 
@@ -58,7 +58,7 @@ class EventTest extends \PHPUnit\Framework\TestCase
     {
         $pet = EventModelStub::connection("mysql")->first();
         $pet->name = 'Loulou';
-        $this->assertEquals($pet->save(), 1);
+        $this->assertEquals($pet->persist(), 1);
         $this->assertEquals('updated', file_get_contents(static::$cache_filename));
     }
 

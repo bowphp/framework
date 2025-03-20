@@ -50,8 +50,8 @@ class Connection
     /**
      * Push the new connection support in connectors management
      *
-     * @param string $name
-     * @param string $classname
+     * @param  string $name
+     * @param  string $classname
      * @return bool
      * @throws ErrorException
      */
@@ -71,7 +71,7 @@ class Connection
     /**
      * Set connection
      *
-     * @param string $connection
+     * @param  string $connection
      * @return Connection
      */
     public function setConnection(string $connection): Connection
@@ -84,8 +84,8 @@ class Connection
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed|null
      * @throws ErrorException
      */

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Bow\Cache;
 
 use BadMethodCallException;
-use Bow\Cache\Adapter\CacheAdapterInterface;
-use Bow\Cache\Adapter\DatabaseAdapter;
-use Bow\Cache\Adapter\FilesystemAdapter;
-use Bow\Cache\Adapter\RedisAdapter;
+use Bow\Cache\Adapters\CacheAdapterInterface;
+use Bow\Cache\Adapters\DatabaseAdapter;
+use Bow\Cache\Adapters\FilesystemAdapter;
+use Bow\Cache\Adapters\RedisAdapter;
 use ErrorException;
 use InvalidArgumentException;
 
@@ -42,7 +42,7 @@ class Cache
     /**
      * Cache configuration method
      *
-     * @param array $config
+     * @param  array $config
      * @return CacheAdapterInterface|null
      */
     public static function configure(array $config): ?CacheAdapterInterface
@@ -64,7 +64,7 @@ class Cache
     /**
      * Get the cache instance
      *
-     * @param string $store
+     * @param  string $store
      * @return CacheAdapterInterface
      */
     public static function store(string $store): CacheAdapterInterface
@@ -100,7 +100,7 @@ class Cache
     /**
      * Add the custom adapters
      *
-     * @param array $adapters
+     * @param  array $adapters
      * @return void
      */
     public static function addAdapters(array $adapters): void
@@ -113,8 +113,8 @@ class Cache
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      * @throws BadMethodCallException
      * @throws ErrorException

@@ -164,8 +164,8 @@ abstract class RequestValidation
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return Request
      */
     public function __call(string $name, array $arguments)
@@ -182,7 +182,7 @@ abstract class RequestValidation
     /**
      * __get
      *
-     * @param string $name
+     * @param  string $name
      * @return string
      */
     public function __get(string $name)

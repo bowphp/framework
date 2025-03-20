@@ -10,8 +10,8 @@ trait SqliteCompose
     /**
      * Compose sql statement for sqlite
      *
-     * @param string $name
-     * @param array $description
+     * @param  string $name
+     * @param  array  $description
      * @return string
      * @throws SQLGeneratorException
      */
@@ -91,8 +91,8 @@ trait SqliteCompose
     /**
      * Rename column with sqlite
      *
-     * @param string $old_name
-     * @param string $new_name
+     * @param  string $old_name
+     * @param  string $new_name
      * @return void
      */
     private function renameColumnOnSqlite(string $old_name, string $new_name): void
@@ -119,19 +119,23 @@ trait SqliteCompose
         $pdo->exec("ALTER TABLE " . $this->table . " RENAME TO __temp_rename_sqlite_table;");
         $pdo->exec('PRAGMA foreign_keys=off');
 
-        $pdo->exec(sprintf(
-            'CREATE TABLE %s AS SELECT * FROM %s;',
-            $this->table,
-            '__temp_rename_sqlite_table'
-        ));
+        $pdo->exec(
+            sprintf(
+                'CREATE TABLE %s AS SELECT * FROM %s;',
+                $this->table,
+                '__temp_rename_sqlite_table'
+            )
+        );
 
-        $pdo->exec(sprintf(
-            "INSERT INTO %s(%s) SELECT %s FROM %s",
-            $this->table,
-            implode(', ', $selects),
-            implode(', ', $old_selects),
-            '__temp_rename_sqlite_table'
-        ));
+        $pdo->exec(
+            sprintf(
+                "INSERT INTO %s(%s) SELECT %s FROM %s",
+                $this->table,
+                implode(', ', $selects),
+                implode(', ', $old_selects),
+                '__temp_rename_sqlite_table'
+            )
+        );
 
         $pdo->exec("DROP TABLE __temp_rename_sqlite_table;");
         $pdo->exec('COMMIT;');
@@ -165,12 +169,14 @@ trait SqliteCompose
 
         $pdo->exec("PRAGMA foreign_keys=off;");
         $pdo->exec('BEGIN TRANSACTION;');
-        $pdo->exec(sprintf(
-            'CREATE TABLE __temp_sqlite_%s_table AS SELECT %s FROM %s;',
-            $this->table,
-            implode(', ', $columns),
-            $this->table,
-        ));
+        $pdo->exec(
+            sprintf(
+                'CREATE TABLE __temp_sqlite_%s_table AS SELECT %s FROM %s;',
+                $this->table,
+                implode(', ', $columns),
+                $this->table,
+            )
+        );
         $pdo->exec(sprintf('DROP TABLE %s;', $this->table));
         $pdo->exec(sprintf('ALTER TABLE __temp_sqlite_%s_table RENAME TO %s;', $this->table, $this->table));
         $pdo->exec('COMMIT;');

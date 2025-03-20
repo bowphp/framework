@@ -3,16 +3,16 @@
 namespace Bow\Tests\Auth;
 
 use Bow\Auth\Auth;
-use Bow\Security\Hash;
-use Policier\Policier;
-use Bow\Database\Database;
 use Bow\Auth\Authentication;
+use Bow\Auth\Exception\AuthenticationException;
+use Bow\Auth\Guards\GuardContract;
 use Bow\Auth\Guards\JwtGuard;
 use Bow\Auth\Guards\SessionGuard;
-use Bow\Auth\Guards\GuardContract;
+use Bow\Database\Database;
+use Bow\Security\Hash;
 use Bow\Tests\Auth\Stubs\UserModelStub;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Auth\Exception\AuthenticationException;
+use Policier\Policier;
 
 class AuthenticationTest extends \PHPUnit\Framework\TestCase
 {
@@ -100,7 +100,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($result);
 
-        $token = (string) $auth->getToken();
+        $token = (string)$auth->getToken();
         $user = $auth->user();
 
         $this->assertInstanceOf(Authentication::class, $user);
@@ -114,7 +114,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $auth = Auth::guard('api');
         $auth->login(UserModelStub::first());
 
-        $token = (string) $auth->getToken();
+        $token = (string)$auth->getToken();
         $user = $auth->user();
 
         $this->assertTrue($auth->check());

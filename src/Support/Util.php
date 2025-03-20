@@ -31,7 +31,8 @@ class Util
 
         $dumper = 'cli' === PHP_SAPI ? new CliDumper() : new HtmlDumper();
 
-        $dumper->setStyles([
+        $dumper->setStyles(
+            [
             'default' => 'background-color:#fff; color:#FF8400; line-height:1.2em; 
                 font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; 
                 white-space: pre-wrap; position:relative; z-index:99999; word-break: normal',
@@ -46,7 +47,8 @@ class Util
             'meta' => 'color:#B729D9',
             'key' => 'color:#212',
             'index' => 'color:#1200DA',
-        ]);
+            ]
+        );
 
         $handler = function ($vars) use ($cloner, $dumper) {
             if (!is_array($vars)) {
@@ -68,7 +70,7 @@ class Util
      *
      * @return void
      */
-    #[NoReturn] public static function dd(mixed $var): void
+    public static function dd(mixed $var): void
     {
         call_user_func_array([static::class, 'debug'], func_get_args());
 
@@ -99,7 +101,7 @@ class Util
     /**
      * Function to secure the data.
      *
-     * @param array $data
+     * @param  array $data
      * @return string
      */
     public static function rangeField(array $data): string
@@ -119,8 +121,8 @@ class Util
     /**
      * Data trainer. key => :value
      *
-     * @param array $data
-     * @param bool $byKey
+     * @param  array $data
+     * @param  bool  $byKey
      * @return array
      */
     public static function add2points(array $data, bool $byKey = false): array

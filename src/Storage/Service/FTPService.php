@@ -54,7 +54,7 @@ class FTPService implements ServiceInterface
     /**
      * FTPService constructor
      *
-     * @param array $config
+     * @param  array $config
      * @return void
      */
     private function __construct(array $config)
@@ -137,7 +137,7 @@ class FTPService implements ServiceInterface
     /**
      * Change path.
      *
-     * @param string|null $path
+     * @param  string|null $path
      * @return void
      */
     public function changePath(?string $path = null): void
@@ -171,7 +171,7 @@ class FTPService implements ServiceInterface
     /**
      * Configure service
      *
-     * @param array $config
+     * @param  array $config
      * @return FTPService
      */
     public static function configure(array $config): FTPService
@@ -199,8 +199,8 @@ class FTPService implements ServiceInterface
      * Store directly the upload file
      *
      * @param UploadedFile $file
-     * @param string|null $location
-     * @param array $option
+     * @param string|null  $location
+     * @param array        $option
      *
      * @return bool
      */
@@ -231,7 +231,7 @@ class FTPService implements ServiceInterface
     /**
      * Write stream
      *
-     * @param string $file
+     * @param string   $file
      * @param resource $resource
      *
      * @return bool
@@ -254,8 +254,8 @@ class FTPService implements ServiceInterface
     /**
      * Append content a file.
      *
-     * @param string $file
-     * @param string $content
+     * @param  string $file
+     * @param  string $content
      * @return bool
      */
     public function append(string $file, string $content): bool
@@ -277,8 +277,8 @@ class FTPService implements ServiceInterface
     /**
      * Write to the beginning of a file specify
      *
-     * @param string $file
-     * @param string $content
+     * @param  string $file
+     * @param  string $content
      * @return bool
      * @throws ResourceException
      */
@@ -304,7 +304,7 @@ class FTPService implements ServiceInterface
     /**
      * Get file content
      *
-     * @param string $file
+     * @param  string $file
      * @return ?string
      * @throws ResourceException
      */
@@ -324,7 +324,7 @@ class FTPService implements ServiceInterface
     /**
      * Read stream
      *
-     * @param string $path
+     * @param  string $path
      * @return mixed
      * @throws ResourceException
      */
@@ -356,8 +356,8 @@ class FTPService implements ServiceInterface
     /**
      * Put other file content in given file
      *
-     * @param string $file
-     * @param string $content
+     * @param  string $file
+     * @param  string $content
      * @return bool
      * @throws ResourceException
      */
@@ -383,22 +383,27 @@ class FTPService implements ServiceInterface
     /**
      * List files in a directory
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public function files(string $dirname = '.'): array
     {
         $listing = $this->listDirectoryContents($dirname);
 
-        return array_values(array_filter($listing, function ($item) {
-            return $item['type'] === 'file';
-        }));
+        return array_values(
+            array_filter(
+                $listing,
+                function ($item) {
+                    return $item['type'] === 'file';
+                }
+            )
+        );
     }
 
     /**
      * List the directory content
      *
-     * @param string $directory
+     * @param  string $directory
      * @return array
      */
     protected function listDirectoryContents(string $directory = '.'): array
@@ -417,7 +422,7 @@ class FTPService implements ServiceInterface
     /**
      * Normalize directory content listing
      *
-     * @param array $listing
+     * @param  array $listing
      * @return array
      */
     private function normalizeDirectoryListing(array $listing): array
@@ -452,23 +457,28 @@ class FTPService implements ServiceInterface
     /**
      * List directories
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return array
      */
     public function directories(string $dirname = '.'): array
     {
         $listing = $this->listDirectoryContents($dirname);
 
-        return array_values(array_filter($listing, function ($item) {
-            return $item['type'] === 'directory';
-        }));
+        return array_values(
+            array_filter(
+                $listing,
+                function ($item) {
+                    return $item['type'] === 'directory';
+                }
+            )
+        );
     }
 
     /**
      * Create a directory
      *
-     * @param string $dirname
-     * @param int $mode
+     * @param  string $dirname
+     * @param  int    $mode
      * @return boolean
      */
     public function makeDirectory(string $dirname, int $mode = 0777): bool
@@ -493,7 +503,7 @@ class FTPService implements ServiceInterface
     /**
      * Create a directory.
      *
-     * @param string $directory
+     * @param  string $directory
      * @return bool
      */
     protected function makeActualDirectory(string $directory): bool
@@ -503,9 +513,12 @@ class FTPService implements ServiceInterface
         $directories = ftp_nlist($connection, '.') ?: [];
 
         // Remove unix characters from directory name
-        array_walk($directories, function ($dir_name, $key) {
-            return preg_match('~^\./.*~', $dir_name) ? substr($dir_name, 2) : $dir_name;
-        });
+        array_walk(
+            $directories,
+            function ($dir_name, $key) {
+                return preg_match('~^\./.*~', $dir_name) ? substr($dir_name, 2) : $dir_name;
+            }
+        );
 
         // Skip directory creation if it already exists
         if (in_array($directory, $directories, true)) {
@@ -518,8 +531,8 @@ class FTPService implements ServiceInterface
     /**
      * Copy the contents of a source file to a target file.
      *
-     * @param string $source
-     * @param string $target
+     * @param  string $source
+     * @param  string $target
      * @return bool
      * @throws ResourceException
      */
@@ -537,8 +550,8 @@ class FTPService implements ServiceInterface
     /**
      * Rename or move a source file to a target file.
      *
-     * @param string $source
-     * @param string $target
+     * @param  string $source
+     * @param  string $target
      * @return bool
      */
     public function move(string $source, string $target): bool
@@ -549,16 +562,19 @@ class FTPService implements ServiceInterface
     /**
      * isFile alias of is_file.
      *
-     * @param string $file
+     * @param  string $file
      * @return bool
      */
     public function isFile(string $file): bool
     {
         $listing = $this->listDirectoryContents();
 
-        $dirname_info = array_filter($listing, function ($item) use ($file) {
-            return $item['type'] === 'file' && $item['name'] === $file;
-        });
+        $dirname_info = array_filter(
+            $listing,
+            function ($item) use ($file) {
+                return $item['type'] === 'file' && $item['name'] === $file;
+            }
+        );
 
         return count($dirname_info) !== 0;
     }
@@ -566,7 +582,7 @@ class FTPService implements ServiceInterface
     /**
      * isDirectory alias of is_dir.
      *
-     * @param string $dirname
+     * @param  string $dirname
      * @return bool
      */
     public function isDirectory(string $dirname): bool
@@ -589,7 +605,7 @@ class FTPService implements ServiceInterface
      * Resolves a path.
      * Give the absolute path of a path
      *
-     * @param string $file
+     * @param  string $file
      * @return string
      */
     public function path(string $file): string
@@ -604,16 +620,19 @@ class FTPService implements ServiceInterface
     /**
      * Check that a file exists
      *
-     * @param string $file
+     * @param  string $file
      * @return bool
      */
     public function exists(string $file): bool
     {
         $listing = $this->listDirectoryContents();
 
-        $dirname_info = array_filter($listing, function ($item) use ($file) {
-            return $item['name'] === $file;
-        });
+        $dirname_info = array_filter(
+            $listing,
+            function ($item) use ($file) {
+                return $item['name'] === $file;
+            }
+        );
 
         return count($dirname_info) !== 0;
     }
@@ -621,7 +640,7 @@ class FTPService implements ServiceInterface
     /**
      * Delete file
      *
-     * @param string $file
+     * @param  string $file
      * @return bool
      */
     public function delete(string $file): bool

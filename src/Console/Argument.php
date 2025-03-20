@@ -99,7 +99,7 @@ class Argument
     /**
      * Initialize main command
      *
-     * @param string $param
+     * @param  string $param
      * @return void
      */
     private function initCommand(string $param): void
@@ -115,8 +115,8 @@ class Argument
     /**
      * Retrieves a parameter
      *
-     * @param string $key
-     * @param mixed $default
+     * @param  string $key
+     * @param  mixed  $default
      * @return bool|string|null
      */
     public function getParameter(string $key, mixed $default = null): mixed
@@ -187,7 +187,7 @@ class Argument
     /**
      * Read line
      *
-     * @param string $message
+     * @param  string $message
      * @return bool
      */
     public function readline(string $message): bool

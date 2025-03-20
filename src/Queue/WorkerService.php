@@ -19,7 +19,7 @@ class WorkerService
     /**
      * Make connection base on default name
      *
-     * @param QueueAdapter $connection
+     * @param  QueueAdapter $connection
      * @return void
      */
     public function setConnection(QueueAdapter $connection): void
@@ -30,14 +30,14 @@ class WorkerService
     /**
      * Start the consumer
      *
-     * @param string $queue
-     * @param int $tries
-     * @param int $sleep
-     * @param int $timeout
-     * @param int $memory
+     * @param  string $queue
+     * @param  int    $tries
+     * @param  int    $sleep
+     * @param  int    $timeout
+     * @param  int    $memory
      * @return void
      */
-    #[NoReturn] public function run(
+    public function run(
         string $queue = "default",
         int $tries = 3,
         int $sleep = 5,

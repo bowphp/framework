@@ -15,11 +15,11 @@ class GenerateResourceControllerCommand extends AbstractCommand
     /**
      * Command used to set up the resource system.
      *
-     * @param string $controller
+     * @param  string $controller
      * @return void
      * @throws
      */
-    #[NoReturn] public function generate(string $controller): void
+    public function generate(string $controller): void
     {
         // We create command generator instance
         $generator = new Generator(
@@ -67,7 +67,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
     /**
      * Create the default view for rest Generation
      *
-     * @param string $base_directory
+     * @param  string $base_directory
      * @return void
      */
     private function createDefaultView(string $base_directory): void
@@ -88,9 +88,9 @@ class GenerateResourceControllerCommand extends AbstractCommand
      * Create rest controller
      *
      * @param Generator $generator
-     * @param string $prefix
-     * @param string $controller
-     * @param string $model_namespace
+     * @param string    $prefix
+     * @param string    $controller
+     * @param string    $model_namespace
      *
      * @return void
      */
@@ -100,12 +100,15 @@ class GenerateResourceControllerCommand extends AbstractCommand
         string $controller,
         string $model_namespace = ''
     ): void {
-        $generator->write('controller/rest', [
+        $generator->write(
+            'controller/rest',
+            [
             'modelNamespace' => $model_namespace,
             'prefix' => $prefix,
             'className' => $controller,
             'baseNamespace' => $this->namespaces['controller'] ?? 'App\\Controllers'
-        ]);
+            ]
+        );
 
         echo Color::green('The controller Rest was well created.');
     }

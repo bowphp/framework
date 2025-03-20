@@ -3,9 +3,9 @@
 namespace Bow\Tests\Validation;
 
 use Bow\Database\Database;
+use Bow\Tests\Config\TestingConfiguration;
 use Bow\Translate\Translator;
 use Bow\Validation\Validator;
-use Bow\Tests\Config\TestingConfiguration;
 
 class ValidationTest extends \PHPUnit\Framework\TestCase
 {

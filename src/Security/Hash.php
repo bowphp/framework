@@ -9,7 +9,7 @@ class Hash
     /**
      * Allows to have a value and when the hash has failed it returns false.
      *
-     * @param string $value
+     * @param  string $value
      * @return string|int|null
      */
     public static function create(string $value): string|int|null
@@ -39,7 +39,7 @@ class Hash
     /**
      * Allows to have a value and when the hash has failed it returns false.
      *
-     * @param string $value
+     * @param  string $value
      * @return string|int|null
      */
     public static function make(string $value): string|int|null
@@ -52,8 +52,8 @@ class Hash
     /**
      * Allows you to check the hash by adding a value
      *
-     * @param string $value
-     * @param string $hash
+     * @param  string $value
+     * @param  string $hash
      * @return bool
      */
     public static function check(string $value, string $hash): bool
@@ -68,7 +68,7 @@ class Hash
     /**
      * Allows you to rehash a value.
      *
-     * @param string $hash
+     * @param  string $hash
      * @return bool
      */
     public static function needsRehash(string $hash): bool

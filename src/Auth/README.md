@@ -5,7 +5,7 @@ Bow Framework auth is a native authentification system
 ```php
 use Bow\Http\Exception\UnauthorizedException;
 
-$auth = auth();
+$auth = app_auth();
 
 $logged = $auth->attempts(["username" => "name@example.com", "password" => "password"]);
 

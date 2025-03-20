@@ -2,7 +2,6 @@
 
 namespace Bow\Tests\Support;
 
-use Bow\View\View;
 use Bow\Support\Env;
 
 class EnvTest extends \PHPUnit\Framework\TestCase

@@ -37,7 +37,7 @@ class Env
     /**
      * Load env file
      *
-     * @param string $filename
+     * @param  string $filename
      * @return void
      * @throws
      */
@@ -90,7 +90,7 @@ class Env
     /**
      * Bind variable
      *
-     * @param array $envs
+     * @param  array $envs
      * @return array
      */
     private static function bindVariables(array $envs): array
@@ -119,8 +119,8 @@ class Env
     /**
      * Retrieve information from the environment
      *
-     * @param string $key
-     * @param mixed $default
+     * @param  string $key
+     * @param  mixed  $default
      * @return mixed
      */
     public static function get(string $key, mixed $default = null): mixed
@@ -145,8 +145,8 @@ class Env
     /**
      * Allows you to modify the information of the environment
      *
-     * @param string $key
-     * @param mixed $value
+     * @param  string $key
+     * @param  mixed  $value
      * @return mixed
      */
     public static function set(string $key, mixed $value): bool

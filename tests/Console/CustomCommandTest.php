@@ -4,7 +4,6 @@ namespace Bow\Tests\Console\Stubs;
 
 use Bow\Console\Console;
 use Bow\Console\Setting;
-use Bow\Tests\Console\Stubs\CustomCommand;
 
 class CustomCommandTest extends \PHPUnit\Framework\TestCase
 {
@@ -30,6 +29,16 @@ class CustomCommandTest extends \PHPUnit\Framework\TestCase
         $this->clearFile();
     }
 
+    protected function getFileContent()
+    {
+        return file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/test_custom_command.txt');
+    }
+
+    protected function clearFile()
+    {
+        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/test_custom_command.txt', '');
+    }
+
     public function test_create_the_custom_command_from_instance_calling()
     {
         static::$console->addCommand("command", CustomCommand::class);
@@ -39,15 +48,5 @@ class CustomCommandTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($content, 'ok');
 
         $this->clearFile();
-    }
-
-    protected function clearFile()
-    {
-        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/test_custom_command.txt', '');
-    }
-
-    protected function getFileContent()
-    {
-        return file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . '/test_custom_command.txt');
     }
 }

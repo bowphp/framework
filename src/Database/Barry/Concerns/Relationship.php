@@ -8,15 +8,16 @@ use Bow\Database\Barry\Relations\BelongsTo;
 use Bow\Database\Barry\Relations\BelongsToMany;
 use Bow\Database\Barry\Relations\HasMany;
 use Bow\Database\Barry\Relations\HasOne;
+use Bow\Database\Exception\QueryBuilderException;
 
 trait Relationship
 {
     /**
      * The has one relative
      *
-     * @param string $related
-     * @param string|null $foreign_key
-     * @param string|null $local_key
+     * @param  string      $related
+     * @param  string|null $foreign_key
+     * @param  string|null $local_key
      * @return BelongsTo
      */
     public function belongsTo(
@@ -49,9 +50,9 @@ trait Relationship
     /**
      * The belongs to many relative
      *
-     * @param string $related
-     * @param string|null $primary_key
-     * @param string|null $foreign_key
+     * @param  string      $related
+     * @param  string|null $primary_key
+     * @param  string|null $foreign_key
      * @return BelongsToMany
      */
     public function belongsToMany(
@@ -76,10 +77,11 @@ trait Relationship
     /**
      * The has many relative
      *
-     * @param string $related
-     * @param string|null $primary_key
-     * @param string|null $foreign_key
+     * @param  string      $related
+     * @param  string|null $primary_key
+     * @param  string|null $foreign_key
      * @return HasMany
+     * @throws QueryBuilderException
      */
     public function hasMany(
         string $related,
@@ -103,9 +105,9 @@ trait Relationship
     /**
      * The has one relative
      *
-     * @param string $related
-     * @param string|null $foreign_key
-     * @param string|null $primary_key
+     * @param  string      $related
+     * @param  string|null $foreign_key
+     * @param  string|null $primary_key
      * @return HasOne
      */
     public function hasOne(

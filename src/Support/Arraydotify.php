@@ -25,7 +25,7 @@ class Arraydotify implements ArrayAccess
     /**
      * Arraydotify constructor.
      *
-     * @param array $items
+     * @param  array $items
      * @return void
      */
     public function __construct(array $items = [])
@@ -38,8 +38,8 @@ class Arraydotify implements ArrayAccess
     /**
      * Dotify action
      *
-     * @param array $items
-     * @param string $prepend
+     * @param  array  $items
+     * @param  string $prepend
      * @return array
      */
     private function dotify(array $items, string $prepend = ''): array
@@ -54,10 +54,13 @@ class Arraydotify implements ArrayAccess
 
             $value = (array)$value;
 
-            $dot = array_merge($dot, $this->dotify(
-                $value,
-                $prepend . $key . '.'
-            ));
+            $dot = array_merge(
+                $dot,
+                $this->dotify(
+                    $value,
+                    $prepend . $key . '.'
+                )
+            );
         }
 
         return $dot;
@@ -66,7 +69,7 @@ class Arraydotify implements ArrayAccess
     /**
      * Make array dotify
      *
-     * @param array $items
+     * @param  array $items
      * @return Arraydotify
      */
     public static function make(array $items = []): Arraydotify
@@ -103,8 +106,8 @@ class Arraydotify implements ArrayAccess
     /**
      * Find information to the origin array
      *
-     * @param array $origin
-     * @param string $segment
+     * @param  array  $origin
+     * @param  string $segment
      * @return ?array
      */
     private function find(array $origin, string $segment): ?array
@@ -167,9 +170,9 @@ class Arraydotify implements ArrayAccess
     /**
      * Transform the dot access to array access
      *
-     * @param mixed $array
-     * @param string $key
-     * @param mixed $value
+     * @param  mixed  $array
+     * @param  string $key
+     * @param  mixed  $value
      * @return void
      */
     private function dataSet(mixed &$array, string $key, mixed $value): void

@@ -100,7 +100,7 @@ class Validator
      */
     public function __construct()
     {
-        $this->lexical = require __DIR__ . '/stubs/lexical.php';
+        $this->lexical = include __DIR__ . '/stubs/lexical.php';
     }
 
     /**

@@ -13,8 +13,8 @@ trait EmailRule
      *
      * [email] Check that the content of the field is an email
      *
-     * @param string $key
-     * @param string $masque
+     * @param  string $key
+     * @param  string $masque
      * @return void
      */
     protected function compileEmail(string $key, string $masque): void

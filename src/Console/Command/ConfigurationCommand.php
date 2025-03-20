@@ -14,10 +14,10 @@ class ConfigurationCommand extends AbstractCommand
     /**
      * Add configuration
      *
-     * @param string $configuration
+     * @param  string $configuration
      * @return void
      */
-    #[NoReturn] public function generate(string $configuration): void
+    public function generate(string $configuration): void
     {
         $generator = new Generator(
             $this->setting->getPackageDirectory(),

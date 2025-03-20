@@ -29,17 +29,6 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
         $this->storage = Storage::disk();
     }
 
-    public function getUploadedFileMock(): \PHPUnit\Framework\MockObject\MockObject
-    {
-        $uploadedFile = $this->getMockBuilder(UploadedFile::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $uploadedFile->method("getContent")->willReturn("some content");
-
-        return $uploadedFile;
-    }
-
     public function test_configuration()
     {
         $this->assertInstanceOf(DiskFilesystemService::class, $this->storage);
@@ -134,6 +123,17 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
 
         $result = $this->storage->store($uploadedFile);
         $this->assertTrue($result);
+    }
+
+    public function getUploadedFileMock(): \PHPUnit\Framework\MockObject\MockObject
+    {
+        $uploadedFile = $this->getMockBuilder(UploadedFile::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $uploadedFile->method("getContent")->willReturn("some content");
+
+        return $uploadedFile;
     }
 
     public function test_store_on_custom_store()

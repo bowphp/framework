@@ -103,7 +103,7 @@ abstract class ProducerService
     /**
      * Set the producer attempts
      *
-     * @param int $attempts
+     * @param  int $attempts
      * @return void
      */
     public function setAttempts(int $attempts): void
@@ -124,7 +124,7 @@ abstract class ProducerService
     /**
      * Set the producer retry
      *
-     * @param int $retry
+     * @param  int $retry
      * @return void
      */
     final public function setRetry(int $retry): void
@@ -145,7 +145,7 @@ abstract class ProducerService
     /**
      * Set the producer queue
      *
-     * @param string $queue
+     * @param  string $queue
      * @return void
      */
     final public function setQueue(string $queue): void
@@ -196,7 +196,7 @@ abstract class ProducerService
     /**
      * Get the job error
      *
-     * @param Throwable $e
+     * @param  Throwable $e
      * @return void
      */
     public function onException(Throwable $e)

@@ -64,9 +64,11 @@ class Collection extends SupportCollection
      */
     public function dropAll(): void
     {
-        $this->each(function (Model $model) {
-            $model->delete();
-        });
+        $this->each(
+            function (Model $model) {
+                $model->delete();
+            }
+        );
     }
 
     /**

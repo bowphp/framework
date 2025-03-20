@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bow\Mail;
 
-use Bow\Mail\Contracts\MailDriverInterface;
-use Bow\Mail\Driver\NativeDriver;
-use Bow\Mail\Driver\SesDriver;
-use Bow\Mail\Driver\SmtpDriver;
+use Bow\Mail\Adapters\NativeAdapter;
+use Bow\Mail\Adapters\SesAdapter;
+use Bow\Mail\Adapters\SmtpAdapter;
+use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Exception\MailException;
 use Bow\View\View;
 use ErrorException;
@@ -27,17 +27,17 @@ class Mail
      * @var array
      */
     private static array $drivers = [
-        'smtp' => SmtpDriver::class,
-        'mail' => NativeDriver::class,
-        'ses' => SesDriver::class,
+        'smtp' => SmtpAdapter::class,
+        'mail' => NativeAdapter::class,
+        'ses' => SesAdapter::class,
     ];
 
     /**
      * The mail driver instance
      *
-     * @var ?MailDriverInterface
+     * @var ?MailAdapterInterface
      */
-    private static ?MailDriverInterface $instance = null;
+    private static ?MailAdapterInterface $instance = null;
 
     /**
      * The mail configuration
@@ -49,7 +49,7 @@ class Mail
     /**
      * Mail constructor
      *
-     * @param array $config
+     * @param  array $config
      * @throws MailException
      */
     public function __construct(array $config = [])
@@ -60,11 +60,11 @@ class Mail
     /**
      * Configure la classe Mail
      *
-     * @param array $config
-     * @return MailDriverInterface
+     * @param  array $config
+     * @return MailAdapterInterface
      * @throws MailException
      */
-    public static function configure(array $config = []): MailDriverInterface
+    public static function configure(array $config = []): MailAdapterInterface
     {
         if (empty(static::$config)) {
             static::$config = $config;
@@ -97,9 +97,9 @@ class Mail
     /**
      * Get mail instance
      *
-     * @return MailDriverInterface
+     * @return MailAdapterInterface
      */
-    public static function getInstance(): MailDriverInterface
+    public static function getInstance(): MailAdapterInterface
     {
         return static::$instance;
     }
@@ -107,33 +107,33 @@ class Mail
     /**
      * Send mail similar to the PHP mail function
      *
-     * @param string|array $to
-     * @param string $subject
-     * @param string $data
-     * @param array $headers
+     * @param  string|array $to
+     * @param  string       $subject
+     * @param  string       $data
+     * @param  array        $headers
      * @return mixed
      */
     public static function raw(string|array $to, string $subject, string $data, array $headers = []): mixed
     {
         $to = (array)$to;
 
-        $message = new Message();
+        $envelop = new Envelop();
 
-        $message->toList($to)->subject($subject)->setMessage($data);
+        $envelop->to($to)->subject($subject)->setMessage($data);
 
         foreach ($headers as $key => $value) {
-            $message->addHeader($key, $value);
+            $envelop->addHeader($key, $value);
         }
 
-        return static::$instance->send($message);
+        return static::$instance->send($envelop);
     }
 
     /**
      * The method thad send the configured mail
      *
-     * @param string $view
-     * @param callable|array $data
-     * @param callable|null $cb
+     * @param  string         $view
+     * @param  callable|array $data
+     * @param  callable|null  $cb
      * @return bool
      */
     public static function send(string $view, callable|array $data, ?callable $cb = null): bool
@@ -145,49 +145,49 @@ class Mail
 
         $content = View::parse($view, $data)->getContent();
 
-        $message = new Message();
-        $message->setMessage($content);
+        $envelop = new Envelop();
+        $envelop->setMessage($content);
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        return static::$instance->send($message);
+        return static::$instance->send($envelop);
     }
 
     /**
-     * Send message on queue
+     * Send env on queue
      *
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function queue(string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         queue($producer);
     }
 
     /**
-     * Send message on specific queue
+     * Send env on specific queue
      *
-     * @param string $queue
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  string   $queue
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function queueOn(string $queue, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setQueue($queue);
 
@@ -197,19 +197,19 @@ class Mail
     /**
      * Send mail later
      *
-     * @param integer $delay
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  integer  $delay
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function later(int $delay, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setDelay($delay);
 
@@ -219,20 +219,20 @@ class Mail
     /**
      * Send mail later on specific queue
      *
-     * @param integer $delay
-     * @param string $queue
-     * @param string $template
-     * @param array $data
-     * @param callable $cb
+     * @param  integer  $delay
+     * @param  string   $queue
+     * @param  string   $template
+     * @param  array    $data
+     * @param  callable $cb
      * @return void
      */
     public static function laterOn(int $delay, string $queue, string $template, array $data, callable $cb): void
     {
-        $message = new Message();
+        $envelop = new Envelop();
 
-        call_user_func_array($cb, [$message]);
+        call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $message);
+        $producer = new MailQueueProducer($template, $data, $envelop);
 
         $producer->setQueue($queue);
         $producer->setDelay($delay);
@@ -243,11 +243,11 @@ class Mail
     /**
      * Modify the smtp|mail|ses driver
      *
-     * @param string $driver
-     * @return MailDriverInterface
+     * @param  string $driver
+     * @return MailAdapterInterface
      * @throws MailException
      */
-    public static function setDriver(string $driver): MailDriverInterface
+    public static function setDriver(string $driver): MailAdapterInterface
     {
         if (static::$config == null) {
             throw new MailException(
@@ -269,8 +269,8 @@ class Mail
     /**
      * Push new driver
      *
-     * @param string $name
-     * @param string $class_name
+     * @param  string $name
+     * @param  string $class_name
      * @return bool
      */
     public function pushDriver(string $name, string $class_name): bool
@@ -287,8 +287,8 @@ class Mail
     /**
      * __call
      *
-     * @param string $name
-     * @param array $arguments
+     * @param  string $name
+     * @param  array  $arguments
      * @return mixed
      * @throws ErrorException
      */

@@ -2,10 +2,8 @@
 
 namespace Bow\Tests\Hashing;
 
-use Bow\Auth\Auth;
-use Bow\Database\Database;
-use Bow\Security\Hash;
 use Bow\Security\Crypto;
+use Bow\Security\Hash;
 use Bow\Tests\Config\TestingConfiguration;
 
 class SecurityTest extends \PHPUnit\Framework\TestCase

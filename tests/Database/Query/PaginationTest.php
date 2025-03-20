@@ -16,7 +16,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
-     * @param Database $database
+     * @param string $name
      */
     public function test_go_current_pagination(string $name)
     {
@@ -32,9 +32,20 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($result->next(), 2);
     }
 
+    public function createTestingTable(string $name): void
+    {
+        $connection = Database::connection($name);
+        $connection->statement('drop table if exists pets');
+        $connection->statement('create table pets (id int primary key, name varchar(255))');
+        $connection->table("pets")->truncate();
+        foreach (range(1, 30) as $key) {
+            $connection->insert('insert into pets values(:id, :name)', ['id' => $key, 'name' => 'Pet ' . $key]);
+        }
+    }
+
     /**
      * @dataProvider connectionNameProvider
-     * @param Database $database
+     * @param string $name
      */
     public function test_go_next_2_pagination(string $name)
     {
@@ -52,7 +63,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider connectionNameProvider
-     * @param Database $database
+     * @param string $name
      */
     public function test_go_next_3_pagination(string $name)
     {
@@ -71,19 +82,8 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public function connectionNameProvider()
+    public function connectionNameProvider(): array
     {
         return [['mysql'], ['sqlite'], ['pgsql']];
-    }
-
-    public function createTestingTable(string $name)
-    {
-        $connection = Database::connection($name);
-        $connection->statement('drop table if exists pets');
-        $connection->statement('create table pets (id int primary key, name varchar(255))');
-        $connection->table("pets")->truncate();
-        foreach (range(1, 30) as $key) {
-            $connection->insert('insert into pets values(:id, :name)', ['id' => $key, 'name' => 'Pet ' . $key]);
-        }
     }
 }
