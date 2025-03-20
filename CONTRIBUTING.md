@@ -1,10 +1,10 @@
 # Contribution
 
 - [Contribution](#contribution)
-    - [Introduction](#introduction)
-    - [Cutting the project](#cutting-the-project)
-    - [How to make the commits](#how-to-make-the-commits)
-    - [Contact](#contact)
+  - [Introduction](#introduction)
+  - [Cutting the project](#cutting-the-project)
+  - [How to make the commits](#how-to-make-the-commits)
+  - [Contact](#contact)
 
 ## Introduction
 
