@@ -17,9 +17,9 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
         Database::statement("drop table if exists caches;");
         Database::statement("
             create table if not exists caches (
-                `keyname` varchar(500) not null primary key,
-                `data` text null,
-                `expire` datetime null
+                keyname varchar(500) not null primary key,
+                data text null,
+                expire datetime null
             )");
 
         Cache::configure($config["cache"]);

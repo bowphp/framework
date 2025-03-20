@@ -20,6 +20,14 @@ trait WithNotification
     /**
      * @throws ConnectionException|Exception\QueryBuilderException
      */
+    public function unreadNotifications()
+    {
+        return $this->notifications()->whereNull('read_at');
+    }
+
+    /**
+     * @throws ConnectionException|Exception\QueryBuilderException
+     */
     public function markAsRead(string $notification_id)
     {
         return $this->notifications()->where('id', $notification_id)->update(['read_at' => app_now()]);
