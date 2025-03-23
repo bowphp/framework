@@ -16,6 +16,13 @@ class DatabaseNotification extends Model
         'data' => 'array',
     ];
 
+    /**
+     * The table name
+     *
+     * @var string
+     */
+    protected string $table = "notifications";
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
