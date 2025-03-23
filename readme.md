@@ -36,12 +36,53 @@ To use this package, please create an application from this package [bowphp/app]
 - The native authentication system
 - Producer/Consumer with beanstalkd, database, Redis, SQS backend
 
+## Project Structure
+
+The project is organized into the following directories, each representing an independent module:
+
+- **src/**: Source code for the Bow Framework.
+  - **Application/**: Main application logic and configuration.
+  - **Auth/**: Authentication and authorization management.
+  - **Cache/**: Caching mechanisms.
+  - **Configuration/**: Configuration settings management.
+  - **Console/**: Console commands and utilities.
+  - **Container/**: Dependency injection and service container.
+  - **Contracts/**: Interfaces and contracts for various components.
+  - **Database/**: Database connections and ORM.
+  - **Event/**: Event management and dispatching.
+  - **Http/**: HTTP requests and responses management.
+  - **Mail/**: Email sending and configuration.
+  - **Messaging/**: Messaging and notifications.
+  - **Middleware/**: Middleware classes for request handling.
+  - **Queue/**: Job queues and background processing.
+  - **Router/**: HTTP request routing.
+  - **Security/**: Security features like encryption and hashing.
+  - **Session/**: User session management.
+  - **Storage/**: File storage and retrieval.
+  - **Support/**: Utility classes and helper functions.
+  - **Testing/**: Unit testing classes and utilities.
+  - **Translate/**: Translation and localization.
+  - **Validation/**: Data validation.
+  - **View/**: View rendering and templating.
+- **tests/**: Unit tests for the project.
+
 ## Contributing
 
 Thank you for considering contributing to Bow Framework! The contribution guide is in the framework documentation.
 
 - [Franck DAKIA](https://github.com/papac)
 - [Thank's collaborators](https://github.com/bowphp/framework/graphs/contributors)
+
+### Contribution Guidelines
+
+We welcome contributions from the community! To contribute to the project, please follow these steps:
+
+1. Fork the project and clone it to your local machine.
+2. Create a new branch for your changes.
+3. Make your changes and commit them.
+4. Push your changes to your fork and create a pull request.
+
+For more detailed information, refer to the `CONTRIBUTING.md` file.
 
 ## Contact
 

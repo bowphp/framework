@@ -100,6 +100,23 @@ trait DateColumn
     }
 
     /**
+     * Add default timestamps
+     *
+     * @return Table
+     * @throws SQLGeneratorException
+     */
+    public function addSoftDelete(): Table
+    {
+        if ($this->adapter == 'pgsql') {
+            $this->addTimestamp('deleted_at', ['default' => 'CURRENT_TIMESTAMP', 'nullable' => true]);
+        } else {
+            $this->addColumn('updated_at', 'datetime', ['nullable' => true]);
+        }
+
+        return $this;
+    }
+
+    /**
      * Change datetime column
      *
      * @param  string $column

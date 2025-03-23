@@ -1220,7 +1220,7 @@ if (!function_exists('app_in_debug')) {
      */
     function app_in_debug(): bool
     {
-        return (bool)app_env('APP_DEBUG');
+        return (bool) app_env('APP_DEBUG');
     }
 }
 
@@ -1228,9 +1228,9 @@ if (!function_exists('client_locale')) {
     /**
      * Get client request language
      *
-     * @return string
+     * @return ?string
      */
-    function client_locale(): string
+    function client_locale(): ?string
     {
         return request()->lang();
     }
@@ -1259,7 +1259,7 @@ if (!function_exists('auth')) {
      * @throws     AuthenticationException
      * @deprecated
      */
-    function auth(string $guard = null): GuardContract
+    function auth(?string $guard = null): GuardContract
     {
         $auth = Auth::getInstance();
 
@@ -1279,7 +1279,7 @@ if (!function_exists('app_auth')) {
      * @return GuardContract
      * @throws AuthenticationException
      */
-    function app_auth(string $guard = null): GuardContract
+    function app_auth(?string $guard = null): GuardContract
     {
         $auth = Auth::getInstance();
 

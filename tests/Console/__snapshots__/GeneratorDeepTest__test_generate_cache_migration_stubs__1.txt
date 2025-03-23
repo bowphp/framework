@@ -11,7 +11,7 @@ class FakeCacheMigration extends Migration
     public function up(): void
     {
         $this->create("caches", function (Table $table) {
-            $table->addString('keyname', ['primary' => true, 'size' => 500]);
+            $table->addString('key_name', ['primary' => true, 'size' => 500]);
             $table->addText('data');
             $table->addDatetime('expire', ['nullable' => true]);
             $table->addTimestamps();

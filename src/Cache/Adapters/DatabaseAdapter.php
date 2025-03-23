@@ -62,7 +62,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
         $time = date("Y-m-d H:i:s");
 
-        return $this->query->insert(['keyname' => $key, "data" => serialize($content), "expire" => $time]);
+        return $this->query->insert(['key_name' => $key, "data" => serialize($content), "expire" => $time]);
     }
 
     /**
@@ -71,7 +71,7 @@ class DatabaseAdapter implements CacheAdapterInterface
      */
     public function has(string $key): bool
     {
-        return $this->query->where("keyname", $key)->exists();
+        return $this->query->where("key_name", $key)->exists();
     }
 
     /**
@@ -91,14 +91,14 @@ class DatabaseAdapter implements CacheAdapterInterface
             $content = $data;
         }
 
-        $result = $this->query->where("keyname", $key)->first();
+        $result = $this->query->where("key_name", $key)->first();
         $result->data = serialize($content);
 
         if (!is_null($time)) {
             $result->expire = date("Y-m-d H:i:s", strtotime($result->expire) + $time);
         }
 
-        return $this->query->where("keyname", $key)->update((array)$result);
+        return $this->query->where("key_name", $key)->update((array)$result);
     }
 
     /**
@@ -135,12 +135,12 @@ class DatabaseAdapter implements CacheAdapterInterface
             throw new Exception("The key $key is not found");
         }
 
-        $result = $this->query->where("keyname", $key)->first();
+        $result = $this->query->where("key_name", $key)->first();
 
         $value = (array)unserialize($result->data);
         $result->data = serialize(array_merge($value, $data));
 
-        return (bool)$this->query->where("keyname", $key)->update((array)$result);
+        return (bool)$this->query->where("key_name", $key)->update((array)$result);
     }
 
     /**
@@ -154,11 +154,11 @@ class DatabaseAdapter implements CacheAdapterInterface
             throw new Exception("The key $key is not found");
         }
 
-        $result = $this->query->where("keyname", $key)->first();
+        $result = $this->query->where("key_name", $key)->first();
 
         $result->expire = date("Y-m-d H:i:s", strtotime($result->expire) + $time);
 
-        return (bool)$this->query->where("keyname", $key)->update((array)$result);
+        return (bool)$this->query->where("key_name", $key)->update((array)$result);
     }
 
     /**
@@ -172,7 +172,7 @@ class DatabaseAdapter implements CacheAdapterInterface
             throw new Exception("The key $key is not found");
         }
 
-        $result = $this->query->where("keyname", $key)->first();
+        $result = $this->query->where("key_name", $key)->first();
 
         return $result->expire;
     }
@@ -188,7 +188,7 @@ class DatabaseAdapter implements CacheAdapterInterface
             throw new Exception("The key $key is not found");
         }
 
-        return $this->query->where("keyname", $key)->delete();
+        return $this->query->where("key_name", $key)->delete();
     }
 
     /**
@@ -210,7 +210,7 @@ class DatabaseAdapter implements CacheAdapterInterface
             return is_callable($default) ? $default() : $default;
         }
 
-        $result = $this->query->where("keyname", $key)->first();
+        $result = $this->query->where("key_name", $key)->first();
 
         $value = unserialize($result->data);
 
