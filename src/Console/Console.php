@@ -616,7 +616,7 @@ USAGE;
     {
         $action = $this->arg->getAction();
 
-        if (!in_array($action, ['key', 'resource', 'session-table', 'cache-table', 'queue-table'])) {
+        if (!in_array($action, ['key', 'resource', 'notification-table', 'session-table', 'cache-table', 'queue-table'])) {
             $this->throwFailsCommand('This action is not exists', 'help generate');
         }
 
