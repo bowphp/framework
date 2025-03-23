@@ -106,7 +106,7 @@ abstract class Messaging
         foreach ($channels as $channel) {
             if (array_key_exists($channel, static::$channels)) {
                 $target_channel = new static::$channels[$channel]();
-                $target_channel->send($context);
+                $target_channel->send($context, $this);
             }
         }
     }
