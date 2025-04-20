@@ -19,7 +19,7 @@ use Bow\Router\Route;
 use Bow\Router\Router;
 use ReflectionException;
 
-class Application extends Router
+class Application
 {
     /**
      * The Application instance
@@ -54,6 +54,13 @@ class Application extends Router
     private Response $response;
 
     /**
+     * The router instance
+     *
+     * @var Router
+     */
+    private Router $router;
+
+    /**
      * The Configuration Loader instance
      *
      * @var Loader
@@ -78,16 +85,15 @@ class Application extends Router
     {
         $this->request = $request;
         $this->response = $response;
+        $this->router = new Router($request->method(), $request->get('_method'));
 
         $this->capsule = Capsule::getInstance();
-
         $this->capsule->instance('response', $response);
         $this->capsule->instance('request', $request);
+        $this->capsule->instance('router', $this->router);
         $this->capsule->instance('app', $this);
 
         $this->request->capture();
-
-        parent::__construct($request->method(), $request->get('_method'));
     }
 
     /**
@@ -98,6 +104,16 @@ class Application extends Router
     public function getContainer(): Capsule
     {
         return $this->capsule;
+    }
+
+    /**
+     * Get router
+     *
+     * @return Router
+     */
+    public function getRouter(): Router
+    {
+        return $this->router;
     }
 
     /**
@@ -117,7 +133,7 @@ class Application extends Router
      * @throws ReflectionException
      * @throws RouterException
      */
-    public function send(): bool
+    public function run(): bool
     {
         if ($this->config->isCli()) {
             return true;
@@ -128,20 +144,20 @@ class Application extends Router
             $this->response->addHeader('X-Powered-By', 'Bow Framework');
         }
 
-        $this->prefix = '';
+        $this->router->setPrefix('');
 
         $method = $this->request->method();
 
         // We verify the existence of a special method DELETE, PUT
         if ($method == 'POST') {
-            if ($this->hasSpecialMethod()) {
-                $method = $this->getSpecialMethod();
+            if ($this->router->hasSpecialMethod()) {
+                $method = $this->router->getSpecialMethod();
             }
         }
 
         // We verify the existence of the method of the request in
         // the routing collection
-        $routes = $this->getRoutes();
+        $routes = $this->router->getRoutes();
 
         $response = null;
         $resolved = false;
@@ -158,7 +174,7 @@ class Application extends Router
                 continue;
             }
 
-            $this->current['path'] = $route->getPath();
+            $this->router->setCurrentPath($route->getPath());
 
             // We call the action associate with the route
             $response = $route->call();
@@ -175,14 +191,15 @@ class Application extends Router
 
         // We apply the 404 error code
         $this->response->status(404);
+        $error_code = $this->router->getErrorCodes();
 
-        if (!array_key_exists(404, $this->error_code)) {
+        if (!array_key_exists(404, $error_code)) {
             throw new RouterException(
                 sprintf('Route "%s" not found', $this->request->path())
             );
         }
 
-        $response = Compass::getInstance()->execute($this->error_code[404], []);
+        $response = Compass::getInstance()->execute($this->router->getErrorCodes(), []);
 
         $this->sendResponse($response, 404);
 
@@ -352,11 +369,11 @@ class Application extends Router
         $this->config = $config;
 
         if (is_string($config['app']['root'])) {
-            $this->setBaseRoute($config['app']['root']);
+            $this->router->setBaseRoute($config['app']['root']);
         }
 
         // We activate the auto csrf switcher
-        $this->setAutoCsrf((bool)($config['app']['auto_csrf'] ?? false));
+        $this->router->setAutoCsrf((bool)($config['app']['auto_csrf'] ?? false));
 
         $this->capsule->instance('config', $config);
 
