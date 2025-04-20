@@ -37,18 +37,21 @@ class Router
      * @var ?string
      */
     protected ?string $special_method = null;
+
     /**
      * Method Http current.
      *
      * @var array
      */
     protected array $current = [];
+
     /**
      * Define the auto csrf check status.
      *
      * @var bool
      */
     protected bool $auto_csrf = true;
+
     /**
      * Define the base route
      *
@@ -111,6 +114,17 @@ class Router
     public function setAutoCsrf(bool $auto_csrf): void
     {
         $this->auto_csrf = $auto_csrf;
+    }
+
+    /**
+     * Set prefix
+     *
+     * @param  string $prefix
+     * @return void
+     */
+    public function setPrefix(string $prefix): void
+    {
+        $this->prefix = $prefix;
     }
 
     /**
@@ -381,6 +395,16 @@ class Router
     }
 
     /**
+     * Get the error codes
+     *
+     * @return array
+     */
+    public function getErrorCodes(): array
+    {
+        return $this->error_code;
+    }
+
+    /**
      * Match route de tout type de method
      *
      * @param  array                 $methods
@@ -410,7 +434,7 @@ class Router
      *
      * @return string
      */
-    protected function getSpecialMethod(): string
+    public function getSpecialMethod(): string
     {
         return $this->special_method;
     }
@@ -420,8 +444,18 @@ class Router
      *
      * @return bool
      */
-    protected function hasSpecialMethod(): bool
+    public function hasSpecialMethod(): bool
     {
         return !is_null($this->special_method);
+    }
+
+    /**
+     * Set the current path
+     *
+     * @return void
+     */
+    public function setCurrentPath(string $path): void
+    {
+        $this->current['path'] = $path;
     }
 }
