@@ -85,7 +85,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
 
         $app = new Application($request, $response);
         $app->bind($config);
-        $app->send();
+        $app->run();
     }
 
     /**
@@ -120,11 +120,11 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $app = new Application($request, $response);
         $app->bind($config);
 
-        $app->get('/', function () {
+        $app->getRouter()->get('/', function () {
             return "work";
         });
 
-        $this->assertIsBool($app->send());
+        $this->assertIsBool($app->run());
     }
 
     public function test_send_application_with_no_matched_route()
@@ -153,11 +153,11 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $app = new Application($request, $response);
         $app->bind($config);
 
-        $app->get('/', function () {
+        $app->getRouter()->get('/', function () {
             return "not work";
         });
 
         $this->expectException(RouterException::class);
-        $this->assertFalse($app->send());
+        $this->assertFalse($app->run());
     }
 }
