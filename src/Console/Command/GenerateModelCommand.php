@@ -8,7 +8,7 @@ use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 
-class ModelCommand extends AbstractCommand
+class GenerateModelCommand extends AbstractCommand
 {
     /**
      * Add Model

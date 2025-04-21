@@ -6,9 +6,8 @@ namespace Bow\Console\Command;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
-use JetBrains\PhpStorm\NoReturn;
 
-class ConsoleCommand extends AbstractCommand
+class GenerateServiceCommand extends AbstractCommand
 {
     /**
      * Add service
@@ -19,21 +18,21 @@ class ConsoleCommand extends AbstractCommand
     public function run(string $service): void
     {
         $generator = new Generator(
-            $this->setting->getCommandDirectory(),
+            $this->setting->getServiceDirectory(),
             $service
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mThe command already exists.\033[00m\n";
+            echo "\033[0;31mThe service already exists.\033[00m\n";
 
             exit(1);
         }
 
-        $generator->write('command', [
-            'baseNamespace' => $this->namespaces['command'] ?? 'App\\Commands'
+        $generator->write('service', [
+            'baseNamespace' => $this->namespaces['service'] ?? 'App\\Services'
         ]);
 
-        echo "\033[0;32mThe command has been well created.\033[00m\n";
+        echo "\033[0;32mThe service has been well created.\033[00m\n";
 
         exit(0);
     }
