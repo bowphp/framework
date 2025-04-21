@@ -15,7 +15,7 @@ class ServerCommand extends AbstractCommand
      */
     public function run(): void
     {
-        $port = (int)$this->arg->getParameter('--port', 5000);
+        $port = (int)$this->arg->getParameter('--port', 8080);
         $hostname = $this->arg->getParameter('--host', 'localhost');
         $settings = $this->arg->getParameter('--php-settings', false);
 

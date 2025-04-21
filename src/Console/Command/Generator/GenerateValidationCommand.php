@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bow\Console\Command;
+namespace Bow\Console\Command\Generator;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
-use JetBrains\PhpStorm\NoReturn;
 
-class ValidationCommand extends AbstractCommand
+class GenerateValidationCommand extends AbstractCommand
 {
     /**
      * Add validation

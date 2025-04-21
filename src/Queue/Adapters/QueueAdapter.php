@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\ProducerService;
-use JetBrains\PhpStorm\NoReturn;
 
 abstract class QueueAdapter
 {

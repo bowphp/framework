@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Bow\Console\Command;
+namespace Bow\Console\Command\Generator;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
-use JetBrains\PhpStorm\NoReturn;
 
-class AppEventCommand extends AbstractCommand
+class GenerateAppEventCommand extends AbstractCommand
 {
     /**
      * Add event

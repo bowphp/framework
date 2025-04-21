@@ -233,7 +233,7 @@ class Console
         // The built-in commands have priority
         $commands = $this->command->getCommands();
 
-        if (in_array($this->arg->getRawCommand(), array_keys($commands))) {
+        if (!in_array($command, array_keys($commands))) {
             // Try to execute the custom command
             if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
                 return $this->executeCustomCommand($command);
@@ -322,9 +322,7 @@ class Console
             $this->throwFailsCommand('This action is not exists!', 'help migration');
         }
 
-        $target = $this->arg->getTarget();
-
-        $this->command->call("migration:{$action}", $action, $target);
+        $this->command->call("migration:{$action}", $action, $action);
     }
 
     /**
@@ -481,6 +479,20 @@ class Console
     }
 
     /**
+     * Show bow framework version and current php version in console
+     *
+     * @return void
+     */
+    private function getVersion(): void
+    {
+        $version = <<<USAGE
+\033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
+
+USAGE;
+        echo sprintf($version, Console::VERSION, PHP_VERSION);
+    }
+
+    /**
      * Display global help or helper command.
      *
      * @param  string|null $command
@@ -501,7 +513,7 @@ Bow task runner usage: php bow command:action [name] --option
  \033[0;33mhelp\033[00m display command helper
 
  \033[0;32mGENERATE\033[00m create a new app key and resources
-   \033[0;33mgenerate:resource\033[00m      Create new REST controller
+   \033[0;33mgenerate:resource\033[00m             Create new REST controller
    \033[0;33mgenerate:session-table\033[00m        For generate the preset table for session
    \033[0;33mgenerate:cache-table\033[00m          For generate the preset table for cache
    \033[0;33mgenerate:queue-table\033[00m          For generate the preset table for queue
@@ -587,7 +599,6 @@ U;
                 break;
             case 'generate':
             case 'gen':
-            case 'generator':
                 echo <<<U
     \n\033[0;32mgenerate\033[00m create a resource and app key
     [option]
@@ -600,6 +611,7 @@ U;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:notification-table       For generate the table for notification
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      For generate a new APP KEY
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     For display this
+    \033[0;33mgen\033[00m                                                           Alias of \033[0;33mgenerate\033[00m
 
 U;
                 break;
@@ -620,7 +632,7 @@ U;
                 echo <<<U
 \n\033[0;32mrun\033[00m for launch repl and local server\n
     [option]
-    run:server [--port=5000] [--host=localhost] [--php-settings="display_errors=on"]
+    run:server [--port=8080] [--host=localhost] [--php-settings="display_errors=on"]
     run:console [--include=filename.php] [--prompt=prompt_name]
     run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
 
@@ -669,19 +681,5 @@ U;
         }
 
         exit(0);
-    }
-
-    /**
-     * Show bow framework version and current php version in console
-     *
-     * @return void
-     */
-    private function getVersion(): void
-    {
-        $version = <<<USAGE
-\033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
-
-USAGE;
-        echo sprintf($version, Console::VERSION, PHP_VERSION);
     }
 }

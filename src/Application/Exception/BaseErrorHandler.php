@@ -7,7 +7,6 @@ namespace Bow\Application\Exception;
 use Bow\Http\Exception\HttpException;
 use Bow\Validation\Exception\ValidationException;
 use Bow\View\View;
-use JetBrains\PhpStorm\NoReturn;
 use PDOException;
 use Policier\Exception\TokenExpiredException;
 use Policier\Exception\TokenInvalidException;
