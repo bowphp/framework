@@ -15,7 +15,7 @@ class ClearCommand extends AbstractCommand
      * @param  string $action
      * @return void
      */
-    public function make(string $action): void
+    public function run(string $action): void
     {
         if (!in_array($action, ['view', 'cache', 'session', 'log', 'all'])) {
             $this->throwFailsCommand('Clear target not valid', 'clear help');

@@ -17,7 +17,7 @@ class MessagingCommand extends AbstractCommand
      * @param  string $messaging
      * @return void
      */
-    public function generate(string $messaging): void
+    public function run(string $messaging): void
     {
         $generator = new Generator(
             $this->setting->getMessagingDirectory(),

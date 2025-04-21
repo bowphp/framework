@@ -39,6 +39,13 @@ class Argument
     private ?string $command = null;
 
     /**
+     * The first param argument
+     *
+     * @var ?string
+     */
+    private ?string $raw_command = null;
+
+    /**
      * The command first argument
      * php bow command:[action]
      *
@@ -104,12 +111,24 @@ class Argument
      */
     private function initCommand(string $param): void
     {
-        if (!preg_match('/^[a-z-]+[a-z]+:[a-z-]+[a-z]+$/', $param)) {
+        $this->raw_command = $param;
+
+        if (!preg_match('/^[a-z-]+[a-z]+(:[a-z-]+[a-z]+){1,}$/', $param)) {
             $this->command = $param;
             $this->action = null;
         } else {
             [$this->command, $this->action] = explode(':', $param);
         }
+    }
+
+    /**
+     * Get commands
+     *
+     * @return ?string
+     */
+    public function getRawCommand(): ?string
+    {
+        return $this->raw_command;
     }
 
     /**

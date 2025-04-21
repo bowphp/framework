@@ -16,7 +16,7 @@ class GenerateSessionCommand extends AbstractCommand
      *
      * @return void
      */
-    public function generate(): void
+    public function run(): void
     {
         $create_at = date("YmdHis");
         $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('sessions')));

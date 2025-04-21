@@ -38,43 +38,47 @@ class Command extends AbstractCommand
      *
      * @var array
      */
-    private array $command = [
+    private array $commands = [
         "clear" => ClearCommand::class,
         "migration" => MigrationCommand::class,
-        "seeder" => SeederCommand::class,
-        "add" => [
-            "controller" => ControllerCommand::class,
-            "configuration" => ConfigurationCommand::class,
-            "exception" => ExceptionCommand::class,
-            "middleware" => MiddlewareCommand::class,
-            "migration" => MigrationCommand::class,
-            "model" => ModelCommand::class,
-            "seeder" => SeederCommand::class,
-            "service" => ServiceCommand::class,
-            "validation" => ValidationCommand::class,
-            "event" => AppEventCommand::class,
-            "listener" => EventListenerCommand::class,
-            "producer" => ProducerCommand::class,
-            "command" => ConsoleCommand::class,
-            "message" => MessagingCommand::class,
-        ],
-        "generator" => [
-            "key" => GenerateKeyCommand::class,
-            "resource" => GenerateResourceControllerCommand::class,
-            "session-table" => GenerateSessionCommand::class,
-            "queue-table" => GenerateQueueCommand::class,
-            "cache-table" => GenerateCacheCommand::class,
-            "notification-table" => GenerateNotificationCommand::class,
-        ],
-        "runner" => [
-            "console" => ReplCommand::class,
-            "server" => ServerCommand::class,
-            "worker" => WorkerCommand::class,
-        ],
-        "flush" => [
-            "worker" => WorkerCommand::class,
-        ],
+        "migrate" => MigrationCommand::class,
+        "seed" => SeederCommand::class,
+        "serve" => ServerCommand::class,
+        "add:controller" => ControllerCommand::class,
+        "add:configuration" => ConfigurationCommand::class,
+        "add:exception" => ExceptionCommand::class,
+        "add:middleware" => MiddlewareCommand::class,
+        "add:migration" => MigrationCommand::class,
+        "add:model" => ModelCommand::class,
+        "add:seeder" => SeederCommand::class,
+        "add:service" => ServiceCommand::class,
+        "add:validation" => ValidationCommand::class,
+        "add:event" => AppEventCommand::class,
+        "add:listener" => EventListenerCommand::class,
+        "add:producer" => ProducerCommand::class,
+        "add:command" => ConsoleCommand::class,
+        "add:message" => MessagingCommand::class,
+        "run:console" => ReplCommand::class,
+        "run:server" => ServerCommand::class,
+        "run:worker" => WorkerCommand::class,
+        "flush:worker" => WorkerCommand::class,
+        "generate:key" => GenerateKeyCommand::class,
+        "generate:resource" => GenerateResourceControllerCommand::class,
+        "generate:session-table" => GenerateSessionCommand::class,
+        "generate:queue-table" => GenerateQueueCommand::class,
+        "generate:cache-table" => GenerateCacheCommand::class,
+        "generate:notification-table" => GenerateNotificationCommand::class,
     ];
+
+    /**
+     * Get the commands
+     *
+     * @return array
+     */
+    public function getCommands(): array
+    {
+        return $this->commands;
+    }
 
     /**
      * The call command
@@ -87,24 +91,16 @@ class Command extends AbstractCommand
      */
     public function call(string $command, string $action, ...$rest): mixed
     {
-        $classes = $this->command[$command] ?? null;
+        $class = $this->commands[$command] ?? null;
 
-        if (is_null($classes)) {
+        if (is_null($class)) {
             $this->throwFailsCommand("The command $command not found !");
         }
 
-        if ($command == "add" || $command == "generator") {
-            $method = "generate";
-        } elseif ($command == "runner") {
+        if (!preg_match('/^(clear|migrate|migration):/', $command)) {
             $method = "run";
         } else {
-            $method = Str::camel($action);
-        }
-
-        if (is_array($classes)) {
-            $class = $classes[$action];
-        } else {
-            $class = $classes;
+            $method = $action;
         }
 
         $instance = new $class($this->setting, $this->arg);

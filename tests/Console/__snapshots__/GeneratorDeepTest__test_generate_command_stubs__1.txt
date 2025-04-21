@@ -2,7 +2,7 @@
 
 namespace App\Commands;
 
-use Bow\Console\Command\AbstractCommand as ConsoleCommand;
+use Bow\Console\AbstractCommand as ConsoleCommand;
 
 class FakeCommand extends ConsoleCommand
 {

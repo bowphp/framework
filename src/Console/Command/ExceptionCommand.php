@@ -16,7 +16,7 @@ class ExceptionCommand extends AbstractCommand
      * @param  string $exception
      * @return void
      */
-    public function generate(string $exception): void
+    public function run(string $exception): void
     {
         $generator = new Generator(
             $this->setting->getExceptionDirectory(),

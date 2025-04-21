@@ -22,7 +22,8 @@ class Console
      *
      * @var string
      */
-    private const VERSION = '5.0';
+    private const VERSION = '5.x';
+
     /**
      * The command list
      *
@@ -31,16 +32,14 @@ class Console
     private const COMMAND = [
         'add', 'migration', 'migrate', 'run', 'generate', 'gen', 'seed', 'help', 'launch', 'clear', 'flush'
     ];
+
     /**
      * The action list
      *
      * @var array
      */
     private const ADD_ACTION = [
-        'middleware', 'controller', 'model', 'validation',
-        'seeder', 'migration', 'configuration', 'service',
-        'exception', 'event', 'producer', 'command', 'listener',
-        'message'
+        'middleware', 'controller', 'model', 'validation', 'seeder', 'migration', 'configuration', 'service', 'exception', 'event', 'producer', 'command', 'listener', 'message'
     ];
 
     /**
@@ -215,11 +214,14 @@ class Console
         }
 
         // The built-in commands have priority
-        if (!in_array($command, static::COMMAND)) {
+        $commands = $this->command->getCommands();
+
+        if (!in_array($this->arg->getRawCommand(), array_keys($commands)) || !in_array($command, static::COMMAND)) {
             // Try to execute the custom command
-            if (array_key_exists($command, static::$registers)) {
+            if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
                 return $this->executeCustomCommand($command);
             }
+
             $this->throwFailsCommand("The command '$command' not exists.", 'help');
         }
 

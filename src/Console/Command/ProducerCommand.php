@@ -17,7 +17,7 @@ class ProducerCommand extends AbstractCommand
      * @param  string $producer
      * @return void
      */
-    public function generate(string $producer): void
+    public function run(string $producer): void
     {
         $generator = new Generator(
             $this->setting->getProducerDirectory(),

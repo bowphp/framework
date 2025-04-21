@@ -16,7 +16,7 @@ class ModelCommand extends AbstractCommand
      * @param  string $model
      * @return void
      */
-    public function generate(string $model): void
+    public function run(string $model): void
     {
         $generator = new Generator(
             $this->setting->getModelDirectory(),
