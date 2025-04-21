@@ -6,9 +6,8 @@ namespace Bow\Console\Command;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
-use JetBrains\PhpStorm\NoReturn;
 
-class EventListenerCommand extends AbstractCommand
+class GenerateEventListenerCommand extends AbstractCommand
 {
     /**
      * Add event

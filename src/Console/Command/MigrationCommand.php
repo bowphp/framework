@@ -15,7 +15,6 @@ use Bow\Database\QueryBuilder;
 use Bow\Support\Str;
 use ErrorException;
 use Exception;
-use JetBrains\PhpStorm\NoReturn;
 
 class MigrationCommand extends AbstractCommand
 {
@@ -28,6 +27,28 @@ class MigrationCommand extends AbstractCommand
     public function migrate(): void
     {
         $this->factory('up');
+    }
+
+    /**
+     * Rollback migration command
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function rollback(): void
+    {
+        $this->factory('rollback');
+    }
+
+    /**
+     * Reset migration command
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function reset(): void
+    {
+        $this->factory('reset');
     }
 
     /**
@@ -55,68 +76,6 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Get migration pattern
-     *
-     * @return array
-     */
-    private function getMigrationFiles(): array
-    {
-        $file_pattern = $this->setting->getMigrationDirectory() . strtolower("/*.php");
-
-        return glob($file_pattern);
-    }
-
-    /**
-     * Create the migration status table
-     *
-     * @return void
-     * @throws ConnectionException
-     */
-    private function createMigrationTable(): void
-    {
-        $connection = $this->arg->getParameter("--connection", config("database.default"));
-
-        Database::connection($connection);
-        $adapter = Database::getConnectionAdapter();
-
-        $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
-        $generator = new Table(
-            $table,
-            $adapter->getName(),
-            'create'
-        );
-
-        $generator->addString('migration', ['unique' => true]);
-        $generator->addInteger('batch');
-        $generator->addDatetime(
-            'created_at',
-            [
-            'default' => 'CURRENT_TIMESTAMP',
-            'nullable' => true
-            ]
-        );
-
-        $sql = sprintf(
-            'CREATE TABLE IF NOT EXISTS %s (%s);',
-            $table,
-            $generator->make()
-        );
-
-        Database::statement($sql);
-    }
-
-    /**
-     * Reset migration command
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function reset(): void
-    {
-        $this->factory('reset');
-    }
-
-    /**
      * Create a migration command
      *
      * @param string $model
@@ -124,7 +83,7 @@ class MigrationCommand extends AbstractCommand
      * @return void
      * @throws ErrorException
      */
-    public function generate(string $model): void
+    public function run(string $model): void
     {
         $create_at = date("YmdHis");
         $filename = sprintf("Version%s%s", $create_at, ucfirst(Str::camel($model)));
@@ -160,16 +119,49 @@ class MigrationCommand extends AbstractCommand
             $type = 'model/create';
         }
 
-        $generator->write(
-            $type,
-            [
+        $generator->write($type, [
             'table' => $table ?? 'table_name',
             'className' => $filename
-            ]
-        );
+        ]);
 
         // Print console information
         echo Color::green('The migration file has been successfully created') . "\n";
+    }
+
+    /**
+     * Create the migration status table
+     *
+     * @return void
+     * @throws ConnectionException
+     */
+    private function createMigrationTable(): void
+    {
+        $connection = $this->arg->getParameter("--connection", config("database.default"));
+
+        Database::connection($connection);
+        $adapter = Database::getConnectionAdapter();
+
+        $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
+        $generator = new Table(
+            $table,
+            $adapter->getName(),
+            'create'
+        );
+
+        $generator->addString('migration', ['unique' => true]);
+        $generator->addInteger('batch');
+        $generator->addDatetime('created_at', [
+            'default' => 'CURRENT_TIMESTAMP',
+            'nullable' => true
+        ]);
+
+        $sql = sprintf(
+            'CREATE TABLE IF NOT EXISTS %s (%s);',
+            $table,
+            $generator->make()
+        );
+
+        Database::statement($sql);
     }
 
     /**
@@ -217,19 +209,6 @@ class MigrationCommand extends AbstractCommand
                 $migration->batch + 1
             );
         }
-    }
-
-    /**
-     * Get migration table
-     *
-     * @return QueryBuilder
-     * @throws ConnectionException
-     */
-    private function getMigrationTable(): QueryBuilder
-    {
-        $migration_status_table = config('database.migration', 'migrations');
-
-        return db_table($migration_status_table);
     }
 
     /**
@@ -288,13 +267,11 @@ class MigrationCommand extends AbstractCommand
     {
         $table = $this->getMigrationTable();
 
-        $table->insert(
-            [
+        $table->insert([
             'migration' => $migration,
             'batch' => 1,
             'created_at' => date('Y-m-d H:i:s')
-            ]
-        );
+        ]);
     }
 
     /**
@@ -309,12 +286,10 @@ class MigrationCommand extends AbstractCommand
     {
         $table = $this->getMigrationTable();
 
-        $table->where('migration', $migration)->update(
-            [
+        $table->where('migration', $migration)->update([
             'migration' => $migration,
             'batch' => $batch
-            ]
-        );
+        ]);
     }
 
     /**
@@ -380,17 +355,6 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Rollback migration command
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function rollback(): void
-    {
-        $this->factory('rollback');
-    }
-
-    /**
      * Reset migration
      *
      * @param  array $migrations
@@ -435,5 +399,30 @@ class MigrationCommand extends AbstractCommand
 
         // Print console information
         echo Color::green('Migration reset.');
+    }
+
+    /**
+     * Get migration pattern
+     *
+     * @return array
+     */
+    private function getMigrationFiles(): array
+    {
+        $file_pattern = $this->setting->getMigrationDirectory() . strtolower("/*.php");
+
+        return glob($file_pattern);
+    }
+
+    /**
+     * Get migration table
+     *
+     * @return QueryBuilder
+     * @throws ConnectionException
+     */
+    private function getMigrationTable(): QueryBuilder
+    {
+        $migration_status_table = config('database.migration', 'migrations');
+
+        return db_table($migration_status_table);
     }
 }

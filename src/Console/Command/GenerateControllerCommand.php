@@ -6,9 +6,8 @@ namespace Bow\Console\Command;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Generator;
-use JetBrains\PhpStorm\NoReturn;
 
-class ControllerCommand extends AbstractCommand
+class GenerateControllerCommand extends AbstractCommand
 {
     /**
      * The add controller command
