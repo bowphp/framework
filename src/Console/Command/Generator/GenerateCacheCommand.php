@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bow\Console\Command;
+namespace Bow\Console\Command\Generator;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 use Bow\Support\Str;
 
-class GenerateQueueCommand extends AbstractCommand
+class GenerateCacheCommand extends AbstractCommand
 {
     /**
      * Generate session
@@ -19,17 +19,17 @@ class GenerateQueueCommand extends AbstractCommand
     public function run(): void
     {
         $create_at = date("YmdHis");
-        $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('queues')));
+        $filename = sprintf("Version%s%sTable", $create_at, ucfirst(Str::camel('caches')));
 
         $generator = new Generator(
             $this->setting->getMigrationDirectory(),
             $filename
         );
 
-        $generator->write('model/queue', [
+        $generator->write('model/cache', [
             'className' => $filename
         ]);
 
-        echo Color::green('Queue migration created.');
+        echo Color::green('Cache migration created.');
     }
 }

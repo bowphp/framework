@@ -116,13 +116,10 @@ class Generator
         // Create the stub parsed content
         $template = $this->makeStubContent(
             $type,
-            array_merge(
-                [
+            array_merge([
                 'namespace' => $namespace,
                 'className' => $classname
-                ],
-                $data
-            )
+            ], $data)
         );
 
         return (bool)file_put_contents($this->getPath(), $template);
