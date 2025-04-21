@@ -486,7 +486,7 @@ class Console
     private function getVersion(): void
     {
         $version = <<<USAGE
-\033[0;33mConsole running for \033[00mBow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
+Console running for BowPHP: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
 
 USAGE;
         echo sprintf($version, Console::VERSION, PHP_VERSION);
@@ -503,7 +503,7 @@ USAGE;
         // Display the framework and php version
         $this->getVersion();
 
-        if ($command === null) {
+        if ($command === null || $command == 'help') {
             $usage = <<<USAGE
 
 Bow task runner usage: php bow command:action [name] --option
@@ -565,9 +565,6 @@ USAGE;
         }
 
         switch ($command) {
-            case 'help':
-                echo "\033[0;33mhelp\033[00m display command helper\n";
-                break;
             case 'add':
                 echo <<<U
 \n\033[0;32mcreate\033[00m create a user class\n
