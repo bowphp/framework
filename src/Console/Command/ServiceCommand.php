@@ -16,7 +16,7 @@ class ServiceCommand extends AbstractCommand
      * @param  string $service
      * @return void
      */
-    public function generate(string $service): void
+    public function run(string $service): void
     {
         $generator = new Generator(
             $this->setting->getServiceDirectory(),

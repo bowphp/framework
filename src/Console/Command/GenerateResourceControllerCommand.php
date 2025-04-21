@@ -19,7 +19,7 @@ class GenerateResourceControllerCommand extends AbstractCommand
      * @return void
      * @throws
      */
-    public function generate(string $controller): void
+    public function run(string $controller): void
     {
         // We create command generator instance
         $generator = new Generator(

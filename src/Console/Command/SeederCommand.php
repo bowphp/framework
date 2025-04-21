@@ -23,7 +23,7 @@ class SeederCommand extends AbstractCommand
      *
      * @param string $seeder
      */
-    public function generate(string $seeder): void
+    public function run(string $seeder): void
     {
         $seeder = Str::plural($seeder);
 

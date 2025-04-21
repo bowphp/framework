@@ -16,7 +16,7 @@ class AppEventCommand extends AbstractCommand
      * @param  string $event
      * @return void
      */
-    public function generate(string $event): void
+    public function run(string $event): void
     {
         $generator = new Generator(
             $this->setting->getEventDirectory(),
