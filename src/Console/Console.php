@@ -39,7 +39,9 @@ class Console
         'seed',
         'help',
         'clear',
-        'flush'
+        'flush',
+        'launch',
+        'serve',
     ];
 
     /**
