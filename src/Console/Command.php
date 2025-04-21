@@ -13,23 +13,23 @@ use Bow\Console\Command\WorkerCommand;
 use Bow\Console\Command\AppEventCommand;
 use Bow\Console\Command\MigrationCommand;
 use Bow\Console\Command\ValidationCommand;
-use Bow\Console\Command\GenerateKeyCommand;
-use Bow\Console\Command\GenerateCacheCommand;
-use Bow\Console\Command\GenerateModelCommand;
-use Bow\Console\Command\GenerateQueueCommand;
-use Bow\Console\Command\GenerateSeederCommand;
-use Bow\Console\Command\GenerateConsoleCommand;
-use Bow\Console\Command\GenerateServiceCommand;
-use Bow\Console\Command\GenerateSessionCommand;
-use Bow\Console\Command\GenerateProducerCommand;
-use Bow\Console\Command\GenerateExceptionCommand;
-use Bow\Console\Command\GenerateMessagingCommand;
-use Bow\Console\Command\GenerateControllerCommand;
-use Bow\Console\Command\GenerateMiddlewareCommand;
-use Bow\Console\Command\GenerateNotificationCommand;
-use Bow\Console\Command\GenerateConfigurationCommand;
-use Bow\Console\Command\GenerateEventListenerCommand;
-use Bow\Console\Command\GenerateResourceControllerCommand;
+use Bow\Console\Command\Generator\GenerateKeyCommand;
+use Bow\Console\Command\Generator\GenerateCacheCommand;
+use Bow\Console\Command\Generator\GenerateModelCommand;
+use Bow\Console\Command\Generator\GenerateQueueCommand;
+use Bow\Console\Command\Generator\GenerateSeederCommand;
+use Bow\Console\Command\Generator\GenerateConsoleCommand;
+use Bow\Console\Command\Generator\GenerateServiceCommand;
+use Bow\Console\Command\Generator\GenerateSessionCommand;
+use Bow\Console\Command\Generator\GenerateProducerCommand;
+use Bow\Console\Command\Generator\GenerateExceptionCommand;
+use Bow\Console\Command\Generator\GenerateMessagingCommand;
+use Bow\Console\Command\Generator\GenerateControllerCommand;
+use Bow\Console\Command\Generator\GenerateMiddlewareCommand;
+use Bow\Console\Command\Generator\GenerateNotificationCommand;
+use Bow\Console\Command\Generator\GenerateConfigurationCommand;
+use Bow\Console\Command\Generator\GenerateEventListenerCommand;
+use Bow\Console\Command\Generator\GenerateRouterResourceCommand;
 
 class Command extends AbstractCommand
 {
@@ -66,7 +66,7 @@ class Command extends AbstractCommand
         "run:worker" => WorkerCommand::class,
         "flush:worker" => WorkerCommand::class,
         "generate:key" => GenerateKeyCommand::class,
-        "generate:resource" => GenerateResourceControllerCommand::class,
+        "generate:resource" => GenerateRouterResourceCommand::class,
         "generate:session-table" => GenerateSessionCommand::class,
         "generate:queue-table" => GenerateQueueCommand::class,
         "generate:cache-table" => GenerateCacheCommand::class,
@@ -100,7 +100,7 @@ class Command extends AbstractCommand
             $this->throwFailsCommand("The command $command not found !");
         }
 
-        if (!preg_match('/^(migrate|migration)/', $command)) {
+        if (!preg_match('/^(migration)/', $command)) {
             $method = "run";
         } else {
             $method = $action;

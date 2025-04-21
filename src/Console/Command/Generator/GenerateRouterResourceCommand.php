@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bow\Console\Command;
+namespace Bow\Console\Command\Generator;
 
 use Bow\Console\AbstractCommand;
 use Bow\Console\Color;
 use Bow\Console\Generator;
 use Bow\Support\Str;
-use JetBrains\PhpStorm\NoReturn;
 
-class GenerateResourceControllerCommand extends AbstractCommand
+class GenerateRouterResourceCommand extends AbstractCommand
 {
     /**
      * Command used to set up the resource system.
