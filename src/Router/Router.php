@@ -14,6 +14,7 @@ class Router
      * @var array
      */
     protected static array $routes = [];
+
     /**
      * Define the functions related to a http
      * code executed if this code is up
@@ -21,18 +22,21 @@ class Router
      * @var array
      */
     protected array $error_code = [];
+
     /**
      * Define the global middleware
      *
      * @var array
      */
     protected array $middlewares = [];
+
     /**
      * Define the routing prefix
      *
      * @var string
      */
     protected string $prefix = '';
+
     /**
      * @var ?string
      */
@@ -60,13 +64,6 @@ class Router
     private string $base_route;
 
     /**
-     * Define the request method
-     *
-     * @var string
-     */
-    private string $method;
-
-    /**
      * Define the request _method parse to form
      * for helper router define a good method called
      *
@@ -75,23 +72,59 @@ class Router
     private ?string $magic_method;
 
     /**
+     * Define the instance of router
+     *
+     * @var ?Router
+     */
+    private static ?Router $instance = null;
+
+    /**
      * Router constructor
      *
-     * @param string  $method
      * @param ?string $magic_method
      * @param string  $base_route
      * @param array   $middlewares
      */
     protected function __construct(
-        string $method,
         ?string $magic_method = null,
         string $base_route = '',
         array $middlewares = []
     ) {
-        $this->method = $method;
         $this->magic_method = $magic_method;
         $this->middlewares = $middlewares;
         $this->base_route = $base_route;
+    }
+
+    /**
+     * Configure route singleton instance
+     *
+     * @param string|null $magic_method
+     * @param string $base_route
+     * @param array $middlewares
+     * @return Router
+     */
+    public static function configure(
+        ?string $magic_method = null,
+        string $base_route = '',
+        array $middlewares = []
+    ): Router {
+        static::$instance = new static($magic_method, $base_route, $middlewares);
+
+        return static::$instance;
+    }
+
+    /**
+     * Get the instance of router
+     *
+     * @return ?Router
+     */
+    public static function getInstance(): ?Router
+    {
+        if (!static::$instance) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
     }
 
     /**
@@ -178,7 +211,7 @@ class Router
 
         $where = $definition['where'] ?? [];
 
-        $cb = (array)$definition['handler'];
+        $cb = (array) $definition['handler'];
 
         if (isset($cb['middleware'])) {
             unset($cb['middleware']);
@@ -207,7 +240,7 @@ class Router
      */
     private function pushHttpVerb(string|array $methods, string $path, callable|string|array $cb): Route
     {
-        $methods = (array)$methods;
+        $methods = (array) $methods;
 
         if (!$this->magic_method) {
             return $this->routeLoader($methods, $path, $cb);
@@ -269,7 +302,7 @@ class Router
      */
     public function middleware(array|string $middlewares): Router
     {
-        $middlewares = (array)$middlewares;
+        $middlewares = (array) $middlewares;
 
         $collection = [];
 
@@ -277,7 +310,7 @@ class Router
             $collection[] = class_exists($middleware) ? [new $middleware(), 'process'] : $middleware;
         }
 
-        return new Router($this->method, $this->magic_method, $this->base_route, $collection);
+        return new Router($this->magic_method, $this->base_route, $collection);
     }
 
     /**

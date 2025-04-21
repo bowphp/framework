@@ -85,9 +85,10 @@ class Application
     {
         $this->request = $request;
         $this->response = $response;
-        $this->router = new Router($request->method(), $request->get('_method'));
 
+        $this->router = Router::configure($request->get('_method'));
         $this->capsule = Capsule::getInstance();
+
         $this->capsule->instance('response', $response);
         $this->capsule->instance('request', $request);
         $this->capsule->instance('router', $this->router);
