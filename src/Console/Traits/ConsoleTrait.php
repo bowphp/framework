@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Console\Traits;
 
 use Bow\Console\Color;
-use JetBrains\PhpStorm\NoReturn;
 
 trait ConsoleTrait
 {

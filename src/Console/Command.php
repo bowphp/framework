@@ -10,9 +10,7 @@ use Bow\Console\Command\ClearCommand;
 use Bow\Console\Command\SeederCommand;
 use Bow\Console\Command\ServerCommand;
 use Bow\Console\Command\WorkerCommand;
-use Bow\Console\Command\AppEventCommand;
 use Bow\Console\Command\MigrationCommand;
-use Bow\Console\Command\ValidationCommand;
 use Bow\Console\Command\Generator\GenerateKeyCommand;
 use Bow\Console\Command\Generator\GenerateCacheCommand;
 use Bow\Console\Command\Generator\GenerateModelCommand;
@@ -21,11 +19,14 @@ use Bow\Console\Command\Generator\GenerateSeederCommand;
 use Bow\Console\Command\Generator\GenerateConsoleCommand;
 use Bow\Console\Command\Generator\GenerateServiceCommand;
 use Bow\Console\Command\Generator\GenerateSessionCommand;
+use Bow\Console\Command\Generator\GenerateAppEventCommand;
 use Bow\Console\Command\Generator\GenerateProducerCommand;
 use Bow\Console\Command\Generator\GenerateExceptionCommand;
 use Bow\Console\Command\Generator\GenerateMessagingCommand;
+use Bow\Console\Command\Generator\GenerateMigrationCommand;
 use Bow\Console\Command\Generator\GenerateControllerCommand;
 use Bow\Console\Command\Generator\GenerateMiddlewareCommand;
+use Bow\Console\Command\Generator\GenerateValidationCommand;
 use Bow\Console\Command\Generator\GenerateNotificationCommand;
 use Bow\Console\Command\Generator\GenerateConfigurationCommand;
 use Bow\Console\Command\Generator\GenerateEventListenerCommand;
@@ -39,11 +40,9 @@ class Command extends AbstractCommand
      * @var array
      */
     private array $commands = [
-        "seed" => SeederCommand::class,
-        "seed:table" => GenerateSeederCommand::class,
-        "serve" => ServerCommand::class,
         "clear" => ClearCommand::class,
-        "migrate" => MigrationCommand::class,
+        "seed:table" => SeederCommand::class,
+        "seed:all" => SeederCommand::class,
         "migration:migrate" => MigrationCommand::class,
         "migration:rollback" => MigrationCommand::class,
         "migration:reset" => MigrationCommand::class,
@@ -51,12 +50,12 @@ class Command extends AbstractCommand
         "add:configuration" => GenerateConfigurationCommand::class,
         "add:exception" => GenerateExceptionCommand::class,
         "add:middleware" => GenerateMiddlewareCommand::class,
-        "add:migration" => MigrationCommand::class,
+        "add:migration" => GenerateMigrationCommand::class,
         "add:model" => GenerateModelCommand::class,
-        "add:seeder" => SeederCommand::class,
+        "add:seeder" => GenerateSeederCommand::class,
         "add:service" => GenerateServiceCommand::class,
-        "add:validation" => ValidationCommand::class,
-        "add:event" => AppEventCommand::class,
+        "add:validation" => GenerateValidationCommand::class,
+        "add:event" => GenerateAppEventCommand::class,
         "add:listener" => GenerateEventListenerCommand::class,
         "add:producer" => GenerateProducerCommand::class,
         "add:command" => GenerateConsoleCommand::class,
