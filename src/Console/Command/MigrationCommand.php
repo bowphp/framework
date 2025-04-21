@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Bow\Console\Command;
 
-use Bow\Console\AbstractCommand;
+use Exception;
+use ErrorException;
+use Bow\Support\Str;
 use Bow\Console\Color;
 use Bow\Database\Database;
+use Bow\Database\QueryBuilder;
+use Bow\Console\AbstractCommand;
+use Bow\Database\Migration\Table;
+use Bow\Database\Exception\MigrationException;
 use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\QueryBuilderException;
-use Bow\Database\Migration\Table;
-use Bow\Database\QueryBuilder;
-use Bow\Support\Str;
-use ErrorException;
-use Exception;
 
 class MigrationCommand extends AbstractCommand
 {
@@ -84,7 +85,13 @@ class MigrationCommand extends AbstractCommand
     {
         $connection = $this->arg->getParameter("--connection", config("database.default"));
 
-        Database::connection($connection);
+        try {
+            Database::connection($connection);
+        } catch (Exception $exception) {
+            echo Color::red("▶ Please check your database configuration on .env.json file\n");
+            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
+        }
+
         $adapter = Database::getConnectionAdapter();
 
         $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
@@ -107,7 +114,12 @@ class MigrationCommand extends AbstractCommand
             $generator->make()
         );
 
-        Database::statement($sql);
+        try {
+            Database::statement($sql);
+        } catch (Exception $exception) {
+            echo sprintf("%s %s\n", Color::red("▶"), $sql);
+            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
+        }
     }
 
     /**

@@ -39,7 +39,9 @@ class Console
         'seed',
         'help',
         'clear',
-        'flush'
+        'flush',
+        'launch',
+        'serve',
     ];
 
     /**
@@ -256,7 +258,7 @@ class Console
         try {
             return call_user_func_array([$this, $command], [$this->arg->getRawCommand()]);
         } catch (Exception $e) {
-            echo $e->getMessage();
+            echo Color::red(sprintf("$command command failed with: %s\n", $e->getMessage()));
             exit(1);
         }
     }
