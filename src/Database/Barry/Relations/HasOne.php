@@ -7,35 +7,34 @@ namespace Bow\Database\Barry\Relations;
 use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
-use Bow\Database\Exception\QueryBuilderException;
 
 class HasOne extends Relation
 {
     /**
      * Create a new belongs to relationship instance.
      *
-     * @param Model  $related
-     * @param Model  $parent
-     * @param string $foreign_key
-     * @param string $local_key
+     * @param Model $related
+     * @param Model $parent
+     * @param string  $foreign_key
+     * @param string  $local_key
      */
     public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
     {
-        parent::__construct($related, $parent);
-
         $this->local_key = $local_key;
         $this->foreign_key = $foreign_key;
+
+        parent::__construct($related, $parent);
     }
 
     /**
      * Get the results of the relationship.
      *
-     * @return Model|null
+     * @return Model
      */
-    public function getResults(): mixed
+    public function getResults(): ?Model
     {
         $key = $this->query->getTable() . ":hasone:" . $this->related->getTable() . ":" . $this->foreign_key;
-
+    
         $cache = Cache::store('file')->get($key);
 
         if (!is_null($cache)) {
@@ -57,7 +56,6 @@ class HasOne extends Relation
      * Set the base constraints on the relation query.
      *
      * @return void
-     * @throws QueryBuilderException
      */
     public function addConstraints(): void
     {
