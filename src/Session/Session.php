@@ -71,12 +71,12 @@ class Session implements CollectionInterface
         // We merge configuration
         $this->config = array_merge(
             [
-            'name' => 'Bow',
-            'path' => '/',
-            'domain' => null,
-            'secure' => false,
-            'httponly' => false,
-            'save_path' => null,
+                'name' => 'Bow',
+                'path' => '/',
+                'domain' => null,
+                'secure' => false,
+                'httponly' => false,
+                'save_path' => null,
             ],
             $config
         );

@@ -53,9 +53,9 @@ class Tokenize
         Session::getInstance()->add(
             '__bow.csrf',
             [
-            'token' => $token,
-            'expire_at' => time() + static::$expire_at,
-            'field' => '<input type="hidden" name="_token" value="' . $token . '"/>'
+                'token' => $token,
+                'expire_at' => time() + static::$expire_at,
+                'field' => '<input type="hidden" name="_token" value="' . $token . '"/>'
             ]
         );
 

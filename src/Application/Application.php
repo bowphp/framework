@@ -422,4 +422,20 @@ class Application
 
         return $this->capsule->bind($params[0], $params[1]);
     }
+
+    /**
+     * Delegate method calls to the router
+     *
+     * @param string $method
+     * @param array $args
+     * @return mixed
+     */
+    public function __call(string $method, array $args): mixed
+    {
+        if (method_exists($this->router, $method)) {
+            return call_user_func_array([$this->router, $method], $args);
+        }
+
+        throw new ApplicationException("Method [$method] does not exist in Application.");
+    }
 }
