@@ -24,7 +24,7 @@ class Tokenize
      * @return ?array
      * @throws SessionException
      */
-    public static function csrf(int $time = null): ?array
+    public static function csrf(?int $time = null): ?array
     {
         static::makeCsrfToken($time);
 
@@ -114,7 +114,7 @@ class Tokenize
      * @return bool
      * @throws SessionException
      */
-    public static function csrfExpired(int $time = null): bool
+    public static function csrfExpired(?int $time = null): bool
     {
         if (Session::getInstance()->has('__bow.csrf')) {
             return false;
