@@ -223,9 +223,9 @@ class Session implements CollectionInterface
         session_set_cookie_params(
             (int)$this->config["lifetime"],
             $this->config["path"],
-            $this->config['domain'],
-            $this->config["secure"],
-            $this->config["httponly"]
+            $this->config['domain'] ?? null,
+            (bool)$this->config["secure"],
+            (bool)$this->config["httponly"]
         );
     }
 
