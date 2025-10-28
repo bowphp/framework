@@ -424,6 +424,16 @@ class Application
     }
 
     /**
+     * Send the application response
+     *
+     * @return void
+     */
+    public function send(): void
+    {
+        $this->run();
+    }
+
+    /**
      * Delegate method calls to the router
      *
      * @param string $method
