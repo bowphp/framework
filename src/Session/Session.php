@@ -214,11 +214,6 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Set session cookie params
-     *
-     * @return void
-     */
-    /**
      * Set session cookie parameters
      *
      * @return void
