@@ -218,14 +218,23 @@ class Session implements CollectionInterface
      *
      * @return void
      */
+    /**
+     * Set session cookie parameters
+     *
+     * @return void
+     */
     private function setCookieParameters(): void
     {
+        $domain = $this->config['domain'] ?? null;
+        $secure = (bool)$this->config["secure"];
+        $httponly = (bool)$this->config["httponly"];
+
         session_set_cookie_params(
             (int)$this->config["lifetime"],
             $this->config["path"],
-            $this->config['domain'] ?? null,
-            (bool)$this->config["secure"],
-            (bool)$this->config["httponly"]
+            $domain,
+            $secure,
+            $httponly
         );
     }
 
