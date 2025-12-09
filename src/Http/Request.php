@@ -424,6 +424,23 @@ class Request
         return false;
     }
 
+    public function wantsJson(): bool
+    {
+        $accept = $this->getHeader('accept');
+
+        if ($accept && str_contains($accept, 'application/json')) {
+            return true;
+        }
+
+        $content_type = $this->getHeader('content-type');
+
+        if ($content_type && str_contains($content_type, 'application/json')) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Check if a url matches with the pattern
      *
