@@ -71,12 +71,12 @@ class Session implements CollectionInterface
         // We merge configuration
         $this->config = array_merge(
             [
-            'name' => 'Bow',
-            'path' => '/',
-            'domain' => null,
-            'secure' => false,
-            'httponly' => false,
-            'save_path' => null,
+                'name' => 'Bow',
+                'path' => '/',
+                'domain' => null,
+                'secure' => false,
+                'httponly' => false,
+                'save_path' => null,
             ],
             $config
         );
@@ -214,18 +214,22 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Set session cookie params
+     * Set session cookie parameters
      *
      * @return void
      */
     private function setCookieParameters(): void
     {
+        $domain = $this->config['domain'] ?? null;
+        $secure = (bool)$this->config["secure"];
+        $httponly = (bool)$this->config["httponly"];
+
         session_set_cookie_params(
             (int)$this->config["lifetime"],
             $this->config["path"],
-            $this->config['domain'],
-            $this->config["secure"],
-            $this->config["httponly"]
+            $domain,
+            $secure,
+            $httponly
         );
     }
 

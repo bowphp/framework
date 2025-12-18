@@ -136,7 +136,7 @@ if (!function_exists('db')) {
      * @return DB
      * @throws ConnectionException
      */
-    function db(string $name = null, callable $cb = null): DB
+    function db(?string $name = null, ?callable $cb = null): DB
     {
         if (func_num_args() == 0) {
             return DB::getInstance();
@@ -195,7 +195,7 @@ if (!function_exists('table')) {
      * @throws     ConnectionException
      * @deprecated
      */
-    function table(string $name, string $connexion = null): QueryBuilder
+    function table(string $name, ?string $connexion = null): QueryBuilder
     {
         if (is_string($connexion)) {
             db($connexion);
@@ -213,7 +213,7 @@ if (!function_exists('get_last_insert_id')) {
      * @param  string|null $name
      * @return int
      */
-    function get_last_insert_id(string $name = null): int
+    function get_last_insert_id(?string $name = null): int
     {
         return DB::lastInsertId($name);
     }
@@ -228,7 +228,7 @@ if (!function_exists('db_table')) {
      * @return Bow\Database\QueryBuilder
      * @throws ConnectionException
      */
-    function db_table(string $name, string $connexion = null): QueryBuilder
+    function db_table(string $name, ?string $connexion = null): QueryBuilder
     {
         if (is_string($connexion)) {
             db($connexion);
@@ -362,7 +362,7 @@ if (!function_exists('create_csrf_token')) {
      * @return ?array
      * @throws SessionException
      */
-    function create_csrf_token(int $time = null): ?array
+    function create_csrf_token(?int $time = null): ?array
     {
         return Tokenize::csrf($time);
     }
@@ -463,7 +463,7 @@ if (!function_exists('csrf_time_is_expired')) {
      * @return bool
      * @throws SessionException
      */
-    function csrf_time_is_expired(string $time = null): bool
+    function csrf_time_is_expired(?string $time = null): bool
     {
         return Tokenize::csrfExpired($time);
     }
@@ -580,7 +580,7 @@ if (!function_exists('redirect')) {
      * @param  string|null $path
      * @return Redirect
      */
-    function redirect(string $path = null): Redirect
+    function redirect(?string $path = null): Redirect
     {
         $redirect = Redirect::getInstance();
 
@@ -600,7 +600,7 @@ if (!function_exists('url')) {
      * @param  array             $parameters
      * @return string
      */
-    function url(string|array $url = null, array $parameters = []): string
+    function url(string|array|null $url = null, array $parameters = []): string
     {
         $current = trim(request()->url(), '/');
 
@@ -783,9 +783,9 @@ if (!function_exists('email')) {
      * @return MailAdapterInterface|bool
      */
     function email(
-        string $view = null,
+        ?string $view = null,
         array $data = [],
-        callable $cb = null
+        ?callable $cb = null
     ): MailAdapterInterface|bool {
         if ($view === null) {
             return Mail::getInstance();
@@ -820,7 +820,7 @@ if (!function_exists('session')) {
      * @return mixed
      * @throws SessionException
      */
-    function session(array|string $value = null, mixed $default = null): mixed
+    function session(array|string|null $value = null, mixed $default = null): mixed
     {
         if ($value == null) {
             return Session::getInstance();
@@ -849,7 +849,7 @@ if (!function_exists('cookie')) {
      * @return string|array|object|null
      */
     function cookie(
-        string $key = null,
+        ?string $key = null,
         mixed $data = null,
         int $expiration = 3600
     ): string|array|object|null {
@@ -990,7 +990,7 @@ if (!function_exists('cache')) {
      * @return mixed
      * @throws ErrorException
      */
-    function cache(string $key = null, mixed $value = null, int $ttl = null): mixed
+    function cache(?string $key = null, mixed $value = null, ?int $ttl = null): mixed
     {
         $instance = Cache::getInstance();
 
@@ -1039,7 +1039,7 @@ if (!function_exists('app_hash')) {
      * @param  mixed  $hash_value
      * @return bool|string
      */
-    function app_hash(string $data, string $hash_value = null): bool|string
+    function app_hash(string $data, ?string $hash_value = null): bool|string
     {
         if (!is_null($hash_value)) {
             return Hash::check($data, $hash_value);
@@ -1058,7 +1058,7 @@ if (!function_exists('bow_hash')) {
      * @return     bool|string
      * @deprecated
      */
-    function bow_hash(string $data, string $hash_value = null): bool|string
+    function bow_hash(string $data, ?string $hash_value = null): bool|string
     {
         return app_hash($data, $hash_value);
     }
@@ -1074,7 +1074,7 @@ if (!function_exists('app_trans')) {
      * @return string|Translator
      */
     function app_trans(
-        string $key = null,
+        ?string $key = null,
         array $data = [],
         bool $choose = false
     ): string|Translator {
