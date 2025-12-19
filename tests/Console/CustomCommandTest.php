@@ -24,7 +24,7 @@ class CustomCommandTest extends \PHPUnit\Framework\TestCase
         static::$console->call("command");
 
         $content = $this->getFileContent();
-        $this->assertEquals($content, 'ok');
+        $this->assertEquals('ok', $content);
 
         $this->clearFile();
     }
@@ -35,7 +35,7 @@ class CustomCommandTest extends \PHPUnit\Framework\TestCase
         static::$console->call("command");
 
         $content = $this->getFileContent();
-        $this->assertEquals($content, 'ok');
+        $this->assertEquals('ok', $content);
 
         $this->clearFile();
     }

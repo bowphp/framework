@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Bow\Console\Command;
 
 use Exception;
-use ErrorException;
-use Bow\Support\Str;
 use Bow\Console\Color;
 use Bow\Database\Database;
 use Bow\Database\QueryBuilder;
@@ -381,6 +379,6 @@ class MigrationCommand extends AbstractCommand
     {
         $migration_status_table = config('database.migration', 'migrations');
 
-        return db_table($migration_status_table);
+        return app_db_table($migration_status_table);
     }
 }

@@ -127,3 +127,39 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
+    rabbitmq:
+        container_name: bowphp_rabbitmq
+        image: rabbitmq:3.11-management
+        restart: unless-stopped
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        networks:
+            - bowphp_network
+        healthcheck:
+            test: ["CMD", "rabbitmq-diagnostics", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    minio:
+        container_name: bowphp_minio
+        image: minio/minio
+        restart: unless-stopped
+        ports:
+            - "9000:9000"
+            - "9001:9001"
+        environment:
+            MINIO_ROOT_USER: minioadmin
+            MINIO_ROOT_PASSWORD: minioadmin
+        command: server /data --console-address ":9001"
+        networks:
+            - bowphp_network
+        healthcheck:
+            test: ["CMD", "mc", "alias", "set", "local", "http://localhost:9000", "minioadmin", "minioadmin"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    

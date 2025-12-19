@@ -114,7 +114,7 @@ class Event
             return $listener->call($data);
         }
 
-        $events = (array)static::$events[$event_name];
+        $events = (array) static::$events[$event_name];
 
         // Execute each listener
         collect($events)->each(fn(Listener $listener) => $listener->call($data));

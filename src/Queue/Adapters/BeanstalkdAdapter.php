@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 use ErrorException;
 use Pheanstalk\Contract\PheanstalkPublisherInterface;
 use Pheanstalk\Pheanstalk;
@@ -63,11 +63,11 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  ProducerService $producer
+     * @param  QueueJob $producer
      * @return void
      * @throws ErrorException
      */
-    public function push(ProducerService $producer): void
+    public function push(QueueJob $producer): void
     {
         $queues = (array)cache("beanstalkd:queues");
 

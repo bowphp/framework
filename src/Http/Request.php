@@ -432,13 +432,7 @@ class Request
             return true;
         }
 
-        $content_type = $this->getHeader('content-type');
-
-        if ($content_type && str_contains($content_type, 'application/json')) {
-            return true;
-        }
-
-        return false;
+        return $this->isAjax();
     }
 
     /**
@@ -504,7 +498,7 @@ class Request
      */
     public function locale(): ?string
     {
-        $accept_language = $this->getHeader('accept_language');
+        $accept_language = $this->getHeader('accept-language');
 
         $tmp = explode(';', $accept_language)[0];
 
@@ -520,9 +514,13 @@ class Request
      */
     public function lang(): ?string
     {
-        $accept_language = $this->getHeader('accept_language');
+        $accept_language = $this->getHeader('accept-language');
 
-        $language = explode(',', explode(';', $accept_language)[0])[0];
+        if (!$accept_language) {
+            return "en";
+        }
+
+        $language = explode(',', explode(';', $accept_language ?? '')[0])[0];
 
         preg_match('/([a-z]+)/', $language, $match);
 

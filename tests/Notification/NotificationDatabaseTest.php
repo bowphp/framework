@@ -34,7 +34,7 @@ class NotificationDatabaseTest extends \PHPUnit\Framework\TestCase
             'read_at' => null
         ]);
 
-        $this->assertTrue($result);
+        $this->assertTrue((bool) $result);
     }
 
     public function testRetrieveNotification()
@@ -55,7 +55,7 @@ class NotificationDatabaseTest extends \PHPUnit\Framework\TestCase
             'read_at' => date('Y-m-d H:i:s')
         ]);
 
-        $this->assertTrue($result);
+        $this->assertTrue((bool) $result);
 
         $notification = Database::table('notifications')->where('id', 1)->first();
         $this->assertNotNull($notification->read_at);
@@ -65,7 +65,7 @@ class NotificationDatabaseTest extends \PHPUnit\Framework\TestCase
     {
         $result = Database::table('notifications')->where('id', 1)->delete();
 
-        $this->assertTrue($result);
+        $this->assertTrue((bool) $result);
 
         $notification = Database::table('notifications')->where('id', 1)->first();
         $this->assertNull($notification);

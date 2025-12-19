@@ -5,7 +5,7 @@ namespace Bow\Queue\Adapters;
 use Bow\Database\Database;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 use ErrorException;
 use Exception;
 
@@ -48,10 +48,10 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  ProducerService $producer
+     * @param  QueueJob $producer
      * @return void
      */
-    public function push(ProducerService $producer): void
+    public function push(QueueJob $producer): void
     {
         $this->table->insert(
             [
@@ -96,11 +96,9 @@ class DatabaseAdapter extends QueueAdapter
                     if (!is_null($job->reserved_at) && strtotime($job->reserved_at) < time()) {
                         continue;
                     }
-                    $this->table->where("id", $job->id)->update(
-                        [
+                    $this->table->where("id", $job->id)->update([
                         "status" => "processing",
-                        ]
-                    );
+                    ]);
                     $this->execute($producer, $job);
                     continue;
                 }
@@ -122,11 +120,9 @@ class DatabaseAdapter extends QueueAdapter
 
                 // Check if the job should be deleted
                 if ($producer->jobShouldBeDelete() || $job->attempts <= 0) {
-                    $this->table->where("id", $job->id)->update(
-                        [
+                    $this->table->where("id", $job->id)->update([
                         "status" => "failed",
-                        ]
-                    );
+                    ]);
                     $this->sleep(1);
                     continue;
                 }
@@ -149,11 +145,11 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Process the next job on the queue.
      *
-     * @param  ProducerService $producer
+     * @param  QueueJob $producer
      * @param  mixed           $job
      * @throws QueryBuilderException
      */
-    private function execute(ProducerService $producer, mixed $job): void
+    private function execute(QueueJob $producer, mixed $job): void
     {
         call_user_func([$producer, "process"]);
         $this->table->where("id", $job->id)->update(

@@ -60,7 +60,7 @@ class Console
         'service',
         'exception',
         'event',
-        'producer',
+        'job',
         'command',
         'listener',
         'message'
@@ -519,13 +519,13 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33mgenerate:session-table\033[00m        For generate the preset table for session
    \033[0;33mgenerate:cache-table\033[00m          For generate the preset table for cache
    \033[0;33mgenerate:queue-table\033[00m          For generate the preset table for queue
-   \033[0;33mgenerate:notification-table\033[00m   For generate the preset table for notification
+   \033[0;33mgenerate:notification-table\033[00m    For generate the preset table for notification
    \033[0;33mgenerate:key\033[00m                  Create new app key
-   \033[0;33mflush:worker\033[00m                  Flush all queues
+   \033[0;33mflush:worker\033[00m                   Flush all queues
 
  \033[0;32mADD\033[00m Create a user class
    \033[0;33madd:middleware\033[00m      Create new middleware
-   \033[0;33madd:configuration\033[00m   Create new configuration
+   \033[0;33madd:configuration\033[00m    Create new configuration
    \033[0;33madd:service\033[00m         Create new service
    \033[0;33madd:exception\033[00m       Create new exception
    \033[0;33madd:controller\033[00m      Create new controller
@@ -535,7 +535,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:migration\033[00m       Create a new migration
    \033[0;33madd:event\033[00m           Create a new event
    \033[0;33madd:listener\033[00m        Create a new event listener
-   \033[0;33madd:producer\033[00m        Create a new producer
+   \033[0;33madd:job\033[00m             Create a new job
    \033[0;33madd:command\033[00m         Create a new bow console command
    \033[0;33madd:message\033[00m         Create a new bow messaging
 
@@ -580,7 +580,7 @@ USAGE;
 
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  For create a new controller
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           For create a new middleware
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name        For create a new configuration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name         For create a new configuration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:exception name            For create a new exception
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       For create a new model
@@ -588,7 +588,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    For create a new seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                For create a new event listener
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:producer name             For create a new queue producer
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:job name                  For create a new queue job
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              For create a new bow console command
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:message name              For create a new bow messaging
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
@@ -635,9 +635,9 @@ U;
     run:console [--include=filename.php] [--prompt=prompt_name]
     run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
 
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL 
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL for debug you code
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local development server
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker\033[00m [option]  Start worker/consumer for handle the producer
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker\033[00m [option]  Start workerr for handle the queue jobs
 
 U; // phpcs:enable
                 break;

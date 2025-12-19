@@ -4,7 +4,7 @@ namespace Bow\Queue\Adapters;
 
 use Aws\Exception\AwsException;
 use Aws\Sqs\SqsClient;
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 use ErrorException;
 use RuntimeException;
 
@@ -48,10 +48,10 @@ class SQSAdapter extends QueueAdapter
     /**
      * Push a job onto the queue.
      *
-     * @param  ProducerService $producer
+     * @param  QueueJob $producer
      * @return void
      */
-    public function push(ProducerService $producer): void
+    public function push(QueueJob $producer): void
     {
         $params = [
             'DelaySeconds' => $producer->getDelay(),
@@ -84,12 +84,10 @@ class SQSAdapter extends QueueAdapter
      */
     public function size(string $queue): int
     {
-        $response = $this->sqs->getQueueAttributes(
-            [
+        $response = $this->sqs->getQueueAttributes([
             'QueueUrl' => $this->getQueue($queue),
             'AttributeNames' => ['ApproximateNumberOfMessages'],
-            ]
-        );
+        ]);
 
         $attributes = $response->get('Attributes');
 
@@ -110,15 +108,13 @@ class SQSAdapter extends QueueAdapter
         $delay = 5;
 
         try {
-            $result = $this->sqs->receiveMessage(
-                [
+            $result = $this->sqs->receiveMessage([
                 'AttributeNames' => ['SentTimestamp'],
                 'MaxNumberOfMessages' => 1,
                 'MessageAttributeNames' => ['All'],
                 'QueueUrl' => $this->config["url"],
                 'WaitTimeSeconds' => 20,
-                ]
-            );
+            ]);
             $messages = $result->get('Messages');
             if (empty($messages)) {
                 $this->sleep(1);
@@ -128,12 +124,10 @@ class SQSAdapter extends QueueAdapter
             $producer = $this->unserializeProducer(base64_decode($message["Body"]));
             $delay = $producer->getDelay();
             call_user_func([$producer, "process"]);
-            $result = $this->sqs->deleteMessage(
-                [
+            $result = $this->sqs->deleteMessage([
                 'QueueUrl' => $this->config["url"],
                 'ReceiptHandle' => $message['ReceiptHandle']
-                ]
-            );
+            ]);
         } catch (AwsException $e) {
             // Write the error log
             error_log($e->getMessage());
@@ -158,23 +152,19 @@ class SQSAdapter extends QueueAdapter
 
             // Check if the job should be deleted
             if ($producer->jobShouldBeDelete()) {
-                $this->sqs->deleteMessage(
-                    [
+                $this->sqs->deleteMessage([
                     'QueueUrl' => $this->config["url"],
                     'ReceiptHandle' => $message['ReceiptHandle']
-                    ]
-                );
+                ]);
             } else {
-                $this->sqs->changeMessageVisibilityBatch(
-                    [
+                $this->sqs->changeMessageVisibilityBatch([
                     'QueueUrl' => $this->config["url"],
                     'Entries' => [
                         'Id' => $producer->getId(),
                         'ReceiptHandle' => $message['ReceiptHandle'],
                         'VisibilityTimeout' => $delay
                     ],
-                    ]
-                );
+                ]);
             }
 
             $this->sleep(1);

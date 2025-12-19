@@ -8,12 +8,12 @@ Bow Framework's storage system is beautiful interface to manage file access. He 
 
 ```php
 // Get the content of code.js file
-mount("public")->get("code.js");
+app_storage("public")->get("code.js");
 ```
 
 Load some service for work on.
 
 ```php
 // Get the content of code.js file
-ftp()->get("code.js");
+storage_service('ftp')->get("code.js");
 ```

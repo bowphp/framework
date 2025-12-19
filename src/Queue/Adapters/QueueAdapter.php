@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 
 abstract class QueueAdapter
 {
@@ -51,18 +51,18 @@ abstract class QueueAdapter
     /**
      * Push new producer
      *
-     * @param ProducerService $producer
+     * @param QueueJob $producer
      */
-    abstract public function push(ProducerService $producer): void;
+    abstract public function push(QueueJob $producer): void;
 
     /**
      * Create producer serialization
      *
-     * @param  ProducerService $producer
+     * @param  QueueJob $producer
      * @return string
      */
     public function serializeProducer(
-        ProducerService $producer
+        QueueJob $producer
     ): string {
         return serialize($producer);
     }
@@ -71,11 +71,11 @@ abstract class QueueAdapter
      * Create producer unserialize
      *
      * @param  string $producer
-     * @return ProducerService
+     * @return QueueJob
      */
     public function unserializeProducer(
         string $producer
-    ): ProducerService {
+    ): QueueJob {
         return unserialize($producer);
     }
 

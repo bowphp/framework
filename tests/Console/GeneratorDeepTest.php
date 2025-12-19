@@ -99,19 +99,19 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertMatchesRegularExpression("@\nclass\sFakeMiddleware\simplements\sBaseMiddleware\n@", $content);
     }
 
-    public function test_generate_producer_stubs()
+    public function test_generate_job_stubs()
     {
-        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeProducer');
-        $content = $generator->makeStubContent('producer', [
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeJob');
+        $content = $generator->makeStubContent('job', [
             "namespace" => "",
-            "className" => "FakeProducer",
-            "baseNamespace" => "App\Producers",
+            "className" => "FakeJob",
+            "baseNamespace" => "App\Jobs",
         ]);
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Producers;\n@", $content);
-        $this->assertMatchesRegularExpression("@\nclass\sFakeProducer\sextends\sProducerService\n@", $content);
+        $this->assertMatchesRegularExpression("@\nnamespace\sApp\\\Jobs;\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeJob\sextends\sQueueJob\n@", $content);
     }
 
     public function test_generate_seeder_stubs()

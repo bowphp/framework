@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Producers;
+namespace App\Jobs;
 
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 
-class FakeProducer extends ProducerService
+class FakeJob extends QueueJob
 {
     /**
-     * FakeProducer constructor
+     * FakeJob constructor
      * 
      * @return void
      */
@@ -17,7 +17,7 @@ class FakeProducer extends ProducerService
     }
 
 	/**
-	 * Handle producer
+	 * Handle job action
 	 * 
 	 * @return void
 	 */

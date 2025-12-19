@@ -18,7 +18,7 @@ use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Mail;
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 use Bow\Security\Crypto;
 use Bow\Security\Hash;
 use Bow\Security\Sanitize;
@@ -60,7 +60,7 @@ if (!function_exists('app')) {
             return $capsule;
         }
 
-        if (count($setting) == 0) {
+        if (empty($setting)) {
             return $capsule->make($key);
         }
 
@@ -136,7 +136,7 @@ if (!function_exists('db')) {
      * @return DB
      * @throws ConnectionException
      */
-    function db(?string $name = null, ?callable $cb = null): DB
+    function app_db(?string $name = null, ?callable $cb = null): DB
     {
         if (func_num_args() == 0) {
             return DB::getInstance();
@@ -198,7 +198,26 @@ if (!function_exists('table')) {
     function table(string $name, ?string $connexion = null): QueryBuilder
     {
         if (is_string($connexion)) {
-            db($connexion);
+            app_db($connexion);
+        }
+
+        return DB::table($name);
+    }
+}
+
+if (!function_exists('app_db_table')) {
+    /**
+     * Table alias of DB::table
+     *
+     * @param      string  $name
+     * @param      ?string $connexion
+     * @return     Bow\Database\QueryBuilder
+     * @throws     ConnectionException
+     */
+    function app_db_table(string $name, ?string $connexion = null): QueryBuilder
+    {
+        if (is_string($connexion)) {
+            app_db($connexion);
         }
 
         return DB::table($name);
@@ -219,42 +238,23 @@ if (!function_exists('get_last_insert_id')) {
     }
 }
 
-if (!function_exists('db_table')) {
-    /**
-     * Table alias of DB::table
-     *
-     * @param  string      $name
-     * @param  string|null $connexion
-     * @return Bow\Database\QueryBuilder
-     * @throws ConnectionException
-     */
-    function db_table(string $name, ?string $connexion = null): QueryBuilder
-    {
-        if (is_string($connexion)) {
-            db($connexion);
-        }
-
-        return DB::table($name);
-    }
-}
-
-if (!function_exists('db_select')) {
+if (!function_exists('app_db_select')) {
     /**
      * Launches SELECT SQL Queries
      *
-     * db_select('SELECT * FROM users');
+     * app_db_select('SELECT * FROM users');
      *
      * @param  string $sql
      * @param  array  $data
      * @return int|array|stdClass
      */
-    function db_select(string $sql, array $data = []): array|int|stdClass
+    function app_db_select(string $sql, array $data = []): array|int|stdClass
     {
         return DB::select($sql, $data);
     }
 }
 
-if (!function_exists('db_select_one')) {
+if (!function_exists('app_db_select_one')) {
     /**
      * Launches SELECT SQL Queries
      *
@@ -262,13 +262,13 @@ if (!function_exists('db_select_one')) {
      * @param  array  $data
      * @return int|array|StdClass
      */
-    function db_select_one(string $sql, array $data = []): array|int|StdClass
+    function app_db_select_one(string $sql, array $data = []): array|int|StdClass
     {
         return DB::selectOne($sql, $data);
     }
 }
 
-if (!function_exists('db_insert')) {
+if (!function_exists('app_db_insert')) {
     /**
      * Launches INSERT SQL Queries
      *
@@ -276,13 +276,13 @@ if (!function_exists('db_insert')) {
      * @param  array  $data
      * @return int
      */
-    function db_insert(string $sql, array $data = []): int
+    function app_db_insert(string $sql, array $data = []): int
     {
         return DB::insert($sql, $data);
     }
 }
 
-if (!function_exists('db_delete')) {
+if (!function_exists('app_db_delete')) {
     /**
      * Launches DELETE type SQL queries
      *
@@ -290,13 +290,13 @@ if (!function_exists('db_delete')) {
      * @param  array  $data
      * @return int
      */
-    function db_delete(string $sql, array $data = []): int
+    function app_db_delete(string $sql, array $data = []): int
     {
         return DB::delete($sql, $data);
     }
 }
 
-if (!function_exists('db_update')) {
+if (!function_exists('app_db_update')) {
     /**
      * Launches UPDATE SQL Queries
      *
@@ -304,20 +304,20 @@ if (!function_exists('db_update')) {
      * @param  array  $data
      * @return int
      */
-    function db_update(string $sql, array $data = []): int
+    function app_db_update(string $sql, array $data = []): int
     {
         return DB::update($sql, $data);
     }
 }
 
-if (!function_exists('db_statement')) {
+if (!function_exists('app_db_statement')) {
     /**
      * Launches CREATE TABLE, ALTER TABLE, RENAME, DROP TABLE SQL Query
      *
      * @param  string $sql
      * @return int
      */
-    function db_statement(string $sql): int
+    function app_db_statement(string $sql): int
     {
         return DB::statement($sql);
     }
@@ -378,7 +378,7 @@ if (!function_exists('csrf_token')) {
      */
     function csrf_token(): string
     {
-        $csrf = (array)create_csrf_token();
+        $csrf = (array) create_csrf_token();
 
         if (count($csrf) == 0) {
             throw new HttpException(
@@ -400,7 +400,7 @@ if (!function_exists('csrf_field')) {
      */
     function csrf_field(): string
     {
-        $csrf = (array)create_csrf_token();
+        $csrf = (array) create_csrf_token();
 
         if (count($csrf) == 0) {
             throw new HttpException(
@@ -469,7 +469,7 @@ if (!function_exists('csrf_time_is_expired')) {
     }
 }
 
-if (!function_exists('json')) {
+if (!function_exists('response_json')) {
     /**
      * Make json response
      *
@@ -478,13 +478,13 @@ if (!function_exists('json')) {
      * @param  array        $headers
      * @return string
      */
-    function json(array|object $data, int $code = 200, array $headers = []): string
+    function response_json(array|object $data, int $code = 200, array $headers = []): string
     {
         return response()->json($data, $code, $headers);
     }
 }
 
-if (!function_exists('download')) {
+if (!function_exists('response_download')) {
     /**
      * Download file
      *
@@ -493,20 +493,20 @@ if (!function_exists('download')) {
      * @param  array       $headers
      * @return string
      */
-    function download(string $file, ?string $filename = null, array $headers = []): string
+    function response_download(string $file, ?string $filename = null, array $headers = []): string
     {
         return response()->download($file, $filename, $headers);
     }
 }
 
-if (!function_exists('set_status_code')) {
+if (!function_exists('set_response_status_code')) {
     /**
      * Set status code
      *
      * @param  int $code
      * @return mixed
      */
-    function set_status_code(int $code): mixed
+    function set_response_status_code(int $code): mixed
     {
         return response()->status($code);
     }
@@ -546,7 +546,7 @@ if (!function_exists('secure')) {
     }
 }
 
-if (!function_exists('set_header')) {
+if (!function_exists('set_response_header')) {
     /**
      * Update http headers
      *
@@ -554,20 +554,20 @@ if (!function_exists('set_header')) {
      * @param  string $value
      * @return void
      */
-    function set_header(string $key, string $value): void
+    function set_response_header(string $key, string $value): void
     {
         response()->addHeader($key, $value);
     }
 }
 
-if (!function_exists('get_header')) {
+if (!function_exists('get_response_header')) {
     /**
      * Get http header
      *
      * @param  string $key
      * @return string|null
      */
-    function get_header(string $key): ?string
+    function get_response_header(string $key): ?string
     {
         return request()->getHeader($key);
     }
@@ -600,7 +600,7 @@ if (!function_exists('url')) {
      * @param  array             $parameters
      * @return string
      */
-    function url(string|array|null $url = null, array $parameters = []): string
+    function url(string|array $url = '', array $parameters = []): string
     {
         $current = trim(request()->url(), '/');
 
@@ -689,49 +689,49 @@ if (!function_exists('decrypt')) {
     }
 }
 
-if (!function_exists('db_transaction')) {
+if (!function_exists('app_db_transaction')) {
     /**
      * Start Database transaction
      *
      * @return void
      */
-    function db_transaction(): void
+    function app_db_transaction(): void
     {
         DB::startTransaction();
     }
 }
 
-if (!function_exists('db_transaction_started')) {
+if (!function_exists('app_db_transaction_started')) {
     /**
      * Check if database transaction
      *
      * @return bool
      */
-    function db_transaction_started(): bool
+    function app_db_transaction_started(): bool
     {
         return DB::inTransaction();
     }
 }
 
-if (!function_exists('db_rollback')) {
+if (!function_exists('app_db_rollback')) {
     /**
      * Stop database transaction
      *
      * @return void
      */
-    function db_rollback(): void
+    function app_db_rollback(): void
     {
         DB::rollback();
     }
 }
 
-if (!function_exists('db_commit')) {
+if (!function_exists('app_db_commit')) {
     /**
      * Commit request after transaction
      *
      * @return void
      */
-    function db_commit(): void
+    function app_db_commit(): void
     {
         DB::commit();
     }
@@ -784,7 +784,7 @@ if (!function_exists('email')) {
      */
     function email(
         ?string $view = null,
-        array $data = [],
+        ?array $data = [],
         ?callable $cb = null
     ): MailAdapterInterface|bool {
         if ($view === null) {
@@ -820,22 +820,13 @@ if (!function_exists('session')) {
      * @return mixed
      * @throws SessionException
      */
-    function session(array|string|null $value = null, mixed $default = null): mixed
+    function session(?string $key = null, mixed $default = null): mixed
     {
-        if ($value == null) {
+        if ($key == null) {
             return Session::getInstance();
         }
 
-        if (!is_array($value)) {
-            $key = $value;
-            return Session::getInstance()->get($key, $default);
-        }
-
-        foreach ($value as $key => $item) {
-            Session::getInstance()->add($key, $item);
-        }
-
-        return $value;
+        return Session::getInstance()->get($key, $default);
     }
 }
 
@@ -966,7 +957,7 @@ if (!function_exists('storage_service')) {
     }
 }
 
-if (!function_exists('app_file_system')) {
+if (!function_exists('app_storage')) {
     /**
      * Alias on the mount method
      *
@@ -974,9 +965,9 @@ if (!function_exists('app_file_system')) {
      * @return DiskFilesystemService
      * @throws DiskNotFoundException
      */
-    function app_file_system(string $disk): DiskFilesystemService
+    function app_storage(string $disk): DiskFilesystemService
     {
-        return Storage::disk($disk);
+        return Storage::local($disk);
     }
 }
 
@@ -985,12 +976,12 @@ if (!function_exists('cache')) {
      * Cache help
      *
      * @param  ?string $key
-     * @param  ?mixed  $value
+     * @param  ?string  $value
      * @param  ?int    $ttl
      * @return mixed
      * @throws ErrorException
      */
-    function cache(?string $key = null, mixed $value = null, ?int $ttl = null): mixed
+    function cache(?string $key, ?string $value = null, ?int $ttl = null): mixed
     {
         $instance = Cache::getInstance();
 
@@ -1567,7 +1558,7 @@ if (!function_exists('str_fix_utf8')) {
     }
 }
 
-if (!function_exists('db_seed')) {
+if (!function_exists('app_db_seed')) {
     /**
      * Make programmatic seeding
      *
@@ -1576,7 +1567,7 @@ if (!function_exists('db_seed')) {
      * @return int|array
      * @throws ErrorException
      */
-    function db_seed(string $name, array $data = []): int|array
+    function app_db_seed(string $name, array $data = []): int|array
     {
         if (class_exists($name)) {
             $instance = app($name);
@@ -1645,9 +1636,9 @@ if (!function_exists("queue")) {
     /**
      * Push the producer on queue
      *
-     * @param ProducerService $producer
+     * @param QueueJob $producer
      */
-    function queue(ProducerService $producer): void
+    function queue(QueueJob $producer): void
     {
         app("queue")->push($producer);
     }

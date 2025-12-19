@@ -4,12 +4,12 @@ namespace Bow\Event;
 
 use Bow\Event\Contracts\EventListener;
 use Bow\Event\Contracts\EventShouldQueue;
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 
-class EventProducer extends ProducerService
+class EventQueueJob extends QueueJob
 {
     /**
-     * EventProducer constructor
+     * EventQueueJob constructor
      *
      * @param EventListener|EventShouldQueue $event
      * @param mixed                          $payload

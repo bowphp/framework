@@ -3,10 +3,10 @@
 namespace Bow\Messaging;
 
 use Bow\Database\Barry\Model;
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 use Throwable;
 
-class MessagingQueueProducer extends ProducerService
+class MessagingQueueProducer extends QueueJob
 {
     /**
      * The message bag

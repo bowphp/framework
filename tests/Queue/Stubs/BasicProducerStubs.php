@@ -2,9 +2,9 @@
 
 namespace Bow\Tests\Queue\Stubs;
 
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 
-class BasicProducerStubs extends ProducerService
+class BasicProducerStubs extends QueueJob
 {
     public function __construct(
         private string $connection
