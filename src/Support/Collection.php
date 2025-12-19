@@ -611,7 +611,7 @@ class Collection implements Countable, JsonSerializable, IteratorAggregate, Arra
      * @param  mixed           $default
      * @return mixed
      */
-    public function get(?string $key = null, mixed $default = null): mixed
+    public function get(int|string|null $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->storage;
