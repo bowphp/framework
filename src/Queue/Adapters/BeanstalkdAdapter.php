@@ -69,7 +69,7 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function push(QueueJob $producer): void
     {
-        $queues = (array)cache("beanstalkd:queues");
+        $queues = (array) cache("beanstalkd:queues");
 
         if (!in_array($producer->getQueue(), $queues)) {
             $queues[] = $producer->getQueue();

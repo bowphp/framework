@@ -21,7 +21,7 @@ trait DatetimeRule
             return;
         }
 
-        if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $this->inputs[$key])) {
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->inputs[$key])) {
             return;
         }
 
@@ -50,12 +50,7 @@ trait DatetimeRule
             return;
         }
 
-        if (
-            !preg_match(
-                '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/i',
-                $this->inputs[$key]
-            )
-        ) {
+        if (preg_match('/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/i', $this->inputs[$key])) {
             return;
         }
 

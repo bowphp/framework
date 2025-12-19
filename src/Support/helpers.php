@@ -976,12 +976,12 @@ if (!function_exists('cache')) {
      * Cache help
      *
      * @param  ?string $key
-     * @param  ?string  $value
+     * @param  mixed  $value
      * @param  ?int    $ttl
      * @return mixed
      * @throws ErrorException
      */
-    function cache(?string $key, ?string $value = null, ?int $ttl = null): mixed
+    function cache(?string $key, mixed $value = null, ?int $ttl = null): mixed
     {
         $instance = Cache::getInstance();
 
