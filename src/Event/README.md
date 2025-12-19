@@ -15,6 +15,9 @@ Event::on("email.sent", function (array $payload) {
 
 // Emit the send.mail event
 Event::emit("email.sent", ["name" => "Franck DAKIA"]);
+
+// With helper
+event("email.sent", ["name" => "Franck DAKIA"])
 ```
 
 NB: Is recommanded to write all event listener into simple class and define the event to the app Kernel file in boot

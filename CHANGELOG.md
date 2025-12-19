@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 5.1.2 - 2023-09-17
 
-Fix `db_seed` helper
+Fix `app_db_seed` helper
 
 Ref
 
@@ -60,8 +60,7 @@ Reference #248
 
 ## 5.0.8 - 2023-05-24
 
-Release 5.0.8
-
+Release **5.0.8**
 Fixes test case errors
 
 Reference #243
@@ -69,7 +68,7 @@ From #242
 
 ## 5.0.7 - 2023-05-24
 
-Release 5.0.7
+Release **5.0.7**
 
 - Fixes the database relationship
 - Fixes the HTTP client
@@ -81,7 +80,7 @@ Fixes #240
 
 ## 5.0.6 - 2023-05-22
 
-Release 5.0.6
+Release **5.0.6**
 
 - Fixes get last insert id for pgsql
 - Add data validation custom message parser
@@ -95,7 +94,7 @@ References
 
 ## 5.0.5 - 2023-05-20
 
-Release 5.0.5
+Release **5.0.5**
 
 - Fix migration status table definition
 - Fix enum creation for pgsql
@@ -104,7 +103,7 @@ Reference #232
 
 ## 5.0.4 - 2023-05-19
 
-Release 5.0.4
+Release **5.0.4**
 
 - Fixes HTTP Client
 - Add variable binding to the env loader
@@ -124,7 +123,7 @@ Add many fixes
 
 ## 5.0.2 - 2023-05-16
 
-Release for 5.0.2
+Release **5.0.2**
 
 - Fix action dependency injector
 - Add the base error handler

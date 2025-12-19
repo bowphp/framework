@@ -424,6 +424,17 @@ class Request
         return false;
     }
 
+    public function wantsJson(): bool
+    {
+        $accept = $this->getHeader('accept');
+
+        if ($accept && str_contains($accept, 'application/json')) {
+            return true;
+        }
+
+        return $this->isAjax();
+    }
+
     /**
      * Check if a url matches with the pattern
      *
@@ -487,7 +498,7 @@ class Request
      */
     public function locale(): ?string
     {
-        $accept_language = $this->getHeader('accept_language');
+        $accept_language = $this->getHeader('accept-language');
 
         $tmp = explode(';', $accept_language)[0];
 
@@ -503,9 +514,13 @@ class Request
      */
     public function lang(): ?string
     {
-        $accept_language = $this->getHeader('accept_language');
+        $accept_language = $this->getHeader('accept-language');
 
-        $language = explode(',', explode(';', $accept_language)[0])[0];
+        if (!$accept_language) {
+            return "en";
+        }
+
+        $language = explode(',', explode(';', $accept_language ?? '')[0])[0];
 
         preg_match('/([a-z]+)/', $language, $match);
 

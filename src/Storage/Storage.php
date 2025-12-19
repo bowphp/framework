@@ -113,7 +113,7 @@ class Storage
      * @return DiskFilesystemService
      * @throws DiskNotFoundException
      */
-    public static function disk(?string $disk = null): DiskFilesystemService
+    public static function local(?string $disk = null): DiskFilesystemService
     {
         // Use the default disk as fallback
         if (is_null($disk)) {
@@ -131,6 +131,15 @@ class Storage
         $config = static::$config['disk']['path'][$disk];
 
         return static::$disk = new DiskFilesystemService($config);
+    }
+
+    /**
+     * Mount disk
+     * @deprecated version
+     */
+    public static function disk(?string $disk = null): DiskFilesystemService
+    {
+        return static::local($disk);
     }
 
     /**

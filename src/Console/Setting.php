@@ -137,12 +137,11 @@ class Setting
     private string $service_directory;
 
     /**
-     * The producer directory
+     * The job directory
      *
      * @var string
      */
-    private string $producer_directory;
-
+    private string $job_directory;
     /**
      * The command directory
      *
@@ -403,24 +402,24 @@ class Setting
     }
 
     /**
-     * Get the producer directory
+     * Get the job directory
      *
      * @return string
      */
-    public function getProducerDirectory(): string
+    public function getJobDirectory(): string
     {
-        return $this->producer_directory;
+        return $this->job_directory;
     }
 
     /**
-     * Set the producer directory
+     * Set the job directory
      *
-     * @param  string $producer_directory
+     * @param  string $job_directory
      * @return void
      */
-    public function setProducerDirectory(string $producer_directory): void
+    public function setJobDirectory(string $job_directory): void
     {
-        $this->producer_directory = $producer_directory;
+        $this->job_directory = $job_directory;
     }
 
     /**

@@ -7,7 +7,7 @@ namespace Bow\Queue;
 use Bow\Support\Serializes;
 use Throwable;
 
-abstract class ProducerService
+abstract class QueueJob
 {
     use Serializes;
 
@@ -61,7 +61,7 @@ abstract class ProducerService
     protected int $attempts = 2;
 
     /**
-     * ProducerService constructor
+     * Worker constructor
      *
      * @return void
      */
@@ -71,7 +71,7 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer priority
+     * Get the worker priority
      *
      * @return int
      */
@@ -81,7 +81,7 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer id
+     * Get the worker id
      *
      * @return string
      */
@@ -91,7 +91,7 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer attempts
+     * Get the worker attempts
      *
      * @return int
      */
@@ -101,7 +101,7 @@ abstract class ProducerService
     }
 
     /**
-     * Set the producer attempts
+     * Set the worker attempts
      *
      * @param  int $attempts
      * @return void
@@ -112,7 +112,7 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer retry
+     * Get the worker retry
      *
      * @return int
      */
@@ -122,7 +122,7 @@ abstract class ProducerService
     }
 
     /**
-     * Set the producer retry
+     * Set the worker retry
      *
      * @param  int $retry
      * @return void
@@ -133,7 +133,7 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer queue
+     * Get the worker queue
      *
      * @return string
      */
@@ -143,7 +143,7 @@ abstract class ProducerService
     }
 
     /**
-     * Set the producer queue
+     * Set the worker queue
      *
      * @param  string $queue
      * @return void
@@ -154,7 +154,7 @@ abstract class ProducerService
     }
 
     /**
-     * Get the producer delay
+     * Get the worker delay
      *
      * @return int
      */
@@ -164,7 +164,7 @@ abstract class ProducerService
     }
 
     /**
-     * Set the producer delay
+     * Set the worker delay
      *
      * @param int $delay
      */

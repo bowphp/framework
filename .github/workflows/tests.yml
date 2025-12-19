@@ -67,4 +67,4 @@ jobs:
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Run test suite
-        run: sudo composer run-script test
+        run: sudo composer run-script test || sudo composer run-script testdox

@@ -58,20 +58,6 @@ class Collection extends SupportCollection
     }
 
     /**
-     * Allows you to delete all the selected recordings
-     *
-     * @return void
-     */
-    public function dropAll(): void
-    {
-        $this->each(
-            function (Model $model) {
-                $model->delete();
-            }
-        );
-    }
-
-    /**
      * @inheritdoc
      */
     public function __toString(): string

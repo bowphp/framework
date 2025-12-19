@@ -73,10 +73,8 @@ class FilesystemAdapter implements CacheAdapterInterface
 
         $group = Str::slice($hash, 0, 2);
 
-        if ($make_group_directory) {
-            if (!is_dir($this->directory . '/' . $group)) {
-                @mkdir($this->directory . '/' . $group);
-            }
+        if ($make_group_directory && !is_dir($this->directory . '/' . $group)) {
+            @mkdir($this->directory . '/' . $group);
         }
 
         return $this->directory . '/' . $group . '/' . $hash;
@@ -153,22 +151,15 @@ class FilesystemAdapter implements CacheAdapterInterface
     {
         if (!$this->has($key)) {
             $this->with_meta = false;
-
-            if (is_callable($default)) {
-                return $default();
-            }
-
-            return $default;
+            return is_callable($default) ? $default() : $default;
         }
 
         $cache = unserialize(file_get_contents($this->makeHashFilename($key)));
 
         $expire_at = $cache['__bow_meta']['expire_at'];
 
-        if ($expire_at != '+') {
-            if (time() > $expire_at) {
-                return null;
-            }
+        if ($expire_at != '+' && time() > $expire_at) {
+            return null;
         }
 
         if (!$this->with_meta) {

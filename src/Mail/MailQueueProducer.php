@@ -2,11 +2,11 @@
 
 namespace Bow\Mail;
 
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 use Bow\View\View;
 use Throwable;
 
-class MailQueueProducer extends ProducerService
+class MailQueueProducer extends QueueJob
 {
     /**
      * The message bag

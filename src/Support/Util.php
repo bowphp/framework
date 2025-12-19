@@ -30,8 +30,7 @@ class Util
 
         $dumper = 'cli' === PHP_SAPI ? new CliDumper() : new HtmlDumper();
 
-        $dumper->setStyles(
-            [
+        $dumper->setStyles([
             'default' => 'background-color:#fff; color:#FF8400; line-height:1.2em; 
                 font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; 
                 white-space: pre-wrap; position:relative; z-index:99999; word-break: normal',
@@ -46,8 +45,7 @@ class Util
             'meta' => 'color:#B729D9',
             'key' => 'color:#212',
             'index' => 'color:#1200DA',
-            ]
-        );
+        ]);
 
         $handler = function ($vars) use ($cloner, $dumper) {
             if (!is_array($vars)) {

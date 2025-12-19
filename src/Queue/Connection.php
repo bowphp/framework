@@ -9,7 +9,8 @@ use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
-use ErrorException;
+use Bow\Queue\Exceptions\ConnexionException;
+use Bow\Queue\Exceptions\MethodCallException;
 
 class Connection
 {
@@ -53,7 +54,7 @@ class Connection
      * @param  string $name
      * @param  string $classname
      * @return bool
-     * @throws ErrorException
+     * @throws ConnexionException
      */
     public static function pushConnection(string $name, string $classname): bool
     {
@@ -63,7 +64,7 @@ class Connection
             return true;
         }
 
-        throw new ErrorException(
+        throw new ConnexionException(
             "An other connection with some name already exists"
         );
     }
@@ -87,7 +88,7 @@ class Connection
      * @param  string $name
      * @param  array  $arguments
      * @return mixed|null
-     * @throws ErrorException
+     * @throws MethodCallException
      */
     public function __call(string $name, array $arguments)
     {
@@ -99,7 +100,7 @@ class Connection
 
         $class = get_class($adapter);
 
-        throw new ErrorException("Call to undefined method {$class}->{$name}()");
+        throw new MethodCallException("Call to undefined method {$class}->{$name}()");
     }
 
     /**

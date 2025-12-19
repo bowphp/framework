@@ -9,7 +9,6 @@ use Bow\Cache\Adapters\CacheAdapterInterface;
 use Bow\Cache\Adapters\DatabaseAdapter;
 use Bow\Cache\Adapters\FilesystemAdapter;
 use Bow\Cache\Adapters\RedisAdapter;
-use ErrorException;
 use InvalidArgumentException;
 
 class Cache
@@ -86,12 +85,12 @@ class Cache
      * Get the cache instance
      *
      * @return CacheAdapterInterface
-     * @throws ErrorException
+     * @throws CacheException
      */
     public static function getInstance(): CacheAdapterInterface
     {
         if (is_null(static::$instance)) {
-            throw new ErrorException("Unable to get cache instance before configuration");
+            throw new CacheException("Unable to get cache instance before configuration");
         }
 
         return static::$instance;
@@ -122,7 +121,7 @@ class Cache
     public static function __callStatic(string $name, array $arguments)
     {
         if (is_null(static::$instance)) {
-            throw new ErrorException(
+            throw new CacheException(
                 "Unable to get cache instance before configuration"
             );
         }

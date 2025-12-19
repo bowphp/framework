@@ -2,9 +2,9 @@
 
 namespace Bow\Tests\Queue\Stubs;
 
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 
-class ModelProducerStub extends ProducerService
+class ModelProducerStub extends QueueJob
 {
     public function __construct(
         private PetModelStub $pet,

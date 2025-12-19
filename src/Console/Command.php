@@ -20,7 +20,7 @@ use Bow\Console\Command\Generator\GenerateConsoleCommand;
 use Bow\Console\Command\Generator\GenerateServiceCommand;
 use Bow\Console\Command\Generator\GenerateSessionCommand;
 use Bow\Console\Command\Generator\GenerateAppEventCommand;
-use Bow\Console\Command\Generator\GenerateProducerCommand;
+use Bow\Console\Command\Generator\GenerateWorkerCommand;
 use Bow\Console\Command\Generator\GenerateExceptionCommand;
 use Bow\Console\Command\Generator\GenerateMessagingCommand;
 use Bow\Console\Command\Generator\GenerateMigrationCommand;
@@ -57,7 +57,7 @@ class Command extends AbstractCommand
         "add:validation" => GenerateValidationCommand::class,
         "add:event" => GenerateAppEventCommand::class,
         "add:listener" => GenerateEventListenerCommand::class,
-        "add:producer" => GenerateProducerCommand::class,
+        "add:producer" => GenerateWorkerCommand::class,
         "add:command" => GenerateConsoleCommand::class,
         "add:message" => GenerateMessagingCommand::class,
         "run:console" => ReplCommand::class,

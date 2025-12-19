@@ -26,7 +26,7 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($arg->getAction());
         $this->assertNull($arg->getTarget());
 
-        $this->assertEquals($arg->getCommand(), "run");
+        $this->assertEquals("run", $arg->getCommand());
     }
 
     public function test_one_arg_passed()
@@ -38,8 +38,8 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
         $this->assertNotNull($arg->getAction());
         $this->assertNull($arg->getTarget());
 
-        $this->assertEquals($arg->getCommand(), "run");
-        $this->assertEquals($arg->getAction(), "server");
+        $this->assertEquals("run", $arg->getCommand());
+        $this->assertEquals("server", $arg->getAction());
     }
 
     public function test_get_target()
@@ -48,7 +48,7 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
         $arg = new Argument();
 
         $this->assertNotNull($arg->getTarget());
-        $this->assertEquals($arg->getTarget(), "target");
+        $this->assertEquals("target", $arg->getTarget());
     }
 
     public function test_get_options_with_target_passed()
@@ -57,10 +57,10 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
         $arg = new Argument();
 
         $this->assertNotNull($arg->getTarget());
-        $this->assertEquals($arg->getTarget(), "target");
+        $this->assertEquals("target", $arg->getTarget());
         $this->assertNull($arg->getParameter("--not-found"));
-        $this->assertEquals($arg->getParameter("--class"), "TestClass::class");
-        $this->assertEquals($arg->getParameter("--data"), "data_source_file.json");
+        $this->assertEquals("TestClass::class", $arg->getParameter("--class"));
+        $this->assertEquals("data_source_file.json", $arg->getParameter("--data"));
     }
 
     public function test_get_options_as_collection()
@@ -72,7 +72,7 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($arg->getParameters()->has("--class"));
         $this->assertTrue($arg->getParameters()->has("--name"));
         $this->assertFalse($arg->getParameters()->has("--not-found"));
-        $this->assertEquals($arg->getParameters()->get("--name"), "papac");
+        $this->assertEquals("papac", $arg->getParameters()->get("--name"));
     }
 
     public function test_the_bad_parameter_collected()
@@ -101,6 +101,6 @@ class ArgumentTest extends \PHPUnit\Framework\TestCase
 
         $this->assertFalse($arg->hasTrash());
         $this->assertTrue($arg->getParameter('--target'));
-        $this->assertEquals($arg->getParameter('--name'), "papac");
+        $this->assertEquals("papac", $arg->getParameter('--name'));
     }
 }

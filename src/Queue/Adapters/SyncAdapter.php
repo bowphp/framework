@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
-use Bow\Queue\ProducerService;
+use Bow\Queue\QueueJob;
 
 class SyncAdapter extends QueueAdapter
 {
@@ -31,10 +31,10 @@ class SyncAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  ProducerService $producer
+     * @param  QueueJob $producer
      * @return void
      */
-    public function push(ProducerService $producer): void
+    public function push(QueueJob $producer): void
     {
         $producer->process();
     }
