@@ -376,7 +376,7 @@ class Console
     {
         $action = $this->arg->getAction();
 
-        if (!in_array($action, ['all', 'table'])) {
+        if (!in_array($action, ['all', 'file'])) {
             $this->throwFailsCommand('This action is not exists', 'help seed');
         }
 
@@ -552,8 +552,8 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33mclear:all\033[00m           Clear all cache information
 
  \033[0;32mSEED\033[00m Make seeding
-   \033[0;33mseed:table\033[00m [name]   Make seeding for one table
-   \033[0;33mseed:all\033[00m            Make seeding for all
+   \033[0;33mseed:file\033[00m [class_name] Make seeding for one file
+   \033[0;33mseed:all\033[00m              Make seeding for all
  
  \033[0;32mRUN\033[00m Launch process
    \033[0;33mrun:console\033[00m show psysh php REPL for debug you code.
@@ -657,7 +657,7 @@ U;
 \n\033[0;32mMake table seeding\033[00m\n
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:all\033[00m               Make seeding for all
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:table\033[00m table_name  Make seeding for one table
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:file\033[00m class_name  Make seeding for one file
 
 U;
                 break;

@@ -20,7 +20,6 @@ use Bow\Console\Command\Generator\GenerateConsoleCommand;
 use Bow\Console\Command\Generator\GenerateServiceCommand;
 use Bow\Console\Command\Generator\GenerateSessionCommand;
 use Bow\Console\Command\Generator\GenerateAppEventCommand;
-use Bow\Console\Command\Generator\GenerateWorkerCommand;
 use Bow\Console\Command\Generator\GenerateExceptionCommand;
 use Bow\Console\Command\Generator\GenerateMessagingCommand;
 use Bow\Console\Command\Generator\GenerateMigrationCommand;
@@ -30,6 +29,7 @@ use Bow\Console\Command\Generator\GenerateValidationCommand;
 use Bow\Console\Command\Generator\GenerateNotificationCommand;
 use Bow\Console\Command\Generator\GenerateConfigurationCommand;
 use Bow\Console\Command\Generator\GenerateEventListenerCommand;
+use Bow\Console\Command\Generator\GenerateJobCommand;
 use Bow\Console\Command\Generator\GenerateRouterResourceCommand;
 
 class Command extends AbstractCommand
@@ -41,7 +41,7 @@ class Command extends AbstractCommand
      */
     private array $commands = [
         "clear" => ClearCommand::class,
-        "seed:table" => SeederCommand::class,
+        "seed:file" => SeederCommand::class,
         "seed:all" => SeederCommand::class,
         "migration:migrate" => MigrationCommand::class,
         "migration:rollback" => MigrationCommand::class,
@@ -57,7 +57,7 @@ class Command extends AbstractCommand
         "add:validation" => GenerateValidationCommand::class,
         "add:event" => GenerateAppEventCommand::class,
         "add:listener" => GenerateEventListenerCommand::class,
-        "add:producer" => GenerateWorkerCommand::class,
+        "add:producer" => GenerateJobCommand::class,
         "add:command" => GenerateConsoleCommand::class,
         "add:message" => GenerateMessagingCommand::class,
         "run:console" => ReplCommand::class,
