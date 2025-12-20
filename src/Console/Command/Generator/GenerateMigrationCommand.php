@@ -61,6 +61,6 @@ class GenerateMigrationCommand extends AbstractCommand
         ]);
 
         // Print console information
-        echo Color::green('The migration file has been successfully created') . "\n";
+        echo Color::green("The migration {$this->setting->getMigrationDirectory()}/{$filename} file has been successfully created") . "\n";
     }
 }

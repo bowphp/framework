@@ -118,8 +118,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
     {
         $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'fake_seeder');
         $content = $generator->makeStubContent('seeder', [
-            'num' => 1,
-            'name' => "fakes"
+            'className' => "fakes"
         ]);
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);

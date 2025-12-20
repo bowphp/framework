@@ -141,7 +141,7 @@ class MigrationCommand extends AbstractCommand
         }
 
         foreach ($migrations as $file => $migration) {
-            if ($this->checkIfMigrationExist($migration)) {
+            if ($this->checkIfMigrationExists($migration)) {
                 continue;
             }
 
@@ -174,7 +174,7 @@ class MigrationCommand extends AbstractCommand
      * @return bool
      * @throws ConnectionException|QueryBuilderException
      */
-    private function checkIfMigrationExist(string $migration): bool
+    private function checkIfMigrationExists(string $migration): bool
     {
         $result = $this->getMigrationTable()
             ->where('migration', $migration)

@@ -20,22 +20,24 @@ class GenerateSeederCommand extends AbstractCommand
      */
     public function run(string $seeder): void
     {
-        $seeder = Str::plural($seeder);
+        $create_at = date("YmdHis");
+        $class_name = sprintf("%s%s", ucfirst(Str::camel($seeder)), $create_at);
+        $filename = sprintf("%s-%s", $create_at, $seeder);
 
         $generator = new Generator(
             $this->setting->getSeederDirectory(),
-            $seeder
+            $filename
         );
 
         if ($generator->fileExists()) {
-            echo "\033[0;31mThe seeder already exists.\033[00m";
+            echo "\033[0;31mThe seeder {$this->setting->getSeederDirectory()}/{$filename}.php already exists.\033[00m";
 
             exit(1);
         }
 
-        $generator->write('seeder', ['name' => $seeder]);
+        $generator->write('seeder', ['className' => $class_name]);
 
-        echo "\033[0;32mThe seeder has been created.\033[00m\n";
+        echo "\033[0;32mThe seeder {$this->setting->getSeederDirectory()}/{$filename}.php has been created.\033[00m\n";
 
         exit(0);
     }

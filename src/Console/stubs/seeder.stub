@@ -2,17 +2,12 @@
 
 use Faker\Factory as FakerFactory;
 
-/**
- * The {name} seeder
- *
- * @see https://fakerphp.github.io for all documentation
- */
-$faker = FakerFactory::create();
+class {className}
+{
+    public function run()
+    {
+        $faker = FakerFactory::create();
 
-$seed = [
-    'name' => $faker->name(),
-    'created_at' => date('Y-m-d H:i:s'),
-    'updated_at' => date('Y-m-d H:i:s')
-];
-
-return ['{name}' => $seed];
+        // Write the seeding here
+    }
+}
