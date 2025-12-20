@@ -21,6 +21,7 @@ class CustomCommandTest extends \PHPUnit\Framework\TestCase
     public function test_create_the_custom_command_from_static_calling()
     {
         Console::register("command", CustomCommand::class);
+
         static::$console->call("command");
 
         $content = $this->getFileContent();

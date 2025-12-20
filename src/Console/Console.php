@@ -238,8 +238,7 @@ class Console
         if (!in_array($command, array_keys($commands))) {
             // Try to execute the custom command
             if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
-                $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
-                exit(0);
+                return $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
             }
         }
 
@@ -251,14 +250,12 @@ class Console
 
         if (!$this->arg->getAction()) {
             if ($target == 'help') {
-                $this->help($command);
-                exit(0);
+                return $this->help($command);
             }
         }
 
         try {
-            call_user_func_array([$this, $command], [$this->arg->getRawCommand()]);
-            exit(0);
+            return call_user_func_array([$this, $command], [$this->arg->getRawCommand()]);
         } catch (Exception $e) {
             echo Color::red(sprintf("$command command failed with: %s\n", $e->getMessage()));
             exit(1);
