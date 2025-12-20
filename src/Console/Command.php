@@ -99,7 +99,7 @@ class Command extends AbstractCommand
             $this->throwFailsCommand("The command $command not found !");
         }
 
-        if (!preg_match('/^(migration)/', $command)) {
+        if (!preg_match('/^(migration|seed)/', $command)) {
             $method = "run";
         } else {
             $method = $action;

@@ -74,7 +74,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey('city', $location);
         $this->assertArrayHasKey('tel', $location);
         $this->assertArrayHasKey('state', $location);
-        
+
         $state = $this->dot['code.location.state'];
         $this->assertTrue(is_array($state));
         $this->assertArrayHasKey('code', $state);
@@ -207,7 +207,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot = new Arraydotify();
         $dot['app.name'] = 'MyApp';
         $this->assertEquals('MyApp', $dot['app.name']);
-        
+
         $array = $dot->toArray();
         $this->assertArrayHasKey('app', $array);
         $this->assertArrayHasKey('name', $array['app']);
@@ -219,7 +219,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot = new Arraydotify();
         $dot['level1.level2.level3.level4.value'] = 'deep';
         $this->assertEquals('deep', $dot['level1.level2.level3.level4.value']);
-        
+
         $this->assertTrue($dot->has('level1'));
         $this->assertTrue($dot->has('level1.level2'));
         $this->assertTrue($dot->has('level1.level2.level3'));
@@ -230,7 +230,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
     {
         $dot = new Arraydotify(['data' => []]);
         $dot['data.items'] = ['apple', 'banana', 'orange'];
-        
+
         $items = $dot['data.items'];
         $this->assertIsArray($items);
         $this->assertCount(3, $items);
@@ -252,7 +252,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
                 'app' => ['name' => 'OldApp']
             ]
         ]);
-        
+
         $dot['config.app'] = 'NewValue';
         $this->assertEquals('NewValue', $dot['config.app']);
         $this->assertFalse($dot->has('config.app.name'));
@@ -264,11 +264,11 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot['user.name'] = 'John';
         $dot['user.email'] = 'john@example.com';
         $dot['user.age'] = 30;
-        
+
         $this->assertEquals('John', $dot['user.name']);
         $this->assertEquals('john@example.com', $dot['user.email']);
         $this->assertEquals(30, $dot['user.age']);
-        
+
         $user = $dot['user'];
         $this->assertIsArray($user);
         $this->assertCount(3, $user);
@@ -280,7 +280,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot['items.0'] = 'first';
         $dot['items.1'] = 'second';
         $dot['items.2'] = 'third';
-        
+
         $this->assertEquals('first', $dot['items.0']);
         $this->assertEquals('second', $dot['items.1']);
         $this->assertEquals('third', $dot['items.2']);
@@ -291,7 +291,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot = new Arraydotify();
         $dot['settings.enabled'] = true;
         $dot['settings.disabled'] = false;
-        
+
         $this->assertTrue($dot['settings.enabled']);
         $this->assertFalse($dot['settings.disabled']);
     }
@@ -302,7 +302,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot['numbers.integer'] = 42;
         $dot['numbers.float'] = 3.14;
         $dot['numbers.negative'] = -10;
-        
+
         $this->assertSame(42, $dot['numbers.integer']);
         $this->assertSame(3.14, $dot['numbers.float']);
         $this->assertSame(-10, $dot['numbers.negative']);
@@ -316,9 +316,9 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
                 'version' => '1.0'
             ]
         ]);
-        
+
         $dot['config.debug'] = true;
-        
+
         $this->assertEquals('MyApp', $dot['config.app']);
         $this->assertEquals('1.0', $dot['config.version']);
         $this->assertTrue($dot['config.debug']);
@@ -328,11 +328,11 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
     {
         $dot = new Arraydotify();
         $dot['new.path.value'] = 'test';
-        
+
         // Check dotified storage
         $dotified = $dot->getDotified();
         $this->assertArrayHasKey('new.path.value', $dotified);
-        
+
         // Check original structure
         $array = $dot->toArray();
         $this->assertEquals('test', $array['new']['path']['value']);
@@ -351,7 +351,7 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot = new Arraydotify();
         $dot['zero.int'] = 0;
         $dot['zero.float'] = 0.0;
-        
+
         $this->assertSame(0, $dot['zero.int']);
         $this->assertSame(0.0, $dot['zero.float']);
     }
@@ -362,11 +362,11 @@ class ArraydotifyTest extends \PHPUnit\Framework\TestCase
         $dot->set('api.endpoints.users.list', '/api/v1/users');
         $dot->set('api.endpoints.users.create', '/api/v1/users/create');
         $dot->set('api.endpoints.posts.list', '/api/v1/posts');
-        
+
         $this->assertEquals('/api/v1/users', $dot->get('api.endpoints.users.list'));
         $this->assertEquals('/api/v1/users/create', $dot->get('api.endpoints.users.create'));
         $this->assertEquals('/api/v1/posts', $dot->get('api.endpoints.posts.list'));
-        
+
         $endpoints = $dot['api.endpoints'];
         $this->assertIsArray($endpoints);
         $this->assertArrayHasKey('users', $endpoints);

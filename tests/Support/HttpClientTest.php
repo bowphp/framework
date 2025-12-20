@@ -29,7 +29,7 @@ class HttpClientTest extends TestCase
     {
         $http = new HttpClient();
         $http->addHeaders(["X-Api-Key" => "Fake-Key"]);
-        
+
         $response = $http->get("https://www.google.com");
 
         $this->assertEquals(200, $response->statusCode());
@@ -39,7 +39,7 @@ class HttpClientTest extends TestCase
     {
         $http = new HttpClient("https://www.google.com");
         $http->addHeaders(["X-Api-Key" => "Fake-Key"]);
-        
+
         $response = $http->get("/the-fake-url");
 
         $this->assertEquals(404, $response->statusCode());
@@ -71,7 +71,7 @@ class HttpClientTest extends TestCase
     {
         $http = new HttpClient();
         $http->addHeaders(['Content-Type' => 'application/json']);
-        
+
         $response = $http->post("https://httpbin.org/post", [
             'name' => 'test',
             'value' => 'example'

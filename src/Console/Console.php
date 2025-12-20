@@ -171,13 +171,12 @@ class Console
     /**
      * Launch Bow task runner
      *
-     * @return mixed
      * @throws
      */
-    public function run(): mixed
+    public function run()
     {
         if ($this->booted) {
-            return false;
+            exit(0);
         }
 
         // Boot kernel and console
@@ -207,7 +206,8 @@ class Console
         }
 
         try {
-            return $this->call($command);
+            $this->call($command);
+            exit(0);
         } catch (Exception $exception) {
             echo Color::red($exception->getMessage());
             echo Color::green($exception->getTraceAsString());
@@ -238,7 +238,8 @@ class Console
         if (!in_array($command, array_keys($commands))) {
             // Try to execute the custom command
             if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
-                return $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
+                $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
+                exit(0);
             }
         }
 
@@ -256,7 +257,8 @@ class Console
         }
 
         try {
-            return call_user_func_array([$this, $command], [$this->arg->getRawCommand()]);
+            call_user_func_array([$this, $command], [$this->arg->getRawCommand()]);
+            exit(0);
         } catch (Exception $e) {
             echo Color::red(sprintf("$command command failed with: %s\n", $e->getMessage()));
             exit(1);
