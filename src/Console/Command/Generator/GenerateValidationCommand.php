@@ -26,7 +26,7 @@ class GenerateValidationCommand extends AbstractCommand
         if ($generator->fileExists()) {
             echo Color::red('The validation already exists.');
 
-            exit(0);
+            exit(1);
         }
 
         $generator->write('validation', [
