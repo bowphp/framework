@@ -8,7 +8,7 @@ use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\Barry\Model;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\MailConfiguration;
-use Bow\Messaging\MessagingQueueProducer;
+use Bow\Messaging\MessagingQueueJob;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -55,10 +55,10 @@ class MessagingQueueTest extends TestCase
 
     public function test_can_send_message_to_queue(): void
     {
-        $producer = new MessagingQueueProducer($this->context, $this->message);
+        $producer = new MessagingQueueJob($this->context, $this->message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
+        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
 
         // Push to queue and verify
         static::$connection->setConnection("beanstalkd")->getAdapter()->push($producer);
@@ -69,10 +69,10 @@ class MessagingQueueTest extends TestCase
     public function test_can_send_message_to_specific_queue(): void
     {
         $queue = 'high-priority';
-        $producer = new MessagingQueueProducer($this->context, $this->message);
+        $producer = new MessagingQueueJob($this->context, $this->message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
+        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
 
         // Push to specific queue and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
@@ -85,10 +85,10 @@ class MessagingQueueTest extends TestCase
     public function test_can_send_message_with_delay(): void
     {
         $delay = 3600;
-        $producer = new MessagingQueueProducer($this->context, $this->message);
+        $producer = new MessagingQueueJob($this->context, $this->message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
+        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
 
         // Push to queue and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
@@ -102,10 +102,10 @@ class MessagingQueueTest extends TestCase
     {
         $delay = 3600;
         $queue = 'delayed-notifications';
-        $producer = new MessagingQueueProducer($this->context, $this->message);
+        $producer = new MessagingQueueJob($this->context, $this->message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueProducer::class, $producer);
+        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
 
         // Push to specific queue with delay and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();

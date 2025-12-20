@@ -6,7 +6,7 @@ use Bow\Database\Barry\Model;
 use Bow\Queue\QueueJob;
 use Throwable;
 
-class MessagingQueueProducer extends QueueJob
+class MessagingQueueJob extends QueueJob
 {
     /**
      * The message bag
@@ -16,7 +16,7 @@ class MessagingQueueProducer extends QueueJob
     private array $bags = [];
 
     /**
-     * MessagingQueueProducer constructor
+     * MessagingQueueJob constructor
      *
      * @param Model     $context
      * @param Messaging $message

@@ -53,7 +53,7 @@ class HttpClient
     public function __construct(?string $base_url = null)
     {
         if (!function_exists('curl_init')) {
-            throw new BadFunctionCallException('cURL php is require.');
+            throw new BadFunctionCallException('cURL extension is required.');
         }
 
         if (!is_null($base_url)) {
@@ -73,7 +73,7 @@ class HttpClient
     }
 
     /**
-     * Make get requester
+     * Make GET request
      *
      * @param  string $url
      * @param  array  $data
@@ -97,7 +97,7 @@ class HttpClient
     }
 
     /**
-     * Reset always connection
+     * Initialize connection with URL
      *
      * @param  string $url
      * @return void
@@ -112,7 +112,7 @@ class HttpClient
     }
 
     /**
-     * Set Curl CURLOPT_RETURNTRANSFER option
+     * Apply common cURL options
      *
      * @return void
      */
@@ -161,7 +161,7 @@ class HttpClient
     }
 
     /**
-     * Make post requester
+     * Make POST request
      *
      * @param  string $url
      * @param  array  $data
@@ -214,7 +214,7 @@ class HttpClient
     }
 
     /**
-     * Make put requester
+     * Make PUT request
      *
      * @param  string $url
      * @param  array  $data
@@ -227,7 +227,7 @@ class HttpClient
         $this->addFields($data);
         $this->applyCommonOptions();
 
-        curl_setopt($this->ch, CURLOPT_PUT, true);
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT");
 
         $content = $this->execute();
 
@@ -235,7 +235,7 @@ class HttpClient
     }
 
     /**
-     * Make put requester
+     * Make DELETE request
      *
      * @param  string $url
      * @param  array  $data
@@ -256,7 +256,7 @@ class HttpClient
     }
 
     /**
-     * Attach new file
+     * Attach file(s) to the request
      *
      * @param  string|array $attach
      * @return HttpClient
@@ -269,7 +269,7 @@ class HttpClient
     }
 
     /**
-     * Set the user agent
+     * Set the User-Agent header
      *
      * @param  string $user_agent
      * @return HttpClient
@@ -282,7 +282,7 @@ class HttpClient
     }
 
     /**
-     * Set the json accept prop to format the sent content in json
+     * Configure client to accept and send JSON data
      *
      * @return HttpClient
      */
@@ -296,7 +296,7 @@ class HttpClient
     }
 
     /**
-     * Add additional header
+     * Add custom HTTP headers
      *
      * @param  array $headers
      * @return HttpClient
