@@ -57,7 +57,7 @@ class Command extends AbstractCommand
         "add:validation" => GenerateValidationCommand::class,
         "add:event" => GenerateAppEventCommand::class,
         "add:listener" => GenerateEventListenerCommand::class,
-        "add:producer" => GenerateJobCommand::class,
+        "add:job" => GenerateJobCommand::class,
         "add:command" => GenerateConsoleCommand::class,
         "add:message" => GenerateMessagingCommand::class,
         "run:console" => ReplCommand::class,

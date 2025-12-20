@@ -72,40 +72,46 @@ class Console
      * @var array
      */
     private static array $registers = [];
+
     /**
      * The console instance
      *
      * @var ?Console
      */
     private static ?Console $instance = null;
+
     /**
      * The Setting instance
      *
      * @var Setting
      */
     private Setting $setting;
+
     /**
-     * The COMMAND instance
+     * The Command instance
      *
      * @var Command
      */
     private Command $command;
+
     /**
      * The Loader instance
      *
      * @var Loader
      */
     private Loader $kernel;
+
     /**
-     * Defines if console booted
+     * Define if console booted
      *
      * @var bool
      */
     private bool $booted = false;
+
     /**
      * The Argument instance
      *
-     * @return Argument
+     * @var Argument
      */
     private Argument $arg;
 
@@ -487,7 +493,7 @@ class Console
     private function getVersion(): void
     {
         $version = <<<USAGE
-Console running for BowPHP: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
+Console running for Bow Framework: \033[0;32m%s\033[00m - PHP Version: \033[0;32m%s\033[0;33m
 
 USAGE;
         echo sprintf($version, Console::VERSION, PHP_VERSION);
@@ -511,16 +517,16 @@ Bow task runner usage: php bow command:action [name] --option
 
 \033[0;32mCOMMAND\033[00m:
 
- \033[0;33mhelp\033[00m display command helper
+ \033[0;33mhelp\033[00m Display command helper
 
- \033[0;32mGENERATE\033[00m create a new app key and resources
+ \033[0;32mGENERATE\033[00m Create new app key and resources
    \033[0;33mgenerate:resource\033[00m             Create new REST controller
-   \033[0;33mgenerate:session-table\033[00m        For generate the preset table for session
-   \033[0;33mgenerate:cache-table\033[00m          For generate the preset table for cache
-   \033[0;33mgenerate:queue-table\033[00m          For generate the preset table for queue
-   \033[0;33mgenerate:notification-table\033[00m    For generate the preset table for notification
+   \033[0;33mgenerate:session-table\033[00m        Generate preset table for session
+   \033[0;33mgenerate:cache-table\033[00m          Generate preset table for cache
+   \033[0;33mgenerate:queue-table\033[00m          Generate preset table for queue
+   \033[0;33mgenerate:notification-table\033[00m   Generate preset table for notification
    \033[0;33mgenerate:key\033[00m                  Create new app key
-   \033[0;33mflush:worker\033[00m                   Flush all queues
+   \033[0;33mflush:worker\033[00m                  Flush all queues
 
  \033[0;32mADD\033[00m Create a user class
    \033[0;33madd:middleware\033[00m      Create new middleware
@@ -535,30 +541,30 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:event\033[00m           Create a new event
    \033[0;33madd:listener\033[00m        Create a new event listener
    \033[0;33madd:job\033[00m             Create a new job
-   \033[0;33madd:command\033[00m         Create a new bow console command
-   \033[0;33madd:message\033[00m         Create a new bow messaging
+   \033[0;33madd:command\033[00m         Create a new console command
+   \033[0;33madd:message\033[00m         Create a new messaging handler
 
- \033[0;32mMIGRATION\033[00m apply a migration in user model
-   \033[0;33mmigration:migrate\033[00m   Make migration
-   \033[0;33mmigration:reset\033[00m     Reset all migration
+ \033[0;32mMIGRATION\033[00m Apply migration to database
+   \033[0;33mmigration:migrate\033[00m   Run migrations
+   \033[0;33mmigration:reset\033[00m     Reset all migrations
    \033[0;33mmigration:rollback\033[00m  Rollback to previous migration
    \033[0;33mmigrate\033[00m             Alias of \033[0;33mmigration:migrate\033[00m
 
- \033[0;32mCLEAR\033[00m for clear cache information
-   \033[0;33mclear:view\033[00m          Clear view cached information
-   \033[0;33mclear:cache\033[00m         Clear cache information
-   \033[0;33mclear:session\033[00m       Clear session cache information
-   \033[0;33mclear:log\033[00m           Clear logs cache information
-   \033[0;33mclear:all\033[00m           Clear all cache information
+ \033[0;32mCLEAR\033[00m Clear cache information
+   \033[0;33mclear:view\033[00m          Clear view cached files
+   \033[0;33mclear:cache\033[00m         Clear cache files
+   \033[0;33mclear:session\033[00m       Clear session cache files
+   \033[0;33mclear:log\033[00m           Clear log files
+   \033[0;33mclear:all\033[00m           Clear all cache files
 
- \033[0;32mSEED\033[00m Make seeding
-   \033[0;33mseed:file\033[00m [class_name] Make seeding for one file
-   \033[0;33mseed:all\033[00m              Make seeding for all
+ \033[0;32mSEED\033[00m Run database seeders
+   \033[0;33mseed:file\033[00m [class_name] Run specific seeder file
+   \033[0;33mseed:all\033[00m              Run all seeders
  
- \033[0;32mRUN\033[00m Launch process
-   \033[0;33mrun:console\033[00m show psysh php REPL for debug you code.
-   \033[0;33mrun:server\033[00m  run a local web server.
-   \033[0;33mrun:worker\033[00m  run a consumer/worker for handle queue.
+ \033[0;32mRUN\033[00m Launch development tools
+   \033[0;33mrun:console\033[00m Show PsySH PHP REPL for debugging code
+   \033[0;33mrun:server\033[00m  Start local development server
+   \033[0;33mrun:worker\033[00m  Start consumer/worker to handle queue jobs
 
 USAGE;
             echo $usage;
@@ -577,20 +583,20 @@ USAGE;
 
     * you can use --no-plain --with-model in same command
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  For create a new controller
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           For create a new middleware
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name         For create a new configuration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              For create a new service
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:exception name            For create a new exception
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       For create a new model
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           For create a new validation
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    For create a new seeder
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            For create a new migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                For create a new event listener
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:job name                  For create a new queue job
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              For create a new bow console command
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:message name              For create a new bow messaging
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      For display this
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  Create a new controller
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           Create a new middleware
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name        Create a new configuration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              Create a new service
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:exception name            Create a new exception
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       Create a new model
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           Create a new validation
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    Create a new seeder
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            Create a new migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                Create a new event listener
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:job name                  Create a new queue job
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              Create a new console command
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:message name              Create a new messaging handler
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      Display this help
 
 U;
 
@@ -602,13 +608,13 @@ U;
     [option]
     --model=[model_name] Define the usable model
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   For create a new REST controller
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:session-table            For generate the table for session
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:cache-table              For generate the table for cache
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:queue-table              For generate the table for queue
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:notification-table       For generate the table for notification
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      For generate a new APP KEY
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     For display this
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   Create a new REST controller
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:session-table            Generate the table for session
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:cache-table              Generate the table for cache
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:queue-table              Generate the table for queue
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:notification-table       Generate the table for notification
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      Generate a new APP KEY
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     Display this help
     \033[0;33mgen\033[00m                                                           Alias of \033[0;33mgenerate\033[00m
 
 U;
@@ -617,11 +623,11 @@ U;
                 echo <<<U
 \n\033[0;32mmigration\033[00m apply a migration in user model\n
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:migrate   Make migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:reset     Reset all migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:migrate   Run migrations
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:reset     Reset all migrations
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:rollback  Rollback to previous migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate             Alias of \033[0;33mmigration:migrate\033[00m
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration help      For display this
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration help      Display this help
 
 U;
                 break;
@@ -634,9 +640,9 @@ U;
     run:console [--include=filename.php] [--prompt=prompt_name]
     run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
 
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console\033[00m          Show psysh php REPL for debug you code
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server\033[00m [option]  Start local development server
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker\033[00m [option]  Start workerr for handle the queue jobs
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console          Show PsySH PHP REPL for debugging code
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server [option]  Start local development server
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker [option]  Start worker to handle queue jobs
 
 U; // phpcs:enable
                 break;
@@ -664,7 +670,7 @@ U;
 
             case 'flush':
                 echo <<<U
-\n\033[0;32mMFlush all queues content\033[00m\n
+\n\033[0;32mFlush all queues content\033[00m\n
     [option]
     flush:worker [connection] [--queue=queue_name]
 

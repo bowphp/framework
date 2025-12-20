@@ -23,7 +23,7 @@ trait CanSendMessage
      */
     public function setMessageQueue(Messaging $message): void
     {
-        $producer = new MessagingQueueProducer($this, $message);
+        $producer = new MessagingQueueJob($this, $message);
 
         queue($producer);
     }
@@ -37,7 +37,7 @@ trait CanSendMessage
      */
     public function sendMessageQueueOn(string $queue, Messaging $message): void
     {
-        $producer = new MessagingQueueProducer($this, $message);
+        $producer = new MessagingQueueJob($this, $message);
 
         $producer->setQueue($queue);
 
@@ -53,7 +53,7 @@ trait CanSendMessage
      */
     public function sendMessageLater(int $delay, Messaging $message): void
     {
-        $producer = new MessagingQueueProducer($this, $message);
+        $producer = new MessagingQueueJob($this, $message);
 
         $producer->setDelay($delay);
 
@@ -70,7 +70,7 @@ trait CanSendMessage
      */
     public function sendMessageLaterOn(int $delay, string $queue, Messaging $message): void
     {
-        $producer = new MessagingQueueProducer($this, $message);
+        $producer = new MessagingQueueJob($this, $message);
 
         $producer->setQueue($queue);
         $producer->setDelay($delay);
