@@ -12,9 +12,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
 
     public function setUp(): void
     {
-        Env::configure(__DIR__ . '/stubs/env.json');
-        $this->config = ConfigurationLoader::configure(__DIR__ . '/stubs/config');
-        $this->config->boot();
+        $this->config = TestingConfiguration::getConfig(__DIR__ . '/stubs/config');
     }
 
     public function test_instance_of_loader()

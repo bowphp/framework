@@ -74,16 +74,17 @@ abstract class Migration
      * Drop table action
      *
      * @param  string $table
+     * @param  bool   $displayInfo
      * @return Migration
      * @throws MigrationException
      */
-    final public function drop(string $table): Migration
+    final public function drop(string $table, bool $displayInfo = true): Migration
     {
         $table = $this->getTablePrefixed($table);
 
         $sql = sprintf('DROP TABLE %s;', $table);
 
-        return $this->executeSqlQuery($sql);
+        return $this->executeSqlQuery($sql, $displayInfo);
     }
 
     /**
@@ -104,7 +105,7 @@ abstract class Migration
      * @return Migration
      * @throws MigrationException
      */
-    private function executeSqlQuery(string $sql): Migration
+    private function executeSqlQuery(string $sql, bool $displayInfo = true): Migration
     {
         try {
             Database::statement($sql);
@@ -113,7 +114,9 @@ abstract class Migration
             throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
         }
 
-        echo sprintf("%s %s\n", Color::green("▶"), $sql);
+        if ($displayInfo) {
+            echo sprintf("%s %s\n", Color::green("▶"), $sql);
+        }
 
         return $this;
     }
@@ -122,10 +125,11 @@ abstract class Migration
      * Drop table if he exists action
      *
      * @param  string $table
+     * @param  bool   $displayInfo
      * @return Migration
      * @throws MigrationException
      */
-    final public function dropIfExists(string $table): Migration
+    final public function dropIfExists(string $table, bool $displayInfo = true): Migration
     {
         $table = $this->getTablePrefixed($table);
 
@@ -135,7 +139,7 @@ abstract class Migration
             $sql = sprintf('DROP TABLE IF EXISTS %s;', $table);
         }
 
-        return $this->executeSqlQuery($sql);
+        return $this->executeSqlQuery($sql, $displayInfo);
     }
 
     /**
@@ -143,19 +147,17 @@ abstract class Migration
      *
      * @param  string   $table
      * @param  callable $cb
+     * @param  bool     $displayInfo
      * @return Migration
      * @throws MigrationException
      */
-    final public function create(string $table, callable $cb): Migration
+    final public function create(string $table, callable $cb, bool $displayInfo = true): Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        call_user_func_array(
-            $cb,
-            [
+        call_user_func_array($cb, [
             $generator = new Table($table, $this->adapter->getName(), 'create')
-            ]
-        );
+        ]);
 
         if ($this->adapter->getName() == 'mysql') {
             $engine = sprintf(' ENGINE=%s', strtoupper($generator->getEngine()));
@@ -166,19 +168,19 @@ abstract class Migration
         if ($this->adapter->getName() !== 'pgsql') {
             $sql = sprintf("CREATE TABLE `%s` (%s)%s;", $table, $generator->make(), $engine);
 
-            return $this->executeSqlQuery($sql);
+            return $this->executeSqlQuery($sql, $displayInfo);
         }
 
         foreach ($generator->getCustomTypeQueries() as $sql) {
             try {
-                $this->executeSqlQuery($sql);
+                $this->executeSqlQuery($sql, $displayInfo);
             } catch (Exception $exception) {
                 echo sprintf("%s\n", Color::yellow("Warning: " . $exception->getMessage()));
             }
         }
 
         $sql = sprintf("CREATE TABLE %s (%s)%s;", $table, $generator->make(), $engine);
-        return $this->executeSqlQuery($sql);
+        return $this->executeSqlQuery($sql, $displayInfo);
     }
 
     /**
