@@ -290,7 +290,7 @@ class HttpClient
     {
         $this->accept_json = true;
 
-        $this->addHeaders(["Content-Type" => "application/json"]);
+        $this->withHeaders(["Content-Type" => "application/json"]);
 
         return $this;
     }
@@ -301,7 +301,7 @@ class HttpClient
      * @param  array $headers
      * @return HttpClient
      */
-    public function addHeaders(array $headers): HttpClient
+    public function withHeaders(array $headers): HttpClient
     {
         foreach ($headers as $key => $value) {
             if (!in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers))) {

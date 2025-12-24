@@ -28,7 +28,7 @@ class HttpClientTest extends TestCase
     public function test_get_method_with_custom_headers()
     {
         $http = new HttpClient();
-        $http->addHeaders(["X-Api-Key" => "Fake-Key"]);
+        $http->withHeaders(["X-Api-Key" => "Fake-Key"]);
 
         $response = $http->get("https://www.google.com");
 
@@ -38,7 +38,7 @@ class HttpClientTest extends TestCase
     public function test_get_method_fails_with_non_existent_path()
     {
         $http = new HttpClient("https://www.google.com");
-        $http->addHeaders(["X-Api-Key" => "Fake-Key"]);
+        $http->withHeaders(["X-Api-Key" => "Fake-Key"]);
 
         $response = $http->get("/the-fake-url");
 
@@ -70,7 +70,7 @@ class HttpClientTest extends TestCase
     public function test_post_method_with_json_data()
     {
         $http = new HttpClient();
-        $http->addHeaders(['Content-Type' => 'application/json']);
+        $http->withHeaders(['Content-Type' => 'application/json']);
 
         $response = $http->post("https://httpbin.org/post", [
             'name' => 'test',
@@ -109,7 +109,7 @@ class HttpClientTest extends TestCase
     public function test_add_multiple_headers()
     {
         $http = new HttpClient();
-        $http->addHeaders([
+        $http->withHeaders([
             "X-Api-Key" => "test-key",
             "X-Custom-Header" => "custom-value"
         ]);
@@ -123,7 +123,7 @@ class HttpClientTest extends TestCase
     public function test_user_agent_header()
     {
         $http = new HttpClient();
-        $http->addHeaders(["User-Agent" => "BowFramework/1.0"]);
+        $http->withHeaders(["User-Agent" => "BowFramework/1.0"]);
 
         $response = $http->get("https://httpbin.org/user-agent");
 

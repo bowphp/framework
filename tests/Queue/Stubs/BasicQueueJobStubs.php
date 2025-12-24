@@ -4,16 +4,15 @@ namespace Bow\Tests\Queue\Stubs;
 
 use Bow\Queue\QueueJob;
 
-class MixedProducerStub extends QueueJob
+class BasicQueueJobStubs extends QueueJob
 {
     public function __construct(
-        private ServiceStub $service,
         private string $connection
     ) {
     }
 
     public function process(): void
     {
-        $this->service->fire($this->connection);
+        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$this->connection}_producer.txt", BasicQueueJobStubs::class);
     }
 }

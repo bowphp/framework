@@ -57,7 +57,7 @@ class ServerAccessControl
             $excepted = '*';
         }
 
-        $this->response->addHeader($allow, $excepted);
+        $this->response->withHeader($allow, $excepted);
 
         return $this;
     }

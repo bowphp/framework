@@ -64,10 +64,10 @@ class BeanstalkdAdapter extends QueueAdapter
      * Queue a job
      *
      * @param  QueueJob $producer
-     * @return void
+     * @return bool
      * @throws ErrorException
      */
-    public function push(QueueJob $producer): void
+    public function push(QueueJob $producer): bool
     {
         $queues = (array) cache("beanstalkd:queues");
 
@@ -85,6 +85,8 @@ class BeanstalkdAdapter extends QueueAdapter
             $producer->getDelay(),
             $producer->getRetry()
         );
+
+        return true;
     }
 
     /**
@@ -123,10 +125,9 @@ class BeanstalkdAdapter extends QueueAdapter
             $payload = $job->getData();
             $producer = $this->unserializeProducer($payload);
             call_user_func([$producer, "process"]);
-            $this->sleep(2);
             $this->pheanstalk->touch($job);
-            $this->sleep(2);
             $this->pheanstalk->delete($job);
+            $this->updateProcessingTimeout();
         } catch (Throwable $e) {
             // Write the error log
             error_log($e->getMessage());

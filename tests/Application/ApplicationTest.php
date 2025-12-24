@@ -66,7 +66,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request = Mockery::mock(Request::class);
 
         // Response mock method
-        $response->allows()->addHeader('X-Powered-By', 'Bow Framework');
+        $response->allows()->withHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status(404);
 
         // Request mock method
@@ -99,7 +99,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request = Mockery::mock(Request::class);
 
         // Response mock method
-        $response->allows()->addHeader('X-Powered-By', 'Bow Framework');
+        $response->allows()->withHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status(200);
         $response->allows()->send('work', 200);
 
@@ -133,7 +133,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request = Mockery::mock(Request::class);
 
         // Response mock method
-        $response->allows()->addHeader('X-Powered-By', 'Bow Framework');
+        $response->allows()->withHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status(404);
 
         // Request mock method

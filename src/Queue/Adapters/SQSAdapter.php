@@ -48,31 +48,33 @@ class SQSAdapter extends QueueAdapter
     /**
      * Push a job onto the queue.
      *
-     * @param  QueueJob $producer
-     * @return void
+     * @param  QueueJob $job
+     * @return bool
      */
-    public function push(QueueJob $producer): void
+    public function push(QueueJob $job): bool
     {
         $params = [
-            'DelaySeconds' => $producer->getDelay(),
+            'DelaySeconds' => $job->getDelay(),
             'MessageAttributes' => [
                 "Title" => [
                     'DataType' => "String",
-                    'StringValue' => get_class($producer)
+                    'StringValue' => get_class($job)
                 ],
                 "Id" => [
                     "DataType" => "String",
                     "StringValue" => $this->generateId(),
                 ]
             ],
-            'MessageBody' => base64_encode($this->serializeProducer($producer)),
+            'MessageBody' => base64_encode($this->serializeProducer($job)),
             'QueueUrl' => $this->config["url"]
         ];
 
         try {
             $this->sqs->sendMessage($params);
+            return true;
         } catch (AwsException $e) {
             error_log($e->getMessage());
+            return false;
         }
     }
 
@@ -121,9 +123,9 @@ class SQSAdapter extends QueueAdapter
                 return;
             }
             $message = $result->get('Messages')[0];
-            $producer = $this->unserializeProducer(base64_decode($message["Body"]));
-            $delay = $producer->getDelay();
-            call_user_func([$producer, "process"]);
+            $job = $this->unserializeProducer(base64_decode($message["Body"]));
+            $delay = $job->getDelay();
+            call_user_func([$job, "process"]);
             $result = $this->sqs->deleteMessage([
                 'QueueUrl' => $this->config["url"],
                 'ReceiptHandle' => $message['ReceiptHandle']
@@ -140,18 +142,18 @@ class SQSAdapter extends QueueAdapter
 
             cache("job:failed:" . $message["ReceiptHandle"], $message["Body"]);
 
-            // Check if producer has been loaded
-            if (!isset($producer)) {
+            // Check if job has been loaded
+            if (!isset($job)) {
                 $this->sleep(1);
                 return;
             }
 
-            // Execute the onException method for notify the producer
+            // Execute the onException method for notify the job
             // and let developer decide if the job should be deleted
-            $producer->onException($e);
+            $job->onException($e);
 
             // Check if the job should be deleted
-            if ($producer->jobShouldBeDelete()) {
+            if ($job->jobShouldBeDelete()) {
                 $this->sqs->deleteMessage([
                     'QueueUrl' => $this->config["url"],
                     'ReceiptHandle' => $message['ReceiptHandle']
@@ -160,7 +162,7 @@ class SQSAdapter extends QueueAdapter
                 $this->sqs->changeMessageVisibilityBatch([
                     'QueueUrl' => $this->config["url"],
                     'Entries' => [
-                        'Id' => $producer->getId(),
+                        'Id' => $job->getId(),
                         'ReceiptHandle' => $message['ReceiptHandle'],
                         'VisibilityTimeout' => $delay
                     ],

@@ -142,7 +142,7 @@ class SmtpAdapter implements MailAdapterInterface
         // Add DKIM signature if enabled
         if ($this->dkimSigner !== null) {
             $dkimHeader = $this->dkimSigner->sign($envelop);
-            $envelop->addHeader('DKIM-Signature', $dkimHeader);
+            $envelop->withHeader('DKIM-Signature', $dkimHeader);
         }
 
         $this->connection();

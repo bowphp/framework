@@ -82,7 +82,7 @@ class TestCase extends PHPUnitTestCase
     {
         $http = new HttpClient($this->getBaseUrl());
 
-        $http->addHeaders($this->headers);
+        $http->withHeaders($this->headers);
 
         return new Response($http->get($url, $param));
     }
@@ -113,7 +113,7 @@ class TestCase extends PHPUnitTestCase
             $http->addAttach($this->attach);
         }
 
-        $http->addHeaders($this->headers);
+        $http->withHeaders($this->headers);
 
         return new Response($http->post($url, $param));
     }
@@ -150,7 +150,7 @@ class TestCase extends PHPUnitTestCase
     {
         $http = new HttpClient($this->getBaseUrl());
 
-        $http->addHeaders($this->headers);
+        $http->withHeaders($this->headers);
 
         return new Response($http->put($url, $param));
     }

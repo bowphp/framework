@@ -14,8 +14,8 @@ use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Queue\Stubs\BasicProducerStubs;
-use Bow\Tests\Queue\Stubs\ModelProducerStub;
+use Bow\Tests\Queue\Stubs\BasicQueueJobStubs;
+use Bow\Tests\Queue\Stubs\ModelJobStub;
 use Bow\Tests\Queue\Stubs\PetModelStub;
 use PHPUnit\Framework\TestCase;
 
@@ -58,9 +58,10 @@ class QueueTest extends TestCase
      * @param string $connection
      * @return void
      */
-    public function test_instance_of_adapter($connection)
+    public function test_instance_of_adapter(string $connection): void
     {
         $adapter = static::$connection->setConnection($connection)->getAdapter();
+        $this->assertNotNull($adapter);
 
         if ($connection == "beanstalkd") {
             $this->assertInstanceOf(BeanstalkdAdapter::class, $adapter);
@@ -81,19 +82,27 @@ class QueueTest extends TestCase
      * @param string $connection
      * @return void
      */
-    public function test_push_service_adapter(string $connection)
+    public function test_push_service_adapter(string $connection): void
     {
         $adapter = static::$connection->setConnection($connection)->getAdapter();
         $filename = TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt";
 
-        $adapter->push(new BasicProducerStubs($connection));
+        // Clean up before test
+        @unlink($filename);
+
+        $producer = new BasicQueueJobStubs($connection);
+        $this->assertInstanceOf(BasicQueueJobStubs::class, $producer);
+
+        $result = $adapter->push($producer);
+        $this->assertTrue($result, "Failed to push producer to {$connection} adapter");
+
         $adapter->setQueue("queue_{$connection}");
         $adapter->setTries(3);
         $adapter->setSleep(5);
         $adapter->run();
 
-        $this->assertTrue(file_exists($filename));
-        $this->assertEquals(file_get_contents($filename), BasicProducerStubs::class);
+        $this->assertFileExists($filename, "Producer file was not created for {$connection}");
+        $this->assertEquals(BasicQueueJobStubs::class, file_get_contents($filename));
 
         @unlink($filename);
     }
@@ -103,24 +112,124 @@ class QueueTest extends TestCase
      * @param string $connection
      * @return void
      */
-    public function test_push_service_adapter_with_model(string $connection)
+    public function test_push_service_adapter_with_model(string $connection): void
     {
         $adapter = static::$connection->setConnection($connection)->getAdapter();
-        $pet = new PetModelStub(["name" => "Filou"]);
-        $producer = new ModelProducerStub($pet, $connection);
+        $filename = TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_queue_pet_model_stub.txt";
 
-        $adapter->push($producer);
+        // Clean up before test
+        @unlink($filename);
+        @unlink(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt");
+
+        $pet = new PetModelStub(["name" => "Filou"]);
+        $this->assertInstanceOf(PetModelStub::class, $pet);
+        $this->assertEquals("Filou", $pet->name);
+
+        $producer = new ModelJobStub($pet, $connection);
+        $this->assertInstanceOf(ModelJobStub::class, $producer);
+
+        $result = $adapter->push($producer);
+        $this->assertTrue($result, "Failed to push model producer to {$connection} adapter");
+
         $adapter->run();
 
-        $this->assertTrue(file_exists(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_queue_pet_model_stub.txt"));
-        $content = file_get_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_queue_pet_model_stub.txt");
+        $this->assertFileExists($filename, "Model producer file was not created for {$connection}");
+        $content = file_get_contents($filename);
+        $this->assertNotEmpty($content);
+
         $data = json_decode($content);
-        $this->assertEquals($data->name, "Filou");
+        $this->assertNotNull($data, "Failed to decode JSON content");
+        $this->assertEquals("Filou", $data->name);
 
         $pet = PetModelStub::first();
-        $this->assertNotNull($pet);
+        $this->assertNotNull($pet, "Pet model was not saved to database");
+        $this->assertEquals("Filou", $pet->name);
 
+        // Clean up after test
+        @unlink($filename);
         @unlink(TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt");
+    }
+
+    /**
+     * @test
+     */
+    public function test_can_set_queue_name(): void
+    {
+        $adapter = static::$connection->setConnection("sync")->getAdapter();
+        $adapter->setQueue("custom-queue");
+
+        $this->assertInstanceOf(SyncAdapter::class, $adapter);
+    }
+
+    /**
+     * @test
+     */
+    public function test_can_set_retry_attempts(): void
+    {
+        $adapter = static::$connection->setConnection("sync")->getAdapter();
+        $adapter->setTries(5);
+
+        $this->assertInstanceOf(SyncAdapter::class, $adapter);
+    }
+
+    /**
+     * @test
+     */
+    public function test_can_set_sleep_delay(): void
+    {
+        $adapter = static::$connection->setConnection("sync")->getAdapter();
+        $adapter->setSleep(10);
+
+        $this->assertInstanceOf(SyncAdapter::class, $adapter);
+    }
+
+    /**
+     * @test
+     */
+    public function test_sync_adapter_processes_immediately(): void
+    {
+        $adapter = static::$connection->setConnection("sync")->getAdapter();
+        $filename = TESTING_RESOURCE_BASE_DIRECTORY . "/sync_producer.txt";
+
+        @unlink($filename);
+
+        $producer = new BasicQueueJobStubs("sync");
+        $result = $adapter->push($producer);
+
+        $this->assertTrue($result);
+        $this->assertFileExists($filename);
+        $this->assertEquals(BasicQueueJobStubs::class, file_get_contents($filename));
+
+        @unlink($filename);
+    }
+
+    /**
+     * @test
+     */
+    public function test_database_adapter_stores_job_in_database(): void
+    {
+        $adapter = static::$connection->setConnection("database")->getAdapter();
+        $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
+
+        $producer = new BasicQueueJobStubs("database");
+        $result = $adapter->push($producer);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @test
+     */
+    public function test_can_switch_between_connections(): void
+    {
+        $syncAdapter = static::$connection->setConnection("sync")->getAdapter();
+        $this->assertInstanceOf(SyncAdapter::class, $syncAdapter);
+
+        $databaseAdapter = static::$connection->setConnection("database")->getAdapter();
+        $this->assertInstanceOf(DatabaseAdapter::class, $databaseAdapter);
+
+        $beanstalkdAdapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        $this->assertInstanceOf(BeanstalkdAdapter::class, $beanstalkdAdapter);
     }
 
     /**
@@ -134,9 +243,6 @@ class QueueTest extends TestCase
             ["beanstalkd"],
             ["database"],
             ["sync"],
-            ["sqs"],
-            // ["redis"],
-            // ["rabbitmq"]
         ];
 
         if (getenv("AWS_SQS_URL")) {

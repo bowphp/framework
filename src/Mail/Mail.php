@@ -122,7 +122,7 @@ class Mail
         $envelop->to($to)->subject($subject)->setMessage($data);
 
         foreach ($headers as $key => $value) {
-            $envelop->addHeader($key, $value);
+            $envelop->withHeader($key, $value);
         }
 
         return static::$instance->send($envelop);

@@ -63,7 +63,7 @@ class MessagingTest extends TestCase
         $mailMessage = $message->toMail($this->context);
 
         $this->assertInstanceOf(Envelop::class, $mailMessage);
-        
+
         [$email] = $mailMessage->getTo();
         $this->assertEquals('test@example.com', $email[1]);
         $this->assertEquals('Test Message', $mailMessage->getSubject());
@@ -182,7 +182,7 @@ class MessagingTest extends TestCase
         $message = $this->getMockBuilder(TestMessage::class)
             ->onlyMethods(['channels', 'toMail'])
             ->getMock();
-        
+
         $message->expects($this->once())
             ->method('channels')
             ->with($this->context)
@@ -195,7 +195,7 @@ class MessagingTest extends TestCase
 
         // Should not throw exception for invalid channel
         $message->process($this->context);
-        
+
         $this->assertTrue(true);
     }
 
@@ -271,12 +271,12 @@ class MessagingTest extends TestCase
     public function test_channels_method_is_abstract_and_must_be_implemented(): void
     {
         $message = new TestMessage();
-        
+
         $this->assertTrue(
             method_exists($message, 'channels'),
             'Message class must implement channels method'
         );
-        
+
         $channels = $message->channels($this->context);
         $this->assertIsArray($channels);
     }

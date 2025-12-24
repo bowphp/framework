@@ -134,7 +134,7 @@ class Envelop
      * @param string $key
      * @param string $value
      */
-    public function addHeader(string $key, string $value): void
+    public function withHeader(string $key, string $value): void
     {
         $this->headers[] = "$key: $value";
     }

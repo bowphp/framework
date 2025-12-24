@@ -556,7 +556,7 @@ if (!function_exists('set_response_header')) {
      */
     function set_response_header(string $key, string $value): void
     {
-        response()->addHeader($key, $value);
+        response()->withHeader($key, $value);
     }
 }
 
@@ -1128,8 +1128,10 @@ if (!function_exists('app_env')) {
      */
     function app_env(string $key, mixed $default = null): ?string
     {
-        if (Env::isLoaded()) {
-            return Env::get($key, $default);
+        $env = Env::getInstance();
+
+        if ($env->isLoaded()) {
+            return $env->get($key, $default);
         }
 
         return $default;

@@ -31,11 +31,13 @@ class SyncAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  QueueJob $producer
-     * @return void
+     * @param  QueueJob $job
+     * @return bool
      */
-    public function push(QueueJob $producer): void
+    public function push(QueueJob $job): bool
     {
-        $producer->process();
+        $job->process();
+
+        return true;
     }
 }
