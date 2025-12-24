@@ -1326,7 +1326,7 @@ class QueryBuilder implements JsonSerializable
         $resets = [];
 
         foreach ($values as $key => $value) {
-            if (is_array($value)) {
+            if (is_array($value) && is_int($key)) {
                 $row_affected += $this->insertOne($value);
             } else {
                 $resets[$key] = $value;

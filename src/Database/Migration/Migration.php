@@ -21,6 +21,13 @@ abstract class Migration
     private AbstractConnection $adapter;
 
     /**
+     * Create the table if not exists
+     *
+     * @var bool
+     */
+    private bool $create_if_not_exists = false;
+
+    /**
      * Migration constructor
      *
      * @return void
@@ -99,29 +106,6 @@ abstract class Migration
     }
 
     /**
-     * Execute direct sql query
-     *
-     * @param  string $sql
-     * @return Migration
-     * @throws MigrationException
-     */
-    private function executeSqlQuery(string $sql, bool $displayInfo = true): Migration
-    {
-        try {
-            Database::statement($sql);
-        } catch (Exception $exception) {
-            echo sprintf("%s %s\n", Color::red("▶"), $sql);
-            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
-        }
-
-        if ($displayInfo) {
-            echo sprintf("%s %s\n", Color::green("▶"), $sql);
-        }
-
-        return $this;
-    }
-
-    /**
      * Drop table if he exists action
      *
      * @param  string $table
@@ -166,7 +150,7 @@ abstract class Migration
         }
 
         if ($this->adapter->getName() !== 'pgsql') {
-            $sql = sprintf("CREATE TABLE `%s` (%s)%s;", $table, $generator->make(), $engine);
+            $sql = sprintf("CREATE TABLE %s%s (%s)%s;", $this->create_if_not_exists ? 'IF NOT EXISTS ' : '', $table, $generator->make(), $engine);
 
             return $this->executeSqlQuery($sql, $displayInfo);
         }
@@ -179,8 +163,27 @@ abstract class Migration
             }
         }
 
-        $sql = sprintf("CREATE TABLE %s (%s)%s;", $table, $generator->make(), $engine);
+        $sql = sprintf("CREATE TABLE %s%s (%s)%s;", $this->create_if_not_exists ? 'IF NOT EXISTS ' : '', $table, $generator->make(), $engine);
+
+        $this->create_if_not_exists = false;
+
         return $this->executeSqlQuery($sql, $displayInfo);
+    }
+
+    /**
+     * Create the table if not exists
+     *
+     * @param  string   $table
+     * @param  callable $cb
+     * @param  bool     $displayInfo
+     * @return Migration
+     * @throws MigrationException
+     */
+    public function createIfNotExists(string $table, callable $cb, bool $displayInfo = true): Migration
+    {
+        $this->create_if_not_exists = true;
+
+        return $this->create($table, $cb, $displayInfo);
     }
 
     /**
@@ -188,19 +191,17 @@ abstract class Migration
      *
      * @param  string   $table
      * @param  callable $cb
+     * @param  bool     $displayInfo
      * @return Migration
      * @throws MigrationException
      */
-    final public function alter(string $table, callable $cb): Migration
+    final public function alter(string $table, callable $cb, bool $displayInfo = true): Migration
     {
         $table = $this->getTablePrefixed($table);
 
-        call_user_func_array(
-            $cb,
-            [
+        call_user_func_array($cb, [
             $generator = new Table($table, $this->adapter->getName(), 'alter')
-            ]
-        );
+        ]);
 
         if ($this->adapter->getName() === 'pgsql') {
             $sql = sprintf('ALTER TABLE %s %s;', $table, $generator->make());
@@ -208,7 +209,7 @@ abstract class Migration
             $sql = sprintf('ALTER TABLE `%s` %s;', $table, $generator->make());
         }
 
-        return $this->executeSqlQuery($sql);
+        return $this->executeSqlQuery($sql, $displayInfo);
     }
 
     /**
@@ -228,14 +229,15 @@ abstract class Migration
      *
      * @param  string $table
      * @param  string $to
+     * @param  bool   $displayInfo
      * @return Migration
      * @throws MigrationException
      */
-    final public function renameTable(string $table, string $to): Migration
+    final public function renameTable(string $table, string $to, bool $displayInfo = true): Migration
     {
         $sql = sprintf('ALTER TABLE %s RENAME TO %s', $table, $to);
 
-        return $this->executeSqlQuery($sql);
+        return $this->executeSqlQuery($sql, $displayInfo);
     }
 
     /**
@@ -243,13 +245,37 @@ abstract class Migration
      *
      * @param  string $table
      * @param  string $to
+     * @param  bool   $displayInfo
      * @return Migration
      * @throws MigrationException
      */
-    final public function renameTableIfExists(string $table, string $to): Migration
+    final public function renameTableIfExists(string $table, string $to, bool $displayInfo = true): Migration
     {
         $sql = sprintf('ALTER TABLE IF EXISTS %s RENAME TO %s', $table, $to);
 
-        return $this->executeSqlQuery($sql);
+        return $this->executeSqlQuery($sql, $displayInfo);
+    }
+
+    /**
+     * Execute direct sql query
+     *
+     * @param  string $sql
+     * @return Migration
+     * @throws MigrationException
+     */
+    private function executeSqlQuery(string $sql, bool $displayInfo = true): Migration
+    {
+        try {
+            Database::statement($sql);
+        } catch (Exception $exception) {
+            echo sprintf("%s %s\n", Color::red("▶"), $sql);
+            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
+        }
+
+        if ($displayInfo) {
+            echo sprintf("%s %s\n", Color::green("▶"), $sql);
+        }
+
+        return $this;
     }
 }

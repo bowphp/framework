@@ -3,6 +3,7 @@
 namespace Bow\Tests\Support;
 
 use Bow\Support\Env;
+use Bow\Tests\Config\TestingConfiguration;
 
 class EnvTest extends \PHPUnit\Framework\TestCase
 {
@@ -10,13 +11,7 @@ class EnvTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $env_filename = __DIR__ . '/stubs/env.json';
-
-        if (!file_exists($env_filename)) {
-            file_put_contents($env_filename, json_encode(['APP_NAME' => 'papac']));
-        }
-
-        Env::configure($env_filename);
+        Env::configure(__DIR__ . '/../Config/stubs/env.json');
     }
 
     public function setUp(): void

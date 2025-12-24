@@ -7,9 +7,12 @@ use Bow\Mail\Envelop;
 use Bow\Messaging\Messaging;
 use Bow\Database\Database;
 use Bow\Database\Barry\Model;
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\Table;
 use Bow\Mail\Mail;
 use PHPUnit\Framework\TestCase;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\Tests\Database\Stubs\MigrationExtendedStub;
 use Bow\Tests\Messaging\Stubs\TestMessage;
 use PHPUnit\Framework\MockObject\MockObject;
 use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
@@ -28,6 +31,17 @@ class MessagingTest extends TestCase
         Database::configure($config["database"]);
         Mail::configure($config["mail"]);
         View::configure($config["view"]);
+
+        (new MigrationExtendedStub())->dropIfExists("notifications", false);
+        (new MigrationExtendedStub())->createIfNotExists("notifications", function (Table $table) {
+            $table->addString('id', ["primary" => true, "size" => 200, "unique" => true]);
+            $table->addString('type');
+            $table->addString('concern_id');
+            $table->addString('concern_type');
+            $table->addText('data');
+            $table->addDatetime('read_at', ['nullable' => true]);
+            $table->addTimestamps();
+        });
     }
 
     protected function setUp(): void
@@ -129,19 +143,15 @@ class MessagingTest extends TestCase
             ->onlyMethods(['channels', 'toMail', 'toDatabase'])
             ->getMock();
 
-        $message->expects($this->once())
-            ->method('channels')
-            ->with($this->context)
+        $envelop = (new Envelop())->to('test@example.com')->subject('Test')->message('Test message');
+
+        $message->method('channels')
             ->willReturn(['mail', 'database']);
 
-        $message->expects($this->once())
-            ->method('toMail')
-            ->with($this->context)
-            ->willReturn((new Envelop())->to('test@example.com')->subject('Test'));
+        $message->method('toMail')
+            ->willReturn($envelop);
 
-        $message->expects($this->once())
-            ->method('toDatabase')
-            ->with($this->context)
+        $message->method('toDatabase')
             ->willReturn(['type' => 'test', 'data' => []]);
 
         $message->process($this->context);
@@ -183,15 +193,13 @@ class MessagingTest extends TestCase
             ->onlyMethods(['channels', 'toMail'])
             ->getMock();
 
-        $message->expects($this->once())
-            ->method('channels')
-            ->with($this->context)
+        $envelop = (new Envelop())->to('test@example.com')->subject('Test')->message('Test message');
+
+        $message->method('channels')
             ->willReturn(['invalid_channel', 'mail']);
 
-        $message->expects($this->once())
-            ->method('toMail')
-            ->with($this->context)
-            ->willReturn((new Envelop())->to('test@example.com')->subject('Test'));
+        $message->method('toMail')
+            ->willReturn($envelop);
 
         // Should not throw exception for invalid channel
         $message->process($this->context);

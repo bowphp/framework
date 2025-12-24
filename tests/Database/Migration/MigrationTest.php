@@ -126,7 +126,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             } else {
                 $generator->addColumn('created_at', 'datetime');
             }
-        });
+        }, false);
 
         $this->assertInstanceOf(Migration::class, $status);
 
@@ -153,7 +153,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             } else {
                 $generator->addColumn('created_at', 'datetime');
             }
-        });
+        }, false);
 
         $this->assertInstanceOf(Migration::class, $status);
     }
@@ -175,7 +175,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             $generator->addColumn('name', 'typenotfound', ['size' => 225]); // SQLite transforms unknown types to NULL
             $generator->addColumn('lastname', 'string', ['size' => 225]);
             $generator->addColumn('created_at', 'datetime');
-        });
+        }, false);
 
         if ($name == 'sqlite') {
             $this->assertInstanceOf(Migration::class, $status);
@@ -192,7 +192,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
         $status = $this->migration->connection($name)->create('bow_empty', function (Table $generator) {
             $generator->addColumn('id', 'int', ['primary' => true, 'autoincrement' => true]);
-        });
+        }, false);
 
         $this->assertInstanceOf(Migration::class, $status);
     }
@@ -210,7 +210,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
         $status = $this->migration->connection($name)->alter('bow_testing', function (Table $generator) {
             $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
-        });
+        }, false);
 
         $this->assertInstanceOf(Migration::class, $status);
     }
@@ -231,7 +231,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
         $status = $this->migration->connection($name)->alter('bow_testing', function (Table $generator) {
             $generator->dropColumn('age');
-        });
+        }, false);
 
         if ($name !== 'sqlite') {
             $this->assertInstanceOf(Migration::class, $status);
@@ -250,7 +250,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         $status = $this->migration->connection($name)->alter('bow_testing', function (Table $generator) {
             $generator->dropColumn('name');
             $generator->addColumn('age', 'int', ['size' => 11, 'default' => 12]);
-        });
+        }, false);
 
         $this->assertInstanceOf(Migration::class, $status);
     }
@@ -264,7 +264,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
         $this->migration->connection($name)->alter('nonexistent_table', function (Table $generator) {
             $generator->dropColumn('name');
-        });
+        }, false);
     }
 
     /**
@@ -280,10 +280,8 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
         $this->migration->connection($name)->alter('bow_testing', function (Table $generator) {
             $generator->dropColumn('nonexistent_column');
-        });
+        }, false);
     }
-
-    // ===== Drop Table Tests =====
 
     /**
      * @dataProvider connectionNames
@@ -336,8 +334,6 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(Migration::class, $status);
     }
-
-    // ===== Add SQL Tests =====
 
     /**
      * @dataProvider connectionNames
@@ -416,7 +412,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         Database::connection($name)->statement("DROP TABLE IF EXISTS bow_new_table");
         Database::connection($name)->statement("CREATE TABLE bow_old_table (id INT, name VARCHAR(255))");
 
-        $status = $this->migration->connection($name)->renameTable('bow_old_table', 'bow_new_table');
+        $status = $this->migration->connection($name)->renameTable('bow_old_table', 'bow_new_table', false);
 
         $this->assertInstanceOf(Migration::class, $status);
 
@@ -467,16 +463,16 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             ->create('bow_sequence', function (Table $generator) {
                 $generator->addColumn('id', 'int', ['primary' => true]);
                 $generator->addColumn('name', 'string', ['size' => 100]);
-            });
+            }, false);
 
         // Alter
         $this->migration->connection($name)
             ->alter('bow_sequence', function (Table $generator) {
                 $generator->addColumn('email', 'string', ['size' => 255]);
-            });
+            }, false);
 
         // Drop
-        $status = $this->migration->connection($name)->drop('bow_sequence');
+        $status = $this->migration->connection($name)->drop('bow_sequence', false);
 
         $this->assertInstanceOf(Migration::class, $status);
     }
@@ -493,7 +489,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
 
         $status = $this->migration->connection($name)->create('bow_test_123', function (Table $generator) {
             $generator->addColumn('id', 'int', ['primary' => true]);
-        });
+        }, false);
 
         $this->assertInstanceOf(Migration::class, $status);
     }

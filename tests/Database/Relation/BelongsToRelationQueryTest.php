@@ -65,7 +65,7 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $migration->connection($name)->create("pet_masters", function (Table $table) {
             $table->addIncrement("id");
             $table->addString("name");
-        });
+        }, false);
 
         $migration->connection($name)->create("pets", function (Table $table) {
             $table->addIncrement("id");
@@ -76,7 +76,7 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
                 "references" => "id",
                 "on" => "delete cascade"
             ]);
-        });
+        }, false);
     }
 
     private function seedTestData(string $name): void

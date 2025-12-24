@@ -14,17 +14,7 @@ use InvalidArgumentException;
 
 class MailServiceTest extends \PHPUnit\Framework\TestCase
 {
-    private static string $sendmail_command;
     private ConfigurationLoader $config;
-
-    public static function setUpBeforeClass(): void
-    {
-        static::$sendmail_command = TESTING_RESOURCE_BASE_DIRECTORY . '/sendmail';
-
-        if (function_exists('shell_exec') && !file_exists(static::$sendmail_command)) {
-            shell_exec("echo 'exit 0;' > " . static::$sendmail_command . " && chmod +x " . static::$sendmail_command);
-        }
-    }
 
     protected function setUp(): void
     {
@@ -36,12 +26,14 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
     public function test_configuration_instance()
     {
         $mail = Mail::configure($this->config["mail"]);
+
         $this->assertInstanceOf(MailAdapterInterface::class, $mail);
     }
 
     public function test_default_configuration_must_be_smtp_driver()
     {
         $mail = Mail::configure($this->config["mail"]);
+
         $this->assertInstanceOf(\Bow\Mail\Adapters\SmtpAdapter::class, $mail);
     }
 
@@ -88,16 +80,10 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         Mail::configure($this->config['mail']);
 
         try {
-            $response = Mail::raw(
-                ['bow@email.com', 'test@example.com'],
-                'Multiple Recipients Test',
-                'This message goes to multiple recipients'
-            );
-
+            $response = Mail::raw(['bow@email.com', 'test@example.com'], 'Multiple Recipients Test', 'This message goes to multiple recipients');
             if ($response === false) {
                 $this->markTestSkipped('SMTP server not accessible or configured');
             }
-
             $this->assertTrue($response);
         } catch (\Bow\Mail\Exception\SmtpException $e) {
             $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
@@ -109,12 +95,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         Mail::configure($this->config['mail']);
 
         try {
-            $response = Mail::raw(
-                'bow@email.com',
-                'Custom Headers Test',
-                'This message has custom headers',
-                ['X-Custom-Header' => 'TestValue']
-            );
+            $response = Mail::raw('bow@email.com', 'Custom Headers Test', 'This message has custom headers', ['X-Custom-Header' => 'TestValue']);
 
             if ($response === false) {
                 $this->markTestSkipped('SMTP server not accessible or configured');
@@ -131,7 +112,7 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         try {
             $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
                 $envelop->to('bow@bowphp.com')
-                        ->subject('Test Email');
+                    ->subject('Test Email');
             });
 
             if ($response === false) {

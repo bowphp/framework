@@ -131,7 +131,13 @@ class BeanstalkdAdapter extends QueueAdapter
         } catch (Throwable $e) {
             // Write the error log
             error_log($e->getMessage());
-            logger()->error($e->getMessage(), $e->getTrace());
+
+            try {
+                logger()->error($e->getMessage(), $e->getTrace());
+            } catch (Throwable $loggerException) {
+                // Logger not available, already logged to error_log
+            }
+
             cache("job:failed:" . $job->getId(), $job->getData());
 
             // Check if producer has been loaded

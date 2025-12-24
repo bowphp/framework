@@ -57,12 +57,12 @@ services:
         image: papacdev/vsftpd
         restart: unless-stopped
         ports:
-            - "21:21"
+            - "1021:21"
             - "20:20"
             - "12020-12025:12020-12025"
         environment:
-            USER: bob
-            PASS: "12345"
+            USER: username
+            PASS: password
         volumes:
             - "ftp_storage:/ftp/$USER"
         networks:

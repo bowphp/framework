@@ -130,6 +130,16 @@ class SmtpAdapter implements MailAdapterInterface
                 throw new MailException("Missing required SMTP configuration: {$key}");
             }
         }
+
+        // Validate port is a valid integer
+        if (!is_numeric($config['port']) || (int)$config['port'] <= 0 || (int)$config['port'] > 65535) {
+            throw new MailException("Invalid SMTP port number. Must be between 1 and 65535.");
+        }
+
+        // Validate timeout is a valid integer
+        if (!is_numeric($config['timeout']) || (int)$config['timeout'] <= 0) {
+            throw new MailException("Invalid SMTP timeout. Must be a positive integer.");
+        }
     }
 
     /**
@@ -142,10 +152,10 @@ class SmtpAdapter implements MailAdapterInterface
         $this->hostname = $config['hostname'];
         $this->username = $config['username'] ?? null;
         $this->password = $config['password'] ?? null;
-        $this->secure = (bool)($config['ssl'] ?? false);
-        $this->tls = (bool)($config['tls'] ?? false);
-        $this->timeout = (int)$config['timeout'];
-        $this->port = (int)$config['port'];
+        $this->secure = (bool) ($config['ssl'] ?? false);
+        $this->tls = (bool) ($config['tls'] ?? false);
+        $this->timeout = (int) $config['timeout'];
+        $this->port = (int) $config['port'];
     }
 
     /**

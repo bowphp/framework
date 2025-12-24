@@ -133,10 +133,13 @@ class Envelop
      *
      * @param string $key
      * @param string $value
+     * @return Envelop
      */
-    public function withHeader(string $key, string $value): void
+    public function withHeader(string $key, string $value): Envelop
     {
         $this->headers[] = "$key: $value";
+
+        return $this;
     }
 
     /**
@@ -476,10 +479,13 @@ class Envelop
      * @param string $message
      * @param string $type
      * @see   setEnvelop
+     * @return Envelop
      */
-    public function message(string $message, string $type = 'text/html'): void
+    public function message(string $message, string $type = 'text/html'): Envelop
     {
         $this->setMessage($message, $type);
+
+        return $this;
     }
 
     /**

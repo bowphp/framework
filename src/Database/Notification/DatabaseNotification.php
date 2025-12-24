@@ -8,6 +8,13 @@ use Bow\Database\Database;
 class DatabaseNotification extends Model
 {
     /**
+     * The primary key type
+     *
+     * @var string
+     */
+    protected string $primary_key_type = 'string';
+
+    /**
      * Cast data as json
      *
      * @var array|string[]

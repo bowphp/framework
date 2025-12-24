@@ -24,6 +24,12 @@ class MailChannelAdapter implements ChannelAdapterInterface
 
         $envelop = $message->toMail($context);
 
+        if ($envelop === null) {
+            throw new \RuntimeException(
+                "The mail notification returned by toMail() cannot be null."
+            );
+        }
+
         Mail::getInstance()->send($envelop);
     }
 }

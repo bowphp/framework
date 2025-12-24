@@ -41,60 +41,70 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * @var ?Builder
      */
     protected static ?Builder $builder = null;
+
     /**
      * The hidden field
      *
      * @var array
      */
     protected array $hidden = [];
+
     /**
      * Enable the timestamps support
      *
      * @var bool
      */
     protected bool $timestamps = true;
+
     /**
      * Define the table prefix
      *
      * @var string
      */
     protected string $prefix = '';
+
     /**
      * Enable the autoincrement support
      *
      * @var bool
      */
     protected bool $auto_increment = true;
+
     /**
      * Enable the soft deletion
      *
      * @var bool
      */
     protected bool $soft_delete = false;
+
     /**
      * Defines the column where the query construct will use for the last query
      *
      * @var string
      */
     protected string $latest = 'created_at';
+
     /**
      * Defines the created_at column name
      *
      * @var string
      */
     protected string $created_at = 'created_at';
+
     /**
      * Defines the created_at column name
      *
      * @var string
      */
     protected string $updated_at = 'updated_at';
+
     /**
      * The table columns listing
      *
      * @var array
      */
     protected array $attributes = [];
+
     /**
      * The date mutation
      *
@@ -154,6 +164,10 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
         $this->original = $attributes;
 
+        if ($this->connection !== null) {
+            $this->setConnection(DB::getConnectionName());
+        }
+
         $this->table = static::query()->getTable();
     }
 
@@ -165,6 +179,11 @@ abstract class Model implements ArrayAccess, JsonSerializable
     public function getTable(): string
     {
         return $this->table;
+    }
+
+    public function getConnection(): ?string
+    {
+        return $this->connection;
     }
 
     /**

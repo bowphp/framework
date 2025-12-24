@@ -3,7 +3,7 @@
 use Bow\Database\Migration\Migration;
 use Bow\Database\Migration\Table;
 
-class {className} extends Migration
+class FakeNotificationTableMigration extends Migration
 {
     /**
      * Up Migration
