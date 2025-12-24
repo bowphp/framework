@@ -16,126 +16,217 @@ use ErrorException;
 class SmtpAdapter implements MailAdapterInterface
 {
     /**
-     * Socket connection
-     *
-     * @var resource
+     * SMTP response codes
      */
-    private $sock;
+    private const SMTP_READY = 220;
+    private const SMTP_OK = 250;
+    private const SMTP_AUTH_CONTINUE = 334;
+    private const SMTP_AUTH_SUCCESS = 235;
+    private const SMTP_DATA_START = 354;
+    private const SMTP_QUIT = 221;
 
     /**
-     * The username
+     * Socket connection resource
      *
-     * @var ?string
+     * @var resource|null
+     */
+    private $socket = null;
+
+    /**
+     * SMTP server hostname
+     *
+     * @var string
+     */
+    private string $hostname;
+
+    /**
+     * SMTP authentication username
+     *
+     * @var string|null
      */
     private ?string $username;
 
     /**
-     * The password
+     * SMTP authentication password
      *
-     * @var ?string
+     * @var string|null
      */
     private ?string $password;
 
     /**
-     * The SMTP server
-     *
-     * @var ?string
-     */
-    private ?string $url;
-
-    /**
-     * Define the security
+     * Enable SSL/TLS encryption
      *
      * @var bool
      */
-    private ?bool $secure;
+    private bool $secure;
 
     /**
-     * Enable TLS
+     * Enable STARTTLS command
      *
      * @var bool
      */
-    private bool $tls = false;
+    private bool $tls;
 
     /**
-     * Connexion time out
+     * Connection timeout in seconds
      *
      * @var int
      */
     private int $timeout;
 
     /**
-     * The SMTP server
+     * SMTP server port
      *
      * @var int
      */
-    private int $port = 25;
+    private int $port;
 
     /**
-     * The DKIM signer
+     * DKIM email signature handler
      *
-     * @var ?DkimSigner
+     * @var DkimSigner|null
      */
     private ?DkimSigner $dkimSigner = null;
 
     /**
-     * The SPF checker
+     * SPF email verification handler
      *
-     * @var ?SpfChecker
+     * @var SpfChecker|null
      */
     private ?SpfChecker $spfChecker = null;
 
     /**
-     * Smtp Constructor
+     * Indicates if currently connected to SMTP server
      *
-     * @param array $config
+     * @var bool
+     */
+    private bool $connected = false;
+
+    /**
+     * SmtpAdapter Constructor
+     *
+     * @param array $config SMTP configuration array
+     * @throws MailException If required configuration is missing
      */
     public function __construct(array $config)
     {
-        if (!isset($config['secure']) || is_null($config['secure'])) {
-            $config['secure'] = false;
-        }
+        $this->validateConfiguration($config);
+        $this->initializeConfiguration($config);
+        $this->initializeSecurityFeatures($config);
+    }
 
-        if (!isset($config['tls']) || is_null($config['tls'])) {
-            $config['tls'] = false;
-        }
+    /**
+     * Validate required configuration parameters
+     *
+     * @param array $config
+     * @throws MailException
+     */
+    private function validateConfiguration(array $config): void
+    {
+        $required = ['hostname', 'port', 'timeout'];
 
-        $this->url = $config['hostname'];
-        $this->username = $config['username'];
-        $this->password = $config['password'];
-        $this->secure = (bool)$config['ssl'];
-        $this->tls = (bool)$config['tls'];
-        $this->timeout = (int)$config['timeout'];
-        $this->port = (int)$config['port'];
-
-        if (isset($config['dkim']) && $config['dkim']['enabled']) {
-            $this->dkimSigner = new DkimSigner($config['dkim']);
-        }
-
-        if (isset($config['spf']) && $config['spf']['enabled']) {
-            $this->spfChecker = new SpfChecker($config['spf']);
+        foreach ($required as $key) {
+            if (!isset($config[$key])) {
+                throw new MailException("Missing required SMTP configuration: {$key}");
+            }
         }
     }
 
     /**
-     * Start sending mail
+     * Initialize SMTP configuration from array
      *
-     * @param  Envelop $envelop
-     * @return bool
-     * @throws SocketException
-     * @throws ErrorException
+     * @param array $config
+     */
+    private function initializeConfiguration(array $config): void
+    {
+        $this->hostname = $config['hostname'];
+        $this->username = $config['username'] ?? null;
+        $this->password = $config['password'] ?? null;
+        $this->secure = (bool)($config['ssl'] ?? false);
+        $this->tls = (bool)($config['tls'] ?? false);
+        $this->timeout = (int)$config['timeout'];
+        $this->port = (int)$config['port'];
+    }
+
+    /**
+     * Initialize security features (DKIM and SPF)
+     *
+     * @param array $config
+     */
+    private function initializeSecurityFeatures(array $config): void
+    {
+        if (!empty($config['dkim']['enabled'])) {
+            $this->dkimSigner = new DkimSigner($config['dkim']);
+        }
+
+        if (!empty($config['spf']['enabled'])) {
+            $this->spfChecker = new SpfChecker($config['spf']);
+        }
+    }
+
+
+    /**
+     * Send email via SMTP
+     *
+     * @param Envelop $envelop Email envelope containing message data
+     * @return bool True on successful send, false otherwise
+     * @throws SocketException If connection fails
+     * @throws SmtpException If SMTP command fails
+     * @throws MailException If SPF verification fails
+     * @throws ErrorException If TLS negotiation fails
      */
     public function send(Envelop $envelop): bool
+    {
+        try {
+            $this->validateEnvelop($envelop);
+            $this->performSecurityChecks($envelop);
+            $this->connect();
+            $this->sendMailTransaction($envelop);
+
+            return true;
+        } catch (SmtpException | SocketException $e) {
+            $this->logError($e);
+            return false;
+        } finally {
+            $this->disconnect();
+        }
+    }
+
+    /**
+     * Validate email envelope has required data
+     *
+     * @param Envelop $envelop
+     * @throws MailException
+     */
+    private function validateEnvelop(Envelop $envelop): void
+    {
+        if (empty($envelop->getTo())) {
+            throw new MailException('No recipients specified');
+        }
+
+        if ($envelop->getMessage() === null || $envelop->getMessage() === '') {
+            throw new MailException('No message content specified');
+        }
+    }
+
+    /**
+     * Perform SPF and DKIM security checks
+     *
+     * @param Envelop $envelop
+     * @throws MailException If SPF verification fails
+     */
+    private function performSecurityChecks(Envelop $envelop): void
     {
         // Validate SPF if enabled
         if ($this->spfChecker !== null) {
             $senderIp = $_SERVER['REMOTE_ADDR'] ?? '';
             $senderEmail = $envelop->getFrom();
-            $senderHelo = gethostname();
+            $senderHelo = gethostname() ?: 'localhost';
 
             $spfResult = $this->spfChecker->verify($senderIp, $senderEmail, $senderHelo);
+
             if ($spfResult === 'fail') {
-                throw new MailException('SPF verification failed');
+                throw new MailException('SPF verification failed for sender: ' . $senderEmail);
             }
         }
 
@@ -144,193 +235,412 @@ class SmtpAdapter implements MailAdapterInterface
             $dkimHeader = $this->dkimSigner->sign($envelop);
             $envelop->withHeader('DKIM-Signature', $dkimHeader);
         }
+    }
 
-        $this->connection();
+    /**
+     * Execute complete SMTP mail transaction
+     *
+     * @param Envelop $envelop
+     * @throws SmtpException
+     */
+    private function sendMailTransaction(Envelop $envelop): void
+    {
+        $this->sendMailFrom($envelop);
+        $this->sendRecipients($envelop);
+        $this->sendData($envelop);
+    }
 
-        $error = true;
+    /**
+     * Send MAIL FROM command
+     *
+     * @param Envelop $envelop
+     * @throws SmtpException
+     */
+    private function sendMailFrom(Envelop $envelop): void
+    {
+        $from = $envelop->getFrom();
 
-        // SMTP command
-        if ($envelop->getFrom() !== null) {
-            $this->write('MAIL FROM: ' . $envelop->getFrom(), 250);
+        if ($from !== null) {
+            // Extract email address from "Name <email>" format if present
+            $email = $this->extractEmailAddress($from);
+            $this->executeCommand('MAIL FROM: <' . $email . '>', self::SMTP_OK);
         } elseif ($this->username !== null) {
-            $this->write('MAIL FROM: <' . $this->username . '>', 250);
+            $this->executeCommand('MAIL FROM: <' . $this->username . '>', self::SMTP_OK);
+        } else {
+            throw new SmtpException('No sender email address specified');
+        }
+    }
+
+    /**
+     * Send RCPT TO commands for all recipients
+     *
+     * @param Envelop $envelop
+     * @throws SmtpException
+     */
+    private function sendRecipients(Envelop $envelop): void
+    {
+        foreach ($envelop->getTo() as $recipient) {
+            $to = $this->formatRecipient($recipient);
+            $this->executeCommand('RCPT TO: ' . $to, self::SMTP_OK);
+        }
+    }
+
+    /**
+     * Format recipient for SMTP RCPT TO command
+     * SMTP RCPT TO requires only the email address in angle brackets
+     *
+     * @param array $recipient [name, email]
+     * @return string Formatted recipient (email only)
+     */
+    private function formatRecipient(array $recipient): string
+    {
+        [, $email] = $recipient;
+        return '<' . $email . '>';
+    }
+
+    /**
+     * Extract email address from a string that may contain "Name <email>" format
+     *
+     * @param string $address Email address possibly with display name
+     * @return string Pure email address
+     */
+    private function extractEmailAddress(string $address): string
+    {
+        // If the address contains angle brackets, extract the email
+        if (preg_match('/<(.+?)>/', $address, $matches)) {
+            return $matches[1];
         }
 
-        foreach ($envelop->getTo() as $value) {
-            if ($value[0] !== null) {
-                $to = $value[0] . ' <' . $value[1] . '>';
-            } else {
-                $to = '<' . $value[1] . '>';
-            }
+        // Otherwise, return the address as-is (assuming it's already a pure email)
+        return $address;
+    }
 
-            $this->write('RCPT TO: ' . $to, 250);
-        }
-
+    /**
+     * Send email data (headers and body)
+     *
+     * @param Envelop $envelop
+     * @throws SmtpException
+     */
+    private function sendData(Envelop $envelop): void
+    {
         $envelop->setDefaultHeader();
 
-        $this->write('DATA', 354);
+        $this->executeCommand('DATA', self::SMTP_DATA_START);
 
+        $data = $this->buildEmailData($envelop);
+        $this->writeToSocket($data);
+
+        $this->executeCommand('.', self::SMTP_OK);
+    }
+
+    /**
+     * Build complete email data string
+     *
+     * @param Envelop $envelop
+     * @return string Complete email data with headers and body
+     */
+    private function buildEmailData(Envelop $envelop): string
+    {
         $data = 'Subject: ' . $envelop->getSubject() . Envelop::END;
         $data .= $envelop->compileHeaders();
         $data .= 'Content-Type: ' . $envelop->getType() . '; charset=' . $envelop->getCharset() . Envelop::END;
         $data .= 'Content-Transfer-Encoding: 8bit' . Envelop::END;
         $data .= Envelop::END . $envelop->getMessage() . Envelop::END;
 
-        $this->write($data);
-
-        try {
-            $this->write('.', 250);
-        } catch (SmtpException $e) {
-            app("logger")->error($e->getMessage(), $e->getTraceAsString());
-            error_log($e->getMessage());
-        }
-
-        $status = $this->disconnect();
-
-        if ($status == 221) {
-            $error = false;
-        }
-
-        return (bool)$error;
+        return $data;
     }
 
-
     /**
-     * Connect to an SMTP server
+     * Log SMTP errors
      *
-     * @throws ErrorException
-     * @throws SocketException | SmtpException
+     * @param \Throwable $exception
      */
-    private function connection(): void
+    private function logError(\Throwable $exception): void
     {
-        $url = $this->url;
+        $message = sprintf(
+            'SMTP Error: %s [Code: %s]',
+            $exception->getMessage(),
+            $exception->getCode()
+        );
 
-        if ($this->secure === true) {
-            $url = 'ssl://' . $this->url;
+        if (function_exists('app')) {
+            try {
+                $logger = app('logger');
+                if ($logger) {
+                    $logger->error($message, [
+                        'exception' => $exception,
+                        'trace' => $exception->getTraceAsString()
+                    ]);
+                }
+            } catch (\Exception $e) {
+                // Logger not available, fallback to error_log
+            }
         }
 
-        $sock = fsockopen($url, $this->port, $errno, $errstr, $this->timeout);
+        error_log($message);
+    }
 
-        if ($sock == null) {
+    /**
+     * Establish connection to SMTP server
+     *
+     * @throws SocketException If connection cannot be established
+     * @throws SmtpException If SMTP handshake fails
+     * @throws ErrorException If TLS negotiation fails
+     */
+    private function connect(): void
+    {
+        if ($this->connected) {
+            return;
+        }
+
+        $this->openSocket();
+        $this->performSmtpHandshake();
+        $this->enableTlsIfConfigured();
+        $this->authenticateIfConfigured();
+
+        $this->connected = true;
+    }
+
+    /**
+     * Open TCP socket connection to SMTP server
+     *
+     * @throws SocketException
+     */
+    private function openSocket(): void
+    {
+        $hostname = $this->secure ? 'ssl://' . $this->hostname : $this->hostname;
+
+        $errno = 0;
+        $errstr = '';
+
+        $socket = @fsockopen(
+            $hostname,
+            $this->port,
+            $errno,
+            $errstr,
+            $this->timeout
+        );
+
+        if ($socket === false) {
             throw new SocketException(
-                'Impossible to get connected to ' . $this->url . ':' . $this->port,
+                sprintf(
+                    'Cannot connect to SMTP server %s:%d - %s (%d)',
+                    $this->hostname,
+                    $this->port,
+                    $errstr,
+                    $errno
+                ),
                 E_USER_ERROR
             );
         }
 
-        $this->sock = $sock;
-        stream_set_timeout($this->sock, $this->timeout);
-        $code = $this->read();
-
-        // The client sends this command to the SMTP server to identify
-        // itself and initiate the SMTP conversation.
-        // The domain name or IP address of the SMTP client is usually sent as an argument
-        // together with the command (e.g. "EHLO client.example.com").
-        $client_host = isset($_SERVER['HTTP_HOST'])
-        && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-
-        if ($code == 220) {
-            $code = $this->write('EHLO ' . $client_host, 250, 'HELO');
-            if ($code != 250) {
-                $this->write('EHLO ' . $client_host, 250, 'HELO');
-            }
-        }
-
-        if ($this->tls === true) {
-            $this->write('STARTTLS', 220);
-
-            $secured = @stream_socket_enable_crypto($this->sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-
-            if (!$secured) {
-                throw new ErrorException(
-                    'Can not secure your connection with tls',
-                    E_ERROR
-                );
-            }
-        }
-
-        if ($this->username !== null && $this->password !== null) {
-            $this->write('AUTH LOGIN', 334);
-            $this->write(base64_encode($this->username), 334, 'username');
-            $this->write(base64_encode($this->password), 235, 'password');
-        }
+        $this->socket = $socket;
+        stream_set_timeout($this->socket, $this->timeout);
     }
 
     /**
-     * Read the current connection stream.
+     * Perform SMTP handshake (EHLO/HELO)
      *
-     * @return int
-     */
-    private function read(): int
-    {
-        $s = null;
-
-        for (; !feof($this->sock);) {
-            if (($line = fgets($this->sock, 1000)) == null) {
-                continue;
-            }
-
-            $s = explode(' ', $line)[0];
-
-            if (preg_match('#^[0-9]+$#', $s)) {
-                break;
-            }
-        }
-
-        return (int)$s;
-    }
-
-    /**
-     * Start an SMTP command
-     *
-     * @param  string  $command
-     * @param  ?int    $code
-     * @param  ?string $envelop
-     * @return int|null
      * @throws SmtpException
      */
-    private function write(string $command, ?int $code = null, ?string $envelop = null): ?int
+    private function performSmtpHandshake(): void
     {
-        if ($envelop == null) {
-            $envelop = $command;
+        $code = $this->readResponse();
+
+        if ($code !== self::SMTP_READY) {
+            throw new SmtpException('SMTP server not ready: ' . $code);
         }
 
-        $command = $command . Envelop::END;
+        $clientHostname = $this->getClientHostname();
 
-        fwrite($this->sock, $command, strlen($command));
+        try {
+            $this->executeCommand('EHLO ' . $clientHostname, self::SMTP_OK);
+        } catch (SmtpException $e) {
+            // Fallback to HELO if EHLO fails
+            $this->executeCommand('HELO ' . $clientHostname, self::SMTP_OK);
+        }
+    }
 
-        $response = null;
-
-        if ($code === null) {
-            return null;
+    /**
+     * Get client hostname for EHLO/HELO command
+     *
+     * @return string
+     */
+    private function getClientHostname(): string
+    {
+        if (isset($_SERVER['HTTP_HOST']) && preg_match('/^[\w.-]+\z/', $_SERVER['HTTP_HOST'])) {
+            return $_SERVER['HTTP_HOST'];
         }
 
-        $response = $this->read();
+        return gethostname() ?: 'localhost';
+    }
 
-        if (!in_array($response, (array)$code)) {
-            throw new SmtpException(
-                sprintf('SMTP server did not accept %s with code [%s]', $envelop, $response),
+    /**
+     * Enable TLS encryption if configured
+     *
+     * @throws ErrorException If TLS negotiation fails
+     * @throws SmtpException
+     */
+    private function enableTlsIfConfigured(): void
+    {
+        if (!$this->tls) {
+            return;
+        }
+
+        $this->executeCommand('STARTTLS', self::SMTP_READY);
+
+        $secured = @stream_socket_enable_crypto(
+            $this->socket,
+            true,
+            STREAM_CRYPTO_METHOD_TLS_CLIENT
+        );
+
+        if (!$secured) {
+            throw new ErrorException(
+                'Failed to enable TLS encryption on SMTP connection',
                 E_ERROR
             );
         }
 
-        return $response;
+        // Re-send EHLO after STARTTLS
+        $clientHostname = $this->getClientHostname();
+        $this->executeCommand('EHLO ' . $clientHostname, self::SMTP_OK);
     }
 
     /**
-     * Disconnection
+     * Authenticate with SMTP server if credentials provided
      *
-     * @return int|string|null
-     * @throws ErrorException
+     * @throws SmtpException
      */
-    private function disconnect(): int|string|null
+    private function authenticateIfConfigured(): void
     {
-        $r = $this->write('QUIT');
+        if ($this->username === null || $this->password === null) {
+            return;
+        }
 
-        fclose($this->sock);
+        $this->executeCommand('AUTH LOGIN', self::SMTP_AUTH_CONTINUE);
+        $this->executeCommand(
+            base64_encode($this->username),
+            self::SMTP_AUTH_CONTINUE,
+            'username'
+        );
+        $this->executeCommand(
+            base64_encode($this->password),
+            self::SMTP_AUTH_SUCCESS,
+            'password'
+        );
+    }
 
-        $this->sock = null;
 
-        return $r;
+    /**
+     * Read SMTP server response code
+     *
+     * @return int Response code
+     */
+    private function readResponse(): int
+    {
+        $code = null;
+
+        while (!feof($this->socket)) {
+            $line = fgets($this->socket, 1000);
+
+            if ($line === false) {
+                continue;
+            }
+
+            $parts = explode(' ', trim($line));
+            $code = $parts[0] ?? null;
+
+            if ($code !== null && preg_match('/^\d{3}$/', $code)) {
+                break;
+            }
+        }
+
+        return (int)$code;
+    }
+
+    /**
+     * Execute SMTP command and verify response
+     *
+     * @param string $command SMTP command to execute
+     * @param int|array $expectedCode Expected response code(s)
+     * @param string|null $label Command label for error messages
+     * @return int Actual response code
+     * @throws SmtpException If response code doesn't match expected
+     */
+    private function executeCommand(string $command, int|array $expectedCode, ?string $label = null): int
+    {
+        $this->writeToSocket($command . Envelop::END);
+
+        $responseCode = $this->readResponse();
+
+        $expectedCodes = (array)$expectedCode;
+
+        if (!in_array($responseCode, $expectedCodes, true)) {
+            $commandLabel = $label ?? $command;
+            throw new SmtpException(
+                sprintf(
+                    'SMTP server did not accept %s with code [%s]',
+                    $commandLabel,
+                    $responseCode
+                ),
+                E_ERROR
+            );
+        }
+
+        return $responseCode;
+    }
+
+    /**
+     * Write data to socket
+     *
+     * @param string $data Data to write
+     * @throws SmtpException If write fails
+     */
+    private function writeToSocket(string $data): void
+    {
+        if ($this->socket === null) {
+            throw new SmtpException('Socket not connected');
+        }
+
+        $written = fwrite($this->socket, $data, strlen($data));
+
+        if ($written === false) {
+            throw new SmtpException('Failed to write to SMTP socket');
+        }
+    }
+
+    /**
+     * Close SMTP connection gracefully
+     *
+     * @return void
+     */
+    private function disconnect(): void
+    {
+        if (!$this->connected || $this->socket === null) {
+            return;
+        }
+
+        try {
+            $this->executeCommand('QUIT', self::SMTP_QUIT);
+        } catch (SmtpException $e) {
+            // Ignore errors during disconnect
+            error_log('SMTP disconnect error: ' . $e->getMessage());
+        } finally {
+            if (is_resource($this->socket)) {
+                fclose($this->socket);
+            }
+
+            $this->socket = null;
+            $this->connected = false;
+        }
+    }
+
+    /**
+     * Destructor - ensure connection is closed
+     */
+    public function __destruct()
+    {
+        $this->disconnect();
     }
 }

@@ -152,7 +152,7 @@ class RedisTest extends \PHPUnit\Framework\TestCase
     {
         $client = Redis::getClient();
         $ping = $client->ping();
-        
+
         // phpredis ping returns "+PONG" or true depending on version
         $this->assertTrue($ping === true || $ping === '+PONG');
     }
@@ -203,7 +203,7 @@ class RedisTest extends \PHPUnit\Framework\TestCase
 
         $client = Redis::getClient();
         $ttl = $client->ttl($key);
-        
+
         $this->assertGreaterThan(5, $ttl);
         $this->assertLessThanOrEqual(10, $ttl);
     }
@@ -381,11 +381,11 @@ class RedisTest extends \PHPUnit\Framework\TestCase
         $this->trackKey($key);
 
         Redis::set($key, 'persistent_value');
-        
+
         // Verify the key exists and has no TTL
         $client = Redis::getClient();
         $ttl = $client->ttl($key);
-        
+
         // -1 means key exists but has no expiration
         $this->assertEquals(-1, $ttl);
         $this->assertEquals('persistent_value', Redis::get($key));
@@ -399,7 +399,7 @@ class RedisTest extends \PHPUnit\Framework\TestCase
         Redis::set($key, 'value', 1);
         $client = Redis::getClient();
         $ttl = $client->ttl($key);
-        
+
         $this->assertGreaterThan(0, $ttl);
         $this->assertLessThanOrEqual(1, $ttl);
     }

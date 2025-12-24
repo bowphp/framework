@@ -48,7 +48,7 @@ class ModelQueryTest extends \PHPUnit\Framework\TestCase
         $connection->statement('DROP TABLE IF EXISTS pets');
         $connection->statement($sql);
         $connection->insert('INSERT INTO pets(name) VALUES(:name)', [
-            ['name' => 'Couli'], 
+            ['name' => 'Couli'],
             ['name' => 'Bobi']
         ]);
     }

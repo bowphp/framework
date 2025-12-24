@@ -307,7 +307,7 @@ class PaginationTest extends TestCase
         $result = $pagination->items();
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertCount(2, $result);
-        
+
         // Verify objects are accessible via collection
         $this->assertSame($obj1, $result->first());
         $this->assertSame($obj2, $result->last());

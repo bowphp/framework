@@ -54,7 +54,7 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     {
         $this->createTestingTable($name);
         $table = Database::connection($name)->table('pets');
-        
+
         $this->assertInstanceOf(QueryBuilder::class, $table);
     }
 

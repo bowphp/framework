@@ -87,7 +87,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $this->createTestingTable($name);
         $database = Database::connection($name);
         $pdo = $database->getConnectionAdapter()->getConnection();
-        
+
         $this->assertInstanceOf(PDO::class, $pdo);
         $this->assertEquals($name, $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
     }
@@ -99,7 +99,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
     {
         $connection1 = Database::connection($name);
         $connection2 = Database::connection($name);
-        
+
         $this->assertSame($connection1, $connection2);
     }
 
@@ -163,7 +163,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->assertEquals(1, $result);
-        
+
         $pet = $database->selectOne("SELECT * FROM pets WHERE id = 5");
         $this->assertEquals('Max', $pet->name);
     }
@@ -177,7 +177,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $database = Database::connection($name);
 
         $database->insert("INSERT INTO pets VALUES(1, 'Bob');");
-        
+
         try {
             $result = $database->insert("INSERT INTO pets VALUES(1, 'Bob');");
             $this->fail("Expected exception for duplicate key");
@@ -366,7 +366,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $database = Database::connection($name);
 
         $result = $database->update("UPDATE pets SET name = 'Bob' WHERE id = 999");
-        
+
         $this->assertEquals(0, $result);
     }
 
@@ -387,7 +387,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
             "UPDATE pets SET name = :newName WHERE id = :id AND name = :oldName",
             ['newName' => 'Bob', 'id' => 1, 'oldName' => 'Ploy']
         );
-        
+
         $this->assertEquals(1, $result);
     }
 
@@ -459,7 +459,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
         $database->insert("INSERT INTO pets VALUES(:id, :name);", ["id" => 1, 'name' => 'Ploy']);
         $result = 0;
-        
+
         $database->transaction(function () use ($database, &$result) {
             $result = $database->delete("DELETE FROM pets WHERE id = :id", ['id' => 1]);
             $this->assertTrue($database->inTransaction());
@@ -467,7 +467,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals(1, $result);
         $this->assertFalse($database->inTransaction());
-        
+
         // Verify deletion was committed (returns false when not found)
         $pet = $database->selectOne("SELECT * FROM pets WHERE id = 1");
         $this->assertFalse($pet);
@@ -574,7 +574,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $database = Database::connection($name);
 
         $this->assertFalse($database->inTransaction());
-        
+
         // PDO throws exception when committing without active transaction
         $this->expectException(\PDOException::class);
         $database->commit();
@@ -620,7 +620,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $database = Database::connection($name);
 
         $database->insert("INSERT INTO pets VALUES(1, 'Bob'), (2, 'Milo');");
-        
+
         $result = $database->statement("TRUNCATE TABLE pets");
         $this->assertTrue($result);
 
@@ -661,7 +661,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $database->insert("INSERT INTO pets VALUES(1, 'Bob');");
 
         $pets = $database->select("SELECT name FROM pets WHERE id = 1");
-        
+
         $this->assertCount(1, $pets);
         $this->assertEquals('Bob', $pets[0]->name);
     }
@@ -678,7 +678,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $this->createTestingTable($name);
         $database = Database::connection($name);
         $database->statement('DROP TABLE IF EXISTS auto_pets');
-        
+
         // Use database-specific syntax for auto-increment
         if ($name === 'pgsql') {
             $database->statement('CREATE TABLE auto_pets (id SERIAL PRIMARY KEY, name VARCHAR(255))');
@@ -687,7 +687,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         }
 
         $database->insert("INSERT INTO auto_pets (name) VALUES('Bob')");
-        
+
         $lastId = $database->getConnectionAdapter()->getConnection()->lastInsertId();
         $this->assertGreaterThan(0, $lastId);
 
@@ -723,7 +723,7 @@ class DatabaseQueryTest extends \PHPUnit\Framework\TestCase
         $database->insert("INSERT INTO pets VALUES(1, 'Bob');");
 
         $pets = $database->select("SELECT * FROM pets WHERE name IS NOT NULL");
-        
+
         $this->assertCount(1, $pets);
     }
 

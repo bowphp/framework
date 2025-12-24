@@ -22,21 +22,21 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         static::initializeConfig();
     }
-    
+
     private static function initializeConfig(): void
     {
         if (static::$config !== null) {
             return;
         }
-        
+
         static::$config = TestingConfiguration::getConfig();
-        
+
         $database = static::$config["database"] ?? null;
-        
+
         if (!$database) {
             throw new \RuntimeException("Database config not found");
         }
-        
+
         // Initialize adapters once for all tests
         static::$sqliteAdapter = new SqliteAdapter($database['connections']['sqlite']);
         static::$mysqlAdapter = new MysqlAdapter($database['connections']['mysql']);
@@ -101,7 +101,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
         static::$sqliteAdapter->setFetchMode(PDO::FETCH_ASSOC);
         $pdo = static::$sqliteAdapter->getConnection();
         $this->assertEquals(PDO::FETCH_ASSOC, $pdo->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));
-        
+
         // Reset to default
         static::$sqliteAdapter->setFetchMode(PDO::FETCH_OBJ);
     }
@@ -110,16 +110,16 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $newPdo = new PDO('sqlite::memory:');
         static::$sqliteAdapter->setConnection($newPdo);
-        
+
         $retrievedPdo = static::$sqliteAdapter->getConnection();
         $this->assertSame($newPdo, $retrievedPdo);
-        
+
         // Restore original connection
         static::$sqliteAdapter->connection();
     }
 
     // ===== MySQL Tests =====
-    
+
     public function test_mysql_connection_instance()
     {
         $this->assertInstanceOf(AbstractConnection::class, static::$mysqlAdapter);
@@ -172,7 +172,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     }
 
     // ===== PostgreSQL Tests =====
-    
+
     public function test_pgsql_connection_instance()
     {
         $this->assertInstanceOf(AbstractConnection::class, static::$pgsqlAdapter);
@@ -225,19 +225,19 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     }
 
     // ===== Binding Tests =====
-    
+
     public function test_bind_with_string_parameters()
     {
         $pdo = static::$sqliteAdapter->getConnection();
         $stmt = $pdo->prepare('SELECT :name AS name, :value AS value');
-        
+
         $bindings = ['name' => 'test', 'value' => 'data'];
         $boundStmt = static::$sqliteAdapter->bind($stmt, $bindings);
-        
+
         $this->assertInstanceOf(\PDOStatement::class, $boundStmt);
         $boundStmt->execute();
         $result = $boundStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $this->assertEquals('test', $result['name']);
         $this->assertEquals('data', $result['value']);
     }
@@ -246,13 +246,13 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $pdo = static::$sqliteAdapter->getConnection();
         $stmt = $pdo->prepare('SELECT :id AS id, :count AS count');
-        
+
         $bindings = ['id' => 123, 'count' => 456];
         $boundStmt = static::$sqliteAdapter->bind($stmt, $bindings);
-        
+
         $boundStmt->execute();
         $result = $boundStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $this->assertEquals(123, $result['id']);
         $this->assertEquals(456, $result['count']);
     }
@@ -261,13 +261,13 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $pdo = static::$sqliteAdapter->getConnection();
         $stmt = $pdo->prepare('SELECT :value AS value');
-        
+
         $bindings = ['value' => null];
         $boundStmt = static::$sqliteAdapter->bind($stmt, $bindings);
-        
+
         $boundStmt->execute();
         $result = $boundStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $this->assertNull($result['value']);
     }
 
@@ -275,17 +275,17 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $pdo = static::$sqliteAdapter->getConnection();
         $stmt = $pdo->prepare('SELECT :string AS string, :integer AS integer, :null AS null_val');
-        
+
         $bindings = [
             'string' => 'text',
             'integer' => 789,
             'null' => null
         ];
         $boundStmt = static::$sqliteAdapter->bind($stmt, $bindings);
-        
+
         $boundStmt->execute();
         $result = $boundStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $this->assertEquals('text', $result['string']);
         $this->assertEquals(789, $result['integer']);
         $this->assertNull($result['null_val']);
@@ -295,23 +295,23 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $pdo = static::$sqliteAdapter->getConnection();
         $stmt = $pdo->prepare('SELECT :price AS price');
-        
+
         $bindings = ['price' => 19.99];
         $boundStmt = static::$sqliteAdapter->bind($stmt, $bindings);
-        
+
         $boundStmt->execute();
         $result = $boundStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $this->assertEquals(19.99, (float) $result['price']);
     }
 
     // ===== Error Handling Tests =====
-    
+
     public function test_sqlite_missing_driver_throws_exception()
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Please select the right sqlite driver");
-        
+
         $invalidConfig = [];
         new SqliteAdapter($invalidConfig);
     }
@@ -320,13 +320,13 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("The database is not defined");
-        
+
         $invalidConfig = ['driver' => 'sqlite'];
         new SqliteAdapter($invalidConfig);
     }
 
     // ===== Data Provider Tests =====
-    
+
     /**
      * @dataProvider adapterProvider
      */
@@ -359,10 +359,10 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     public function test_all_adapters_support_fetch_mode_changes(AbstractConnection $adapter)
     {
         $originalMode = $adapter->getConnection()->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE);
-        
+
         $adapter->setFetchMode(PDO::FETCH_NUM);
         $this->assertEquals(PDO::FETCH_NUM, $adapter->getConnection()->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));
-        
+
         // Restore original mode
         $adapter->setFetchMode($originalMode);
     }
@@ -371,7 +371,7 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
     {
         // Initialize config if not already done
         static::initializeConfig();
-        
+
         return [
             'sqlite' => [static::$sqliteAdapter, 'sqlite'],
             'mysql' => [static::$mysqlAdapter, 'mysql'],

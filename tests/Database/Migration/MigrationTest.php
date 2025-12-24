@@ -42,7 +42,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     protected function tearDown(): void
     {
         ob_get_clean();
-        
+
         // Clean up all test tables
         foreach ($this->testTables as $table => $connections) {
             foreach ($connections as $name) {
@@ -78,7 +78,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_connection_switching(string $name)
     {
         $result = $this->migration->connection($name);
-        
+
         $this->assertInstanceOf(Migration::class, $result);
         $this->assertEquals($name, $this->migration->getAdapterName());
     }
@@ -90,7 +90,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     {
         $this->migration->connection($name);
         $adapterName = $this->migration->getAdapterName();
-        
+
         $this->assertEquals($name, $adapterName);
         $this->assertIsString($adapterName);
     }
@@ -102,7 +102,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     {
         $this->migration->connection($name);
         $tableName = $this->migration->getTablePrefixed('users');
-        
+
         $this->assertIsString($tableName);
         $this->assertStringContainsString('users', $tableName);
     }
@@ -129,7 +129,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         });
 
         $this->assertInstanceOf(Migration::class, $status);
-        
+
         // Verify table was created
         $result = Database::connection($name)->select('SELECT * FROM bow_testing');
         $this->assertIsArray($result);
@@ -261,7 +261,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_alter_fail_nonexistent_table(string $name)
     {
         $this->expectException(MigrationException::class);
-        
+
         $this->migration->connection($name)->alter('nonexistent_table', function (Table $generator) {
             $generator->dropColumn('name');
         });
@@ -277,7 +277,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         $this->migration->connection($name)->addSql('CREATE TABLE bow_testing (name varchar(255))');
 
         $this->expectException(MigrationException::class);
-        
+
         $this->migration->connection($name)->alter('bow_testing', function (Table $generator) {
             $generator->dropColumn('nonexistent_column');
         });
@@ -295,9 +295,9 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         Database::connection($name)->statement("CREATE TABLE bow_testing (id INT, name VARCHAR(255))");
 
         $status = $this->migration->connection($name)->drop('bow_testing');
-        
+
         $this->assertInstanceOf(Migration::class, $status);
-        
+
         // Verify table was dropped
         $this->expectException(Exception::class);
         Database::connection($name)->select('SELECT * FROM bow_testing');
@@ -309,7 +309,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_drop_nonexistent_table_throws_exception(string $name)
     {
         $this->expectException(MigrationException::class);
-        
+
         $this->migration->connection($name)->drop('nonexistent_table_xyz');
     }
 
@@ -323,7 +323,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         Database::connection($name)->statement("CREATE TABLE bow_testing (id INT, name VARCHAR(255))");
 
         $status = $this->migration->connection($name)->dropIfExists('bow_testing', false);
-        
+
         $this->assertInstanceOf(Migration::class, $status);
     }
 
@@ -333,7 +333,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_drop_if_exists_nonexistent_table(string $name)
     {
         $status = $this->migration->connection($name)->dropIfExists('nonexistent_table_xyz', false);
-        
+
         $this->assertInstanceOf(Migration::class, $status);
     }
 
@@ -363,13 +363,13 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     {
         $this->trackTable('bow_testing', $name);
         $this->migration->connection($name)->addSql('DROP TABLE IF EXISTS bow_testing');
-        
+
         $status1 = $this->migration->connection($name)->addSql('CREATE TABLE bow_testing (id INT, name VARCHAR(255))');
         $status2 = $this->migration->connection($name)->addSql("INSERT INTO bow_testing VALUES(1, 'Test')");
-        
+
         $this->assertInstanceOf(Migration::class, $status1);
         $this->assertInstanceOf(Migration::class, $status2);
-        
+
         $result = Database::connection($name)->select('SELECT * FROM bow_testing');
         $this->assertCount(1, $result);
     }
@@ -398,7 +398,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_addSql_invalid_syntax(string $name)
     {
         $this->expectException(MigrationException::class);
-        
+
         $this->migration->connection($name)->addSql('INVALID SQL SYNTAX HERE');
     }
 
@@ -411,15 +411,15 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     {
         $this->trackTable('bow_old_table', $name);
         $this->trackTable('bow_new_table', $name);
-        
+
         Database::connection($name)->statement("DROP TABLE IF EXISTS bow_old_table");
         Database::connection($name)->statement("DROP TABLE IF EXISTS bow_new_table");
         Database::connection($name)->statement("CREATE TABLE bow_old_table (id INT, name VARCHAR(255))");
 
         $status = $this->migration->connection($name)->renameTable('bow_old_table', 'bow_new_table');
-        
+
         $this->assertInstanceOf(Migration::class, $status);
-        
+
         // Verify new table exists
         $result = Database::connection($name)->select('SELECT * FROM bow_new_table');
         $this->assertIsArray($result);
@@ -431,7 +431,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_rename_nonexistent_table(string $name)
     {
         $this->expectException(MigrationException::class);
-        
+
         $this->migration->connection($name)->renameTable('nonexistent_table', 'new_table');
     }
 
@@ -443,14 +443,14 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_chained_operations(string $name)
     {
         $this->trackTable('bow_chain_test', $name);
-        
+
         $status = $this->migration->connection($name)
             ->addSql('DROP TABLE IF EXISTS bow_chain_test')
             ->addSql('CREATE TABLE bow_chain_test (id INT, name VARCHAR(255))')
             ->addSql("INSERT INTO bow_chain_test VALUES(1, 'Test')");
-        
+
         $this->assertInstanceOf(Migration::class, $status);
-        
+
         $result = Database::connection($name)->select('SELECT * FROM bow_chain_test');
         $this->assertCount(1, $result);
     }
@@ -461,23 +461,23 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_create_alter_drop_sequence(string $name)
     {
         $this->trackTable('bow_sequence', $name);
-        
+
         // Create
         $this->migration->connection($name)
             ->create('bow_sequence', function (Table $generator) {
                 $generator->addColumn('id', 'int', ['primary' => true]);
                 $generator->addColumn('name', 'string', ['size' => 100]);
             });
-        
+
         // Alter
         $this->migration->connection($name)
             ->alter('bow_sequence', function (Table $generator) {
                 $generator->addColumn('email', 'string', ['size' => 255]);
             });
-        
+
         // Drop
         $status = $this->migration->connection($name)->drop('bow_sequence');
-        
+
         $this->assertInstanceOf(Migration::class, $status);
     }
 
@@ -504,12 +504,12 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function test_multiple_connection_switches(string $name)
     {
         $connections = ['mysql', 'sqlite', 'pgsql'];
-        
+
         foreach ($connections as $conn) {
             $result = $this->migration->connection($conn);
             $this->assertEquals($conn, $this->migration->getAdapterName());
         }
-        
+
         // Finally switch back to the original connection
         $this->migration->connection($name);
         $this->assertEquals($name, $this->migration->getAdapterName());
@@ -518,8 +518,8 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
     public function connectionNames()
     {
         return [
-            ['mysql'], 
-            ['sqlite'], 
+            ['mysql'],
+            ['sqlite'],
             ['pgsql']
         ];
     }

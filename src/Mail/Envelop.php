@@ -482,20 +482,6 @@ class Envelop
         $this->setMessage($message, $type);
     }
 
-    public function composeTo()
-    {
-        $to = '';
-        foreach ($this->getTo() as $value) {
-            if ($value[0] !== null) {
-                $to .= $value[0] . ' <' . $value[1] . '>';
-            } else {
-                $to .= '<' . $value[1] . '>';
-            }
-
-            $this->write('RCPT TO: ' . $to, 250);
-        }
-    }
-
     /**
      * Get the list of receivers
      *

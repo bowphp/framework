@@ -45,10 +45,10 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $connection = Database::connection($name);
         $connection->statement('DROP TABLE IF EXISTS pets');
         $connection->statement('CREATE TABLE pets (id INT PRIMARY KEY, name VARCHAR(255))');
-        
+
         foreach (range(1, $count) as $key) {
             $connection->insert('INSERT INTO pets VALUES(:id, :name)', [
-                'id' => $key, 
+                'id' => $key,
                 'name' => 'Pet ' . $key
             ]);
         }
@@ -97,7 +97,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
         $items = $result->items();
         $this->assertCount(10, $items);
-        
+
         // Check first item - items() returns a Collection, use array access
         $firstItem = $items[0];
         $this->assertIsObject($firstItem);
@@ -136,7 +136,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
         $items = $result->items();
         $this->assertCount(10, $items);
-        
+
         // Second page should start at Pet 11
         $firstItem = $items[0];
         $this->assertEquals(11, $firstItem->id);
@@ -172,12 +172,12 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
         $items = $result->items();
         $this->assertCount(10, $items);
-        
+
         // Last page should start at Pet 21
         $firstItem = $items[0];
         $this->assertEquals(21, $firstItem->id);
         $this->assertEquals('Pet 21', $firstItem->name);
-        
+
         // Last item should be Pet 30 - use array index instead of end()
         $lastItem = $items[9]; // 10th item (index 9)
         $this->assertEquals(30, $lastItem->id);
@@ -222,7 +222,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $result = Database::connection($name)->table("pets")->paginate(10);
 
         $this->assertEquals(2, $result->total()); // Exactly 2 pages
-        
+
         // Navigate to page 2
         $page2 = Database::connection($name)->table("pets")->paginate(10, 2);
         $this->assertCount(10, $page2->items());
@@ -308,7 +308,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
     public function test_pagination_with_where_clause(string $name)
     {
         $this->createTestingTable($name);
-        
+
         // Use simple WHERE with = instead of <= to avoid binding issues
         $result = Database::connection($name)
             ->table("pets")
@@ -333,7 +333,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
         $items = $result->items();
         $firstItem = $items[0];
-        
+
         // With DESC order, first item should be Pet 30
         // But if ordering doesn't work, first will be Pet 1
         // Let's just check that items are returned

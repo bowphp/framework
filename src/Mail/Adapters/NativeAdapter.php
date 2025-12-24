@@ -35,7 +35,8 @@ class NativeAdapter implements MailAdapterInterface
         $this->config = $config;
 
         if (count($config) > 0) {
-            $this->from = $this->config["from"][$config["default"]];
+            $default = $this->config["default"];
+            $this->from = $this->config["from"][$default];
         }
     }
 

@@ -43,7 +43,7 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
     public function tearDown(): void
     {
         ob_get_clean();
-        
+
         // Clean up test tables after each test
         foreach (['mysql', 'sqlite', 'pgsql'] as $name) {
             try {
@@ -61,12 +61,12 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $migration = new MigrationExtendedStub();
         $migration->connection($name)->dropIfExists("pets", false);
         $migration->connection($name)->dropIfExists("pet_masters", false);
-        
+
         $migration->connection($name)->create("pet_masters", function (Table $table) {
             $table->addIncrement("id");
             $table->addString("name");
         });
-        
+
         $migration->connection($name)->create("pets", function (Table $table) {
             $table->addIncrement("id");
             $table->addString("name");
@@ -143,13 +143,13 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $this->seedTestData($name);
 
         $pet = PetModelStub::connection($name)->retrieve(1);
-        
+
         // Master should not be loaded yet (lazy loading)
         $this->assertIsObject($pet);
-        
+
         // Access the relationship
         $master = $pet->master;
-        
+
         $this->assertInstanceOf(PetMasterModelStub::class, $master);
         $this->assertEquals('didi', $master->name);
     }
@@ -163,11 +163,11 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $this->seedTestData($name);
 
         $pet = PetModelStub::connection($name)->retrieve(1);
-        
+
         // Access the relationship multiple times
         $master1 = $pet->master;
         $master2 = $pet->master;
-        
+
         $this->assertInstanceOf(PetMasterModelStub::class, $master1);
         $this->assertInstanceOf(PetMasterModelStub::class, $master2);
         $this->assertEquals($master1->id, $master2->id);
@@ -185,10 +185,10 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $this->seedTestData($name);
 
         $pets = PetModelStub::connection($name)->all();
-        
+
         $this->assertInstanceOf(Collection::class, $pets);
         $this->assertCount(5, $pets);
-        
+
         // Iterate directly over Collection (it's IteratorAggregate)
         foreach ($pets as $pet) {
             $master = $pet->master;
@@ -275,10 +275,10 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $this->seedTestData($name);
 
         $pets = PetModelStub::connection($name)->where('master_id', 1)->get();
-        
+
         $this->assertInstanceOf(Collection::class, $pets);
         $this->assertCount(2, $pets);
-        
+
         // Iterate directly over Collection
         foreach ($pets as $pet) {
             $this->assertEquals(1, $pet->master_id);
