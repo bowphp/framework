@@ -1,4 +1,4 @@
-Hello from Twig,
+Hello from PHP,
 
 Bow framework is awesome
 

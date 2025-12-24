@@ -40,12 +40,24 @@ class EventQueueTest extends TestCase
 
     /**
      * @test
+     * @group integration
      */
     public function it_should_queue_event(): void
     {
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        
+        // Skip if Beanstalkd is not available
+        try {
+            $adapter->getConnection();
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
+        }
+        
         $producer = new EventQueueJob(new UserEventListenerStub(), new UserEventStub("bowphp"));
         $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
+
+        // Clean up any existing file before test
+        @unlink($cache_filename);
 
         $this->assertInstanceOf(EventQueueJob::class, $producer);
 

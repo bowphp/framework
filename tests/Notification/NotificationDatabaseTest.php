@@ -16,23 +16,25 @@ class NotificationDatabaseTest extends TestCase
         Database::configure($config["database"]);
 
         Database::statement("drop table if exists notifications;");
+        $driver = $config["database"]["default"];
+        $idColumn = $driver === 'pgsql' ? 'id SERIAL PRIMARY KEY' : ($driver === 'mysql' ? 'id INTEGER PRIMARY KEY AUTO_INCREMENT' : 'id INTEGER PRIMARY KEY AUTOINCREMENT');
         Database::statement("create table if not exists notifications (
-            id int not null primary key auto_increment,
+            $idColumn,
             type text null,
             concern_id int,
             concern_type varchar(500),
             data text null,
-            read_at datetime null,
+            read_at TIMESTAMP null,
             created_at timestamp null default current_timestamp,
-            updated_at timestamp null default current_timestamp on update current_timestamp,
-            deleted_at datetime null
+            updated_at timestamp null default current_timestamp,
+            deleted_at TIMESTAMP null
         );");
     }
 
     public function test_insert_notification()
     {
         $result = Database::table('notifications')->insert([
-            'type' => 'info',
+            'type' => 'success',
             'concern_id' => 1,
             'concern_type' => 'user',
             'data' => json_encode(['message' => 'Test notification']),
@@ -44,10 +46,13 @@ class NotificationDatabaseTest extends TestCase
 
     public function test_retrieve_notification()
     {
-        $notification = Database::table('notifications')->where('id', 1)->first();
+        $notification = Database::table('notifications')
+            ->where('concern_type', 'user')
+            ->where('concern_id', 1)
+            ->first();
 
         $this->assertNotNull($notification);
-        $this->assertEquals('info', $notification->type);
+        $this->assertEquals('success', $notification->type);
         $this->assertEquals(1, $notification->concern_id);
         $this->assertEquals('user', $notification->concern_type);
         $this->assertEquals(json_encode(['message' => 'Test notification']), $notification->data);

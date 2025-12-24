@@ -88,9 +88,19 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 
 ### Request Lifecycle
 
-```
-Client → Request → Kernel → Router → Middleware → Controller 
-→ Model (Barry ORM) → Database → Response → Client
+```mermaid
+flowchart LR
+    Client --> Request
+    Request --> Kernel
+    Kernel --> Router
+    Router --> Middleware
+    Middleware --> Controller
+    Controller --> Model[Model<br/>Barry ORM]
+    Model --> Database
+    Database --> View
+    Database --> Response
+    View --> Response
+    Response --> Client
 ```
 
 1. **Request arrives** at entry point
@@ -105,6 +115,7 @@ Client → Request → Kernel → Router → Middleware → Controller
 ### Design Patterns
 
 The framework implements several design patterns:
+
 - **Singleton**: Application, Configuration loaders
 - **Factory**: Database connections, Mail adapters
 - **Strategy**: Storage drivers, Queue backends

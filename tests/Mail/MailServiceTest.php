@@ -16,6 +16,11 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 {
     private ConfigurationLoader $config;
 
+    /**
+     * @var string Path to sendmail command
+     */
+    private static string $sendmail_command = '/usr/sbin/sendmail';
+
     protected function setUp(): void
     {
         $this->config = TestingConfiguration::getConfig();

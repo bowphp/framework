@@ -1,4 +1,4 @@
-Hello from Twig,
+Hello from Tintin,
 
 Bow framework is awesome
 

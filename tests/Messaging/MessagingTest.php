@@ -41,7 +41,7 @@ class MessagingTest extends TestCase
             $table->addText('data');
             $table->addDatetime('read_at', ['nullable' => true]);
             $table->addTimestamps();
-        });
+        }, false);
     }
 
     protected function setUp(): void
@@ -145,16 +145,22 @@ class MessagingTest extends TestCase
 
         $envelop = (new Envelop())->to('test@example.com')->subject('Test')->message('Test message');
 
-        $message->method('channels')
+        $message->expects($this->once())
+            ->method('channels')
             ->willReturn(['mail', 'database']);
 
-        $message->method('toMail')
+        $message->expects($this->once())
+            ->method('toMail')
             ->willReturn($envelop);
 
-        $message->method('toDatabase')
+        $message->expects($this->once())
+            ->method('toDatabase')
             ->willReturn(['type' => 'test', 'data' => []]);
 
         $message->process($this->context);
+        
+        // Assert that the mock expectations were met
+        $this->assertTrue(true);
     }
 
     public function test_message_returns_empty_array_for_unconfigured_channels(): void
@@ -195,16 +201,16 @@ class MessagingTest extends TestCase
 
         $envelop = (new Envelop())->to('test@example.com')->subject('Test')->message('Test message');
 
-        $message->method('channels')
+        $message->expects($this->once())
+            ->method('channels')
             ->willReturn(['invalid_channel', 'mail']);
 
-        $message->method('toMail')
+        $message->expects($this->once())
+            ->method('toMail')
             ->willReturn($envelop);
 
         // Should not throw exception for invalid channel
         $message->process($this->context);
-
-        $this->assertTrue(true);
     }
 
     public function test_mail_message_returns_correct_envelop_instance(): void

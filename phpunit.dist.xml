@@ -15,7 +15,6 @@
     resolveDependencies="true">
     <testsuite name="Bow Framework">
         <directory suffix=".php">tests/</directory>
-        <exclude>./tests/SessionTest.php</exclude>
     </testsuite>
     <php>
         <env name="MYSQL_HOSTNAME" value="127.0.0.1"/>

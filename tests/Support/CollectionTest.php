@@ -49,71 +49,54 @@ class CollectionTest extends \PHPUnit\Framework\TestCase
      */
     public function test_count(Collection $collection)
     {
+        // Create fresh collection to avoid mutations from previous tests
+        $collection = new Collection(range(1, 10));
         $this->assertEquals(count(range(1, 10)), $collection->count());
     }
 
-    /**
-     * @param Collection $collection
-     * @depends test_get_instance
-     */
-    public function test_pop(Collection $collection)
+    public function test_pop()
     {
+        $collection = new Collection(range(1, 10));
         $this->assertEquals(10, $collection->pop());
     }
 
-    /**
-     * @param Collection $collection
-     * @depends test_get_instance
-     */
-    public function test_shift(Collection $collection)
+    public function test_shift()
     {
+        $collection = new Collection(range(1, 10));
         $this->assertEquals(1, $collection->shift());
     }
 
-    /**
-     * @param Collection $collection
-     * @depends test_get_instance
-     */
-    public function test_reserve(Collection $collection)
+    public function test_reserve()
     {
-        $this->assertEquals(array_reverse(range(1, 9)), $collection->reverse()->toArray());
+        $collection = new Collection(range(1, 10));
+        $this->assertEquals(array_reverse(range(1, 10)), $collection->reverse()->toArray());
     }
 
-    /**
-     * @param Collection $collection
-     * @depends test_get_instance
-     */
-    public function test_generator(Collection $collection)
+    public function test_generator()
     {
+        $collection = new Collection(range(1, 10));
         $gen = $collection->yieldify();
 
         $this->assertInstanceOf(PHPGenerator::class, $gen);
     }
 
-    /**
-     * @param Collection $collection
-     * @depends test_get_instance
-     */
-    public function test_json(Collection $collection)
+    public function test_json()
     {
+        $collection = new Collection(range(1, 10));
         $this->assertJson($collection->toJson());
     }
 
-    /**
-     * @param Collection $collection
-     * @depends test_get_instance
-     */
-    public function test_excepts(Collection $collection)
+    public function test_excepts()
     {
-        $this->assertEquals(range(1, 2), $collection->excepts([0, 1])->toArray());
+        $collection = new Collection(range(1, 10));
+        // excepts([0, 1]) keeps only items at indices 0 and 1, which are values 1 and 2
+        $result = $collection->excepts([0, 1])->toArray();
+        $this->assertEquals([0 => 1, 1 => 2], $result);
     }
 
-    /**
-     * @param Collection $collection
-     * @depends test_get_instance
-     */
-    public function test_push(Collection $collection)
+    public function test_push()
     {
+        $collection = new Collection(range(1, 9));
         $collection->push(10);
 
         $this->assertEquals(range(1, 10), $collection->toArray());
