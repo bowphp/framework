@@ -162,7 +162,7 @@ abstract class AbstractConnection
         }
 
         foreach ($bindings as $key => $value) {
-            $param = PDO::PARAM_INT;
+            $param = PDO::PARAM_STR;
 
             /**
              * We force the value in whole or in real.
@@ -172,15 +172,14 @@ abstract class AbstractConnection
              * - XSS
              */
             if (is_int($value)) {
-                $value = (int)$value;
+                $value = (int) $value;
+                $param = PDO::PARAM_INT;
             } elseif (is_float($value)) {
-                $value = (float)$value;
+                $value = (float) $value;
             } elseif (is_double($value)) {
-                $value = (float)$value;
+                $value = (float) $value;
             } elseif (is_resource($value)) {
                 $param = PDO::PARAM_LOB;
-            } else {
-                $param = PDO::PARAM_STR;
             }
 
             // Bind by value with native pdo statement object
