@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Configuration;
 
 use Bow\Support\Env;
-use InvalidArgumentException;
 
 class EnvConfiguration extends Configuration
 {

@@ -140,7 +140,7 @@ class Env
             return $value;
         }
 
-        $data = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode($value, true, 512);
 
         return json_last_error() ? $value : $data;
     }

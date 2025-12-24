@@ -55,6 +55,6 @@ class TestingConfiguration
      */
     public static function getConfig(): ConfigurationLoader
     {
-        return KernelTesting::configure(__DIR__ . '/stubs');
+        return KernelTesting::configure(__DIR__ . '/stubs/config');
     }
 }

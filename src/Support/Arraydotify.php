@@ -72,20 +72,32 @@ class Arraydotify implements ArrayAccess
     }
 
     /**
+     * Get the original array
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->origin;
+    }
+
+    /**
      * Get a value from the array using dot notation
      *
      * @param mixed $offset
      * @return mixed
      */
-    public function offsetGet(mixed $offset): mixed
+    public function &offsetGet(mixed $offset): mixed
     {
         // Try to get from dotified items first
         if (isset($this->items[$offset])) {
-            return $this->items[$offset];
+            $value = $this->items[$offset];
+            return $value;
         }
 
-        // Try to find nested array in origin
-        return $this->find($this->origin, $offset);
+        // Try to find nested array in origin and return by reference
+        $value = $this->findByReference($this->origin, $offset);
+        return $value;
     }
 
     /**
@@ -102,130 +114,7 @@ class Arraydotify implements ArrayAccess
 
         $value = $this->find($this->origin, $offset);
 
-        return $value !== null && (!is_array($value) || !empty($value));
-    }
-
-    /**
-     * Find a value in the original array using dot notation
-     *
-     * @param  array  $array
-     * @param  string $key
-     * @return mixed
-     */
-    private function find(array $array, string $key): mixed
-    {
-        if (empty($key)) {
-            return null;
-        }
-
-        $keys = explode('.', $key);
-
-        foreach ($keys as $segment) {
-            if (!is_array($array) || !array_key_exists($segment, $array)) {
-                return null;
-            }
-
-            $array = $array[$segment];
-        }
-
-        return $array;
-    }
-
-    /**
-     * Set a value in the array using dot notation
-     *
-     * @param mixed $offset
-     * @param mixed $value
-     * @return void
-     */
-    public function offsetSet(mixed $offset, mixed $value): void
-    {
-        if (is_null($offset)) {
-            $this->origin[] = $value;
-        } else {
-            $this->dataSet($this->origin, $offset, $value);
-        }
-
-        // Rebuild dotified array
-        $this->items = $this->dotify($this->origin);
-    }
-
-    /**
-     * Set a value in an array using dot notation
-     *
-     * @param  array  $array
-     * @param  string $key
-     * @param  mixed  $value
-     * @return void
-     */
-    private function dataSet(array &$array, string $key, mixed $value): void
-    {
-        $keys = explode('.', $key);
-
-        while (count($keys) > 1) {
-            $segment = array_shift($keys);
-
-            // Create nested array if it doesn't exist or isn't an array
-            if (!isset($array[$segment]) || !is_array($array[$segment])) {
-                $array[$segment] = [];
-            }
-
-            $array = &$array[$segment];
-        }
-
-        $array[array_shift($keys)] = $value;
-    }
-
-    /**
-     * Unset a value from the array using dot notation
-     *
-     * @param mixed $offset
-     * @return void
-     */
-    public function offsetUnset(mixed $offset): void
-    {
-        if (isset($this->items[$offset])) {
-            unset($this->items[$offset]);
-        }
-
-        $this->dataUnset($this->origin, $offset);
-
-        // Rebuild dotified array
-        $this->items = $this->dotify($this->origin);
-    }
-
-    /**
-     * Unset a value from an array using dot notation
-     *
-     * @param  array  $array
-     * @param  string $key
-     * @return void
-     */
-    private function dataUnset(array &$array, string $key): void
-    {
-        $keys = explode('.', $key);
-
-        while (count($keys) > 1) {
-            $segment = array_shift($keys);
-
-            if (!isset($array[$segment]) || !is_array($array[$segment])) {
-                return;
-            }
-
-            $array = &$array[$segment];
-        }
-
-        unset($array[array_shift($keys)]);
-    }
-
-    /**
-     * Get the original array
-     *
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return $this->origin;
+        return $value !== null;
     }
 
     /**
@@ -273,5 +162,147 @@ class Arraydotify implements ArrayAccess
     public function set(string $key, mixed $value): void
     {
         $this->offsetSet($key, $value);
+    }
+
+    /**
+     * Find a value in the original array using dot notation
+     *
+     * @param  array  $array
+     * @param  string $key
+     * @return mixed
+     */
+    private function find(array $array, string $key): mixed
+    {
+        if (empty($key)) {
+            return null;
+        }
+
+        $keys = explode('.', $key);
+
+        foreach ($keys as $segment) {
+            if (!is_array($array) || !array_key_exists($segment, $array)) {
+                return null;
+            }
+
+            $array = $array[$segment];
+        }
+
+        return $array;
+    }
+
+    /**
+     * Find a value in the original array by reference using dot notation
+     *
+     * @param  array  $array
+     * @param  string $key
+     * @return mixed
+     */
+    private function &findByReference(array &$array, string $key): mixed
+    {
+        if (empty($key)) {
+            $null = null;
+            return $null;
+        }
+
+        $keys = explode('.', $key);
+        $current = &$array;
+
+        foreach ($keys as $segment) {
+            if (!is_array($current) || !array_key_exists($segment, $current)) {
+                $null = null;
+                return $null;
+            }
+
+            $current = &$current[$segment];
+        }
+
+        return $current;
+    }
+
+    /**
+     * Set a value in the array using dot notation
+     *
+     * @param mixed $offset
+     * @param mixed $value
+     * @return void
+     */
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        if (is_null($offset)) {
+            $this->origin[] = $value;
+        } else {
+            $this->dataSet($this->origin, $offset, $value);
+        }
+
+        // Rebuild dotified array
+        $this->items = $this->dotify($this->origin);
+    }
+
+    /**
+     * Unset a value from the array using dot notation
+     *
+     * @param mixed $offset
+     * @return void
+     */
+    public function offsetUnset(mixed $offset): void
+    {
+        if (isset($this->items[$offset])) {
+            unset($this->items[$offset]);
+        }
+
+        $this->dataUnset($this->origin, $offset);
+
+        // Rebuild dotified array
+        $this->items = $this->dotify($this->origin);
+    }
+
+    /**
+     * Set a value in an array using dot notation
+     *
+     * @param  array  $array
+     * @param  string $key
+     * @param  mixed  $value
+     * @return void
+     */
+    private function dataSet(array &$array, string $key, mixed $value): void
+    {
+        $keys = explode('.', $key);
+
+        while (count($keys) > 1) {
+            $segment = array_shift($keys);
+
+            // Create nested array if it doesn't exist or isn't an array
+            if (!isset($array[$segment]) || !is_array($array[$segment])) {
+                $array[$segment] = [];
+            }
+
+            $array = &$array[$segment];
+        }
+
+        $array[array_shift($keys)] = $value;
+    }
+
+    /**
+     * Unset a value from an array using dot notation
+     *
+     * @param  array  $array
+     * @param  string $key
+     * @return void
+     */
+    private function dataUnset(array &$array, string $key): void
+    {
+        $keys = explode('.', $key);
+
+        while (count($keys) > 1) {
+            $segment = array_shift($keys);
+
+            if (!isset($array[$segment]) || !is_array($array[$segment])) {
+                return;
+            }
+
+            $array = &$array[$segment];
+        }
+
+        unset($array[array_shift($keys)]);
     }
 }
