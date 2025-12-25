@@ -2,13 +2,6 @@ name: bowphp
 
 on: [ push, pull_request ]
 
-# env:
-#   FTP_HOST: localhost
-#   FTP_USER: username
-#   FTP_PASSWORD: password
-#   FTP_PORT: 21
-#   FTP_ROOT: /tmp
-
 jobs:
   lunix-tests:
     runs-on: ${{ matrix.os }}
