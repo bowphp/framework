@@ -11,13 +11,6 @@ use Bow\Support\Str;
 class LogAdapter implements MailAdapterInterface
 {
     /**
-     * The configuration
-     *
-     * @var array
-     */
-    private array $config;
-
-    /**
      * The log path
      *
      * @var string
@@ -31,8 +24,7 @@ class LogAdapter implements MailAdapterInterface
      */
     public function __construct(array $config = [])
     {
-        $this->config = $config;
-        $this->path = $config['path'];
+        $this->path = $config['path'] ?? sys_get_temp_dir() . '/_bow/mails';
 
         if (!is_dir($this->path)) {
             mkdir($this->path, 0755, true);
@@ -53,19 +45,14 @@ class LogAdapter implements MailAdapterInterface
         $content = "Date: " . date('r') . "\n";
         $content .= $envelop->compileHeaders();
 
-        $content .= "To: " . implode(
-            ', ',
-            array_map(
-                function ($to) {
-                    return $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1];
-                },
-                $envelop->getTo()
-            )
-        ) . "\n";
+        $recipients = array_map(fn($to) => $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1], $envelop->getTo());
+        
+        $content .= "To: " . implode(', ', $recipients) . "\n";
 
         $content .= "Subject: " . $envelop->getSubject() . "\n";
+
         $content .= $envelop->getMessage();
 
-        return (bool)file_put_contents($filepath, $content);
+        return (bool) file_put_contents($filepath, $content);
     }
 }

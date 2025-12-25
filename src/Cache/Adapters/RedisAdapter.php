@@ -47,12 +47,12 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
-    public function addMany(array $data): bool
+    public function setMany(array $data): bool
     {
         $return = true;
 
-        foreach ($data as $attribute => $value) {
-            $return = $this->add($attribute, $value);
+        foreach ($data as $key => $value) {
+            $return = $this->set($key, $value);
         }
 
         return $return;
@@ -61,7 +61,7 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
-    public function add(string $key, mixed $data, ?int $time = null): bool
+    protected function add(string $key, mixed $data, ?int $time = null): bool
     {
         $options = [];
 
@@ -101,6 +101,55 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
+    public function remember(string $key, int $time, callable $callback): mixed
+    {
+        $cache = $this->get($key);
+
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $data = $callback();
+
+        $this->set($key, $data, $time);
+
+        return $data;
+    }
+
+
+
+    /**
+     * @inheritDoc
+     * @throws     Exception
+     */
+    public function increment(string $key, int $value = 1): int
+    {
+        $current = (int) $this->get($key, 0);
+        $new = $current + $value;
+
+        $this->set($key, $new);
+
+        return $new;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws     Exception
+     */
+    public function decrement(string $key, int $value = 1): int
+    {
+        $current = (int) $this->get($key, 0);
+
+        $new = $current - $value;
+
+        $this->set($key, $new);
+
+        return $new;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function push(string $key, array $data): bool
     {
         return $this->redis->append($key, $data);
@@ -131,7 +180,7 @@ class RedisAdapter implements CacheAdapterInterface
     /**
      * @inheritDoc
      */
-    public function addTime(string $key, int $time): bool
+    public function setTime(string $key, int $time): bool
     {
         return $this->redis->expire($key, $time);
     }

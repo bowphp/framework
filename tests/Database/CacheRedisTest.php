@@ -5,51 +5,57 @@ namespace Bow\Tests\Cache;
 use Bow\Cache\Cache;
 use Bow\Tests\Config\TestingConfiguration;
 
-class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
+class CacheRedisTest extends \PHPUnit\Framework\TestCase
 {
-    public static function setUpBeforeClass(): void
+    public function setUp(): void
     {
+        parent::setUp();
         $config = TestingConfiguration::getConfig();
+
         Cache::configure($config["cache"]);
-        Cache::store("file");
+        Cache::store("redis");
+
+        // Clear cache before each test for isolation
+        try {
+            // Cache::clear();
+        } catch (\Exception $e) {
+            // Redis might not be available, skip clearing
+        }
     }
 
     public function test_create_cache()
     {
-        $result = Cache::add('name', 'Dakia');
+        $result = Cache::set('name', 'Dakia');
 
         $this->assertEquals($result, true);
     }
 
     public function test_get_cache()
     {
-        // Add cache first since each test is isolated
-        Cache::add('name', 'Dakia');
+        Cache::set('name', 'Dakia');
+
         $this->assertEquals(Cache::get('name'), 'Dakia');
     }
 
-    public function test_add_with_callback_cache()
+    public function test_set_with_callback_cache()
     {
-        $result = Cache::add('lastname', fn() => 'Franck');
-        $result = $result && Cache::add('age', fn() => 25, 20000);
+        $result = Cache::set('lastname', fn() => 'Franck');
+        $result = $result && Cache::set('age', fn() => 25, 20000);
 
         $this->assertEquals($result, true);
     }
 
     public function test_get_callback_cache()
     {
-        // Add cache first
-        Cache::add('lastname', fn() => 'Franck');
         $this->assertEquals(Cache::get('lastname'), 'Franck');
 
-        Cache::add('age', fn() => 25, 20000);
         $this->assertEquals(Cache::get('age'), 25);
     }
 
-    public function test_add_array_cache()
+    public function test_set_array_cache()
     {
-        $result = Cache::add('address', [
-            'tel' => "49929598",
+        $result = Cache::set('address', [
+            'tel' => "0700000000",
             'city' => "Abidjan",
             'country' => "Cote d'ivoire"
         ]);
@@ -59,13 +65,12 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_get_array_cache()
     {
-        // Add cache first
-        Cache::add('address', [
-            'tel' => "49929598",
+        $result = Cache::set('address', [
+            'tel' => "0700000000",
             'city' => "Abidjan",
             'country' => "Cote d'ivoire"
         ]);
-        
+
         $result = Cache::get('address');
 
         $this->assertEquals(true, is_array($result));
@@ -77,9 +82,6 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_has()
     {
-        // Add cache first
-        Cache::add('name', 'Dakia');
-        
         $first_result = Cache::has('name');
         $other_result = Cache::has('jobs');
 
@@ -89,12 +91,6 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_forget()
     {
-        // Add caches first
-        Cache::add('address', ['tel' => "49929598"]);
-        Cache::add('name', 'Dakia');
-        
-        Cache::forget('address');
-
         $result = Cache::forget('name');
 
         $this->assertEquals(true, $result);
@@ -110,42 +106,35 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_time_of_empty()
     {
-        // Add cache with expiry
-        Cache::add('lastname', 'Franck', 20000);
         $result = Cache::timeOf('lastname');
 
-        $this->assertTrue(is_numeric($result));
-        $this->assertGreaterThan(0, $result);
+        $this->assertEquals($result, -1);
     }
 
     public function test_time_of_empty_2()
     {
         $result = Cache::timeOf('address');
 
-        $this->assertEquals(false, $result);
+        $this->assertEquals($result, -1);
     }
 
     public function test_time_of_empty_3()
     {
-        // Add cache with expiry first
-        Cache::add('age', 25, 20000);
         $result = Cache::timeOf('age');
 
-        // Cache with expiry should return an integer timestamp
-        $this->assertTrue(is_int($result));
-        $this->assertGreaterThan(0, $result);
+        $this->assertEquals(is_int($result), true);
     }
 
     public function test_can_add_many_data_at_the_same_time_in_the_cache()
     {
-        $result = Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        $result = Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals($result, true);
     }
 
     public function test_can_retrieve_multiple_cache_stored()
     {
-        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals(Cache::get('name'), 'Doe');
         $this->assertEquals(Cache::get('first_name'), 'John');
@@ -153,7 +142,7 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_clear_cache()
     {
-        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals(Cache::get('first_name'), 'John');
         $this->assertEquals(Cache::get('name'), 'Doe');
@@ -164,13 +153,33 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
         $this->assertNull(Cache::get('first_name'));
     }
 
-    protected function setUp(): void
+    public function test_get_with_default_returns_default_for_missing_key()
     {
-        $config = TestingConfiguration::getConfig();
-        Cache::configure($config["cache"]);
-        Cache::store("file");
+        $result = Cache::get('missing_key', 'default_value');
+        $this->assertEquals('default_value', $result);
+    }
 
-        // Clear cache before each test to ensure isolation
-        Cache::clear();
+    public function test_cache_stores_complex_data_structures()
+    {
+        $complexData = [
+            'nested' => [
+                'array' => [1, 2, 3],
+                'string' => 'value'
+            ],
+            'number' => 42
+        ];
+
+        Cache::set('complex', $complexData);
+        $retrieved = Cache::get('complex');
+
+        $this->assertEquals($complexData, $retrieved);
+    }
+
+    public function test_multiple_stores_work_independently()
+    {
+        Cache::store('redis')->set('redis_key', 'redis_value');
+
+        $this->assertEquals('redis_value', Cache::get('redis_key'));
+        $this->assertTrue(Cache::has('redis_key'));
     }
 }

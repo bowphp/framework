@@ -118,6 +118,24 @@ class Cache
      * @throws BadMethodCallException
      * @throws ErrorException
      */
+    public function __call($name, $arguments)
+    {
+        if (method_exists(static::getInstance(), $name)) {
+            return call_user_func_array([static::getInstance(), $name], $arguments);
+        }
+
+        throw new BadMethodCallException("The $name method does not exist");
+    }
+
+    /**
+     * __callStatic
+     *
+     * @param  string $name
+     * @param  array  $arguments
+     * @return mixed
+     * @throws BadMethodCallException
+     * @throws ErrorException
+     */
     public static function __callStatic(string $name, array $arguments)
     {
         if (is_null(static::$instance)) {

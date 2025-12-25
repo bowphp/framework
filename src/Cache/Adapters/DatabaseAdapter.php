@@ -2,6 +2,7 @@
 
 namespace Bow\Cache\Adapters;
 
+use Bow\Cache\CacheException;
 use Bow\Database\Database;
 use Bow\Database\Exception\ConnectionException;
 use Bow\Database\Exception\QueryBuilderException;
@@ -42,10 +43,10 @@ class DatabaseAdapter implements CacheAdapterInterface
      * @inheritDoc
      * @throws     Exception
      */
-    public function add(string $key, mixed $data, ?int $time = null): bool
+    protected function add(string $key_name, mixed $data, ?int $time = null): bool
     {
-        if ($this->has($key)) {
-            return $this->update($key, $data, $time);
+        if ($this->has($key_name)) {
+            return $this->update($key_name, $data, $time);
         }
 
         if (is_callable($data)) {
@@ -54,37 +55,33 @@ class DatabaseAdapter implements CacheAdapterInterface
             $content = $data;
         }
 
+        $current_time = time();
+
         if (!is_null($time)) {
-            $time += time();
+            $time += $current_time;
         } else {
-            $time = time();
+            $time = $current_time;
         }
 
-        $time = date("Y-m-d H:i:s");
-
-        return $this->query->insert(['key_name' => $key, "data" => serialize($content), "expire" => $time]);
+        return $this->query->insert(['key_name' => $key_name, "data" => serialize($content), "expire" => date("Y-m-d H:i:s", $time)]);
     }
 
     /**
      * @inheritDoc
      * @throws     QueryBuilderException
      */
-    public function has(string $key): bool
+    public function has(string $key_name): bool
     {
-        return $this->query->where("key_name", $key)->exists();
+        return $this->query->where("key_name", $key_name)->exists();
     }
 
     /**
      * Update value from key
      *
-     * @throws Exception
+     * @throws CacheException
      */
-    public function update(string $key, mixed $data, ?int $time = null): mixed
+    private function update(string $key, mixed $data, ?int $time = null): mixed
     {
-        if (!$this->has($key)) {
-            throw new Exception("The key $key is not found");
-        }
-
         if (is_callable($data)) {
             $content = $data();
         } else {
@@ -98,19 +95,19 @@ class DatabaseAdapter implements CacheAdapterInterface
             $result->expire = date("Y-m-d H:i:s", strtotime($result->expire) + $time);
         }
 
-        return $this->query->where("key_name", $key)->update((array)$result);
+        return $this->query->where("key_name", $key)->update((array) $result);
     }
 
     /**
      * @inheritDoc
      * @throws     Exception
      */
-    public function addMany(array $data): bool
+    public function setMany(array $data): bool
     {
         $return = true;
 
-        foreach ($data as $attribute => $value) {
-            $return = $this->add($attribute, $value);
+        foreach ($data as $key => $value) {
+            $return = $this->set($key, $value);
         }
 
         return $return;
@@ -129,6 +126,52 @@ class DatabaseAdapter implements CacheAdapterInterface
      * @inheritDoc
      * @throws     Exception
      */
+    public function remember(string $key, int $time, callable $callback): mixed
+    {
+        if ($this->has($key)) {
+            return $this->get($key);
+        }
+
+        $value = $callback();
+
+        $this->set($key, $value, $time);
+
+        return $value;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws     Exception
+     */
+    public function increment(string $key, int $value = 1): int
+    {
+        $current = (int) $this->get($key, 0);
+        $new = $current + $value;
+
+        $this->set($key, $new);
+
+        return $new;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws     Exception
+     */
+    public function decrement(string $key, int $value = 1): int
+    {
+        $current = (int) $this->get($key, 0);
+
+        $new = $current - $value;
+
+        $this->set($key, $new);
+
+        return $new;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws     Exception
+     */
     public function push(string $key, array $data): bool
     {
         if (!$this->has($key)) {
@@ -137,10 +180,10 @@ class DatabaseAdapter implements CacheAdapterInterface
 
         $result = $this->query->where("key_name", $key)->first();
 
-        $value = (array)unserialize($result->data);
+        $value = (array) unserialize($result->data);
         $result->data = serialize(array_merge($value, $data));
 
-        return (bool)$this->query->where("key_name", $key)->update((array)$result);
+        return (bool) $this->query->where("key_name", $key)->update((array) $result);
     }
 
     /**
@@ -148,7 +191,7 @@ class DatabaseAdapter implements CacheAdapterInterface
      * @throws     QueryBuilderException
      * @throws     Exception
      */
-    public function addTime(string $key, int $time): bool
+    public function setTime(string $key, int $time): bool
     {
         if (!$this->has($key)) {
             throw new Exception("The key $key is not found");
@@ -158,7 +201,7 @@ class DatabaseAdapter implements CacheAdapterInterface
 
         $result->expire = date("Y-m-d H:i:s", strtotime($result->expire) + $time);
 
-        return (bool)$this->query->where("key_name", $key)->update((array)$result);
+        return (bool) $this->query->where("key_name", $key)->update((array) $result);
     }
 
     /**
@@ -169,12 +212,14 @@ class DatabaseAdapter implements CacheAdapterInterface
     public function timeOf(string $key): int|bool|string
     {
         if (!$this->has($key)) {
-            throw new Exception("The key $key is not found");
+            return false;
         }
 
         $result = $this->query->where("key_name", $key)->first();
 
-        return $result->expire;
+        $current_time = time();
+
+        return strtotime($result->expire, $current_time) - $current_time;
     }
 
     /**
@@ -182,13 +227,9 @@ class DatabaseAdapter implements CacheAdapterInterface
      * @throws     QueryBuilderException
      * @throws     Exception
      */
-    public function forget(string $key): bool
+    public function forget(string $key_name): bool
     {
-        if (!$this->has($key)) {
-            throw new Exception("The key $key is not found");
-        }
-
-        return $this->query->where("key_name", $key)->delete();
+        return $this->query->where("key_name", $key_name)->delete();
     }
 
     /**
@@ -211,6 +252,11 @@ class DatabaseAdapter implements CacheAdapterInterface
         }
 
         $result = $this->query->where("key_name", $key)->first();
+
+        if (strtotime($result->expire) < time()) {
+            $this->forget($key);
+            return is_callable($default) ? $default() : $default;
+        }
 
         $value = unserialize($result->data);
 

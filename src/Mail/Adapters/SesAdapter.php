@@ -44,7 +44,7 @@ class SesAdapter implements MailAdapterInterface
      *
      * @return SesClient
      */
-    public function initializeSesClient(): SesClient
+    private function initializeSesClient(): SesClient
     {
         $this->ses = new SesClient($this->config);
 

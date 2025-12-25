@@ -8,7 +8,6 @@ use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Security\Sanitize;
 use Bow\Support\Str;
-use Bow\Support\Util;
 use JsonSerializable;
 use PDO;
 use PDOStatement;
@@ -852,9 +851,11 @@ class QueryBuilder implements JsonSerializable
         $statement = $this->connection->prepare($sql);
 
         $this->bind($statement, $this->where_data_binding);
-        $this->where_data_binding = [];
 
         $statement->execute();
+
+        $this->triggerQueryEvent($sql, $this->where_data_binding);
+        $this->where_data_binding = [];
 
         if ($statement->rowCount() > 1) {
             return Sanitize::make($statement->fetchAll());
@@ -866,54 +867,71 @@ class QueryBuilder implements JsonSerializable
 
     /**
      * Executes PDOStatement::bindValue on an instance of
+     * Binds parameter values to a PDO statement with proper type detection.
+     *
+     * Handles type-safe parameter binding for SQL injection prevention.
      *
      * @param PDOStatement $pdo_statement
      * @param array        $bindings
-     *
      * @return void
      */
     private function bind(PDOStatement $pdo_statement, array $bindings = []): void
     {
         foreach ($bindings as $key => $value) {
-            if (is_null($value) || strtolower((string)$value) === 'null') {
-                $pdo_statement->bindValue(
-                    ':' . $key,
-                    $value,
-                    PDO::PARAM_NULL
-                );
+            if (is_null($value) || strtolower((string) $value) === 'null') {
+                $key_binding = ':' . $key;
+                $pdo_statement->bindValue($key_binding, $value, PDO::PARAM_NULL);
                 unset($bindings[$key]);
             }
         }
 
         foreach ($bindings as $key => $value) {
-            $param = PDO::PARAM_INT;
+            $param = PDO::PARAM_STR;
 
-            /**
-             * We force the value in whole or in real.
-             *
-             * SECURITY OF DATA
-             * - Injection SQL
-             * - XSS
-             */
             if (is_int($value)) {
-                $value = (int)$value;
+                $value = (int) $value;
+                $param = PDO::PARAM_INT;
             } elseif (is_float($value)) {
-                $value = (float)$value;
+                $value = (float) $value;
             } elseif (is_double($value)) {
-                $value = (float)$value;
+                $value = (float) $value;
             } elseif (is_resource($value)) {
                 $param = PDO::PARAM_LOB;
-            } else {
-                $param = PDO::PARAM_STR;
             }
 
             // Bind by value with native pdo statement object
-            $pdo_statement->bindValue(
-                is_string($key) ? ":" . $key : $key + 1,
-                $value,
-                $param
-            );
+            $key_binding = is_string($key) ? ":" . $key : $key + 1;
+            $pdo_statement->bindValue($key_binding, $value, $param);
         }
+    }
+
+    /**
+     * Data trainer. key => :value
+     *
+     * @param  array $data
+     * @param  bool  $byKey
+     * @return array
+     */
+    private function add2points(array $data, bool $byKey = false): array
+    {
+        $result = [];
+
+        if (!$byKey) {
+            foreach ($data as $key => $value) {
+                $result[$value] = ':' . $value;
+            }
+            return $result;
+        }
+
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $result[$key] = ':' . $value;
+            } else {
+                $result[$key] = '?';
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -1039,13 +1057,14 @@ class QueryBuilder implements JsonSerializable
 
         $this->bind($statement, $this->where_data_binding);
 
-        $this->where_data_binding = [];
-
         $statement->execute();
 
         $data = $statement->fetchAll();
 
         $statement->closeCursor();
+
+        $this->triggerQueryEvent($sql, $this->where_data_binding);
+        $this->where_data_binding = [];
 
         if (!$this->first) {
             return $data;
@@ -1140,21 +1159,22 @@ class QueryBuilder implements JsonSerializable
 
             $this->where = null;
 
-            $data = array_merge(array_values($data), $this->where_data_binding);
-
-            $this->where_data_binding = [];
+            $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
         }
 
         $statement = $this->connection->prepare($sql);
 
-        $this->bind($statement, $data);
+        $this->bind($statement, $this->where_data_binding);
 
         // Execution of the request
         $statement->execute();
 
         $result = $statement->rowCount();
 
-        return (int)$result;
+        $this->triggerQueryEvent($sql, $this->where_data_binding);
+        $this->where_data_binding = [];
+
+        return (int) $result;
     }
 
     /**
@@ -1192,13 +1212,14 @@ class QueryBuilder implements JsonSerializable
 
         $this->bind($statement, $this->where_data_binding);
 
-        $this->where_data_binding = [];
-
         $statement->execute();
 
         $result = $statement->rowCount();
 
-        return (int)$result;
+        $this->triggerQueryEvent($sql, $this->where_data_binding);
+        $this->where_data_binding = [];
+
+        return (int) $result;
     }
 
     /**
@@ -1285,15 +1306,19 @@ class QueryBuilder implements JsonSerializable
     public function truncate(): bool
     {
         if ($this->connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-            $query = 'delete from ' . $this->table . ';';
+            $sql = 'delete from ' . $this->table . ';';
             if (!$this->connection->inTransaction()) {
-                $query .= ' VACUUM;';
+                $sql .= ' VACUUM;';
             }
         } else {
-            $query = 'truncate table ' . $this->table . ';';
+            $sql = 'truncate table ' . $this->table . ';';
         }
 
-        return (bool)$this->connection->exec($query);
+        $result = (bool) $this->connection->exec($sql);
+
+        $this->triggerQueryEvent($sql, []);
+
+        return $result;
     }
 
     /**
@@ -1321,22 +1346,37 @@ class QueryBuilder implements JsonSerializable
      */
     public function insert(array $values): int
     {
-        $row_affected = 0;
+        $mixture_item_structure_detected = false;
+        $single_item_structure_detected = false;
 
-        $resets = [];
+        $single_item_structure = [];
+        $multi_item_structures = [];
 
         foreach ($values as $key => $value) {
             if (is_array($value) && is_int($key)) {
-                $row_affected += $this->insertOne($value);
+                $multi_item_structures[] = $value;
+                $mixture_item_structure_detected = true;
             } else {
-                $resets[$key] = $value;
+                $single_item_structure[$key] = $value;
+                $single_item_structure_detected = true;
             }
-
-            unset($values[$key]);
         }
 
-        if (!empty($resets)) {
-            $row_affected += $this->insertOne($resets);
+        if ($single_item_structure_detected && $mixture_item_structure_detected) {
+            throw new QueryBuilderException(
+                'Mixed structure detected in insert data. Cannot mix single and multiple row inserts.',
+                E_ERROR
+            );
+        }
+
+        $multi_item_structures = !empty($multi_item_structures)
+            ? $multi_item_structures
+            : [$single_item_structure];
+
+        $row_affected = 0;
+
+        foreach ($multi_item_structures as $structure) {
+            $row_affected += $this->insertOne($structure);
         }
 
         return $row_affected;
@@ -1356,22 +1396,15 @@ class QueryBuilder implements JsonSerializable
 
         $sql = 'insert into ' . $this->table . '(' . $column . ') values';
 
-        $sql .= '(' . implode(', ', Util::add2points($fields, true)) . ');';
+        $sql .= '(' . implode(', ', $this->add2points($fields, true)) . ');';
 
         $statement = $this->connection->prepare($sql);
 
         $this->bind($statement, $values);
 
-        try {
-            $statement->execute();
-        } catch (\PDOException $e) {
-            throw new QueryBuilderException(
-                'Error during insertion: ' . $e->getMessage(),
-                (int) $e->getCode(),
-            );
-        }
-
         $statement->execute();
+
+        $this->triggerQueryEvent($sql, $values);
 
         return (int) $statement->rowCount();
     }
@@ -1383,7 +1416,13 @@ class QueryBuilder implements JsonSerializable
      */
     public function drop(): bool
     {
-        return (bool)$this->connection->exec('drop table ' . $this->table);
+        $sql = 'drop table ' . $this->table;
+
+        $result = (bool) $this->connection->exec($sql);
+
+        $this->triggerQueryEvent($sql, []);
+
+        return $result;
     }
 
     /**
@@ -1457,7 +1496,7 @@ class QueryBuilder implements JsonSerializable
             return $this->count() > 0;
         }
 
-        return $this->whereIn($column, (array)$value)->count() > 0;
+        return $this->whereIn($column, (array) $value)->count() > 0;
     }
 
     /**
@@ -1494,13 +1533,15 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
-     * __toString
+     * Trigger the query event
      *
-     * @return string
+     * @param  string $sql
+     * @param  array  $bindings
+     * @return void
      */
-    public function __toString(): string
+    private function triggerQueryEvent(string $sql, array $bindings): void
     {
-        return $this->toJson();
+        Database::triggerQueryEvent($sql, $bindings);
     }
 
     /**
@@ -1512,5 +1553,15 @@ class QueryBuilder implements JsonSerializable
     public function toJson(int $option = 0): string
     {
         return json_encode($this->get(), $option);
+    }
+
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->toJson();
     }
 }

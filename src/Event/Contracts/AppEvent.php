@@ -6,4 +6,10 @@ namespace Bow\Event\Contracts;
 
 interface AppEvent
 {
+    /**
+     * Get the name of the event
+     *
+     * @return string
+     */
+    public function getName(): string;
 }

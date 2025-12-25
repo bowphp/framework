@@ -313,6 +313,19 @@ class Envelop
     }
 
     /**
+     * Adds blind carbon copy
+     *
+     * @param string  $mail
+     * @param ?string $name
+     *
+     * @return Envelop
+     */
+    public function bcc(string $mail, ?string $name = null): Envelop
+    {
+        return $this->addBcc($mail, $name);
+    }
+
+    /**
      * Add carbon copy
      *
      * @param string  $mail
@@ -330,6 +343,19 @@ class Envelop
     }
 
     /**
+     * Add carbon copy
+     *
+     * @param string  $mail
+     * @param ?string $name
+     *
+     * @return Envelop
+     */
+    public function cc(string $mail, ?string $name = null): Envelop
+    {
+        return $this->addCc($mail, $name);
+    }
+
+    /**
      * Add Reply-To
      *
      * @param  string  $mail
@@ -343,6 +369,18 @@ class Envelop
         $this->headers[] = "Replay-To: $mail";
 
         return $this;
+    }
+
+    /**
+     * Add Reply-To
+     *
+     * @param  string  $mail
+     * @param  ?string $name
+     * @return Envelop
+     */
+    public function replyTo(string $mail, ?string $name = null): Envelop
+    {
+        return $this->addReplyTo($mail, $name);
     }
 
     /**
@@ -363,6 +401,23 @@ class Envelop
     }
 
     /**
+     * Add Return-Path
+     *
+     * @param string  $mail
+     * @param ?string $name = null
+     *
+     * @return Envelop
+     */
+    public function returnPath(string $mail, ?string $name = null): Envelop
+    {
+        $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
+
+        $this->headers[] = "Return-Path: $mail";
+
+        return $this;
+    }
+
+    /**
      * Set email priority.
      *
      * @param int $priority
@@ -374,6 +429,18 @@ class Envelop
         $this->headers[] = "X-Priority: " . (int)$priority;
 
         return $this;
+    }
+
+    /**
+     * Set email priority.
+     *
+     * @param int $priority
+     *
+     * @return Envelop
+     */
+    public function setPriority(int $priority): Envelop
+    {
+        return $this->addPriority($priority);
     }
 
     /**

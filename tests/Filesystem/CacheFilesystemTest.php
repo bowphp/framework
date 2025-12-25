@@ -1,70 +1,54 @@
 <?php
 
-namespace Bow\Tests\Cache;
+namespace Bow\Tests\Filesystem;
 
 use Bow\Cache\Cache;
-use Bow\Database\Database;
 use Bow\Tests\Config\TestingConfiguration;
 
-class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
+class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass(): void
     {
         $config = TestingConfiguration::getConfig();
-
-        Database::configure($config["database"]);
-
-        Database::statement("DROP TABLE IF EXISTS caches;");
-        Database::statement("
-            CREATE TABLE IF NOT EXISTS caches (
-                key_name varchar(500) not null primary key,
-                data text null,
-                expire TIMESTAMP null
-            )");
-
         Cache::configure($config["cache"]);
-        Cache::store("database");
-    }
-
-    public function setUp(): void
-    {
-        // Clear all cache before each test for isolation
-        Database::statement("DELETE FROM caches");
+        Cache::store("file");
     }
 
     public function test_create_cache()
     {
-        $result = Cache::add('name', 'Dakia');
+        $result = Cache::set('name', 'Dakia');
 
         $this->assertEquals($result, true);
     }
 
     public function test_get_cache()
     {
-        Cache::add('name', 'Dakia');
+        // Add cache first since each test is isolated
+        Cache::set('name', 'Dakia');
         $this->assertEquals(Cache::get('name'), 'Dakia');
     }
 
-    public function test_add_with_callback_cache()
+    public function test_set_with_callback_cache()
     {
-        $result = Cache::add('lastname', fn() => 'Franck');
-        $result = $result && Cache::add('age', fn() => 25, 20000);
+        $result = Cache::set('lastname', fn() => 'Franck');
+        $result = $result && Cache::set('age', fn() => 25, 20000);
 
         $this->assertEquals($result, true);
     }
 
     public function test_get_callback_cache()
     {
-        Cache::add('lastname', fn() => 'Franck');
-        Cache::add('age', fn() => 25, 20000);
-        
+        // Add cache first
+        Cache::set('lastname', fn() => 'Franck');
         $this->assertEquals(Cache::get('lastname'), 'Franck');
+
+        Cache::set('age', fn() => 25, 20000);
         $this->assertEquals(Cache::get('age'), 25);
     }
 
-    public function test_add_array_cache()
+    public function test_set_array_cache()
     {
-        $result = Cache::add('address', [
+        $result = Cache::set('address', [
             'tel' => "49929598",
             'city' => "Abidjan",
             'country' => "Cote d'ivoire"
@@ -75,12 +59,13 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
     public function test_get_array_cache()
     {
-        Cache::add('address', [
-            'tel' => "49929598",
+        // Add cache first
+        Cache::set('address', [
+            'tel' => "0728010298",
             'city' => "Abidjan",
             'country' => "Cote d'ivoire"
         ]);
-        
+
         $result = Cache::get('address');
 
         $this->assertEquals(true, is_array($result));
@@ -92,8 +77,9 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
     public function test_has()
     {
-        Cache::add('name', 'TestValue');
-        
+        // Add cache first
+        Cache::set('name', 'Dakia');
+
         $first_result = Cache::has('name');
         $other_result = Cache::has('jobs');
 
@@ -103,7 +89,12 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
     public function test_forget()
     {
-        Cache::add('name', 'TestValue');
+        // Add caches first
+        Cache::set('address', ['tel' => "49929598"]);
+        Cache::set('name', 'Dakia');
+
+        Cache::forget('address');
+
         $result = Cache::forget('name');
 
         $this->assertEquals(true, $result);
@@ -112,45 +103,49 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
     public function test_forget_empty()
     {
-        $this->expectExceptionMessage("is not found");
-        // Try to forget a key that doesn't exist
-        $result = Cache::forget('non_existent_key');
+        $result = Cache::forget('name');
+
+        $this->assertEquals(false, $result);
     }
 
     public function test_time_of_empty()
     {
-        Cache::add('lastname', 'TestValue');
+        // Add cache with expiry
+        Cache::set('lastname', 'Franck', 20000);
         $result = Cache::timeOf('lastname');
 
-        $this->assertIsString($result);
+        $this->assertTrue(is_numeric($result));
+        $this->assertGreaterThan(0, $result);
     }
 
     public function test_time_of_empty_2()
     {
-        Cache::add('address', ['test' => 'value']);
         $result = Cache::timeOf('address');
 
-        $this->assertIsString($result);
+        $this->assertEquals(false, $result);
     }
 
     public function test_time_of_empty_3()
     {
-        Cache::add('age', 25, 20000);
+        // Set cache with expiry first
+        Cache::set('age', 25, 20000);
         $result = Cache::timeOf('age');
 
-        $this->assertIsString($result);
+        // Cache with expiry should return an integer timestamp
+        $this->assertTrue(is_int($result));
+        $this->assertGreaterThan(0, $result);
     }
 
     public function test_can_add_many_data_at_the_same_time_in_the_cache()
     {
-        $result = Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        $result = Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals($result, true);
     }
 
     public function test_can_retrieve_multiple_cache_stored()
     {
-        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals(Cache::get('name'), 'Doe');
         $this->assertEquals(Cache::get('first_name'), 'John');
@@ -158,7 +153,7 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
     public function test_clear_cache()
     {
-        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals(Cache::get('first_name'), 'John');
         $this->assertEquals(Cache::get('name'), 'Doe');
@@ -167,5 +162,32 @@ class CacheDatabaseTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNull(Cache::get('name'));
         $this->assertNull(Cache::get('first_name'));
+    }
+
+    public function test_set_overwrites_existing_value()
+    {
+        Cache::set('overwrite_test', 'original');
+        $this->assertEquals('original', Cache::get('overwrite_test'));
+
+        Cache::set('overwrite_test', 'updated');
+        $this->assertEquals('updated', Cache::get('overwrite_test'));
+    }
+
+    public function test_cache_stores_null_value()
+    {
+        Cache::set('null_value', null);
+
+        $this->assertTrue(Cache::has('null_value'));
+        $this->assertNull(Cache::get('null_value'));
+    }
+
+    protected function setUp(): void
+    {
+        $config = TestingConfiguration::getConfig();
+        Cache::configure($config["cache"]);
+        Cache::store("file");
+
+        // Clear cache before each test to ensure isolation
+        Cache::clear();
     }
 }

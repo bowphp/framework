@@ -57,7 +57,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns($path);
         $request->allows()->get("_method")->andReturns("");
-        
+
         return $request;
     }
 
@@ -70,7 +70,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $response->allows()->withHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status($expectedStatus);
         $response->allows()->send(Mockery::any(), Mockery::any())->andReturn('');
-        
+
         return $response;
     }
 
@@ -86,7 +86,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
             "boot" => $config,
             "isCli" => $isCli
         ]);
-        
+
         return $config;
     }
 
@@ -154,7 +154,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
     {
         $request = $this->createRequestMock();
         $response = Mockery::mock(Response::class);
-        
+
         // Should NOT call withHeader for X-Powered-By
         $response->shouldNotReceive('withHeader')->with('X-Powered-By', Mockery::any());
         $response->allows()->status(200);
@@ -171,7 +171,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         });
 
         $app->run();
-        
+
         $this->assertTrue(true); // If we get here without Mockery exception, test passes
     }
 

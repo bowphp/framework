@@ -11,7 +11,7 @@ class FakeNotificationTableMigration extends Migration
     public function up(): void
     {
         $this->create("notifications", function (Table $table) {
-            $table->addString('id', ["primary" => true, 'size' => 500]);
+            $table->addIncrement('id', ["primary" => true]);
             $table->addString('type');
             $table->addString('concern_id');
             $table->addString('concern_type');

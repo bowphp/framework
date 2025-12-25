@@ -158,7 +158,7 @@ class MessagingTest extends TestCase
             ->willReturn(['type' => 'test', 'data' => []]);
 
         $message->process($this->context);
-        
+
         // Assert that the mock expectations were met
         $this->assertTrue(true);
     }

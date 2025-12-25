@@ -196,7 +196,7 @@ class FTPService implements ServiceInterface
             $attempts++;
 
             try {
-                $connection = $use_tls 
+                $connection = $use_tls
                     ? @ftp_ssl_connect($host, $port, $timeout)
                     : @ftp_connect($host, $port, $timeout);
 

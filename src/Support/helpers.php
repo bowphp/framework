@@ -757,6 +757,26 @@ if (!function_exists('event')) {
     }
 }
 
+if (!function_exists('app_event')) {
+    /**
+     * Event
+     *
+     * @return mixed
+     */
+    function app_event(): mixed
+    {
+        $args = func_get_args();
+
+        $event = Event::getInstance();
+
+        if (count($args) === 0) {
+            return $event;
+        }
+
+        return call_user_func_array([$event, "emit"], $args);
+    }
+}
+
 if (!function_exists('flash')) {
     /**
      * Flash session
@@ -773,6 +793,22 @@ if (!function_exists('flash')) {
     }
 }
 
+if (!function_exists('app_flash')) {
+    /**
+     * Flash session
+     *
+     * @param  string $key
+     * @param  string $message
+     * @return mixed
+     * @throws SessionException
+     */
+    function app_flash(string $key, string $message): mixed
+    {
+        return Session::getInstance()
+            ->flash($key, $message);
+    }
+}
+
 if (!function_exists('email')) {
     /**
      * Send email
@@ -783,6 +819,28 @@ if (!function_exists('email')) {
      * @return MailAdapterInterface|bool
      */
     function email(
+        ?string $view = null,
+        ?array $data = [],
+        ?callable $cb = null
+    ): MailAdapterInterface|bool {
+        if ($view === null) {
+            return Mail::getInstance();
+        }
+
+        return Mail::send($view, $data, $cb);
+    }
+}
+
+if (!function_exists('app_email')) {
+    /**
+     * Send email
+     *
+     * @param  null|string   $view
+     * @param  array         $data
+     * @param  callable|null $cb
+     * @return MailAdapterInterface|bool
+     */
+    function app_email(
         ?string $view = null,
         ?array $data = [],
         ?callable $cb = null
@@ -993,7 +1051,7 @@ if (!function_exists('cache')) {
             return $instance->get($key);
         }
 
-        return $instance->add($key, $value, $ttl);
+        return $instance->set($key, $value, $ttl);
     }
 }
 

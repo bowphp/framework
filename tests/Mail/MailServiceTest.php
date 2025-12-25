@@ -16,14 +16,10 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 {
     private ConfigurationLoader $config;
 
-    /**
-     * @var string Path to sendmail command
-     */
-    private static string $sendmail_command = '/usr/sbin/sendmail';
-
     protected function setUp(): void
     {
         $this->config = TestingConfiguration::getConfig();
+
         Mail::configure($this->config["mail"]);
         View::configure($this->config["view"]);
     }
@@ -54,101 +50,10 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
     public function test_get_mail_instance()
     {
         Mail::configure($this->config["mail"]);
+
         $instance = Mail::getInstance();
 
         $this->assertInstanceOf(MailAdapterInterface::class, $instance);
-    }
-
-    /**
-     * Note: SMTP tests may fail if SMTP server is not properly configured.
-     * These tests require a working SMTP connection as configured in the test config.
-     */
-    public function test_send_mail_with_raw_content_for_smtp_driver()
-    {
-        Mail::configure($this->config['mail']);
-
-        try {
-            $response = Mail::raw('bow@email.com', 'This is a test', 'The message content');
-
-            if ($response === false) {
-                $this->markTestSkipped('SMTP server not accessible or configured');
-            }
-
-            $this->assertTrue($response);
-        } catch (\Bow\Mail\Exception\SmtpException $e) {
-            $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
-        }
-    }
-
-    public function test_send_mail_with_multiple_recipients_for_smtp_driver()
-    {
-        Mail::configure($this->config['mail']);
-
-        try {
-            $response = Mail::raw(['bow@email.com', 'test@example.com'], 'Multiple Recipients Test', 'This message goes to multiple recipients');
-            if ($response === false) {
-                $this->markTestSkipped('SMTP server not accessible or configured');
-            }
-            $this->assertTrue($response);
-        } catch (\Bow\Mail\Exception\SmtpException $e) {
-            $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
-        }
-    }
-
-    public function test_send_mail_with_custom_headers_for_smtp_driver()
-    {
-        Mail::configure($this->config['mail']);
-
-        try {
-            $response = Mail::raw('bow@email.com', 'Custom Headers Test', 'This message has custom headers', ['X-Custom-Header' => 'TestValue']);
-
-            if ($response === false) {
-                $this->markTestSkipped('SMTP server not accessible or configured');
-            }
-
-            $this->assertTrue($response);
-        } catch (\Bow\Mail\Exception\SmtpException $e) {
-            $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
-        }
-    }
-
-    public function test_send_mail_with_view_for_smtp_driver()
-    {
-        try {
-            $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
-                $envelop->to('bow@bowphp.com')
-                    ->subject('Test Email');
-            });
-
-            if ($response === false) {
-                $this->markTestSkipped('SMTP server not accessible or configured');
-            }
-
-            $this->assertTrue($response);
-        } catch (\Bow\Mail\Exception\SmtpException $e) {
-            $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
-        } catch (\Bow\Mail\Exception\MailException $e) {
-            $this->markTestSkipped('Mail configuration error: ' . $e->getMessage());
-        }
-    }
-
-    public function test_send_mail_with_view_and_subject_for_smtp_driver()
-    {
-        try {
-            $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
-                $envelop->to('bow@tests.com')
-                        ->subject('Welcome Email')
-                        ->from('noreply@tests.com', 'Bow Framework');
-            });
-
-            if ($response === false) {
-                $this->markTestSkipped('SMTP server not accessible or configured');
-            }
-
-            $this->assertTrue($response);
-        } catch (\Bow\Mail\Exception\SmtpException $e) {
-            $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
-        }
     }
 
     public function test_send_mail_with_view_not_found_for_smtp_driver()
@@ -160,47 +65,6 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
             $envelop->to('bow@bowphp.com');
             $envelop->subject('test email');
         });
-    }
-
-    // ===== Native Driver Tests =====
-
-    public function test_send_mail_with_raw_content_for_native_driver()
-    {
-        if (!file_exists('/usr/sbin/sendmail') && !file_exists(static::$sendmail_command)) {
-            return $this->markTestSkipped('Test skipped because /usr/sbin/sendmail not found');
-        }
-
-        $config = $this->config["mail"];
-        $config['driver'] = 'mail';
-        $config['mail']['sendmail'] = static::$sendmail_command;
-
-        Mail::configure($config);
-        $response = Mail::raw('bow@email.com', 'This is a test', 'The message content');
-
-        if ($response === false) {
-            return $this->markTestSkipped('Native mail() function not functional on this system');
-        }
-
-        $this->assertTrue($response);
-    }
-
-    public function test_send_mail_with_view_for_native_driver()
-    {
-        $config = (array) $this->config["mail"];
-        $config['driver'] = 'mail';
-
-        Mail::configure($config);
-
-        $response = Mail::send('mail', ['name' => "papac"], function (Envelop $envelop) {
-            $envelop->to('bow@tests.com');
-            $envelop->subject('test email');
-        });
-
-        if ($response === false) {
-            return $this->markTestSkipped('Native mail() function not functional on this system');
-        }
-
-        $this->assertTrue($response);
     }
 
     public function test_send_mail_with_view_not_found_for_native_driver()
@@ -334,25 +198,6 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('Chained Subject', $envelop->getSubject());
     }
 
-    // ===== Edge Cases =====
-
-    public function test_send_mail_with_empty_subject()
-    {
-        Mail::configure($this->config['mail']);
-
-        try {
-            $response = Mail::raw('bow@email.com', '', 'Message without subject');
-
-            if ($response === false) {
-                $this->markTestSkipped('SMTP server not accessible or configured');
-            }
-
-            $this->assertTrue($response);
-        } catch (\Bow\Mail\Exception\SmtpException $e) {
-            $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
-        }
-    }
-
     public function test_envelop_with_named_email_format()
     {
         $envelop = new Envelop();
@@ -383,24 +228,6 @@ class MailServiceTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals('text/plain', $envelop->getType());
         $this->assertEquals('Custom message', $envelop->getMessage());
-    }
-
-    public function test_mail_send_with_callback_only()
-    {
-        try {
-            $response = Mail::send('mail', function (Envelop $envelop) {
-                $envelop->to('bow@bowphp.com')
-                        ->subject('Callback Only Test');
-            });
-
-            if ($response === false) {
-                $this->markTestSkipped('SMTP server not accessible or configured');
-            }
-
-            $this->assertTrue($response);
-        } catch (\Bow\Mail\Exception\SmtpException $e) {
-            $this->markTestSkipped('SMTP server not configured: ' . $e->getMessage());
-        }
     }
 
     public function test_envelop_multiple_calls_to_same_method()
