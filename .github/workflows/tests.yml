@@ -63,4 +63,4 @@ jobs:
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Run test suite
-        run: ./vendor/bin/phpunit tests 
+        run: ./vendor/bin/phpunit tests --configuration phpunit.dist.xml

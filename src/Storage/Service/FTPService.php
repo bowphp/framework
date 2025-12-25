@@ -251,7 +251,6 @@ class FTPService implements ServiceInterface
     {
         if ($this->connection !== null) {
             @ftp_close($this->connection);
-            $this->connection = null;
             $this->is_connected = false;
         }
     }
