@@ -30,8 +30,8 @@ class MailQueueTest extends TestCase
             MailConfiguration::class,
             ViewConfiguration::class,
         ]);
+
         $config = TestingConfiguration::getConfig();
-        $config->boot();
 
         static::$connection = new QueueConnection($config["queue"]);
     }

@@ -11,7 +11,7 @@ class {className} extends Migration
     public function up(): void
     {
         $this->create("sessions", function (Table $table) {
-            $table->addColumn('id', 'string', ['primary' => true]);
+            $table->addString('id', ['primary' => true, 'size' => 200]);
             $table->addColumn('time', 'timestamp');
             $table->addColumn('data', 'text');
             $table->addColumn('ip', 'string');

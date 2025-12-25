@@ -73,7 +73,7 @@ $user->sendMessageQueueOn('high-priority', new WelcomeMessage());
 
 ## Configuration
 
-Pour utiliser le système de messaging, assurez-vous que votre modèle implémente le trait `CanSendMessage` :
+Pour utiliser le système de messaging, assurez-vous que votre modèle implémente le trait `SendMessaging` :
 
 ```php
 use Bow\Messaging\Message;
@@ -81,7 +81,7 @@ use Bow\Database\Barry\Model;
 
 class User extends Model
 {
-    use CanSendMessage;
+    use SendMessaging;
     
     // ...
 }

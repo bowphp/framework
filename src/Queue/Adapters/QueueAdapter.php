@@ -263,16 +263,6 @@ abstract class QueueAdapter
     }
 
     /**
-     * Generate the job id
-     *
-     * @return string
-     */
-    public function generateId(): string
-    {
-        return sha1(uniqid(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), true));
-    }
-
-    /**
      * Get the queue size
      *
      * @param  string $queue
@@ -292,5 +282,15 @@ abstract class QueueAdapter
     public function flush(?string $queue = null): void
     {
         //
+    }
+
+    /**
+     * Generate the job id
+     *
+     * @return string
+     */
+    final protected function generateId(): string
+    {
+        return md5(uniqid((string) time(), true) . bin2hex(random_bytes(10)) . str_uuid() . microtime(true));
     }
 }

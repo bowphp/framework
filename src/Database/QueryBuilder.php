@@ -1345,13 +1345,13 @@ class QueryBuilder implements JsonSerializable
     /**
      * Insert On, insert one row in the table
      *
-     * @param  array $value
+     * @param  array $values
      * @return int
      * @see    insert
      */
-    private function insertOne(array $value): int
+    private function insertOne(array $values): int
     {
-        $fields = array_keys($value);
+        $fields = array_keys($values);
         $column = implode(', ', $fields);
 
         $sql = 'insert into ' . $this->table . '(' . $column . ') values';
@@ -1360,11 +1360,20 @@ class QueryBuilder implements JsonSerializable
 
         $statement = $this->connection->prepare($sql);
 
-        $this->bind($statement, $value);
+        $this->bind($statement, $values);
+
+        try {
+            $statement->execute();
+        } catch (\PDOException $e) {
+            throw new QueryBuilderException(
+                'Error during insertion: ' . $e->getMessage(),
+                (int) $e->getCode(),
+            );
+        }
 
         $statement->execute();
 
-        return (int)$statement->rowCount();
+        return (int) $statement->rowCount();
     }
 
     /**

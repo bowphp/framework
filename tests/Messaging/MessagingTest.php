@@ -268,17 +268,17 @@ class MessagingTest extends TestCase
     {
         $this->assertTrue(
             method_exists($this->context, 'sendMessage'),
-            'Context should have sendMessage method from CanSendMessage trait'
+            'Context should have sendMessage method from SendMessaging trait'
         );
 
         $this->assertTrue(
             method_exists($this->context, 'setMessageQueue'),
-            'Context should have setMessageQueue method from CanSendMessage trait'
+            'Context should have setMessageQueue method from SendMessaging trait'
         );
 
         $this->assertTrue(
             method_exists($this->context, 'sendMessageQueueOn'),
-            'Context should have sendMessageQueueOn method from CanSendMessage trait'
+            'Context should have sendMessageQueueOn method from SendMessaging trait'
         );
     }
 

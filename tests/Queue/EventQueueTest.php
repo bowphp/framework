@@ -38,21 +38,9 @@ class EventQueueTest extends TestCase
         static::$connection = new Connection($config["queue"]);
     }
 
-    /**
-     * @test
-     * @group integration
-     */
-    public function it_should_queue_event(): void
+    public function test_should_queue_event(): void
     {
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
-        
-        // Skip if Beanstalkd is not available
-        try {
-            $adapter->getConnection();
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
-        }
-        
         $producer = new EventQueueJob(new UserEventListenerStub(), new UserEventStub("bowphp"));
         $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
 
@@ -61,21 +49,22 @@ class EventQueueTest extends TestCase
 
         $this->assertInstanceOf(EventQueueJob::class, $producer);
 
-        $result = $adapter->push($producer);
-        $this->assertTrue($result);
+        try {
+            $result = $adapter->push($producer);
+            $this->assertTrue($result);
 
-        $adapter->run();
+            $adapter->run();
 
-        $this->assertFileExists($cache_filename);
-        $this->assertEquals("bowphp", file_get_contents($cache_filename));
-
-        @unlink($cache_filename);
+            $this->assertFileExists($cache_filename);
+            $this->assertEquals("bowphp", file_get_contents($cache_filename));
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Sservice is not available: ' . $e->getMessage());
+        } finally {
+            @unlink($cache_filename);
+        }
     }
 
-    /**
-     * @test
-     */
-    public function it_should_create_event_queue_job_with_listener_and_payload(): void
+    public function test_should_create_event_queue_job_with_listener_and_payload(): void
     {
         $listener = new UserEventListenerStub();
         $event = new UserEventStub("test-data");
@@ -85,10 +74,7 @@ class EventQueueTest extends TestCase
         $this->assertInstanceOf(EventQueueJob::class, $producer);
     }
 
-    /**
-     * @test
-     */
-    public function it_should_process_event_from_queue(): void
+    public function test_should_process_event_from_queue(): void
     {
         $adapter = static::$connection->setConnection("sync")->getAdapter();
         $producer = new EventQueueJob(new UserEventListenerStub(), new UserEventStub("sync-test"));

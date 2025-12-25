@@ -54,7 +54,7 @@ class DatabaseAdapter extends QueueAdapter
      */
     public function push(QueueJob $job): bool
     {
-        $count = $this->table->insert([
+        $value = [
             "id" => $this->generateId(),
             "queue" => $this->getQueue(),
             "payload" => base64_encode($this->serializeProducer($job)),
@@ -63,7 +63,9 @@ class DatabaseAdapter extends QueueAdapter
             "available_at" => date("Y-m-d H:i:s", time() + $job->getDelay()),
             "reserved_at" => null,
             "created_at" => date("Y-m-d H:i:s"),
-        ]);
+        ];
+
+        $count = $this->table->insert($value);
 
         return $count > 0;
     }
