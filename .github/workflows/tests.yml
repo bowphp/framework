@@ -2,12 +2,12 @@ name: bowphp
 
 on: [ push, pull_request ]
 
-env:
-  FTP_HOST: localhost
-  FTP_USER: username
-  FTP_PASSWORD: password
-  FTP_PORT: 21
-  FTP_ROOT: /tmp
+# env:
+#   FTP_HOST: localhost
+#   FTP_USER: username
+#   FTP_PASSWORD: password
+#   FTP_PORT: 21
+#   FTP_ROOT: /tmp
 
 jobs:
   lunix-tests:
@@ -42,11 +42,8 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
           coverage: none
 
-      - run: docker run -p 21:21 -p 20:20 -p 12020:12020 -p 12021:12021 -p 12022:12022 -p 12023:12023 -p 12024:12024 -p 12025:12025 -e USER=$FTP_USER -e PASS=$FTP_PASSWORD -d --name ftp papacdev/vsftpd
-      - run: docker run -p 1080:1080 -p 1025:1025 -d --name maildev soulteary/maildev
-      - run: docker run -p 6379:6379 -d --name redis redis
-      - run: docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis
-      - run: docker run -d -p 11300:11300 schickling/beanstalkd
+      - name: Set Docker containers
+        run: docker compose up -d
 
       - name: Cache Composer packages
         id: composer-cache
@@ -67,4 +64,16 @@ jobs:
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Run test suite
+        env:
+          FTP_HOST: localhost
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_ROOT: ${{ secrets.FTP_ROOT }}
+          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          AWS_REGION: us-east-1
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: ./vendor/bin/phpunit tests --configuration phpunit.dist.xml
