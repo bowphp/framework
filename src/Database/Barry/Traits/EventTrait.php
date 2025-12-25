@@ -17,9 +17,7 @@ trait EventTrait
     {
         $env = static::formatEventName($event);
 
-        if (event()->bound($env)) {
-            event()->emit($env, $this);
-        }
+        event()->emit($env, $this);
     }
 
     /**

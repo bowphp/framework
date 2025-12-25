@@ -7,9 +7,9 @@ namespace Bow\Event\Contracts;
 interface AppEvent
 {
     /**
-     * Get the name of the event
+     * Dispatch the event
      *
-     * @return string
+     * @return mixed
      */
-    public function getName(): string;
+    public static function dispatch(): mixed;
 }

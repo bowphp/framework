@@ -78,7 +78,7 @@ class Event
         uasort(
             static::$events[$event],
             function (Listener $first_listener, Listener $second_listener) {
-                return $first_listener->getPriority() < $second_listener->getPriority();
+                return $second_listener->getPriority() <=> $first_listener->getPriority();
             }
         );
     }
@@ -105,14 +105,8 @@ class Event
     {
         $onces = static::$events['__bow.once.event'] ?? [];
 
-        if (is_string($event)) {
-            return array_key_exists($event, static::$events) ||
-                array_key_exists($event, $onces);
-        }
-
-        $event = $event->getName();
-
-        return array_key_exists($event, $onces) || array_key_exists($event, static::$events);
+        return array_key_exists($event, static::$events) ||
+            array_key_exists($event, $onces);
     }
 
     /**
@@ -135,7 +129,15 @@ class Event
      */
     public function getEventListeners(string $event_name): array
     {
-        return (array) (static::$events['__bow.once.event'][$event_name] ?? static::$events[$event_name]);
+        $once_event = static::$events['__bow.once.event'][$event_name] ?? null;
+
+        if ($once_event) {
+            return [$once_event];
+        }
+
+        $regular_events = static::$events[$event_name] ?? [];
+        
+        return (array) $regular_events;
     }
 
     /**
@@ -156,7 +158,7 @@ class Event
             $data = array_slice(func_get_args(), 1);
         }
 
-        if (!$this->bound($event_name) || !$this->bound($event)) {
+        if (!$this->bound($event_name)) {
             return null;
         }
 
