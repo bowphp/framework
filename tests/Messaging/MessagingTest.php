@@ -24,8 +24,6 @@ class MessagingTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        parent::setUpBeforeClass();
-
         $config = TestingConfiguration::getConfig();
 
         Database::configure($config["database"]);
@@ -34,7 +32,7 @@ class MessagingTest extends TestCase
 
         (new MigrationExtendedStub())->dropIfExists("notifications", false);
         (new MigrationExtendedStub())->createIfNotExists("notifications", function (Table $table) {
-            $table->addString('id', ["primary" => true, "size" => 200, "unique" => true]);
+            $table->addIncrement('id', ["primary" => true]);
             $table->addString('type');
             $table->addString('concern_id');
             $table->addString('concern_type');

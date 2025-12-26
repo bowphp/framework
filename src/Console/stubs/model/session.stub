@@ -12,9 +12,9 @@ class {className} extends Migration
     {
         $this->create("sessions", function (Table $table) {
             $table->addString('id', ['primary' => true, 'size' => 200]);
-            $table->addColumn('time', 'timestamp');
-            $table->addColumn('data', 'text');
-            $table->addColumn('ip', 'string');
+            $table->addTimestamp('time');
+            $table->addText('data');
+            $table->addString('ip');
         });
     }
 

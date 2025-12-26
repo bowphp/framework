@@ -34,7 +34,6 @@ class DatabaseChannelAdapter implements ChannelAdapterInterface
         $table = Database::connection($context->getConnection())->table($table_name ?? 'notifications');
 
         $notification = [
-            'id' => str_uuid(),
             'data' => json_encode($database['data']),
             'concern_id' => $context->getKey(),
             'concern_type' => get_class($context),

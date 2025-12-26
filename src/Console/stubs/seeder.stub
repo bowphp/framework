@@ -10,4 +10,14 @@ class {className}
 
         // Write the seeding here
     }
+
+    /**
+     * Return the list of depended seeder
+     *
+     * @return array
+     */
+    public function depends()
+    {
+        return [];
+    }
 }

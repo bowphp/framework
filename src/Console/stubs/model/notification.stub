@@ -11,7 +11,7 @@ class {className} extends Migration
     public function up(): void
     {
         $this->create("notifications", function (Table $table) {
-            $table->addIncrement('id', ["primary" => true]);
+            $table->addBigIncrement('id', ["primary" => true]);
             $table->addString('type');
             $table->addString('concern_id');
             $table->addString('concern_type');

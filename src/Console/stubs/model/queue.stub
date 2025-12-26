@@ -11,7 +11,7 @@ class {className} extends Migration
     public function up(): void
     {
         $this->create("queues", function (Table $table) {
-            $table->addString('id', ["primary" => true]);
+            $table->addString('id', ["primary" => true, "size" => 200]);
             $table->addString('queue');
             $table->addText('payload');
             $table->addInteger('attempts', ["default" => 3]);
