@@ -7,7 +7,7 @@ namespace Bow\Container;
 use Bow\Configuration\Configuration;
 use Bow\Configuration\Loader;
 
-class ContainerConfiguration extends Configuration
+class CompassConfiguration extends Configuration
 {
     /**
      * @var array
@@ -21,7 +21,7 @@ class ContainerConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind('container', function () use ($config) {
+        $this->container->bind('compass', function () use ($config) {
             $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
 
             return Compass::configure($config->namespaces(), $middlewares);
@@ -33,6 +33,6 @@ class ContainerConfiguration extends Configuration
      */
     public function run(): void
     {
-        $this->container->make('action');
+        $this->container->make('compass');
     }
 }

@@ -10,8 +10,8 @@ use Bow\Container\Capsule;
 use Bow\Support\Arraydotify;
 use Bow\Session\SessionConfiguration;
 use Bow\Configuration\EnvConfiguration;
-use Bow\Container\ContainerConfiguration;
 use Bow\Application\Exception\ApplicationException;
+use Bow\Container\CompassConfiguration;
 
 class Loader implements ArrayAccess
 {
@@ -175,37 +175,27 @@ class Loader implements ArrayAccess
             return $this;
         }
 
-        $services = array_merge(
-            [ContainerConfiguration::class, EnvConfiguration::class],
-            $this->configurations(),
-        );
-
-        $service_collection = [];
+        $configurations = array_merge([CompassConfiguration::class], $this->configurations());
 
         $container = Capsule::getInstance();
 
+        $this->loadConfiguration(EnvConfiguration::class, $container);
+
+        $loaded_configurations = [];
+
         // Configuration of services
-        foreach ($services as $service) {
-            if ($this->without_session && $service === SessionConfiguration::class) {
+        foreach ($configurations as $configuration) {
+            if ($this->without_session && $configuration === SessionConfiguration::class) {
                 continue;
             }
 
-            if (!class_exists($service)) {
-                continue;
-            }
-
-            $service_instance = new $service($container);
-            $service_instance->create($this);
-            $service_collection[] = $service_instance;
-
-            // Encure that the .env file is loaded before others services
-            if ($service === EnvConfiguration::class) {
-                $this->loadEnvfile();
+            if (class_exists($configuration)) {
+                $loaded_configurations[] = $this->loadConfiguration($configuration, $container);
             }
         }
 
         // Start of services or initial code
-        foreach ($service_collection as $service) {
+        foreach ($loaded_configurations as $service) {
             $service->run();
         }
 
@@ -213,7 +203,7 @@ class Loader implements ArrayAccess
         foreach ($this->events() as $name => $handlers) {
             $handlers = (array) $handlers;
             foreach ($handlers as $handler) {
-                Event::on($name, $handler);
+                app_event($name, $handler);
             }
         }
 
@@ -221,6 +211,22 @@ class Loader implements ArrayAccess
         $this->booted = true;
 
         return $this;
+    }
+
+    /**
+     * Load a configuration service
+     *
+     * @param  string $service
+     * @param  Capsule $container
+     * @return Configuration
+     */
+    private function loadConfiguration(string $service, Capsule $container): Configuration
+    {
+        $service_instance = new $service($container);
+
+        $service_instance->create($this);
+
+        return $service_instance;
     }
 
     /**
