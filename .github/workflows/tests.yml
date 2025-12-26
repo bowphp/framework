@@ -2,6 +2,14 @@ name: bowphp
 
 on: [ push, pull_request ]
 
+env:
+  AWS_KEY: ${{ secrets.AWS_KEY }}
+  AWS_SECRET: ${{ secrets.AWS_SECRET }}
+  AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+
 jobs:
   lunix-tests:
     runs-on: ${{ matrix.os }}
@@ -57,11 +65,4 @@ jobs:
         run: if [ ! -d /tmp/bowphp_testing ]; then mkdir -p /tmp/bowphp_testing; fi;
 
       - name: Run test suite
-        env:
-          AWS_KEY: ${{ secrets.AWS_KEY }}
-          AWS_SECRET: ${{ secrets.AWS_SECRET }}
-          AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: ./vendor/bin/phpunit tests --configuration phpunit.dist.xml
