@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Configuration;
 
 use ArrayAccess;
-use Bow\Event\Event;
 use Bow\Container\Capsule;
 use Bow\Support\Arraydotify;
 use Bow\Session\SessionConfiguration;
@@ -175,37 +174,21 @@ class Loader implements ArrayAccess
             return $this;
         }
 
-        $configurations = array_merge([CompassConfiguration::class], $this->configurations());
-
         $container = Capsule::getInstance();
 
-        $this->loadConfiguration(EnvConfiguration::class, $container);
-
-        $loaded_configurations = [];
+        $this->createConfiguration(EnvConfiguration::class, $container);
 
         // Configuration of services
-        foreach ($configurations as $configuration) {
-            if ($this->without_session && $configuration === SessionConfiguration::class) {
-                continue;
-            }
+        $loaded_configurations = $this->createConfigurations(
+            array_merge([CompassConfiguration::class], $this->configurations()),
+            $container
+        );
 
-            if (class_exists($configuration)) {
-                $loaded_configurations[] = $this->loadConfiguration($configuration, $container);
-            }
-        }
+        // Load configurations
+        $this->runConfirmations($loaded_configurations);
 
-        // Start of services or initial code
-        foreach ($loaded_configurations as $service) {
-            $service->run();
-        }
-
-        // Bind the define events
-        foreach ($this->events() as $name => $handlers) {
-            $handlers = (array) $handlers;
-            foreach ($handlers as $handler) {
-                app_event($name, $handler);
-            }
-        }
+        // Load load events
+        $this->loadEvents();
 
         // Set the load as booted
         $this->booted = true;
@@ -216,17 +199,72 @@ class Loader implements ArrayAccess
     /**
      * Load a configuration service
      *
-     * @param  string $service
+     * @param  string $configuration_class
      * @param  Capsule $container
      * @return Configuration
      */
-    private function loadConfiguration(string $service, Capsule $container): Configuration
+    private function createConfiguration(string $configuration_class, Capsule $container): Configuration
     {
-        $service_instance = new $service($container);
+        if (!class_exists($configuration_class)) {
+            throw new ApplicationException("The configuration class {$configuration_class} does not exists.");
+        }
 
-        $service_instance->create($this);
+        $configuration = new $configuration_class($container);
 
-        return $service_instance;
+        $configuration->create($this);
+
+        return $configuration;
+    }
+
+    /**
+     * Load configurations
+     *
+     * @param  array   $configurations
+     * @param  Capsule $container
+     * @return array
+     */
+    private function createConfigurations(array $configurations, Capsule $container): array
+    {
+        $loaded_configurations = [];
+
+        foreach ($configurations as $configuration) {
+            if ($this->without_session && $configuration === SessionConfiguration::class) {
+                continue;
+            }
+
+            $loaded_configurations[] = $this->createConfiguration($configuration, $container);
+        }
+
+        return $loaded_configurations;
+    }
+
+    /**
+     * Run the loaded configurations
+     *
+     * @param  array $loaded_configurations
+     * @return void
+     */
+    private function runConfirmations(array $loaded_configurations): void
+    {
+        // Start of services or initial code
+        foreach ($loaded_configurations as $service) {
+            $service->run();
+        }
+    }
+
+    /**
+     * Load events
+     *
+     * @return void
+     */
+    private function loadEvents(): void
+    {
+        // Bind the define events
+        foreach ($this->events() as $name => $handlers) {
+            foreach ((array) $handlers as $handler) {
+                app_event($name, $handler);
+            }
+        }
     }
 
     /**
