@@ -1,9 +1,10 @@
 # Bow Framework
 
-<a href="https://github.com/bowphp/docs" title="docs"><img src="https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square"/></a>
-<a href="https://packagist.org/packages/bowphp/framework" title="version"><img src="https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square"/></a>
-<a href="https://github.com/bowphp/framework/blob/master/LICENSE" title="license"><img src="https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square"/></a>
-<a href="https://travis-ci.org/bowphp/framework" title="Build Status"><img src="https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square"/></a>
+[![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square)](https://github.com/bowphp/docs)
+[![version](https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square)](https://packagist.org/packages/bowphp/framework)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/bowphp/framework/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square)](https://travis-ci.org/bowphp/framework)
+![Build Status](https://github.com/bowphp/framework/actions/workflows/tests.yml/badge.svg)
 
 > A lightweight, modern PHP framework designed for building web applications with clean architecture and modular design.
 
@@ -14,11 +15,13 @@ To use this package, please create an application from this package [bowphp/app]
 Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphasizes simplicity, performance, and developer experience. It provides a comprehensive set of tools for building modern web applications with clean, maintainable code.
 
 **Requirements:**
+
 - PHP ^8.1+
 - Composer
 - Extensions: ext-ftp, ext-openssl, ext-pcntl, ext-readline, ext-pdo
 
 **Key Highlights:**
+
 - Modern PHP 8.1+ features (union types, attributes, named arguments)
 - Modular architecture with 20+ independent components
 - Lightweight and fast with minimal dependencies
@@ -29,6 +32,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 ## Core Features
 
 ### Database & ORM
+
 - **Barry ORM**: Lightweight ActiveRecord-style ORM
 - **Query Builder**: Fluent, expressive database queries
 - **Multi-database**: MySQL, PostgreSQL, SQLite support
@@ -37,6 +41,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - **Pagination**: Built-in pagination support
 
 ### Routing System
+
 - Simple, expressive routing syntax
 - RESTful resource routing with automatic CRUD operations
 - Route naming for easy URL generation
@@ -45,6 +50,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - Route prefix support for grouping
 
 ### Mail System
+
 - Multiple adapters: SMTP, AWS SES, Native PHP mail
 - RFC-compliant SMTP implementation
 - Email parsing with "Name <email>" format support
@@ -52,6 +58,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - Queue integration for asynchronous sending
 
 ### Queue System
+
 - Multiple backends: Beanstalkd, Redis, SQS, Database, Sync
 - Object-oriented job definitions
 - Event-driven job queuing
@@ -59,6 +66,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - Mail queue support
 
 ### Storage System
+
 - Multi-driver: Local, FTP, AWS S3
 - Dynamic storage adapter selection
 - File operations: upload, download, copy, move, delete
@@ -66,6 +74,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - Efficient stream handling for large files
 
 ### Security Features
+
 - XSS protection with automatic filtering
 - CSRF token-based validation
 - Data encryption utilities
@@ -73,6 +82,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - Native authentication system with guards
 
 ### Additional Features
+
 - **Cache**: Filesystem, Redis, Database caching
 - **Events**: Event management and dispatching
 - **Session**: User session management
@@ -249,6 +259,7 @@ See [CHANGELOG.md](CHANGELOG.md) for full details.
 ## Use Cases
 
 **Ideal For:**
+
 - REST APIs and microservices
 - Web applications with complex database requirements
 - Applications requiring file storage (S3, FTP)
@@ -312,9 +323,11 @@ The Bow Framework is open-source software licensed under the [MIT license](LICEN
 ## Credits
 
 **Created and maintained by:**
+
 - [Franck DAKIA](https://github.com/papac) - Lead Developer
 
 **Special thanks to:**
+
 - [All contributors](https://github.com/bowphp/framework/graphs/contributors)
 - The PHP community
 
@@ -329,4 +342,3 @@ For questions and discussions, join us on [Slack](https://bowphp.slack.com).
 ---
 
 **Made with love by the Bow Framework Team**
-
