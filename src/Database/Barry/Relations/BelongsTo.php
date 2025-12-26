@@ -51,7 +51,7 @@ class BelongsTo extends Relation
         $result = $this->query->first();
 
         if (!is_null($result)) {
-            Cache::store('file')->add($key, $result->toArray(), 500);
+            Cache::store('file')->set($key, $result->toArray(), 500);
         }
 
         return $result;

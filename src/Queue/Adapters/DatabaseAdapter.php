@@ -5,6 +5,7 @@ namespace Bow\Queue\Adapters;
 use Bow\Database\Database;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
+use Bow\Queue\ProducerService;
 use Bow\Queue\QueueJob;
 use ErrorException;
 use Exception;
@@ -48,23 +49,25 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  QueueJob $producer
+     * @param  QueueJob $job
      * @return void
      */
-    public function push(QueueJob $producer): void
+    public function push(QueueJob $job): bool
     {
-        $this->table->insert(
-            [
+        $value = [
             "id" => $this->generateId(),
             "queue" => $this->getQueue(),
-            "payload" => base64_encode($this->serializeProducer($producer)),
+            "payload" => base64_encode($this->serializeProducer($job)),
             "attempts" => $this->tries,
             "status" => "waiting",
-            "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
+            "available_at" => date("Y-m-d H:i:s", time() + $job->getDelay()),
             "reserved_at" => null,
             "created_at" => date("Y-m-d H:i:s"),
-            ]
-        );
+        ];
+
+        $count = $this->table->insert($value);
+
+        return $count > 0;
     }
 
     /**
@@ -89,24 +92,24 @@ class DatabaseAdapter extends QueueAdapter
             return;
         }
 
-        foreach ($queues as $job) {
+        foreach ($queues as $queue) {
             try {
-                $producer = $this->unserializeProducer(base64_decode($job->payload));
-                if (strtotime($job->available_at) >= time()) {
-                    if (!is_null($job->reserved_at) && strtotime($job->reserved_at) < time()) {
+                $producer = $this->unserializeProducer(base64_decode($queue->payload));
+                if (strtotime($queue->available_at) >= time()) {
+                    if (!is_null($queue->reserved_at) && strtotime($queue->reserved_at) < time()) {
                         continue;
                     }
-                    $this->table->where("id", $job->id)->update([
+                    $this->table->where("id", $queue->id)->update([
                         "status" => "processing",
                     ]);
-                    $this->execute($producer, $job);
+                    $this->execute($producer, $queue);
                     continue;
                 }
             } catch (Exception $e) {
                 // Write the error log
                 error_log($e->getMessage());
                 app('logger')->error($e->getMessage(), $e->getTrace());
-                cache("job:failed:" . $job->id, $job->payload);
+                cache("job:failed:" . $queue->id, $queue->payload);
 
                 // Check if producer has been loaded
                 if (!isset($producer)) {
@@ -119,8 +122,8 @@ class DatabaseAdapter extends QueueAdapter
                 $producer->onException($e);
 
                 // Check if the job should be deleted
-                if ($producer->jobShouldBeDelete() || $job->attempts <= 0) {
-                    $this->table->where("id", $job->id)->update([
+                if ($producer->jobShouldBeDelete() || $queue->attempts <= 0) {
+                    $this->table->where("id", $queue->id)->update([
                         "status" => "failed",
                     ]);
                     $this->sleep(1);
@@ -128,14 +131,12 @@ class DatabaseAdapter extends QueueAdapter
                 }
 
                 // Check if the job should be retried
-                $this->table->where("id", $job->id)->update(
-                    [
+                $this->table->where("id", $queue->id)->update([
                     "status" => "reserved",
-                    "attempts" => $job->attempts - 1,
+                    "attempts" => $queue->attempts - 1,
                     "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
                     "reserved_at" => date("Y-m-d H:i:s", time() + $producer->getRetry())
-                    ]
-                );
+                ]);
 
                 $this->sleep(1);
             }
@@ -145,18 +146,16 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Process the next job on the queue.
      *
-     * @param  QueueJob $producer
-     * @param  mixed           $job
+     * @param  QueueJob $job
+     * @param  mixed $queue
      * @throws QueryBuilderException
      */
-    private function execute(QueueJob $producer, mixed $job): void
+    private function execute(QueueJob $job, mixed $queue): void
     {
-        call_user_func([$producer, "process"]);
-        $this->table->where("id", $job->id)->update(
-            [
+        call_user_func([$job, "process"]);
+        $this->table->where("id", $queue->id)->update([
             "status" => "done"
-            ]
-        );
+        ]);
         $this->sleep($this->sleep ?? 5);
     }
 

@@ -5,16 +5,6 @@ namespace Bow\Cache\Adapters;
 interface CacheAdapterInterface
 {
     /**
-     * Add new enter in the cache system
-     *
-     * @param  string $key
-     * @param  mixed  $data
-     * @param  ?int   $time
-     * @return bool
-     */
-    public function add(string $key, mixed $data, ?int $time = null): bool;
-
-    /**
      * Set a new enter
      *
      * @param  string $key
@@ -30,7 +20,7 @@ interface CacheAdapterInterface
      * @param  array $data
      * @return bool
      */
-    public function addMany(array $data): bool;
+    public function setMany(array $data): bool;
 
     /**
      * Adds a cache that will persist
@@ -66,7 +56,7 @@ interface CacheAdapterInterface
      * @param  int    $time
      * @return bool
      */
-    public function addTime(string $key, int $time): bool;
+    public function setTime(string $key, int $time): bool;
 
     /**
      * Retrieves the cache expiration time
@@ -77,12 +67,40 @@ interface CacheAdapterInterface
     public function timeOf(string $key): int|bool|string;
 
     /**
-     * Delete an entry in the cache
+     * Remove an entry from the cache
      *
      * @param  string $key
      * @return bool
      */
     public function forget(string $key): bool;
+
+    /**
+     * Retrieve an entry from the cache or store it if it does not exist
+     *
+     * @param  string   $key
+     * @param  int      $time
+     * @param  callable $callback
+     * @return mixed
+     */
+    public function remember(string $key, int $time, callable $callback): mixed;
+
+    /**
+     * Increment the value of an entry in the cache
+     *
+     * @param  string $key
+     * @param  int    $value
+     * @return int
+     */
+    public function increment(string $key, int $value = 1): int;
+
+    /**
+     * Decrement the value of an entry in the cache
+     *
+     * @param  string $key
+     * @param  int    $value
+     * @return int
+     */
+    public function decrement(string $key, int $value = 1): int;
 
     /**
      * Check for an entry in the cache.

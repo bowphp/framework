@@ -12,10 +12,11 @@ Let's show a little exemple:
 ```php
 use Bow\Http\Request;
 
-$app->post('/', function (Request $request) {
+$router->post('/', function (Request $request) {
     $name = $request->get('name');
-    response()->addHeader("X-Custom-Header", "Bow Framework");
-    return response()->json(["data" => "Hello $name!"]);
+    return response()
+        ->withHeader("X-Custom-Header", "Bow Framework")
+        ->json(["data" => "Hello $name!"]);
 });
 ```
 

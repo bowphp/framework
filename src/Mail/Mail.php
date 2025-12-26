@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Mail;
 
+use Bow\Mail\Adapters\LogAdapter;
 use Bow\Mail\Adapters\NativeAdapter;
 use Bow\Mail\Adapters\SesAdapter;
 use Bow\Mail\Adapters\SmtpAdapter;
@@ -30,14 +31,15 @@ class Mail
         'smtp' => SmtpAdapter::class,
         'mail' => NativeAdapter::class,
         'ses' => SesAdapter::class,
+        'log' => LogAdapter::class,
     ];
 
     /**
      * The mail driver instance
      *
-     * @var ?MailAdapterInterface
+     * @var SmtpAdapter|NativeAdapter|SesAdapter
      */
-    private static ?MailAdapterInterface $instance = null;
+    private static mixed $instance = null;
 
     /**
      * The mail configuration
@@ -97,9 +99,9 @@ class Mail
     /**
      * Get mail instance
      *
-     * @return MailAdapterInterface
+     * @return SmtpAdapter|NativeAdapter|SesAdapter
      */
-    public static function getInstance(): MailAdapterInterface
+    public static function getInstance(): SmtpAdapter|NativeAdapter|SesAdapter
     {
         return static::$instance;
     }
@@ -115,14 +117,14 @@ class Mail
      */
     public static function raw(string|array $to, string $subject, string $data, array $headers = []): mixed
     {
-        $to = (array)$to;
+        $to = (array) $to;
 
         $envelop = new Envelop();
 
         $envelop->to($to)->subject($subject)->setMessage($data);
 
         foreach ($headers as $key => $value) {
-            $envelop->addHeader($key, $value);
+            $envelop->withHeader($key, $value);
         }
 
         return static::$instance->send($envelop);

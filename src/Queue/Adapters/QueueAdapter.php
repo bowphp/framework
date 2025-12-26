@@ -20,6 +20,13 @@ abstract class QueueAdapter
     protected float $start_time;
 
     /**
+     * Define the processing timeout
+     *
+     * @var float
+     */
+    protected float $processing_timeout;
+
+    /**
      * Determine the default watch name
      *
      * @var string
@@ -49,34 +56,33 @@ abstract class QueueAdapter
     abstract public function configure(array $config): QueueAdapter;
 
     /**
-     * Push new producer
+     * Push new job
      *
-     * @param QueueJob $producer
+     * @param QueueJob $job
+     * @return bool
      */
-    abstract public function push(QueueJob $producer): void;
+    abstract public function push(QueueJob $job): bool;
 
     /**
-     * Create producer serialization
+     * Create job serialization
      *
-     * @param  QueueJob $producer
+     * @param  QueueJob $job
      * @return string
      */
-    public function serializeProducer(
-        QueueJob $producer
-    ): string {
-        return serialize($producer);
+    public function serializeProducer(QueueJob $job): string
+    {
+        return serialize($job);
     }
 
     /**
-     * Create producer unserialize
+     * Create job unserialize
      *
-     * @param  string $producer
+     * @param  string $job
      * @return QueueJob
      */
-    public function unserializeProducer(
-        string $producer
-    ): QueueJob {
-        return unserialize($producer);
+    public function unserializeProducer(string $job): QueueJob
+    {
+        return unserialize($job);
     }
 
     /**
@@ -95,6 +101,16 @@ abstract class QueueAdapter
     }
 
     /**
+     * Update the processing timeout
+     *
+     * @return void
+     */
+    public function updateProcessingTimeout(): void
+    {
+        $this->processing_timeout = time();
+    }
+
+    /**
      * Launch the worker
      *
      * @param  integer $timeout
@@ -103,7 +119,7 @@ abstract class QueueAdapter
      */
     final public function work(int $timeout, int $memory): void
     {
-        [$this->start_time, $jobs_processed] = [hrtime(true) / 1e9, 0];
+        [$this->processing_timeout, $jobs_processed] = [time(), 0];
 
         if ($this->supportsAsyncSignals()) {
             $this->listenForSignals();
@@ -164,7 +180,7 @@ abstract class QueueAdapter
      */
     protected function timeoutReached(int $timeout): bool
     {
-        return (time() - $this->start_time) >= $timeout;
+        return (time() - $this->processing_timeout) >= $timeout;
     }
 
     /**
@@ -205,6 +221,16 @@ abstract class QueueAdapter
     }
 
     /**
+     * Get job tries
+     *
+     * @return int
+     */
+    public function getTries(): int
+    {
+        return $this->tries;
+    }
+
+    /**
      * Set sleep time
      *
      * @param  int $sleep
@@ -237,16 +263,6 @@ abstract class QueueAdapter
     }
 
     /**
-     * Generate the job id
-     *
-     * @return string
-     */
-    public function generateId(): string
-    {
-        return sha1(uniqid(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), true));
-    }
-
-    /**
      * Get the queue size
      *
      * @param  string $queue
@@ -266,5 +282,15 @@ abstract class QueueAdapter
     public function flush(?string $queue = null): void
     {
         //
+    }
+
+    /**
+     * Generate the job id
+     *
+     * @return string
+     */
+    final protected function generateId(): string
+    {
+        return md5(uniqid((string) time(), true) . bin2hex(random_bytes(10)) . str_uuid() . microtime(true));
     }
 }

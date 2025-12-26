@@ -10,63 +10,63 @@ use Bow\Tests\Config\TestingConfiguration;
 
 class QueryBuilderTest extends \PHPUnit\Framework\TestCase
 {
+    private static bool $configured = false;
+
     public static function setUpBeforeClass(): void
     {
-        $config = TestingConfiguration::getConfig();
-        Database::configure($config["database"]);
+        if (!static::$configured) {
+            $config = TestingConfiguration::getConfig();
+            Database::configure($config["database"]);
+            static::$configured = true;
+        }
     }
 
-    public function setUp(): void
+    public function tearDown(): void
     {
-        Database::statement('drop table if exists pets');
-        Database::statement(
-            'create table pets (id int primary key, name varchar(255))'
-        );
-        Database::table("pets")->truncate();
+        // Clean up test table after each test for all connections
+        foreach (['mysql', 'sqlite', 'pgsql'] as $name) {
+            try {
+                Database::connection($name)->statement('DROP TABLE IF EXISTS pets');
+            } catch (\Exception $e) {
+                // Ignore errors during cleanup
+            }
+        }
+        parent::tearDown();
     }
 
-    /**
-     * @return Database
-     */
+    private function createTestingTable(string $name): void
+    {
+        $connection = Database::connection($name);
+        $connection->statement('DROP TABLE IF EXISTS pets');
+        $connection->statement('CREATE TABLE pets (id INT PRIMARY KEY, name VARCHAR(255))');
+    }
+
     public function test_get_database_connection()
     {
         $instance = Database::getInstance();
-
         $this->assertInstanceOf(Database::class, $instance);
-
-        return Database::getInstance();
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
-     * @param Database $database
      */
-    public function test_get_instance(string $name, Database $database)
+    public function test_get_query_builder_instance(string $name)
     {
         $this->createTestingTable($name);
-        $this->assertInstanceOf(QueryBuilder::class, $database->connection($name)->table('pets'));
-    }
+        $table = Database::connection($name)->table('pets');
 
-    public function createTestingTable(string $name): void
-    {
-        Database::connection($name)->statement('drop table if exists pets');
-        Database::connection($name)->statement(
-            'create table pets (id int primary key, name varchar(255))'
-        );
+        $this->assertInstanceOf(QueryBuilder::class, $table);
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      */
-    public function test_insert_by_passing_a_array(string $name, Database $database)
+    public function test_insert_by_passing_a_array(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $table->truncate();
 
         $result = $table->insert([
@@ -78,16 +78,14 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      */
-    public function test_insert_by_passing_a_multiple_array(string $name, Database $database)
+    public function test_insert_by_passing_a_multiple_array(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         // We keep clear the pet table
         $table->truncate();
 
@@ -101,16 +99,14 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      */
-    public function test_select_rows(string $name, Database $database)
+    public function test_select_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
 
         $this->assertInstanceOf(QueryBuilder::class, $table);
 
@@ -120,33 +116,29 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      */
-    public function test_select_chain_rows(string $name, Database $database)
+    public function test_select_chain_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $pets = $table->select(['name'])->get();
 
         $this->assertEquals(is_array($pets), true);
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      */
-    public function test_select_first_chain_rows(string $name, Database $database)
+    public function test_select_first_chain_rows(string $name)
     {
         $this->createTestingTable($name);
 
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $table->insert([
             ['id' => 1, 'name' => 'Milou'],
             ['id' => 2, 'name' => 'Foli'],
@@ -159,100 +151,88 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      * @throws QueryBuilderException
      */
-    public function test_where_in_chain_rows(string $name, Database $database)
+    public function test_where_in_chain_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $pets = $table->whereIn('id', [1, 3])->get();
 
         $this->assertEquals(is_array($pets), true);
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      */
-    public function test_where_null_chain_rows(string $name, Database $database)
+    public function test_where_null_chain_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $pets = $table->whereNull('name')->get();
 
         $this->assertEquals(is_array($pets), true);
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      * @throws QueryBuilderException
      */
-    public function test_where_between_chain_rows(string $name, Database $database)
+    public function test_where_between_chain_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $pets = $table->whereBetween('id', [1, 3])->get();
 
         $this->assertEquals(is_array($pets), true);
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      */
-    public function test_where_not_between_chain_rows(string $name, Database $database)
+    public function test_where_not_between_chain_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $pets = $table->whereNotBetween('id', [1, 3])->get();
 
         $this->assertEquals(is_array($pets), true);
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      * @throws QueryBuilderException
      */
-    public function test_where_not_null_chain_rows(string $name, Database $database)
+    public function test_where_not_null_chain_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
         $pets = $table->whereNotIn('id', [1, 3])->get();
 
         $this->assertEquals(is_array($pets), true);
     }
 
     /**
-     * @depends      test_get_database_connection
      * @dataProvider connectionNameProvider
      * @param string $name
-     * @param Database $database
      * @throws ConnectionException
      * @throws QueryBuilderException
      */
-    public function test_where_chain_rows(string $name, Database $database)
+    public function test_where_chain_rows(string $name)
     {
         $this->createTestingTable($name);
-        $table = $database->connection($name)->table('pets');
+        $table = Database::connection($name)->table('pets');
 
         $pets = $table->where('id', 1)->orWhere('name', 1)
             ->whereNull('name')

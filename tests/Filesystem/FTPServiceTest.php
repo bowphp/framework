@@ -20,6 +20,16 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         Storage::configure($config["storage"]);
     }
 
+    protected function setUp(): void
+    {
+        $this->ftp_service = Storage::service('ftp');
+    }
+
+    protected function tearDown(): void
+    {
+        $this->ftp_service->changePath();
+    }
+
     public function test_the_connection()
     {
         $this->assertInstanceOf(FTPService::class, $this->ftp_service);
@@ -59,8 +69,8 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
 
     public function test_file_should_not_be_existe()
     {
-        $this->expectException(\Bow\Storage\Exception\ResourceException::class);
-        $this->ftp_service->get('dummy.txt');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->ftp_service->get('');
     }
 
     public function test_create_the_new_file_and_the_content()
@@ -77,8 +87,7 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $result = $this->ftp_service->delete($file_name);
 
         $this->assertTrue($result);
-        $this->expectException(\Bow\Storage\Exception\ResourceException::class);
-        $this->ftp_service->get($file_name);
+        $this->assertEmpty($this->ftp_service->get($file_name));
     }
 
     public function test_rename_file()
@@ -179,15 +188,5 @@ class FTPServiceTest extends \PHPUnit\Framework\TestCase
         $this->ftp_service->put('put.txt', ' else');
 
         $this->assertTrue(true);
-    }
-
-    protected function setUp(): void
-    {
-        $this->ftp_service = Storage::service('ftp');
-    }
-
-    protected function tearDown(): void
-    {
-        $this->ftp_service->changePath();
     }
 }

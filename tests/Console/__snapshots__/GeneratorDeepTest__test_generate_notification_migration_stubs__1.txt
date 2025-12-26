@@ -1,0 +1,32 @@
+<?php
+
+use Bow\Database\Migration\Migration;
+use Bow\Database\Migration\Table;
+
+class FakeNotificationTableMigration extends Migration
+{
+    /**
+     * Up Migration
+     */
+    public function up(): void
+    {
+        $this->create("notifications", function (Table $table) {
+            $table->addBigIncrement('id', ["primary" => true]);
+            $table->addString('type');
+            $table->addString('concern_id');
+            $table->addString('concern_type');
+            $table->addText('data');
+            $table->addDatetime('read_at', ['nullable' => true]);
+            $table->addTimestamps();
+            $table->addDatetime('deleted_id', ['nullable' => true]);
+        });
+    }
+
+    /**
+     * Rollback migration
+     */
+    public function rollback(): void
+    {
+        $this->dropIfExists("notifications");
+    }
+}

@@ -2,7 +2,7 @@
 
 namespace Bow\Messaging;
 
-trait CanSendMessage
+trait SendMessaging
 {
     /**
      * Send message from authenticate user
@@ -23,9 +23,9 @@ trait CanSendMessage
      */
     public function setMessageQueue(Messaging $message): void
     {
-        $producer = new MessagingQueueJob($this, $message);
+        $queue_job = new MessagingQueueJob($this, $message);
 
-        queue($producer);
+        queue($queue_job);
     }
 
     /**
@@ -37,11 +37,11 @@ trait CanSendMessage
      */
     public function sendMessageQueueOn(string $queue, Messaging $message): void
     {
-        $producer = new MessagingQueueJob($this, $message);
+        $queue_job = new MessagingQueueJob($this, $message);
 
-        $producer->setQueue($queue);
+        $queue_job->setQueue($queue);
 
-        queue($producer);
+        queue($queue_job);
     }
 
     /**
@@ -53,11 +53,11 @@ trait CanSendMessage
      */
     public function sendMessageLater(int $delay, Messaging $message): void
     {
-        $producer = new MessagingQueueJob($this, $message);
+        $queue_job = new MessagingQueueJob($this, $message);
 
-        $producer->setDelay($delay);
+        $queue_job->setDelay($delay);
 
-        queue($producer);
+        queue($queue_job);
     }
 
     /**
@@ -70,11 +70,11 @@ trait CanSendMessage
      */
     public function sendMessageLaterOn(int $delay, string $queue, Messaging $message): void
     {
-        $producer = new MessagingQueueJob($this, $message);
+        $queue_job = new MessagingQueueJob($this, $message);
 
-        $producer->setQueue($queue);
-        $producer->setDelay($delay);
+        $queue_job->setQueue($queue);
+        $queue_job->setDelay($delay);
 
-        queue($producer);
+        queue($queue_job);
     }
 }

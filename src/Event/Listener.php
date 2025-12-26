@@ -50,7 +50,7 @@ class Listener
             $instance = app($callable);
             if ($instance instanceof EventListener) {
                 if ($instance instanceof EventShouldQueue) {
-                    queue(new EventProducer($instance, $data));
+                    queue(new EventQueueJob($instance, $data));
                     return null;
                 }
                 $callable = [$instance, 'process'];

@@ -27,7 +27,9 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
         // Configuration database
         Database::configure($config["database"]);
-        Database::statement("create table if not exists users (id int primary key auto_increment, name varchar(255), password varchar(255), username varchar(255))");
+        $driver = $config["database"]["default"];
+        $idColumn = $driver === 'pgsql' ? 'id SERIAL PRIMARY KEY' : ($driver === 'mysql' ? 'id INTEGER PRIMARY KEY AUTO_INCREMENT' : 'id INTEGER PRIMARY KEY AUTOINCREMENT');
+        Database::statement("CREATE TABLE IF NOT EXISTS users ($idColumn, name VARCHAR(255), password VARCHAR(255), username VARCHAR(255))");
         Database::table('users')->insert([
             'name' => 'Franck',
             'password' => Hash::make("password"),
@@ -43,7 +45,8 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     public function test_it_should_be_a_default_guard()
     {
         $config = TestingConfiguration::getConfig();
-        $auth = Auth::getInstance();
+        // Reset to default guard by calling guard() with null or default
+        $auth = Auth::guard($config["auth"]["default"]);
 
         $this->assertEquals($auth->getName(), $config["auth"]["default"]);
         $this->assertEquals($auth->getName(), "web");

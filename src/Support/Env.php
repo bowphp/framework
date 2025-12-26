@@ -8,6 +8,15 @@ use Bow\Application\Exception\ApplicationException;
 use ErrorException;
 use InvalidArgumentException;
 
+/**
+ * Class Env
+ *
+ * @package Bow\Support
+ * @method static bool  isLoaded()
+ * @method static mixed get(string $key, mixed $default = null)
+ * @method static bool  set(string $key, mixed $value)
+ * @method static array all()
+ */
 class Env
 {
     /**
@@ -18,56 +27,35 @@ class Env
     private static bool $loaded = false;
 
     /**
-     * Define the env list
+     * The Env instance
+     *
+     * @var ?Env
+     */
+    private static ?Env $instance = null;
+
+    /**
+     * The static envs
      *
      * @var array
      */
-    private static array $envs = [];
+    private array $envs = [];
 
     /**
-     * Check if env is load
+     * Env constructor.
      *
-     * @return bool
-     */
-    public static function isLoaded(): bool
-    {
-        return static::$loaded;
-    }
-
-    /**
-     * Load env file
-     *
-     * @param  string $filename
-     * @return void
      * @throws
      */
-    public static function load(string $filename): void
+    public function __construct(string $filename)
     {
-        if (static::$loaded) {
+        if ($this->isLoaded()) {
             return;
         }
 
-        if (!file_exists($filename)) {
-            throw new InvalidArgumentException(
-                "The application environment file [.env.json] cannot be empty or is not define."
-            );
-        }
+        $this->envs = json_decode(file_get_contents($filename), true, 512, JSON_THROW_ON_ERROR);
 
-        // Get the env file content
-        $content = file_get_contents($filename);
+        $this->envs = $this->bindVariables($this->envs);
 
-        $envs = json_decode(trim($content), true, 1024);
-
-        if (json_last_error()) {
-            throw new ApplicationException(
-                json_last_error_msg() . ": check your env json and syntax please."
-            );
-        }
-
-        static::$envs = $envs;
-        static::$envs = static::bindVariables($envs);
-
-        foreach (static::$envs as $key => $value) {
+        foreach ($this->envs as $key => $value) {
             $key = Str::upper(trim($key));
             putenv($key . '=' . json_encode($value));
         }
@@ -88,32 +76,47 @@ class Env
     }
 
     /**
-     * Bind variable
+     * Load env file
      *
-     * @param  array $envs
-     * @return array
+     * @param  string $filename
+     * @return void
+     * @throws
      */
-    private static function bindVariables(array $envs): array
+    public static function configure(string $filename)
     {
-        $keys = array_keys(static::$envs);
-
-        foreach ($envs as $env_key => $value) {
-            foreach ($keys as $key) {
-                if ($key == $env_key) {
-                    break;
-                }
-                if (is_array($value)) {
-                    $envs[$env_key] = static::bindVariables($value);
-                    break;
-                }
-                if (is_string($value) && preg_match("/\\$\{\s*$key\s*\}/", $value)) {
-                    $envs[$env_key] = str_replace('${' . $key . '}', static::$envs[$key], $value);
-                    break;
-                }
-            }
+        if (!file_exists($filename)) {
+            throw new InvalidArgumentException(
+                "The application environment file [.env.json] cannot be empty or is not define."
+            );
         }
 
-        return $envs;
+        static::$instance = new Env($filename);
+    }
+
+    /**
+     * Check if env is load
+     *
+     * @return bool
+     */
+    public function isLoaded(): bool
+    {
+        return static::$loaded;
+    }
+
+    /**
+     * Get the Env instance
+     *
+     * @return Env
+     */
+    public static function getInstance(): Env
+    {
+        if (!is_null(static::$instance)) {
+            return static::$instance;
+        }
+
+        throw new ApplicationException(
+            "The environment is not loaded. Please load it before using it."
+        );
     }
 
     /**
@@ -123,11 +126,11 @@ class Env
      * @param  mixed  $default
      * @return mixed
      */
-    public static function get(string $key, mixed $default = null): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
         $key = Str::upper(trim($key));
 
-        $value = static::$envs[$key] ?? getenv($key);
+        $value = $this->envs[$key] ?? getenv($key);
 
         if ($value === false) {
             return $default;
@@ -137,7 +140,7 @@ class Env
             return $value;
         }
 
-        $data = json_decode($value);
+        $data = json_decode($value, true, 512);
 
         return json_last_error() ? $value : $data;
     }
@@ -149,12 +152,67 @@ class Env
      * @param  mixed  $value
      * @return mixed
      */
-    public static function set(string $key, mixed $value): bool
+    public function set(string $key, mixed $value): bool
     {
         $key = Str::upper(trim($key));
 
-        static::$envs[$key] = $value;
+        $this->envs[$key] = $value;
 
         return putenv($key . '=' . $value);
+    }
+
+    /**
+     * Retrieve all environment information
+     *
+     * @return array
+     */
+    public function all(): array
+    {
+        return $this->envs;
+    }
+
+    /**
+     * Bind variable
+     *
+     * @param  array $envs
+     * @return array
+     */
+    private function bindVariables(array $envs): array
+    {
+        $keys = array_keys($this->envs);
+
+        foreach ($envs as $env_key => $value) {
+            foreach ($keys as $key) {
+                if ($key == $env_key) {
+                    break;
+                }
+                if (is_array($value)) {
+                    $envs[$env_key] = $this->bindVariables($value);
+                    break;
+                }
+                if (is_string($value) && preg_match("/\\$\{\s*$key\s*\}/", $value)) {
+                    $envs[$env_key] = str_replace('${' . $key . '}', $this->envs[$key], $value);
+                    break;
+                }
+            }
+        }
+
+        return $envs;
+    }
+
+    /**
+     * Handle dynamic calls to the class methods.
+     *
+     * @param  string $name
+     * @param  array  $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        if (method_exists(static::$instance, $name)) {
+            return call_user_func_array([static::$instance, $name], $arguments);
+        }
+
+        throw new \BadMethodCallException("Method {$name} does not exist.");
     }
 }

@@ -3,6 +3,7 @@
 namespace Bow\Tests\Config;
 
 use Bow\Configuration\Loader as ConfigurationLoader;
+use Bow\Support\Env;
 use Bow\Testing\KernelTesting;
 
 class TestingConfiguration
@@ -55,6 +56,8 @@ class TestingConfiguration
      */
     public static function getConfig(): ConfigurationLoader
     {
-        return KernelTesting::configure(__DIR__ . '/stubs');
+        Env::configure(__DIR__ . '/stubs/env.json');
+
+        return KernelTesting::configure(__DIR__ . '/stubs/config')->boot();
     }
 }

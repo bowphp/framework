@@ -11,7 +11,6 @@ use Bow\Container\ContainerConfiguration;
 use Bow\Event\Event;
 use Bow\Session\SessionConfiguration;
 use Bow\Support\Arraydotify;
-use Bow\Support\Env;
 
 class Loader implements ArrayAccess
 {
@@ -57,33 +56,7 @@ class Loader implements ArrayAccess
     private function __construct(string $base_path)
     {
         $this->base_path = $base_path;
-
-        /**
-         * We load all env file
-         */
-        if (file_exists($base_path . '/../.env.json')) {
-            Env::load($base_path . '/../.env.json');
-        }
-
-        /**
-         * We load all Bow configuration
-         */
-        $glob = glob($base_path . '/**.php');
-
-        $config = [];
-
-        foreach ($glob as $file) {
-            $key = str_replace('.php', '', basename($file));
-
-            if ($key == 'helper' || $key == 'helpers' || !file_exists($file)) {
-                continue;
-            }
-
-            // Laad the configuration file content
-            $config[$key] = include $file;
-        }
-
-        $this->config = Arraydotify::make($config);
+        $this->config = new Arraydotify([]);
     }
 
     /**
@@ -95,7 +68,7 @@ class Loader implements ArrayAccess
      */
     public static function configure(string $base_path): Loader
     {
-        if (!static::$instance instanceof Loader) {
+        if (is_null(static::$instance)) {
             static::$instance = new static($base_path);
         }
 
@@ -201,6 +174,8 @@ class Loader implements ArrayAccess
             return $this;
         }
 
+        $this->loadEnvfile();
+
         $services = array_merge(
             [ContainerConfiguration::class],
             $this->configurations(),
@@ -232,7 +207,7 @@ class Loader implements ArrayAccess
 
         // Bind the define events
         foreach ($this->events() as $name => $handlers) {
-            $handlers = (array)$handlers;
+            $handlers = (array) $handlers;
             foreach ($handlers as $handler) {
                 Event::on($name, $handler);
             }
@@ -242,6 +217,35 @@ class Loader implements ArrayAccess
         $this->booted = true;
 
         return $this;
+    }
+
+    /**
+     * Load the .env file
+     *
+     * @return void
+     * @throws
+     */
+    private function loadEnvfile(): void
+    {
+        /**
+         * We load all Bow configuration
+         */
+        $glob = glob($this->base_path . '/**.php');
+
+        $config = [];
+
+        foreach ($glob as $file) {
+            $key = str_replace('.php', '', basename($file));
+
+            if ($key == 'helper' || $key == 'helpers' || !file_exists($file)) {
+                continue;
+            }
+
+            // Laad the configuration file content
+            $config[$key] = include $file;
+        }
+
+        $this->config = Arraydotify::make($config);
     }
 
     /**
@@ -310,9 +314,14 @@ class Loader implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet(mixed $offset): mixed
+    public function &offsetGet(mixed $offset): mixed
     {
-        return $this->config[$offset] ?? null;
+        if (!$this->config->offsetExists($offset)) {
+            $null = null;
+            return $null;
+        }
+
+        return $this->config[$offset];
     }
 
     /**

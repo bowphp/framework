@@ -32,11 +32,18 @@ class Response implements ResponseInterface
     private int $code;
 
     /**
-     * The added headers
+     * Define the headers
      *
      * @var array
      */
     private array $headers = [];
+
+    /**
+     * Define the cookies
+     *
+     * @var array
+     */
+    private array $cookies = [];
 
     /**
      * Downloadable flag
@@ -99,19 +106,6 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Add http headers
-     *
-     * @param  array $headers
-     * @return Response
-     */
-    public function addHeaders(array $headers): Response
-    {
-        $this->headers = [...$this->headers, ...$headers];
-
-        return $this;
-    }
-
-    /**
      * Download the given file as an argument
      *
      * @param  string  $file
@@ -132,16 +126,16 @@ class Response implements ResponseInterface
 
         $disposition = $headers["disposition"] ?? 'attachment';
 
-        $this->addHeader('Content-Disposition', $disposition . '; filename=' . $filename);
-        $this->addHeader('Content-Type', $type);
+        $this->withHeader('Content-Disposition', $disposition . '; filename=' . $filename);
+        $this->withHeader('Content-Type', $type);
 
         $file_size = filesize($file);
-        $this->addHeader('Content-Length', (string)(is_int($file_size) ? $file_size : ''));
-        $this->addHeader('Content-Encoding', 'base64');
+        $this->withHeader('Content-Length', (string)(is_int($file_size) ? $file_size : ''));
+        $this->withHeader('Content-Encoding', 'base64');
 
         // We put the new headers
         foreach ($headers as $key => $value) {
-            $this->addHeader($key, $value);
+            $this->withHeader($key, $value);
         }
 
         $this->download_filename = $file;
@@ -151,15 +145,55 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Add http headers
+     *
+     * @param  array $headers
+     * @return Response
+     */
+    public function withHeaders(array $headers): Response
+    {
+        $this->headers = array_merge($this->headers, $headers);
+
+        return $this;
+    }
+
+    /**
      * Add http header
      *
      * @param  string $key
      * @param  string $value
      * @return Response
      */
-    public function addHeader(string $key, string $value): Response
+    public function withHeader(string $key, string $value): Response
     {
         $this->headers[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Set cookie header
+     *
+     * @param  string $key
+     * @param  string $value
+     * @return Response
+     */
+    public function withCookie(string $key, string $value): Response
+    {
+        $this->cookies[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Set multiple cookies
+     *
+     * @param  array $cookies
+     * @return Response
+     */
+    public function withCookies(array $cookies): Response
+    {
+        $this->cookies = array_merge($this->cookies, $cookies);
 
         return $this;
     }
@@ -177,6 +211,10 @@ class Response implements ResponseInterface
 
         foreach ($this->getHeaders() as $key => $header) {
             header(sprintf('%s: %s', $key, $header));
+        }
+
+        foreach ($this->cookies as $key => $value) {
+            cookie($key, $value);
         }
 
         if ($this->download) {
@@ -254,7 +292,7 @@ class Response implements ResponseInterface
         $this->code = $code;
 
         foreach ($headers as $key => $value) {
-            $this->addHeader($key, $value);
+            $this->withHeader($key, $value);
         }
 
         $this->content = $data;
@@ -272,11 +310,8 @@ class Response implements ResponseInterface
      */
     public function json(mixed $data, int $code = 200, array $headers = []): string
     {
-        $this->addHeader('Content-Type', 'application/json; charset=UTF-8');
-
-        foreach ($headers as $key => $value) {
-            $this->addHeader($key, $value);
-        }
+        $this->withHeader('Content-Type', 'application/json; charset=UTF-8');
+        $this->withHeaders($headers);
 
         $this->content = json_encode($data);
         $this->code = $code;
@@ -305,19 +340,6 @@ class Response implements ResponseInterface
         $this->content = $view->getContent();
 
         return $this->buildHttpResponse();
-    }
-
-    /**
-     * Get headers
-     *
-     * @param  array $headers
-     * @return Response
-     */
-    public function withHeaders(array $headers): Response
-    {
-        $this->headers = $headers;
-
-        return $this;
     }
 
     /**

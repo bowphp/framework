@@ -7,6 +7,7 @@ namespace Bow\Database;
 use PDO;
 use ErrorException;
 use Bow\Security\Sanitize;
+use Bow\Database\QueryEvent;
 use Bow\Database\Exception\DatabaseException;
 use Bow\Database\Connection\AbstractConnection;
 use Bow\Database\Exception\ConnectionException;
@@ -115,7 +116,7 @@ class Database
      */
     public static function getInstance(): Database
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         return static::$instance;
     }
@@ -125,7 +126,7 @@ class Database
      *
      * @throws
      */
-    private static function verifyConnection(): void
+    private static function ensureDatabaseConnection(): void
     {
         if (is_null(static::$adapter)) {
             static::connection(static::$name);
@@ -149,7 +150,7 @@ class Database
      */
     public static function getConnectionAdapter(): ?AbstractConnection
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         return static::$adapter;
     }
@@ -163,7 +164,7 @@ class Database
      */
     public static function update(string $sql_statement, array $data = []): int
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         if (preg_match("/^update\s[\w\d_`]+\s+\bset\b\s.+\s\bwhere\b\s+.+$/i", $sql_statement)) {
             return static::executePrepareQuery($sql_statement, $data);
@@ -192,6 +193,8 @@ class Database
 
         $pdo_statement->execute();
 
+        static::triggerQueryEvent($sql_statement, $data);
+
         return $pdo_statement->rowCount();
     }
 
@@ -204,7 +207,7 @@ class Database
      */
     public static function select(string $sql_statement, array $data = []): mixed
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         if (
             !preg_match(
@@ -241,7 +244,7 @@ class Database
      */
     public static function selectOne(string $sql_statement, array $data = []): mixed
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         if (!preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sql_statement)) {
             throw new DatabaseException(
@@ -273,7 +276,7 @@ class Database
      */
     public static function insert(string $sql_statement, array $data = []): int
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         if (
             !preg_match(
@@ -321,7 +324,9 @@ class Database
      */
     public static function statement(string $sql_statement): bool
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
+
+        $sql_statement = trim($sql_statement);
 
         return static::$adapter
             ->getConnection()
@@ -337,7 +342,7 @@ class Database
      */
     public static function delete(string $sql_statement, array $data = []): int
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         if (!preg_match("/^delete\s+from\s+[\w\d_`]+\s+where\s+.+;?$/i", $sql_statement)) {
             throw new DatabaseException(
@@ -357,7 +362,7 @@ class Database
      */
     public static function table(string $table): QueryBuilder
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         $table = static::$adapter->getTablePrefix() . $table;
 
@@ -397,7 +402,7 @@ class Database
      */
     public static function startTransaction(): void
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         if (!static::$adapter->getConnection()->inTransaction()) {
             static::$adapter->getConnection()->beginTransaction();
@@ -411,7 +416,7 @@ class Database
      */
     public static function inTransaction(): bool
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         return static::$adapter->getConnection()->inTransaction();
     }
@@ -421,7 +426,7 @@ class Database
      */
     public static function commit(): void
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         static::$adapter->getConnection()->commit();
     }
@@ -431,7 +436,7 @@ class Database
      */
     public static function rollback(): void
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         static::$adapter->getConnection()->rollBack();
     }
@@ -444,7 +449,7 @@ class Database
      */
     public static function lastInsertId(?string $name = null): int|string|PDO
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         if ($name === null) {
             return static::$adapter->getConnection();
@@ -460,7 +465,7 @@ class Database
      */
     public static function getPdo(): PDO
     {
-        static::verifyConnection();
+        static::ensureDatabaseConnection();
 
         return static::$adapter->getConnection();
     }
@@ -473,6 +478,20 @@ class Database
     public static function setPdo(PDO $pdo): void
     {
         static::$adapter->setConnection($pdo);
+    }
+
+    /**
+     * Trigger the query executed event
+     *
+     * @param  string $sql
+     * @param  array  $bindings
+     * @return void
+     */
+    public static function triggerQueryEvent(string $sql, array $bindings = []): void
+    {
+        $event = new QueryEvent($sql, $bindings);
+
+        app_event($event);
     }
 
     /**

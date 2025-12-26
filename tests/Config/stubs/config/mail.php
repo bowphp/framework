@@ -4,6 +4,10 @@ return [
     'driver' => 'smtp',
     'charset' => 'utf8',
 
+    'log' => [
+        'path' => sys_get_temp_dir() . '/bow/mails',
+    ],
+
     'smtp' => [
         'hostname' => 'localhost',
         'username' => 'test@test.dev',

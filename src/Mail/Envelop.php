@@ -133,10 +133,13 @@ class Envelop
      *
      * @param string $key
      * @param string $value
+     * @return Envelop
      */
-    public function addHeader(string $key, string $value): void
+    public function withHeader(string $key, string $value): Envelop
     {
         $this->headers[] = "$key: $value";
+
+        return $this;
     }
 
     /**
@@ -310,6 +313,19 @@ class Envelop
     }
 
     /**
+     * Adds blind carbon copy
+     *
+     * @param string  $mail
+     * @param ?string $name
+     *
+     * @return Envelop
+     */
+    public function bcc(string $mail, ?string $name = null): Envelop
+    {
+        return $this->addBcc($mail, $name);
+    }
+
+    /**
      * Add carbon copy
      *
      * @param string  $mail
@@ -327,6 +343,19 @@ class Envelop
     }
 
     /**
+     * Add carbon copy
+     *
+     * @param string  $mail
+     * @param ?string $name
+     *
+     * @return Envelop
+     */
+    public function cc(string $mail, ?string $name = null): Envelop
+    {
+        return $this->addCc($mail, $name);
+    }
+
+    /**
      * Add Reply-To
      *
      * @param  string  $mail
@@ -340,6 +369,18 @@ class Envelop
         $this->headers[] = "Replay-To: $mail";
 
         return $this;
+    }
+
+    /**
+     * Add Reply-To
+     *
+     * @param  string  $mail
+     * @param  ?string $name
+     * @return Envelop
+     */
+    public function replyTo(string $mail, ?string $name = null): Envelop
+    {
+        return $this->addReplyTo($mail, $name);
     }
 
     /**
@@ -360,6 +401,23 @@ class Envelop
     }
 
     /**
+     * Add Return-Path
+     *
+     * @param string  $mail
+     * @param ?string $name = null
+     *
+     * @return Envelop
+     */
+    public function returnPath(string $mail, ?string $name = null): Envelop
+    {
+        $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
+
+        $this->headers[] = "Return-Path: $mail";
+
+        return $this;
+    }
+
+    /**
      * Set email priority.
      *
      * @param int $priority
@@ -371,6 +429,18 @@ class Envelop
         $this->headers[] = "X-Priority: " . (int)$priority;
 
         return $this;
+    }
+
+    /**
+     * Set email priority.
+     *
+     * @param int $priority
+     *
+     * @return Envelop
+     */
+    public function setPriority(int $priority): Envelop
+    {
+        return $this->addPriority($priority);
     }
 
     /**
@@ -476,24 +546,13 @@ class Envelop
      * @param string $message
      * @param string $type
      * @see   setEnvelop
+     * @return Envelop
      */
-    public function message(string $message, string $type = 'text/html'): void
+    public function message(string $message, string $type = 'text/html'): Envelop
     {
         $this->setMessage($message, $type);
-    }
 
-    public function composeTo()
-    {
-        $to = '';
-        foreach ($this->getTo() as $value) {
-            if ($value[0] !== null) {
-                $to .= $value[0] . ' <' . $value[1] . '>';
-            } else {
-                $to .= '<' . $value[1] . '>';
-            }
-
-            $this->write('RCPT TO: ' . $to, 250);
-        }
+        return $this;
     }
 
     /**

@@ -13,7 +13,7 @@ class TestMessage extends Messaging
         return ['mail', 'database', 'slack', 'sms', 'telegram'];
     }
 
-    public function toMail(Model $context): Envelop
+    public function toMail(Model $context): ?Envelop
     {
         return (new Envelop())
             ->to('test@example.com')

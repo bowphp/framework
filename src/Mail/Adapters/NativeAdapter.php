@@ -35,7 +35,8 @@ class NativeAdapter implements MailAdapterInterface
         $this->config = $config;
 
         if (count($config) > 0) {
-            $this->from = $this->config["from"][$config["default"]];
+            $default = $this->config["default"];
+            $this->from = $this->config["from"][$default];
         }
     }
 
@@ -71,7 +72,7 @@ class NativeAdapter implements MailAdapterInterface
     {
         if (empty($envelop->getTo()) || empty($envelop->getSubject()) || empty($envelop->getMessage())) {
             throw new InvalidArgumentException(
-                "An error has occurred. The sender or the env$envelop or object omits.",
+                "An error has occurred. The sender or the envelope or object omits.",
                 E_USER_ERROR
             );
         }
@@ -82,9 +83,29 @@ class NativeAdapter implements MailAdapterInterface
             }
         }
 
-        $to = '';
-
         $envelop->setDefaultHeader();
+
+        $headers = $envelop->compileHeaders();
+
+        $headers .= 'Content-Type: ' . $envelop->getType() . '; charset=' . $envelop->getCharset() . Envelop::END;
+        $headers .= 'Content-Transfer-Encoding: 8bit' . Envelop::END;
+
+        // Send email use the php native function
+        $status = $this->executeNativeMail($envelop, $headers);
+
+        return (bool) $status;
+    }
+
+    /**
+     * Execute the native php mail function
+     *
+     * @param  Envelop $envelop
+     * @param  string  $headers
+     * @return bool
+     */
+    protected function executeNativeMail($envelop, string $headers): bool
+    {
+        $to = '';
 
         foreach ($envelop->getTo() as $key => $value) {
             if ($key > 0) {
@@ -97,14 +118,9 @@ class NativeAdapter implements MailAdapterInterface
             }
         }
 
-        $headers = $envelop->compileHeaders();
-
-        $headers .= 'Content-Type: ' . $envelop->getType() . '; charset=' . $envelop->getCharset() . Envelop::END;
-        $headers .= 'Content-Transfer-Encoding: 8bit' . Envelop::END;
-
         // Send email use the php native function
         $status = @mail($to, $envelop->getSubject(), $envelop->getMessage(), $headers);
 
-        return (bool)$status;
+        return (bool) $status;
     }
 }

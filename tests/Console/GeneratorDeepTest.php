@@ -232,6 +232,19 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertMatchesRegularExpression("@\nclass\sFakeStandardTableMigration\sextends\sMigration\n@", $content);
     }
 
+    public function test_generate_notification_migration_stubs()
+    {
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'FakeNotificationTableMigration');
+        $content = $generator->makeStubContent('model/notification', [
+            "className" => "FakeNotificationTableMigration",
+            "table" => "Notifications",
+        ]);
+
+        $this->assertNotNull($content);
+        $this->assertMatchesSnapshot($content);
+        $this->assertMatchesRegularExpression("@\nclass\sFakeNotificationTableMigration\sextends\sMigration\n@", $content);
+    }
+
     public function test_generate_model_stubs()
     {
         $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'Example');

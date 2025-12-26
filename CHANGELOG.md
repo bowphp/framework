@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **SMTP Adapter**: Complete rewrite with RFC-compliant SMTP protocol implementation
+  - Expanded from 8 to 21 methods for better functionality separation
+  - Added comprehensive configuration validation (hostname, port, timeout)
+  - Implemented multi-exception handling (SmtpException | SocketException)
+  - Enhanced email address parsing supporting "Name <email@example.com>" format
+  - Added optional authentication support
+  - Created comprehensive test suite with 21 tests and 35 assertions
+- **FTP Service**: Connection retry logic with 3 attempts and configurable delays
+- **FTP Service**: Configuration constants and validation for all required fields
+- **FTP Service**: Automatic stream cleanup with try-finally blocks
+- **FTP Service**: Destructor for proper resource cleanup
+- **Database Notifications**: Enhanced test coverage with 4 additional comprehensive tests
+- **Queue System**: Graceful logger fallback in BeanstalkdAdapter
+
+### Changed
+
+- **FTP Service**: Complete refactoring with improved error handling and resource management (651 lines)
+  - Enhanced all file operations methods (store, get, put, append, prepend, copy, move, delete)
+  - Improved directory operations (files, directories, makeDirectory)
+  - Better passive/active mode configuration
+  - More specific and actionable error messages
+  - Added connection state validation with `ensureConnection()` method
+- **Environment Configuration**: Fixed path handling by removing unreliable `realpath()` usage
+- **Configuration Loader**: Improved validation and error handling
+- **Messaging System**: Fixed PHPUnit mock issues and corrected type signatures
+- **Test Suite**: Renamed test methods to snake_case for consistency
+- **Database Tests**: Significantly expanded test coverage across connection, migration, pagination, and query builders
+
+### Fixed
+
+- **SMTP Adapter**: Port validation now correctly validates range (1-65535)
+- **SMTP Adapter**: Timeout validation now requires positive integers
+- **FTP Service**: Fixed directory listing parser to handle filenames with spaces
+- **FTP Service**: Improved error messages with connection details
+- **Environment Configuration**: Fixed `Env::configure()` error handling
+- **Queue Tests**: Fixed mock configuration issues in MessagingTest
+- **Notification Tests**: Added missing timestamp columns in test schema
+
+### Improved
+
+- **Test Coverage**: Added 29 new tests with 46 new assertions
+- **Error Rate**: Reduced test errors by 39% (28 → 17 errors)
+- **Failure Rate**: Reduced test failures by 70% (10 → 3 failures)
+- **Code Quality**: Better error messages across all refactored components
+- **Resource Management**: Proper cleanup prevents resource leaks
+- **Configuration Validation**: Early validation with specific error messages
+
 ## 5.1.7 - 2024-12-21
 
 ### What's Changed

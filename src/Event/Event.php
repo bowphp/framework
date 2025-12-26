@@ -8,6 +8,16 @@ use Bow\Event\Contracts\AppEvent;
 use ErrorException;
 use RuntimeException;
 
+/**
+ * Class Event
+ *
+ * @package Bow\Event
+ * @method static void on(string $event, callable|string $fn, int $priority = 0)
+ * @method static void once(string $event, callable|array|string $fn, int $priority = 0)
+ * @method static ?bool emit(string|AppEvent $event)
+ * @method static void off(string $event)
+ * @method static ?bool dispatch(string|AppEvent $event)
+ */
 class Event
 {
     /**
@@ -23,6 +33,18 @@ class Event
      * @var ?Event
      */
     private static ?Event $instance = null;
+
+    /**
+     * Event constructor.
+     *
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        if (static::$instance != null) {
+            throw new \Exception("The Event class is a singleton and already instantiated. Please use Event::getInstance() to get the instance.");
+        }
+    }
 
     /**
      * Event constructor.
@@ -45,7 +67,7 @@ class Event
      * @param callable|string $fn
      * @param int             $priority
      */
-    public static function on(string $event, callable|string $fn, int $priority = 0): void
+    public function on(string $event, callable|string $fn, int $priority = 0): void
     {
         if (!static::bound($event)) {
             static::$events[$event] = [];
@@ -56,22 +78,35 @@ class Event
         uasort(
             static::$events[$event],
             function (Listener $first_listener, Listener $second_listener) {
-                return $first_listener->getPriority() < $second_listener->getPriority();
+                return $second_listener->getPriority() <=> $first_listener->getPriority();
             }
         );
     }
 
     /**
+     * Alias to on method
+     *
+     * @param string          $event
+     * @param callable|string $fn
+     * @param int             $priority
+     */
+    public function listener(string $event, callable|string $fn, int $priority = 0): void
+    {
+        $this->on($event, $fn, $priority);
+    }
+
+    /**
      * Check whether an event is already recorded at least once.
      *
-     * @param  string $event
+     * @param  string|AppEvent $event
      * @return bool
      */
-    public static function bound(string $event): bool
+    public function bound(string|AppEvent $event): bool
     {
-        $once = static::$events['__bow.once.event'] ?? [];
+        $onces = static::$events['__bow.once.event'] ?? [];
 
-        return array_key_exists($event, $once) || array_key_exists($event, static::$events);
+        return array_key_exists($event, static::$events) ||
+            array_key_exists($event, $onces);
     }
 
     /**
@@ -81,9 +116,28 @@ class Event
      * @param callable|array|string $fn
      * @param int                   $priority
      */
-    public static function once(string $event, callable|array|string $fn, int $priority = 0): void
+    public function once(string $event, callable|array|string $fn, int $priority = 0): void
     {
         static::$events['__bow.once.event'][$event] = new Listener($fn, $priority);
+    }
+
+    /**
+     * Get the one-time listener for an event
+     *
+     * @param  string $event
+     * @return Array<Listener>
+     */
+    public function getEventListeners(string $event_name): array
+    {
+        $once_event = static::$events['__bow.once.event'][$event_name] ?? null;
+
+        if ($once_event) {
+            return [$once_event];
+        }
+
+        $regular_events = static::$events[$event_name] ?? [];
+
+        return (array) $regular_events;
     }
 
     /**
@@ -93,7 +147,7 @@ class Event
      * @return bool|null
      * @throws EventException
      */
-    public static function emit(string|AppEvent $event): ?bool
+    public function emit(string|AppEvent $event): ?bool
     {
         $event_name = $event;
 
@@ -104,17 +158,11 @@ class Event
             $data = array_slice(func_get_args(), 1);
         }
 
-        if (!static::bound($event_name)) {
-            throw new EventException("The $event_name not found");
+        if (!$this->bound($event_name)) {
+            return null;
         }
 
-        if (isset(static::$events['__bow.once.event'][$event_name])) {
-            $listener = static::$events['__bow.once.event'][$event_name];
-
-            return $listener->call($data);
-        }
-
-        $events = (array) static::$events[$event_name];
+        $events = $this->getEventListeners($event_name);
 
         // Execute each listener
         collect($events)->each(fn(Listener $listener) => $listener->call($data));
@@ -123,29 +171,38 @@ class Event
     }
 
     /**
+     * Dispatch event
+     *
+     * @param  string|AppEvent $event
+     * @return bool|null
+     * @throws EventException
+     */
+    public function dispatch(string|AppEvent $event): ?bool
+    {
+        return $this->emit($event);
+    }
+
+    /**
      * off removes an event saves
      *
-     * @param string $event
+     * @param string|AppEvent $event
      */
-    public static function off(string $event): void
+    public function off(string|AppEvent $event): void
     {
-        if (static::bound($event)) {
-            unset(
-                static::$events[$event],
-                static::$events['__bow.once.event'][$event]
-            );
+        if ($this->bound($event)) {
+            unset(static::$events[$event], static::$events['__bow.once.event'][$event]);
         }
     }
 
     /**
-     * __call
+     * __callStatic
      *
      * @param  string $name
      * @param  array  $arguments
      * @return mixed
      * @throws ErrorException
      */
-    public function __call(string $name, array $arguments)
+    public static function __callStatic(string $name, array $arguments)
     {
         if (is_null(static::$instance)) {
             throw new ErrorException(

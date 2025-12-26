@@ -39,6 +39,7 @@ class ActivityEvent extends EventListener
     public function process($payload)
     {
         Activity::create($payload);
+        // $payload => ['action' => 'update profile']
     }
 }
 ```
@@ -54,4 +55,10 @@ public function events()
         ]
     ]
 }
+```
+
+Send the event now
+
+```php
+event('user.activity', ['action' => 'update profile']);
 ```

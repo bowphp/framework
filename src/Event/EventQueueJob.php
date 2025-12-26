@@ -15,8 +15,8 @@ class EventQueueJob extends QueueJob
      * @param mixed                          $payload
      */
     public function __construct(
-        private readonly mixed $event,
-        private readonly mixed $payload = null,
+        private EventListener|EventShouldQueue $event,
+        private mixed $payload = null,
     ) {
         parent::__construct();
     }

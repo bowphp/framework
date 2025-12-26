@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bow\Configuration;
 
 use Bow\Support\Env;
-use InvalidArgumentException;
 
 class EnvConfiguration extends Configuration
 {
@@ -14,20 +13,11 @@ class EnvConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind(
-            'env',
-            function () use ($config) {
-                $path = $config['app.env_file'];
-                if ($path === false) {
-                    throw new InvalidArgumentException(
-                        "The application environment file [.env.json] is not exists. "
-                        . "Copy the .env.example.json file to .env.json"
-                    );
-                }
+        $this->container->bind('env', function () use ($config) {
+            Env::configure($config['app.env_file']);
 
-                Env::load($config['app.env_file']);
-            }
-        );
+            return Env::getInstance();
+        });
     }
 
     /**

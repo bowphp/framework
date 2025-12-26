@@ -41,7 +41,7 @@ services:
             - "5432:5432"
         environment:
             POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: password
+            POSTGRES_PASSWORD: postgres
             POSTGRES_DB: postgres
         volumes:
             - postgres_data:/var/lib/postgresql/data
@@ -61,23 +61,23 @@ services:
             - "20:20"
             - "12020-12025:12020-12025"
         environment:
-            USER: bob
-            PASS: "12345"
+            USER: username
+            PASS: password
         volumes:
             - "ftp_storage:/ftp/$USER"
         networks:
             - bowphp_network
     mail:
-        container_name: bowphp_mail
-        image: maildev/maildev
+        container_name: bowphp_mailhog
+        image: mailhog/mailhog
         restart: unless-stopped
         ports:
-            - "1025:25"
-            - "1080:80"
+            - "1025:1025"
+            - "1080:8025"
         networks:
             - bowphp_network
         healthcheck:
-            test: ["CMD", "nc", "-z", "localhost", "25"]
+            test: ["CMD", "nc", "-z", "localhost", "1025"]
             interval: 10s
             timeout: 5s
             retries: 5

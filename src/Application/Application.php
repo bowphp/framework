@@ -142,7 +142,7 @@ class Application
 
         // We add of the X-Powered-By header when disable_powered_by is true
         if (!$this->disable_powered_by) {
-            $this->response->addHeader('X-Powered-By', 'Bow Framework');
+            $this->response->withHeader('X-Powered-By', 'Bow Framework');
         }
 
         $this->router->setPrefix('');
@@ -320,7 +320,7 @@ class Application
         $this->response->status($code);
 
         foreach ($headers as $key => $value) {
-            $this->response->addHeader($key, $value);
+            $this->response->withHeader($key, $value);
         }
 
         if ($message == null) {

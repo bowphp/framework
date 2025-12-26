@@ -23,14 +23,23 @@ class DatabaseChannelAdapter implements ChannelAdapterInterface
 
         $database = $message->toDatabase($context);
 
-        Database::table(config('messaging.notification.table') ?? 'notifications')->insert(
-            [
-            'id' => str_uuid(),
-            'data' => $database['data'],
+        if ($database === null) {
+            throw new \RuntimeException(
+                "The database notification returned by toDatabase() cannot be null."
+            );
+        }
+
+        $table_name = config('messaging.notification.table');
+
+        $table = Database::connection($context->getConnection())->table($table_name ?? 'notifications');
+
+        $notification = [
+            'data' => json_encode($database['data']),
             'concern_id' => $context->getKey(),
             'concern_type' => get_class($context),
             'type' => $database['type'] ?? 'notification',
-            ]
-        );
+        ];
+
+        $table->insert($notification);
     }
 }

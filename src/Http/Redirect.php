@@ -139,7 +139,7 @@ class Redirect implements ResponseInterface
      */
     public function sendContent(): void
     {
-        $this->response->addHeader('Location', $this->to);
+        $this->response->withHeader('Location', $this->to);
 
         $this->response->sendContent();
     }

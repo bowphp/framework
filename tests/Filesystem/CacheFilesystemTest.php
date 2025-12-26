@@ -1,42 +1,54 @@
 <?php
 
-namespace Bow\Tests\Cache;
+namespace Bow\Tests\Filesystem;
 
 use Bow\Cache\Cache;
 use Bow\Tests\Config\TestingConfiguration;
 
 class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        $config = TestingConfiguration::getConfig();
+        Cache::configure($config["cache"]);
+        Cache::store("file");
+    }
+
     public function test_create_cache()
     {
-        $result = Cache::add('name', 'Dakia');
+        $result = Cache::set('name', 'Dakia');
 
         $this->assertEquals($result, true);
     }
 
     public function test_get_cache()
     {
+        // Add cache first since each test is isolated
+        Cache::set('name', 'Dakia');
         $this->assertEquals(Cache::get('name'), 'Dakia');
     }
 
-    public function test_add_with_callback_cache()
+    public function test_set_with_callback_cache()
     {
-        $result = Cache::add('lastname', fn() => 'Franck');
-        $result = $result && Cache::add('age', fn() => 25, 20000);
+        $result = Cache::set('lastname', fn() => 'Franck');
+        $result = $result && Cache::set('age', fn() => 25, 20000);
 
         $this->assertEquals($result, true);
     }
 
     public function test_get_callback_cache()
     {
+        // Add cache first
+        Cache::set('lastname', fn() => 'Franck');
         $this->assertEquals(Cache::get('lastname'), 'Franck');
 
+        Cache::set('age', fn() => 25, 20000);
         $this->assertEquals(Cache::get('age'), 25);
     }
 
-    public function test_add_array_cache()
+    public function test_set_array_cache()
     {
-        $result = Cache::add('address', [
+        $result = Cache::set('address', [
             'tel' => "49929598",
             'city' => "Abidjan",
             'country' => "Cote d'ivoire"
@@ -47,6 +59,13 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_get_array_cache()
     {
+        // Add cache first
+        Cache::set('address', [
+            'tel' => "0728010298",
+            'city' => "Abidjan",
+            'country' => "Cote d'ivoire"
+        ]);
+
         $result = Cache::get('address');
 
         $this->assertEquals(true, is_array($result));
@@ -58,6 +77,9 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_has()
     {
+        // Add cache first
+        Cache::set('name', 'Dakia');
+
         $first_result = Cache::has('name');
         $other_result = Cache::has('jobs');
 
@@ -67,6 +89,10 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_forget()
     {
+        // Add caches first
+        Cache::set('address', ['tel' => "49929598"]);
+        Cache::set('name', 'Dakia');
+
         Cache::forget('address');
 
         $result = Cache::forget('name');
@@ -84,9 +110,12 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_time_of_empty()
     {
+        // Add cache with expiry
+        Cache::set('lastname', 'Franck', 20000);
         $result = Cache::timeOf('lastname');
 
         $this->assertTrue(is_numeric($result));
+        $this->assertGreaterThan(0, $result);
     }
 
     public function test_time_of_empty_2()
@@ -98,21 +127,25 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_time_of_empty_3()
     {
+        // Set cache with expiry first
+        Cache::set('age', 25, 20000);
         $result = Cache::timeOf('age');
 
-        $this->assertEquals(is_int($result), true);
+        // Cache with expiry should return an integer timestamp
+        $this->assertTrue(is_int($result));
+        $this->assertGreaterThan(0, $result);
     }
 
     public function test_can_add_many_data_at_the_same_time_in_the_cache()
     {
-        $result = Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        $result = Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals($result, true);
     }
 
     public function test_can_retrieve_multiple_cache_stored()
     {
-        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals(Cache::get('name'), 'Doe');
         $this->assertEquals(Cache::get('first_name'), 'John');
@@ -120,7 +153,7 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
 
     public function test_clear_cache()
     {
-        Cache::addMany(['name' => 'Doe', 'first_name' => 'John']);
+        Cache::setMany(['name' => 'Doe', 'first_name' => 'John']);
 
         $this->assertEquals(Cache::get('first_name'), 'John');
         $this->assertEquals(Cache::get('name'), 'Doe');
@@ -131,11 +164,30 @@ class CacheFilesystemTest extends \PHPUnit\Framework\TestCase
         $this->assertNull(Cache::get('first_name'));
     }
 
+    public function test_set_overwrites_existing_value()
+    {
+        Cache::set('overwrite_test', 'original');
+        $this->assertEquals('original', Cache::get('overwrite_test'));
+
+        Cache::set('overwrite_test', 'updated');
+        $this->assertEquals('updated', Cache::get('overwrite_test'));
+    }
+
+    public function test_cache_stores_null_value()
+    {
+        Cache::set('null_value', null);
+
+        $this->assertTrue(Cache::has('null_value'));
+        $this->assertNull(Cache::get('null_value'));
+    }
+
     protected function setUp(): void
     {
-        parent::setUp();
         $config = TestingConfiguration::getConfig();
         Cache::configure($config["cache"]);
         Cache::store("file");
+
+        // Clear cache before each test to ensure isolation
+        Cache::clear();
     }
 }
