@@ -73,7 +73,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com', 'Sender Name')
@@ -83,7 +83,7 @@ class LogAdapterTest extends TestCase
         $result = $adapter->send($envelop);
 
         $this->assertTrue($result);
-        
+
         // Verify file was created
         $files = glob($this->testLogPath . '/*.eml');
         $this->assertCount(1, $files);
@@ -96,7 +96,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com', 'Sender Name')
@@ -120,7 +120,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com', 'Sender Name')
@@ -142,7 +142,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to(['test1@example.com', 'test2@example.com', 'test3@example.com'])
             ->from('sender@example.com', 'Sender Name')
@@ -168,7 +168,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('Recipient Name <test@example.com>')
             ->from('sender@example.com', 'Sender Name')
@@ -190,7 +190,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -204,7 +204,7 @@ class LogAdapterTest extends TestCase
 
         $files = glob($this->testLogPath . '/*.eml');
         $this->assertCount(3, $files);
-        
+
         // Verify all filenames are unique
         $this->assertEquals(count($files), count(array_unique($files)));
     }
@@ -216,7 +216,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -239,9 +239,9 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $htmlContent = '<html><body><h1>Test HTML</h1><p>Paragraph</p></body></html>';
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -265,7 +265,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -290,7 +290,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->addCc('cc@example.com')
@@ -314,7 +314,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->bcc('bcc@example.com')
@@ -338,7 +338,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -363,7 +363,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -390,9 +390,9 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $longMessage = str_repeat('This is a long message. ', 1000);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -416,7 +416,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -440,7 +440,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -460,7 +460,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to(['John Doe <john@example.com>', 'jane@example.com', 'Bob Smith <bob@example.com>'])
             ->from('sender@example.com')
@@ -486,7 +486,7 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')
@@ -496,7 +496,7 @@ class LogAdapterTest extends TestCase
         $adapter->send($envelop);
 
         $files = glob($this->testLogPath . '/*.eml');
-        
+
         $this->assertFileExists($files[0]);
         $this->assertFileIsReadable($files[0]);
     }
@@ -508,9 +508,9 @@ class LogAdapterTest extends TestCase
         ];
 
         $adapter = new LogAdapter($config);
-        
+
         $message = "Line 1\nLine 2\nLine 3\n\nParagraph 2";
-        
+
         $envelop = (new Envelop())
             ->to('test@example.com')
             ->from('sender@example.com')

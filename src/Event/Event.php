@@ -136,7 +136,7 @@ class Event
         }
 
         $regular_events = static::$events[$event_name] ?? [];
-        
+
         return (array) $regular_events;
     }
 

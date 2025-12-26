@@ -53,7 +53,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 
 - Multiple adapters: SMTP, AWS SES, Native PHP mail
 - RFC-compliant SMTP implementation
-- Email parsing with "Name <email>" format support
+- Email parsing with "Name <name@email.com>" format support
 - File attachments
 - Queue integration for asynchronous sending
 

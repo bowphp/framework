@@ -46,7 +46,7 @@ class LogAdapter implements MailAdapterInterface
         $content .= $envelop->compileHeaders();
 
         $recipients = array_map(fn($to) => $to[0] ? "{$to[0]} <{$to[1]}>" : $to[1], $envelop->getTo());
-        
+
         $content .= "To: " . implode(', ', $recipients) . "\n";
 
         $content .= "Subject: " . $envelop->getSubject() . "\n";
