@@ -58,15 +58,10 @@ jobs:
 
       - name: Run test suite
         env:
-          FTP_HOST: localhost
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_PORT: ${{ secrets.FTP_PORT }}
-          FTP_ROOT: ${{ secrets.FTP_ROOT }}
-          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_KEY: ${{ secrets.AWS_KEY }}
+          AWS_SECRET: ${{ secrets.AWS_SECRET }}
           AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          AWS_REGION: us-east-1
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: ./vendor/bin/phpunit tests --configuration phpunit.dist.xml

@@ -57,8 +57,8 @@ services:
         image: papacdev/vsftpd
         restart: unless-stopped
         ports:
-            - "2021:21"
-            - "2020:20"
+            - "21:21"
+            - "20:20"
             - "12020-12025:12020-12025"
         environment:
             USER: username
