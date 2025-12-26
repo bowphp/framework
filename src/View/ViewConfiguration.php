@@ -14,14 +14,11 @@ class ViewConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind(
-            'view',
-            function () use ($config) {
-                View::configure($config["view"]);
+        $this->container->bind('view', function () use ($config) {
+            View::configure($config["view"]);
 
-                return View::getInstance();
-            }
-        );
+            return View::getInstance();
+        });
     }
 
     /**

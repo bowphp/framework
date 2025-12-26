@@ -14,12 +14,12 @@ class DatabaseConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind(
-            'db',
-            function () use ($config) {
-                return Database::configure($config['database'] ?? $config['db']);
-            }
-        );
+        $this->container->bind('db', function () use ($config) {
+            return Database::configure($config['database'] ?? $config['db']);
+        });
+        $this->container->bind('database', function () use ($config) {
+            return Database::configure($config['database'] ?? $config['db']);
+        });
     }
 
     /**
@@ -28,5 +28,6 @@ class DatabaseConfiguration extends Configuration
     public function run(): void
     {
         $this->container->make('db');
+        $this->container->make('database');
     }
 }

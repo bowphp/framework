@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Bow\Configuration;
 
 use ArrayAccess;
-use Bow\Application\Exception\ApplicationException;
-use Bow\Container\Capsule;
-use Bow\Container\ContainerConfiguration;
 use Bow\Event\Event;
-use Bow\Session\SessionConfiguration;
+use Bow\Container\Capsule;
 use Bow\Support\Arraydotify;
+use Bow\Session\SessionConfiguration;
+use Bow\Configuration\EnvConfiguration;
+use Bow\Container\ContainerConfiguration;
+use Bow\Application\Exception\ApplicationException;
 
 class Loader implements ArrayAccess
 {
@@ -174,10 +175,8 @@ class Loader implements ArrayAccess
             return $this;
         }
 
-        $this->loadEnvfile();
-
         $services = array_merge(
-            [ContainerConfiguration::class],
+            [ContainerConfiguration::class, EnvConfiguration::class],
             $this->configurations(),
         );
 
@@ -198,6 +197,11 @@ class Loader implements ArrayAccess
             $service_instance = new $service($container);
             $service_instance->create($this);
             $service_collection[] = $service_instance;
+
+            // Encure that the .env file is loaded before others services
+            if ($service === EnvConfiguration::class) {
+                $this->loadEnvfile();
+            }
         }
 
         // Start of services or initial code
