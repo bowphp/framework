@@ -176,7 +176,11 @@ class Loader implements ArrayAccess
 
         $container = Capsule::getInstance();
 
+        // Load the env configuration first
         $this->createConfiguration(EnvConfiguration::class, $container);
+
+        // Load the .env or .env.json file
+        $this->loadEnvfile();
 
         // Configuration of services
         $loaded_configurations = $this->createConfigurations(
