@@ -369,16 +369,16 @@ class Application
     {
         $this->config = $config;
 
-        if (is_string($config['app']['root'])) {
-            $this->router->setBaseRoute($config['app']['root']);
-        }
-
-        // We activate the auto csrf switcher
-        $this->router->setAutoCsrf((bool)($config['app']['auto_csrf'] ?? false));
-
         $this->capsule->instance('config', $config);
 
         $this->boot();
+
+        // We activate the auto csrf switcher
+        $this->router->setAutoCsrf((bool) ($config['app']['auto_csrf'] ?? false));
+
+        if (is_string($config['app']['root'])) {
+            $this->router->setBaseRoute($config['app']['root']);
+        }
     }
 
     /**
