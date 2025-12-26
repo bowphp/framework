@@ -99,7 +99,7 @@ class Storage
         static::$config = $config;
 
         if (is_null(static::$disk)) {
-            static::$disk = static::disk($config['disk']['mount']);
+            static::$disk = static::local($config['disk']['mount']);
         }
 
         return static::$disk;
@@ -130,12 +130,26 @@ class Storage
 
         $config = static::$config['disk']['path'][$disk];
 
+        if (is_null($config)) {
+            throw new DiskNotFoundException('The ' . $disk . ' disk is not define.');
+        }
+
+        if (!is_dir($config)) {
+            // Try to create the directory
+            if (!mkdir($config, 0755, true)) {
+                throw new DiskNotFoundException('The ' . $disk . ' disk directory does not exist.');
+            }
+        }
+
         return static::$disk = new DiskFilesystemService($config);
     }
 
     /**
      * Mount disk
-     * @deprecated version
+     * 
+     * @param string|null $disk
+     * @return DiskFilesystemService
+     * @throws DiskNotFoundException
      */
     public static function disk(?string $disk = null): DiskFilesystemService
     {

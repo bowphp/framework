@@ -94,7 +94,7 @@ class FTPService implements ServiceInterface
     {
         $this->validateConfiguration($config);
         $this->config = $this->normalizeConfiguration($config);
-        $this->use_passive_mode = (bool)($this->config[self::CONFIG_PASSIVE] ?? self::DEFAULT_PASSIVE);
+        $this->use_passive_mode = (bool) ($this->config[self::CONFIG_PASSIVE] ?? self::DEFAULT_PASSIVE);
 
         $this->connect();
     }
@@ -147,9 +147,9 @@ class FTPService implements ServiceInterface
         }
 
         $host = $this->config[self::CONFIG_HOSTNAME];
-        $port = (int)$this->config[self::CONFIG_PORT];
-        $timeout = (int)$this->config[self::CONFIG_TIMEOUT];
-        $use_tls = (bool)$this->config[self::CONFIG_TLS];
+        $port = (int) $this->config[self::CONFIG_PORT];
+        $timeout = (int) $this->config[self::CONFIG_TIMEOUT];
+        $use_tls = (bool) $this->config[self::CONFIG_TLS];
 
         $connection = $this->attemptConnection($host, $port, $timeout, $use_tls);
 
@@ -171,7 +171,6 @@ class FTPService implements ServiceInterface
             $this->login();
             $this->changePath();
             $this->activePassiveMode();
-            $this->is_connected = true;
         } catch (RuntimeException $e) {
             $this->disconnect();
             throw $e;
@@ -251,7 +250,6 @@ class FTPService implements ServiceInterface
     {
         if ($this->connection !== null) {
             @ftp_close($this->connection);
-            $this->is_connected = false;
         }
     }
 
@@ -283,7 +281,7 @@ class FTPService implements ServiceInterface
      */
     private function ensureConnection(): void
     {
-        if (!$this->is_connected || $this->connection === null) {
+        if ($this->connection === null) {
             throw new RuntimeException('FTP connection is not established');
         }
     }
