@@ -186,16 +186,16 @@ php bow serve
 
 ```php
 // routes/app.php
-$app->get('/', function () {
+$route->get('/', function () {
     return 'Hello World!';
 });
 
-$app->get('/users/:id', function ($id) {
+$route->get('/users/:id', function ($id) {
     return "User ID: $id";
 });
 
 // RESTful resource routing
-$app->rest('/api/posts', PostController::class);
+$route->rest('/api/posts', PostController::class);
 ```
 
 **Create a Controller:**
@@ -204,6 +204,7 @@ $app->rest('/api/posts', PostController::class);
 namespace App\Controllers;
 
 use Bow\Http\Request;
+use App\Models\Post;
 
 class PostController
 {
@@ -274,7 +275,6 @@ The Bow ecosystem includes several packages:
 - **[bowphp/app](https://github.com/bowphp/app)**: Application skeleton
 - **[bowphp/tintin](https://github.com/bowphp/tintin)**: Template engine
 - **[bowphp/policier](https://github.com/bowphp/policier)**: Authentication & authorization
-- **[bowphp/slack-webhook](https://github.com/bowphp/slack-webhook)**: Slack integration
 - **[bowphp/payment](https://github.com/bowphp/payment)**: Payment gateway integration
 
 ## Contributing
@@ -300,7 +300,6 @@ For more detailed information, refer to the `CONTRIBUTING.md` file.
 - [Official Documentation](https://bowphp.com)
 - [API Reference](https://bowphp.com/api)
 - [Tutorials & Guides](https://bowphp.com/docs)
-- [Community Forum](https://bowphp.slack.com)
 
 ## Support & Community
 
@@ -309,7 +308,6 @@ For more detailed information, refer to the `CONTRIBUTING.md` file.
 - **Documentation**: [https://bowphp.com](https://bowphp.com)
 - **Issues**: [GitHub Issues](https://github.com/bowphp/framework/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/bowphp/framework/discussions)
-- **Slack**: [Join our Slack](https://join.slack.com/t/bowphp/shared_invite/enQtNzMxOTQ0MTM2ODM5LTQ3MWQ3Mzc1NDFiNDYxMTAyNzBkNDJlMTgwNDJjM2QyMzA2YTk4NDYyN2NiMzM0YTZmNjU1YjBhNmJjZThiM2Q)
 
 ### Stay Updated
 
@@ -320,24 +318,12 @@ For more detailed information, refer to the `CONTRIBUTING.md` file.
 
 The Bow Framework is open-source software licensed under the [MIT license](LICENSE).
 
-## Credits
-
-**Created and maintained by:**
-
-- [Franck DAKIA](https://github.com/papac) - Lead Developer
-
-**Special thanks to:**
-
-- [All contributors](https://github.com/bowphp/framework/graphs/contributors)
-- The PHP community
-
 ## Contact
 
 - Email: [papac@bowphp.com](mailto:papac@bowphp.com)  
 - Twitter: [@papacdev](https://twitter.com/papacdev)
 
 For bug reports, please use [GitHub Issues](https://github.com/bowphp/framework/issues).  
-For questions and discussions, join us on [Slack](https://bowphp.slack.com).
 
 ---
 
