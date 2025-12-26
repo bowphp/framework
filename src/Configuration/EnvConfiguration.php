@@ -14,6 +14,7 @@ class EnvConfiguration extends Configuration
     public function create(Loader $config): void
     {
         Env::configure(base_path('.env.json'));
+
         $event = Env::getInstance();
 
         $this->container->instance('env', $event);
