@@ -146,7 +146,7 @@ class Storage
 
     /**
      * Mount disk
-     * 
+     *
      * @param string|null $disk
      * @return DiskFilesystemService
      * @throws DiskNotFoundException

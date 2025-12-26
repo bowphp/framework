@@ -21,14 +21,11 @@ class ContainerConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind(
-            'action',
-            function () use ($config) {
-                $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
+        $this->container->bind('container', function () use ($config) {
+            $middlewares = array_merge($config->getMiddlewares(), $this->middlewares);
 
-                return Compass::configure($config->namespaces(), $middlewares);
-            }
-        );
+            return Compass::configure($config->namespaces(), $middlewares);
+        });
     }
 
     /**

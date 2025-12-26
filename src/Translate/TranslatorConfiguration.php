@@ -14,25 +14,22 @@ class TranslatorConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind(
-            'translate',
-            function () use ($config) {
-                $auto_detected = $config['translate.auto_detected'] ?? false;
-                $lang = $config['translate.lang'];
-                $dictionary = $config['translate.dictionary'];
+        $this->container->bind('translate', function () use ($config) {
+            $auto_detected = $config['translate.auto_detected'] ?? false;
+            $lang = $config['translate.lang'];
+            $dictionary = $config['translate.dictionary'];
 
-                if ($auto_detected) {
-                    $lang = app("request")->lang();
-                    if (is_string($lang)) {
-                        $lang = strtolower($lang);
-                    } else {
-                        $lang = $config['translate.lang'];
-                    }
+            if ($auto_detected) {
+                $lang = app("request")->lang();
+                if (is_string($lang)) {
+                    $lang = strtolower($lang);
+                } else {
+                    $lang = $config['translate.lang'];
                 }
-
-                return Translator::configure($lang, $dictionary);
             }
-        );
+
+            return Translator::configure($lang, $dictionary);
+        });
     }
 
     /**

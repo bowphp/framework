@@ -15,19 +15,16 @@ class SessionConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind(
-            'session',
-            function () use ($config) {
-                $session = Session::configure((array)$config['session']);
+        $this->container->bind('session', function () use ($config) {
+            $session = Session::configure((array)$config['session']);
 
-                Tokenize::makeCsrfToken((int)$config['session.lifetime']);
+            Tokenize::makeCsrfToken((int)$config['session.lifetime']);
 
-                // Reboot the old request values
-                Session::getInstance()->add('__bow.old', []);
+            // Reboot the old request values
+            Session::getInstance()->add('__bow.old', []);
 
-                return $session;
-            }
-        );
+            return $session;
+        });
     }
 
     /**
