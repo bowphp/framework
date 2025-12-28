@@ -2,8 +2,8 @@
 
 [![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square)](https://github.com/bowphp/docs)
 [![version](https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square)](https://packagist.org/packages/bowphp/framework)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/bowphp/framework/blob/master/LICENSE)
-[![Build Status](https://img.shields.io/travis/bowphp/framework/master.svg?style=flat-square)](https://travis-ci.org/bowphp/framework)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/bowphp/framework/blob/main/LICENSE)
+[![Build Status](https://img.shields.io/travis/bowphp/framework/main.svg?style=flat-square)](https://travis-ci.org/bowphp/framework)
 ![Build Status](https://github.com/bowphp/framework/actions/workflows/tests.yml/badge.svg)
 
 > A lightweight, modern PHP framework designed for building web applications with clean architecture and modular design.
