@@ -164,9 +164,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
         $this->original = $attributes;
 
-        if ($this->connection !== null) {
-            $this->setConnection(DB::getConnectionName());
-        }
+        $this->setConnection($this->connection ?: DB::getConnectionName());
 
         $this->table = static::query()->getTable();
     }
