@@ -13,11 +13,24 @@ class EnvConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        Env::configure(base_path('.env.json'));
-
-        $event = Env::getInstance();
-
-        $this->container->instance('env', $event);
+        $envFile = $config->getBasePath() . '/.env.json';
+        
+        // Only configure if file exists and environment is not already loaded
+        try {
+            $env = Env::getInstance();
+            if ($env->isLoaded()) {
+                $this->container->instance('env', $env);
+                return;
+            }
+        } catch (\Bow\Application\Exception\ApplicationException $e) {
+            // Environment not loaded, continue to load it
+        }
+        
+        if (file_exists($envFile)) {
+            Env::configure($envFile);
+            $event = Env::getInstance();
+            $this->container->instance('env', $event);
+        }
     }
 
     /**

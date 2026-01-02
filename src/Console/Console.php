@@ -243,8 +243,9 @@ class Console
 
         if (!in_array($command, array_keys($commands))) {
             // Try to execute the custom command
-            if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
-                return $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
+            $rawCommand = $this->arg->getRawCommand() ?? '';
+            if (($rawCommand !== '' && array_key_exists($rawCommand, static::$registers)) || array_key_exists($command, static::$registers)) {
+                return $this->executeCustomCommand($rawCommand ?: $command);
             }
         }
 
