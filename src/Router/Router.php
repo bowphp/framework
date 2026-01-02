@@ -491,4 +491,18 @@ class Router
     {
         $this->current['path'] = $path;
     }
+
+    /**
+     * Register routes from controller classes
+     *
+     * @param string|array $controllers
+     * @return Router
+     */
+    public function register(string|array $controllers): Router
+    {
+        $registrar = new AttributeRouteRegistrar($this);
+        $registrar->register($controllers);
+
+        return $this;
+    }
 }
