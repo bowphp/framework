@@ -921,7 +921,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
                 return (float)$value;
             }
             if ($type === "double") {
-                return (double)$value;
+                return (float)$value;
             }
             if ($type === "json") {
                 if (is_array($value)) {
