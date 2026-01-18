@@ -66,9 +66,9 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     {
         $data = $notifier->toSms($context);
 
-        $account_sid = config('messaging.twilio.account_sid');
-        $auth_token = config('messaging.twilio.auth_token');
-        $this->from_number = config('messaging.twilio.from');
+        $account_sid = config('notifier.twilio.account_sid');
+        $auth_token = config('notifier.twilio.auth_token');
+        $this->from_number = config('notifier.twilio.from');
 
         if (!$account_sid || !$auth_token || !$this->from_number) {
             throw new InvalidArgumentException('Twilio credentials are required');
@@ -76,18 +76,15 @@ class SmsChannelAdapter implements ChannelAdapterInterface
 
         $this->client = new Client($account_sid, $auth_token);
 
-        if (!isset($data['to']) || !isset($data['notifier'])) {
+        if (!isset($data['to']) || !isset($data['message'])) {
             throw new InvalidArgumentException('The phone number and notifier are required');
         }
 
         try {
-            $this->client->notifiers->create(
-                $data['to'],
-                [
+            $this->client->notifiers->create($data['to'], [
                 'from' => $this->from_number,
                 'body' => $data['notifier']
-                ]
-            );
+            ]);
         } catch (\Exception $e) {
             throw new \RuntimeException('Error while sending SMS: ' . $e->getMessage());
         }
