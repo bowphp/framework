@@ -1,11 +1,11 @@
 <?php
 
-namespace Bow\Messaging\Adapters;
+namespace Bow\Notifier\Adapters;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Mail;
-use Bow\Messaging\Contracts\ChannelAdapterInterface;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Contracts\ChannelAdapterInterface;
+use Bow\Notifier\Notifier;
 
 class MailChannelAdapter implements ChannelAdapterInterface
 {
@@ -13,16 +13,16 @@ class MailChannelAdapter implements ChannelAdapterInterface
      * Send the notification to mail
      *
      * @param  Model     $context
-     * @param  Messaging $message
+     * @param  Notifier $notifier
      * @return void
      */
-    public function send(Model $context, Messaging $message): void
+    public function send(Model $context, Notifier $notifier): void
     {
-        if (!method_exists($message, 'toMail')) {
+        if (!method_exists($notifier, 'toMail')) {
             return;
         }
 
-        $envelop = $message->toMail($context);
+        $envelop = $notifier->toMail($context);
 
         if ($envelop === null) {
             throw new \RuntimeException(

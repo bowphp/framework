@@ -151,7 +151,7 @@ The project is organized into the following directories, each representing an in
   - **Event/**: Event management and dispatching.
   - **Http/**: HTTP requests and responses management.
   - **Mail/**: Email sending and configuration.
-  - **Messaging/**: Messaging and notifications.
+  - **Notifier/**: Notifications.
   - **Middleware/**: Middleware classes for request handling.
   - **Queue/**: Job queues and background processing.
   - **Router/**: HTTP request routing.

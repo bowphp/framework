@@ -1,30 +1,30 @@
 <?php
 
-namespace Bow\Messaging\Adapters;
+namespace Bow\Notifier\Adapters;
 
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Contracts\ChannelAdapterInterface;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Contracts\ChannelAdapterInterface;
+use Bow\Notifier\Notifier;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
 class SlackChannelAdapter implements ChannelAdapterInterface
 {
     /**
-     * Send message via Slack
+     * Send notifier via Slack
      *
      * @param  Model     $context
-     * @param  Messaging $message
+     * @param  Notifier $notifier
      * @return void
      * @throws GuzzleException
      */
-    public function send(Model $context, Messaging $message): void
+    public function send(Model $context, Notifier $notifier): void
     {
-        if (!method_exists($message, 'toSlack')) {
+        if (!method_exists($notifier, 'toSlack')) {
             return;
         }
 
-        $data = $message->toSlack($context);
+        $data = $notifier->toSlack($context);
 
         if (!isset($data['content'])) {
             throw new \InvalidArgumentException('The content are required for Slack');
@@ -39,17 +39,14 @@ class SlackChannelAdapter implements ChannelAdapterInterface
         $client = new Client();
 
         try {
-            $client->post(
-                $webhook_url,
-                [
+            $client->post($webhook_url, [
                 'json' => $data['content'],
                 'headers' => [
                     'Content-Type' => 'application/json'
                 ]
-                ]
-            );
+            ]);
         } catch (\Exception $e) {
-            throw new \RuntimeException('Error while sending Slack message: ' . $e->getMessage());
+            throw new \RuntimeException('Error while sending Slack notifier: ' . $e->getMessage());
         }
     }
 }

@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added connection state validation with `ensureConnection()` method
 - **Environment Configuration**: Fixed path handling by removing unreliable `realpath()` usage
 - **Configuration Loader**: Improved validation and error handling
-- **Messaging System**: Fixed PHPUnit mock issues and corrected type signatures
+- **Notifier System**: Fixed PHPUnit mock issues and corrected type signatures
 - **Test Suite**: Renamed test methods to snake_case for consistency
 - **Database Tests**: Significantly expanded test coverage across connection, migration, pagination, and query builders
 
@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FTP Service**: Fixed directory listing parser to handle filenames with spaces
 - **FTP Service**: Improved error messages with connection details
 - **Environment Configuration**: Fixed `Env::configure()` error handling
-- **Queue Tests**: Fixed mock configuration issues in MessagingTest
+- **Queue Tests**: Fixed mock configuration issues in NotifierTest
 - **Notification Tests**: Added missing timestamp columns in test schema
 
 ### Improved

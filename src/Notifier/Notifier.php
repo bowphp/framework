@@ -1,16 +1,16 @@
 <?php
 
-namespace Bow\Messaging;
+namespace Bow\Notifier;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Envelop;
-use Bow\Messaging\Adapters\DatabaseChannelAdapter;
-use Bow\Messaging\Adapters\MailChannelAdapter;
-use Bow\Messaging\Adapters\SlackChannelAdapter;
-use Bow\Messaging\Adapters\SmsChannelAdapter;
-use Bow\Messaging\Adapters\TelegramChannelAdapter;
+use Bow\Notifier\Adapters\DatabaseChannelAdapter;
+use Bow\Notifier\Adapters\MailChannelAdapter;
+use Bow\Notifier\Adapters\SlackChannelAdapter;
+use Bow\Notifier\Adapters\SmsChannelAdapter;
+use Bow\Notifier\Adapters\TelegramChannelAdapter;
 
-abstract class Messaging
+abstract class Notifier
 {
     /**
      * Defines the available channel

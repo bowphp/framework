@@ -177,10 +177,12 @@ class Loader implements ArrayAccess
         $container = Capsule::getInstance();
 
         // Load the env configuration first
-        $this->createConfiguration(EnvConfiguration::class, $container);
+        $env_config = $this->createConfiguration(EnvConfiguration::class, $container);
 
         // Load the .env or .env.json file
         $this->loadEnvfile();
+
+        $env_config->run();
 
         // Configuration of services
         $loaded_configurations = $this->createConfigurations(
@@ -340,22 +342,6 @@ class Loader implements ArrayAccess
     }
 
     /**
-     * __invoke
-     *
-     * @param  string $key
-     * @param  mixed  $value
-     * @return mixed
-     */
-    public function __invoke(string $key, mixed $value = null): mixed
-    {
-        if ($value == null) {
-            return $this->config[$key];
-        }
-
-        return $this->config[$key] = $value;
-    }
-
-    /**
      * @inheritDoc
      */
     public function offsetExists(mixed $offset): bool
@@ -390,5 +376,21 @@ class Loader implements ArrayAccess
     public function offsetUnset(mixed $offset): void
     {
         $this->config->offsetUnset($offset);
+    }
+
+    /**
+     * __invoke
+     *
+     * @param  string $key
+     * @param  mixed  $value
+     * @return mixed
+     */
+    public function __invoke(string $key, mixed $value = null): mixed
+    {
+        if ($value == null) {
+            return $this->config[$key];
+        }
+
+        return $this->config[$key] = $value;
     }
 }

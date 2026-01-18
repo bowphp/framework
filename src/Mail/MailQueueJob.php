@@ -6,7 +6,7 @@ use Bow\Queue\QueueJob;
 use Bow\View\View;
 use Throwable;
 
-class MailQueueProducer extends QueueJob
+class MailQueueJob extends QueueJob
 {
     /**
      * The message bag
@@ -16,7 +16,7 @@ class MailQueueProducer extends QueueJob
     private array $bags = [];
 
     /**
-     * MailQueueProducer constructor
+     * MailQueueJob constructor
      *
      * @param string  $view
      * @param array   $data

@@ -63,7 +63,7 @@ class Console
         'job',
         'command',
         'listener',
-        'message'
+        'notifier'
     ];
 
     /**
@@ -542,7 +542,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:listener\033[00m        Create a new event listener
    \033[0;33madd:job\033[00m             Create a new job
    \033[0;33madd:command\033[00m         Create a new console command
-   \033[0;33madd:message\033[00m         Create a new messaging handler
+   \033[0;33madd:notifier\033[00m         Create a new messaging handler
 
  \033[0;32mMIGRATION\033[00m Apply migration to database
    \033[0;33mmigration:migrate\033[00m   Run migrations
@@ -595,7 +595,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                Create a new event listener
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:job name                  Create a new queue job
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              Create a new console command
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:message name              Create a new messaging handler
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:notifier name              Create a new messaging handler
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      Display this help
 
 U;

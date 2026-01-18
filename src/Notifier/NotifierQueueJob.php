@@ -1,12 +1,12 @@
 <?php
 
-namespace Bow\Messaging;
+namespace Bow\Notifier;
 
 use Bow\Database\Barry\Model;
 use Bow\Queue\QueueJob;
 use Throwable;
 
-class MessagingQueueJob extends QueueJob
+class NotifierQueueJob extends QueueJob
 {
     /**
      * The message bag
@@ -16,19 +16,19 @@ class MessagingQueueJob extends QueueJob
     private array $bags = [];
 
     /**
-     * MessagingQueueJob constructor
+     * NotifierQueueJob constructor
      *
      * @param Model     $context
-     * @param Messaging $message
+     * @param Notifier $notifier
      */
     public function __construct(
         Model $context,
-        Messaging $message,
+        Notifier $notifier,
     ) {
         parent::__construct();
 
         $this->bags = [
-            "message" => $message,
+            "notifier" => $notifier,
             "context" => $context,
         ];
     }
@@ -40,8 +40,8 @@ class MessagingQueueJob extends QueueJob
      */
     public function process(): void
     {
-        $message = $this->bags['message'];
-        $message->process($this->bags['context']);
+        $notifier = $this->bags['notifier'];
+        $notifier->process($this->bags['context']);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Bow\Tests\Notification;
+namespace Bow\Tests\Database;
 
 use Bow\Database\Database;
 use Bow\Database\Notification\DatabaseNotification;

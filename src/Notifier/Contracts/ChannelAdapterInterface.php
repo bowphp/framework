@@ -1,9 +1,9 @@
 <?php
 
-namespace Bow\Messaging\Contracts;
+namespace Bow\Notifier\Contracts;
 
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Notifier;
 
 interface ChannelAdapterInterface
 {
@@ -11,8 +11,8 @@ interface ChannelAdapterInterface
      * Send a message through the channel
      *
      * @param  Model     $context
-     * @param  Messaging $message
+     * @param  Notifier $notifier
      * @return void
      */
-    public function send(Model $context, Messaging $message): void;
+    public function send(Model $context, Notifier $notifier): void;
 }

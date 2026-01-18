@@ -21,7 +21,7 @@ use Bow\Console\Command\Generator\GenerateServiceCommand;
 use Bow\Console\Command\Generator\GenerateSessionCommand;
 use Bow\Console\Command\Generator\GenerateAppEventCommand;
 use Bow\Console\Command\Generator\GenerateExceptionCommand;
-use Bow\Console\Command\Generator\GenerateMessagingCommand;
+use Bow\Console\Command\Generator\GenerateNotifierCommand;
 use Bow\Console\Command\Generator\GenerateMigrationCommand;
 use Bow\Console\Command\Generator\GenerateControllerCommand;
 use Bow\Console\Command\Generator\GenerateMiddlewareCommand;
@@ -59,7 +59,7 @@ class Command extends AbstractCommand
         "add:listener" => GenerateEventListenerCommand::class,
         "add:job" => GenerateJobCommand::class,
         "add:command" => GenerateConsoleCommand::class,
-        "add:message" => GenerateMessagingCommand::class,
+        "add:notifier" => GenerateNotifierCommand::class,
         "run:console" => ReplCommand::class,
         "run:server" => ServerCommand::class,
         "run:worker" => WorkerCommand::class,
