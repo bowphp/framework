@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\QueueJob;
-use ErrorException;
 use Pheanstalk\Contract\PheanstalkPublisherInterface;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\Values\Timeout;
 use Pheanstalk\Values\TubeName;
 use RuntimeException;
 use Throwable;
+use ErrorException;
 
 class BeanstalkdAdapter extends QueueAdapter
 {

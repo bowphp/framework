@@ -1,11 +1,11 @@
 <?php
 
-namespace Bow\Messaging\Adapters;
+namespace Bow\Notifier\Adapters;
 
 use Bow\Database\Barry\Model;
 use Bow\Database\Database;
-use Bow\Messaging\Contracts\ChannelAdapterInterface;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Contracts\ChannelAdapterInterface;
+use Bow\Notifier\Notifier;
 
 class DatabaseChannelAdapter implements ChannelAdapterInterface
 {
@@ -13,9 +13,9 @@ class DatabaseChannelAdapter implements ChannelAdapterInterface
      * Send the notification to database
      *
      * @param Model     $context
-     * @param Messaging $message
+     * @param Notifier $message
      */
-    public function send(Model $context, Messaging $message): void
+    public function send(Model $context, Notifier $message): void
     {
         if (!method_exists($message, 'toDatabase')) {
             return;

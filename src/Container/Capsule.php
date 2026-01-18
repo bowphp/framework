@@ -149,6 +149,12 @@ class Capsule implements ArrayAccess
             return $this->resolve($key);
         }
 
+        if (is_string($this->registers[$key])) {
+            return $this->instances[$key] = $this->resolve(
+                $this->registers[$key]
+            );
+        }
+
         if (is_callable($this->registers[$key])) {
             return $this->instances[$key] = call_user_func_array(
                 $this->registers[$key],

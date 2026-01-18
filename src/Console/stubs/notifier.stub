@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Messages;
+namespace {baseNamespace}{namespace};
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Envelop;
 use Bow\Notifier\Notifier;
 
-class WelcomeMessage extends Notifier
+class {className} extends Notifier
 {
     /**
      * Returns the available channels to be used

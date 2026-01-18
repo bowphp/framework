@@ -169,7 +169,7 @@ class Mail
 
         call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $envelop);
+        $producer = new MailQueueJob($template, $data, $envelop);
 
         queue($producer);
     }
@@ -189,7 +189,7 @@ class Mail
 
         call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $envelop);
+        $producer = new MailQueueJob($template, $data, $envelop);
 
         $producer->setQueue($queue);
 
@@ -211,7 +211,7 @@ class Mail
 
         call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $envelop);
+        $producer = new MailQueueJob($template, $data, $envelop);
 
         $producer->setDelay($delay);
 
@@ -234,7 +234,7 @@ class Mail
 
         call_user_func_array($cb, [$envelop]);
 
-        $producer = new MailQueueProducer($template, $data, $envelop);
+        $producer = new MailQueueJob($template, $data, $envelop);
 
         $producer->setQueue($queue);
         $producer->setDelay($delay);

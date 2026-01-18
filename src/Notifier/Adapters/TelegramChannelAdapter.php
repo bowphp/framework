@@ -1,10 +1,10 @@
 <?php
 
-namespace Bow\Messaging\Adapters;
+namespace Bow\Notifier\Adapters;
 
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Contracts\ChannelAdapterInterface;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Contracts\ChannelAdapterInterface;
+use Bow\Notifier\Notifier;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -36,11 +36,11 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
      * Envoyer le message via Telegram
      *
      * @param  Model     $context
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      * @throws GuzzleException
      */
-    public function send(Model $context, Messaging $message): void
+    public function send(Model $context, Notifier $message): void
     {
         if (!method_exists($message, 'toTelegram')) {
             return;

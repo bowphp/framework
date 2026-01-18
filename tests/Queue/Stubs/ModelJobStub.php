@@ -2,9 +2,9 @@
 
 namespace Bow\Tests\Queue\Stubs;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueMessage;
 
-class ModelJobStub extends QueueJob
+class ModelJobStub extends QueueMessage
 {
     public function __construct(
         private PetModelStub $pet,

@@ -1,4 +1,4 @@
-# Bow Framework - Messaging System
+# Bow Framework - Notifier System
 
 Le système de messaging de Bow Framework permet d'envoyer des notifications à travers différents canaux (email, base de
 données, etc.) de manière simple et flexible.
@@ -14,9 +14,9 @@ namespace App\Messages;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Envelop;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Notifier;
 
-class WelcomeMessage extends Messaging
+class WelcomeNotifier extends Notifier
 {
     /**
      * Définir les canaux de diffusion du message
@@ -59,29 +59,29 @@ class WelcomeMessage extends Messaging
 
 ```php
 // Envoi synchrone
-$user->sendMessage(new WelcomeMessage());
+$user->sendMessage(new WelcomeNotifier());
 
 // Envoi asynchrone (file d'attente)
-$user->setMessageQueue(new WelcomeMessage());
+$user->setMessageQueue(new WelcomeNotifier());
 
 // Envoi différé
-$user->sendMessageLater(3600, new WelcomeMessage()); // Délai en secondes
+$user->sendMessageLater(3600, new WelcomeNotifier()); // Délai en secondes
 
 // Envoi sur une file d'attente spécifique
-$user->sendMessageQueueOn('high-priority', new WelcomeMessage());
+$user->sendMessageQueueOn('high-priority', new WelcomeNotifier());
 ```
 
 ## Configuration
 
-Pour utiliser le système de messaging, assurez-vous que votre modèle implémente le trait `SendMessaging` :
+Pour utiliser le système de messaging, assurez-vous que votre modèle implémente le trait `SendNotifier` :
 
 ```php
-use Bow\Messaging\Message;
+use Bow\Notifier\Message;
 use Bow\Database\Barry\Model;
 
 class User extends Model
 {
-    use SendMessaging;
+    use SendNotifier;
     
     // ...
 }
@@ -101,22 +101,22 @@ class User extends Model
 1. Créez un message par type de notification
 2. Utilisez les files d'attente pour les notifications non urgentes
 3. Personnalisez les canaux en fonction du contexte
-4. Utilisez les vues pour les templates d'emails 
+4. Utilisez les vues pour les templates d'emails
 
 ## Exemple de configuration
 
-```mermaid 
+```mermaid
 sequenceDiagram
     participant User as Utilisateur
     participant Model as Modèle (User)
-    participant Message as WelcomeMessage
+    participant Message as WelcomeNotifier
     participant Mail as Canal Email
     participant DB as Canal Database
     participant Services as Services (SMTP/BDD)
 
     Note over User,Services: Envoi d'une notification de bienvenue
     
-    User->>Model: sendMessage(new WelcomeMessage("Bienvenue!"))
+    User->>Model: sendMessage(new WelcomeNotifier("Bienvenue!"))
     Model->>Message: process(context)
     Message->>Message: channels(context)
     
@@ -131,7 +131,7 @@ sequenceDiagram
     end
 
     Note over User,Services: Envoi asynchrone
-    User->>Model: setMessageQueue(new WelcomeMessage())
+    User->>Model: setMessageQueue(new WelcomeNotifier())
     Model->>Services: Ajout à la file d'attente
     Services-->>Model: Confirmation
 ```

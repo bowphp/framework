@@ -1,12 +1,12 @@
 <?php
 
-namespace Bow\Tests\Messaging\Stubs;
+namespace Bow\Tests\Notifier\Stubs;
 
 use Bow\Database\Barry\Model;
 use Bow\Mail\Envelop;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Notifier;
 
-class TestMessage extends Messaging
+class TestNotifier extends Notifier
 {
     public function channels(Model $context): array
     {

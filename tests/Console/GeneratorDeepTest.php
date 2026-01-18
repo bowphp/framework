@@ -271,7 +271,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertMatchesRegularExpression("@\nclass\sExampleController\sextends\sController\n@", $content);
+        $this->assertMatchesRegularExpression("@\nclass\sExampleController\n@", $content);
     }
 
     public function test_generate_controller_no_plain_stubs()
@@ -285,7 +285,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertMatchesRegularExpression('@\nclass\sExampleController\sextends\sController\n@', $content);
+        $this->assertMatchesRegularExpression('@\nclass\sExampleController\n@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\sindex()@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\screate()@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
@@ -306,7 +306,7 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertMatchesRegularExpression('@\nclass\sExampleController\sextends\sController\n@', $content);
+        $this->assertMatchesRegularExpression('@\nclass\sExampleController\n@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\sindex()@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\supdate\(Request\s\$request,\smixed\s\$id\)@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\sshow\(Request\s\$request,\smixed\s\$id\)@', $content);
@@ -314,18 +314,18 @@ class GeneratorDeepTest extends \PHPUnit\Framework\TestCase
         $this->assertMatchesRegularExpression('@public\sfunction\sdestroy\(Request\s\$request,\smixed\s\$id\)@', $content);
     }
 
-    public function test_generate_messaging_stubs()
+    public function test_generate_notifier_stubs()
     {
-        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'WelcomeMessage');
-        $content = $generator->makeStubContent('messaging', [
-            "className" => "WelcomeMessage",
+        $generator = new Generator(TESTING_RESOURCE_BASE_DIRECTORY, 'WelcomeNotifier');
+        $content = $generator->makeStubContent('notifier', [
+            "className" => "WelcomeNotifier",
             "baseNamespace" => "App\\",
-            "namespace" => "Messages"
+            "namespace" => "Notifiers"
         ]);
 
         $this->assertNotNull($content);
         $this->assertMatchesSnapshot($content);
-        $this->assertMatchesRegularExpression('@\nclass\sWelcomeMessage\sextends\sMessaging\n@', $content);
+        $this->assertMatchesRegularExpression('@\nclass\sWelcomeNotifier\sextends\sNotifier\n@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\schannels\(Model\s\$notifiable\)@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\stoMail\(Model\s\$notifiable\)@', $content);
         $this->assertMatchesRegularExpression('@public\sfunction\stoDatabase\(Model\s\$notifiable\)@', $content);

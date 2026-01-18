@@ -171,11 +171,11 @@ class Setting
     private array $namespaces = [];
 
     /**
-     * The messaging directory
+     * The notifier directory
      *
      * @var string
      */
-    private string $messaging_directory;
+    private string $notifier_directory;
 
     /**
      * Command constructor.
@@ -507,24 +507,24 @@ class Setting
     }
 
     /**
-     * Get the messaging directory
+     * Get the notifier directory
      *
      * @return string
      */
-    public function getMessagingDirectory(): string
+    public function getNotifierDirectory(): string
     {
-        return $this->messaging_directory;
+        return $this->notifier_directory;
     }
 
     /**
-     * Set the messaging directory
+     * Set the notifier directory
      *
-     * @param  string $messaging_directory
+     * @param  string $notifier_directory
      * @return void
      */
-    public function setMessagingDirectory(string $messaging_directory): void
+    public function setNotifierDirectory(string $notifier_directory): void
     {
-        $this->messaging_directory = $messaging_directory;
+        $this->notifier_directory = $notifier_directory;
     }
 
     /**

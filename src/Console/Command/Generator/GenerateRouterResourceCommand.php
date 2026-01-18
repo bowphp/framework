@@ -99,15 +99,12 @@ class GenerateRouterResourceCommand extends AbstractCommand
         string $controller,
         string $model_namespace = ''
     ): void {
-        $generator->write(
-            'controller/rest',
-            [
+        $generator->write('controller/rest', [
             'modelNamespace' => $model_namespace,
             'prefix' => $prefix,
             'className' => $controller,
             'baseNamespace' => $this->namespaces['controller'] ?? 'App\\Controllers'
-            ]
-        );
+        ]);
 
         echo Color::green('The controller Rest was well created.');
     }

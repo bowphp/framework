@@ -1,12 +1,12 @@
 <?php
 
-namespace Bow\Mail;
+namespace Bow\Notifier;
 
+use Bow\Database\Barry\Model;
 use Bow\Queue\QueueJob;
-use Bow\View\View;
 use Throwable;
 
-class MailQueueProducer extends QueueJob
+class NotifierQueueJob extends QueueJob
 {
     /**
      * The message bag
@@ -16,23 +16,20 @@ class MailQueueProducer extends QueueJob
     private array $bags = [];
 
     /**
-     * MailQueueProducer constructor
+     * NotifierQueueMessage constructor
      *
-     * @param string  $view
-     * @param array   $data
-     * @param Envelop $message
+     * @param Model     $context
+     * @param Notifier $message
      */
     public function __construct(
-        string $view,
-        array $data,
-        Envelop $envelop
+        Model $context,
+        Notifier $message,
     ) {
         parent::__construct();
 
         $this->bags = [
-            "view" => $view,
-            "data" => $data,
-            "envelop" => $envelop,
+            "message" => $message,
+            "context" => $context,
         ];
     }
 
@@ -43,13 +40,8 @@ class MailQueueProducer extends QueueJob
      */
     public function process(): void
     {
-        $envelop = $this->bags["envelop"];
-
-        $envelop->setMessage(
-            View::parse($this->bags["view"], $this->bags["data"])->getContent()
-        );
-
-        Mail::getInstance()->send($envelop);
+        $message = $this->bags['message'];
+        $message->process($this->bags['context']);
     }
 
     /**

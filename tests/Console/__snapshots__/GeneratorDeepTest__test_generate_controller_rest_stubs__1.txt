@@ -5,7 +5,7 @@ namespace App\Controllers;
 {modelNamespace}use App\\Controller;
 use Bow\Http\Request;
 
-class ExampleController extends Controller
+class ExampleController
 {
     /**
      * Start point

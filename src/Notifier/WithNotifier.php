@@ -1,16 +1,16 @@
 <?php
 
-namespace Bow\Messaging;
+namespace Bow\Notifier;
 
-trait SendMessaging
+trait WithNotifier
 {
     /**
      * Send message from authenticate user
      *
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      */
-    public function sendMessage(Messaging $message): void
+    public function sendMessage(Notifier $message): void
     {
         $message->process($this);
     }
@@ -18,12 +18,12 @@ trait SendMessaging
     /**
      * Send message on queue
      *
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      */
-    public function setMessageQueue(Messaging $message): void
+    public function setMessageQueue(Notifier $message): void
     {
-        $queue_job = new MessagingQueueJob($this, $message);
+        $queue_job = new NotifierQueueJob($this, $message);
 
         queue($queue_job);
     }
@@ -32,12 +32,12 @@ trait SendMessaging
      * Send message on specific queue
      *
      * @param  string    $queue
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      */
-    public function sendMessageQueueOn(string $queue, Messaging $message): void
+    public function sendMessageQueueOn(string $queue, Notifier $message): void
     {
-        $queue_job = new MessagingQueueJob($this, $message);
+        $queue_job = new NotifierQueueJob($this, $message);
 
         $queue_job->setQueue($queue);
 
@@ -48,12 +48,12 @@ trait SendMessaging
      * Send mail later
      *
      * @param  integer   $delay
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      */
-    public function sendMessageLater(int $delay, Messaging $message): void
+    public function sendMessageLater(int $delay, Notifier $message): void
     {
-        $queue_job = new MessagingQueueJob($this, $message);
+        $queue_job = new NotifierQueueJob($this, $message);
 
         $queue_job->setDelay($delay);
 
@@ -65,12 +65,12 @@ trait SendMessaging
      *
      * @param  integer   $delay
      * @param  string    $queue
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      */
-    public function sendMessageLaterOn(int $delay, string $queue, Messaging $message): void
+    public function sendMessageLaterOn(int $delay, string $queue, Notifier $message): void
     {
-        $queue_job = new MessagingQueueJob($this, $message);
+        $queue_job = new NotifierQueueJob($this, $message);
 
         $queue_job->setQueue($queue);
         $queue_job->setDelay($delay);

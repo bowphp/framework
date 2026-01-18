@@ -5,7 +5,6 @@ namespace Bow\Queue\Adapters;
 use Bow\Database\Database;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
-use Bow\Queue\ProducerService;
 use Bow\Queue\QueueJob;
 use ErrorException;
 use Exception;

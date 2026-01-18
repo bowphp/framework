@@ -380,6 +380,10 @@ class Compass
             return null;
         }
 
+        if (interface_exists($class_name)) {
+            return app()->make($class_name);
+        }
+
         if (!class_exists($class_name)) {
             throw new InvalidArgumentException(
                 sprintf('class %s not exists', $class_name)

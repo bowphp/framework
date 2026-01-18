@@ -1,10 +1,10 @@
 <?php
 
-namespace Bow\Messaging\Adapters;
+namespace Bow\Notifier\Adapters;
 
 use Bow\Database\Barry\Model;
-use Bow\Messaging\Contracts\ChannelAdapterInterface;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Contracts\ChannelAdapterInterface;
+use Bow\Notifier\Notifier;
 use InvalidArgumentException;
 use Twilio\Exceptions\ConfigurationException;
 use Twilio\Rest\Client;
@@ -43,10 +43,10 @@ class SmsChannelAdapter implements ChannelAdapterInterface
      * Send message via SMS
      *
      * @param  Model     $context
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      */
-    public function send(Model $context, Messaging $message): void
+    public function send(Model $context, Notifier $message): void
     {
         if (!method_exists($message, 'toSms')) {
             return;
@@ -59,10 +59,10 @@ class SmsChannelAdapter implements ChannelAdapterInterface
      * Send the message via SMS using Twilio
      *
      * @param  Model     $context
-     * @param  Messaging $message
+     * @param  Notifier $message
      * @return void
      */
-    private function sendWithTwilio(Model $context, Messaging $message): void
+    private function sendWithTwilio(Model $context, Notifier $message): void
     {
         $data = $message->toSms($context);
 

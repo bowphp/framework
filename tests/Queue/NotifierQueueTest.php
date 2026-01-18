@@ -5,19 +5,18 @@ namespace Bow\Tests\Queue;
 use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
-use Bow\Database\Barry\Model;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\MailConfiguration;
-use Bow\Messaging\MessagingQueueJob;
+use Bow\Notifier\NotifierQueueJob;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Messaging\Stubs\TestMessage;
-use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
+use Bow\Tests\Notifier\Stubs\TestNotifier;
+use Bow\Tests\Notifier\Stubs\TestNotifiableModel;
 use Bow\View\ViewConfiguration;
 use PHPUnit\Framework\TestCase;
 
-class MessagingQueueTest extends TestCase
+class NotifierQueueTest extends TestCase
 {
     private static QueueConnection $connection;
 
@@ -42,7 +41,7 @@ class MessagingQueueTest extends TestCase
     public function test_can_send_message_synchronously(): void
     {
         $context = new TestNotifiableModel();
-        $message = $this->getMockBuilder(TestMessage::class)
+        $message = $this->getMockBuilder(TestNotifier::class)
             ->onlyMethods(['process'])
             ->getMock();
 
@@ -57,12 +56,12 @@ class MessagingQueueTest extends TestCase
     {
         // Use real objects for queue tests (mock objects don't serialize)
         $context = new TestNotifiableModel();
-        $message = new TestMessage();
+        $message = new TestNotifier();
 
-        $producer = new MessagingQueueJob($context, $message);
+        $producer = new NotifierQueueJob($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
 
         // Push to queue and verify
         $result = static::$connection->setConnection("beanstalkd")->getAdapter()->push($producer);
@@ -73,12 +72,12 @@ class MessagingQueueTest extends TestCase
     {
         $queue = 'high-priority';
         $context = new TestNotifiableModel();
-        $message = new TestMessage();
+        $message = new TestNotifier();
 
-        $producer = new MessagingQueueJob($context, $message);
+        $producer = new NotifierQueueJob($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
 
         // Push to specific queue and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
@@ -92,12 +91,12 @@ class MessagingQueueTest extends TestCase
     {
         $delay = 3600;
         $context = new TestNotifiableModel();
-        $message = new TestMessage();
+        $message = new TestNotifier();
 
-        $producer = new MessagingQueueJob($context, $message);
+        $producer = new NotifierQueueJob($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
 
         // Push to queue with delay and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
@@ -112,12 +111,12 @@ class MessagingQueueTest extends TestCase
         $delay = 3600;
         $queue = 'delayed-notifications';
         $context = new TestNotifiableModel();
-        $message = new TestMessage();
+        $message = new TestNotifier();
 
-        $producer = new MessagingQueueJob($context, $message);
+        $producer = new NotifierQueueJob($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(MessagingQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
 
         // Push to specific queue with delay and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();

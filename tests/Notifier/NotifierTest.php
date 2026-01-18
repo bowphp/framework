@@ -1,26 +1,25 @@
 <?php
 
-namespace Bow\Tests\Messaging;
+namespace Bow\Tests\Notifier;
 
 use Bow\View\View;
 use Bow\Mail\Envelop;
-use Bow\Messaging\Messaging;
+use Bow\Notifier\Notifier;
 use Bow\Database\Database;
 use Bow\Database\Barry\Model;
-use Bow\Database\Migration\Migration;
 use Bow\Database\Migration\Table;
 use Bow\Mail\Mail;
 use PHPUnit\Framework\TestCase;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Database\Stubs\MigrationExtendedStub;
-use Bow\Tests\Messaging\Stubs\TestMessage;
+use Bow\Tests\Notifier\Stubs\TestNotifier;
 use PHPUnit\Framework\MockObject\MockObject;
-use Bow\Tests\Messaging\Stubs\TestNotifiableModel;
+use Bow\Tests\Notifier\Stubs\TestNotifiableModel;
 
-class MessagingTest extends TestCase
+class NotifierTest extends TestCase
 {
     private TestNotifiableModel $context;
-    private MockObject|TestMessage $message;
+    private MockObject|TestNotifier $message;
 
     public static function setUpBeforeClass(): void
     {
@@ -47,7 +46,7 @@ class MessagingTest extends TestCase
         parent::setUp();
 
         $this->context = new TestNotifiableModel();
-        $this->message = $this->createMock(TestMessage::class);
+        $this->message = $this->createMock(TestNotifier::class);
     }
 
     public function test_can_send_message_synchronously(): void
@@ -61,7 +60,7 @@ class MessagingTest extends TestCase
 
     public function test_message_sends_to_correct_channels(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $channels = $message->channels($this->context);
 
         $this->assertIsArray($channels);
@@ -71,7 +70,7 @@ class MessagingTest extends TestCase
 
     public function test_message_can_send_to_mail(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $mailMessage = $message->toMail($this->context);
 
         $this->assertInstanceOf(Envelop::class, $mailMessage);
@@ -83,7 +82,7 @@ class MessagingTest extends TestCase
 
     public function test_message_can_send_to_database(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toDatabase($this->context);
 
         $this->assertIsArray($data);
@@ -97,7 +96,7 @@ class MessagingTest extends TestCase
 
     public function test_message_can_send_to_slack(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toSlack($this->context);
 
         $this->assertIsArray($data);
@@ -111,7 +110,7 @@ class MessagingTest extends TestCase
 
     public function test_message_can_send_to_sms(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toSms($this->context);
 
         $this->assertIsArray($data);
@@ -123,7 +122,7 @@ class MessagingTest extends TestCase
 
     public function test_message_can_send_to_telegram(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toTelegram($this->context);
 
         $this->assertIsArray($data);
@@ -137,7 +136,7 @@ class MessagingTest extends TestCase
 
     public function test_process_calls_all_channels(): void
     {
-        $message = $this->getMockBuilder(TestMessage::class)
+        $message = $this->getMockBuilder(TestNotifier::class)
             ->onlyMethods(['channels', 'toMail', 'toDatabase'])
             ->getMock();
 
@@ -163,7 +162,7 @@ class MessagingTest extends TestCase
 
     public function test_message_returns_empty_array_for_unconfigured_channels(): void
     {
-        $messaging = new class extends Messaging {
+        $messaging = new class extends Notifier {
             public function channels(Model $context): array
             {
                 return [];
@@ -183,7 +182,7 @@ class MessagingTest extends TestCase
             'custom' => \stdClass::class,
         ];
 
-        $result = Messaging::pushChannels($customChannels);
+        $result = Notifier::pushChannels($customChannels);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('custom', $result);
@@ -193,7 +192,7 @@ class MessagingTest extends TestCase
 
     public function test_message_process_skips_invalid_channels(): void
     {
-        $message = $this->getMockBuilder(TestMessage::class)
+        $message = $this->getMockBuilder(TestNotifier::class)
             ->onlyMethods(['channels', 'toMail'])
             ->getMock();
 
@@ -213,7 +212,7 @@ class MessagingTest extends TestCase
 
     public function test_mail_message_returns_correct_envelop_instance(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $mailMessage = $message->toMail($this->context);
 
         $this->assertInstanceOf(Envelop::class, $mailMessage);
@@ -223,7 +222,7 @@ class MessagingTest extends TestCase
 
     public function test_database_message_has_required_structure(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toDatabase($this->context);
 
         // Verify required structure
@@ -235,7 +234,7 @@ class MessagingTest extends TestCase
 
     public function test_slack_message_has_valid_webhook_url(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toSlack($this->context);
 
         $this->assertArrayHasKey('webhook_url', $data);
@@ -245,7 +244,7 @@ class MessagingTest extends TestCase
 
     public function test_sms_message_has_valid_phone_number(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toSms($this->context);
 
         $this->assertArrayHasKey('to', $data);
@@ -255,7 +254,7 @@ class MessagingTest extends TestCase
 
     public function test_telegram_message_has_valid_parse_mode(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
         $data = $message->toTelegram($this->context);
 
         $this->assertArrayHasKey('parse_mode', $data);
@@ -266,23 +265,23 @@ class MessagingTest extends TestCase
     {
         $this->assertTrue(
             method_exists($this->context, 'sendMessage'),
-            'Context should have sendMessage method from SendMessaging trait'
+            'Context should have sendMessage method from SendNotifier trait'
         );
 
         $this->assertTrue(
             method_exists($this->context, 'setMessageQueue'),
-            'Context should have setMessageQueue method from SendMessaging trait'
+            'Context should have setMessageQueue method from SendNotifier trait'
         );
 
         $this->assertTrue(
             method_exists($this->context, 'sendMessageQueueOn'),
-            'Context should have sendMessageQueueOn method from SendMessaging trait'
+            'Context should have sendMessageQueueOn method from SendNotifier trait'
         );
     }
 
     public function test_channels_method_is_abstract_and_must_be_implemented(): void
     {
-        $message = new TestMessage();
+        $message = new TestNotifier();
 
         $this->assertTrue(
             method_exists($message, 'channels'),
