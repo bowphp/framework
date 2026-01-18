@@ -2,9 +2,9 @@
 
 namespace Bow\Tests\Queue\Stubs;
 
-use Bow\Queue\QueueMessage;
+use Bow\Queue\QueueJob;
 
-class MixedQueueMessageStub extends QueueMessage
+class MixedQueueJobStub extends QueueJob
 {
     public function __construct(
         private ServiceStub $service,

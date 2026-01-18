@@ -16,7 +16,7 @@ class NotifierQueueJob extends QueueJob
     private array $bags = [];
 
     /**
-     * NotifierQueueMessage constructor
+     * NotifierQueueJob constructor
      *
      * @param Model     $context
      * @param Notifier $notifier

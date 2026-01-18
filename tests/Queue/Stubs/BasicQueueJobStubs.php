@@ -2,9 +2,9 @@
 
 namespace Bow\Tests\Queue\Stubs;
 
-use Bow\Queue\QueueMessage;
+use Bow\Queue\QueueJob;
 
-class BasicQueueMessageStubs extends QueueMessage
+class BasicQueueJobStubs extends QueueJob
 {
     public function __construct(
         private string $connection
@@ -13,6 +13,6 @@ class BasicQueueMessageStubs extends QueueMessage
 
     public function process(): void
     {
-        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$this->connection}_producer.txt", BasicQueueMessageStubs::class);
+        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$this->connection}_producer.txt", BasicQueueJobStubs::class);
     }
 }
