@@ -13,11 +13,6 @@ use Twilio\Rest\Client;
 class SmsChannelAdapter implements ChannelAdapterInterface
 {
     /**
-     * @var Client
-     */
-    private Client $client;
-
-    /**
      * @var string
      */
     private string $from_number;
@@ -83,24 +78,23 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     {
         $data = $notifier->toSms($context);
 
-        $account_sid = config('notifier.twilio.account_sid');
-        $auth_token = config('notifier.twilio.auth_token');
-        $this->from_number = config('notifier.twilio.from');
+        $account_sid = $this->setting['account_sid'] ?? null;
+        $auth_token = $this->setting['auth_token'] ?? null;
+        $this->from_number = $this->setting['from'] ?? null;
 
         if (!$account_sid || !$auth_token || !$this->from_number) {
             throw new InvalidArgumentException('Twilio credentials are required');
         }
-
-        $this->client = new Client($account_sid, $auth_token);
 
         if (!isset($data['to']) || !isset($data['message'])) {
             throw new InvalidArgumentException('The phone number and notifier are required');
         }
 
         try {
-            $this->client->notifiers->create($data['to'], [
+            $client = new Client($account_sid, $auth_token);
+            $client->messages->create($data['to'], [
                 'from' => $this->from_number,
-                'body' => $data['notifier']
+                'body' => $data['message']
             ]);
         } catch (\Exception $e) {
             throw new \RuntimeException('Error while sending SMS: ' . $e->getMessage());
@@ -126,7 +120,7 @@ class SmsChannelAdapter implements ChannelAdapterInterface
 
         $data = $notifier->toSms($context);
 
-        if (!isset($data['to']) || !isset($data['message'])) {
+        if (!isset($data['to']) || !isset($data['message']) || !isset($data['sender'])) {
             throw new InvalidArgumentException('The phone number and notifier are required');
         }
 
@@ -139,6 +133,7 @@ class SmsChannelAdapter implements ChannelAdapterInterface
         $payload = [
             'to' => (array) $data['to'],
             'message' => $data['message'],
+            'sender' => $data['sender'],
         ];
 
         if ($data['notify_url']) {
