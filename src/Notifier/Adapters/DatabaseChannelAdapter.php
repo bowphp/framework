@@ -13,15 +13,15 @@ class DatabaseChannelAdapter implements ChannelAdapterInterface
      * Send the notification to database
      *
      * @param Model     $context
-     * @param Notifier $message
+     * @param Notifier $notifier
      */
-    public function send(Model $context, Notifier $message): void
+    public function send(Model $context, Notifier $notifier): void
     {
-        if (!method_exists($message, 'toDatabase')) {
+        if (!method_exists($notifier, 'toDatabase')) {
             return;
         }
 
-        $database = $message->toDatabase($context);
+        $database = $notifier->toDatabase($context);
 
         if ($database === null) {
             throw new \RuntimeException(

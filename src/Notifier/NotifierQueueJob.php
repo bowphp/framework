@@ -19,16 +19,16 @@ class NotifierQueueJob extends QueueJob
      * NotifierQueueMessage constructor
      *
      * @param Model     $context
-     * @param Notifier $message
+     * @param Notifier $notifier
      */
     public function __construct(
         Model $context,
-        Notifier $message,
+        Notifier $notifier,
     ) {
         parent::__construct();
 
         $this->bags = [
-            "message" => $message,
+            "notifier" => $notifier,
             "context" => $context,
         ];
     }
@@ -40,8 +40,8 @@ class NotifierQueueJob extends QueueJob
      */
     public function process(): void
     {
-        $message = $this->bags['message'];
-        $message->process($this->bags['context']);
+        $notifier = $this->bags['notifier'];
+        $notifier->process($this->bags['context']);
     }
 
     /**

@@ -13,16 +13,16 @@ class MailChannelAdapter implements ChannelAdapterInterface
      * Send the notification to mail
      *
      * @param  Model     $context
-     * @param  Notifier $message
+     * @param  Notifier $notifier
      * @return void
      */
-    public function send(Model $context, Notifier $message): void
+    public function send(Model $context, Notifier $notifier): void
     {
-        if (!method_exists($message, 'toMail')) {
+        if (!method_exists($notifier, 'toMail')) {
             return;
         }
 
-        $envelop = $message->toMail($context);
+        $envelop = $notifier->toMail($context);
 
         if ($envelop === null) {
             throw new \RuntimeException(

@@ -19,7 +19,7 @@ use Bow\Tests\Notifier\Stubs\TestNotifiableModel;
 class NotifierTest extends TestCase
 {
     private TestNotifiableModel $context;
-    private MockObject|TestNotifier $message;
+    private MockObject|TestNotifier $notifier;
 
     public static function setUpBeforeClass(): void
     {
@@ -46,22 +46,22 @@ class NotifierTest extends TestCase
         parent::setUp();
 
         $this->context = new TestNotifiableModel();
-        $this->message = $this->createMock(TestNotifier::class);
+        $this->notifier = $this->createMock(TestNotifier::class);
     }
 
     public function test_can_send_message_synchronously(): void
     {
-        $this->message->expects($this->once())
+        $this->notifier->expects($this->once())
             ->method('process')
             ->with($this->context);
 
-        $this->context->sendMessage($this->message);
+        $this->context->sendMessage($this->notifier);
     }
 
     public function test_message_sends_to_correct_channels(): void
     {
-        $message = new TestNotifier();
-        $channels = $message->channels($this->context);
+        $notifier = new TestNotifier();
+        $channels = $notifier->channels($this->context);
 
         $this->assertIsArray($channels);
         $this->assertCount(5, $channels);

@@ -40,31 +40,31 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     }
 
     /**
-     * Send message via SMS
+     * Send notifier via SMS
      *
      * @param  Model     $context
-     * @param  Notifier $message
+     * @param  Notifier $notifier
      * @return void
      */
-    public function send(Model $context, Notifier $message): void
+    public function send(Model $context, Notifier $notifier): void
     {
-        if (!method_exists($message, 'toSms')) {
+        if (!method_exists($notifier, 'toSms')) {
             return;
         }
 
-        $this->sendWithTwilio($context, $message);
+        $this->sendWithTwilio($context, $notifier);
     }
 
     /**
-     * Send the message via SMS using Twilio
+     * Send the notifier via SMS using Twilio
      *
      * @param  Model     $context
-     * @param  Notifier $message
+     * @param  Notifier $notifier
      * @return void
      */
-    private function sendWithTwilio(Model $context, Notifier $message): void
+    private function sendWithTwilio(Model $context, Notifier $notifier): void
     {
-        $data = $message->toSms($context);
+        $data = $notifier->toSms($context);
 
         $account_sid = config('messaging.twilio.account_sid');
         $auth_token = config('messaging.twilio.auth_token');
@@ -76,16 +76,16 @@ class SmsChannelAdapter implements ChannelAdapterInterface
 
         $this->client = new Client($account_sid, $auth_token);
 
-        if (!isset($data['to']) || !isset($data['message'])) {
-            throw new InvalidArgumentException('The phone number and message are required');
+        if (!isset($data['to']) || !isset($data['notifier'])) {
+            throw new InvalidArgumentException('The phone number and notifier are required');
         }
 
         try {
-            $this->client->messages->create(
+            $this->client->notifiers->create(
                 $data['to'],
                 [
                 'from' => $this->from_number,
-                'body' => $data['message']
+                'body' => $data['notifier']
                 ]
             );
         } catch (\Exception $e) {
