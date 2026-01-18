@@ -179,10 +179,10 @@ class Loader implements ArrayAccess
         // Load the env configuration first
         $env_config = $this->createConfiguration(EnvConfiguration::class, $container);
 
-        // Load the .env or .env.json file
-        $this->loadEnvfile();
-
         $env_config->run();
+
+        // Load the .env or .env.json file
+        $this->loadConfigFiles();
 
         // Configuration of services
         $loaded_configurations = $this->createConfigurations(
@@ -279,7 +279,7 @@ class Loader implements ArrayAccess
      * @return void
      * @throws
      */
-    private function loadEnvfile(): void
+    private function loadConfigFiles(): void
     {
         /**
          * We load all Bow configuration
