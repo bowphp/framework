@@ -13,13 +13,11 @@ class EnvConfiguration extends Configuration
      */
     public function create(Loader $config): void
     {
-        $this->container->bind('env', function () use ($config) {
-            Env::configure($config['app.env_file'] ?? null);
+        Env::configure($config->getPath('.env.json') ?? null);
 
-            $event = Env::getInstance();
+        $event = Env::getInstance();
 
-            $this->container->instance('env', $event);
-        });
+        $this->container->instance('env', $event);
     }
 
     /**
@@ -27,6 +25,6 @@ class EnvConfiguration extends Configuration
      */
     public function run(): void
     {
-        // $this->container->make('env');
+        //
     }
 }

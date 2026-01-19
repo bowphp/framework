@@ -30,6 +30,11 @@ class Loader implements ArrayAccess
     protected string $base_path;
 
     /**
+     * @var string
+     */
+    protected string $config_path;
+
+    /**
      * @var bool
      */
     protected bool $booted = false;
@@ -51,11 +56,13 @@ class Loader implements ArrayAccess
 
     /**
      * @param  string $base_path
+     * @param  ?string $config_path
      * @throws
      */
-    private function __construct(string $base_path)
+    private function __construct(string $config_path, ?string $base_path)
     {
         $this->base_path = $base_path;
+        $this->config_path = $config_path;
         $this->config = new Arraydotify([]);
     }
 
@@ -66,10 +73,10 @@ class Loader implements ArrayAccess
      * @return Loader
      * @throws
      */
-    public static function configure(string $base_path): Loader
+    public static function configure(string $config_path): Loader
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($base_path);
+            static::$instance = new static($config_path, null);
         }
 
         return static::$instance;
@@ -93,6 +100,27 @@ class Loader implements ArrayAccess
     public function getBasePath(): string
     {
         return $this->base_path;
+    }
+
+    /**
+     * Get the base path
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function getPath(string $filename): string
+    {
+        return $this->base_path . DIRECTORY_SEPARATOR . $filename;
+    }
+
+    /**
+     * Get the config path
+     *
+     * @return string
+     */
+    public function getConfigPath(): string
+    {
+        return $this->config_path;
     }
 
     /**
@@ -179,7 +207,7 @@ class Loader implements ArrayAccess
         // Load the env configuration first
         $env_config = $this->createConfiguration(EnvConfiguration::class, $container);
 
-        $env_config->run();
+        $env_config->run($this->base_path);
 
         // Load the .env or .env.json file
         $this->loadConfigFiles();
@@ -284,7 +312,7 @@ class Loader implements ArrayAccess
         /**
          * We load all Bow configuration
          */
-        $glob = glob($this->base_path . '/**.php');
+        $glob = glob($this->config_path . '/**.php');
 
         $config = [];
 
