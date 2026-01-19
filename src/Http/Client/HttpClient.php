@@ -46,6 +46,27 @@ class HttpClient
     private ?string $base_url = null;
 
     /**
+     * The request timeout in seconds
+     *
+     * @var int|null
+     */
+    private ?int $timeout = null;
+
+    /**
+     * The connection timeout in seconds
+     *
+     * @var int|null
+     */
+    private ?int $connect_timeout = null;
+
+    /**
+     * Whether to verify SSL certificates
+     *
+     * @var bool
+     */
+    private bool $verify_ssl = true;
+
+    /**
      * HttpClient Constructor.
      *
      * @param string|null $base_url
@@ -121,6 +142,19 @@ class HttpClient
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($this->ch, CURLOPT_AUTOREFERER, true);
+
+        if ($this->timeout !== null) {
+            curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
+        }
+
+        if ($this->connect_timeout !== null) {
+            curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        }
+
+        if (!$this->verify_ssl) {
+            curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
     }
 
     /**
@@ -308,6 +342,91 @@ class HttpClient
                 $this->headers[] = $key . ': ' . $value;
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Set HTTP authentication credentials
+     *
+     * @param  string $username
+     * @param  string $password
+     * @return HttpClient
+     */
+    public function auth(string $username, string $password): HttpClient
+    {
+        curl_setopt($this->ch, CURLOPT_USERPWD, $username . ":" . $password);
+
+        return $this;
+    }
+
+    /**
+     * Set Basic HTTP authentication
+     *
+     * @param  string $key
+     * @param  string $secret
+     * @return HttpClient
+     */
+    public function basicAuth(string $key, string $secret): HttpClient
+    {
+        $this->withHeaders([
+            'Authorization' => 'Basic ' . base64_encode($key . ':' . $secret)
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Set Bearer token authentication
+     *
+     * @param  string $token
+     * @return HttpClient
+     */
+    public function bearerAuth(string $token): HttpClient
+    {
+        $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Set the maximum time the request is allowed to take
+     *
+     * @param  int $seconds
+     * @return HttpClient
+     */
+    public function timeout(int $seconds): HttpClient
+    {
+        $this->timeout = $seconds;
+
+        return $this;
+    }
+
+    /**
+     * Set the maximum time to wait for a connection
+     *
+     * @param  int $seconds
+     * @return HttpClient
+     */
+    public function connectTimeout(int $seconds): HttpClient
+    {
+        $this->connect_timeout = $seconds;
+
+        return $this;
+    }
+
+    /**
+     * Disable SSL certificate verification
+     *
+     * Warning: This should only be used in development environments
+     *
+     * @return HttpClient
+     */
+    public function disableSslVerification(): HttpClient
+    {
+        $this->verify_ssl = false;
 
         return $this;
     }

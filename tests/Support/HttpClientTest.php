@@ -170,4 +170,126 @@ class HttpClientTest extends TestCase
 
         $this->assertEquals(200, $response->statusCode());
     }
+
+    // ==================== Authentication Tests ====================
+
+    public function test_basic_auth_with_valid_credentials()
+    {
+        $http = new HttpClient();
+        $http->basicAuth('user', 'passwd');
+
+        $response = $http->get("https://httpbin.org/basic-auth/user/passwd");
+
+        $this->assertEquals(200, $response->statusCode());
+        $this->assertStringContainsString('authenticated', $response->getContent());
+    }
+
+    public function test_basic_auth_with_invalid_credentials()
+    {
+        $http = new HttpClient();
+        $http->basicAuth('wrong', 'credentials');
+
+        $response = $http->get("https://httpbin.org/basic-auth/user/passwd");
+
+        $this->assertEquals(401, $response->statusCode());
+    }
+
+    public function test_bearer_auth_sends_token_in_header()
+    {
+        $http = new HttpClient();
+        $http->bearerAuth('my-test-token');
+
+        $response = $http->get("https://httpbin.org/bearer");
+
+        $this->assertEquals(200, $response->statusCode());
+        $this->assertStringContainsString('authenticated', $response->getContent());
+    }
+
+    public function test_bearer_auth_fails_without_token()
+    {
+        $http = new HttpClient();
+
+        $response = $http->get("https://httpbin.org/bearer");
+
+        $this->assertEquals(401, $response->statusCode());
+    }
+
+    // ==================== Accept JSON Tests ====================
+
+    public function test_accept_json_sets_content_type_header()
+    {
+        $http = new HttpClient();
+        $http->acceptJson();
+
+        $response = $http->post("https://httpbin.org/post", [
+            'name' => 'test',
+            'value' => 'example'
+        ]);
+
+        $this->assertEquals(200, $response->statusCode());
+        $content = json_decode($response->getContent(), true);
+        $this->assertEquals('application/json', $content['headers']['Content-Type']);
+    }
+
+    // ==================== Timeout Configuration Tests ====================
+
+    public function test_connect_timeout_configuration()
+    {
+        $http = new HttpClient();
+        $http->connectTimeout(5);
+
+        $response = $http->get("https://httpbin.org/get");
+
+        $this->assertEquals(200, $response->statusCode());
+    }
+
+    public function test_timeout_configuration()
+    {
+        $http = new HttpClient();
+        $http->timeout(10);
+
+        $response = $http->get("https://httpbin.org/get");
+
+        $this->assertEquals(200, $response->statusCode());
+    }
+
+    // ==================== SSL Verification Tests ====================
+
+    public function test_disable_ssl_verification()
+    {
+        $http = new HttpClient();
+        $http->disableSslVerification();
+
+        $response = $http->get("https://httpbin.org/get");
+
+        $this->assertEquals(200, $response->statusCode());
+    }
+
+    // ==================== Base URL Tests ====================
+
+    public function test_set_base_url_method()
+    {
+        $http = new HttpClient();
+        $http->setBaseUrl("https://httpbin.org");
+
+        $response = $http->get("/get");
+
+        $this->assertEquals(200, $response->statusCode());
+    }
+
+    // ==================== Method Chaining Tests ====================
+
+    public function test_method_chaining()
+    {
+        $http = new HttpClient();
+
+        $response = $http
+            ->withHeaders(['X-Custom' => 'value'])
+            ->acceptJson()
+            ->timeout(10)
+            ->connectTimeout(5)
+            ->post("https://httpbin.org/post", ['key' => 'value']);
+
+        $this->assertEquals(200, $response->statusCode());
+    }
 }

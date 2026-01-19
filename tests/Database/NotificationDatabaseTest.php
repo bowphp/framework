@@ -17,7 +17,7 @@ class NotificationDatabaseTest extends TestCase
 
         Database::statement("drop table if exists notifications;");
         $driver = $config["database"]["default"];
-        $idColumn = $driver === 'pgsql' ? 'id SERIAL PRIMARY KEY' : ($driver === 'mysql' ? 'id INTEGER PRIMARY KEY AUTO_INCREMENT' : 'id INTEGER PRIMARY KEY AUTOINCREMENT');
+        $idColumn = $driver === 'pgsql' ? 'id SERIAL PRIMARY KEY' : ($driver === 'mysql' ? 'id INT PRIMARY KEY AUTO_INCREMENT' : 'id INTEGER PRIMARY KEY AUTOINCREMENT');
         Database::statement("create table if not exists notifications (
             $idColumn,
             type text null,
@@ -27,7 +27,7 @@ class NotificationDatabaseTest extends TestCase
             read_at TIMESTAMP null,
             created_at timestamp null default current_timestamp,
             updated_at timestamp null default current_timestamp,
-            deleted_at TIMESTAMP null
+            deleted_at timestamp null
         );");
     }
 
