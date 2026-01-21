@@ -56,13 +56,12 @@ class Loader implements ArrayAccess
 
     /**
      * @param  string $base_path
-     * @param  ?string $config_path
      * @throws
      */
-    private function __construct(string $config_path, ?string $base_path)
+    private function __construct(string $base_path)
     {
         $this->base_path = $base_path;
-        $this->config_path = $config_path;
+        $this->config_path = $base_path . DIRECTORY_SEPARATOR . 'config';
         $this->config = new Arraydotify([]);
     }
 
@@ -73,10 +72,10 @@ class Loader implements ArrayAccess
      * @return Loader
      * @throws
      */
-    public static function configure(string $config_path): Loader
+    public static function configure(string $base_path): Loader
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($config_path, null);
+            static::$instance = new static($base_path);
         }
 
         return static::$instance;
@@ -95,16 +94,6 @@ class Loader implements ArrayAccess
     /**
      * Get the base path
      *
-     * @return string
-     */
-    public function getBasePath(): string
-    {
-        return $this->base_path;
-    }
-
-    /**
-     * Get the base path
-     *
      * @param string $filename
      * @return string
      */
@@ -114,13 +103,26 @@ class Loader implements ArrayAccess
     }
 
     /**
-     * Get the config path
+     * Get the base path
      *
      * @return string
      */
-    public function getConfigPath(): string
+    public function getBasePath(): string
     {
-        return $this->config_path;
+        return $this->base_path;
+    }
+
+    /**
+     * Set the configuration path
+     *
+     * @param string $path
+     * @return Loader
+     */
+    public function withConfigPath(string $path): Loader
+    {
+        $this->config_path = $path;
+
+        return $this;
     }
 
     /**
@@ -205,9 +207,7 @@ class Loader implements ArrayAccess
         $container = Capsule::getInstance();
 
         // Load the env configuration first
-        $env_config = $this->createConfiguration(EnvConfiguration::class, $container);
-
-        $env_config->run($this->base_path);
+        $this->createConfiguration(EnvConfiguration::class, $container);
 
         // Load the .env or .env.json file
         $this->loadConfigFiles();
@@ -221,7 +221,7 @@ class Loader implements ArrayAccess
         // Load configurations
         $this->runConfirmations($loaded_configurations);
 
-        // Load load events
+        // Load events
         $this->loadEvents();
 
         // Set the load as booted

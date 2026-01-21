@@ -165,7 +165,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
     public function test_get_base_path()
     {
         $basePath = $this->config->getBasePath();
-        $this->assertEquals(__DIR__ . '/stubs/config', $basePath);
+        $this->assertEquals(__DIR__ . '/stubs', $basePath);
         $this->assertIsString($basePath);
     }
 
