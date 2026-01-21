@@ -84,6 +84,10 @@ class Env
      */
     public static function configure(string $filename)
     {
+        if (static::$instance !== null) {
+            return;
+        }
+
         if (!file_exists($filename)) {
             throw new InvalidArgumentException(
                 "The application environment file [.env.json] cannot be empty or is not define."

@@ -58,6 +58,6 @@ class TestingConfiguration
     {
         Env::configure(__DIR__ . '/stubs/env.json');
 
-        return KernelTesting::configure(__DIR__ . '/stubs/config')->boot();
+        return KernelTesting::configure(__DIR__ . '/stubs')->withConfigPath(__DIR__ . '/stubs/config')->boot();
     }
 }

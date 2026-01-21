@@ -30,6 +30,11 @@ class Loader implements ArrayAccess
     protected string $base_path;
 
     /**
+     * @var string
+     */
+    protected string $config_path;
+
+    /**
      * @var bool
      */
     protected bool $booted = false;
@@ -56,6 +61,7 @@ class Loader implements ArrayAccess
     private function __construct(string $base_path)
     {
         $this->base_path = $base_path;
+        $this->config_path = $base_path . DIRECTORY_SEPARATOR . 'config';
         $this->config = new Arraydotify([]);
     }
 
@@ -88,11 +94,35 @@ class Loader implements ArrayAccess
     /**
      * Get the base path
      *
+     * @param string $filename
+     * @return string
+     */
+    public function getPath(string $filename): string
+    {
+        return $this->base_path . DIRECTORY_SEPARATOR . $filename;
+    }
+
+    /**
+     * Get the base path
+     *
      * @return string
      */
     public function getBasePath(): string
     {
         return $this->base_path;
+    }
+
+    /**
+     * Set the configuration path
+     *
+     * @param string $path
+     * @return Loader
+     */
+    public function withConfigPath(string $path): Loader
+    {
+        $this->config_path = $path;
+
+        return $this;
     }
 
     /**
@@ -177,9 +207,7 @@ class Loader implements ArrayAccess
         $container = Capsule::getInstance();
 
         // Load the env configuration first
-        $env_config = $this->createConfiguration(EnvConfiguration::class, $container);
-
-        $env_config->run();
+        $this->createConfiguration(EnvConfiguration::class, $container);
 
         // Load the .env or .env.json file
         $this->loadConfigFiles();
@@ -193,7 +221,7 @@ class Loader implements ArrayAccess
         // Load configurations
         $this->runConfirmations($loaded_configurations);
 
-        // Load load events
+        // Load events
         $this->loadEvents();
 
         // Set the load as booted
@@ -284,7 +312,7 @@ class Loader implements ArrayAccess
         /**
          * We load all Bow configuration
          */
-        $glob = glob($this->base_path . '/**.php');
+        $glob = glob($this->config_path . '/**.php');
 
         $config = [];
 
