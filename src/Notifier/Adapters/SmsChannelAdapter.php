@@ -39,7 +39,7 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     public function __construct()
     {
         $config = config('notifier.sms');
-        $this->setting = $config['setting'] ?? [];
+        $this->setting = $config;
         $this->sms_provider = $config['provider'] ?? 'callisto';
     }
 
@@ -77,10 +77,11 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     private function sendWithTwilio(Model $context, Notifier $notifier): void
     {
         $data = $notifier->toSms($context);
+        $config = $this->setting['twilio'] ?? [];
 
-        $account_sid = $this->setting['account_sid'] ?? null;
-        $auth_token = $this->setting['auth_token'] ?? null;
-        $this->from_number = $this->setting['from'] ?? null;
+        $account_sid = $config['account_sid'] ?? null;
+        $auth_token = $config['auth_token'] ?? null;
+        $this->from_number = $config['from'] ?? null;
 
         if (!$account_sid || !$auth_token || !$this->from_number) {
             throw new InvalidArgumentException('Twilio credentials are required');
@@ -110,9 +111,12 @@ class SmsChannelAdapter implements ChannelAdapterInterface
      */
     private function sendWithCallisto(Model $context, Notifier $notifier): void
     {
-        $access_key = $this->setting['access_key'] ?? null;
-        $access_secret = $this->setting['access_secret'] ?? null;
-        $notify_url = $this->setting['notify_url'] ?? null;
+        $config = $this->setting['callisto'] ?? [];
+
+        $access_key = $config['access_key'] ?? null;
+        $access_secret = $config['access_secret'] ?? null;
+        $notify_url = $config['notify_url'] ?? null;
+        $sender = $config['sender'] ?? null;
 
         if (!$access_key || !$access_secret) {
             throw new InvalidArgumentException('Callisto credentials are required');
@@ -120,7 +124,7 @@ class SmsChannelAdapter implements ChannelAdapterInterface
 
         $data = $notifier->toSms($context);
 
-        if (!isset($data['to']) || !isset($data['message']) || !isset($data['sender'])) {
+        if (!isset($data['to']) || !isset($data['message'])) {
             throw new InvalidArgumentException('The phone number and notifier are required');
         }
 
@@ -133,7 +137,7 @@ class SmsChannelAdapter implements ChannelAdapterInterface
         $payload = [
             'to' => (array) $data['to'],
             'message' => $data['message'],
-            'sender' => $data['sender'],
+            'sender' => $data['sender'] ?? $sender,
         ];
 
         if ($data['notify_url']) {
