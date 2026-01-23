@@ -2,6 +2,8 @@
 
 namespace Bow\Notifier;
 
+use Bow\Notifier\NotifierShouldQueue;
+
 trait WithNotifier
 {
     /**
@@ -12,6 +14,11 @@ trait WithNotifier
      */
     public function sendMessage(Notifier $notifier): void
     {
+        if (in_array(NotifierShouldQueue::class, class_implements($notifier))) {
+            $this->setMessageQueue($notifier);
+            return;
+        }
+
         $notifier->process($this);
     }
 
