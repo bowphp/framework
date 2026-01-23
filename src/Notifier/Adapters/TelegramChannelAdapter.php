@@ -3,11 +3,10 @@
 namespace Bow\Notifier\Adapters;
 
 use Bow\Database\Barry\Model;
+use Bow\Http\Client\HttpClient;
 use Bow\Notifier\Contracts\ChannelAdapterInterface;
 use Bow\Notifier\Notifier;
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -38,7 +37,7 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
      * @param  Model     $context
      * @param  Notifier $notifier
      * @return void
-     * @throws GuzzleException
+     * @throws Exception
      */
     public function send(Model $context, Notifier $notifier): void
     {
@@ -52,16 +51,14 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
             throw new InvalidArgumentException('The chat ID and message are required for Telegram');
         }
 
-        $client = new Client();
+        $client = new HttpClient();
         $endpoint = "https://api.telegram.org/bot{$this->botToken}/sendMessage";
 
         try {
-            $client->post($endpoint, [
-                'json' => [
-                    'chat_id' => $data['chat_id'],
-                    'text' => $data['message'],
-                    'parse_mode' => $data['parse_mode'] ?? 'HTML'
-                ]
+            $client->acceptJson()->post($endpoint, [
+                'chat_id' => $data['chat_id'],
+                'text' => $data['message'],
+                'parse_mode' => $data['parse_mode'] ?? 'HTML'
             ]);
         } catch (Exception $e) {
             throw new RuntimeException('Error while sending Telegram message: ' . $e->getMessage());
