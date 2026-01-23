@@ -7,7 +7,7 @@ namespace Bow\Queue;
 use Bow\Support\Serializes;
 use Throwable;
 
-abstract class QueueJob
+abstract class QueueTask
 {
     use Serializes;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 
 abstract class QueueAdapter
 {
@@ -58,18 +58,18 @@ abstract class QueueAdapter
     /**
      * Push new job
      *
-     * @param QueueJob $job
+     * @param QueueTask $job
      * @return bool
      */
-    abstract public function push(QueueJob $job): bool;
+    abstract public function push(QueueTask $job): bool;
 
     /**
      * Create job serialization
      *
-     * @param  QueueJob $job
+     * @param  QueueTask $job
      * @return string
      */
-    public function serializeProducer(QueueJob $job): string
+    public function serializeProducer(QueueTask $job): string
     {
         return serialize($job);
     }
@@ -78,9 +78,9 @@ abstract class QueueAdapter
      * Create job unserialize
      *
      * @param  string $job
-     * @return QueueJob
+     * @return QueueTask
      */
-    public function unserializeProducer(string $job): QueueJob
+    public function unserializeProducer(string $job): QueueTask
     {
         return unserialize($job);
     }
@@ -126,8 +126,13 @@ abstract class QueueAdapter
         }
 
         while (true) {
-            $this->run();
-            $jobs_processed++;
+            try {
+                $this->updateProcessingTimeout();
+                $this->run();
+            } finally {
+                $this->sleep($this->sleep);
+                $jobs_processed++;
+            }
 
             if ($this->timeoutReached($timeout)) {
                 $this->kill(static::EXIT_ERROR);

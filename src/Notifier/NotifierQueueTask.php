@@ -3,10 +3,10 @@
 namespace Bow\Notifier;
 
 use Bow\Database\Barry\Model;
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 use Throwable;
 
-class NotifierQueueJob extends QueueJob
+class NotifierQueueTask extends QueueTask
 {
     /**
      * The message bag
@@ -16,7 +16,7 @@ class NotifierQueueJob extends QueueJob
     private array $bags = [];
 
     /**
-     * NotifierQueueJob constructor
+     * NotifierQueueTask constructor
      *
      * @param Model     $context
      * @param Notifier $notifier

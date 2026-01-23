@@ -23,7 +23,7 @@ trait WithNotifier
      */
     public function setMessageQueue(Notifier $notifier): void
     {
-        $queue_job = new NotifierQueueJob($this, $notifier);
+        $queue_job = new NotifierQueueTask($this, $notifier);
 
         queue($queue_job);
     }
@@ -37,7 +37,7 @@ trait WithNotifier
      */
     public function sendMessageQueueOn(string $queue, Notifier $notifier): void
     {
-        $queue_job = new NotifierQueueJob($this, $notifier);
+        $queue_job = new NotifierQueueTask($this, $notifier);
 
         $queue_job->setQueue($queue);
 
@@ -53,7 +53,7 @@ trait WithNotifier
      */
     public function sendMessageLater(int $delay, Notifier $notifier): void
     {
-        $queue_job = new NotifierQueueJob($this, $notifier);
+        $queue_job = new NotifierQueueTask($this, $notifier);
 
         $queue_job->setDelay($delay);
 
@@ -70,7 +70,7 @@ trait WithNotifier
      */
     public function sendMessageLaterOn(int $delay, string $queue, Notifier $notifier): void
     {
-        $queue_job = new NotifierQueueJob($this, $notifier);
+        $queue_job = new NotifierQueueTask($this, $notifier);
 
         $queue_job->setQueue($queue);
         $queue_job->setDelay($delay);

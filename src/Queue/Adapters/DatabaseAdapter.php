@@ -5,7 +5,7 @@ namespace Bow\Queue\Adapters;
 use Bow\Database\Database;
 use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 use ErrorException;
 use Exception;
 
@@ -48,10 +48,10 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  QueueJob $job
+     * @param  QueueTask $job
      * @return void
      */
-    public function push(QueueJob $job): bool
+    public function push(QueueTask $job): bool
     {
         $value = [
             "id" => $this->generateId(),
@@ -145,11 +145,11 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Process the next job on the queue.
      *
-     * @param  QueueJob $job
+     * @param  QueueTask $job
      * @param  mixed $queue
      * @throws QueryBuilderException
      */
-    private function execute(QueueJob $job, mixed $queue): void
+    private function execute(QueueTask $job, mixed $queue): void
     {
         call_user_func([$job, "process"]);
         $this->table->where("id", $queue->id)->update([

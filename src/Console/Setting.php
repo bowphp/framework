@@ -137,11 +137,11 @@ class Setting
     private string $service_directory;
 
     /**
-     * The job directory
+     * The task directory
      *
      * @var string
      */
-    private string $job_directory;
+    private string $task_directory;
     /**
      * The command directory
      *
@@ -402,24 +402,24 @@ class Setting
     }
 
     /**
-     * Get the job directory
+     * Get the task directory
      *
      * @return string
      */
-    public function getJobDirectory(): string
+    public function getTaskDirectory(): string
     {
-        return $this->job_directory;
+        return $this->task_directory;
     }
 
     /**
-     * Set the job directory
+     * Set the task directory
      *
-     * @param  string $job_directory
+     * @param  string $task_directory
      * @return void
      */
-    public function setJobDirectory(string $job_directory): void
+    public function setTaskDirectory(string $task_directory): void
     {
-        $this->job_directory = $job_directory;
+        $this->task_directory = $task_directory;
     }
 
     /**

@@ -2,11 +2,11 @@
 
 namespace Bow\Mail;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 use Bow\View\View;
 use Throwable;
 
-class MailQueueJob extends QueueJob
+class MailQueueTask extends QueueTask
 {
     /**
      * The message bag
@@ -16,7 +16,7 @@ class MailQueueJob extends QueueJob
     private array $bags = [];
 
     /**
-     * MailQueueJob constructor
+     * MailQueueTask constructor
      *
      * @param string  $view
      * @param array   $data

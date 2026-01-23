@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 
 class SyncAdapter extends QueueAdapter
 {
@@ -31,12 +31,14 @@ class SyncAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  QueueJob $job
+     * @param  QueueTask $job
      * @return bool
      */
-    public function push(QueueJob $job): bool
+    public function push(QueueTask $job): bool
     {
         $job->process();
+
+        $this->sleep($job->getDelay());
 
         return true;
     }

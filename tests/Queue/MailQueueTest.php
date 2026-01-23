@@ -8,7 +8,7 @@ use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\Envelop;
 use Bow\Mail\MailConfiguration;
-use Bow\Mail\MailQueueJob;
+use Bow\Mail\MailQueueTask;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -44,9 +44,9 @@ class MailQueueTest extends TestCase
         $envelop = new Envelop();
         $envelop->to("bow@bow.org");
         $envelop->subject("hello from bow");
-        $producer = new MailQueueJob("email", [], $envelop);
+        $producer = new MailQueueTask("email", [], $envelop);
 
-        $this->assertInstanceOf(MailQueueJob::class, $producer);
+        $this->assertInstanceOf(MailQueueTask::class, $producer);
 
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
 
@@ -67,9 +67,9 @@ class MailQueueTest extends TestCase
         $envelop->from("sender@example.com");
         $envelop->subject("Test Subject");
 
-        $producer = new MailQueueJob("test-template", ["name" => "John"], $envelop);
+        $producer = new MailQueueTask("test-template", ["name" => "John"], $envelop);
 
-        $this->assertInstanceOf(MailQueueJob::class, $producer);
+        $this->assertInstanceOf(MailQueueTask::class, $producer);
     }
 
     /**
@@ -80,7 +80,7 @@ class MailQueueTest extends TestCase
         $envelop = new Envelop();
         $envelop->to("priority@example.com");
         $envelop->subject("Priority Mail");
-        $producer = new MailQueueJob("email", [], $envelop);
+        $producer = new MailQueueTask("email", [], $envelop);
 
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
         $adapter->setQueue("priority-mail");
@@ -98,7 +98,7 @@ class MailQueueTest extends TestCase
         $envelop->to("retry@example.com");
         $envelop->subject("Retry Test");
 
-        $producer = new MailQueueJob("email", [], $envelop);
+        $producer = new MailQueueTask("email", [], $envelop);
         $producer->setRetry(3);
 
         $this->assertEquals(3, $producer->getRetry());
