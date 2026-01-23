@@ -128,7 +128,7 @@ abstract class QueueAdapter
         while (true) {
             try {
                 $this->updateProcessingTimeout();
-                $this->run();
+                $this->run($this->queue);
             } finally {
                 $this->sleep($this->sleep);
                 $jobs_processed++;

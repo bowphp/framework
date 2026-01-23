@@ -40,21 +40,21 @@ abstract class QueueTask
     protected int $priority = 1;
 
     /**
-     * Determine if the job can be deleted
+     * Determine if the task can be deleted
      *
      * @var bool
      */
     protected bool $delete = false;
 
     /**
-     * Define the job id
+     * Define the task id
      *
      * @return integer
      */
     protected ?string $id = null;
 
     /**
-     * Define the job attempts
+     * Define the task attempts
      *
      * @var int
      */
@@ -174,27 +174,27 @@ abstract class QueueTask
     }
 
     /**
-     * Delete the job from queue.
+     * Delete the task from queue.
      *
      * @return void
      */
-    public function deleteJob(): void
+    public function deleteTask(): void
     {
         $this->delete = true;
     }
 
     /**
-     * Delete the job from queue.
+     * Delete the task from queue.
      *
      * @return bool
      */
-    public function jobShouldBeDelete(): bool
+    public function taskShouldBeDelete(): bool
     {
         return $this->delete;
     }
 
     /**
-     * Get the job error
+     * Get the task error
      *
      * @param  Throwable $e
      * @return void
@@ -205,7 +205,7 @@ abstract class QueueTask
     }
 
     /**
-     * Process the producer
+     * Process the task
      *
      * @return void
      */

@@ -98,9 +98,7 @@ class DatabaseAdapter extends QueueAdapter
                     if (!is_null($queue->reserved_at) && strtotime($queue->reserved_at) < time()) {
                         continue;
                     }
-                    $this->table->where("id", $queue->id)->update([
-                        "status" => "processing",
-                    ]);
+                    $this->table->where("id", $queue->id)->update(["status" => "processing"]);
                     $this->execute($producer, $queue);
                     continue;
                 }
@@ -152,9 +150,7 @@ class DatabaseAdapter extends QueueAdapter
     private function execute(QueueTask $job, mixed $queue): void
     {
         call_user_func([$job, "process"]);
-        $this->table->where("id", $queue->id)->update([
-            "status" => "done"
-        ]);
+        $this->table->where("id", $queue->id)->update(["status" => "done"]);
         $this->sleep($this->sleep ?? 5);
     }
 
