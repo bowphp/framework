@@ -426,9 +426,9 @@ class Database
      */
     public static function commit(): void
     {
-        static::ensureDatabaseConnection();
-
-        static::$adapter->getConnection()->commit();
+        if (static::inTransaction()) {
+            static::$adapter->getConnection()->commit();
+        }
     }
 
     /**
@@ -436,9 +436,9 @@ class Database
      */
     public static function rollback(): void
     {
-        static::ensureDatabaseConnection();
-
-        static::$adapter->getConnection()->rollBack();
+        if (static::inTransaction()) {
+            static::$adapter->getConnection()->rollBack();
+        }
     }
 
     /**

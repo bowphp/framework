@@ -337,7 +337,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         }
 
         if ($model instanceof Collection) {
-            $model->delete();
+            $model->map(fn ($m) => $m->delete());
             return $model;
         }
 
@@ -861,9 +861,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         return array_filter(
             $this->attributes,
-            function ($key) {
-                return !in_array($key, $this->hidden);
-            },
+            fn ($key) => !in_array($key, $this->hidden),
             ARRAY_FILTER_USE_KEY
         );
     }
@@ -875,9 +873,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         return array_filter(
             $this->attributes,
-            function ($key) {
-                return !in_array($key, $this->hidden);
-            },
+            fn ($key) => !in_array($key, $this->hidden),
             ARRAY_FILTER_USE_KEY
         );
     }
