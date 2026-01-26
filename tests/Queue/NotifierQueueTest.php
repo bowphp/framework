@@ -7,7 +7,7 @@ use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\MailConfiguration;
-use Bow\Notifier\NotifierQueueJob;
+use Bow\Notifier\NotifierQueueTask;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -58,10 +58,10 @@ class NotifierQueueTest extends TestCase
         $context = new TestNotifiableModel();
         $message = new TestNotifier();
 
-        $producer = new NotifierQueueJob($context, $message);
+        $producer = new NotifierQueueTask($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to queue and verify
         $result = static::$connection->setConnection("beanstalkd")->getAdapter()->push($producer);
@@ -74,10 +74,10 @@ class NotifierQueueTest extends TestCase
         $context = new TestNotifiableModel();
         $message = new TestNotifier();
 
-        $producer = new NotifierQueueJob($context, $message);
+        $producer = new NotifierQueueTask($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to specific queue and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
@@ -93,10 +93,10 @@ class NotifierQueueTest extends TestCase
         $context = new TestNotifiableModel();
         $message = new TestNotifier();
 
-        $producer = new NotifierQueueJob($context, $message);
+        $producer = new NotifierQueueTask($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to queue with delay and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
@@ -113,10 +113,10 @@ class NotifierQueueTest extends TestCase
         $context = new TestNotifiableModel();
         $message = new TestNotifier();
 
-        $producer = new NotifierQueueJob($context, $message);
+        $producer = new NotifierQueueTask($context, $message);
 
         // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueJob::class, $producer);
+        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to specific queue with delay and verify
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();

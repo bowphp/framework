@@ -29,7 +29,7 @@ use Bow\Console\Command\Generator\GenerateValidationCommand;
 use Bow\Console\Command\Generator\GenerateNotificationCommand;
 use Bow\Console\Command\Generator\GenerateConfigurationCommand;
 use Bow\Console\Command\Generator\GenerateEventListenerCommand;
-use Bow\Console\Command\Generator\GenerateJobCommand;
+use Bow\Console\Command\Generator\GenerateTaskCommand;
 use Bow\Console\Command\Generator\GenerateRouterResourceCommand;
 
 class Command extends AbstractCommand
@@ -57,7 +57,7 @@ class Command extends AbstractCommand
         "add:validation" => GenerateValidationCommand::class,
         "add:event" => GenerateAppEventCommand::class,
         "add:listener" => GenerateEventListenerCommand::class,
-        "add:job" => GenerateJobCommand::class,
+        "add:task" => GenerateTaskCommand::class,
         "add:command" => GenerateConsoleCommand::class,
         "add:notifier" => GenerateNotifierCommand::class,
         "run:console" => ReplCommand::class,

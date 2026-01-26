@@ -15,8 +15,8 @@ use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Tests\Config\TestingConfiguration;
-use Bow\Tests\Queue\Stubs\BasicQueueJobStubs;
-use Bow\Tests\Queue\Stubs\ModelJobStub;
+use Bow\Tests\Queue\Stubs\BasicQueueTaskStub;
+use Bow\Tests\Queue\Stubs\ModelQueueTaskStub;
 use Bow\Tests\Queue\Stubs\PetModelStub;
 use Bow\View\View;
 use PHPUnit\Framework\TestCase;
@@ -78,18 +78,18 @@ class QueueTest extends TestCase
     /**
      * Create and return a basic job producer
      */
-    private function createBasicJob(string $connection): BasicQueueJobStubs
+    private function createBasicJob(string $connection): BasicQueueTaskStub
     {
-        return new BasicQueueJobStubs($connection);
+        return new BasicQueueTaskStub($connection);
     }
 
     /**
      * Create and return a model-based job producer
      */
-    private function createModelJob(string $connection, string $petName = "Filou"): ModelJobStub
+    private function createModelJob(string $connection, string $petName = "Filou"): ModelQueueTaskStub
     {
         $pet = new PetModelStub(["name" => $petName]);
-        return new ModelJobStub($pet, $connection);
+        return new ModelQueueTaskStub($pet, $connection);
     }
 
     /**
@@ -221,7 +221,7 @@ class QueueTest extends TestCase
         $this->cleanupFiles([$filename]);
 
         $producer = $this->createBasicJob($connection);
-        $this->assertInstanceOf(BasicQueueJobStubs::class, $producer);
+        $this->assertInstanceOf(BasicQueueTaskStub::class, $producer);
 
         try {
             $result = $adapter->push($producer);
@@ -233,7 +233,7 @@ class QueueTest extends TestCase
             $adapter->run();
 
             $this->assertFileExists($filename, "Producer file was not created for {$connection}");
-            $this->assertEquals(BasicQueueJobStubs::class, file_get_contents($filename));
+            $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
         } catch (\Exception $e) {
             if ($connection === 'beanstalkd') {
                 $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
@@ -266,7 +266,7 @@ class QueueTest extends TestCase
         $this->cleanupFiles([$filename, $producerFile]);
 
         $producer = $this->createModelJob($connection, "Filou");
-        $this->assertInstanceOf(ModelJobStub::class, $producer);
+        $this->assertInstanceOf(ModelQueueTaskStub::class, $producer);
 
         try {
             $result = $adapter->push($producer);
@@ -308,13 +308,13 @@ class QueueTest extends TestCase
     public function test_job_can_be_created_with_connection_parameter(): void
     {
         $job = $this->createBasicJob("test-connection");
-        $this->assertInstanceOf(BasicQueueJobStubs::class, $job);
+        $this->assertInstanceOf(BasicQueueTaskStub::class, $job);
     }
 
     public function test_model_job_can_be_created_with_pet_instance(): void
     {
         $job = $this->createModelJob("test", "TestPet");
-        $this->assertInstanceOf(ModelJobStub::class, $job);
+        $this->assertInstanceOf(ModelQueueTaskStub::class, $job);
     }
 
     public function test_can_push_job_to_specific_queue(): void
@@ -345,7 +345,7 @@ class QueueTest extends TestCase
         $adapter->push($producer);
 
         $content = file_get_contents($filename);
-        $this->assertEquals(BasicQueueJobStubs::class, $content);
+        $this->assertEquals(BasicQueueTaskStub::class, $content);
 
         $this->cleanupFiles([$filename]);
     }
@@ -495,7 +495,7 @@ class QueueTest extends TestCase
             $adapter->run();
 
             $this->assertFileExists($filename);
-            $this->assertEquals(BasicQueueJobStubs::class, file_get_contents($filename));
+            $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
         } catch (\Exception $e) {
             $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
         } finally {
@@ -608,7 +608,7 @@ class QueueTest extends TestCase
 
         $this->assertTrue($result);
         $this->assertFileExists($filename);
-        $this->assertEquals(BasicQueueJobStubs::class, file_get_contents($filename));
+        $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
 
         $this->cleanupFiles([$filename]);
     }

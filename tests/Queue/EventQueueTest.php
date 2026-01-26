@@ -6,7 +6,7 @@ use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
-use Bow\Event\EventQueueJob;
+use Bow\Event\EventQueueTask;
 use Bow\Mail\MailConfiguration;
 use Bow\Queue\Connection;
 use Bow\Queue\QueueConfiguration;
@@ -41,13 +41,13 @@ class EventQueueTest extends TestCase
     public function test_should_queue_event(): void
     {
         $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
-        $producer = new EventQueueJob(new UserEventListenerStub(), new UserEventStub("bowphp"));
+        $producer = new EventQueueTask(new UserEventListenerStub(), new UserEventStub("bowphp"));
         $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
 
         // Clean up any existing file before test
         @unlink($cache_filename);
 
-        $this->assertInstanceOf(EventQueueJob::class, $producer);
+        $this->assertInstanceOf(EventQueueTask::class, $producer);
 
         try {
             $result = $adapter->push($producer);
@@ -69,15 +69,15 @@ class EventQueueTest extends TestCase
         $listener = new UserEventListenerStub();
         $event = new UserEventStub("test-data");
 
-        $producer = new EventQueueJob($listener, $event);
+        $producer = new EventQueueTask($listener, $event);
 
-        $this->assertInstanceOf(EventQueueJob::class, $producer);
+        $this->assertInstanceOf(EventQueueTask::class, $producer);
     }
 
     public function test_should_process_event_from_queue(): void
     {
         $adapter = static::$connection->setConnection("sync")->getAdapter();
-        $producer = new EventQueueJob(new UserEventListenerStub(), new UserEventStub("sync-test"));
+        $producer = new EventQueueTask(new UserEventListenerStub(), new UserEventStub("sync-test"));
         $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
 
         $adapter->push($producer);

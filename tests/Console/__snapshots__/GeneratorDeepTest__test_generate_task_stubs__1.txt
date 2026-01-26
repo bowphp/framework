@@ -1,13 +1,13 @@
 <?php
 
-namespace {baseNamespace}{namespace};
+namespace App\Tasks;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 
-class {className} extends QueueJob
+class FakeTask extends QueueTask
 {
     /**
-     * {className} constructor
+     * FakeTask constructor
      * 
      * @return void
      */

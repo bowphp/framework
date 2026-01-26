@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 use Pheanstalk\Contract\PheanstalkPublisherInterface;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\Values\Timeout;
@@ -63,11 +63,11 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Queue a job
      *
-     * @param  QueueJob $producer
+     * @param  QueueTask $producer
      * @return bool
      * @throws ErrorException
      */
-    public function push(QueueJob $producer): bool
+    public function push(QueueTask $producer): bool
     {
         $queues = (array) cache("beanstalkd:queues");
 
@@ -117,11 +117,10 @@ class BeanstalkdAdapter extends QueueAdapter
         // we want jobs from define queue only.
         $queue = $this->getQueue($queue);
         $this->pheanstalk->watch(new TubeName($queue));
-
-        // This hangs until a Job is produced.
-        $job = $this->pheanstalk->reserve();
-
+        $job = null;
         try {
+            // This hangs until a Job is produced.
+            $job = $this->pheanstalk->reserve();
             $payload = $job->getData();
             $producer = $this->unserializeProducer($payload);
             call_user_func([$producer, "process"]);
@@ -136,6 +135,10 @@ class BeanstalkdAdapter extends QueueAdapter
                 logger()->error($e->getMessage(), $e->getTrace());
             } catch (Throwable $loggerException) {
                 // Logger not available, already logged to error_log
+            }
+
+            if (!$job) {
+                return;
             }
 
             cache("job:failed:" . $job->getId(), $job->getData());

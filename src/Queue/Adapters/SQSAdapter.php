@@ -4,7 +4,7 @@ namespace Bow\Queue\Adapters;
 
 use Aws\Exception\AwsException;
 use Aws\Sqs\SqsClient;
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 use ErrorException;
 use RuntimeException;
 
@@ -48,10 +48,10 @@ class SQSAdapter extends QueueAdapter
     /**
      * Push a job onto the queue.
      *
-     * @param  QueueJob $job
+     * @param  QueueTask $job
      * @return bool
      */
-    public function push(QueueJob $job): bool
+    public function push(QueueTask $job): bool
     {
         $params = [
             'DelaySeconds' => $job->getDelay(),

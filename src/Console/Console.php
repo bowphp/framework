@@ -60,7 +60,7 @@ class Console
         'service',
         'exception',
         'event',
-        'job',
+        'task',
         'command',
         'listener',
         'notifier'
@@ -540,7 +540,7 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:migration\033[00m       Create a new migration
    \033[0;33madd:event\033[00m           Create a new event
    \033[0;33madd:listener\033[00m        Create a new event listener
-   \033[0;33madd:job\033[00m             Create a new job
+   \033[0;33madd:task\033[00m             Create a new task
    \033[0;33madd:command\033[00m         Create a new console command
    \033[0;33madd:notifier\033[00m         Create a new messaging handler
 
@@ -564,7 +564,7 @@ Bow task runner usage: php bow command:action [name] --option
  \033[0;32mRUN\033[00m Launch development tools
    \033[0;33mrun:console\033[00m Show PsySH PHP REPL for debugging code
    \033[0;33mrun:server\033[00m  Start local development server
-   \033[0;33mrun:worker\033[00m  Start consumer/worker to handle queue jobs
+   \033[0;33mrun:worker\033[00m  Start consumer/worker to handle queue tasks
 
 USAGE;
             echo $usage;
@@ -593,7 +593,7 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    Create a new seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            Create a new migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                Create a new event listener
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:job name                  Create a new queue job
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:task name                  Create a new queue task
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              Create a new console command
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:notifier name              Create a new messaging handler
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      Display this help
@@ -642,7 +642,7 @@ U;
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console          Show PsySH PHP REPL for debugging code
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server [option]  Start local development server
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker [option]  Start worker to handle queue jobs
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker [option]  Start worker to handle queue tasks
 
 U; // phpcs:enable
                 break;

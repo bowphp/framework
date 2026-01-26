@@ -39,8 +39,8 @@ class SmsChannelAdapter implements ChannelAdapterInterface
     public function __construct()
     {
         $config = config('notifier.sms');
-        $this->setting = $config;
-        $this->sms_provider = $config['provider'] ?? 'callisto';
+        $this->setting = $config ?? [];
+        $this->sms_provider = $config['provider'] ?? 'log';
     }
 
     /**
@@ -56,6 +56,14 @@ class SmsChannelAdapter implements ChannelAdapterInterface
             return;
         }
 
+        if ($this->sms_provider === 'log') {
+            // Log the SMS content instead of sending
+            $data = $notifier->toSms($context);
+            $data['to'] = implode(', ', (array) ($data['to'] ?? []));
+            logger()->info('SMS Log - To: ' . ($data['to'] ?? 'N/A') . ' Message: ' . ($data['message'] ?? 'N/A'));
+            return;
+        }
+
         if ($this->sms_provider === 'twilio') {
             $this->sendWithTwilio($context, $notifier);
             return;
@@ -64,7 +72,7 @@ class SmsChannelAdapter implements ChannelAdapterInterface
         if ($this->sms_provider === 'callisto') {
             $this->sendWithCallisto($context, $notifier);
             return;
-        };
+        }
     }
 
     /**

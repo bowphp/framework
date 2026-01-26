@@ -3,10 +3,9 @@
 namespace Bow\Notifier\Adapters;
 
 use Bow\Database\Barry\Model;
+use Bow\Http\Client\HttpClient;
 use Bow\Notifier\Contracts\ChannelAdapterInterface;
 use Bow\Notifier\Notifier;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 
 class SlackChannelAdapter implements ChannelAdapterInterface
 {
@@ -16,7 +15,7 @@ class SlackChannelAdapter implements ChannelAdapterInterface
      * @param  Model     $context
      * @param  Notifier $notifier
      * @return void
-     * @throws GuzzleException
+     * @throws \Exception
      */
     public function send(Model $context, Notifier $notifier): void
     {
@@ -36,15 +35,10 @@ class SlackChannelAdapter implements ChannelAdapterInterface
             throw new \InvalidArgumentException('The webhook URL is required for Slack');
         }
 
-        $client = new Client();
+        $client = new HttpClient();
 
         try {
-            $client->post($webhook_url, [
-                'json' => $data['content'],
-                'headers' => [
-                    'Content-Type' => 'application/json'
-                ]
-            ]);
+            $client->acceptJson()->post($webhook_url, $data['content']);
         } catch (\Exception $e) {
             throw new \RuntimeException('Error while sending Slack notifier: ' . $e->getMessage());
         }
