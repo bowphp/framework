@@ -862,7 +862,7 @@ class QueryBuilder implements JsonSerializable
         }
 
         // Notice: The result of the next action can be float or int type
-        return $statement->fetchColumn();
+        return $statement->fetchColumn() ?? 0;
     }
 
     /**
