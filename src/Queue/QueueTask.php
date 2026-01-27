@@ -23,14 +23,14 @@ abstract class QueueTask
      *
      * @var int
      */
-    protected int $delay = 30;
+    protected int $delay = 0;
 
     /**
      * Define the time of retry
      *
      * @var int
      */
-    protected int $retry = 60;
+    protected int $retry = 30;
 
     /**
      * Define the priority
@@ -189,6 +189,16 @@ abstract class QueueTask
      * @return bool
      */
     public function taskShouldBeDelete(): bool
+    {
+        return $this->delete;
+    }
+
+    /**
+     * Delete the job from queue.
+     *
+     * @return bool
+     */
+    public function jobShouldBeDelete()
     {
         return $this->delete;
     }

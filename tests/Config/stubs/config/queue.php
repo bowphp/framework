@@ -27,6 +27,14 @@ return [
         ],
 
         /**
+         * The redis connexion
+         */
+        "redis" => [
+            "database" => 1,
+            "block_timeout" => 5,
+        ],
+
+        /**
          * The sqs connexion
          */
         "sqs" => [
@@ -41,7 +49,7 @@ return [
         ],
 
         /**
-         * The sqs connexion
+         * The database connexion
          */
         "database" => [
             'table' => "queues",

@@ -45,7 +45,7 @@ abstract class QueueAdapter
      *
      * @var int
      */
-    protected int $sleep = 5;
+    protected int $sleep = 0;
 
     /**
      * Make adapter configuration
@@ -270,10 +270,10 @@ abstract class QueueAdapter
     /**
      * Get the queue size
      *
-     * @param  string $queue
+     * @param  ?string $queue
      * @return int
      */
-    public function size(string $queue): int
+    public function size(?string $queue = null): int
     {
         return 0;
     }

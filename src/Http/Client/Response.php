@@ -133,9 +133,9 @@ class Response
     /**
      * Get the response executing time
      *
-     * @return ?int
+     * @return mixed
      */
-    public function getExecutionTime(): ?int
+    public function getExecutionTime(): mixed
     {
         return $this->headers['total_time'] ?? null;
     }

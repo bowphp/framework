@@ -52,6 +52,6 @@ class NotifierQueueTask extends QueueTask
      */
     public function onException(Throwable $e): void
     {
-        $this->deleteJob();
+        $this->deleteTask();
     }
 }

@@ -15,7 +15,7 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
     /**
      * @var string
      */
-    private string $botToken;
+    private ?string $botToken;
 
     /**
      * Constructor
@@ -25,10 +25,6 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
     public function __construct()
     {
         $this->botToken = config('messaging.telegram.bot_token');
-
-        if (!$this->botToken) {
-            throw new InvalidArgumentException('The Telegram bot token is required');
-        }
     }
 
     /**
@@ -49,6 +45,10 @@ class TelegramChannelAdapter implements ChannelAdapterInterface
 
         if (!isset($data['chat_id']) || !isset($data['message'])) {
             throw new InvalidArgumentException('The chat ID and message are required for Telegram');
+        }
+
+        if (!$this->botToken) {
+            throw new InvalidArgumentException('The Telegram bot token is required');
         }
 
         $client = new HttpClient();
