@@ -186,12 +186,8 @@ class QueueTest extends TestCase
         $beanstalkdAdapter = $this->getAdapter("beanstalkd");
         $this->assertInstanceOf(BeanstalkdAdapter::class, $beanstalkdAdapter);
 
-        try {
-            $redisAdapter = $this->getAdapter("redis");
-            $this->assertInstanceOf(RedisAdapter::class, $redisAdapter);
-        } catch (\Exception $e) {
-            // Redis not available, skip this assertion
-        }
+        $redisAdapter = $this->getAdapter("redis");
+        $this->assertInstanceOf(RedisAdapter::class, $redisAdapter);
     }
 
     public function test_connection_returns_same_instance_for_same_adapter(): void
@@ -217,11 +213,6 @@ class QueueTest extends TestCase
      */
     public function test_push_service_adapter(string $connection): void
     {
-        // Skip database adapter due to UUID collision bug
-        if ($connection === 'database') {
-            $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-        }
-
         $adapter = $this->getAdapter($connection);
         $filename = $this->getProducerFilePath($connection);
 
@@ -258,11 +249,6 @@ class QueueTest extends TestCase
      */
     public function test_push_service_adapter_with_model(string $connection): void
     {
-        // Skip database adapter due to UUID collision bug
-        if ($connection === 'database') {
-            $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-        }
-
         // Recreate table to reset auto-increment and avoid test pollution
         $this->recreatePetsTable();
 
@@ -767,6 +753,7 @@ class QueueTest extends TestCase
 
         $startTime = microtime(true);
         $producer = $this->createBasicJob("sync");
+        $producer->setDelay(0);
         $adapter->push($producer);
         $endTime = microtime(true);
 

@@ -218,7 +218,7 @@ class DatabaseAdapter extends QueueAdapter
         error_log($exception->getMessage());
 
         try {
-            app("logger")->error($exception->getMessage(), $exception->getTrace());
+            logger()->error($exception->getMessage(), $exception->getTrace());
         } catch (Throwable $loggerException) {
             // Logger not available, already logged to error_log
         }

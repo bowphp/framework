@@ -45,13 +45,17 @@ class Env
      *
      * @throws
      */
-    public function __construct(string $filename)
+    public function __construct(?string $filename = null)
     {
         if ($this->isLoaded()) {
             return;
         }
 
-        $this->envs = json_decode(file_get_contents($filename), true, 512, JSON_THROW_ON_ERROR);
+        if ($filename === null || !file_exists($filename)) {
+            $this->envs = [];
+        } else {
+            $this->envs = json_decode(file_get_contents($filename), true, 512, JSON_THROW_ON_ERROR);
+        }
 
         $this->envs = $this->bindVariables($this->envs);
 

@@ -18,7 +18,7 @@ services:
         image: mysql:8.3.0
         restart: unless-stopped
         ports:
-            - "3308:3306"
+            - "3306:3306"
         environment:
             MYSQL_DATABASE: test_db
             MYSQL_ROOT_PASSWORD: password
@@ -73,7 +73,7 @@ services:
         restart: unless-stopped
         ports:
             - "1025:1025"
-            - "1080:8025"
+            - "1080:1080"
         networks:
             - bowphp_network
         healthcheck:
