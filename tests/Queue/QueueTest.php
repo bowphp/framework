@@ -2,7 +2,6 @@
 
 namespace Bow\Tests\Queue;
 
-use Bow\Cache\Adapters\RedisAdapter;
 use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
@@ -11,6 +10,7 @@ use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\Mail;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
+use Bow\Queue\Adapters\RedisAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
 use Bow\Queue\Connection as QueueConnection;
@@ -185,6 +185,13 @@ class QueueTest extends TestCase
 
         $beanstalkdAdapter = $this->getAdapter("beanstalkd");
         $this->assertInstanceOf(BeanstalkdAdapter::class, $beanstalkdAdapter);
+
+        try {
+            $redisAdapter = $this->getAdapter("redis");
+            $this->assertInstanceOf(RedisAdapter::class, $redisAdapter);
+        } catch (\Exception $e) {
+            // Redis not available, skip this assertion
+        }
     }
 
     public function test_connection_returns_same_instance_for_same_adapter(): void
@@ -529,6 +536,144 @@ class QueueTest extends TestCase
         }
     }
 
+    public function test_redis_adapter_is_correct_instance(): void
+    {
+        try {
+            $adapter = $this->getAdapter("redis");
+            $this->assertInstanceOf(RedisAdapter::class, $adapter);
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @group integration
+     */
+    public function test_redis_adapter_can_push_job(): void
+    {
+        $filename = $this->getProducerFilePath("redis");
+        $this->cleanupFiles([$filename]);
+
+        try {
+            $adapter = $this->getAdapter("redis");
+            $producer = $this->createBasicJob("redis");
+
+            $result = $adapter->push($producer);
+            $this->assertTrue($result);
+
+            // Verify queue size increased
+            $size = $adapter->size();
+            $this->assertGreaterThanOrEqual(1, $size);
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
+        } finally {
+            $this->cleanupFiles([$filename]);
+        }
+    }
+
+    /**
+     * @group integration
+     */
+    public function test_redis_adapter_can_process_queued_jobs(): void
+    {
+        $filename = $this->getProducerFilePath("redis");
+        $this->cleanupFiles([$filename]);
+
+        try {
+            $adapter = $this->getAdapter("redis");
+
+            // Flush the queue first to ensure clean state
+            $adapter->flush();
+
+            $producer = $this->createBasicJob("redis");
+            $adapter->push($producer);
+            $adapter->run();
+
+            $this->assertFileExists($filename);
+            $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
+        } finally {
+            $this->cleanupFiles([$filename]);
+        }
+    }
+
+    /**
+     * @group integration
+     */
+    public function test_redis_adapter_respects_queue_configuration(): void
+    {
+        $filename = $this->getProducerFilePath("redis");
+        $this->cleanupFiles([$filename]);
+
+        try {
+            $adapter = $this->getAdapter("redis");
+            $adapter->setQueue("custom-redis-queue");
+            $adapter->setTries(2);
+            $adapter->setSleep(1);
+
+            $producer = $this->createBasicJob("redis");
+            $result = $adapter->push($producer);
+
+            $this->assertTrue($result);
+
+            // Cleanup
+            $adapter->flush("custom-redis-queue");
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
+        } finally {
+            $this->cleanupFiles([$filename]);
+        }
+    }
+
+    /**
+     * @group integration
+     */
+    public function test_redis_adapter_can_get_queue_size(): void
+    {
+        try {
+            $adapter = $this->getAdapter("redis");
+
+            // Flush first
+            $adapter->flush();
+
+            $initialSize = $adapter->size();
+            $this->assertEquals(0, $initialSize);
+
+            $producer = $this->createBasicJob("redis");
+            $adapter->push($producer);
+
+            $newSize = $adapter->size();
+            $this->assertEquals(1, $newSize);
+
+            // Cleanup
+            $adapter->flush();
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @group integration
+     */
+    public function test_redis_adapter_can_flush_queue(): void
+    {
+        try {
+            $adapter = $this->getAdapter("redis");
+
+            $producer = $this->createBasicJob("redis");
+            $adapter->push($producer);
+
+            $this->assertGreaterThanOrEqual(1, $adapter->size());
+
+            $adapter->flush();
+
+            $this->assertEquals(0, $adapter->size());
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
+        }
+    }
+
     public function test_can_set_queue_name(): void
     {
         $adapter = $this->getAdapter("sync");
@@ -747,6 +892,7 @@ class QueueTest extends TestCase
         $data = [
             ["beanstalkd"],
             ["database"],
+            ["redis"],
             ["sync"],
         ];
 

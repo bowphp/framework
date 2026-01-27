@@ -6,27 +6,37 @@ namespace Bow\Queue\Adapters;
 
 use Bow\Queue\QueueTask;
 use Pheanstalk\Contract\PheanstalkPublisherInterface;
+use Pheanstalk\Contract\JobIdInterface;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\Values\Timeout;
 use Pheanstalk\Values\TubeName;
 use RuntimeException;
 use Throwable;
-use ErrorException;
 
 class BeanstalkdAdapter extends QueueAdapter
 {
     /**
-     * Define the instance Pheanstalk
+     * Maximum priority value for Beanstalkd
+     */
+    private const MAX_PRIORITY = 4294967295;
+
+    /**
+     * Cache key for storing queue names
+     */
+    private const QUEUE_CACHE_KEY = "beanstalkd:queues";
+
+    /**
+     * The Pheanstalk client instance
      *
      * @var Pheanstalk
      */
     private Pheanstalk $pheanstalk;
 
     /**
-     * Configure Beanstalkd driver
+     * Configure the Beanstalkd queue adapter
      *
      * @param  array $config
-     * @return mixed
+     * @return BeanstalkdAdapter
      */
     public function configure(array $config): BeanstalkdAdapter
     {
@@ -34,10 +44,14 @@ class BeanstalkdAdapter extends QueueAdapter
             throw new RuntimeException("Please install the pda/pheanstalk package");
         }
 
+        $timeout = isset($config["timeout"]) && $config["timeout"]
+            ? new Timeout($config["timeout"])
+            : null;
+
         $this->pheanstalk = Pheanstalk::create(
             $config["hostname"],
             $config["port"],
-            $config["timeout"] ? new Timeout($config["timeout"]) : null,
+            $timeout,
         );
 
         if (isset($config["queue"])) {
@@ -48,36 +62,29 @@ class BeanstalkdAdapter extends QueueAdapter
     }
 
     /**
-     * Get the size of the queue.
+     * Get the size of the queue
      *
      * @param  string|null $queue
      * @return int
      */
     public function size(?string $queue = null): int
     {
-        $queue = new TubeName($this->getQueue($queue));
+        $tubeName = new TubeName($this->getQueue($queue));
 
-        return (int)$this->pheanstalk->statsTube($queue)->currentJobsReady;
+        return (int) $this->pheanstalk->statsTube($tubeName)->currentJobsReady;
     }
 
     /**
-     * Queue a job
+     * Push a job onto the queue
      *
      * @param  QueueTask $producer
      * @return bool
-     * @throws ErrorException
      */
     public function push(QueueTask $producer): bool
     {
-        $queues = (array) cache("beanstalkd:queues");
+        $this->registerQueueName($producer->getQueue());
 
-        if (!in_array($producer->getQueue(), $queues)) {
-            $queues[] = $producer->getQueue();
-            cache("beanstalkd:queues", $queues);
-        }
-
-        $this->pheanstalk
-            ->useTube(new TubeName($producer->getQueue()));
+        $this->pheanstalk->useTube(new TubeName($producer->getQueue()));
 
         $this->pheanstalk->put(
             $this->serializeProducer($producer),
@@ -90,101 +97,189 @@ class BeanstalkdAdapter extends QueueAdapter
     }
 
     /**
-     * Get the priority
+     * Register a queue name in cache for later reference
+     *
+     * @param  string $queueName
+     * @return void
+     */
+    private function registerQueueName(string $queueName): void
+    {
+        $queues = (array) cache(self::QUEUE_CACHE_KEY);
+
+        if (!in_array($queueName, $queues)) {
+            $queues[] = $queueName;
+            cache(self::QUEUE_CACHE_KEY, $queues);
+        }
+    }
+
+    /**
+     * Convert priority level to Beanstalkd priority value
+     *
+     * Priority mapping:
+     * - 0: Highest priority (urgent)
+     * - 1: Default priority (normal)
+     * - 2: Default priority (normal)
+     * - 3+: Lowest priority (bulk/background)
      *
      * @param  int $priority
      * @return int
      */
     public function getPriority(int $priority): int
     {
-        return match ($priority) {
-            $priority > 2 => 4294967295,
-            1 => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
-            0 => 0,
+        return match (true) {
+            $priority <= 0 => 0,
+            $priority > 2 => self::MAX_PRIORITY,
             default => PheanstalkPublisherInterface::DEFAULT_PRIORITY,
         };
     }
 
     /**
-     * Run the worker
+     * Run the queue worker
      *
      * @param  string|null $queue
      * @return void
-     * @throws ErrorException
      */
     public function run(?string $queue = null): void
     {
-        // we want jobs from define queue only.
-        $queue = $this->getQueue($queue);
-        $this->pheanstalk->watch(new TubeName($queue));
+        $queueName = $this->getQueue($queue);
+        $this->pheanstalk->watch(new TubeName($queueName));
+
         $job = null;
+        $producer = null;
+
         try {
-            // This hangs until a Job is produced.
             $job = $this->pheanstalk->reserve();
-            $payload = $job->getData();
-            $producer = $this->unserializeProducer($payload);
-            call_user_func([$producer, "process"]);
+            $producer = $this->unserializeProducer($job->getData());
+
+            $this->executeTask($producer);
             $this->pheanstalk->touch($job);
             $this->pheanstalk->delete($job);
             $this->updateProcessingTimeout();
         } catch (Throwable $e) {
-            // Write the error log
-            error_log($e->getMessage());
-
-            try {
-                logger()->error($e->getMessage(), $e->getTrace());
-            } catch (Throwable $loggerException) {
-                // Logger not available, already logged to error_log
-            }
-
-            if (!$job) {
-                return;
-            }
-
-            cache("job:failed:" . $job->getId(), $job->getData());
-
-            // Check if producer has been loaded
-            if (!isset($producer)) {
-                $this->pheanstalk->delete($job);
-                return;
-            }
-
-            // Execute the onException method for notify the producer
-            // and let developer decide if the job should be deleted
-            $producer->onException($e);
-
-            // Check if the job should be deleted
-            if ($producer->jobShouldBeDelete()) {
-                $this->pheanstalk->delete($job);
-            } else {
-                $this->pheanstalk->release($job, $this->getPriority($producer->getPriority()), $producer->getDelay());
-            }
-
-            $this->sleep(1);
+            $this->handleJobFailure($job, $producer, $e);
         }
     }
 
     /**
-     * Flush the queue
+     * Execute the task
+     *
+     * @param  QueueTask $producer
+     * @return void
+     */
+    private function executeTask(QueueTask $producer): void
+    {
+        call_user_func([$producer, "process"]);
+    }
+
+    /**
+     * Handle job failure
+     *
+     * @param  JobIdInterface|null $job
+     * @param  QueueTask|null $producer
+     * @param  Throwable $exception
+     * @return void
+     */
+    private function handleJobFailure(?JobIdInterface $job, ?QueueTask $producer, Throwable $exception): void
+    {
+        $this->logError($exception);
+
+        if (is_null($job)) {
+            return;
+        }
+
+        cache("job:failed:" . $job->getId(), $job->getData());
+
+        if (is_null($producer)) {
+            $this->pheanstalk->delete($job);
+            return;
+        }
+
+        $producer->onException($exception);
+
+        if ($producer->taskShouldBeDelete()) {
+            $this->pheanstalk->delete($job);
+        } else {
+            $this->releaseJob($job, $producer);
+        }
+
+        $this->sleep(1);
+    }
+
+    /**
+     * Release the job back to the queue for retry
+     *
+     * @param  JobIdInterface $job
+     * @param  QueueTask $producer
+     * @return void
+     */
+    private function releaseJob(JobIdInterface $job, QueueTask $producer): void
+    {
+        $this->pheanstalk->release(
+            $job,
+            $this->getPriority($producer->getPriority()),
+            $producer->getDelay()
+        );
+    }
+
+    /**
+     * Log an error
+     *
+     * @param  Throwable $exception
+     * @return void
+     */
+    private function logError(Throwable $exception): void
+    {
+        error_log($exception->getMessage());
+
+        try {
+            app("logger")->error($exception->getMessage(), $exception->getTrace());
+        } catch (Throwable $loggerException) {
+            // Logger not available, already logged to error_log
+        }
+    }
+
+    /**
+     * Flush all jobs from the queue
      *
      * @param  string|null $queue
      * @return void
-     * @throws ErrorException
      */
     public function flush(?string $queue = null): void
     {
-        $queues = (array)$queue;
+        $queues = $this->getQueuesToFlush($queue);
 
-        if (count($queues) == 0) {
-            $queues = cache("beanstalkd:queues");
+        foreach ($queues as $queueName) {
+            $this->flushQueue($queueName);
+        }
+    }
+
+    /**
+     * Get the list of queues to flush
+     *
+     * @param  string|null $queue
+     * @return array
+     */
+    private function getQueuesToFlush(?string $queue): array
+    {
+        if (!is_null($queue)) {
+            return [$queue];
         }
 
-        foreach ($queues as $queue) {
-            $this->pheanstalk->useTube($queue);
+        return (array) cache(self::QUEUE_CACHE_KEY) ?: [];
+    }
 
-            while ($job = $this->pheanstalk->reserve()) {
-                $this->pheanstalk->delete($job);
-            }
+    /**
+     * Flush all jobs from a specific queue
+     *
+     * @param  string $queueName
+     * @return void
+     */
+    private function flushQueue(string $queueName): void
+    {
+        $this->pheanstalk->useTube(new TubeName($queueName));
+
+        while ($job = $this->pheanstalk->reserveWithTimeout(0)) {
+            $this->pheanstalk->delete($job);
         }
     }
 }
