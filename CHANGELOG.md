@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.2.3 - 2026-01-27
+
+### What's Changed
+
+* Refactoring queue adapter and add redis support by @papac in https://github.com/bowphp/framework/pull/358
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.2...5.2.3
+
 ## [Unreleased]
 
 ### Added
@@ -13,9 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expanded from 8 to 21 methods for better functionality separation
   - Added comprehensive configuration validation (hostname, port, timeout)
   - Implemented multi-exception handling (SmtpException | SocketException)
-  - Enhanced email address parsing supporting "Name <email@example.com>" format
+  - Enhanced email address parsing supporting "Name [email@example.com](mailto:email@example.com)" format
   - Added optional authentication support
   - Created comprehensive test suite with 21 tests and 35 assertions
+  
 - **FTP Service**: Connection retry logic with 3 attempts and configurable delays
 - **FTP Service**: Configuration constants and validation for all required fields
 - **FTP Service**: Automatic stream cleanup with try-finally blocks
@@ -31,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better passive/active mode configuration
   - More specific and actionable error messages
   - Added connection state validation with `ensureConnection()` method
+  
 - **Environment Configuration**: Fixed path handling by removing unreliable `realpath()` usage
 - **Configuration Loader**: Improved validation and error handling
 - **Notifier System**: Fixed PHPUnit mock issues and corrected type signatures
@@ -90,8 +100,8 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
-```
 
+```
 Ref: #255
 
 ## 5.1.0 - 2023-06-07
