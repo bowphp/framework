@@ -45,7 +45,7 @@ abstract class QueueAdapter
      *
      * @var int
      */
-    protected int $sleep = 5;
+    protected int $sleep = 0;
 
     /**
      * Make adapter configuration

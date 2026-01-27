@@ -23,7 +23,7 @@ abstract class QueueTask
      *
      * @var int
      */
-    protected int $delay = 5;
+    protected int $delay = 0;
 
     /**
      * Define the time of retry
