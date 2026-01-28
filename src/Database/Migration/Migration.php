@@ -203,10 +203,16 @@ abstract class Migration
             $generator = new Table($table, $this->adapter->getName(), 'alter')
         ]);
 
+        $sql_definition = $generator->make();
+
         if ($this->adapter->getName() === 'pgsql') {
-            $sql = sprintf('ALTER TABLE %s %s;', $table, $generator->make());
+            $sql = sprintf('ALTER TABLE %s %s;', $table, $sql_definition);
         } else {
-            $sql = sprintf('ALTER TABLE `%s` %s;', $table, $generator->make());
+            $sql = sprintf('ALTER TABLE `%s` %s;', $table, $sql_definition);
+        }
+
+        if (empty($sql_definition)) {
+            return $this;
         }
 
         return $this->executeSqlQuery($sql, $displayInfo);
@@ -218,8 +224,21 @@ abstract class Migration
      * @param  string $sql
      * @return Migration
      * @throws MigrationException
+     * @deprecated Use sql() instead.
      */
     final public function addSql(string $sql): Migration
+    {
+        return $this->executeSqlQuery($sql);
+    }
+
+    /**
+     * Execute SQL query
+     *
+     * @param  string $sql
+     * @return Migration
+     * @throws MigrationException
+     */
+    final public function sql(string $sql): Migration
     {
         return $this->executeSqlQuery($sql);
     }
