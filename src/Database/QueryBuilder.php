@@ -877,31 +877,39 @@ class QueryBuilder implements JsonSerializable
      */
     private function bind(PDOStatement $pdo_statement, array $bindings = []): void
     {
-        foreach ($bindings as $key => $value) {
-            if (is_null($value) || strtolower((string) $value) === 'null') {
-                $key_binding = ':' . $key;
-                $pdo_statement->bindValue($key_binding, $value, PDO::PARAM_NULL);
-                unset($bindings[$key]);
+        // Detect if the SQL uses positional or named placeholders
+        $sql = $pdo_statement->queryString;
+        $uses_named = strpos($sql, ':') !== false;
+
+        if ($uses_named) {
+            // Named placeholders
+            foreach ($bindings as $key => $value) {
+                $param = PDO::PARAM_STR;
+                if (is_null($value) || strtolower((string) $value) === 'null') {
+                    $param = PDO::PARAM_NULL;
+                } elseif (is_int($value)) {
+                    $param = PDO::PARAM_INT;
+                } elseif (is_resource($value)) {
+                    $param = PDO::PARAM_LOB;
+                }
+                $key_binding = is_string($key) ? ":$key" : $key + 1;
+                $pdo_statement->bindValue($key_binding, $value, $param);
             }
-        }
-
-        foreach ($bindings as $key => $value) {
-            $param = PDO::PARAM_STR;
-
-            if (is_int($value)) {
-                $value = (int) $value;
-                $param = PDO::PARAM_INT;
-            } elseif (is_float($value)) {
-                $value = (float) $value;
-            } elseif (is_double($value)) {
-                $value = (float) $value;
-            } elseif (is_resource($value)) {
-                $param = PDO::PARAM_LOB;
+        } else {
+            // Positional placeholders
+            $i = 1;
+            foreach ($bindings as $value) {
+                $param = PDO::PARAM_STR;
+                if (is_null($value) || strtolower((string) $value) === 'null') {
+                    $param = PDO::PARAM_NULL;
+                } elseif (is_int($value)) {
+                    $param = PDO::PARAM_INT;
+                } elseif (is_resource($value)) {
+                    $param = PDO::PARAM_LOB;
+                }
+                $pdo_statement->bindValue($i, $value, $param);
+                $i++;
             }
-
-            // Bind by value with native pdo statement object
-            $key_binding = is_string($key) ? ":" . $key : $key + 1;
-            $pdo_statement->bindValue($key_binding, $value, $param);
         }
     }
 
