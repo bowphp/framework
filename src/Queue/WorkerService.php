@@ -40,7 +40,7 @@ class WorkerService
         string $queue = "default",
         int $tries = 3,
         int $sleep = 5,
-        int $timeout = 60,
+        int $timeout = 120,
         int $memory = 128
     ): void {
         $this->connection->setQueue($queue);

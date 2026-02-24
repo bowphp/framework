@@ -27,6 +27,13 @@ abstract class QueueAdapter
     protected float $processing_timeout;
 
     /**
+     * Define the work time out
+     *
+     * @var integer
+     */
+    protected int $timeout = 120;
+
+    /**
      * Determine the default watch name
      *
      * @var string
@@ -101,14 +108,25 @@ abstract class QueueAdapter
     }
 
     /**
-     * Update the processing timeout
+     * Set worker timeout
      *
-     * @param int $timeout
+     * @param integer $timeout
      * @return void
      */
-    public function updateProcessingTimeout(int $timeout = 60): void
+    public function setTimeout(int $timeout): void
     {
-        $this->processing_timeout = time() + $timeout;
+        $this->timeout = $timeout;
+    }
+
+    /**
+     * Update the processing timeout
+     *
+     * @param int  $timeout
+     * @return void
+     */
+    public function updateProcessingTimeout(?int $timeout = null): void
+    {
+        $this->processing_timeout = time() + ($timeout ?? $this->timeout);
     }
 
     /**
@@ -128,7 +146,8 @@ abstract class QueueAdapter
 
         while (true) {
             try {
-                $this->updateProcessingTimeout($timeout);
+                $this->setTimeout($timeout);
+                $this->updateProcessingTimeout();
                 $this->run($this->queue);
             } finally {
                 $this->sleep($this->sleep);
