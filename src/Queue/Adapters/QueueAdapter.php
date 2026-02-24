@@ -103,11 +103,12 @@ abstract class QueueAdapter
     /**
      * Update the processing timeout
      *
+     * @param int $timeout
      * @return void
      */
-    public function updateProcessingTimeout(): void
+    public function updateProcessingTimeout(int $timeout = 60): void
     {
-        $this->processing_timeout = time();
+        $this->processing_timeout = time() + $timeout;
     }
 
     /**
@@ -119,7 +120,7 @@ abstract class QueueAdapter
      */
     final public function work(int $timeout, int $memory): void
     {
-        [$this->processing_timeout, $jobs_processed] = [time(), 0];
+        [$this->processing_timeout, $jobs_processed] = [time() + $timeout, 0];
 
         if ($this->supportsAsyncSignals()) {
             $this->listenForSignals();
@@ -127,7 +128,7 @@ abstract class QueueAdapter
 
         while (true) {
             try {
-                $this->updateProcessingTimeout();
+                $this->updateProcessingTimeout($timeout);
                 $this->run($this->queue);
             } finally {
                 $this->sleep($this->sleep);
