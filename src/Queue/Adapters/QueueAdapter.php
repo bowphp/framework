@@ -155,7 +155,7 @@ abstract class QueueAdapter
             }
 
             if ($this->timeoutReached($timeout)) {
-                $this->kill(static::EXIT_ERROR);
+                // $this->kill(static::EXIT_ERROR);
             } elseif ($this->memoryExceeded($memory)) {
                 $this->kill(static::EXIT_MEMORY_LIMIT);
             }
