@@ -92,4 +92,41 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($route->match('/hello/bow'));
         $this->assertEquals($route->call(), "hello bow");
     }
+
+
+    public function testRouteMatchesDomainAndPath()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain('sub.example.com');
+        $this->assertTrue($route->match('/foo/bar', 'sub.example.com'));
+    }
+
+    public function testRouteDoesNotMatchWrongDomain()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain('sub.example.com');
+        $this->assertFalse($route->match('/foo/bar', 'other.example.com'));
+    }
+
+    public function testRouteMatchesWildcardDomain()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain('*.example.com');
+        $this->assertTrue($route->match('/foo/bar', 'api.example.com'));
+        $this->assertTrue($route->match('/foo/bar', 'www.example.com'));
+        $this->assertFalse($route->match('/foo/bar', 'example.com'));
+    }
+
+    public function testRouteMatchesWithoutDomainConstraint()
+    {
+        $route = new Route('/foo/bar', fn() => 'ok');
+        $this->assertTrue($route->match('/foo/bar', 'any.domain.com'));
+    }
+
+    public function testRouteDoesNotMatchIfPathWrongEvenIfDomainMatches()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain('sub.example.com');
+        $this->assertFalse($route->match('/foo/other', 'sub.example.com'));
+    }
 }

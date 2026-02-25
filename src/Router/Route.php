@@ -10,49 +10,56 @@ use Bow\Container\Compass;
 class Route
 {
     /**
-     * The callback has launched if the url of the query has matched.
+     * The callback to execute if the route matches.
      *
      * @var mixed
      */
-    private mixed $cb;
+    private mixed $callback;
 
     /**
-     * The road on the road set by the user
+     * The route path pattern
      *
      * @var string
      */
-    private string $path;
+    private string $path = '';
+
+    /**
+     * The domain pattern for the route (optional)
+     *
+     * @var string|null
+     */
+    private ?string $domain = null;
 
     /**
      * The route name
      *
-     * @var string
+     * @var null|string
      */
-    private string $name;
+    private ?string $name = null;
 
     /**
-     * key
+     * Parameter keys extracted from the path
      *
      * @var array
      */
     private array $keys = [];
 
     /**
-     * The route parameter
+     * Route parameters
      *
      * @var array
      */
     private array $params = [];
 
     /**
-     * List of parameters that we match
+     * Matched values from the URI
      *
      * @var array
      */
     private array $match = [];
 
     /**
-     * Additional URL validation rule
+     * Additional URL validation rules
      *
      * @var array
      */
@@ -73,14 +80,11 @@ class Route
      *
      * @throws
      */
-    public function __construct(string $path, mixed $cb)
+    public function __construct(string $path, mixed $callback)
     {
         $this->config = Loader::getInstance();
-
-        $this->cb = $cb;
-
-        $this->path = str_replace('.', '\.', $path);
-
+        $this->callback = $callback;
+        $this->path = str_replace('.', '\\.', $path);
         $this->match = [];
     }
 
@@ -91,7 +95,7 @@ class Route
      */
     public function getAction(): mixed
     {
-        return $this->cb;
+        return $this->callback;
     }
 
     /**
@@ -103,18 +107,28 @@ class Route
     public function middleware(array|string $middleware): Route
     {
         $middleware = (array)$middleware;
-
-        if (!is_array($this->cb)) {
-            $this->cb = [
-                'controller' => $this->cb,
+        if (!is_array($this->callback)) {
+            $this->callback = [
+                'controller' => $this->callback,
                 'middleware' => $middleware
             ];
-
             return $this;
         }
+        $this->callback['middleware'] = !isset($this->callback['middleware'])
+            ? $middleware
+            : array_merge((array)$this->callback['middleware'], $middleware);
+        return $this;
+    }
 
-        $this->cb['middleware'] = !isset($this->cb['middleware']) ? $middleware : array_merge((array)$this->cb['middleware'], $middleware);
-
+    /**
+     * Set the domain pattern for the route
+     *
+     * @param string $domainPattern
+     * @return $this
+     */
+    public function withDomain(string $domainPattern): self
+    {
+        $this->domain = $domainPattern;
         return $this;
     }
 
@@ -158,7 +172,7 @@ class Route
             $this->match[$key] = $tmp;
         }
 
-        return Compass::getInstance()->call($this->cb, $this->match);
+        return Compass::getInstance()->call($this->callback, $this->match);
     }
 
     /**
@@ -196,7 +210,7 @@ class Route
      *
      * @return string
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -229,8 +243,17 @@ class Route
      * @param  string $uri
      * @return bool
      */
-    public function match(string $uri): bool
+    public function match(string $uri, ?string $host = null): bool
     {
+        // If a domain constraint is set, check the host
+        if ($this->domain !== null && $host !== null) {
+            // Convert domain pattern to regex (support wildcards like *.example.com)
+            $pattern = str_replace(['.', '*'], ['\\.', '.*'], $this->domain);
+            if (!preg_match('/^' . $pattern . '$/i', $host)) {
+                return false;
+            }
+        }
+
         // Normalization of the url of the navigator.
         if (preg_match('~(.*)/$~', $uri, $match)) {
             $uri = end($match);
@@ -321,7 +344,7 @@ class Route
 
         array_shift($match);
 
-        $this->match = str_replace('/', '', $match);
+        $this->match = array_map(fn($v) => is_string($v) ? str_replace('/', '', $v) : $v, $match);
 
         return true;
     }
