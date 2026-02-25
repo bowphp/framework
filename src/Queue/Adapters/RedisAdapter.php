@@ -192,6 +192,7 @@ class RedisAdapter extends QueueAdapter
      */
     private function executeTask(QueueTask $producer): void
     {
+        error_log('Processing job: ' . get_class($producer) . ' with ID: ' . $producer->getId());
         call_user_func([$producer, "process"]);
     }
 
@@ -225,6 +226,7 @@ class RedisAdapter extends QueueAdapter
         }
 
         $producer->onException($exception);
+        error_log('Job failed: ' . get_class($producer) . ' with ID: ' . $producer->getId());
 
         if ($this->shouldMarkJobAsFailed($producer, $jobData)) {
             $this->removeFromProcessing($rawPayload, $processingKey);

@@ -880,6 +880,7 @@ class QueueTest extends TestCase
             ["beanstalkd"],
             ["database"],
             ["redis"],
+            ["rabbitmq"],
             ["sync"],
         ];
 

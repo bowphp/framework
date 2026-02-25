@@ -168,6 +168,8 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     private function executeTask(QueueTask $producer): void
     {
+        error_log('Processing job: ' . get_class($producer) . ' with ID: ' . $producer->getId());
+
         call_user_func([$producer, "process"]);
     }
 
@@ -182,6 +184,7 @@ class BeanstalkdAdapter extends QueueAdapter
     private function handleJobFailure(?JobIdInterface $job, ?QueueTask $producer, Throwable $exception): void
     {
         $this->logError($exception);
+        error_log('Failed job: ' . get_class($producer) . ' with ID: ' . $producer->getId());
 
         if (is_null($job)) {
             return;

@@ -71,11 +71,10 @@ class DatabaseAdapter extends QueueAdapter
             "payload" => base64_encode($this->serializeProducer($job)),
             "attempts" => $this->tries,
             "status" => self::STATUS_WAITING,
-            "available_at" => date("Y-m-d H:i:s", time() + $job->getDelay()),
+            "available_at" => date("Y-m-d H:i:s", time() + (method_exists($job, 'getDelay') ? $job->getDelay() : 0)),
             "reserved_at" => null,
             "created_at" => date("Y-m-d H:i:s"),
         ];
-
         return $this->table->insert($payload) > 0;
     }
 
@@ -172,7 +171,11 @@ class DatabaseAdapter extends QueueAdapter
      */
     private function executeTask(QueueTask $producer, stdClass $job): void
     {
-        call_user_func([$producer, "process"]);
+        error_log('Processing job: ' . get_class($producer) . ' with ID: ' . (method_exists($producer, 'getId') ? $producer->getId() : 'unknown'));
+        if (method_exists($producer, 'process')) {
+            throw new \RuntimeException('Job does not have a process or handle method.');
+        }
+        $producer->process();
         $this->markJobAs($job->id, self::STATUS_DONE);
         $this->sleep($this->sleep);
     }
@@ -189,13 +192,16 @@ class DatabaseAdapter extends QueueAdapter
     {
         $this->logError($exception);
         cache("job:failed:" . $job->id, $job->payload);
+        error_log('Job failed: ' . (is_object($producer) ? get_class($producer) : 'unknown') . ' with ID: ' . (is_object($producer) && method_exists($producer, 'getId') ? $producer->getId() : 'unknown'));
 
         if (is_null($producer)) {
             $this->sleep(1);
             return;
         }
 
-        $producer->onException($exception);
+        if (method_exists($producer, 'onException')) {
+            $producer->onException($exception);
+        }
 
         if ($this->shouldMarkJobAsFailed($producer, $job)) {
             $this->markJobAs($job->id, self::STATUS_FAILED);

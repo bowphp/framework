@@ -17,11 +17,11 @@ class WorkerCommand extends AbstractCommand
      */
     public function run(?string $connection = null): void
     {
-        $tries = (int)$this->arg->getParameter('--tries', 3);
+        $tries = (int) $this->arg->getParameter('--tries', 3);
         $default = $this->arg->getParameter('--queue', "default");
-        $memory = (int)$this->arg->getParameter('--memory', 126);
-        $timout = (int)$this->arg->getParameter('--timout', 60);
-        $sleep = (int)$this->arg->getParameter('--sleep', 60);
+        $memory = (int) $this->arg->getParameter('--memory', 126);
+        $timout = (int) $this->arg->getParameter('--timout', 3);
+        $sleep = (int) $this->arg->getParameter('--sleep', 60);
 
         $queue = app("queue");
 

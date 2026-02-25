@@ -35,6 +35,18 @@ return [
         ],
 
         /**
+         * The rabbitmq connection
+         */
+        "rabbitmq" => [
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+            'vhost' => '/',
+            'queue' => 'default',
+        ],
+
+        /**
          * The sqs connexion
          */
         "sqs" => [

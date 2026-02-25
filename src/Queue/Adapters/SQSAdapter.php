@@ -161,14 +161,15 @@ class SQSAdapter extends QueueAdapter
      */
     private function processMessage(array $message): void
     {
-        $job = null;
+        $task = null;
 
         try {
-            $job = $this->unserializeProducer(base64_decode($message["Body"]));
-            call_user_func([$job, "process"]);
+            $task = $this->unserializeProducer(base64_decode($message["Body"]));
+            error_log('Processing job: ' . get_class($task) . ' with ID: ' . $task->getId());
+            call_user_func([$task, "process"]);
             $this->deleteMessage($message);
         } catch (Throwable $e) {
-            $this->handleMessageFailure($message, $job, $e);
+            $this->handleMessageFailure($message, $task, $e);
         }
     }
 
@@ -176,26 +177,27 @@ class SQSAdapter extends QueueAdapter
      * Handle message processing failure
      *
      * @param  array $message
-     * @param  QueueTask|null $job
+     * @param  QueueTask|null $task
      * @param  Throwable $exception
      * @return void
      */
-    private function handleMessageFailure(array $message, ?QueueTask $job, Throwable $exception): void
+    private function handleMessageFailure(array $message, ?QueueTask $task, Throwable $exception): void
     {
         $this->logError($exception);
         cache("job:failed:" . $message["ReceiptHandle"], $message["Body"]);
+        error_log('Job failed: ' . get_class($task) . ' with ID: ' . $task->getId());
 
-        if (is_null($job)) {
+        if (is_null($task)) {
             $this->sleep(1);
             return;
         }
 
-        $job->onException($exception);
+        $task->onException($exception);
 
-        if ($job->taskShouldBeDelete()) {
+        if ($task->taskShouldBeDelete()) {
             $this->deleteMessage($message);
         } else {
-            $this->changeMessageVisibility($message, $job);
+            $this->changeMessageVisibility($message, $task);
         }
 
         $this->sleep(1);
@@ -219,18 +221,18 @@ class SQSAdapter extends QueueAdapter
      * Change message visibility for retry
      *
      * @param  array $message
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return void
      */
-    private function changeMessageVisibility(array $message, QueueTask $job): void
+    private function changeMessageVisibility(array $message, QueueTask $task): void
     {
         $this->sqs->changeMessageVisibilityBatch([
             "QueueUrl" => $this->getQueueUrl(),
             "Entries" => [
                 [
-                    "Id" => $job->getId(),
+                    "Id" => $task->getId(),
                     "ReceiptHandle" => $message["ReceiptHandle"],
-                    "VisibilityTimeout" => $job->getDelay(),
+                    "VisibilityTimeout" => $task->getDelay(),
                 ],
             ],
         ]);
