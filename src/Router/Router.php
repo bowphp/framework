@@ -290,7 +290,7 @@ class Router
      */
     private function routeLoader(string|array $methods, string $path, callable|string|array $cb): Route
     {
-        $methods = (array)$methods;
+        $methods = (array) $methods;
 
         $path = '/' . trim($path, '/');
 
@@ -299,7 +299,10 @@ class Router
 
         // We add the new route
         $route = new Route($path, $cb);
-        $route->withDomain($this->domain);
+
+        if ($this->domain) {
+            $route->withDomain($this->domain);
+        }
 
         $route->middleware($this->middlewares);
 

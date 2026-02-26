@@ -18,12 +18,12 @@ class RedisAdapter extends QueueAdapter
     private const QUEUE_PREFIX = "queues:";
 
     /**
-     * Redis key for processing jobs
+     * Redis key for processing tasks
      */
     private const PROCESSING_SUFFIX = ":processing";
 
     /**
-     * Redis key for failed jobs
+     * Redis key for failed tasks
      */
     private const FAILED_SUFFIX = ":failed";
 
@@ -81,17 +81,19 @@ class RedisAdapter extends QueueAdapter
     }
 
     /**
-     * Push a job onto the queue
+     * Push a task onto the queue
      *
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return bool
      */
-    public function push(QueueTask $job): bool
+    public function push(QueueTask $task): bool
     {
-        $payload = $this->buildPayload($job);
+        $task->setId($this->generateId());
+
+        $payload = $this->buildPayload($task);
 
         $result = $this->redis->rPush(
-            $this->getQueueKey($job->getQueue()),
+            $this->getQueueKey($task->getQueue()),
             json_encode($payload)
         );
 
@@ -99,21 +101,21 @@ class RedisAdapter extends QueueAdapter
     }
 
     /**
-     * Build the job payload
+     * Build the task payload
      *
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return array
      */
-    private function buildPayload(QueueTask $job): array
+    private function buildPayload(QueueTask $task): array
     {
         return [
             "id" => $this->generateId(),
-            "queue" => $this->getQueue($job->getQueue()),
-            "payload" => base64_encode($this->serializeProducer($job)),
+            "queue" => $this->getQueue($task->getQueue()),
+            "payload" => base64_encode($this->serializeProducer($task)),
             "attempts" => $this->tries,
-            "delay" => $job->getDelay(),
-            "retry" => $job->getRetry(),
-            "available_at" => time() + $job->getDelay(),
+            "delay" => $task->getDelay(),
+            "retry" => $task->getRetry(),
+            "available_at" => time() + $task->getDelay(),
             "created_at" => time(),
         ];
     }
@@ -129,7 +131,7 @@ class RedisAdapter extends QueueAdapter
         $queueKey = $this->getQueueKey($queue);
         $processingKey = $queueKey . self::PROCESSING_SUFFIX;
 
-        // Move job from queue to processing list (atomic operation)
+        // Move task from queue to processing list (atomic operation)
         $rawPayload = $this->redis->brPopLPush(
             $queueKey,
             $processingKey,
@@ -141,139 +143,142 @@ class RedisAdapter extends QueueAdapter
             return;
         }
 
-        $this->processJob($rawPayload, $processingKey);
+        $this->processTask($rawPayload, $processingKey);
     }
 
     /**
-     * Process a job from the queue
+     * Process a task from the queue
      *
      * @param  string $rawPayload
      * @param  string $processingKey
      * @return void
      */
-    private function processJob(string $rawPayload, string $processingKey): void
+    private function processTask(string $rawPayload, string $processingKey): void
     {
-        $jobData = json_decode($rawPayload, true);
-        $producer = null;
+        $taskData = json_decode($rawPayload, true);
+        $task = null;
 
         try {
-            // Check if job is available for processing
-            if (!$this->isJobReady($jobData)) {
+            // Check if task is available for processing
+            if (!$this->isTaskReady($taskData)) {
                 $this->requeue($rawPayload, $processingKey);
                 return;
             }
 
-            $producer = $this->unserializeProducer(base64_decode($jobData["payload"]));
+            $task = $this->unserializeProducer(base64_decode($taskData["payload"]));
 
-            $this->executeTask($producer);
+            $this->executeTask($task);
             $this->removeFromProcessing($rawPayload, $processingKey);
             $this->updateProcessingTimeout();
         } catch (Throwable $e) {
-            $this->handleJobFailure($rawPayload, $jobData, $producer, $processingKey, $e);
+            $this->handleTaskFailure($rawPayload, $taskData, $task, $processingKey, $e);
         }
     }
 
     /**
-     * Check if the job is ready to be processed
+     * Check if the task is ready to be processed
      *
-     * @param  array $jobData
+     * @param  array $taskData
      * @return bool
      */
-    private function isJobReady(array $jobData): bool
+    private function isTaskReady(array $taskData): bool
     {
-        return $jobData["available_at"] <= time();
+        return $taskData["available_at"] <= time();
     }
 
     /**
      * Execute the task
      *
-     * @param  QueueTask $producer
+     * @param  QueueTask $task
      * @return void
      */
-    private function executeTask(QueueTask $producer): void
+    private function executeTask(QueueTask $task): void
     {
-        error_log('Processing job: ' . get_class($producer) . ' with ID: ' . $producer->getId());
-        call_user_func([$producer, "process"]);
+        $this->logProcesingTask($task);
+
+        $task->process();
+
+        $this->logProcessedTask($task);
     }
 
     /**
-     * Handle job failure
+     * Handle task failure
      *
      * @param  string $rawPayload
-     * @param  array $jobData
-     * @param  QueueTask|null $producer
+     * @param  array $taskData
+     * @param  QueueTask|null $task
      * @param  string $processingKey
      * @param  Throwable $exception
      * @return void
      */
-    private function handleJobFailure(
+    private function handleTaskFailure(
         string $rawPayload,
-        array $jobData,
-        ?QueueTask $producer,
+        array $taskData,
+        ?QueueTask $task,
         string $processingKey,
         Throwable $exception
     ): void {
         $this->logError($exception);
 
-        // Store failed job info
-        $failedKey = $this->getQueueKey($jobData["queue"]) . self::FAILED_SUFFIX;
-        $this->redis->hSet($failedKey, $jobData["id"], $rawPayload);
+        // Store failed task info
+        $failedKey = $this->getQueueKey($taskData["queue"]) . self::FAILED_SUFFIX;
+        $this->redis->hSet($failedKey, $taskData["id"], $rawPayload);
 
-        if (is_null($producer)) {
+        if (is_null($task)) {
             $this->removeFromProcessing($rawPayload, $processingKey);
             $this->sleep(1);
             return;
         }
 
-        $producer->onException($exception);
-        error_log('Job failed: ' . get_class($producer) . ' with ID: ' . $producer->getId());
+        $task->onException($exception);
+        $this->logFailedTask($task, $exception);
 
-        if ($this->shouldMarkJobAsFailed($producer, $jobData)) {
+        if ($this->shouldMarkTaskAsFailed($task, $taskData)) {
             $this->removeFromProcessing($rawPayload, $processingKey);
             $this->sleep(1);
             return;
         }
 
-        // Retry the job
-        $this->scheduleJobRetry($jobData, $producer, $processingKey);
+        // Retry the task
+        $this->scheduleTaskRetry($taskData, $task, $processingKey);
         $this->sleep(1);
     }
 
     /**
-     * Determine if the job should be marked as failed
+     * Determine if the task should be marked as failed
      *
      * @param  QueueTask $producer
-     * @param  array $jobData
+     * @param  array $taskData
      * @return bool
      */
-    private function shouldMarkJobAsFailed(QueueTask $producer, array $jobData): bool
+    private function shouldMarkTaskAsFailed(QueueTask $producer, array $taskData): bool
     {
-        return $producer->taskShouldBeDelete() || $jobData["attempts"] <= 0;
+        return $producer->taskShouldBeDelete() || $taskData["attempts"] <= 0;
     }
 
     /**
-     * Schedule a job for retry
+     * Schedule a task for retry
      *
-     * @param  array $jobData
+     * @param  array $taskData
      * @param  QueueTask $producer
      * @param  string $processingKey
      * @return void
      */
-    private function scheduleJobRetry(array $jobData, QueueTask $producer, string $processingKey): void
+    private function scheduleTaskRetry(array $taskData, QueueTask $producer, string $processingKey): void
     {
-        // Update job data for retry
-        $jobData["attempts"] = $jobData["attempts"] - 1;
-        $jobData["available_at"] = time() + $producer->getDelay();
+        // Update task data for retry
+        $taskData["attempts"] = $taskData["attempts"] - 1;
+        $taskData["available_at"] = time() + $producer->getDelay();
 
-        $newPayload = json_encode($jobData);
+        $newPayload = json_encode($taskData);
 
         // Remove from processing and add back to queue
         $this->redis->lRem($processingKey, $newPayload, 0);
-        $this->redis->rPush($this->getQueueKey($jobData["queue"]), $newPayload);
+        $this->redis->rPush($this->getQueueKey($taskData["queue"]), $newPayload);
     }
 
     /**
-     * Requeue a job that is not yet ready
+     * Requeue a task that is not yet ready
      *
      * @param  string $rawPayload
      * @param  string $processingKey
@@ -281,16 +286,16 @@ class RedisAdapter extends QueueAdapter
      */
     private function requeue(string $rawPayload, string $processingKey): void
     {
-        $jobData = json_decode($rawPayload, true);
+        $taskData = json_decode($rawPayload, true);
 
         $this->redis->lRem($processingKey, $rawPayload, 0);
-        $this->redis->rPush($this->getQueueKey($jobData["queue"]), $rawPayload);
+        $this->redis->rPush($this->getQueueKey($taskData["queue"]), $rawPayload);
 
         $this->sleep(1);
     }
 
     /**
-     * Remove a job from the processing list
+     * Remove a task from the processing list
      *
      * @param  string $rawPayload
      * @param  string $processingKey
@@ -313,24 +318,7 @@ class RedisAdapter extends QueueAdapter
     }
 
     /**
-     * Log an error
-     *
-     * @param  Throwable $exception
-     * @return void
-     */
-    private function logError(Throwable $exception): void
-    {
-        error_log($exception->getMessage());
-
-        try {
-            logger()->error($exception->getMessage(), $exception->getTrace());
-        } catch (Throwable $loggerException) {
-            // Logger not available, already logged to error_log
-        }
-    }
-
-    /**
-     * Flush all jobs from the queue
+     * Flush all tasks from the queue
      *
      * @param  string|null $queue
      * @return void
@@ -345,12 +333,12 @@ class RedisAdapter extends QueueAdapter
     }
 
     /**
-     * Get failed jobs for a queue
+     * Get failed tasks for a queue
      *
      * @param  string|null $queue
      * @return array
      */
-    public function getFailedJobs(?string $queue = null): array
+    public function getFailedTasks(?string $queue = null): array
     {
         $failedKey = $this->getQueueKey($queue) . self::FAILED_SUFFIX;
 
@@ -358,38 +346,38 @@ class RedisAdapter extends QueueAdapter
     }
 
     /**
-     * Retry a failed job
+     * Retry a failed task
      *
-     * @param  string $jobId
+     * @param  string $taskId
      * @param  string|null $queue
      * @return bool
      */
-    public function retryFailedJob(string $jobId, ?string $queue = null): bool
+    public function retryFailedTask(string $taskId, ?string $queue = null): bool
     {
         $failedKey = $this->getQueueKey($queue) . self::FAILED_SUFFIX;
-        $rawPayload = $this->redis->hGet($failedKey, $jobId);
+        $rawPayload = $this->redis->hGet($failedKey, $taskId);
 
         if ($rawPayload === false) {
             return false;
         }
 
-        $jobData = json_decode($rawPayload, true);
-        $jobData["attempts"] = $this->tries;
-        $jobData["available_at"] = time();
+        $taskData = json_decode($rawPayload, true);
+        $taskData["attempts"] = $this->tries;
+        $taskData["available_at"] = time();
 
-        $this->redis->rPush($this->getQueueKey($queue), json_encode($jobData));
-        $this->redis->hDel($failedKey, $jobId);
+        $this->redis->rPush($this->getQueueKey($queue), json_encode($taskData));
+        $this->redis->hDel($failedKey, $taskId);
 
         return true;
     }
 
     /**
-     * Clear all failed jobs for a queue
+     * Clear all failed tasks for a queue
      *
      * @param  string|null $queue
      * @return void
      */
-    public function clearFailedJobs(?string $queue = null): void
+    public function clearFailedTasks(?string $queue = null): void
     {
         $this->redis->del($this->getQueueKey($queue) . self::FAILED_SUFFIX);
     }

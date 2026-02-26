@@ -92,12 +92,6 @@ class Env
             return;
         }
 
-        if (!file_exists($filename)) {
-            throw new InvalidArgumentException(
-                "The application environment file [.env.json] cannot be empty or is not define."
-            );
-        }
-
         static::$instance = new Env($filename);
     }
 
@@ -122,9 +116,9 @@ class Env
             return static::$instance;
         }
 
-        throw new ApplicationException(
-            "The environment is not loaded. Please load it before using it."
-        );
+        static::$instance = new Env();
+
+        return static::$instance;
     }
 
     /**

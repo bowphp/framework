@@ -38,7 +38,7 @@ class DatabaseAdapter extends QueueAdapter
      */
     public function configure(array $config): DatabaseAdapter
     {
-        $this->table = Database::table($config["table"] ?? "queue_jobs");
+        $this->table = Database::table($config["table"] ?? "queue_tasks");
 
         return $this;
     }
@@ -58,23 +58,26 @@ class DatabaseAdapter extends QueueAdapter
     }
 
     /**
-     * Push a job onto the queue
+     * Push a task onto the queue
      *
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return bool
      */
-    public function push(QueueTask $job): bool
+    public function push(QueueTask $task): bool
     {
+        $task->setId($this->generateId());
+
         $payload = [
-            "id" => $this->generateId(),
+            "id" => $task->getId(),
             "queue" => $this->getQueue(),
-            "payload" => base64_encode($this->serializeProducer($job)),
+            "payload" => base64_encode($this->serializeProducer($task)),
             "attempts" => $this->tries,
             "status" => self::STATUS_WAITING,
-            "available_at" => date("Y-m-d H:i:s", time() + (method_exists($job, 'getDelay') ? $job->getDelay() : 0)),
+            "available_at" => date("Y-m-d H:i:s", time() + (method_exists($task, 'getDelay') ? $task->getDelay() : 0)),
             "reserved_at" => null,
             "created_at" => date("Y-m-d H:i:s"),
         ];
+
         return $this->table->insert($payload) > 0;
     }
 
@@ -89,20 +92,20 @@ class DatabaseAdapter extends QueueAdapter
     public function run(?string $queue = null): void
     {
         $queueName = $this->getQueue($queue);
-        $jobs = $this->fetchPendingJobs($queueName);
+        $tasks = $this->fetchPendingJobs($queueName);
 
-        if (count($jobs) === 0) {
+        if (count($tasks) === 0) {
             $this->sleep($this->sleep);
             return;
         }
 
-        foreach ($jobs as $job) {
-            $this->processJob($job);
+        foreach ($tasks as $task) {
+            $this->processJob($task);
         }
     }
 
     /**
-     * Fetch pending jobs from the queue
+     * Fetch pending tasks from the queue
      *
      * @param  string $queueName
      * @return array
@@ -117,44 +120,44 @@ class DatabaseAdapter extends QueueAdapter
     }
 
     /**
-     * Process a single job from the queue
+     * Process a single task from the queue
      *
-     * @param  stdClass $job
+     * @param  stdClass $task
      * @return void
      */
-    private function processJob(stdClass $job): void
+    private function processJob(stdClass $task): void
     {
         $producer = null;
 
         try {
-            $producer = $this->unserializeProducer(base64_decode($job->payload));
+            $producer = $this->unserializeProducer(base64_decode($task->payload));
 
-            if (!$this->isJobReady($job)) {
+            if (!$this->isJobReady($task)) {
                 return;
             }
 
-            $this->markJobAs($job->id, self::STATUS_PROCESSING);
-            $this->executeTask($producer, $job);
+            $this->markJobAs($task->id, self::STATUS_PROCESSING);
+            $this->executeTask($producer, $task);
         } catch (Throwable $e) {
-            $this->handleJobFailure($job, $producer, $e);
+            $this->handleJobFailure($task, $producer, $e);
         }
     }
 
     /**
-     * Check if the job is ready to be processed
+     * Check if the task is ready to be processed
      *
-     * @param  stdClass $job
+     * @param  stdClass $task
      * @return bool
      */
-    private function isJobReady(stdClass $job): bool
+    private function isJobReady(stdClass $task): bool
     {
-        // Check if the job is available for processing
-        if (strtotime($job->available_at) > time()) {
+        // Check if the task is available for processing
+        if (strtotime($task->available_at) > time()) {
             return false;
         }
 
-        // Skip if the job is still reserved
-        if (!is_null($job->reserved_at) && strtotime($job->reserved_at) > time()) {
+        // Skip if the task is still reserved
+        if (!is_null($task->reserved_at) && strtotime($task->reserved_at) > time()) {
             return false;
         }
 
@@ -164,34 +167,36 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Execute the task
      *
-     * @param  QueueTask $producer
-     * @param  stdClass $job
+     * @param  QueueTask $task
+     * @param  stdClass $item
      * @return void
      * @throws QueryBuilderException
      */
-    private function executeTask(QueueTask $producer, stdClass $job): void
+    private function executeTask(QueueTask $task, stdClass $item): void
     {
-        error_log('Processing job: ' . get_class($producer) . ' with ID: ' . (method_exists($producer, 'getId') ? $producer->getId() : 'unknown'));
-        if (method_exists($producer, 'process')) {
+        $this->logProcesingTask($task);
+        if (!method_exists($task, 'process')) {
             throw new \RuntimeException('Job does not have a process or handle method.');
         }
-        $producer->process();
-        $this->markJobAs($job->id, self::STATUS_DONE);
+        $task->process();
+        $this->logProcessedTask($task);
+        $this->markJobAs($item->id, self::STATUS_DONE);
         $this->sleep($this->sleep);
     }
 
     /**
-     * Handle job failure
+     * Handle task failure
      *
-     * @param  stdClass $job
+     * @param  stdClass $task
      * @param  QueueTask|null $producer
      * @param  Throwable $exception
      * @return void
      */
-    private function handleJobFailure(stdClass $job, ?QueueTask $producer, Throwable $exception): void
+    private function handleJobFailure(stdClass $task, ?QueueTask $producer, Throwable $exception): void
     {
         $this->logError($exception);
-        cache("job:failed:" . $job->id, $job->payload);
+
+        cache("task:failed:" . $task->id, $task->payload);
         error_log('Job failed: ' . (is_object($producer) ? get_class($producer) : 'unknown') . ' with ID: ' . (is_object($producer) && method_exists($producer, 'getId') ? $producer->getId() : 'unknown'));
 
         if (is_null($producer)) {
@@ -203,74 +208,57 @@ class DatabaseAdapter extends QueueAdapter
             $producer->onException($exception);
         }
 
-        if ($this->shouldMarkJobAsFailed($producer, $job)) {
-            $this->markJobAs($job->id, self::STATUS_FAILED);
+        if ($this->shouldMarkJobAsFailed($producer, $task)) {
+            $this->markJobAs($task->id, self::STATUS_FAILED);
             $this->sleep(1);
             return;
         }
 
-        $this->scheduleJobRetry($job, $producer);
+        $this->scheduleJobRetry($task, $producer);
         $this->sleep(1);
     }
 
     /**
-     * Log an error
-     *
-     * @param  Throwable $exception
-     * @return void
-     */
-    private function logError(Throwable $exception): void
-    {
-        error_log($exception->getMessage());
-
-        try {
-            logger()->error($exception->getMessage(), $exception->getTrace());
-        } catch (Throwable $loggerException) {
-            // Logger not available, already logged to error_log
-        }
-    }
-
-    /**
-     * Determine if the job should be marked as failed
+     * Determine if the task should be marked as failed
      *
      * @param  QueueTask $producer
-     * @param  stdClass $job
+     * @param  stdClass $task
      * @return bool
      */
-    private function shouldMarkJobAsFailed(QueueTask $producer, stdClass $job): bool
+    private function shouldMarkJobAsFailed(QueueTask $producer, stdClass $task): bool
     {
-        return $producer->taskShouldBeDelete() || $job->attempts <= 0;
+        return $producer->taskShouldBeDelete() || $task->attempts <= 0;
     }
 
     /**
-     * Schedule a job for retry
+     * Schedule a task for retry
      *
-     * @param  stdClass $job
+     * @param  stdClass $task
      * @param  QueueTask $producer
      * @return void
      * @throws QueryBuilderException
      */
-    private function scheduleJobRetry(stdClass $job, QueueTask $producer): void
+    private function scheduleJobRetry(stdClass $task, QueueTask $producer): void
     {
-        $this->table->where("id", $job->id)->update([
+        $this->table->where("id", $task->id)->update([
             "status" => self::STATUS_RESERVED,
-            "attempts" => $job->attempts - 1,
+            "attempts" => $task->attempts - 1,
             "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
             "reserved_at" => date("Y-m-d H:i:s", time() + $producer->getRetry()),
         ]);
     }
 
     /**
-     * Update job status
+     * Update task status
      *
-     * @param  string $jobId
+     * @param  string $taskId
      * @param  string $status
      * @return void
      * @throws QueryBuilderException
      */
-    private function markJobAs(string $jobId, string $status): void
+    private function markJobAs(string $taskId, string $status): void
     {
-        $this->table->where("id", $jobId)->update(["status" => $status]);
+        $this->table->where("id", $taskId)->update(["status" => $status]);
     }
 
     /**

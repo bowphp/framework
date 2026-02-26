@@ -141,15 +141,17 @@ class KafkaAdapter extends QueueAdapter
     }
 
     /**
-     * Push a new job onto the queue
+     * Push a new task onto the queue
      *
-     * @param QueueTask $job
+     * @param QueueTask $task
      * @return bool
      */
-    public function push(QueueTask $job): bool
+    public function push(QueueTask $task): bool
     {
+        $task->setId($this->generateId());
+
         $topic = $this->producer->newTopic($this->topic);
-        $body = $this->serializeProducer($job);
+        $body = $this->serializeProducer($task);
 
         $topic->produce(RD_KAFKA_PARTITION_UA, 0, $body);
         $this->producer->poll(0);
@@ -161,7 +163,7 @@ class KafkaAdapter extends QueueAdapter
     }
 
     /**
-     * Run the worker to consume jobs
+     * Run the worker to consume tasks
      *
      * @param string|null $queue
      * @return void
@@ -209,17 +211,18 @@ class KafkaAdapter extends QueueAdapter
     protected function processMessage($message): void
     {
         try {
-            $job = $this->unserializeProducer($message->payload);
+            $task = $this->unserializeProducer($message->payload);
 
-            error_log('Processing job: ' . get_class($job) . ' with ID: ' . (method_exists($job, 'getId') ? $job->getId() : 'unknown'));
+            $this->logProcesingTask($task);
 
-            if (method_exists($job, 'process')) {
-                $job->process();
+            if (method_exists($task, 'process')) {
+                $task->process();
+                $this->logProcessedTask($task);
             } else {
                 throw new \RuntimeException('Job does not have a process method.');
             }
         } catch (\Throwable $e) {
-            error_log('Job failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->logFailedTask($task ?? null, $e);
         }
     }
 

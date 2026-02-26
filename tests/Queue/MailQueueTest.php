@@ -38,8 +38,9 @@ class MailQueueTest extends TestCase
 
     /**
      * @test
+     * @dataProvider getConnection
      */
-    public function it_should_queue_mail_successfully(): void
+    public function it_should_queue_mail_successfully(string $connection): void
     {
         $envelop = new Envelop();
         $envelop->to("bow@bow.org");
@@ -48,7 +49,7 @@ class MailQueueTest extends TestCase
 
         $this->assertInstanceOf(MailQueueTask::class, $producer);
 
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
 
         $result = $adapter->push($producer);
         $this->assertTrue($result);
@@ -74,15 +75,16 @@ class MailQueueTest extends TestCase
 
     /**
      * @test
+     * @dataProvider getConnection
      */
-    public function it_should_push_mail_to_specific_queue(): void
+    public function it_should_push_mail_to_specific_queue(string $connection): void
     {
         $envelop = new Envelop();
         $envelop->to("priority@example.com");
         $envelop->subject("Priority Mail");
         $producer = new MailQueueTask("email", [], $envelop);
 
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
         $adapter->setQueue("priority-mail");
 
         $result = $adapter->push($producer);
@@ -102,5 +104,31 @@ class MailQueueTest extends TestCase
         $producer->setRetry(3);
 
         $this->assertEquals(3, $producer->getRetry());
+    }
+
+    /**
+     * Get the connection data
+     *
+     * @return array
+     */
+    public function getConnection(): array
+    {
+        $data = [
+            ["beanstalkd"],
+            ["database"],
+            ["redis"],
+            ["rabbitmq"],
+            ["sync"],
+        ];
+
+        if (getenv("AWS_SQS_URL")) {
+            $data[] = ["sqs"];
+        }
+
+        if (extension_loaded('rdkafka')) {
+            $data[] = ["kafka"];
+        }
+
+        return $data;
     }
 }

@@ -13,6 +13,6 @@ class BasicQueueTaskStub extends QueueTask
 
     public function process(): void
     {
-        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$this->connection}_producer.txt", BasicQueueTaskStub::class);
+        file_put_contents(TESTING_RESOURCE_BASE_DIRECTORY . "/{$this->connection}_task.txt", BasicQueueTaskStub::class);
     }
 }

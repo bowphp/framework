@@ -54,14 +54,15 @@ class RabbitMQAdapter extends QueueAdapter
     }
 
     /**
-     * Push a new job onto the queue
+     * Push a new task onto the queue
      *
-     * @param QueueTask $job
+     * @param QueueTask $task
      * @return bool
      */
-    public function push(QueueTask $job): bool
+    public function push(QueueTask $task): bool
     {
-        $body = $this->serializeProducer($job);
+        $task->setId($this->generateId());
+        $body = $this->serializeProducer($task);
         $msg = new AMQPMessage($body, [
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
         ]);
@@ -70,7 +71,7 @@ class RabbitMQAdapter extends QueueAdapter
     }
 
     /**
-     * Run the worker to consume jobs
+     * Run the worker to consume tasks
      *
      * @param string|null $queue
      * @return void
@@ -79,17 +80,18 @@ class RabbitMQAdapter extends QueueAdapter
     {
         $queue = $this->getQueue($queue);
         $callback = function ($msg) {
-            $job = $this->unserializeProducer($msg->body);
+            $task = $this->unserializeProducer($msg->body);
             try {
-                error_log('Processing job: ' . get_class($job) . ' with ID: ' . (method_exists($job, 'getId') ? $job->getId() : 'unknown'));
-                if (method_exists($job, 'process')) {
-                    $job->process();
+                $this->logProcesingTask($task);
+                if (method_exists($task, 'process')) {
+                    $task->process();
                 } else {
-                    throw new \RuntimeException('Job does not have a process or handle method.');
+                    throw new \RuntimeException('Task does not have a process or handle method.');
                 }
+                $this->logProcessedTask($task);
                 $msg->ack();
             } catch (\Throwable $e) {
-                error_log('Job failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+                $this->logFailedTask($task, $e);
                 // Optionally requeue: set second param to true to requeue
                 $msg->nack(false, false); // reject and don't requeue
             }
@@ -97,7 +99,14 @@ class RabbitMQAdapter extends QueueAdapter
         $this->channel->basic_qos(null, 1, null);
         $this->channel->basic_consume($queue, '', false, false, false, false, $callback);
         while ($this->channel->is_consuming()) {
-            $this->channel->wait();
+            try {
+                $this->channel->wait(null, false, 1);
+            } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
+                // Timeout reached, check if there are more messages
+                if ($this->size($queue) === 0) {
+                    break;
+                }
+            }
         }
     }
 

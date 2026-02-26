@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\QueueTask;
-use Pheanstalk\Contract\PheanstalkPublisherInterface;
 use Pheanstalk\Contract\JobIdInterface;
+use Pheanstalk\Contract\PheanstalkPublisherInterface;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\Values\Timeout;
 use Pheanstalk\Values\TubeName;
@@ -75,22 +75,24 @@ class BeanstalkdAdapter extends QueueAdapter
     }
 
     /**
-     * Push a job onto the queue
+     * Push a task onto the queue
      *
-     * @param  QueueTask $producer
+     * @param  QueueTask $task
      * @return bool
      */
-    public function push(QueueTask $producer): bool
+    public function push(QueueTask $task): bool
     {
-        $this->registerQueueName($producer->getQueue());
+        $task->setId($this->generateId());
 
-        $this->pheanstalk->useTube(new TubeName($producer->getQueue()));
+        $this->registerQueueName($task->getQueue());
+
+        $this->pheanstalk->useTube(new TubeName($task->getQueue()));
 
         $this->pheanstalk->put(
-            $this->serializeProducer($producer),
-            $this->getPriority($producer->getPriority()),
-            $producer->getDelay(),
-            $producer->getRetry()
+            $this->serializeProducer($task),
+            $this->getPriority($task->getPriority()),
+            $task->getDelay(),
+            $task->getRetry()
         );
 
         return true;
@@ -144,105 +146,91 @@ class BeanstalkdAdapter extends QueueAdapter
         $queueName = $this->getQueue($queue);
         $this->pheanstalk->watch(new TubeName($queueName));
 
+        $task = null;
         $job = null;
-        $producer = null;
 
         try {
             $job = $this->pheanstalk->reserve();
-            $producer = $this->unserializeProducer($job->getData());
+            $task = $this->unserializeProducer($job->getData());
 
-            $this->executeTask($producer);
+            $this->executeTask($task);
             $this->pheanstalk->touch($job);
             $this->pheanstalk->delete($job);
             $this->updateProcessingTimeout();
         } catch (Throwable $e) {
-            $this->handleJobFailure($job, $producer, $e);
+            $this->handleTaskFailure($job, $task, $e);
         }
     }
 
     /**
      * Execute the task
      *
-     * @param  QueueTask $producer
+     * @param  QueueTask $task
      * @return void
      */
-    private function executeTask(QueueTask $producer): void
+    private function executeTask(QueueTask $task): void
     {
-        error_log('Processing job: ' . get_class($producer) . ' with ID: ' . $producer->getId());
+        $this->logProcesingTask($task);
 
-        call_user_func([$producer, "process"]);
+        $task->process();
+
+        $this->logProcessedTask($task);
     }
 
     /**
-     * Handle job failure
+     * Handle task failure
      *
      * @param  JobIdInterface|null $job
-     * @param  QueueTask|null $producer
+     * @param  QueueTask|null $task
      * @param  Throwable $exception
      * @return void
      */
-    private function handleJobFailure(?JobIdInterface $job, ?QueueTask $producer, Throwable $exception): void
+    private function handleTaskFailure(?JobIdInterface $job, ?QueueTask $task, Throwable $exception): void
     {
         $this->logError($exception);
-        error_log('Failed job: ' . get_class($producer) . ' with ID: ' . $producer->getId());
+
+        $this->logFailedTask($task, $exception);
 
         if (is_null($job)) {
             return;
         }
 
-        cache("job:failed:" . $job->getId(), $job->getData());
+        cache("task:failed:" . $task->getId(), method_exists($task, 'getData') ? $task->getData() : "");
 
-        if (is_null($producer)) {
+        if (is_null($task)) {
             $this->pheanstalk->delete($job);
             return;
         }
 
-        $producer->onException($exception);
+        $task->onException($exception);
 
-        if ($producer->taskShouldBeDelete()) {
+        if ($task->taskShouldBeDelete()) {
             $this->pheanstalk->delete($job);
         } else {
-            $this->releaseJob($job, $producer);
+            $this->releaseTask($job, $task);
         }
 
         $this->sleep(1);
     }
 
     /**
-     * Release the job back to the queue for retry
+     * Release the task back to the queue for retry
      *
      * @param  JobIdInterface $job
-     * @param  QueueTask $producer
+     * @param  QueueTask $task
      * @return void
      */
-    private function releaseJob(JobIdInterface $job, QueueTask $producer): void
+    private function releaseTask(JobIdInterface $job, QueueTask $task): void
     {
         $this->pheanstalk->release(
             $job,
-            $this->getPriority($producer->getPriority()),
-            $producer->getDelay()
+            $this->getPriority($task->getPriority()),
+            $task->getDelay()
         );
     }
 
     /**
-     * Log an error
-     *
-     * @param  Throwable $exception
-     * @return void
-     */
-    private function logError(Throwable $exception): void
-    {
-        error_log($exception->getMessage());
-
-        try {
-            logger()->error($exception->getMessage(), $exception->getTrace());
-        } catch (Throwable $loggerException) {
-            // Logger not available, already logged to error_log
-        }
-    }
-
-    /**
-     * Flush all jobs from the queue
+     * Flush all tasks from the queue
      *
      * @param  string|null $queue
      * @return void
@@ -272,7 +260,7 @@ class BeanstalkdAdapter extends QueueAdapter
     }
 
     /**
-     * Flush all jobs from a specific queue
+     * Flush all tasks from a specific queue
      *
      * @param  string $queueName
      * @return void
@@ -281,8 +269,8 @@ class BeanstalkdAdapter extends QueueAdapter
     {
         $this->pheanstalk->useTube(new TubeName($queueName));
 
-        while ($job = $this->pheanstalk->reserveWithTimeout(0)) {
-            $this->pheanstalk->delete($job);
+        while ($task = $this->pheanstalk->reserveWithTimeout(0)) {
+            $this->pheanstalk->delete($task);
         }
     }
 }

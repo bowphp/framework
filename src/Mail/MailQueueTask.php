@@ -27,8 +27,6 @@ class MailQueueTask extends QueueTask
         array $data,
         Envelop $envelop
     ) {
-        parent::__construct();
-
         $this->bags = [
             "view" => $view,
             "data" => $data,

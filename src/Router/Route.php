@@ -134,6 +134,16 @@ class Route
     }
 
     /**
+     * Get the domain pattern for the route
+     *
+     * @return string|null
+     */
+    public function getDomain(): ?string
+    {
+        return $this->domain;
+    }
+
+    /**
      * Add the url rules
      *
      * @param  array|string $where

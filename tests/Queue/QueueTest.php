@@ -10,6 +10,7 @@ use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\Mail;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
+use Bow\Queue\Adapters\KafkaAdapter;
 use Bow\Queue\Adapters\RedisAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
@@ -76,7 +77,7 @@ class QueueTest extends TestCase
     }
 
     /**
-     * Create and return a basic job producer
+     * Create and return a basic job task
      */
     private function createBasicJob(string $connection): BasicQueueTaskStub
     {
@@ -84,7 +85,7 @@ class QueueTest extends TestCase
     }
 
     /**
-     * Create and return a model-based job producer
+     * Create and return a model-based job task
      */
     private function createModelJob(string $connection, string $petName = "Filou"): ModelQueueTaskStub
     {
@@ -95,9 +96,9 @@ class QueueTest extends TestCase
     /**
      * Get the file path for a connection's output
      */
-    private function getProducerFilePath(string $connection): string
+    private function getTaskFilePath(string $connection): string
     {
-        return TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt";
+        return TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_task.txt";
     }
 
     /**
@@ -154,6 +155,8 @@ class QueueTest extends TestCase
             $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
         } elseif ($connection == "sync") {
             $this->assertInstanceOf(SyncAdapter::class, $adapter);
+        } elseif ($connection == "kafka") {
+            $this->assertInstanceOf(KafkaAdapter::class, $adapter);
         }
     }
 
@@ -214,29 +217,25 @@ class QueueTest extends TestCase
     public function test_push_service_adapter(string $connection): void
     {
         $adapter = $this->getAdapter($connection);
-        $filename = $this->getProducerFilePath($connection);
+        $filename = $this->getTaskFilePath($connection);
 
         $this->cleanupFiles([$filename]);
 
-        $producer = $this->createBasicJob($connection);
-        $this->assertInstanceOf(BasicQueueTaskStub::class, $producer);
+        $task = $this->createBasicJob($connection);
+        $this->assertInstanceOf(BasicQueueTaskStub::class, $task);
 
         try {
-            $result = $adapter->push($producer);
-            $this->assertTrue($result, "Failed to push producer to {$connection} adapter");
+            $result = $adapter->push($task);
+            $this->assertTrue($result, "Failed to push task to {$connection} adapter");
 
             $adapter->setQueue("queue_{$connection}");
-            $adapter->setTries(3);
-            $adapter->setSleep(5);
+            $adapter->setTries(1);
+            $adapter->setSleep(0);
             $adapter->run();
 
-            $this->assertFileExists($filename, "Producer file was not created for {$connection}");
+            $this->assertFileExists($filename, "Task file was not created for {$connection}");
             $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
         } catch (\Exception $e) {
-            if ($connection === 'beanstalkd') {
-                $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
-                return;
-            }
             throw $e;
         } finally {
             $this->cleanupFiles([$filename]);
@@ -254,20 +253,20 @@ class QueueTest extends TestCase
 
         $adapter = $this->getAdapter($connection);
         $filename = $this->getModelJobFilePath($connection);
-        $producerFile = $this->getProducerFilePath($connection);
+        $taskFile = $this->getTaskFilePath($connection);
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
 
-        $producer = $this->createModelJob($connection, "Filou");
-        $this->assertInstanceOf(ModelQueueTaskStub::class, $producer);
+        $task = $this->createModelJob($connection, "Filou");
+        $this->assertInstanceOf(ModelQueueTaskStub::class, $task);
 
         try {
-            $result = $adapter->push($producer);
-            $this->assertTrue($result, "Failed to push model producer to {$connection} adapter");
+            $result = $adapter->push($task);
+            $this->assertTrue($result, "Failed to push model task to {$connection} adapter");
 
             $adapter->run();
 
-            $this->assertFileExists($filename, "Model producer file was not created for {$connection}");
+            $this->assertFileExists($filename, "Model task file was not created for {$connection}");
             $content = file_get_contents($filename);
             $this->assertNotEmpty($content);
 
@@ -287,14 +286,9 @@ class QueueTest extends TestCase
             $this->assertNotNull($filouPet, "Pet model with name 'Filou' was not saved to database");
             $this->assertEquals("Filou", $filouPet->name);
         } catch (\Exception $e) {
-            if ($connection === 'beanstalkd') {
-                $this->cleanupFiles([$filename, $producerFile]);
-                $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
-                return;
-            }
             throw $e;
         } finally {
-            $this->cleanupFiles([$filename, $producerFile]);
+            $this->cleanupFiles([$filename, $taskFile]);
         }
     }
 
@@ -313,13 +307,13 @@ class QueueTest extends TestCase
     public function test_can_push_job_to_specific_queue(): void
     {
         $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
+        $filename = $this->getTaskFilePath("sync");
 
         $this->cleanupFiles([$filename]);
 
         $adapter->setQueue("specific-queue");
-        $producer = $this->createBasicJob("sync");
-        $result = $adapter->push($producer);
+        $task = $this->createBasicJob("sync");
+        $result = $adapter->push($task);
 
         $this->assertTrue($result);
         $this->assertFileExists($filename);
@@ -330,12 +324,12 @@ class QueueTest extends TestCase
     public function test_job_execution_creates_expected_output(): void
     {
         $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
+        $filename = $this->getTaskFilePath("sync");
 
         $this->cleanupFiles([$filename]);
 
-        $producer = $this->createBasicJob("sync");
-        $adapter->push($producer);
+        $task = $this->createBasicJob("sync");
+        $adapter->push($task);
 
         $content = file_get_contents($filename);
         $this->assertEquals(BasicQueueTaskStub::class, $content);
@@ -350,12 +344,12 @@ class QueueTest extends TestCase
 
         $adapter = $this->getAdapter("sync");
         $filename = $this->getModelJobFilePath("sync");
-        $producerFile = $this->getProducerFilePath("sync");
+        $taskFile = $this->getTaskFilePath("sync");
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
 
-        $producer = $this->createModelJob("sync", "TestDog");
-        $adapter->push($producer);
+        $task = $this->createModelJob("sync", "TestDog");
+        $adapter->push($task);
 
         // Get all pets and find the TestDog
         $pets = PetModelStub::all();
@@ -370,7 +364,7 @@ class QueueTest extends TestCase
         $this->assertNotNull($testDog);
         $this->assertEquals("TestDog", $testDog->name);
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
     }
 
     public function test_model_job_creates_json_output(): void
@@ -380,12 +374,12 @@ class QueueTest extends TestCase
 
         $adapter = $this->getAdapter("sync");
         $filename = $this->getModelJobFilePath("sync");
-        $producerFile = $this->getProducerFilePath("sync");
+        $taskFile = $this->getTaskFilePath("sync");
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
 
-        $producer = $this->createModelJob("sync", "JsonTest");
-        $adapter->push($producer);
+        $task = $this->createModelJob("sync", "JsonTest");
+        $adapter->push($task);
 
         $this->assertFileExists($filename);
         $content = file_get_contents($filename);
@@ -394,7 +388,7 @@ class QueueTest extends TestCase
         $this->assertNotNull($data);
         $this->assertEquals("JsonTest", $data->name);
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
     }
 
     public function test_multiple_model_jobs_can_be_processed(): void
@@ -404,31 +398,31 @@ class QueueTest extends TestCase
 
         $adapter = $this->getAdapter("sync");
         $filename = $this->getModelJobFilePath("sync");
-        $producerFile = $this->getProducerFilePath("sync");
+        $taskFile = $this->getTaskFilePath("sync");
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
 
-        $producer1 = $this->createModelJob("sync", "FirstPet");
-        $producer2 = $this->createModelJob("sync", "SecondPet");
+        $task1 = $this->createModelJob("sync", "FirstPet");
+        $task2 = $this->createModelJob("sync", "SecondPet");
 
-        $result1 = $adapter->push($producer1);
-        $result2 = $adapter->push($producer2);
+        $result1 = $adapter->push($task1);
+        $result2 = $adapter->push($task2);
 
         $this->assertTrue($result1);
         $this->assertTrue($result2);
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
     }
 
     public function test_push_returns_boolean_result(): void
     {
         $adapter = $this->getAdapter("sync");
-        $producer = $this->createBasicJob("sync");
-        $filename = $this->getProducerFilePath("sync");
+        $task = $this->createBasicJob("sync");
+        $filename = $this->getTaskFilePath("sync");
 
         $this->cleanupFiles([$filename]);
 
-        $result = $adapter->push($producer);
+        $result = $adapter->push($task);
 
         $this->assertIsBool($result);
         $this->assertTrue($result);
@@ -446,8 +440,8 @@ class QueueTest extends TestCase
 
         // Note: Rapid successive pushes cause UUID collision in Str::uuid()
         // Testing single push verifies the adapter works correctly
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
+        $task = $this->createBasicJob("database");
+        $result = $adapter->push($task);
         $this->assertTrue($result);
     }
 
@@ -457,13 +451,13 @@ class QueueTest extends TestCase
     public function test_beanstalkd_adapter_can_push_job(): void
     {
         $adapter = $this->getAdapter("beanstalkd");
-        $producer = $this->createBasicJob("beanstalkd");
-        $filename = $this->getProducerFilePath("beanstalkd");
+        $task = $this->createBasicJob("beanstalkd");
+        $filename = $this->getTaskFilePath("beanstalkd");
 
         $this->cleanupFiles([$filename]);
 
         try {
-            $result = $adapter->push($producer);
+            $result = $adapter->push($task);
             $this->assertTrue($result);
         } catch (\Exception $e) {
             $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
@@ -478,13 +472,13 @@ class QueueTest extends TestCase
     public function test_beanstalkd_adapter_can_process_queued_jobs(): void
     {
         $adapter = $this->getAdapter("beanstalkd");
-        $producer = $this->createBasicJob("beanstalkd");
-        $filename = $this->getProducerFilePath("beanstalkd");
+        $task = $this->createBasicJob("beanstalkd");
+        $filename = $this->getTaskFilePath("beanstalkd");
 
         $this->cleanupFiles([$filename]);
 
         try {
-            $adapter->push($producer);
+            $adapter->push($task);
             $adapter->run();
 
             $this->assertFileExists($filename);
@@ -502,17 +496,17 @@ class QueueTest extends TestCase
     public function test_beanstalkd_adapter_respects_queue_configuration(): void
     {
         $adapter = $this->getAdapter("beanstalkd");
-        $filename = $this->getProducerFilePath("beanstalkd");
+        $filename = $this->getTaskFilePath("beanstalkd");
 
         $this->cleanupFiles([$filename]);
 
         try {
             $adapter->setQueue("custom-beanstalkd-queue");
-            $adapter->setTries(2);
-            $adapter->setSleep(1);
+            $adapter->setTries(1);
+            $adapter->setSleep(0);
 
-            $producer = $this->createBasicJob("beanstalkd");
-            $result = $adapter->push($producer);
+            $task = $this->createBasicJob("beanstalkd");
+            $result = $adapter->push($task);
 
             $this->assertTrue($result);
         } catch (\Exception $e) {
@@ -537,14 +531,14 @@ class QueueTest extends TestCase
      */
     public function test_redis_adapter_can_push_job(): void
     {
-        $filename = $this->getProducerFilePath("redis");
+        $filename = $this->getTaskFilePath("redis");
         $this->cleanupFiles([$filename]);
 
         try {
             $adapter = $this->getAdapter("redis");
-            $producer = $this->createBasicJob("redis");
+            $task = $this->createBasicJob("redis");
 
-            $result = $adapter->push($producer);
+            $result = $adapter->push($task);
             $this->assertTrue($result);
 
             // Verify queue size increased
@@ -562,7 +556,7 @@ class QueueTest extends TestCase
      */
     public function test_redis_adapter_can_process_queued_jobs(): void
     {
-        $filename = $this->getProducerFilePath("redis");
+        $filename = $this->getTaskFilePath("redis");
         $this->cleanupFiles([$filename]);
 
         try {
@@ -571,8 +565,8 @@ class QueueTest extends TestCase
             // Flush the queue first to ensure clean state
             $adapter->flush();
 
-            $producer = $this->createBasicJob("redis");
-            $adapter->push($producer);
+            $task = $this->createBasicJob("redis");
+            $adapter->push($task);
             $adapter->run();
 
             $this->assertFileExists($filename);
@@ -589,17 +583,17 @@ class QueueTest extends TestCase
      */
     public function test_redis_adapter_respects_queue_configuration(): void
     {
-        $filename = $this->getProducerFilePath("redis");
+        $filename = $this->getTaskFilePath("redis");
         $this->cleanupFiles([$filename]);
 
         try {
             $adapter = $this->getAdapter("redis");
             $adapter->setQueue("custom-redis-queue");
-            $adapter->setTries(2);
-            $adapter->setSleep(1);
+            $adapter->setTries(1);
+            $adapter->setSleep(0);
 
-            $producer = $this->createBasicJob("redis");
-            $result = $adapter->push($producer);
+            $task = $this->createBasicJob("redis");
+            $result = $adapter->push($task);
 
             $this->assertTrue($result);
 
@@ -626,8 +620,8 @@ class QueueTest extends TestCase
             $initialSize = $adapter->size();
             $this->assertEquals(0, $initialSize);
 
-            $producer = $this->createBasicJob("redis");
-            $adapter->push($producer);
+            $task = $this->createBasicJob("redis");
+            $adapter->push($task);
 
             $newSize = $adapter->size();
             $this->assertEquals(1, $newSize);
@@ -647,8 +641,8 @@ class QueueTest extends TestCase
         try {
             $adapter = $this->getAdapter("redis");
 
-            $producer = $this->createBasicJob("redis");
-            $adapter->push($producer);
+            $task = $this->createBasicJob("redis");
+            $adapter->push($task);
 
             $this->assertGreaterThanOrEqual(1, $adapter->size());
 
@@ -671,7 +665,7 @@ class QueueTest extends TestCase
     public function test_can_set_retry_attempts(): void
     {
         $adapter = $this->getAdapter("sync");
-        $adapter->setTries(5);
+        $adapter->setTries(1);
 
         $this->assertInstanceOf(SyncAdapter::class, $adapter);
     }
@@ -679,7 +673,7 @@ class QueueTest extends TestCase
     public function test_can_set_sleep_delay(): void
     {
         $adapter = $this->getAdapter("sync");
-        $adapter->setSleep(10);
+        $adapter->setSleep(00);
 
         $this->assertInstanceOf(SyncAdapter::class, $adapter);
     }
@@ -688,8 +682,8 @@ class QueueTest extends TestCase
     {
         $adapter = $this->getAdapter("sync");
         $adapter->setQueue("test-queue");
-        $adapter->setTries(3);
-        $adapter->setSleep(5);
+        $adapter->setTries(1);
+        $adapter->setSleep(0);
 
         $this->assertInstanceOf(SyncAdapter::class, $adapter);
     }
@@ -711,7 +705,7 @@ class QueueTest extends TestCase
     public function test_can_set_tries_for_all_adapters(string $connection): void
     {
         $adapter = $this->getAdapter($connection);
-        $adapter->setTries(3);
+        $adapter->setTries(1);
 
         $this->assertNotNull($adapter);
     }
@@ -722,7 +716,7 @@ class QueueTest extends TestCase
     public function test_can_set_sleep_for_all_adapters(string $connection): void
     {
         $adapter = $this->getAdapter($connection);
-        $adapter->setSleep(5);
+        $adapter->setSleep(0);
 
         $this->assertNotNull($adapter);
     }
@@ -730,12 +724,12 @@ class QueueTest extends TestCase
     public function test_sync_adapter_processes_immediately(): void
     {
         $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
+        $filename = $this->getTaskFilePath("sync");
 
         $this->cleanupFiles([$filename]);
 
-        $producer = $this->createBasicJob("sync");
-        $result = $adapter->push($producer);
+        $task = $this->createBasicJob("sync");
+        $result = $adapter->push($task);
 
         $this->assertTrue($result);
         $this->assertFileExists($filename);
@@ -747,14 +741,14 @@ class QueueTest extends TestCase
     public function test_sync_adapter_executes_without_delay(): void
     {
         $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
+        $filename = $this->getTaskFilePath("sync");
 
         $this->cleanupFiles([$filename]);
 
         $startTime = microtime(true);
-        $producer = $this->createBasicJob("sync");
-        $producer->setDelay(0);
-        $adapter->push($producer);
+        $task = $this->createBasicJob("sync");
+        $task->setDelay(0);
+        $adapter->push($task);
         $endTime = microtime(true);
 
         $executionTime = $endTime - $startTime;
@@ -767,17 +761,17 @@ class QueueTest extends TestCase
     public function test_sync_adapter_can_process_multiple_jobs(): void
     {
         $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
+        $filename = $this->getTaskFilePath("sync");
 
         $this->cleanupFiles([$filename]);
 
-        $producer1 = $this->createBasicJob("sync");
-        $producer2 = $this->createBasicJob("sync");
+        $task1 = $this->createBasicJob("sync");
+        $task2 = $this->createBasicJob("sync");
 
-        $result1 = $adapter->push($producer1);
+        $result1 = $adapter->push($task1);
         $this->assertTrue($result1);
 
-        $result2 = $adapter->push($producer2);
+        $result2 = $adapter->push($task2);
         $this->assertTrue($result2);
 
         $this->assertFileExists($filename);
@@ -787,29 +781,25 @@ class QueueTest extends TestCase
 
     public function test_database_adapter_stores_job_in_database(): void
     {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-
         $this->cleanQueuesTable();
 
         $adapter = $this->getAdapter("database");
         $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
 
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
+        $task = $this->createBasicJob("database");
+        $result = $adapter->push($task);
 
         $this->assertTrue($result);
     }
 
     public function test_database_adapter_can_push_multiple_jobs(): void
     {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-
         $this->cleanQueuesTable();
 
         $adapter = $this->getAdapter("database");
 
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
+        $task = $this->createBasicJob("database");
+        $result = $adapter->push($task);
         $this->assertTrue($result);
 
         // Note: Pushing multiple jobs rapidly causes UUID collision in Str::uuid()
@@ -819,8 +809,6 @@ class QueueTest extends TestCase
 
     public function test_database_adapter_stores_job_with_queue_name(): void
     {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-
         $this->cleanQueuesTable();
 
         // Note: setQueue() is not implemented in QueueAdapter base class,
@@ -830,8 +818,8 @@ class QueueTest extends TestCase
         // Setting queue doesn't actually work in current implementation
         // $adapter->setQueue("test-queue-name");
 
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
+        $task = $this->createBasicJob("database");
+        $result = $adapter->push($task);
 
         $this->assertTrue($result, "Push operation should return true");
 
@@ -854,8 +842,8 @@ class QueueTest extends TestCase
         // setQueue doesn't work in current implementation
         // $adapter->setQueue("structure-test-queue");
 
-        $producer = $this->createBasicJob("database");
-        $adapter->push($producer);
+        $task = $this->createBasicJob("database");
+        $adapter->push($task);
 
         $job = Database::table('queues')
             ->where('queue', 'default')

@@ -7,14 +7,12 @@ use PHPUnit\Framework\TestCase;
 
 class HttpClientTest extends TestCase
 {
-    // ==================== GET Method Tests ====================
-
     public function test_get_method_fails_with_invalid_domain()
     {
-        $http = new HttpClient();
-        $response = $http->get("https://www.oogle.com");
+        $this->expectException(\Bow\Http\Client\HttpClientException::class);
 
-        $this->assertEquals(503, $response->statusCode());
+        $http = new HttpClient();
+        $http->get("https://invalid-domain.invalid");
     }
 
     public function test_get_method_succeeds_with_valid_url()

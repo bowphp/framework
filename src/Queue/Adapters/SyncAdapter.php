@@ -28,27 +28,32 @@ class SyncAdapter extends QueueAdapter
     }
 
     /**
-     * Queue a job and execute it immediately (synchronously)
+     * Queue a task and execute it immediately (synchronously)
      *
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return bool
      */
-    public function push(QueueTask $job): bool
+    public function push(QueueTask $task): bool
     {
+        $task->setId($this->generateId());
+
         try {
-            if (!method_exists($job, 'process')) {
-                throw new \RuntimeException('Job does not have a process or handle method.');
+            if (!method_exists($task, 'process')) {
+                throw new \RuntimeException('Task does not have a process or handle method.');
             }
-            error_log('Processing job: ' . get_class($job) . ' with ID: ' . (method_exists($job, 'getId') ? $job->getId() : 'unknown'));
-            $job->process();
+            $this->logProcesingTask($task);
+
+            $task->process();
+
+            $this->logProcessedTask($task);
         } catch (\Throwable $e) {
             // Optionally log or handle error
-            error_log('Job failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->logFailedTask($task, $e);
             throw $e;
         }
 
-        if (method_exists($job, 'getDelay')) {
-            $this->sleep($job->getDelay());
+        if (method_exists($task, 'getDelay')) {
+            $this->sleep($task->getDelay());
         }
 
         return true;

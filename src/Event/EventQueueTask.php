@@ -18,7 +18,6 @@ class EventQueueTask extends QueueTask
         private EventListener|EventShouldQueue $event,
         private mixed $payload = null,
     ) {
-        parent::__construct();
     }
 
     /**

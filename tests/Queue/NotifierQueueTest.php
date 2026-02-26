@@ -52,7 +52,10 @@ class NotifierQueueTest extends TestCase
         $context->sendMessage($message);
     }
 
-    public function test_can_send_message_to_queue(): void
+    /**
+     * @dataProvider getConnection
+     */
+    public function test_can_send_message_to_queue(string $connection): void
     {
         // Use real objects for queue tests (mock objects don't serialize)
         $context = new TestNotifiableModel();
@@ -64,11 +67,14 @@ class NotifierQueueTest extends TestCase
         $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to queue and verify
-        $result = static::$connection->setConnection("beanstalkd")->getAdapter()->push($producer);
+        $result = static::$connection->setConnection($connection)->getAdapter()->push($producer);
         $this->assertTrue($result);
     }
 
-    public function test_can_send_message_to_specific_queue(): void
+    /**
+     * @dataProvider getConnection
+     */
+    public function test_can_send_message_to_specific_queue(string $connection): void
     {
         $queue = 'high-priority';
         $context = new TestNotifiableModel();
@@ -80,14 +86,17 @@ class NotifierQueueTest extends TestCase
         $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to specific queue and verify
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
         $adapter->setQueue($queue);
         $result = $adapter->push($producer);
 
         $this->assertTrue($result);
     }
 
-    public function test_can_send_message_with_delay(): void
+    /**
+     * @dataProvider getConnection
+     */
+    public function test_can_send_message_with_delay(string $connection): void
     {
         $delay = 3600;
         $context = new TestNotifiableModel();
@@ -99,14 +108,17 @@ class NotifierQueueTest extends TestCase
         $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to queue with delay and verify
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
         $adapter->setSleep($delay);
         $result = $adapter->push($producer);
 
         $this->assertTrue($result);
     }
 
-    public function test_can_send_message_with_delay_on_specific_queue(): void
+    /**
+     * @dataProvider getConnection
+     */
+    public function test_can_send_message_with_delay_on_specific_queue(string $connection): void
     {
         $delay = 3600;
         $queue = 'delayed-notifications';
@@ -119,11 +131,37 @@ class NotifierQueueTest extends TestCase
         $this->assertInstanceOf(NotifierQueueTask::class, $producer);
 
         // Push to specific queue with delay and verify
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
         $adapter->setQueue($queue);
         $adapter->setSleep($delay);
         $result = $adapter->push($producer);
 
         $this->assertTrue($result);
+    }
+
+    /**
+     * Get the connection data
+     *
+     * @return array
+     */
+    public function getConnection(): array
+    {
+        $data = [
+            ["beanstalkd"],
+            ["database"],
+            ["redis"],
+            ["rabbitmq"],
+            ["sync"],
+        ];
+
+        if (getenv("AWS_SQS_URL")) {
+            $data[] = ["sqs"];
+        }
+
+        if (extension_loaded('rdkafka')) {
+            $data[] = ["kafka"];
+        }
+
+        return $data;
     }
 }

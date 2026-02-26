@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\QueueTask;
+use Throwable;
 
 abstract class QueueAdapter
 {
@@ -63,33 +64,33 @@ abstract class QueueAdapter
     abstract public function configure(array $config): QueueAdapter;
 
     /**
-     * Push new job
+     * Push new task
      *
-     * @param QueueTask $job
+     * @param QueueTask $task
      * @return bool
      */
-    abstract public function push(QueueTask $job): bool;
+    abstract public function push(QueueTask $task): bool;
 
     /**
-     * Create job serialization
+     * Create task serialization
      *
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return string
      */
-    public function serializeProducer(QueueTask $job): string
+    public function serializeProducer(QueueTask $task): string
     {
-        return serialize($job);
+        return serialize($task);
     }
 
     /**
-     * Create job unserialize
+     * Create task unserialize
      *
-     * @param  string $job
+     * @param  string $task
      * @return QueueTask
      */
-    public function unserializeProducer(string $job): QueueTask
+    public function unserializeProducer(string $task): QueueTask
     {
-        return unserialize($job);
+        return unserialize($task);
     }
 
     /**
@@ -138,7 +139,7 @@ abstract class QueueAdapter
      */
     final public function work(int $timeout, int $memory): void
     {
-        [$this->processing_timeout, $jobs_processed] = [time() + $timeout, 0];
+        [$this->processing_timeout, $tasks_processed] = [time() + $timeout, 0];
 
         if ($this->supportsAsyncSignals()) {
             $this->listenForSignals();
@@ -151,7 +152,7 @@ abstract class QueueAdapter
                 $this->run($this->queue);
             } finally {
                 $this->sleep($this->sleep);
-                $jobs_processed++;
+                $tasks_processed++;
             }
 
             if ($this->timeoutReached($timeout)) {
@@ -235,7 +236,7 @@ abstract class QueueAdapter
     }
 
     /**
-     * Set job tries
+     * Set task tries
      *
      * @param  int $tries
      * @return void
@@ -246,7 +247,7 @@ abstract class QueueAdapter
     }
 
     /**
-     * Get job tries
+     * Get task tries
      *
      * @return int
      */
@@ -310,12 +311,63 @@ abstract class QueueAdapter
     }
 
     /**
-     * Generate the job id
+     * Log an error
+     *
+     * @param  Throwable $exception
+     * @return void
+     */
+    protected function logError(Throwable $exception): void
+    {
+        error_log($exception->getMessage());
+
+        try {
+            logger()->error($exception->getMessage(), $exception->getTrace());
+        } catch (Throwable $loggerException) {
+            // Logger not available, already logged to error_log
+        }
+    }
+
+    /**
+     * Generate the task id
      *
      * @return string
      */
     final protected function generateId(): string
     {
         return md5(uniqid((string) time(), true) . bin2hex(random_bytes(10)) . str_uuid() . microtime(true));
+    }
+
+    /**
+     * Log processing task
+     *
+     * @param QueueTask $task
+     * @return void
+     */
+    final protected function logProcesingTask(QueueTask $task): void
+    {
+        error_log('Processing task: ' . get_class($task) . ' with ID: ' . $task->getId());
+    }
+
+    /**
+     * Log processed task
+     *
+     * @param QueueTask $task
+     * @return void
+     */
+    final protected function logProcessedTask(QueueTask $task): void
+    {
+        error_log('Processed task: ' . get_class($task) . ' with ID: ' . $task->getId());
+    }
+
+    /**
+     * Log failed task
+     *
+     * @param QueueTask $task
+     * @param \Throwable $e
+     * @return void
+     */
+    final protected function logFailedTask(QueueTask $task, \Throwable $e): void
+    {
+        error_log('Task failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
     }
 }
