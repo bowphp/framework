@@ -129,4 +129,92 @@ class RouteTest extends \PHPUnit\Framework\TestCase
             ->withDomain('sub.example.com');
         $this->assertFalse($route->match('/foo/other', 'sub.example.com'));
     }
+
+    public function testRouteCapturesSubdomainParameter()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain(':sub.example.com');
+        $this->assertTrue($route->match('/foo/bar', 'app.example.com'));
+        $this->assertEquals('app', $route->getParameter('sub'));
+    }
+
+    public function testRouteCapturesMultipleDomainParameters()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain(':sub.:env.example.com');
+        $this->assertTrue($route->match('/foo/bar', 'api.dev.example.com'));
+        $this->assertEquals('api', $route->getParameter('sub'));
+        $this->assertEquals('dev', $route->getParameter('env'));
+    }
+
+    public function testRouteDoesNotMatchIfDomainParameterWrong()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain(':sub.example.com');
+        $this->assertFalse($route->match('/foo/bar', 'example.com'));
+        $this->assertNull($route->getParameter('sub'));
+    }
+
+    public function testRouteDomainParameterWithWildcard()
+    {
+        $route = (new Route('/foo/bar', fn() => 'ok'))
+            ->withDomain(':sub.*.example.com');
+        $this->assertTrue($route->match('/foo/bar', 'app.api.example.com'));
+        $this->assertEquals('app', $route->getParameter('sub'));
+    }
+
+
+    public function test_angle_bracket_param_in_path()
+    {
+        $route = new Route('/foo/<bar>', function ($bar) {
+            return $bar;
+        });
+        $this->assertTrue($route->match('/foo/baz'));
+        $this->assertEquals('baz', $route->call());
+    }
+
+    public function test_angle_bracket_multiple_params_in_path()
+    {
+        $route = new Route('/<foo>/<bar>', function ($foo, $bar) {
+            return [$foo, $bar];
+        });
+        $this->assertTrue($route->match('/one/two'));
+        $this->assertEquals(['one', 'two'], $route->call());
+    }
+
+    public function test_angle_bracket_optional_param_in_path()
+    {
+        $route = new Route('/foo/<bar>?', function ($bar = null) {
+            return $bar ?? 'none';
+        });
+        $this->assertTrue($route->match('/foo'));
+        $this->assertEquals('none', $route->call());
+        $this->assertTrue($route->match('/foo/baz'));
+        $this->assertEquals('baz', $route->call());
+    }
+
+    public function test_angle_bracket_param_in_domain()
+    {
+        $route = (new Route('/foo', fn() => 'ok'))
+            ->withDomain('<sub>.example.com');
+        $this->assertTrue($route->match('/foo', 'app.example.com'));
+        $this->assertEquals('app', $route->getParameter('sub'));
+    }
+
+    public function test_angle_bracket_multiple_params_in_domain()
+    {
+        $route = (new Route('/foo', fn() => 'ok'))
+            ->withDomain('<sub>.<env>.example.com');
+        $this->assertTrue($route->match('/foo', 'api.dev.example.com'));
+        $this->assertEquals('api', $route->getParameter('sub'));
+        $this->assertEquals('dev', $route->getParameter('env'));
+    }
+
+    public function test_angle_bracket_param_with_wildcard_in_domain()
+    {
+        $route = (new Route('/foo', fn() => 'ok'))
+            ->withDomain('<sub>.*.example.com');
+        $this->assertTrue($route->match('/foo', 'app.api.example.com'));
+        $this->assertEquals('app', $route->getParameter('sub'));
+    }
 }

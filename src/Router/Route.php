@@ -123,12 +123,13 @@ class Route
     /**
      * Set the domain pattern for the route
      *
-     * @param string $domainPattern
+     * @param string $domain_pattern
      * @return $this
      */
-    public function withDomain(string $domainPattern): self
+    public function withDomain(string $domain_pattern): self
     {
-        $this->domain = $domainPattern;
+        $this->domain = $domain_pattern;
+
         return $this;
     }
 
@@ -185,7 +186,7 @@ class Route
     {
         $this->name = $name;
 
-        $routes = (array)$this->config['app.routes'];
+        $routes = (array) $this->config['app.routes'];
 
         $this->config['app.routes'] = array_merge(
             $routes,
