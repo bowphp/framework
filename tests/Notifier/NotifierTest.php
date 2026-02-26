@@ -12,6 +12,7 @@ use Bow\Mail\Mail;
 use PHPUnit\Framework\TestCase;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Database\Stubs\MigrationExtendedStub;
+use Bow\Tests\Notifier\Stubs\MockChannelAdapter;
 use Bow\Tests\Notifier\Stubs\TestNotifier;
 use PHPUnit\Framework\MockObject\MockObject;
 use Bow\Tests\Notifier\Stubs\TestNotifiableModel;
@@ -39,6 +40,13 @@ class NotifierTest extends TestCase
             $table->addDatetime('read_at', ['nullable' => true]);
             $table->addTimestamps();
         }, false);
+
+        // Mock external notification channels to avoid requiring real credentials
+        Notifier::pushChannels([
+            'telegram' => MockChannelAdapter::class,
+            'slack' => MockChannelAdapter::class,
+            'sms' => MockChannelAdapter::class,
+        ]);
     }
 
     protected function setUp(): void

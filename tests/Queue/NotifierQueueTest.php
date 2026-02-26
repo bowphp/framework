@@ -7,10 +7,12 @@ use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\MailConfiguration;
+use Bow\Notifier\Notifier;
 use Bow\Notifier\NotifierQueueTask;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\Tests\Notifier\Stubs\MockChannelAdapter;
 use Bow\Tests\Notifier\Stubs\TestNotifier;
 use Bow\Tests\Notifier\Stubs\TestNotifiableModel;
 use Bow\View\ViewConfiguration;
@@ -36,6 +38,20 @@ class NotifierQueueTest extends TestCase
         $config->boot();
 
         static::$connection = new QueueConnection($config["queue"]);
+
+        // Mock external notification channels to avoid requiring real credentials
+        Notifier::pushChannels([
+            'mail' => MockChannelAdapter::class,
+            'telegram' => MockChannelAdapter::class,
+            'slack' => MockChannelAdapter::class,
+            'sms' => MockChannelAdapter::class,
+        ]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        MockChannelAdapter::reset();
     }
 
     public function test_can_send_message_synchronously(): void
@@ -140,26 +156,24 @@ class NotifierQueueTest extends TestCase
     }
 
     /**
-     * Get the connection data
-     *
-     * @return array
+     * @return array<string, array{string}>
      */
-    public function getConnection(): array
+    public static function getConnection(): array
     {
         $data = [
-            ["beanstalkd"],
-            ["database"],
-            ["redis"],
-            ["rabbitmq"],
-            ["sync"],
+            "beanstalkd" => ["beanstalkd"],
+            "database" => ["database"],
+            "redis" => ["redis"],
+            "rabbitmq" => ["rabbitmq"],
+            "sync" => ["sync"],
         ];
 
         if (getenv("AWS_SQS_URL")) {
-            $data[] = ["sqs"];
+            $data["sqs"] = ["sqs"];
         }
 
         if (extension_loaded('rdkafka')) {
-            $data[] = ["kafka"];
+            $data["kafka"] = ["kafka"];
         }
 
         return $data;
