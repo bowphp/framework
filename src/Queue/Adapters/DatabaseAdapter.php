@@ -174,7 +174,7 @@ class DatabaseAdapter extends QueueAdapter
      */
     private function executeTask(QueueTask $task, stdClass $item): void
     {
-        $this->logProcesingTask($task);
+        $this->logProcessingTask($task);
         if (!method_exists($task, 'process')) {
             throw new \RuntimeException('Job does not have a process or handle method.');
         }

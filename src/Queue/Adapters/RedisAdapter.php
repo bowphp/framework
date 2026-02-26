@@ -194,7 +194,7 @@ class RedisAdapter extends QueueAdapter
      */
     private function executeTask(QueueTask $task): void
     {
-        $this->logProcesingTask($task);
+        $this->logProcessingTask($task);
 
         $task->process();
 

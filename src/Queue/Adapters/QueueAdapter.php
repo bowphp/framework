@@ -56,6 +56,24 @@ abstract class QueueAdapter
     protected int $sleep = 0;
 
     /**
+     * Whether to suppress logging (useful for testing)
+     *
+     * @var bool
+     */
+    protected static bool $suppressLogging = false;
+
+    /**
+     * Enable or disable logging suppression
+     *
+     * @param bool $suppress
+     * @return void
+     */
+    public static function suppressLogging(bool $suppress = true): void
+    {
+        static::$suppressLogging = $suppress;
+    }
+
+    /**
      * Make adapter configuration
      *
      * @param  array $config
@@ -343,8 +361,12 @@ abstract class QueueAdapter
      * @param QueueTask $task
      * @return void
      */
-    final protected function logProcesingTask(QueueTask $task): void
+    protected function logProcessingTask(QueueTask $task): void
     {
+        if (static::$suppressLogging) {
+            return;
+        }
+
         error_log('Processing task: ' . get_class($task) . ' with ID: ' . $task->getId());
     }
 
@@ -354,8 +376,11 @@ abstract class QueueAdapter
      * @param QueueTask $task
      * @return void
      */
-    final protected function logProcessedTask(QueueTask $task): void
+    protected function logProcessedTask(QueueTask $task): void
     {
+        if (static::$suppressLogging) {
+            return;
+        }
         error_log('Processed task: ' . get_class($task) . ' with ID: ' . $task->getId());
     }
 
@@ -366,8 +391,11 @@ abstract class QueueAdapter
      * @param \Throwable $e
      * @return void
      */
-    final protected function logFailedTask(QueueTask $task, \Throwable $e): void
+    protected function logFailedTask(QueueTask $task, \Throwable $e): void
     {
+        if (static::$suppressLogging) {
+            return;
+        }
         error_log('Task failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
     }
 }

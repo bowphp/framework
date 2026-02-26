@@ -8,6 +8,7 @@ use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Event\EventQueueTask;
 use Bow\Mail\MailConfiguration;
+use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Connection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -24,6 +25,9 @@ class EventQueueTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        // Suppress queue task logging during tests
+        QueueAdapter::suppressLogging(true);
+
         TestingConfiguration::withConfigurations([
             CacheConfiguration::class,
             QueueConfiguration::class,

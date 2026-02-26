@@ -167,7 +167,7 @@ class SQSAdapter extends QueueAdapter
 
         try {
             $task = $this->unserializeProducer(base64_decode($message["Body"]));
-            $this->logProcesingTask($task);
+            $this->logProcessingTask($task);
             $task->process();
             $this->logProcessedTask($task);
             $this->deleteMessage($message);

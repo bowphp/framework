@@ -82,12 +82,11 @@ class RabbitMQAdapter extends QueueAdapter
         $callback = function ($msg) {
             $task = $this->unserializeProducer($msg->body);
             try {
-                $this->logProcesingTask($task);
-                if (method_exists($task, 'process')) {
-                    $task->process();
-                } else {
+                $this->logProcessingTask($task);
+                if (!method_exists($task, 'process')) {
                     throw new \RuntimeException('Task does not have a process or handle method.');
                 }
+                $task->process();
                 $this->logProcessedTask($task);
                 $msg->ack();
             } catch (\Throwable $e) {

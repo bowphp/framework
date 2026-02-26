@@ -213,7 +213,7 @@ class KafkaAdapter extends QueueAdapter
         try {
             $task = $this->unserializeProducer($message->payload);
 
-            $this->logProcesingTask($task);
+            $this->logProcessingTask($task);
 
             if (method_exists($task, 'process')) {
                 $task->process();

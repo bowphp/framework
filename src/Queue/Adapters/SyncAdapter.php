@@ -41,7 +41,7 @@ class SyncAdapter extends QueueAdapter
             if (!method_exists($task, 'process')) {
                 throw new \RuntimeException('Task does not have a process or handle method.');
             }
-            $this->logProcesingTask($task);
+            $this->logProcessingTask($task);
 
             $task->process();
 
