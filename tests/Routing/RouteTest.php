@@ -94,21 +94,21 @@ class RouteTest extends \PHPUnit\Framework\TestCase
     }
 
 
-    public function testRouteMatchesDomainAndPath()
+    public function test_route_matches_domain_and_path()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain('sub.example.com');
         $this->assertTrue($route->match('/foo/bar', 'sub.example.com'));
     }
 
-    public function testRouteDoesNotMatchWrongDomain()
+    public function test_route_does_not_match_wrong_domain()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain('sub.example.com');
         $this->assertFalse($route->match('/foo/bar', 'other.example.com'));
     }
 
-    public function testRouteMatchesWildcardDomain()
+    public function test_route_matches_wildcard_domain()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain('*.example.com');
@@ -117,20 +117,20 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($route->match('/foo/bar', 'example.com'));
     }
 
-    public function testRouteMatchesWithoutDomainConstraint()
+    public function test_route_matches_without_domain_constraint()
     {
         $route = new Route('/foo/bar', fn() => 'ok');
         $this->assertTrue($route->match('/foo/bar', 'any.domain.com'));
     }
 
-    public function testRouteDoesNotMatchIfPathWrongEvenIfDomainMatches()
+    public function test_route_does_not_match_if_path_wrong_even_if_domain_matches()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain('sub.example.com');
         $this->assertFalse($route->match('/foo/other', 'sub.example.com'));
     }
 
-    public function testRouteCapturesSubdomainParameter()
+    public function test_route_captures_subdomain_parameter()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain(':sub.example.com');
@@ -138,7 +138,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('app', $route->getParameter('sub'));
     }
 
-    public function testRouteCapturesMultipleDomainParameters()
+    public function test_route_captures_multiple_domain_parameters()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain(':sub.:env.example.com');
@@ -147,7 +147,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('dev', $route->getParameter('env'));
     }
 
-    public function testRouteDoesNotMatchIfDomainParameterWrong()
+    public function test_route_does_not_match_if_domain_parameter_wrong()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain(':sub.example.com');
@@ -155,7 +155,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($route->getParameter('sub'));
     }
 
-    public function testRouteDomainParameterWithWildcard()
+    public function test_route_domain_parameter_with_wildcard()
     {
         $route = (new Route('/foo/bar', fn() => 'ok'))
             ->withDomain(':sub.*.example.com');
@@ -184,7 +184,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 
     public function test_angle_bracket_optional_param_in_path()
     {
-        $route = new Route('/foo/<bar>?', function ($bar = null) {
+        $route = new Route('/foo/<bar?>', function ($bar = null) {
             return $bar ?? 'none';
         });
         $this->assertTrue($route->match('/foo'));

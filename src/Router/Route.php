@@ -84,7 +84,7 @@ class Route
     {
         $this->config = Loader::getInstance();
         $this->callback = $callback;
-        $this->path = str_replace('.', '\\.', $path);
+        $this->path = $path;
         $this->match = [];
     }
 
@@ -159,7 +159,8 @@ class Route
     {
         // Association of parameters at the request
         foreach ($this->keys as $key => $value) {
-            if (!isset($this->match[$key])) {
+            if (!isset($this->match[$key]) || $this->match[$key] === null) {
+                $this->params[$value] = null;
                 continue;
             }
 
@@ -173,7 +174,10 @@ class Route
             $this->match[$key] = $tmp;
         }
 
-        return Compass::getInstance()->call($this->callback, $this->match);
+        // Filter out null values before passing to Compass
+        $args = array_filter($this->match, fn($v) => $v !== null);
+
+        return Compass::getInstance()->call($this->callback, $args);
     }
 
     /**
@@ -246,12 +250,31 @@ class Route
      */
     public function match(string $uri, ?string $host = null): bool
     {
-        // If a domain constraint is set, check the host
+        // If a domain constraint is set, check the host and capture params
         if ($this->domain !== null && $host !== null) {
-            // Convert domain pattern to regex (support wildcards like *.example.com)
-            $pattern = str_replace(['.', '*'], ['\\.', '.*'], $this->domain);
-            if (!preg_match('/^' . $pattern . '$/i', $host)) {
+            $domain_param_names = [];
+            $domain_pattern = $this->domain;
+            // Build regex for domain with parameter capture (supports :param and <param>)
+            $domain_pattern = preg_replace_callback(
+                '/(:([a-zA-Z0-9_]+)|<([a-zA-Z0-9_]+)>)/',
+                function ($m) use (&$domain_param_names) {
+                    $name = $m[2] !== '' ? $m[2] : $m[3];
+                    $domain_param_names[] = $name;
+                    return '([^.]+)';
+                },
+                $domain_pattern
+            );
+            // Escape dots and handle wildcards
+            $domain_pattern = str_replace(['.', '*'], ['\\.', '[^.]+'], $domain_pattern);
+            if (!preg_match('~^' . $domain_pattern . '$~i', $host, $domain_matches)) {
                 return false;
+            }
+            // Store domain params
+            array_shift($domain_matches);
+            foreach ($domain_param_names as $i => $name) {
+                if (isset($domain_matches[$i])) {
+                    $this->params[$name] = $domain_matches[$i];
+                }
             }
         }
 
@@ -270,34 +293,59 @@ class Route
             return true;
         }
 
-        // We check the length of the path defined by the programmer
-        // with that of the current url in the user's browser.
-        $path = implode('', preg_split('/(\/:[a-z0-9-_]+\?)/', $this->path));
-
-        if (count(explode('/', $path)) != count(explode('/', $uri))) {
-            if (count(explode('/', $this->path)) != count(explode('/', $uri))) {
-                return false;
+        // Check segment count (accounting for optional params)
+        $route_segments = explode('/', trim($this->path, '/'));
+        $uri_segments = explode('/', trim($uri, '/'));
+        $optional_count = 0;
+        foreach ($route_segments as $seg) {
+            if (preg_match('/^(:[a-zA-Z0-9_]+\?|<[a-zA-Z0-9_]+\?>)$/', $seg)) {
+                $optional_count++;
             }
         }
+        $route_required = count($route_segments) - $optional_count;
+        $uri_count = count($uri_segments);
+        if ($uri_count < $route_required || $uri_count > count($route_segments)) {
+            return false;
+        }
 
-        // Copied of url
-        $path = $uri;
-
-        // In case the developer did not add of constraint on captured variables
+        // Robust regex builder for path parameters (supports :param, <param>, optional, required)
         if (empty($this->with)) {
-            $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
-
-            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
-
-            $this->keys = end($this->keys);
-
-            return $this->checkRequestUri($path, $uri);
+            $param_names = [];
+            $regex_parts = [];
+            foreach ($route_segments as $seg) {
+                /** Optional :param? or <param?> */
+                if (preg_match('/^:([a-zA-Z0-9_]+)\?$/', $seg, $m) || preg_match('/^<([a-zA-Z0-9_]+)\?>$/', $seg, $m)) {
+                    $param_names[] = $m[1];
+                    $regex_parts[] = '(?:/([^/]+))?';
+                }
+                // Required :param or <param>
+                elseif (preg_match('/^:([a-zA-Z0-9_]+)$/', $seg, $m) || preg_match('/^<([a-zA-Z0-9_]+)>$/', $seg, $m)) {
+                    $param_names[] = $m[1];
+                    $regex_parts[] = '/([^/]+)';
+                }
+                // Static segment
+                else {
+                    $regex_parts[] = '/' . preg_quote($seg, '~');
+                }
+            }
+            $regex = '~^' . implode('', $regex_parts) . '$~';
+            $this->keys = $param_names;
+            // Build URI with leading slash for matching
+            $normalized_uri = '/' . implode('/', $uri_segments);
+            if (!preg_match($regex, $normalized_uri, $matches)) {
+                return false;
+            }
+            array_shift($matches);
+            // Pad missing optionals with null
+            $matches = array_pad($matches, count($this->keys), null);
+            $this->match = $matches;
+            return true;
         }
 
         // In case the developer has added constraints
         // on the captured variables
         if (!preg_match_all('~:([\w]+)?~', $this->path, $match)) {
-            return $this->checkRequestUri($path, $uri);
+            return $this->checkRequestUri($this->path, $uri);
         }
 
         $tmp_path = $this->path;
