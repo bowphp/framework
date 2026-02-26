@@ -888,6 +888,10 @@ class QueueTest extends TestCase
             $data[] = ["sqs"];
         }
 
+        if (extension_loaded('rdkafka')) {
+            $data[] = ["kafka"];
+        }
+
         return $data;
     }
 }

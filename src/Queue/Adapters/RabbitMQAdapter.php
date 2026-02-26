@@ -7,6 +7,7 @@ namespace Bow\Queue\Adapters;
 use Bow\Queue\QueueTask;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use RuntimeException;
 
 class RabbitMQAdapter extends QueueAdapter
 {
@@ -33,6 +34,10 @@ class RabbitMQAdapter extends QueueAdapter
      */
     public function configure(array $config): QueueAdapter
     {
+        if (!class_exists(AMQPStreamConnection::class)) {
+            throw new RuntimeException("Please install the php-amqplib/php-amqplib package");
+        }
+
         $this->config = $config;
         $host = $config['host'] ?? 'localhost';
         $port = $config['port'] ?? 5672;

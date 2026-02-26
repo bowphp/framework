@@ -47,6 +47,18 @@ return [
         ],
 
         /**
+         * The kafka connection
+         */
+        "kafka" => [
+            'host' => 'localhost',
+            'port' => 9092,
+            'topic' => 'default',
+            'group_id' => 'bow_queue_group',
+            'auto_offset_reset' => 'earliest',
+            'enable_auto_commit' => 'true',
+        ],
+
+        /**
          * The sqs connexion
          */
         "sqs" => [

@@ -8,6 +8,7 @@ use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
 use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Adapters\RedisAdapter;
+use Bow\Queue\Adapters\KafkaAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\RabbitMQAdapter;
@@ -31,6 +32,7 @@ class Connection
         'sync'       => SyncAdapter::class,
         'redis'      => RedisAdapter::class,
         'rabbitmq'   => RabbitMQAdapter::class,
+        'kafka'      => KafkaAdapter::class,
     ];
 
     /**
