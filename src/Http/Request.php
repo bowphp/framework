@@ -279,6 +279,18 @@ class Request
     }
 
     /**
+     * Get the domain of the server.
+     *
+     * @return string
+     */
+    public function domain(): string
+    {
+        $part = explode(':', $this->hostname() ?? '');
+
+        return $part[0] ?? 'unknown';
+    }
+
+    /**
      * Get uri send by client.
      *
      * @return string
@@ -356,15 +368,13 @@ class Request
         $collect = [];
 
         foreach ($files['name'] as $key => $name) {
-            $collect[] = new UploadedFile(
-                [
+            $collect[] = new UploadedFile([
                 'name' => $name,
                 'type' => $files['type'][$key],
                 'size' => $files['size'][$key],
                 'error' => $files['error'][$key],
                 'tmp_name' => $files['tmp_name'][$key],
-                ]
-            );
+            ]);
         }
 
         return new Collection($collect);
@@ -417,11 +427,7 @@ class Request
 
         $content_type = $this->getHeader("content-type");
 
-        if ($content_type && str_contains($content_type, "application/json")) {
-            return true;
-        }
-
-        return false;
+        return $content_type && str_contains($content_type, "application/json");
     }
 
     public function wantsJson(): bool

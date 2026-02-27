@@ -25,8 +25,6 @@ class NotifierQueueTask extends QueueTask
         Model $context,
         Notifier $notifier,
     ) {
-        parent::__construct();
-
         $this->bags = [
             "notifier" => $notifier,
             "context" => $context,

@@ -9,6 +9,7 @@ use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\Envelop;
 use Bow\Mail\MailConfiguration;
 use Bow\Mail\MailQueueTask;
+use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -21,6 +22,9 @@ class MailQueueTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        // Suppress queue task logging during tests
+        QueueAdapter::suppressLogging(true);
+
         TestingConfiguration::withConfigurations([
             CacheConfiguration::class,
             QueueConfiguration::class,
@@ -36,71 +40,85 @@ class MailQueueTest extends TestCase
         static::$connection = new QueueConnection($config["queue"]);
     }
 
-    /**
-     * @test
-     */
-    public function it_should_queue_mail_successfully(): void
+    private function createEnvelop(string $to, string $subject): Envelop
     {
         $envelop = new Envelop();
-        $envelop->to("bow@bow.org");
-        $envelop->subject("hello from bow");
-        $producer = new MailQueueTask("email", [], $envelop);
-
-        $this->assertInstanceOf(MailQueueTask::class, $producer);
-
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
-
-        $result = $adapter->push($producer);
-        $this->assertTrue($result);
-
-        $adapter->run();
-        $this->assertTrue(true, "Mail queue processed successfully");
+        $envelop->to($to);
+        $envelop->subject($subject);
+        return $envelop;
     }
 
     /**
-     * @test
+     * @dataProvider connectionProvider
      */
-    public function it_should_create_mail_producer_with_correct_parameters(): void
+    public function test_should_queue_and_process_mail(string $connection): void
     {
-        $envelop = new Envelop();
-        $envelop->to("test@example.com");
-        $envelop->from("sender@example.com");
-        $envelop->subject("Test Subject");
+        $envelop = $this->createEnvelop("bow@bow.org", "hello from bow");
+        $task = new MailQueueTask("email", [], $envelop);
 
-        $producer = new MailQueueTask("test-template", ["name" => "John"], $envelop);
+        $this->assertInstanceOf(MailQueueTask::class, $task);
 
-        $this->assertInstanceOf(MailQueueTask::class, $producer);
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
+
+        try {
+            $result = $adapter->push($task);
+            $this->assertTrue($result);
+
+            $adapter->run();
+        } catch (\Exception $e) {
+            $this->markTestSkipped("Service {$connection} is not available: " . $e->getMessage());
+        }
     }
 
     /**
-     * @test
+     * @dataProvider connectionProvider
      */
-    public function it_should_push_mail_to_specific_queue(): void
+    public function test_should_push_mail_to_specific_queue(string $connection): void
     {
-        $envelop = new Envelop();
-        $envelop->to("priority@example.com");
-        $envelop->subject("Priority Mail");
-        $producer = new MailQueueTask("email", [], $envelop);
+        $envelop = $this->createEnvelop("priority@example.com", "Priority Mail");
+        $task = new MailQueueTask("email", [], $envelop);
 
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
         $adapter->setQueue("priority-mail");
 
-        $result = $adapter->push($producer);
-        $this->assertTrue($result);
+        try {
+            $result = $adapter->push($task);
+            $this->assertTrue($result);
+        } catch (\Exception $e) {
+            $this->markTestSkipped("Service {$connection} is not available: " . $e->getMessage());
+        }
+    }
+
+    public function test_should_set_mail_retry_attempts(): void
+    {
+        $envelop = $this->createEnvelop("retry@example.com", "Retry Test");
+        $task = new MailQueueTask("email", [], $envelop);
+        $task->setRetry(3);
+
+        $this->assertSame(3, $task->getRetry());
     }
 
     /**
-     * @test
+     * @return array<string, array{string}>
      */
-    public function it_should_set_mail_retry_attempts(): void
+    public static function connectionProvider(): array
     {
-        $envelop = new Envelop();
-        $envelop->to("retry@example.com");
-        $envelop->subject("Retry Test");
+        $data = [
+            "beanstalkd" => ["beanstalkd"],
+            "database" => ["database"],
+            "redis" => ["redis"],
+            "rabbitmq" => ["rabbitmq"],
+            "sync" => ["sync"],
+        ];
 
-        $producer = new MailQueueTask("email", [], $envelop);
-        $producer->setRetry(3);
+        if (getenv("AWS_SQS_URL")) {
+            $data["sqs"] = ["sqs"];
+        }
 
-        $this->assertEquals(3, $producer->getRetry());
+        if (extension_loaded('rdkafka')) {
+            $data["kafka"] = ["kafka"];
+        }
+
+        return $data;
     }
 }

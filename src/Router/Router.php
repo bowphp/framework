@@ -43,6 +43,13 @@ class Router
     protected ?string $special_method = null;
 
     /**
+     * Define the domain constraint for routes
+     *
+     * @var string|null
+     */
+    protected ?string $domain = null;
+
+    /**
      * Method Http current.
      *
      * @var array
@@ -186,6 +193,24 @@ class Router
     }
 
     /**
+     * Add a domain constraint for a group of routes
+     *
+     * @param string $domainPattern
+     * @param callable $cb
+     * @return Router
+     */
+    public function domain(string $domainPattern): Router
+    {
+        $previousDomain = $this->domain;
+
+        $this->domain = $domainPattern;
+
+        $this->domain = $previousDomain;
+
+        return $this;
+    }
+
+    /**
      * Route mapper
      *
      * @param  array $definition
@@ -265,7 +290,7 @@ class Router
      */
     private function routeLoader(string|array $methods, string $path, callable|string|array $cb): Route
     {
-        $methods = (array)$methods;
+        $methods = (array) $methods;
 
         $path = '/' . trim($path, '/');
 
@@ -274,6 +299,10 @@ class Router
 
         // We add the new route
         $route = new Route($path, $cb);
+
+        if ($this->domain) {
+            $route->withDomain($this->domain);
+        }
 
         $route->middleware($this->middlewares);
 

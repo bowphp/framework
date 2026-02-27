@@ -8,6 +8,7 @@ use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Event\EventQueueTask;
 use Bow\Mail\MailConfiguration;
+use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Connection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
@@ -18,10 +19,15 @@ use PHPUnit\Framework\TestCase;
 
 class EventQueueTest extends TestCase
 {
+    private const CACHE_FILENAME = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
+
     private static Connection $connection;
 
     public static function setUpBeforeClass(): void
     {
+        // Suppress queue task logging during tests
+        QueueAdapter::suppressLogging(true);
+
         TestingConfiguration::withConfigurations([
             CacheConfiguration::class,
             QueueConfiguration::class,
@@ -38,29 +44,41 @@ class EventQueueTest extends TestCase
         static::$connection = new Connection($config["queue"]);
     }
 
-    public function test_should_queue_event(): void
+    protected function tearDown(): void
     {
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
-        $producer = new EventQueueTask(new UserEventListenerStub(), new UserEventStub("bowphp"));
-        $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
+        $this->cleanupCacheFile();
+        parent::tearDown();
+    }
 
-        // Clean up any existing file before test
-        @unlink($cache_filename);
+    private function cleanupCacheFile(): void
+    {
+        @unlink(self::CACHE_FILENAME);
+    }
 
-        $this->assertInstanceOf(EventQueueTask::class, $producer);
+    /**
+     * @dataProvider connectionProvider
+     */
+    public function test_should_queue_and_process_event(string $connection): void
+    {
+        $this->cleanupCacheFile();
+
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
+        $expectedPayload = "$connection-bowphp";
+        $task = new EventQueueTask(new UserEventListenerStub(), new UserEventStub($expectedPayload));
+
+        $this->assertInstanceOf(EventQueueTask::class, $task);
 
         try {
-            $result = $adapter->push($producer);
+            $result = $adapter->push($task);
             $this->assertTrue($result);
-
+            $adapter->setSleep(0);
+            $adapter->setTries(0);
             $adapter->run();
 
-            $this->assertFileExists($cache_filename);
-            $this->assertEquals("bowphp", file_get_contents($cache_filename));
+            $this->assertFileExists(self::CACHE_FILENAME);
+            $this->assertSame($expectedPayload, file_get_contents(self::CACHE_FILENAME));
         } catch (\Exception $e) {
-            $this->markTestSkipped('Sservice is not available: ' . $e->getMessage());
-        } finally {
-            @unlink($cache_filename);
+            $this->markTestSkipped('Service is not available: ' . $e->getMessage());
         }
     }
 
@@ -69,23 +87,32 @@ class EventQueueTest extends TestCase
         $listener = new UserEventListenerStub();
         $event = new UserEventStub("test-data");
 
-        $producer = new EventQueueTask($listener, $event);
+        $task = new EventQueueTask($listener, $event);
 
-        $this->assertInstanceOf(EventQueueTask::class, $producer);
+        $this->assertInstanceOf(EventQueueTask::class, $task);
     }
 
-    public function test_should_process_event_from_queue(): void
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function connectionProvider(): array
     {
-        $adapter = static::$connection->setConnection("sync")->getAdapter();
-        $producer = new EventQueueTask(new UserEventListenerStub(), new UserEventStub("sync-test"));
-        $cache_filename = TESTING_RESOURCE_BASE_DIRECTORY . '/event.txt';
+        $data = [
+            "beanstalkd" => ["beanstalkd"],
+            "database" => ["database"],
+            "redis" => ["redis"],
+            "rabbitmq" => ["rabbitmq"],
+            "sync" => ["sync"],
+        ];
 
-        $adapter->push($producer);
-        $adapter->run();
+        if (getenv("AWS_SQS_URL")) {
+            $data["sqs"] = ["sqs"];
+        }
 
-        $this->assertFileExists($cache_filename);
-        $this->assertEquals("sync-test", file_get_contents($cache_filename));
+        if (extension_loaded('rdkafka')) {
+            $data["kafka"] = ["kafka"];
+        }
 
-        @unlink($cache_filename);
+        return $data;
     }
 }

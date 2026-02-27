@@ -61,17 +61,18 @@ abstract class QueueTask
     protected int $attempts = 2;
 
     /**
-     * Worker constructor
+     * Set the task ID
      *
+     * @param  string $id
      * @return void
      */
-    public function __construct()
+    public function setId(string $id)
     {
-        $this->id = str_uuid();
+        $this->id = $id;
     }
 
     /**
-     * Get the worker priority
+     * Get the task priority
      *
      * @return int
      */
@@ -81,7 +82,7 @@ abstract class QueueTask
     }
 
     /**
-     * Get the worker id
+     * Get the task id
      *
      * @return string
      */
@@ -91,7 +92,7 @@ abstract class QueueTask
     }
 
     /**
-     * Get the worker attempts
+     * Get the task attempts
      *
      * @return int
      */
@@ -101,7 +102,7 @@ abstract class QueueTask
     }
 
     /**
-     * Set the worker attempts
+     * Set the task attempts
      *
      * @param  int $attempts
      * @return void
@@ -112,7 +113,7 @@ abstract class QueueTask
     }
 
     /**
-     * Get the worker retry
+     * Get the task retry
      *
      * @return int
      */
@@ -122,7 +123,7 @@ abstract class QueueTask
     }
 
     /**
-     * Set the worker retry
+     * Set the task retry
      *
      * @param  int $retry
      * @return void
@@ -133,7 +134,7 @@ abstract class QueueTask
     }
 
     /**
-     * Get the worker queue
+     * Get the task queue
      *
      * @return string
      */
@@ -143,7 +144,7 @@ abstract class QueueTask
     }
 
     /**
-     * Set the worker queue
+     * Set the task queue
      *
      * @param  string $queue
      * @return void
@@ -154,7 +155,7 @@ abstract class QueueTask
     }
 
     /**
-     * Get the worker delay
+     * Get the task delay
      *
      * @return int
      */
@@ -164,7 +165,7 @@ abstract class QueueTask
     }
 
     /**
-     * Set the worker delay
+     * Set the task delay
      *
      * @param int $delay
      */
@@ -194,7 +195,7 @@ abstract class QueueTask
     }
 
     /**
-     * Delete the job from queue.
+     * Delete the task from queue.
      *
      * @return bool
      */

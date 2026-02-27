@@ -8,6 +8,7 @@ use Bow\Support\Str;
 use Bow\Validation\Rules\DatabaseRule;
 use Bow\Validation\Rules\DatetimeRule;
 use Bow\Validation\Rules\EmailRule;
+use Bow\Validation\Rules\NullableRule;
 use Bow\Validation\Rules\NumericRule;
 use Bow\Validation\Rules\RegexRule;
 use Bow\Validation\Rules\StringRule;
@@ -21,6 +22,7 @@ class Validator
     use NumericRule;
     use StringRule;
     use RegexRule;
+    use NullableRule;
 
     /**
      * The Fails flag
@@ -63,6 +65,7 @@ class Validator
      * @var array
      */
     protected array $rules = [
+        'Nullable',
         'Required',
         "RequiredIf",
         'Max',
@@ -147,21 +150,8 @@ class Validator
          * Formatting and validation of each rule
          * eg. name => "required|max:100|alpha"
          */
-        foreach ($rules as $key => $rule) {
-            foreach (explode("|", $rule) as $masque) {
-                // In the box there is a | super flux.
-                if (is_int($masque) || Str::len($masque) == "") {
-                    continue;
-                }
-
-                // Mask on the required rule
-                foreach ($this->rules as $rule) {
-                    $this->{'compile' . $rule}($key, $masque);
-                    if ($rule == 'Required' && $this->fails) {
-                        break;
-                    }
-                }
-            }
+        foreach ($rules as $field => $rule) {
+            $this->checkRule($rule, $field);
         }
 
         return new Validate(
@@ -169,5 +159,30 @@ class Validator
             $this->last_message,
             $this->errors
         );
+    }
+
+    /**
+     * Check atomic rule
+     *
+     * @param string $rule
+     * @param string $field
+     * @return void
+     */
+    private function checkRule(string $rule, string $field): void
+    {
+        foreach (explode("|", $rule) as $masque) {
+            // In the box there is a | super flux.
+            if (is_int($masque) || Str::len($masque) == "") {
+                continue;
+            }
+
+            // Mask on the required rule
+            foreach ($this->rules as $rule) {
+                $this->{'compile' . $rule}($field, $masque);
+                if ($rule == 'Required' && $this->fails) {
+                    break;
+                }
+            }
+        }
     }
 }

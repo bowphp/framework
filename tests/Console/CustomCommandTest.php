@@ -15,6 +15,7 @@ class CustomCommandTest extends \PHPUnit\Framework\TestCase
         $GLOBALS["argv"] = ["command"];
 
         $setting = new Setting(TESTING_RESOURCE_BASE_DIRECTORY);
+
         static::$console = new Console($setting);
     }
 
@@ -33,6 +34,7 @@ class CustomCommandTest extends \PHPUnit\Framework\TestCase
     public function test_create_the_custom_command_from_instance_calling()
     {
         static::$console->addCommand("command", CustomCommand::class);
+
         static::$console->call("command");
 
         $content = $this->getFileContent();

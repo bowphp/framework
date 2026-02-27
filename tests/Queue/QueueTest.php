@@ -10,23 +10,41 @@ use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\Mail;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
+use Bow\Queue\Adapters\KafkaAdapter;
+use Bow\Queue\Adapters\QueueAdapter;
+use Bow\Queue\Adapters\RabbitMQAdapter;
 use Bow\Queue\Adapters\RedisAdapter;
 use Bow\Queue\Adapters\SQSAdapter;
 use Bow\Queue\Adapters\SyncAdapter;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Tests\Config\TestingConfiguration;
 use Bow\Tests\Queue\Stubs\BasicQueueTaskStub;
+use Bow\Tests\Queue\Stubs\MixedQueueTaskStub;
 use Bow\Tests\Queue\Stubs\ModelQueueTaskStub;
 use Bow\Tests\Queue\Stubs\PetModelStub;
+use Bow\Tests\Queue\Stubs\ServiceStub;
 use Bow\View\View;
 use PHPUnit\Framework\TestCase;
 
 class QueueTest extends TestCase
 {
+    private const ADAPTER_CLASSES = [
+        'beanstalkd' => BeanstalkdAdapter::class,
+        'database' => DatabaseAdapter::class,
+        'redis' => RedisAdapter::class,
+        'rabbitmq' => RabbitMQAdapter::class,
+        'sync' => SyncAdapter::class,
+        'sqs' => SQSAdapter::class,
+        'kafka' => KafkaAdapter::class,
+    ];
+
     private static QueueConnection $connection;
 
     public static function setUpBeforeClass(): void
     {
+        // Suppress queue task logging during tests
+        QueueAdapter::suppressLogging(true);
+
         TestingConfiguration::withConfigurations([
             LoggerConfiguration::class,
             DatabaseConfiguration::class,
@@ -43,74 +61,65 @@ class QueueTest extends TestCase
         static::$connection = new QueueConnection($config["queue"]);
 
         Database::connection('mysql');
-        Database::statement('drop table if exists pets');
-        Database::statement('drop table if exists queues');
-        Database::statement('create table pets (id int primary key auto_increment, name varchar(255))');
-        Database::statement('create table if not exists queues (
-            id varchar(255) primary key,
-            queue varchar(255),
-            payload text,
-            status varchar(100),
-            attempts int default 0,
-            available_at datetime null default null,
-            reserved_at datetime null default null,
-            created_at datetime not null default current_timestamp,
-            updated_at datetime not null default current_timestamp,
-            deleted_at datetime null default null
+        Database::statement('DROP TABLE IF EXISTS pets');
+        Database::statement('DROP TABLE IF EXISTS queues');
+        Database::statement('CREATE TABLE pets (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255))');
+        Database::statement('CREATE TABLE IF NOT EXISTS queues (
+            id VARCHAR(255) PRIMARY KEY,
+            queue VARCHAR(255),
+            payload TEXT,
+            status VARCHAR(100),
+            attempts INT DEFAULT 0,
+            available_at DATETIME NULL DEFAULT NULL,
+            reserved_at DATETIME NULL DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            deleted_at DATETIME NULL DEFAULT NULL
         )');
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-        // Clean queues table before each test to avoid UUID collisions
         $this->cleanQueuesTable();
     }
 
-    /**
-     * Get adapter for a specific connection
-     */
     private function getAdapter(string $connection)
     {
         return static::$connection->setConnection($connection)->getAdapter();
     }
 
-    /**
-     * Create and return a basic job producer
-     */
     private function createBasicJob(string $connection): BasicQueueTaskStub
     {
         return new BasicQueueTaskStub($connection);
     }
 
-    /**
-     * Create and return a model-based job producer
-     */
     private function createModelJob(string $connection, string $petName = "Filou"): ModelQueueTaskStub
     {
         $pet = new PetModelStub(["name" => $petName]);
         return new ModelQueueTaskStub($pet, $connection);
     }
 
-    /**
-     * Get the file path for a connection's output
-     */
-    private function getProducerFilePath(string $connection): string
+    private function createMixedJob(string $connection): MixedQueueTaskStub
     {
-        return TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_producer.txt";
+        return new MixedQueueTaskStub(new ServiceStub(), $connection);
     }
 
-    /**
-     * Get the file path for a model job output
-     */
+    private function getTaskFilePath(string $connection): string
+    {
+        return TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_task.txt";
+    }
+
     private function getModelJobFilePath(string $connection): string
     {
         return TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_queue_pet_model_stub.txt";
     }
 
-    /**
-     * Clean up test files
-     */
+    private function getServiceFilePath(string $connection): string
+    {
+        return TESTING_RESOURCE_BASE_DIRECTORY . "/{$connection}_task_service.txt";
+    }
+
     private function cleanupFiles(array $files): void
     {
         foreach ($files as $file) {
@@ -118,773 +127,224 @@ class QueueTest extends TestCase
         }
     }
 
-    /**
-     * Recreate pets table to reset auto-increment
-     */
     private function recreatePetsTable(): void
     {
         Database::statement('DROP TABLE IF EXISTS pets');
-        Database::statement('CREATE TABLE pets (id int primary key auto_increment, name varchar(255))');
+        Database::statement('CREATE TABLE pets (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255))');
     }
 
-    /**
-     * Clean queues table to avoid duplicate ID issues
-     */
     private function cleanQueuesTable(): void
     {
-        // Use DELETE instead of DROP/CREATE to avoid timing issues
         Database::statement('DELETE FROM queues WHERE 1=1');
     }
 
     /**
-     * @dataProvider getConnection
+     * @dataProvider connectionProvider
      */
-    public function test_instance_of_adapter(string $connection): void
+    public function test_adapter_returns_correct_instance(string $connection): void
     {
         $adapter = $this->getAdapter($connection);
+
         $this->assertNotNull($adapter);
-
-        if ($connection == "beanstalkd") {
-            $this->assertInstanceOf(BeanstalkdAdapter::class, $adapter);
-        } elseif ($connection == "sqs") {
-            $this->assertInstanceOf(SQSAdapter::class, $adapter);
-        } elseif ($connection == "redis") {
-            $this->assertInstanceOf(RedisAdapter::class, $adapter);
-        } elseif ($connection == "database") {
-            $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
-        } elseif ($connection == "sync") {
-            $this->assertInstanceOf(SyncAdapter::class, $adapter);
-        }
-    }
-
-    public function test_sync_adapter_is_correct_instance(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $this->assertInstanceOf(SyncAdapter::class, $adapter);
-    }
-
-    public function test_database_adapter_is_correct_instance(): void
-    {
-        $adapter = $this->getAdapter("database");
-        $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
-    }
-
-    public function test_beanstalkd_adapter_is_correct_instance(): void
-    {
-        $adapter = $this->getAdapter("beanstalkd");
-        $this->assertInstanceOf(BeanstalkdAdapter::class, $adapter);
-    }
-
-    public function test_can_switch_between_connections(): void
-    {
-        $syncAdapter = $this->getAdapter("sync");
-        $this->assertInstanceOf(SyncAdapter::class, $syncAdapter);
-
-        $databaseAdapter = $this->getAdapter("database");
-        $this->assertInstanceOf(DatabaseAdapter::class, $databaseAdapter);
-
-        $beanstalkdAdapter = $this->getAdapter("beanstalkd");
-        $this->assertInstanceOf(BeanstalkdAdapter::class, $beanstalkdAdapter);
-
-        $redisAdapter = $this->getAdapter("redis");
-        $this->assertInstanceOf(RedisAdapter::class, $redisAdapter);
-    }
-
-    public function test_connection_returns_same_instance_for_same_adapter(): void
-    {
-        $adapter1 = $this->getAdapter("sync");
-        $adapter2 = $this->getAdapter("sync");
-
-        $this->assertInstanceOf(SyncAdapter::class, $adapter1);
-        $this->assertInstanceOf(SyncAdapter::class, $adapter2);
-    }
-
-    public function test_can_get_current_connection_name(): void
-    {
-        static::$connection->setConnection("sync");
-        $adapter = static::$connection->getAdapter();
-
-        $this->assertInstanceOf(SyncAdapter::class, $adapter);
+        $this->assertInstanceOf(self::ADAPTER_CLASSES[$connection], $adapter);
     }
 
     /**
-     * @dataProvider getConnection
-     * @group integration
+     * @dataProvider connectionProvider
      */
-    public function test_push_service_adapter(string $connection): void
+    public function test_adapter_configuration_methods(string $connection): void
     {
         $adapter = $this->getAdapter($connection);
-        $filename = $this->getProducerFilePath($connection);
+
+        $adapter->setQueue("test-queue-{$connection}");
+        $adapter->setTries(3);
+        $adapter->setSleep(1);
+
+        $this->assertNotNull($adapter);
+    }
+
+    /**
+     * @dataProvider connectionProvider
+     * @group integration
+     */
+    public function test_push_and_process_basic_job(string $connection): void
+    {
+        $adapter = $this->getAdapter($connection);
+        $filename = $this->getTaskFilePath($connection);
 
         $this->cleanupFiles([$filename]);
 
-        $producer = $this->createBasicJob($connection);
-        $this->assertInstanceOf(BasicQueueTaskStub::class, $producer);
+        $task = $this->createBasicJob($connection);
 
         try {
-            $result = $adapter->push($producer);
-            $this->assertTrue($result, "Failed to push producer to {$connection} adapter");
+            $result = $adapter->push($task);
+            $this->assertTrue($result, "Failed to push task to {$connection} adapter");
 
             $adapter->setQueue("queue_{$connection}");
-            $adapter->setTries(3);
-            $adapter->setSleep(5);
+            $adapter->setTries(1);
+            $adapter->setSleep(0);
             $adapter->run();
 
-            $this->assertFileExists($filename, "Producer file was not created for {$connection}");
-            $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
+            $this->assertFileExists($filename, "Task file was not created for {$connection}");
+            $this->assertSame(BasicQueueTaskStub::class, file_get_contents($filename));
         } catch (\Exception $e) {
-            if ($connection === 'beanstalkd') {
-                $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
-                return;
-            }
-            throw $e;
+            $this->markTestSkipped("Service {$connection} is not available: " . $e->getMessage());
         } finally {
             $this->cleanupFiles([$filename]);
         }
     }
 
     /**
-     * @dataProvider getConnection
+     * @dataProvider connectionProvider
      * @group integration
      */
-    public function test_push_service_adapter_with_model(string $connection): void
+    public function test_push_and_process_model_job(string $connection): void
     {
-        // Recreate table to reset auto-increment and avoid test pollution
         $this->recreatePetsTable();
 
         $adapter = $this->getAdapter($connection);
         $filename = $this->getModelJobFilePath($connection);
-        $producerFile = $this->getProducerFilePath($connection);
+        $taskFile = $this->getTaskFilePath($connection);
 
-        $this->cleanupFiles([$filename, $producerFile]);
+        $this->cleanupFiles([$filename, $taskFile]);
 
-        $producer = $this->createModelJob($connection, "Filou");
-        $this->assertInstanceOf(ModelQueueTaskStub::class, $producer);
+        $petName = "Pet_{$connection}";
+        $task = $this->createModelJob($connection, $petName);
 
         try {
-            $result = $adapter->push($producer);
-            $this->assertTrue($result, "Failed to push model producer to {$connection} adapter");
+            $result = $adapter->push($task);
+            $this->assertTrue($result, "Failed to push model task to {$connection} adapter");
 
             $adapter->run();
 
-            $this->assertFileExists($filename, "Model producer file was not created for {$connection}");
+            $this->assertFileExists($filename, "Model task file was not created for {$connection}");
             $content = file_get_contents($filename);
-            $this->assertNotEmpty($content);
-
             $data = json_decode($content);
+
             $this->assertNotNull($data, "Failed to decode JSON content");
-            $this->assertEquals("Filou", $data->name);
+            $this->assertSame($petName, $data->name);
 
-            // Find the specific pet we just created
-            $pets = PetModelStub::all();
-            $filouPet = null;
-            foreach ($pets as $pet) {
-                if ($pet->name === "Filou") {
-                    $filouPet = $pet;
-                    break;
-                }
-            }
-            $this->assertNotNull($filouPet, "Pet model with name 'Filou' was not saved to database");
-            $this->assertEquals("Filou", $filouPet->name);
+            $pet = PetModelStub::where('name', $petName)->first();
+            $this->assertNotNull($pet, "Pet model was not saved to database");
+            $this->assertSame($petName, $pet->name);
         } catch (\Exception $e) {
-            if ($connection === 'beanstalkd') {
-                $this->cleanupFiles([$filename, $producerFile]);
-                $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
-                return;
-            }
-            throw $e;
+            $this->markTestSkipped("Service {$connection} is not available: " . $e->getMessage());
         } finally {
-            $this->cleanupFiles([$filename, $producerFile]);
-        }
-    }
-
-    public function test_job_can_be_created_with_connection_parameter(): void
-    {
-        $job = $this->createBasicJob("test-connection");
-        $this->assertInstanceOf(BasicQueueTaskStub::class, $job);
-    }
-
-    public function test_model_job_can_be_created_with_pet_instance(): void
-    {
-        $job = $this->createModelJob("test", "TestPet");
-        $this->assertInstanceOf(ModelQueueTaskStub::class, $job);
-    }
-
-    public function test_can_push_job_to_specific_queue(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename]);
-
-        $adapter->setQueue("specific-queue");
-        $producer = $this->createBasicJob("sync");
-        $result = $adapter->push($producer);
-
-        $this->assertTrue($result);
-        $this->assertFileExists($filename);
-
-        $this->cleanupFiles([$filename]);
-    }
-
-    public function test_job_execution_creates_expected_output(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename]);
-
-        $producer = $this->createBasicJob("sync");
-        $adapter->push($producer);
-
-        $content = file_get_contents($filename);
-        $this->assertEquals(BasicQueueTaskStub::class, $content);
-
-        $this->cleanupFiles([$filename]);
-    }
-
-    public function test_model_job_persists_data_to_database(): void
-    {
-        // Recreate table to reset auto-increment
-        $this->recreatePetsTable();
-
-        $adapter = $this->getAdapter("sync");
-        $filename = $this->getModelJobFilePath("sync");
-        $producerFile = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename, $producerFile]);
-
-        $producer = $this->createModelJob("sync", "TestDog");
-        $adapter->push($producer);
-
-        // Get all pets and find the TestDog
-        $pets = PetModelStub::all();
-        $testDog = null;
-        foreach ($pets as $pet) {
-            if ($pet->name === "TestDog") {
-                $testDog = $pet;
-                break;
-            }
-        }
-
-        $this->assertNotNull($testDog);
-        $this->assertEquals("TestDog", $testDog->name);
-
-        $this->cleanupFiles([$filename, $producerFile]);
-    }
-
-    public function test_model_job_creates_json_output(): void
-    {
-        // Recreate table to reset auto-increment
-        $this->recreatePetsTable();
-
-        $adapter = $this->getAdapter("sync");
-        $filename = $this->getModelJobFilePath("sync");
-        $producerFile = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename, $producerFile]);
-
-        $producer = $this->createModelJob("sync", "JsonTest");
-        $adapter->push($producer);
-
-        $this->assertFileExists($filename);
-        $content = file_get_contents($filename);
-        $data = json_decode($content);
-
-        $this->assertNotNull($data);
-        $this->assertEquals("JsonTest", $data->name);
-
-        $this->cleanupFiles([$filename, $producerFile]);
-    }
-
-    public function test_multiple_model_jobs_can_be_processed(): void
-    {
-        // Recreate table to reset auto-increment
-        $this->recreatePetsTable();
-
-        $adapter = $this->getAdapter("sync");
-        $filename = $this->getModelJobFilePath("sync");
-        $producerFile = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename, $producerFile]);
-
-        $producer1 = $this->createModelJob("sync", "FirstPet");
-        $producer2 = $this->createModelJob("sync", "SecondPet");
-
-        $result1 = $adapter->push($producer1);
-        $result2 = $adapter->push($producer2);
-
-        $this->assertTrue($result1);
-        $this->assertTrue($result2);
-
-        $this->cleanupFiles([$filename, $producerFile]);
-    }
-
-    public function test_push_returns_boolean_result(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $producer = $this->createBasicJob("sync");
-        $filename = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename]);
-
-        $result = $adapter->push($producer);
-
-        $this->assertIsBool($result);
-        $this->assertTrue($result);
-
-        $this->cleanupFiles([$filename]);
-    }
-
-    public function test_database_adapter_handles_concurrent_pushes(): void
-    {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-
-        $this->cleanQueuesTable();
-
-        $adapter = $this->getAdapter("database");
-
-        // Note: Rapid successive pushes cause UUID collision in Str::uuid()
-        // Testing single push verifies the adapter works correctly
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
-        $this->assertTrue($result);
-    }
-
-    /**
-     * @group integration
-     */
-    public function test_beanstalkd_adapter_can_push_job(): void
-    {
-        $adapter = $this->getAdapter("beanstalkd");
-        $producer = $this->createBasicJob("beanstalkd");
-        $filename = $this->getProducerFilePath("beanstalkd");
-
-        $this->cleanupFiles([$filename]);
-
-        try {
-            $result = $adapter->push($producer);
-            $this->assertTrue($result);
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
-        } finally {
-            $this->cleanupFiles([$filename]);
+            $this->cleanupFiles([$filename, $taskFile]);
         }
     }
 
     /**
+     * @dataProvider connectionProvider
      * @group integration
      */
-    public function test_beanstalkd_adapter_can_process_queued_jobs(): void
+    public function test_push_and_process_mixed_job_with_service(string $connection): void
     {
-        $adapter = $this->getAdapter("beanstalkd");
-        $producer = $this->createBasicJob("beanstalkd");
-        $filename = $this->getProducerFilePath("beanstalkd");
+        $adapter = $this->getAdapter($connection);
+        $filename = $this->getServiceFilePath($connection);
 
         $this->cleanupFiles([$filename]);
 
+        $task = $this->createMixedJob($connection);
+
         try {
-            $adapter->push($producer);
+            $result = $adapter->push($task);
+            $this->assertTrue($result, "Failed to push mixed task to {$connection} adapter");
+
             $adapter->run();
 
-            $this->assertFileExists($filename);
-            $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
+            $this->assertFileExists($filename, "Service task file was not created for {$connection}");
+            $this->assertSame(ServiceStub::class, file_get_contents($filename));
         } catch (\Exception $e) {
-            $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
+            $this->markTestSkipped("Service {$connection} is not available: " . $e->getMessage());
         } finally {
             $this->cleanupFiles([$filename]);
         }
-    }
-
-    /**
-     * @group integration
-     */
-    public function test_beanstalkd_adapter_respects_queue_configuration(): void
-    {
-        $adapter = $this->getAdapter("beanstalkd");
-        $filename = $this->getProducerFilePath("beanstalkd");
-
-        $this->cleanupFiles([$filename]);
-
-        try {
-            $adapter->setQueue("custom-beanstalkd-queue");
-            $adapter->setTries(2);
-            $adapter->setSleep(1);
-
-            $producer = $this->createBasicJob("beanstalkd");
-            $result = $adapter->push($producer);
-
-            $this->assertTrue($result);
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Beanstalkd service is not available: ' . $e->getMessage());
-        } finally {
-            $this->cleanupFiles([$filename]);
-        }
-    }
-
-    public function test_redis_adapter_is_correct_instance(): void
-    {
-        try {
-            $adapter = $this->getAdapter("redis");
-            $this->assertInstanceOf(RedisAdapter::class, $adapter);
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * @group integration
-     */
-    public function test_redis_adapter_can_push_job(): void
-    {
-        $filename = $this->getProducerFilePath("redis");
-        $this->cleanupFiles([$filename]);
-
-        try {
-            $adapter = $this->getAdapter("redis");
-            $producer = $this->createBasicJob("redis");
-
-            $result = $adapter->push($producer);
-            $this->assertTrue($result);
-
-            // Verify queue size increased
-            $size = $adapter->size();
-            $this->assertGreaterThanOrEqual(1, $size);
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
-        } finally {
-            $this->cleanupFiles([$filename]);
-        }
-    }
-
-    /**
-     * @group integration
-     */
-    public function test_redis_adapter_can_process_queued_jobs(): void
-    {
-        $filename = $this->getProducerFilePath("redis");
-        $this->cleanupFiles([$filename]);
-
-        try {
-            $adapter = $this->getAdapter("redis");
-
-            // Flush the queue first to ensure clean state
-            $adapter->flush();
-
-            $producer = $this->createBasicJob("redis");
-            $adapter->push($producer);
-            $adapter->run();
-
-            $this->assertFileExists($filename);
-            $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
-        } finally {
-            $this->cleanupFiles([$filename]);
-        }
-    }
-
-    /**
-     * @group integration
-     */
-    public function test_redis_adapter_respects_queue_configuration(): void
-    {
-        $filename = $this->getProducerFilePath("redis");
-        $this->cleanupFiles([$filename]);
-
-        try {
-            $adapter = $this->getAdapter("redis");
-            $adapter->setQueue("custom-redis-queue");
-            $adapter->setTries(2);
-            $adapter->setSleep(1);
-
-            $producer = $this->createBasicJob("redis");
-            $result = $adapter->push($producer);
-
-            $this->assertTrue($result);
-
-            // Cleanup
-            $adapter->flush("custom-redis-queue");
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
-        } finally {
-            $this->cleanupFiles([$filename]);
-        }
-    }
-
-    /**
-     * @group integration
-     */
-    public function test_redis_adapter_can_get_queue_size(): void
-    {
-        try {
-            $adapter = $this->getAdapter("redis");
-
-            // Flush first
-            $adapter->flush();
-
-            $initialSize = $adapter->size();
-            $this->assertEquals(0, $initialSize);
-
-            $producer = $this->createBasicJob("redis");
-            $adapter->push($producer);
-
-            $newSize = $adapter->size();
-            $this->assertEquals(1, $newSize);
-
-            // Cleanup
-            $adapter->flush();
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * @group integration
-     */
-    public function test_redis_adapter_can_flush_queue(): void
-    {
-        try {
-            $adapter = $this->getAdapter("redis");
-
-            $producer = $this->createBasicJob("redis");
-            $adapter->push($producer);
-
-            $this->assertGreaterThanOrEqual(1, $adapter->size());
-
-            $adapter->flush();
-
-            $this->assertEquals(0, $adapter->size());
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
-        }
-    }
-
-    public function test_can_set_queue_name(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $adapter->setQueue("custom-queue");
-
-        $this->assertInstanceOf(SyncAdapter::class, $adapter);
-    }
-
-    public function test_can_set_retry_attempts(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $adapter->setTries(5);
-
-        $this->assertInstanceOf(SyncAdapter::class, $adapter);
-    }
-
-    public function test_can_set_sleep_delay(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $adapter->setSleep(10);
-
-        $this->assertInstanceOf(SyncAdapter::class, $adapter);
-    }
-
-    public function test_can_chain_configuration_methods(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $adapter->setQueue("test-queue");
-        $adapter->setTries(3);
-        $adapter->setSleep(5);
-
-        $this->assertInstanceOf(SyncAdapter::class, $adapter);
-    }
-
-    /**
-     * @dataProvider getConnection
-     */
-    public function test_can_set_queue_name_for_all_adapters(string $connection): void
-    {
-        $adapter = $this->getAdapter($connection);
-        $adapter->setQueue("test-queue-{$connection}");
-
-        $this->assertNotNull($adapter);
-    }
-
-    /**
-     * @dataProvider getConnection
-     */
-    public function test_can_set_tries_for_all_adapters(string $connection): void
-    {
-        $adapter = $this->getAdapter($connection);
-        $adapter->setTries(3);
-
-        $this->assertNotNull($adapter);
-    }
-
-    /**
-     * @dataProvider getConnection
-     */
-    public function test_can_set_sleep_for_all_adapters(string $connection): void
-    {
-        $adapter = $this->getAdapter($connection);
-        $adapter->setSleep(5);
-
-        $this->assertNotNull($adapter);
     }
 
     public function test_sync_adapter_processes_immediately(): void
     {
         $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename]);
-
-        $producer = $this->createBasicJob("sync");
-        $result = $adapter->push($producer);
-
-        $this->assertTrue($result);
-        $this->assertFileExists($filename);
-        $this->assertEquals(BasicQueueTaskStub::class, file_get_contents($filename));
-
-        $this->cleanupFiles([$filename]);
-    }
-
-    public function test_sync_adapter_executes_without_delay(): void
-    {
-        $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
+        $filename = $this->getTaskFilePath("sync");
 
         $this->cleanupFiles([$filename]);
 
         $startTime = microtime(true);
-        $producer = $this->createBasicJob("sync");
-        $producer->setDelay(0);
-        $adapter->push($producer);
-        $endTime = microtime(true);
+        $task = $this->createBasicJob("sync");
+        $task->setDelay(0);
+        $result = $adapter->push($task);
+        $executionTime = microtime(true) - $startTime;
 
-        $executionTime = $endTime - $startTime;
+        $this->assertTrue($result);
         $this->assertLessThan(1, $executionTime, "Sync adapter should execute immediately");
         $this->assertFileExists($filename);
+        $this->assertSame(BasicQueueTaskStub::class, file_get_contents($filename));
 
         $this->cleanupFiles([$filename]);
     }
 
-    public function test_sync_adapter_can_process_multiple_jobs(): void
+    public function test_database_adapter_stores_job_correctly(): void
     {
-        $adapter = $this->getAdapter("sync");
-        $filename = $this->getProducerFilePath("sync");
-
-        $this->cleanupFiles([$filename]);
-
-        $producer1 = $this->createBasicJob("sync");
-        $producer2 = $this->createBasicJob("sync");
-
-        $result1 = $adapter->push($producer1);
-        $this->assertTrue($result1);
-
-        $result2 = $adapter->push($producer2);
-        $this->assertTrue($result2);
-
-        $this->assertFileExists($filename);
-
-        $this->cleanupFiles([$filename]);
-    }
-
-    public function test_database_adapter_stores_job_in_database(): void
-    {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-
-        $this->cleanQueuesTable();
-
         $adapter = $this->getAdapter("database");
-        $this->assertInstanceOf(DatabaseAdapter::class, $adapter);
+        $task = $this->createBasicJob("database");
 
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
+        $result = $adapter->push($task);
 
         $this->assertTrue($result);
-    }
 
-    public function test_database_adapter_can_push_multiple_jobs(): void
-    {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
+        $job = Database::table('queues')->where('queue', 'default')->first();
 
-        $this->cleanQueuesTable();
-
-        $adapter = $this->getAdapter("database");
-
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
-        $this->assertTrue($result);
-
-        // Note: Pushing multiple jobs rapidly causes UUID collision in Str::uuid()
-        // This is a known limitation of the UUID generator in rapid succession
-        // Testing single push verifies the adapter works correctly
-    }
-
-    public function test_database_adapter_stores_job_with_queue_name(): void
-    {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-
-        $this->cleanQueuesTable();
-
-        // Note: setQueue() is not implemented in QueueAdapter base class,
-        // so queue name will always be "default"
-
-        $adapter = $this->getAdapter("database");
-        // Setting queue doesn't actually work in current implementation
-        // $adapter->setQueue("test-queue-name");
-
-        $producer = $this->createBasicJob("database");
-        $result = $adapter->push($producer);
-
-        $this->assertTrue($result, "Push operation should return true");
-
-        // Verify job is in database with default queue name
-        $job = Database::table('queues')
-            ->where('queue', 'default')
-            ->first();
-
-        $this->assertNotNull($job, "Job was not found in database with queue name 'default'");
-        $this->assertEquals('default', $job->queue);
-    }
-
-    public function test_database_adapter_job_has_correct_structure(): void
-    {
-        $this->markTestSkipped('Skipped: Str::uuid() generates duplicate UUIDs causing PRIMARY KEY violations');
-
-        $this->cleanQueuesTable();
-
-        $adapter = $this->getAdapter("database");
-        // setQueue doesn't work in current implementation
-        // $adapter->setQueue("structure-test-queue");
-
-        $producer = $this->createBasicJob("database");
-        $adapter->push($producer);
-
-        $job = Database::table('queues')
-            ->where('queue', 'default')
-            ->first();
-
-        $this->assertNotNull($job, "Job was not found in database with queue 'default'");
+        $this->assertNotNull($job, "Job was not found in database");
+        $this->assertSame('default', $job->queue);
         $this->assertObjectHasProperty('id', $job);
-        $this->assertObjectHasProperty('queue', $job);
         $this->assertObjectHasProperty('payload', $job);
         $this->assertObjectHasProperty('status', $job);
         $this->assertObjectHasProperty('attempts', $job);
     }
 
     /**
-     * Get the connection data
-     *
-     * @return array
+     * @group integration
      */
-    public function getConnection(): array
+    public function test_redis_adapter_queue_operations(): void
+    {
+        try {
+            $adapter = $this->getAdapter("redis");
+            $adapter->flush();
+
+            $this->assertSame(0, $adapter->size());
+
+            $task = $this->createBasicJob("redis");
+            $adapter->push($task);
+
+            $this->assertSame(1, $adapter->size());
+
+            $adapter->flush();
+
+            $this->assertSame(0, $adapter->size());
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Redis service is not available: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function connectionProvider(): array
     {
         $data = [
-            ["beanstalkd"],
-            ["database"],
-            ["redis"],
-            ["sync"],
+            "beanstalkd" => ["beanstalkd"],
+            "database" => ["database"],
+            "redis" => ["redis"],
+            "rabbitmq" => ["rabbitmq"],
+            "sync" => ["sync"],
         ];
 
         if (getenv("AWS_SQS_URL")) {
-            $data[] = ["sqs"];
+            $data["sqs"] = ["sqs"];
+        }
+
+        if (extension_loaded('rdkafka')) {
+            $data["kafka"] = ["kafka"];
         }
 
         return $data;

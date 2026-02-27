@@ -52,17 +52,19 @@ class SQSAdapter extends QueueAdapter
     }
 
     /**
-     * Push a job onto the queue
+     * Push a task onto the queue
      *
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return bool
      */
-    public function push(QueueTask $job): bool
+    public function push(QueueTask $task): bool
     {
+        $task->setId($this->generateId());
+
         $params = [
-            "DelaySeconds" => $job->getDelay(),
-            "MessageAttributes" => $this->buildMessageAttributes($job),
-            "MessageBody" => base64_encode($this->serializeProducer($job)),
+            "DelaySeconds" => $task->getDelay(),
+            "MessageAttributes" => $this->buildMessageAttributes($task),
+            "MessageBody" => base64_encode($this->serializeProducer($task)),
             "QueueUrl" => $this->getQueueUrl(),
         ];
 
@@ -78,19 +80,19 @@ class SQSAdapter extends QueueAdapter
     /**
      * Build message attributes for SQS
      *
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return array
      */
-    private function buildMessageAttributes(QueueTask $job): array
+    private function buildMessageAttributes(QueueTask $task): array
     {
         return [
             "Title" => [
                 "DataType" => "String",
-                "StringValue" => get_class($job),
+                "StringValue" => get_class($task),
             ],
             "Id" => [
                 "DataType" => "String",
-                "StringValue" => $this->generateId(),
+                "StringValue" => $task->getId(),
             ],
         ];
     }
@@ -114,7 +116,7 @@ class SQSAdapter extends QueueAdapter
     }
 
     /**
-     * Process the next job on the queue
+     * Process the next task on the queue
      *
      * @param  string|null $queue
      * @return void
@@ -161,14 +163,16 @@ class SQSAdapter extends QueueAdapter
      */
     private function processMessage(array $message): void
     {
-        $job = null;
+        $task = null;
 
         try {
-            $job = $this->unserializeProducer(base64_decode($message["Body"]));
-            call_user_func([$job, "process"]);
+            $task = $this->unserializeProducer(base64_decode($message["Body"]));
+            $this->logProcessingTask($task);
+            $task->process();
+            $this->logProcessedTask($task);
             $this->deleteMessage($message);
         } catch (Throwable $e) {
-            $this->handleMessageFailure($message, $job, $e);
+            $this->handleMessageFailure($message, $task, $e);
         }
     }
 
@@ -176,26 +180,29 @@ class SQSAdapter extends QueueAdapter
      * Handle message processing failure
      *
      * @param  array $message
-     * @param  QueueTask|null $job
+     * @param  QueueTask|null $task
      * @param  Throwable $exception
      * @return void
      */
-    private function handleMessageFailure(array $message, ?QueueTask $job, Throwable $exception): void
+    private function handleMessageFailure(array $message, ?QueueTask $task, Throwable $exception): void
     {
         $this->logError($exception);
-        cache("job:failed:" . $message["ReceiptHandle"], $message["Body"]);
 
-        if (is_null($job)) {
+        cache("task:failed:" . $message["ReceiptHandle"], $message["Body"]);
+
+        $this->logFailedTask($task, $exception);
+
+        if (is_null($task)) {
             $this->sleep(1);
             return;
         }
 
-        $job->onException($exception);
+        $task->onException($exception);
 
-        if ($job->taskShouldBeDelete()) {
+        if ($task->taskShouldBeDelete()) {
             $this->deleteMessage($message);
         } else {
-            $this->changeMessageVisibility($message, $job);
+            $this->changeMessageVisibility($message, $task);
         }
 
         $this->sleep(1);
@@ -219,18 +226,18 @@ class SQSAdapter extends QueueAdapter
      * Change message visibility for retry
      *
      * @param  array $message
-     * @param  QueueTask $job
+     * @param  QueueTask $task
      * @return void
      */
-    private function changeMessageVisibility(array $message, QueueTask $job): void
+    private function changeMessageVisibility(array $message, QueueTask $task): void
     {
         $this->sqs->changeMessageVisibilityBatch([
             "QueueUrl" => $this->getQueueUrl(),
             "Entries" => [
                 [
-                    "Id" => $job->getId(),
+                    "Id" => $task->getId(),
                     "ReceiptHandle" => $message["ReceiptHandle"],
-                    "VisibilityTimeout" => $job->getDelay(),
+                    "VisibilityTimeout" => $task->getDelay(),
                 ],
             ],
         ]);
@@ -244,22 +251,5 @@ class SQSAdapter extends QueueAdapter
     private function getQueueUrl(): string
     {
         return $this->config["url"];
-    }
-
-    /**
-     * Log an error
-     *
-     * @param  Throwable $exception
-     * @return void
-     */
-    private function logError(Throwable $exception): void
-    {
-        error_log($exception->getMessage());
-
-        try {
-            logger()->error($exception->getMessage(), $exception->getTrace());
-        } catch (Throwable $loggerException) {
-            // Logger not available, already logged to error_log
-        }
     }
 }

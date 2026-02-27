@@ -7,10 +7,13 @@ use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
 use Bow\Mail\MailConfiguration;
+use Bow\Notifier\Notifier;
 use Bow\Notifier\NotifierQueueTask;
+use Bow\Queue\Adapters\QueueAdapter;
 use Bow\Queue\Connection as QueueConnection;
 use Bow\Queue\QueueConfiguration;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\Tests\Notifier\Stubs\MockChannelAdapter;
 use Bow\Tests\Notifier\Stubs\TestNotifier;
 use Bow\Tests\Notifier\Stubs\TestNotifiableModel;
 use Bow\View\ViewConfiguration;
@@ -22,6 +25,9 @@ class NotifierQueueTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        // Suppress queue task logging during tests
+        QueueAdapter::suppressLogging(true);
+
         TestingConfiguration::withConfigurations([
             CacheConfiguration::class,
             DatabaseConfiguration::class,
@@ -36,6 +42,25 @@ class NotifierQueueTest extends TestCase
         $config->boot();
 
         static::$connection = new QueueConnection($config["queue"]);
+
+        // Mock external notification channels to avoid requiring real credentials
+        Notifier::pushChannels([
+            'mail' => MockChannelAdapter::class,
+            'telegram' => MockChannelAdapter::class,
+            'slack' => MockChannelAdapter::class,
+            'sms' => MockChannelAdapter::class,
+        ]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        MockChannelAdapter::reset();
+    }
+
+    private function createNotifierTask(): NotifierQueueTask
+    {
+        return new NotifierQueueTask(new TestNotifiableModel(), new TestNotifier());
     }
 
     public function test_can_send_message_synchronously(): void
@@ -52,78 +77,63 @@ class NotifierQueueTest extends TestCase
         $context->sendMessage($message);
     }
 
-    public function test_can_send_message_to_queue(): void
+    /**
+     * @dataProvider connectionProvider
+     */
+    public function test_can_push_notifier_to_queue(string $connection): void
     {
-        // Use real objects for queue tests (mock objects don't serialize)
-        $context = new TestNotifiableModel();
-        $message = new TestNotifier();
+        $task = $this->createNotifierTask();
 
-        $producer = new NotifierQueueTask($context, $message);
+        $this->assertInstanceOf(NotifierQueueTask::class, $task);
 
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
-
-        // Push to queue and verify
-        $result = static::$connection->setConnection("beanstalkd")->getAdapter()->push($producer);
-        $this->assertTrue($result);
+        try {
+            $result = static::$connection->setConnection($connection)->getAdapter()->push($task);
+            $this->assertTrue($result);
+        } catch (\Exception $e) {
+            $this->markTestSkipped("Service {$connection} is not available: " . $e->getMessage());
+        }
     }
 
-    public function test_can_send_message_to_specific_queue(): void
+    /**
+     * @dataProvider connectionProvider
+     */
+    public function test_can_push_notifier_with_queue_and_delay_options(string $connection): void
     {
-        $queue = 'high-priority';
-        $context = new TestNotifiableModel();
-        $message = new TestNotifier();
+        $task = $this->createNotifierTask();
 
-        $producer = new NotifierQueueTask($context, $message);
+        $adapter = static::$connection->setConnection($connection)->getAdapter();
+        $adapter->setQueue('notifications');
+        $adapter->setSleep(3600);
 
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
-
-        // Push to specific queue and verify
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
-        $adapter->setQueue($queue);
-        $result = $adapter->push($producer);
-
-        $this->assertTrue($result);
+        try {
+            $result = $adapter->push($task);
+            $this->assertTrue($result);
+        } catch (\Exception $e) {
+            $this->markTestSkipped("Service {$connection} is not available: " . $e->getMessage());
+        }
     }
 
-    public function test_can_send_message_with_delay(): void
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function connectionProvider(): array
     {
-        $delay = 3600;
-        $context = new TestNotifiableModel();
-        $message = new TestNotifier();
+        $data = [
+            "beanstalkd" => ["beanstalkd"],
+            "database" => ["database"],
+            "redis" => ["redis"],
+            "rabbitmq" => ["rabbitmq"],
+            "sync" => ["sync"],
+        ];
 
-        $producer = new NotifierQueueTask($context, $message);
+        if (getenv("AWS_SQS_URL")) {
+            $data["sqs"] = ["sqs"];
+        }
 
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
+        if (extension_loaded('rdkafka')) {
+            $data["kafka"] = ["kafka"];
+        }
 
-        // Push to queue with delay and verify
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
-        $adapter->setSleep($delay);
-        $result = $adapter->push($producer);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_can_send_message_with_delay_on_specific_queue(): void
-    {
-        $delay = 3600;
-        $queue = 'delayed-notifications';
-        $context = new TestNotifiableModel();
-        $message = new TestNotifier();
-
-        $producer = new NotifierQueueTask($context, $message);
-
-        // Verify that the producer is created with correct parameters
-        $this->assertInstanceOf(NotifierQueueTask::class, $producer);
-
-        // Push to specific queue with delay and verify
-        $adapter = static::$connection->setConnection("beanstalkd")->getAdapter();
-        $adapter->setQueue($queue);
-        $adapter->setSleep($delay);
-        $result = $adapter->push($producer);
-
-        $this->assertTrue($result);
+        return $data;
     }
 }

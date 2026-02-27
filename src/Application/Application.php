@@ -171,7 +171,7 @@ class Application
 
             // We launch the search of the method that arrived in the query
             // then start checking the url of the request
-            if (!$route->match($this->request->path())) {
+            if (!$route->match($this->request->path(), $this->request->domain())) {
                 continue;
             }
 
