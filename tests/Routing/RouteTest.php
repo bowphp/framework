@@ -217,4 +217,56 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($route->match('/foo', 'app.api.example.com'));
         $this->assertEquals('app', $route->getParameter('sub'));
     }
+
+    public function test_router_route_method_with_domain_definition()
+    {
+        $router = \Bow\Router\Router::getInstance();
+
+        $router->route([
+            'path' => '/api/domain-test',
+            'method' => 'GET',
+            'handler' => fn() => 'domain route',
+            'domain' => 'api.example.com'
+        ]);
+
+        $routes = $router->getRoutes();
+        $route = end($routes['GET']);
+
+        $this->assertTrue($route->match('/api/domain-test', 'api.example.com'));
+        $this->assertFalse($route->match('/api/domain-test', 'other.example.com'));
+    }
+
+    public function test_router_route_method_with_wildcard_domain()
+    {
+        $router = \Bow\Router\Router::getInstance();
+
+        $router->route([
+            'path' => '/api/wildcard-domain',
+            'method' => 'GET',
+            'handler' => fn() => 'wildcard domain',
+            'domain' => '*.example.com'
+        ]);
+
+        $routes = $router->getRoutes();
+        $route = end($routes['GET']);
+
+        $this->assertTrue($route->match('/api/wildcard-domain', 'api.example.com'));
+        $this->assertTrue($route->match('/api/wildcard-domain', 'www.example.com'));
+        $this->assertFalse($route->match('/api/wildcard-domain', 'example.com'));
+    }
+
+    public function test_router_domain_group_method()
+    {
+        $router = \Bow\Router\Router::getInstance();
+
+        $router->domain('admin.example.com', function ($router) {
+            $router->get('/admin/dashboard', fn() => 'admin dashboard');
+        });
+
+        $routes = $router->getRoutes();
+        $route = end($routes['GET']);
+
+        $this->assertTrue($route->match('/admin/dashboard', 'admin.example.com'));
+        $this->assertFalse($route->match('/admin/dashboard', 'other.example.com'));
+    }
 }
