@@ -22,18 +22,5 @@ trait NullableRule
         if (!preg_match("/^nullable$/", $masque, $match)) {
             return;
         }
-
-        if (!isset($this->inputs[$key]) || $this->inputs[$key] === null || (is_string($this->inputs[$key]) && Str::isEmpty($this->inputs[$key]))) {
-            return;
-        }
-
-        $this->last_message = $this->lexical('nullable', $key);
-
-        $this->fails = true;
-
-        $this->errors[$key][] = [
-            "masque" => $masque,
-            "message" => $this->last_message
-        ];
     }
 }
