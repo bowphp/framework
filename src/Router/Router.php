@@ -173,7 +173,7 @@ class Router
      * @param  string   $prefix
      * @param  callable $cb
      * @return Router
-     * @throws
+     * @throws RouterException
      */
     public function prefix(string $prefix, callable $cb): Router
     {
@@ -195,17 +195,18 @@ class Router
     /**
      * Add a domain constraint for a group of routes
      *
-     * @param string $domainPattern
+     * @param string $domain_pattern
      * @param callable $cb
      * @return Router
+     * @throws RouterException
      */
-    public function domain(string $domainPattern): Router
+    public function domain(string $domain_pattern, callable $cb): Router
     {
-        $previousDomain = $this->domain;
+        $this->domain = $domain_pattern;
 
-        $this->domain = $domainPattern;
+        call_user_func_array($cb, [$this]);
 
-        $this->domain = $previousDomain;
+        $this->domain = null;
 
         return $this;
     }
@@ -250,6 +251,10 @@ class Router
 
         if (isset($definition['middleware'])) {
             $route->middleware($definition['middleware']);
+        }
+
+        if (isset($definition['domain'])) {
+            $route->withDomain($definition['domain']);
         }
 
         $route->where($where);
