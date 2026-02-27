@@ -35,6 +35,30 @@ jobs:
       - name: Set Docker containers
         run: docker compose up -d
 
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          for i in {1..30}; do
+            if docker exec bowphp_mysql mysqladmin ping -h localhost -u root -ppassword --silent 2>/dev/null; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            if docker exec bowphp_postgres pg_isready -U postgres --silent 2>/dev/null; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "Waiting for PostgreSQL... ($i/30)"
+            sleep 2
+          done
+
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v4
