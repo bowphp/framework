@@ -25,17 +25,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          host port: 3306
-          container port: 3306
-          character set server: 'utf8mb4'
-          collation server: 'utf8mb4_general_ci'
-          mysql version: '5.7'
-          mysql database: 'test_db'
-          mysql root password: 'password'
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
