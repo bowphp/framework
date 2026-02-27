@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.2.5 - 2026-02-27
+
+### What's Changed
+
+* Fix database, validation, add rabbitmq/kafka queue adapter by @papac in https://github.com/bowphp/framework/pull/362
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.4...5.2.5
+
 ## 5.2.3 - 2026-01-27
 
 ### What's Changed
@@ -18,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **SMTP Adapter**: Complete rewrite with RFC-compliant SMTP protocol implementation
+  
   - Expanded from 8 to 21 methods for better functionality separation
   - Added comprehensive configuration validation (hostname, port, timeout)
   - Implemented multi-exception handling (SmtpException | SocketException)
@@ -26,15 +35,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Created comprehensive test suite with 21 tests and 35 assertions
   
 - **FTP Service**: Connection retry logic with 3 attempts and configurable delays
+  
 - **FTP Service**: Configuration constants and validation for all required fields
+  
 - **FTP Service**: Automatic stream cleanup with try-finally blocks
+  
 - **FTP Service**: Destructor for proper resource cleanup
+  
 - **Database Notifications**: Enhanced test coverage with 4 additional comprehensive tests
+  
 - **Queue System**: Graceful logger fallback in BeanstalkdAdapter
+  
 
 ### Changed
 
 - **FTP Service**: Complete refactoring with improved error handling and resource management (651 lines)
+  
   - Enhanced all file operations methods (store, get, put, append, prepend, copy, move, delete)
   - Improved directory operations (files, directories, makeDirectory)
   - Better passive/active mode configuration
@@ -42,10 +58,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added connection state validation with `ensureConnection()` method
   
 - **Environment Configuration**: Fixed path handling by removing unreliable `realpath()` usage
+  
 - **Configuration Loader**: Improved validation and error handling
+  
 - **Notifier System**: Fixed PHPUnit mock issues and corrected type signatures
+  
 - **Test Suite**: Renamed test methods to snake_case for consistency
+  
 - **Database Tests**: Significantly expanded test coverage across connection, migration, pagination, and query builders
+  
 
 ### Fixed
 
@@ -100,6 +121,7 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
+
 
 ```
 Ref: #255
