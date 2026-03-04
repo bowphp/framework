@@ -142,6 +142,14 @@ class Setting
      * @var string
      */
     private string $task_directory;
+
+    /**
+     * The scheduler directory
+     *
+     * @var string
+     */
+    private string $scheduler_directory;
+
     /**
      * The command directory
      *
@@ -420,6 +428,27 @@ class Setting
     public function setTaskDirectory(string $task_directory): void
     {
         $this->task_directory = $task_directory;
+    }
+
+    /**
+     * Get the scheduler directory
+     *
+     * @return string
+     */
+    public function getSchedulerDirectory(): string
+    {
+        return $this->scheduler_directory;
+    }
+
+    /**
+     * Set the scheduler directory
+     *
+     * @param  string $scheduler_directory
+     * @return void
+     */
+    public function setSchedulerDirectory(string $scheduler_directory): void
+    {
+        $this->scheduler_directory = $scheduler_directory;
     }
 
     /**

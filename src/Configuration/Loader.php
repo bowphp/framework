@@ -11,6 +11,7 @@ use Bow\Session\SessionConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Application\Exception\ApplicationException;
 use Bow\Container\CompassConfiguration;
+use Bow\Scheduler\Scheduler;
 
 class Loader implements ArrayAccess
 {
@@ -367,6 +368,19 @@ class Loader implements ArrayAccess
         return [
             //
         ];
+    }
+
+    /**
+     * Define scheduled tasks
+     *
+     * Override this method in your Kernel to define scheduled tasks.
+     *
+     * @param Scheduler $schedule
+     * @return void
+     */
+    public function schedules(Scheduler $schedule): void
+    {
+        //
     }
 
     /**

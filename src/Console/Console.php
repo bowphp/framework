@@ -42,6 +42,7 @@ class Console
         'flush',
         'launch',
         'serve',
+        'schedule',
     ];
 
     /**
@@ -61,6 +62,7 @@ class Console
         'exception',
         'event',
         'task',
+        'scheduler',
         'command',
         'listener',
         'notifier'
@@ -428,6 +430,23 @@ class Console
     }
 
     /**
+     * Handle scheduler commands
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function schedule(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, ['run', 'work', 'list', 'next', 'test'])) {
+            $this->throwFailsCommand('Bad command usage', 'help schedule');
+        }
+
+        $this->command->call("schedule:{$action}", $action, $this->arg->getTarget());
+    }
+
+    /**
      * Alias of generate
      *
      * @return void
@@ -566,6 +585,13 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33mrun:server\033[00m  Start local development server
    \033[0;33mrun:worker\033[00m  Start consumer/worker to handle queue tasks
 
+ \033[0;32mSCHEDULE\033[00m Task scheduling commands
+   \033[0;33mschedule:run\033[00m   Run the scheduler once (execute all due tasks)
+   \033[0;33mschedule:work\033[00m  Start the scheduler daemon (continuous loop)
+   \033[0;33mschedule:list\033[00m  List all registered scheduled tasks
+   \033[0;33mschedule:next\033[00m  Show the next run time for all tasks
+   \033[0;33mschedule:test\033[00m  Test run a specific task by class name
+
 USAGE;
             echo $usage;
             return 0;
@@ -675,6 +701,25 @@ U;
     flush:worker [connection] [--queue=queue_name]
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m flush:worker\033[00m           Flush all queues
+
+U;
+                break;
+
+            case 'schedule':
+                echo <<<U
+\n\033[0;32mTask scheduling commands\033[00m\n
+    [commands]
+    schedule:run            Run the scheduler once (execute all due tasks)
+    schedule:work           Start the scheduler daemon (continuous loop)
+    schedule:list           List all registered scheduled tasks
+    schedule:next           Show the next run time for all tasks
+    schedule:test [class]   Test run a specific task by class name
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:run\033[00m           Run due tasks once
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:work\033[00m          Start scheduler daemon
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:list\033[00m          List all scheduled tasks
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:next\033[00m          Show next run times
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:test TaskClass\033[00m  Test a specific task
 
 U;
                 break;
