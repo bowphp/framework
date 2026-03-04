@@ -10,6 +10,7 @@ use Bow\Console\Command\ClearCommand;
 use Bow\Console\Command\SeederCommand;
 use Bow\Console\Command\ServerCommand;
 use Bow\Console\Command\WorkerCommand;
+use Bow\Console\Command\SchedulerCommand;
 use Bow\Console\Command\MigrationCommand;
 use Bow\Console\Command\Generator\GenerateKeyCommand;
 use Bow\Console\Command\Generator\GenerateCacheCommand;
@@ -64,6 +65,11 @@ class Command extends AbstractCommand
         "run:server" => ServerCommand::class,
         "run:worker" => WorkerCommand::class,
         "flush:worker" => WorkerCommand::class,
+        "schedule:run" => SchedulerCommand::class,
+        "schedule:work" => SchedulerCommand::class,
+        "schedule:list" => SchedulerCommand::class,
+        "schedule:next" => SchedulerCommand::class,
+        "schedule:test" => SchedulerCommand::class,
         "generate:key" => GenerateKeyCommand::class,
         "generate:resource" => GenerateRouterResourceCommand::class,
         "generate:session-table" => GenerateSessionCommand::class,
@@ -99,7 +105,7 @@ class Command extends AbstractCommand
             $this->throwFailsCommand("The command $command not found !");
         }
 
-        if (!preg_match('/^(migration|seed)/', $command)) {
+        if (!preg_match('/^(migration|seed|schedule)/', $command)) {
             $method = "run";
         } else {
             $method = $action;
