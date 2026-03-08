@@ -112,9 +112,7 @@ class HttpClient
 
         curl_setopt($this->ch, CURLOPT_HTTPGET, true);
 
-        $content = $this->execute();
-
-        return new Response($this->ch, $content);
+        return $this->execute();
     }
 
     /**
@@ -158,12 +156,12 @@ class HttpClient
     }
 
     /**
-     * Execute request
+     * Execute request and return Response
      *
-     * @return string
+     * @return Response
      * @throws Exception
      */
-    private function execute(): string
+    private function execute(): Response
     {
         if ($this->headers) {
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
@@ -171,6 +169,9 @@ class HttpClient
 
         $content = curl_exec($this->ch);
         $errno = curl_errno($this->ch);
+
+        // Create response before closing to capture curl info
+        $response = new Response($this->ch, $content !== false ? $content : null);
 
         $this->close();
 
@@ -181,17 +182,40 @@ class HttpClient
             );
         }
 
-        return $content;
+        return $response;
     }
 
     /**
-     * Close connection
+     * Close connection and reset state
      *
      * @return void
      */
     private function close(): void
     {
-        curl_close($this->ch);
+        $this->ch = null;
+        $this->headers = [];
+        $this->attach = [];
+        $this->accept_json = false;
+    }
+
+    /**
+     * Send request with custom HTTP method
+     *
+     * @param  string $method
+     * @param  string $url
+     * @param  array  $data
+     * @return Response
+     * @throws Exception
+     */
+    private function sendWithMethod(string $method, string $url, array $data = []): Response
+    {
+        $this->init($url);
+        $this->addFields($data);
+        $this->applyCommonOptions();
+
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $method);
+
+        return $this->execute();
     }
 
     /**
@@ -221,9 +245,7 @@ class HttpClient
 
         curl_setopt($this->ch, CURLOPT_POST, true);
 
-        $content = $this->execute();
-
-        return new Response($this->ch, $content);
+        return $this->execute();
     }
 
     /**
@@ -257,15 +279,7 @@ class HttpClient
      */
     public function put(string $url, array $data = []): Response
     {
-        $this->init($url);
-        $this->addFields($data);
-        $this->applyCommonOptions();
-
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT");
-
-        $content = $this->execute();
-
-        return new Response($this->ch, $content);
+        return $this->sendWithMethod("PUT", $url, $data);
     }
 
     /**
@@ -278,15 +292,60 @@ class HttpClient
      */
     public function delete(string $url, array $data = []): Response
     {
+        return $this->sendWithMethod("DELETE", $url, $data);
+    }
+
+    /**
+     * Make PATCH request
+     *
+     * @param  string $url
+     * @param  array  $data
+     * @return Response
+     * @throws Exception
+     */
+    public function patch(string $url, array $data = []): Response
+    {
+        return $this->sendWithMethod("PATCH", $url, $data);
+    }
+
+    /**
+     * Make HEAD request (retrieves headers only, no body)
+     *
+     * @param  string $url
+     * @param  array  $data
+     * @return Response
+     * @throws Exception
+     */
+    public function head(string $url, array $data = []): Response
+    {
+        if (count($data) > 0) {
+            $url = $url . "?" . http_build_query($data);
+        }
+
         $this->init($url);
-        $this->addFields($data);
         $this->applyCommonOptions();
 
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($this->ch, CURLOPT_NOBODY, true);
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "HEAD");
 
-        $content = $this->execute();
+        return $this->execute();
+    }
 
-        return new Response($this->ch, $content);
+    /**
+     * Make OPTIONS request (retrieves allowed HTTP methods)
+     *
+     * @param  string $url
+     * @return Response
+     * @throws Exception
+     */
+    public function options(string $url): Response
+    {
+        $this->init($url);
+        $this->applyCommonOptions();
+
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "OPTIONS");
+
+        return $this->execute();
     }
 
     /**
