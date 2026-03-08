@@ -102,6 +102,64 @@ class HttpClientTest extends TestCase
         $this->assertEquals(200, $response->statusCode());
     }
 
+    // ==================== PATCH Method Tests ====================
+
+    public function test_patch_method_with_data()
+    {
+        $http = new HttpClient();
+        $response = $http->patch("https://httpbin.org/patch", [
+            'name' => 'patched',
+            'value' => 'example'
+        ]);
+
+        $this->assertEquals(200, $response->statusCode());
+        $this->assertStringContainsString('patched', $response->getContent());
+    }
+
+    public function test_patch_method_with_json_data()
+    {
+        $http = new HttpClient();
+        $http->acceptJson();
+
+        $response = $http->patch("https://httpbin.org/patch", [
+            'name' => 'patched',
+            'value' => 'json-example'
+        ]);
+
+        $this->assertEquals(200, $response->statusCode());
+        $this->assertStringContainsString('json-example', $response->getContent());
+    }
+
+    // ==================== HEAD Method Tests ====================
+
+    public function test_head_method()
+    {
+        $http = new HttpClient();
+        $response = $http->head("https://httpbin.org/get");
+
+        $this->assertEquals(200, $response->statusCode());
+        // HEAD should not return body content
+        $this->assertEmpty($response->getContent());
+    }
+
+    public function test_head_method_with_query_params()
+    {
+        $http = new HttpClient();
+        $response = $http->head("https://httpbin.org/get", ['key' => 'value']);
+
+        $this->assertEquals(200, $response->statusCode());
+    }
+
+    // ==================== OPTIONS Method Tests ====================
+
+    public function test_options_method()
+    {
+        $http = new HttpClient();
+        $response = $http->options("https://httpbin.org/get");
+
+        $this->assertEquals(200, $response->statusCode());
+    }
+
     // ==================== Header Tests ====================
 
     public function test_add_multiple_headers()
