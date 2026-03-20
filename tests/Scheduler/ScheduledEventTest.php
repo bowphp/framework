@@ -287,7 +287,7 @@ class ScheduledEventTest extends TestCase
         $this->expectExceptionMessage('Task class [NonExistentClass] does not exist');
 
         // Create a mock that skips queue push
-        $event = new class(ScheduledEvent::TYPE_TASK, 'NonExistentClass') extends ScheduledEvent {
+        $event = new class (ScheduledEvent::TYPE_TASK, 'NonExistentClass') extends ScheduledEvent {
             protected function pushToQueue(\Bow\Queue\QueueTask $task): void
             {
                 // Skip actual queue push in test
@@ -303,7 +303,7 @@ class ScheduledEventTest extends TestCase
         $this->expectExceptionMessage('Task must be an instance of');
 
         // Create a mock that skips queue push
-        $event = new class(ScheduledEvent::TYPE_TASK, new \stdClass()) extends ScheduledEvent {
+        $event = new class (ScheduledEvent::TYPE_TASK, new \stdClass()) extends ScheduledEvent {
             protected function pushToQueue(\Bow\Queue\QueueTask $task): void
             {
                 // Skip actual queue push in test

@@ -51,7 +51,7 @@ abstract class Configuration
      */
     public function create(Loader $config): void
     {
-        // By default, we do nothing here, but you can override this method in your configuration class 
+        // By default, we do nothing here, but you can override this method in your configuration class
         // to set up your server or package as needed.
     }
 
