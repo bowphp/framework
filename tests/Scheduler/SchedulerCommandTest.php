@@ -353,7 +353,7 @@ class SchedulerCommandTest extends TestCase
         // Skipped status only occurs with overlap prevention when lock is already held
         // For this test, we'll just verify the displayResult method handles 'skipped' status
         // by checking the match expression in the code exists and works
-        
+
         // Register an event that will be due
         $this->scheduler->call(fn() => 'test')
             ->everyMinute()
@@ -387,7 +387,7 @@ class SchedulerCommandTest extends TestCase
     public function test_full_workflow_register_list_run()
     {
         $counter = 0;
-        
+
         $this->scheduler->call(function () use (&$counter) {
             $counter++;
             return $counter;
@@ -414,7 +414,7 @@ class SchedulerCommandTest extends TestCase
 
     public function test_multiple_event_types_in_list()
     {
-        
+
         $this->scheduler->call(fn() => 'closure')->everyMinute()->description('Closure event');
         $this->scheduler->command('test:command')->hourly()->description('Command event');
         $this->scheduler->exec('echo hello')->daily()->description('Exec event');
@@ -431,7 +431,7 @@ class SchedulerCommandTest extends TestCase
 
     public function test_events_with_different_schedules()
     {
-        
+
         $this->scheduler->call(fn() => null)->everyMinute();
         $this->scheduler->call(fn() => null)->hourly();
         $this->scheduler->call(fn() => null)->daily();
@@ -459,7 +459,7 @@ class SchedulerCommandTest extends TestCase
 
         $markerFile = TESTING_RESOURCE_BASE_DIRECTORY . '/scheduler_marker.txt';
         $schedulerFile = $routesDir . '/scheduler.php';
-        
+
         file_put_contents($schedulerFile, '<?php
 use Bow\Scheduler\Scheduler;
 $scheduler = Scheduler::getInstance();

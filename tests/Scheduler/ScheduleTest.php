@@ -223,10 +223,10 @@ class ScheduleTest extends TestCase
     public function test_is_due_specific_time()
     {
         $this->schedule->dailyAt('10:30');
-        
+
         $dueTime = new DateTime('today 10:30');
         $notDueTime = new DateTime('today 11:00');
-        
+
         $this->assertTrue($this->schedule->isDue($dueTime));
         $this->assertFalse($this->schedule->isDue($notDueTime));
     }
@@ -284,10 +284,10 @@ class ScheduleTest extends TestCase
     public function test_is_due_hourly()
     {
         $this->schedule->hourly();
-        
+
         $dueTime = new DateTime('today 14:00');
         $notDueTime = new DateTime('today 14:30');
-        
+
         $this->assertTrue($this->schedule->isDue($dueTime));
         $this->assertFalse($this->schedule->isDue($notDueTime));
     }
@@ -295,10 +295,10 @@ class ScheduleTest extends TestCase
     public function test_is_due_with_step()
     {
         $this->schedule->everyFiveMinutes();
-        
+
         $dueTime = new DateTime('today 14:05');
         $notDueTime = new DateTime('today 14:03');
-        
+
         $this->assertTrue($this->schedule->isDue($dueTime));
         $this->assertFalse($this->schedule->isDue($notDueTime));
     }

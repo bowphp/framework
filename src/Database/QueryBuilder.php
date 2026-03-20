@@ -290,16 +290,12 @@ class QueryBuilder implements JsonSerializable
             return false;
         }
 
-        return in_array(
-            Str::upper($comparator),
-            [
+        return in_array(Str::upper($comparator), [
             '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN",
             'ILIKE', '&', '|', '<<', '>>', 'NOT LIKE',
             '&&', '@>', '<@', '?', '?|', '?&', '||', '-', '@?', '@@', '#-',
             'IS DISTINCT FROM', 'IS NOT DISTINCT FROM',
-            ],
-            true
-        );
+        ], true);
     }
 
     /**
@@ -397,15 +393,14 @@ class QueryBuilder implements JsonSerializable
      * WHERE column IS NULL
      *
      * @param  string $column
-     * @param  string $boolean
      * @return QueryBuilder
      */
-    public function whereNull(string $column, string $boolean = 'and'): QueryBuilder
+    public function whereNull(string $column): QueryBuilder
     {
         if (is_null($this->where)) {
             $this->where = $column . ' is null';
         } else {
-            $this->where .= ' ' . $boolean . ' ' . $column . ' is null';
+            $this->where .= ' and ' . $column . ' is null';
         }
 
         return $this;
@@ -416,16 +411,15 @@ class QueryBuilder implements JsonSerializable
      *
      * WHERE column NOT NULL
      *
-     * @param  $column
-     * @param  string $boolean
+     * @param  string $column
      * @return QueryBuilder
      */
-    public function whereNotNull($column, $boolean = 'and'): QueryBuilder
+    public function whereNotNull(string $column): QueryBuilder
     {
         if (is_null($this->where)) {
             $this->where = $column . ' is not null';
         } else {
-            $this->where .= ' ' . $boolean . ' ' . $column . ' is not null';
+            $this->where .= ' and ' . $column . ' is not null';
         }
 
         return $this;
@@ -440,7 +434,14 @@ class QueryBuilder implements JsonSerializable
      */
     public function whereNotBetween(string $column, array $range): QueryBuilder
     {
-        $this->whereBetween($column, $range, 'not');
+        $range = (array) $range;
+        $between = implode(' and ', $range);
+
+        if (is_null($this->where)) {
+            $this->where = $column . ' not between ' . $between;
+        } else {
+            $this->where .= ' and ' . $column . ' not between ' . $between;
+        }
 
         return $this;
     }
@@ -452,28 +453,32 @@ class QueryBuilder implements JsonSerializable
      *
      * @param  string $column
      * @param  array  $range
-     * @param  string $boolean
      * @return QueryBuilder
-     * @throws QueryBuilderException
      */
-    public function whereBetween(string $column, array $range, string $boolean = 'and'): QueryBuilder
+    public function whereBetween(string $column, array $range): QueryBuilder
     {
-        $range = (array)$range;
+        $range = (array) $range;
         $between = implode(' and ', $range);
 
         if (is_null($this->where)) {
-            if ($boolean == 'not') {
-                $this->where = $column . ' not between ' . $between;
-            } else {
-                $this->where = $column . ' between ' . $between;
-            }
+            $this->where = $column . ' between ' . $between;
         } else {
-            if ($boolean == 'not') {
-                $this->where .= ' and ' . $column . ' not between ' . $between;
-            } else {
-                $this->where .= ' ' . $boolean . ' ' . $column . ' between ' . $between;
-            }
+            $this->where .= ' and ' . $column . ' between ' . $between;
         }
+
+        return $this;
+    }
+
+    /**
+     * WHERE column NOT BETWEEN '' AND ''
+     *
+     * @param  string $column
+     * @param  mixed  $value
+     * @return QueryBuilder
+     */
+    public function whereDifferent(string $column, mixed $value): QueryBuilder
+    {
+        $this->where($column, '<>', $value);
 
         return $this;
     }
@@ -488,7 +493,25 @@ class QueryBuilder implements JsonSerializable
      */
     public function whereNotIn(string $column, array $range)
     {
-        $this->whereIn($column, $range, 'not');
+        if ($range instanceof QueryBuilder) {
+            $range = "(" . $range->toSql() . ")";
+        }
+
+        if (is_array($range)) {
+            $range = (array)$range;
+            $this->where_data_binding = array_merge($this->where_data_binding, $range);
+
+            $map = array_map(fn() => '?', $range);
+            $in = implode(', ', $map);
+        } else {
+            $in = (string) $range;
+        }
+
+        if (is_null($this->where)) {
+            $this->where = $column . ' not in (' . $in . ')';
+        } else {
+            $this->where .= ' and ' . $column . ' not in (' . $in . ')';
+        }
 
         return $this;
     }
@@ -498,11 +521,10 @@ class QueryBuilder implements JsonSerializable
      *
      * @param  string $column
      * @param  array  $range
-     * @param  string $boolean
      * @return QueryBuilder
      * @throws QueryBuilderException
      */
-    public function whereIn(string $column, array $range, string $boolean = 'and'): QueryBuilder
+    public function whereIn(string $column, array $range): QueryBuilder
     {
         if ($range instanceof QueryBuilder) {
             $range = "(" . $range->toSql() . ")";
@@ -515,21 +537,13 @@ class QueryBuilder implements JsonSerializable
             $map = array_map(fn() => '?', $range);
             $in = implode(', ', $map);
         } else {
-            $in = (string)$range;
+            $in = (string) $range;
         }
 
         if (is_null($this->where)) {
-            if ($boolean == 'not') {
-                $this->where = $column . ' not in (' . $in . ')';
-            } else {
-                $this->where = $column . ' in (' . $in . ')';
-            }
+            $this->where = $column . ' in (' . $in . ')';
         } else {
-            if ($boolean == 'not') {
-                $this->where .= ' and ' . $column . ' not in (' . $in . ')';
-            } else {
-                $this->where .= ' and ' . $column . ' in (' . $in . ')';
-            }
+            $this->where .= ' and ' . $column . ' in (' . $in . ')';
         }
 
         return $this;
@@ -727,8 +741,8 @@ class QueryBuilder implements JsonSerializable
     /**
      * Clause Group By
      *
-     * @param      string $column
-     * @return     QueryBuilder
+     * @param   string $column
+     * @return  QueryBuilder
      * @deprecated
      */
     public function group($column)
