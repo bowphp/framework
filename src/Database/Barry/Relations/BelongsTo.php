@@ -38,7 +38,7 @@ class BelongsTo extends Relation
      */
     public function getResults(): mixed
     {
-        $key = $this->query->getTable() . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
+        $key = $this->query->getTable() . ":" . $this->local_key . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
 
         $cache = Cache::store('file')->get($key);
 
