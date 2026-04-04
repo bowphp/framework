@@ -22,5 +22,11 @@ trait NullableRule
         if (!preg_match("/^nullable$/", $masque, $match)) {
             return;
         }
+
+        if (isset($this->inputs[$key]) && !Str::isEmpty($this->inputs[$key])) {
+            return;
+        }
+
+        $this->inputs[$key] = null;
     }
 }

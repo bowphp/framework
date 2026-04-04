@@ -176,6 +176,11 @@ class Validator
                 continue;
             }
 
+            if ($masque == "nullable") {
+                $this->compileNullable($field, $masque);
+                break;
+            }
+
             // Mask on the required rule
             foreach ($this->rules as $rule) {
                 $this->{'compile' . $rule}($field, $masque);
