@@ -30,6 +30,20 @@ class Request
     private array $input = [];
 
     /**
+     * Define the post variables
+     *
+     * @var array
+     */
+    private array $post = [];
+
+    /**
+     * Define the query variables
+     *
+     * @var array
+     */
+    private array $query = [];
+
+    /**
      * Define the bags instance
      *
      * @var array
@@ -91,17 +105,45 @@ class Request
             }
         }
 
-        $this->input = array_merge((array)$data, $_GET);
+        $this->post = $data;
+        $this->query = $_GET;
+        $this->input = array_merge((array) $data, $this->query);
 
         foreach ($this->input as $key => $value) {
-            if (is_string($value) && strlen($value) == 0) {
-                $value = null;
-            }
-
-            $this->input[$key] = $value;
+            $this->input[$key] = is_string($value) && strlen($value) == 0 ? null : $value;
         }
 
         $this->capture = true;
+    }
+
+    /**
+     * Retrieve query variables
+     *
+     * @param string|null $key
+     * @return array
+     */
+    public function query(?string $key = null): array
+    {
+        if ($key === null) {
+            return $this->query;
+        }
+
+        return $this->query[$key] ?? [];
+    }
+
+    /**
+     * Get posted data
+     *
+     * @param string|null $key
+     * @return array
+     */
+    public function post(?string $key = null): array
+    {
+        if ($key === null) {
+            return $this->post;
+        }
+
+        return $this->post[$key] ?? [];
     }
 
     /**
@@ -430,6 +472,11 @@ class Request
         return $content_type && str_contains($content_type, "application/json");
     }
 
+    /**
+     * Determine if is accept application/json
+     *
+     * @return boolean
+     */
     public function wantsJson(): bool
     {
         $accept = $this->getHeader('accept');
