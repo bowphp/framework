@@ -15,18 +15,20 @@ trait NullableRule
      *
      * @param  string $key
      * @param  string $masque
-     * @return void
+     * @return bool
      */
-    protected function compileNullable(string $key, string $masque): void
+    protected function compileNullable(string $key, string $masque): bool
     {
         if (!preg_match("/^nullable$/", $masque, $match)) {
-            return;
+            return false;
         }
 
         if (isset($this->inputs[$key]) && !Str::isEmpty($this->inputs[$key])) {
-            return;
+            return false;
         }
 
         $this->inputs[$key] = null;
+
+        return true;
     }
 }

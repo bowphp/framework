@@ -176,8 +176,7 @@ class Validator
                 continue;
             }
 
-            if ($masque == "nullable") {
-                $this->compileNullable($field, $masque);
+            if ($masque == "nullable" && $this->compileNullable($field, $masque)) {
                 break;
             }
 
