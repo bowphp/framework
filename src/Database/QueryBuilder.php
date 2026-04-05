@@ -291,10 +291,37 @@ class QueryBuilder implements JsonSerializable
         }
 
         return in_array(Str::upper($comparator), [
-            '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN",
-            'ILIKE', '&', '|', '<<', '>>', 'NOT LIKE',
-            '&&', '@>', '<@', '?', '?|', '?&', '||', '-', '@?', '@@', '#-',
-            'IS DISTINCT FROM', 'IS NOT DISTINCT FROM',
+            '=',
+            '>',
+            '<',
+            '>=',
+            '=<',
+            '<>',
+            '!=',
+            'LIKE',
+            'NOT',
+            'IS NOT',
+            "IN",
+            "NOT IN",
+            'ILIKE',
+            '&',
+            '|',
+            '<<',
+            '>>',
+            'NOT LIKE',
+            '&&',
+            '@>',
+            '<@',
+            '?',
+            '?|',
+            '?&',
+            '||',
+            '-',
+            '@?',
+            '@@',
+            '#-',
+            'IS DISTINCT FROM',
+            'IS NOT DISTINCT FROM',
         ], true);
     }
 
@@ -905,6 +932,10 @@ class QueryBuilder implements JsonSerializable
                     $param = PDO::PARAM_INT;
                 } elseif (is_resource($value)) {
                     $param = PDO::PARAM_LOB;
+                } elseif (is_bool($value)) {
+                    $param = PDO::PARAM_BOOL;
+                } elseif (is_string($value)) {
+                    $param = PDO::PARAM_STR;
                 }
                 $key_binding = is_string($key) ? ":$key" : $key + 1;
                 $pdo_statement->bindValue($key_binding, $value, $param);
@@ -920,6 +951,10 @@ class QueryBuilder implements JsonSerializable
                     $param = PDO::PARAM_INT;
                 } elseif (is_resource($value)) {
                     $param = PDO::PARAM_LOB;
+                } elseif (is_bool($value)) {
+                    $param = PDO::PARAM_BOOL;
+                } elseif (is_string($value)) {
+                    $param = PDO::PARAM_STR;
                 }
                 $pdo_statement->bindValue($i, $value, $param);
                 $i++;
