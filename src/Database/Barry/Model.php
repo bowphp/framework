@@ -890,10 +890,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
         if (!$attribute_exists && method_exists($this, $name)) {
             $result = $this->$name();
-            if ($result instanceof Relation) {
-                return $result->getResults();
-            }
-            return $result;
+            return $result instanceof Relation ? $result->getResults() : $result;
         }
 
         if (!$attribute_exists) {
@@ -998,23 +995,27 @@ abstract class Model implements ArrayAccess, JsonSerializable
         }
 
         if ($type === "int") {
-            return (int)$value;
+            return (int) $value;
         }
 
         if ($type === "float") {
-            return (float)$value;
+            return (float) $value;
         }
 
         if ($type === "double") {
-            return (float)$value;
+            return (float) $value;
+        }
+
+        if ($type === "boolean" || $type === "bool") {
+            return (bool) $value;
         }
 
         if ($type === "json") {
             if (is_array($value)) {
-                return (object)$value;
+                return (object) $value;
             }
             if (is_object($value)) {
-                return (object)$value;
+                return (object) $value;
             }
             return json_decode(
                 $value,
