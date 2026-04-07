@@ -8,5 +8,17 @@ use ErrorException;
 
 class QueryBuilderException extends ErrorException
 {
-    // Empty
+    protected string $query;
+
+    public function __construct(
+        string $message,
+        string $query = '',
+        int $code = 0,
+        int $severity = E_ERROR,
+        ?string $filename = null,
+        ?int $line = null
+    ) {
+        parent::__construct($message, $code, $severity, $filename, $line);
+        $this->query = $query;
+    }
 }
