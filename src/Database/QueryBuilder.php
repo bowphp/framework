@@ -10,7 +10,6 @@ use Bow\Security\Sanitize;
 use Bow\Support\Str;
 use JsonSerializable;
 use PDO;
-use PDOException;
 use PDOStatement;
 
 class QueryBuilder implements JsonSerializable
