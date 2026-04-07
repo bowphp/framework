@@ -190,7 +190,7 @@ class QueryBuilder implements JsonSerializable
         }
 
         if (!empty($data)) {
-            $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
+            $this->where_data_binding = array_merge($this->where_data_binding, array_values($data));
         }
 
         return $this;
@@ -214,7 +214,7 @@ class QueryBuilder implements JsonSerializable
         }
 
         if (!empty($data)) {
-            $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
+            $this->where_data_binding = array_merge($this->where_data_binding, array_values($data));
         }
 
         return $this;
@@ -1477,7 +1477,7 @@ class QueryBuilder implements JsonSerializable
             $this->triggerQueryEvent($sql, $bindings);
         } catch (\Exception $e) {
             throw new QueryBuilderException(
-                'Error executing query: ' . $e->getMessage(),
+                'Error executing query: ' . $e->getMessage() . ' | Query: ' . $this->last_query,
                 $this->last_query,
                 E_ERROR,
             );
