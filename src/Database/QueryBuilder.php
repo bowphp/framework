@@ -10,6 +10,7 @@ use Bow\Security\Sanitize;
 use Bow\Support\Str;
 use JsonSerializable;
 use PDO;
+use PDOException;
 use PDOStatement;
 
 class QueryBuilder implements JsonSerializable
@@ -113,6 +114,13 @@ class QueryBuilder implements JsonSerializable
     protected string $adapter = '';
 
     /**
+     * Determine the last sql query
+     *
+     * @var string|null
+     */
+    protected ?string $last_query = null;
+
+    /**
      * QueryBuilder Constructor
      *
      * @param string                 $table
@@ -170,14 +178,19 @@ class QueryBuilder implements JsonSerializable
      * WHERE column1 $comparator $value|column
      *
      * @param  string $where
+     * @param  array  $data
      * @return QueryBuilder
      */
-    public function whereRaw(string $where): QueryBuilder
+    public function whereRaw(string $where, array $data = []): QueryBuilder
     {
         if ($this->where == null) {
             $this->where = $where;
         } else {
             $this->where .= ' and ' . $where;
+        }
+
+        if (!empty($data)) {
+            $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
         }
 
         return $this;
@@ -189,14 +202,19 @@ class QueryBuilder implements JsonSerializable
      * WHERE column1 $comparator $value|column
      *
      * @param  string $where
+     * @param  array  $data
      * @return QueryBuilder
      */
-    public function orWhereRaw(string $where): QueryBuilder
+    public function orWhereRaw(string $where, array $data = []): QueryBuilder
     {
         if ($this->where == null) {
             $this->where = $where;
         } else {
             $this->where .= ' or ' . $where;
+        }
+
+        if (!empty($data)) {
+            $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
         }
 
         return $this;
@@ -217,8 +235,7 @@ class QueryBuilder implements JsonSerializable
     {
         if (is_null($this->where)) {
             throw new QueryBuilderException(
-                'This function can not be used without a where before.',
-                E_ERROR
+                'This function can not be used without a where before.'
             );
         }
 
@@ -252,13 +269,12 @@ class QueryBuilder implements JsonSerializable
         }
 
         if ($value === null) {
-            throw new QueryBuilderException('Unresolved comparison value', E_ERROR);
+            throw new QueryBuilderException('Unresolved comparison value');
         }
 
         if (!in_array(Str::lower($boolean), ['and', 'or'])) {
             throw new QueryBuilderException(
-                'The bool ' . $boolean . ' not accepted',
-                E_ERROR
+                'The bool ' . $boolean . ' not accepted'
             );
         }
 
@@ -719,8 +735,7 @@ class QueryBuilder implements JsonSerializable
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException(
-                'The inner join clause is already initialized.',
-                E_ERROR
+                'The inner join clause is already initialized.'
             );
         }
 
@@ -750,7 +765,6 @@ class QueryBuilder implements JsonSerializable
         if (is_null($this->join)) {
             throw new QueryBuilderException(
                 'The inner join clause is already initialized.',
-                E_ERROR
             );
         }
 
@@ -889,13 +903,8 @@ class QueryBuilder implements JsonSerializable
             }
         }
 
-        $statement = $this->connection->prepare($sql);
+        $statement = $this->execute($sql, $this->where_data_binding);
 
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
-
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         if ($statement->rowCount() > 1) {
@@ -926,7 +935,9 @@ class QueryBuilder implements JsonSerializable
             // Named placeholders
             foreach ($bindings as $key => $value) {
                 $param = PDO::PARAM_STR;
-                if (is_null($value) || strtolower((string) $value) === 'null') {
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                } elseif (is_null($value) || strtolower((string) $value) === 'null') {
                     $param = PDO::PARAM_NULL;
                 } elseif (is_int($value)) {
                     $param = PDO::PARAM_INT;
@@ -945,7 +956,9 @@ class QueryBuilder implements JsonSerializable
             $i = 1;
             foreach ($bindings as $value) {
                 $param = PDO::PARAM_STR;
-                if (is_null($value) || strtolower((string) $value) === 'null') {
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                } elseif (is_null($value) || strtolower((string) $value) === 'null') {
                     $param = PDO::PARAM_NULL;
                 } elseif (is_int($value)) {
                     $param = PDO::PARAM_INT;
@@ -1110,17 +1123,12 @@ class QueryBuilder implements JsonSerializable
         // Execution of request.
         $sql = $this->toSql();
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding);
 
         $data = $statement->fetchAll();
 
         $statement->closeCursor();
 
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         if (!$this->first) {
@@ -1215,20 +1223,14 @@ class QueryBuilder implements JsonSerializable
             $sql .= ' where ' . $this->where;
 
             $this->where = null;
-
-            $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
         }
 
-        $statement = $this->connection->prepare($sql);
+        $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
 
-        $this->bind($statement, $this->where_data_binding);
-
-        // Execution of the request
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding);
 
         $result = $statement->rowCount();
 
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         return (int) $result;
@@ -1265,15 +1267,10 @@ class QueryBuilder implements JsonSerializable
             $this->where = null;
         }
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding);
 
         $result = $statement->rowCount();
 
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         return (int) $result;
@@ -1290,6 +1287,18 @@ class QueryBuilder implements JsonSerializable
     public function increment(string $column, int $step = 1): int
     {
         return $this->incrementAction($column, $step);
+    }
+
+    /**
+     * Decrement column
+     *
+     * @param  string $column
+     * @param  int    $step
+     * @return int
+     */
+    public function decrement(string $column, int $step = 1): int
+    {
+        return $this->incrementAction($column, $step, '-');
     }
 
     /**
@@ -1310,25 +1319,9 @@ class QueryBuilder implements JsonSerializable
             $this->where = null;
         }
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding);
 
         return (int)$statement->rowCount();
-    }
-
-    /**
-     * Decrement column
-     *
-     * @param  string $column
-     * @param  int    $step
-     * @return int
-     */
-    public function decrement(string $column, int $step = 1): int
-    {
-        return $this->incrementAction($column, $step, '-');
     }
 
     /**
@@ -1371,9 +1364,13 @@ class QueryBuilder implements JsonSerializable
             $sql = 'truncate table ' . $this->table . ';';
         }
 
+        $this->last_query = $sql;
+
         $result = (bool) $this->connection->exec($sql);
 
         $this->triggerQueryEvent($sql, []);
+
+        $this->last_query = $sql;
 
         return $result;
     }
@@ -1422,7 +1419,6 @@ class QueryBuilder implements JsonSerializable
         if ($single_item_structure_detected && $mixture_item_structure_detected) {
             throw new QueryBuilderException(
                 'Mixed structure detected in insert data. Cannot mix single and multiple row inserts.',
-                E_ERROR
             );
         }
 
@@ -1455,15 +1451,39 @@ class QueryBuilder implements JsonSerializable
 
         $sql .= '(' . implode(', ', $this->add2points($fields, true)) . ');';
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $values);
-
-        $statement->execute();
-
-        $this->triggerQueryEvent($sql, $values);
+        $statement = $this->execute($sql, $values);
 
         return (int) $statement->rowCount();
+    }
+
+    /**
+     * Execute statement
+     *
+     * @param string $sql
+     * @param array $bindings
+     * @return PDOStatement
+     */
+    private function execute(string $sql, array $bindings = []): PDOStatement
+    {
+        $this->last_query = $sql;
+
+        $statement = $this->connection->prepare($sql);
+
+        $this->bind($statement, $bindings);
+
+        try {
+            $statement->execute();
+
+            $this->triggerQueryEvent($sql, $bindings);
+        } catch (\Exception $e) {
+            throw new QueryBuilderException(
+                'Error executing query: ' . $e->getMessage(),
+                $this->last_query,
+                E_ERROR,
+            );
+        }
+
+        return $statement;
     }
 
     /**
@@ -1474,6 +1494,8 @@ class QueryBuilder implements JsonSerializable
     public function drop(): bool
     {
         $sql = 'drop table ' . $this->table;
+
+        $this->last_query = $sql;
 
         $result = (bool) $this->connection->exec($sql);
 

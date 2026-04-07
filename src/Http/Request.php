@@ -402,6 +402,10 @@ class Request
             return null;
         }
 
+        if (!is_uploaded_file($_FILES[$key]['tmp_name']) === UPLOAD_ERR_OK) {
+            return null;
+        }
+
         if (!is_array($_FILES[$key]['name'])) {
             return new UploadedFile($_FILES[$key]);
         }

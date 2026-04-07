@@ -1017,12 +1017,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
             if (is_object($value)) {
                 return (object) $value;
             }
-            return json_decode(
-                $value,
-                false,
-                512,
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
-            );
+            return $this->parseToJson($value);
         }
 
         if ($type === "array") {
@@ -1032,14 +1027,25 @@ abstract class Model implements ArrayAccess, JsonSerializable
             if (is_object($value)) {
                 return (array) $value;
             }
-            return json_decode(
-                $value,
-                true,
-                512,
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
-            );
+            return $this->parseToJson($value);
         }
 
         return $this->attributes[$name];
+    }
+
+    /**
+     * Parse value to json
+     *
+     * @param string $value
+     * @return void
+     */
+    private function parseToJson($value)
+    {
+        return json_decode(
+            $value,
+            false,
+            512,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
+        );
     }
 }
