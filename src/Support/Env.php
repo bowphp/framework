@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
-use Bow\Application\Exception\ApplicationException;
 use ErrorException;
-use InvalidArgumentException;
 
 /**
  * Class Env
@@ -82,11 +80,11 @@ class Env
     /**
      * Load env file
      *
-     * @param  string $filename
+     * @param  ?string $filename
      * @return void
      * @throws
      */
-    public static function configure(string $filename)
+    public static function configure(?string $filename = null): void
     {
         if (static::$instance !== null) {
             return;
