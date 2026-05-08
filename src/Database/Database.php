@@ -426,6 +426,14 @@ class Database
      */
     public static function commit(): void
     {
+        static::commitTransaction();
+    }
+
+    /**
+     * Validate a transaction
+     */
+    public static function commitTransaction(): void
+    {
         if (static::inTransaction()) {
             static::$adapter->getConnection()->commit();
         }
@@ -435,6 +443,14 @@ class Database
      * Cancel a transaction
      */
     public static function rollback(): void
+    {
+        static::rollbackTransaction();
+    }
+
+    /**
+     * Cancel a transaction
+     */
+    public static function rollbackTransaction(): void
     {
         if (static::inTransaction()) {
             static::$adapter->getConnection()->rollBack();
