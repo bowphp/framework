@@ -120,6 +120,20 @@ class QueryBuilder implements JsonSerializable
     protected ?string $last_query = null;
 
     /**
+     * Lock rows for update
+     *
+     * @var bool
+     */
+    protected bool $lock_for_update = false;
+
+    /**
+     * Lock rows in share mode
+     *
+     * @var bool
+     */
+    protected bool $shared_lock = false;
+
+    /**
      * QueryBuilder Constructor
      *
      * @param string                 $table
@@ -401,6 +415,20 @@ class QueryBuilder implements JsonSerializable
             if (!is_null($this->having)) {
                 $sql .= ' having ' . $this->having;
             }
+        }
+
+        // Adding the lock for update clause
+        if ($this->lock_for_update) {
+            $sql .= ' for update';
+
+            $this->lock_for_update = false;
+        }
+
+        // Adding the shared lock clause
+        if ($this->shared_lock) {
+            $sql .= $this->adapter === 'pgsql' ? ' for share' : ' lock in share mode';
+
+            $this->shared_lock = false;
         }
 
         return $sql;
@@ -1080,6 +1108,30 @@ class QueryBuilder implements JsonSerializable
         $this->take(1);
 
         return $this->get();
+    }
+
+    /**
+     * Lock the selected rows for update
+     *
+     * @return QueryBuilder
+     */
+    public function lockForUpdate(): QueryBuilder
+    {
+        $this->lock_for_update = true;
+
+        return $this;
+    }
+
+    /**
+     * Lock the selected rows in share mode
+     *
+     * @return QueryBuilder
+     */
+    public function sharedLock(): QueryBuilder
+    {
+        $this->shared_lock = true;
+
+        return $this;
     }
 
     /**

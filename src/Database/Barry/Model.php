@@ -22,11 +22,11 @@ use JsonSerializable;
 use ReflectionClass;
 
 /**
- * @method select(array|string[] $select)
- * @method whereIn(string $primary_key, array $id)
- * @method get()
- * @method where(string $column, mixed $value)
- * @method orderBy(string $latest, string $string)
+ * @method static select(array|string[] $select): Builder
+ * @method static whereIn(string $primary_key, array $id): Builder
+ * @method static all(): Collection
+ * @method static where(string $column, mixed $value): Builder
+ * @method static orderBy(string $latest, string $string): Builder
  */
 abstract class Model implements ArrayAccess, JsonSerializable
 {
@@ -188,7 +188,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Initialize the connection
      *
      * @return Builder
-     * @throws
      */
     public static function query(): Builder
     {
@@ -374,7 +373,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Delete a record
      *
      * @return int
-     * @throws
      */
     public function delete(): int
     {
@@ -482,7 +480,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * persist aliases on insert action
      *
      * @return int
-     * @throws
      */
     public function persist(): int
     {
@@ -601,7 +598,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      *
      * @param  array $attributes
      * @return int|bool
-     * @throws
      */
     public function update(array $attributes): int|bool
     {
@@ -666,7 +662,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function deleted(callable $cb): void
     {
@@ -679,7 +674,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function deleting(callable $cb): void
     {
@@ -692,7 +686,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function creating(callable $cb): void
     {
@@ -705,7 +698,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function created(callable $cb): void
     {
@@ -718,7 +710,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function updating(callable $cb): void
     {
@@ -731,7 +722,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function updated(callable $cb): void
     {
@@ -760,7 +750,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      *
      * @param  string $name
      * @param  array  $arguments
-     * @return mixed
+     * @return Builder|Collection|Model|mixed
      */
     public static function __callStatic(string $name, array $arguments)
     {
@@ -1037,9 +1027,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Parse value to json
      *
      * @param string $value
-     * @return void
+     * @return mixed
      */
-    private function parseToJson($value)
+    private function parseToJson($value): mixed
     {
         return json_decode(
             $value,

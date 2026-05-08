@@ -500,7 +500,7 @@ class Request
      */
     public function is(string $match): bool
     {
-        return (bool)preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->path());
+        return (bool) preg_match('@' . addcslashes($match, "/{()}[]$^") . '@', $this->path());
     }
 
     /**
@@ -511,7 +511,7 @@ class Request
      */
     public function isReferer(string $match): bool
     {
-        return (bool)preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->referer());
+        return (bool) preg_match('@' . addcslashes($match, "/{()}[]$^") . '@', $this->referer());
     }
 
     /**
