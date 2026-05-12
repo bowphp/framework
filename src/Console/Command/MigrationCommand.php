@@ -72,18 +72,15 @@ class MigrationCommand extends AbstractCommand
         }
 
         try {
-            Database::startTransaction();
             // We create the migration database status
-            $this->createMigrationTable($connection);
+            $this->createMigrationTable();
 
             $action = 'make' . ucfirst($type);
             if (!method_exists($this, $action)) {
                 throw new MigrationException("Migration action '$action' not found.");
             }
             $this->$action($migrations);
-            Database::commitTransaction();
         } catch (Exception $exception) {
-            Database::rollbackTransaction();
             throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
         }
     }
