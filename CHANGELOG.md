@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.2.95 - 2026-05-08
+
+### What's Changed
+
+* Fix data binding by @papac in https://github.com/bowphp/framework/pull/381
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/382
+* Optimize database query performance by @papac in https://github.com/bowphp/framework/pull/383
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.94...5.2.95
+
 ## 5.2.94 - 2026-04-07
 
 ### What's Changed
@@ -194,6 +204,7 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
+
 
 
 
