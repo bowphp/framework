@@ -1558,12 +1558,12 @@ class QueryBuilder implements JsonSerializable
     /**
      * Paginate, make pagination system
      *
-     * @param  int $number_of_page
+     * @param  int $per_page
      * @param  int $current
      * @param  int $chunk
      * @return Pagination
      */
-    public function paginate(int $number_of_page, int $current = 0, ?int $chunk = null): Pagination
+    public function paginate(int $per_page, int $current = 0, ?int $chunk = null): Pagination
     {
         // We go to back page
         --$current;
@@ -1573,7 +1573,7 @@ class QueryBuilder implements JsonSerializable
             $jump = 0;
             $current = 1;
         } else {
-            $jump = $number_of_page * $current;
+            $jump = $per_page * $current;
             $current++;
         }
 
@@ -1582,7 +1582,7 @@ class QueryBuilder implements JsonSerializable
         $join = $this->join;
         $data_bind = $this->where_data_binding;
 
-        $data = $this->jump($jump)->take($number_of_page)->get();
+        $data = $this->jump($jump)->take($per_page)->get();
 
         if (is_array($data)) {
             $data = collect($data);
@@ -1594,7 +1594,9 @@ class QueryBuilder implements JsonSerializable
         $this->where_data_binding = $data_bind;
 
         // We count the number of pages that remain
-        $rest_of_page = ceil($this->count() / $number_of_page) - $current;
+        $total = $this->count();
+        $total_of_page = (int) ceil($total / $per_page);
+        $rest_of_page = $total_of_page - $current;
 
         // Grouped data
         if (is_int($chunk)) {
@@ -1603,12 +1605,12 @@ class QueryBuilder implements JsonSerializable
 
         // Enables automatic paging.
         return new Pagination(
-            $current >= 1 && $rest_of_page > 0 ? $current + 1 : 0,
-            ($current - 1) <= 0 ? 1 : ($current - 1),
-            (int)($rest_of_page + $current),
-            $number_of_page,
-            $current,
-            $data
+            next: $current >= 1 && $rest_of_page > 0 ? $current + 1 : 0,
+            previous: ($current - 1) <= 0 ? 1 : ($current - 1),
+            total: $total,
+            perPage: $per_page,
+            current: $current,
+            data: $data,
         );
     }
 
