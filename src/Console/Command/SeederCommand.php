@@ -40,12 +40,14 @@ class SeederCommand extends AbstractCommand
      */
     private function make(string $seed_filename, string $seeder_class_name): void
     {
+        $file_basename = basename($seed_filename);
         try {
+            echo Color::green("Seeding: seeders/$file_basename\n");
             include_once $seed_filename;
             (new $seeder_class_name())->run();
-            echo Color::green("Seeding completed: $seed_filename\n");
+            echo Color::green("Seeded: seeders/$file_basename\n");
         } catch (Exception $e) {
-            echo Color::red("Seeding failed for: $seed_filename");
+            echo Color::red("Seeding failed for: seeders/$file_basename");
             echo Color::red("\n" . $e->getMessage());
         }
     }
@@ -73,12 +75,8 @@ class SeederCommand extends AbstractCommand
             break;
         }
 
-        foreach ($seeder_files as $file => $seeder_class_name) {
-            echo Color::green("Seeding: $file");
-
-            $this->make($file, $seeder_class_name);
-
-            echo Color::green("Seeding completed: $file");
+        foreach ($seeder_files as $file => $_seeder_class_name) {
+            $this->make($file, $_seeder_class_name);
         }
     }
 

@@ -9,9 +9,29 @@ namespace Bow\Support;
  * @method static void alert(string $message, array $context = [])
  * @method static void critical(string $message, array $context = [])
  * @method static void emergency(string $message, array $context = [])
+ * @method void error(string $message, array $context = [])
+ * @method void info(string $message, array $context = [])
+ * @method void warning(string $message, array $context = [])
+ * @method void alert(string $message, array $context = [])
+ * @method void critical(string $message, array $context = [])
+ * @method void emergency(string $message, array $context = [])
  */
 class Log
 {
+    /**
+     * Log
+     *
+     * @param  string $name
+     * @param  array  $arguments
+     * @return void
+     */
+    public function __call(string $name, array $arguments = [])
+    {
+        $instance = app("logger");
+
+        call_user_func_array([$instance, $name], $arguments);
+    }
+
     /**
      * Log
      *

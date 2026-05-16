@@ -9,7 +9,6 @@ use Bow\Database\Exception\QueryBuilderException;
 use Bow\Database\QueryBuilder;
 use Bow\Queue\QueueTask;
 use ErrorException;
-use stdClass;
 use Throwable;
 
 class DatabaseAdapter extends QueueAdapter
@@ -69,9 +68,9 @@ class DatabaseAdapter extends QueueAdapter
 
         $payload = [
             "id" => $task->getId(),
-            "queue" => $this->getQueue(),
+            "queue" => $task->getQueue(),
             "payload" => base64_encode($this->serializeProducer($task)),
-            "attempts" => $this->tries,
+            "attempts" => $task->getRetry(),
             "status" => self::STATUS_WAITING,
             "available_at" => date("Y-m-d H:i:s", time() + (method_exists($task, 'getDelay') ? $task->getDelay() : 0)),
             "reserved_at" => null,
@@ -122,10 +121,10 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Process a single task from the queue
      *
-     * @param  stdClass $task
+     * @param  \stdClass $task
      * @return void
      */
-    private function processJob(stdClass $task): void
+    private function processJob(\stdClass $task): void
     {
         $producer = null;
 
@@ -146,10 +145,10 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Check if the task is ready to be processed
      *
-     * @param  stdClass $task
+     * @param  \stdClass $task
      * @return bool
      */
-    private function isJobReady(stdClass $task): bool
+    private function isJobReady(\stdClass $task): bool
     {
         // Check if the task is available for processing
         if (strtotime($task->available_at) > time()) {
@@ -168,11 +167,11 @@ class DatabaseAdapter extends QueueAdapter
      * Execute the task
      *
      * @param  QueueTask $task
-     * @param  stdClass $item
+     * @param  \stdClass $item
      * @return void
      * @throws QueryBuilderException
      */
-    private function executeTask(QueueTask $task, stdClass $item): void
+    private function executeTask(QueueTask $task, \stdClass $item): void
     {
         $this->logProcessingTask($task);
         if (!method_exists($task, 'process')) {
@@ -187,12 +186,12 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Handle task failure
      *
-     * @param  stdClass $task
+     * @param  \stdClass $task
      * @param  QueueTask|null $producer
      * @param  Throwable $exception
      * @return void
      */
-    private function handleJobFailure(stdClass $task, ?QueueTask $producer, Throwable $exception): void
+    private function handleJobFailure(\stdClass $task, ?QueueTask $producer, Throwable $exception): void
     {
         $this->logError($exception);
 
@@ -222,10 +221,10 @@ class DatabaseAdapter extends QueueAdapter
      * Determine if the task should be marked as failed
      *
      * @param  QueueTask $producer
-     * @param  stdClass $task
+     * @param  \stdClass $task
      * @return bool
      */
-    private function shouldMarkJobAsFailed(QueueTask $producer, stdClass $task): bool
+    private function shouldMarkJobAsFailed(QueueTask $producer, \stdClass $task): bool
     {
         return $producer->taskShouldBeDelete() || $task->attempts <= 0;
     }
@@ -233,18 +232,18 @@ class DatabaseAdapter extends QueueAdapter
     /**
      * Schedule a task for retry
      *
-     * @param  stdClass $task
-     * @param  QueueTask $producer
+     * @param  \stdClass $task
+     * @param  QueueTask $queueTask
      * @return void
      * @throws QueryBuilderException
      */
-    private function scheduleJobRetry(stdClass $task, QueueTask $producer): void
+    private function scheduleJobRetry(\stdClass $task, QueueTask $queueTask): void
     {
         $this->table->where("id", $task->id)->update([
             "status" => self::STATUS_RESERVED,
             "attempts" => $task->attempts - 1,
-            "available_at" => date("Y-m-d H:i:s", time() + $producer->getDelay()),
-            "reserved_at" => date("Y-m-d H:i:s", time() + $producer->getRetry()),
+            "available_at" => date("Y-m-d H:i:s", time() + $queueTask->getDelay()),
+            "reserved_at" => date("Y-m-d H:i:s", time() + $queueTask->getRetry()),
         ]);
     }
 

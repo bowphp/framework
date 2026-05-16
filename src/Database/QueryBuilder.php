@@ -813,7 +813,7 @@ class QueryBuilder implements JsonSerializable
      * @return  QueryBuilder
      * @deprecated
      */
-    public function group($column)
+    public function group(string $column)
     {
         return $this->groupBy($column);
     }
