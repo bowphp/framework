@@ -22,10 +22,16 @@ use JsonSerializable;
 use ReflectionClass;
 
 /**
+ * @method static as(string $as): Builder
+ * @method static whereRaw(string $where, array $data = []): Builder
+ * @method static join(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
+ * @method static leftJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
+ * @method static rightJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
+ * @method static innerJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
  * @method static select(array|string[] $select): Builder
  * @method static whereIn(string $primary_key, array $id): Builder
  * @method static all(): Collection
- * @method static where(string $column, mixed $value): Builder
+ * @method static where(string $column, mixed $comparator = '=', mixed $value = null): Builder
  * @method static orderBy(string $latest, string $string): Builder
  */
 abstract class Model implements ArrayAccess, JsonSerializable
