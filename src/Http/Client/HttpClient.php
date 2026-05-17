@@ -260,7 +260,7 @@ class HttpClient
             return;
         }
 
-        if ($this->accept_json) {
+        if ($this->accept_json || $this->hasHeader('content-type', 'application/json')) {
             $payload = json_encode($data);
         } else {
             $payload = http_build_query($data);
@@ -377,9 +377,25 @@ class HttpClient
     /**
      * Configure client to accept and send JSON data
      *
+     * @deprecated 5.2.99
      * @return HttpClient
      */
     public function acceptJson(): HttpClient
+    {
+        $this->accept_json = true;
+
+        $this->withHeaders(["Content-Type" => "application/json"]);
+        $this->withHeaders(["Accept" => "application/json"]);
+
+        return $this;
+    }
+
+    /**
+     * Configure client to accept and send JSON data
+     *
+     * @return HttpClient
+     */
+    public function withJson(): HttpClient
     {
         $this->accept_json = true;
 
@@ -398,11 +414,23 @@ class HttpClient
     {
         foreach ($headers as $key => $value) {
             if (!in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers))) {
-                $this->headers[] = $key . ': ' . $value;
+                $this->headers[] = trim($key) . ': ' . $value;
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Check if header exists
+     *
+     * @param string $key
+     * @param string $value
+     * @return boolean
+     */
+    public function hasHeader(string $key, string $value): bool
+    {
+        return in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers));
     }
 
     /**

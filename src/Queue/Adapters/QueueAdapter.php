@@ -297,13 +297,13 @@ abstract class QueueAdapter
     }
 
     /**
-     * Watch the queue name
+     * Set the queue name
      *
      * @param string $queue
      */
     public function setQueue(string $queue): void
     {
-        //
+        $this->queue = $queue;
     }
 
     /**
