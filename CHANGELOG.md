@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.2.98 - 2026-05-16
+
+### What's Changed
+
+* Fix push the right queue name by @papac in https://github.com/bowphp/framework/pull/388
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.97...5.2.98
+
 ## 5.2.96 - 2026-05-12
 
 ### What's Changed
@@ -219,6 +227,7 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
+
 
 
 
