@@ -41,7 +41,7 @@ class UploadedFile
         if (!$this->isUploaded()) {
             return null;
         }
-        
+
         if (!isset($this->file['name'])) {
             return null;
         }
