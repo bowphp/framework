@@ -334,7 +334,7 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (!preg_match(""/^\s*delete\b/i"", $sql_statement)) {
+        if (!preg_match("/^\s*delete\b/i", $sql_statement)) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
