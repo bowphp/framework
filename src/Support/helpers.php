@@ -1186,10 +1186,14 @@ if (!function_exists('app_env')) {
      */
     function app_env(string $key, mixed $default = null): ?string
     {
-        $env = Env::getInstance();
+        try {
+            $env = Env::getInstance();
 
-        if ($env->isLoaded()) {
-            return $env->get($key, $default);
+            if ($env->isLoaded()) {
+                return $env->get($key, $default);
+            }
+        } catch (\Bow\Application\Exception\ApplicationException $e) {
+            // Environment not loaded, return default
         }
 
         return $default;
