@@ -6,7 +6,7 @@ use {baseNamespace}\Controller;
 use Bow\Http\Request;
 use {serviceNamespace}\{serviceClassName};
 
-class {className} extends Controller
+class {className}
 {
 	/**
 	 * Instance of {serviceClassName}

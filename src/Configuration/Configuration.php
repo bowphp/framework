@@ -49,7 +49,11 @@ abstract class Configuration
      * @param  Loader $config
      * @return void
      */
-    abstract public function create(Loader $config): void;
+    public function create(Loader $config): void
+    {
+        // By default, we do nothing here, but you can override this method in your configuration class
+        // to set up your server or package as needed.
+    }
 
     /**
      * Start the configured package

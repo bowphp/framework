@@ -11,6 +11,7 @@ use Bow\Session\SessionConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Application\Exception\ApplicationException;
 use Bow\Container\CompassConfiguration;
+use Bow\Scheduler\Scheduler;
 
 class Loader implements ArrayAccess
 {
@@ -28,6 +29,11 @@ class Loader implements ArrayAccess
      * @var string
      */
     protected string $base_path;
+
+    /**
+     * @var string
+     */
+    protected string $config_path;
 
     /**
      * @var bool
@@ -56,6 +62,7 @@ class Loader implements ArrayAccess
     private function __construct(string $base_path)
     {
         $this->base_path = $base_path;
+        $this->config_path = $base_path . DIRECTORY_SEPARATOR . 'config';
         $this->config = new Arraydotify([]);
     }
 
@@ -88,11 +95,35 @@ class Loader implements ArrayAccess
     /**
      * Get the base path
      *
+     * @param string $filename
+     * @return string
+     */
+    public function getPath(string $filename): string
+    {
+        return $this->base_path . DIRECTORY_SEPARATOR . $filename;
+    }
+
+    /**
+     * Get the base path
+     *
      * @return string
      */
     public function getBasePath(): string
     {
         return $this->base_path;
+    }
+
+    /**
+     * Set the configuration path
+     *
+     * @param string $path
+     * @return Loader
+     */
+    public function withConfigPath(string $path): Loader
+    {
+        $this->config_path = $path;
+
+        return $this;
     }
 
     /**
@@ -180,7 +211,7 @@ class Loader implements ArrayAccess
         $this->createConfiguration(EnvConfiguration::class, $container);
 
         // Load the .env or .env.json file
-        $this->loadEnvfile();
+        $this->loadConfigFiles();
 
         // Configuration of services
         $loaded_configurations = $this->createConfigurations(
@@ -191,7 +222,7 @@ class Loader implements ArrayAccess
         // Load configurations
         $this->runConfirmations($loaded_configurations);
 
-        // Load load events
+        // Load events
         $this->loadEvents();
 
         // Set the load as booted
@@ -277,12 +308,12 @@ class Loader implements ArrayAccess
      * @return void
      * @throws
      */
-    private function loadEnvfile(): void
+    private function loadConfigFiles(): void
     {
         /**
          * We load all Bow configuration
          */
-        $glob = glob($this->base_path . '/**.php');
+        $glob = glob($this->config_path . '/**.php');
 
         $config = [];
 
@@ -340,19 +371,16 @@ class Loader implements ArrayAccess
     }
 
     /**
-     * __invoke
+     * Define scheduled tasks
      *
-     * @param  string $key
-     * @param  mixed  $value
-     * @return mixed
+     * Override this method in your Kernel to define scheduled tasks.
+     *
+     * @param Scheduler $schedule
+     * @return void
      */
-    public function __invoke(string $key, mixed $value = null): mixed
+    public function schedules(Scheduler $schedule): void
     {
-        if ($value == null) {
-            return $this->config[$key];
-        }
-
-        return $this->config[$key] = $value;
+        //
     }
 
     /**
@@ -390,5 +418,21 @@ class Loader implements ArrayAccess
     public function offsetUnset(mixed $offset): void
     {
         $this->config->offsetUnset($offset);
+    }
+
+    /**
+     * __invoke
+     *
+     * @param  string $key
+     * @param  mixed  $value
+     * @return mixed
+     */
+    public function __invoke(string $key, mixed $value = null): mixed
+    {
+        if ($value == null) {
+            return $this->config[$key];
+        }
+
+        return $this->config[$key] = $value;
     }
 }

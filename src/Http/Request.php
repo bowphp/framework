@@ -30,6 +30,20 @@ class Request
     private array $input = [];
 
     /**
+     * Define the post variables
+     *
+     * @var array
+     */
+    private array $post = [];
+
+    /**
+     * Define the query variables
+     *
+     * @var array
+     */
+    private array $query = [];
+
+    /**
      * Define the bags instance
      *
      * @var array
@@ -91,17 +105,45 @@ class Request
             }
         }
 
-        $this->input = array_merge((array)$data, $_GET);
+        $this->post = $data;
+        $this->query = $_GET;
+        $this->input = array_merge((array) $data, $this->query);
 
         foreach ($this->input as $key => $value) {
-            if (is_string($value) && strlen($value) == 0) {
-                $value = null;
-            }
-
-            $this->input[$key] = $value;
+            $this->input[$key] = is_string($value) && strlen($value) == 0 ? null : $value;
         }
 
         $this->capture = true;
+    }
+
+    /**
+     * Retrieve query variables
+     *
+     * @param string|null $key
+     * @return array
+     */
+    public function query(?string $key = null): array
+    {
+        if ($key === null) {
+            return $this->query;
+        }
+
+        return $this->query[$key] ?? [];
+    }
+
+    /**
+     * Get posted data
+     *
+     * @param string|null $key
+     * @return array
+     */
+    public function post(?string $key = null): array
+    {
+        if ($key === null) {
+            return $this->post;
+        }
+
+        return $this->post[$key] ?? [];
     }
 
     /**
@@ -279,6 +321,18 @@ class Request
     }
 
     /**
+     * Get the domain of the server.
+     *
+     * @return string
+     */
+    public function domain(): string
+    {
+        $part = explode(':', $this->hostname() ?? '');
+
+        return $part[0] ?? 'unknown';
+    }
+
+    /**
      * Get uri send by client.
      *
      * @return string
@@ -348,6 +402,10 @@ class Request
             return null;
         }
 
+        if (!is_uploaded_file($_FILES[$key]['tmp_name']) === UPLOAD_ERR_OK) {
+            return null;
+        }
+
         if (!is_array($_FILES[$key]['name'])) {
             return new UploadedFile($_FILES[$key]);
         }
@@ -356,15 +414,13 @@ class Request
         $collect = [];
 
         foreach ($files['name'] as $key => $name) {
-            $collect[] = new UploadedFile(
-                [
+            $collect[] = new UploadedFile([
                 'name' => $name,
                 'type' => $files['type'][$key],
                 'size' => $files['size'][$key],
                 'error' => $files['error'][$key],
                 'tmp_name' => $files['tmp_name'][$key],
-                ]
-            );
+            ]);
         }
 
         return new Collection($collect);
@@ -417,13 +473,14 @@ class Request
 
         $content_type = $this->getHeader("content-type");
 
-        if ($content_type && str_contains($content_type, "application/json")) {
-            return true;
-        }
-
-        return false;
+        return $content_type && str_contains($content_type, "application/json");
     }
 
+    /**
+     * Determine if is accept application/json
+     *
+     * @return boolean
+     */
     public function wantsJson(): bool
     {
         $accept = $this->getHeader('accept');
@@ -443,7 +500,7 @@ class Request
      */
     public function is(string $match): bool
     {
-        return (bool)preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->path());
+        return (bool) preg_match('@' . addcslashes($match, "/{()}[]$^") . '@', $this->path());
     }
 
     /**
@@ -454,7 +511,7 @@ class Request
      */
     public function isReferer(string $match): bool
     {
-        return (bool)preg_match('@' . addcslashes($match, "/*{()}[]$^") . '@', $this->referer());
+        return (bool) preg_match('@' . addcslashes($match, "/{()}[]$^") . '@', $this->referer());
     }
 
     /**

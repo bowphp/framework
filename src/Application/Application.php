@@ -7,7 +7,6 @@ namespace Bow\Application;
 use Bow\Application\Exception\ApplicationException;
 use Bow\Configuration\Loader;
 use Bow\Container\Capsule;
-use Bow\Container\Compass;
 use Bow\Contracts\ResponseInterface;
 use Bow\Http\Exception\BadRequestException;
 use Bow\Http\Exception\HttpException;
@@ -86,6 +85,8 @@ class Application
         $this->request = $request;
         $this->response = $response;
 
+        $this->request->capture();
+
         $this->router = Router::configure($request->get('_method'));
         $this->capsule = Capsule::getInstance();
 
@@ -93,8 +94,6 @@ class Application
         $this->capsule->instance('request', $request);
         $this->capsule->instance('router', $this->router);
         $this->capsule->instance('app', $this);
-
-        $this->request->capture();
     }
 
     /**
@@ -149,13 +148,6 @@ class Application
 
         $method = $this->request->method();
 
-        // We verify the existence of a special method DELETE, PUT
-        if ($method == 'POST') {
-            if ($this->router->hasSpecialMethod()) {
-                $method = $this->router->getSpecialMethod();
-            }
-        }
-
         // We verify the existence of the method of the request in
         // the routing collection
         $routes = $this->router->getRoutes();
@@ -171,7 +163,7 @@ class Application
 
             // We launch the search of the method that arrived in the query
             // then start checking the url of the request
-            if (!$route->match($this->request->path())) {
+            if (!$route->match($this->request->path(), $this->request->domain())) {
                 continue;
             }
 
@@ -186,23 +178,16 @@ class Application
 
         // Error management
         if ($resolved) {
-            $this->sendResponse($response);
+            $this->send($response);
             return true;
         }
 
         // We apply the 404 error code
         $this->response->status(404);
-        $error_code = $this->router->getErrorCodes();
 
-        if (!array_key_exists(404, $error_code)) {
-            throw new RouterException(
-                sprintf('Route "%s" not found', $this->request->path())
-            );
-        }
-
-        $response = Compass::getInstance()->execute($this->router->getErrorCodes(), []);
-
-        $this->sendResponse($response, 404);
+        throw new RouterException(
+            sprintf('Route "%s" not found', $this->request->path())
+        );
 
         return false;
     }
@@ -214,7 +199,7 @@ class Application
      * @param  int   $code
      * @return void
      */
-    private function sendResponse(mixed $response, int $code = 200): void
+    private function send(mixed $response, int $code = 200): void
     {
         if ($response instanceof ResponseInterface) {
             $response->sendContent();
@@ -421,16 +406,6 @@ class Application
         }
 
         return $this->capsule->bind($params[0], $params[1]);
-    }
-
-    /**
-     * Send the application response
-     *
-     * @return void
-     */
-    public function send(): void
-    {
-        $this->run();
     }
 
     /**

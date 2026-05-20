@@ -56,7 +56,7 @@ class SettingTest extends \PHPUnit\Framework\TestCase
             ["service", "/app/Services"],
             ["Event", "/app/Events"],
             ["EventListener", "/app/Listeners"],
-            ["job", "/app/Jobs"],
+            ["task", "/app/Tasks"],
             ["command", "/app/Commands"],
             ["seeder", "/seeders"],
             ["component", "/frontend"],

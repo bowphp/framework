@@ -42,6 +42,7 @@ class Console
         'flush',
         'launch',
         'serve',
+        'schedule',
     ];
 
     /**
@@ -60,10 +61,11 @@ class Console
         'service',
         'exception',
         'event',
-        'job',
+        'task',
+        'scheduler',
         'command',
         'listener',
-        'message'
+        'notifier'
     ];
 
     /**
@@ -429,6 +431,23 @@ class Console
     }
 
     /**
+     * Handle scheduler commands
+     *
+     * @return void
+     * @throws ErrorException
+     */
+    private function schedule(): void
+    {
+        $action = $this->arg->getAction();
+
+        if (!in_array($action, ['run', 'work', 'list', 'next', 'test'])) {
+            $this->throwFailsCommand('Bad command usage', 'help schedule');
+        }
+
+        $this->command->call("schedule:{$action}", $action, $this->arg->getTarget());
+    }
+
+    /**
      * Alias of generate
      *
      * @return void
@@ -541,9 +560,9 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33madd:migration\033[00m       Create a new migration
    \033[0;33madd:event\033[00m           Create a new event
    \033[0;33madd:listener\033[00m        Create a new event listener
-   \033[0;33madd:job\033[00m             Create a new job
+   \033[0;33madd:task\033[00m             Create a new task
    \033[0;33madd:command\033[00m         Create a new console command
-   \033[0;33madd:message\033[00m         Create a new messaging handler
+   \033[0;33madd:notifier\033[00m         Create a new messaging handler
 
  \033[0;32mMIGRATION\033[00m Apply migration to database
    \033[0;33mmigration:migrate\033[00m   Run migrations
@@ -565,7 +584,14 @@ Bow task runner usage: php bow command:action [name] --option
  \033[0;32mRUN\033[00m Launch development tools
    \033[0;33mrun:console\033[00m Show PsySH PHP REPL for debugging code
    \033[0;33mrun:server\033[00m  Start local development server
-   \033[0;33mrun:worker\033[00m  Start consumer/worker to handle queue jobs
+   \033[0;33mrun:worker\033[00m  Start consumer/worker to handle queue tasks
+
+ \033[0;32mSCHEDULE\033[00m Task scheduling commands
+   \033[0;33mschedule:run\033[00m   Run the scheduler once (execute all due tasks)
+   \033[0;33mschedule:work\033[00m  Start the scheduler daemon (continuous loop)
+   \033[0;33mschedule:list\033[00m  List all registered scheduled tasks
+   \033[0;33mschedule:next\033[00m  Show the next run time for all tasks
+   \033[0;33mschedule:test\033[00m  Test run a specific task by class name
 
 USAGE;
             echo $usage;
@@ -594,9 +620,9 @@ USAGE;
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    Create a new seeder
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            Create a new migration
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                Create a new event listener
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:job name                  Create a new queue job
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:task name                  Create a new queue task
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              Create a new console command
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:message name              Create a new messaging handler
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:notifier name              Create a new messaging handler
     \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      Display this help
 
 U;
@@ -643,7 +669,7 @@ U;
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console          Show PsySH PHP REPL for debugging code
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server [option]  Start local development server
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker [option]  Start worker to handle queue jobs
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker [option]  Start worker to handle queue tasks
 
 U; // phpcs:enable
                 break;
@@ -676,6 +702,25 @@ U;
     flush:worker [connection] [--queue=queue_name]
 
    \033[0;33m$\033[00m php \033[0;34mbow\033[00m flush:worker\033[00m           Flush all queues
+
+U;
+                break;
+
+            case 'schedule':
+                echo <<<U
+\n\033[0;32mTask scheduling commands\033[00m\n
+    [commands]
+    schedule:run            Run the scheduler once (execute all due tasks)
+    schedule:work           Start the scheduler daemon (continuous loop)
+    schedule:list           List all registered scheduled tasks
+    schedule:next           Show the next run time for all tasks
+    schedule:test [class]   Test run a specific task by class name
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:run\033[00m           Run due tasks once
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:work\033[00m          Start scheduler daemon
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:list\033[00m          List all scheduled tasks
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:next\033[00m          Show next run times
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:test TaskClass\033[00m  Test a specific task
 
 U;
                 break;

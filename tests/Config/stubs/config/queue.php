@@ -27,6 +27,38 @@ return [
         ],
 
         /**
+         * The redis connexion
+         */
+        "redis" => [
+            "database" => 1,
+            "block_timeout" => 5,
+        ],
+
+        /**
+         * The rabbitmq connection
+         */
+        "rabbitmq" => [
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+            'vhost' => '/',
+            'queue' => 'default',
+        ],
+
+        /**
+         * The kafka connection
+         */
+        "kafka" => [
+            'host' => 'localhost',
+            'port' => 9092,
+            'topic' => 'default',
+            'group_id' => 'bow_queue_group',
+            'auto_offset_reset' => 'earliest',
+            'enable_auto_commit' => 'true',
+        ],
+
+        /**
          * The sqs connexion
          */
         "sqs" => [
@@ -41,7 +73,7 @@ return [
         ],
 
         /**
-         * The sqs connexion
+         * The database connexion
          */
         "database" => [
             'table' => "queues",

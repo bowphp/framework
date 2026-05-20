@@ -21,7 +21,7 @@ class Router
      *
      * @var array
      */
-    protected array $error_code = [];
+    protected array $error_codes = [];
 
     /**
      * Define the global middleware
@@ -38,9 +38,11 @@ class Router
     protected string $prefix = '';
 
     /**
-     * @var ?string
+     * Define the domain constraint for routes
+     *
+     * @var string|null
      */
-    protected ?string $special_method = null;
+    protected ?string $domain = null;
 
     /**
      * Method Http current.
@@ -166,7 +168,7 @@ class Router
      * @param  string   $prefix
      * @param  callable $cb
      * @return Router
-     * @throws
+     * @throws RouterException
      */
     public function prefix(string $prefix, callable $cb): Router
     {
@@ -181,6 +183,25 @@ class Router
         call_user_func_array($cb, [$this]);
 
         $this->prefix = '';
+
+        return $this;
+    }
+
+    /**
+     * Add a domain constraint for a group of routes
+     *
+     * @param string $domain_pattern
+     * @param callable $cb
+     * @return Router
+     * @throws RouterException
+     */
+    public function domain(string $domain_pattern, callable $cb): Router
+    {
+        $this->domain = $domain_pattern;
+
+        call_user_func_array($cb, [$this]);
+
+        $this->domain = null;
 
         return $this;
     }
@@ -221,38 +242,38 @@ class Router
             unset($cb['controller']);
         }
 
-        $route = $this->pushHttpVerb($method, $path, $cb);
+        $route = $this->pushMany($method, $path, $cb);
 
         if (isset($definition['middleware'])) {
             $route->middleware($definition['middleware']);
+        }
+
+        if (isset($definition['domain'])) {
+            $route->withDomain($definition['domain']);
         }
 
         $route->where($where);
     }
 
     /**
-     * Add other HTTP verbs [PUT, DELETE, UPDATE, HEAD, PATCH]
+     * Add other HTTP verbs [PUT, DELETE, OPTIONS, HEAD, PATCH]
      *
      * @param  string|array          $methods
      * @param  string                $path
      * @param  callable|array|string $cb
      * @return Route
      */
-    private function pushHttpVerb(string|array $methods, string $path, callable|string|array $cb): Route
+    private function pushMany(string|array $methods, string $path, callable|string|array $cb): Route
     {
         $methods = (array) $methods;
 
-        if (!$this->magic_method) {
-            return $this->routeLoader($methods, $path, $cb);
-        }
-
         foreach ($methods as $key => $method) {
-            if ($this->magic_method === $method) {
-                $methods[$key] = $this->magic_method;
+            if (in_array($this->magic_method, ['PUT', 'DELETE', 'PATCH']) && in_array($method, ['PUT', 'DELETE', 'PATCH'])) {
+                $methods[$key] = 'POST';
             }
         }
 
-        return $this->routeLoader($methods, $path, $cb);
+        return $this->push($methods, $path, $cb);
     }
 
     /**
@@ -263,9 +284,9 @@ class Router
      * @param  callable|string|array $cb
      * @return Route
      */
-    private function routeLoader(string|array $methods, string $path, callable|string|array $cb): Route
+    private function push(string|array $methods, string $path, callable|string|array $cb): Route
     {
-        $methods = (array)$methods;
+        $methods = (array) $methods;
 
         $path = '/' . trim($path, '/');
 
@@ -274,6 +295,10 @@ class Router
 
         // We add the new route
         $route = new Route($path, $cb);
+
+        if ($this->domain) {
+            $route->withDomain($this->domain);
+        }
 
         $route->middleware($this->middlewares);
 
@@ -327,7 +352,7 @@ class Router
     {
         $methods = array_map('strtoupper', ['options', 'patch', 'post', 'delete', 'put', 'get']);
 
-        return $this->pushHttpVerb($methods, $path, $cb);
+        return $this->pushMany($methods, $path, $cb);
     }
 
     /**
@@ -339,7 +364,7 @@ class Router
      */
     public function get(string $path, callable|string|array $cb): Route
     {
-        return $this->routeLoader('GET', $path, $cb);
+        return $this->push('GET', $path, $cb);
     }
 
     /**
@@ -351,17 +376,7 @@ class Router
      */
     public function post(string $path, callable|string|array $cb): Route
     {
-        if (!$this->magic_method) {
-            return $this->routeLoader('POST', $path, $cb);
-        }
-
-        $method = strtoupper($this->magic_method);
-
-        if (in_array($method, ['DELETE', 'PUT'])) {
-            $this->special_method = $method;
-        }
-
-        return $this->pushHttpVerb($method, $path, $cb);
+        return $this->push('POST', $path, $cb);
     }
 
     /**
@@ -373,7 +388,11 @@ class Router
      */
     public function delete(string $path, callable|string|array $cb): Route
     {
-        return $this->pushHttpVerb('DELETE', $path, $cb);
+        if ($this->magic_method && strtoupper($this->magic_method) === 'DELETE') {
+            return $this->post($path, $cb);
+        }
+
+        return $this->push('DELETE', $path, $cb);
     }
 
     /**
@@ -385,7 +404,11 @@ class Router
      */
     public function put(string $path, callable|string|array $cb): Route
     {
-        return $this->pushHttpVerb('PUT', $path, $cb);
+        if ($this->magic_method && strtoupper($this->magic_method) === 'PUT') {
+            return $this->post($path, $cb);
+        }
+
+        return $this->push('PUT', $path, $cb);
     }
 
     /**
@@ -397,7 +420,11 @@ class Router
      */
     public function patch(string $path, callable|string|array $cb): Route
     {
-        return $this->pushHttpVerb('PATCH', $path, $cb);
+        if ($this->magic_method && strtoupper($this->magic_method) === 'PATCH') {
+            return $this->post($path, $cb);
+        }
+
+        return $this->push('PATCH', $path, $cb);
     }
 
     /**
@@ -409,7 +436,7 @@ class Router
      */
     public function options(string $path, callable|string|array $cb): Route
     {
-        return $this->pushHttpVerb('OPTIONS', $path, $cb);
+        return $this->push('OPTIONS', $path, $cb);
     }
 
     /**
@@ -422,7 +449,7 @@ class Router
      */
     public function code(int $code, callable|array|string $cb): Router
     {
-        $this->error_code[$code] = $cb;
+        $this->error_codes[$code] = $cb;
 
         return $this;
     }
@@ -434,7 +461,7 @@ class Router
      */
     public function getErrorCodes(): array
     {
-        return $this->error_code;
+        return $this->error_codes;
     }
 
     /**
@@ -449,7 +476,7 @@ class Router
     {
         $methods = array_map('strtoupper', $methods);
 
-        return $this->pushHttpVerb($methods, $path, $cb);
+        return $this->pushMany($methods, $path, $cb);
     }
 
     /**
@@ -469,7 +496,7 @@ class Router
      */
     public function getSpecialMethod(): string
     {
-        return $this->special_method;
+        return $this->magic_method;
     }
 
     /**
@@ -479,7 +506,7 @@ class Router
      */
     public function hasSpecialMethod(): bool
     {
-        return !is_null($this->special_method);
+        return !is_null($this->magic_method);
     }
 
     /**

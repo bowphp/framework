@@ -18,7 +18,7 @@ use Bow\Http\Request;
 use Bow\Http\Response;
 use Bow\Mail\Contracts\MailAdapterInterface;
 use Bow\Mail\Mail;
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 use Bow\Security\Crypto;
 use Bow\Security\Hash;
 use Bow\Security\Sanitize;
@@ -1039,7 +1039,7 @@ if (!function_exists('cache')) {
      * @return mixed
      * @throws ErrorException
      */
-    function cache(?string $key, mixed $value = null, ?int $ttl = null): mixed
+    function cache(?string $key = null, mixed $value = null, ?int $ttl = null): mixed
     {
         $instance = Cache::getInstance();
 
@@ -1700,9 +1700,9 @@ if (!function_exists("queue")) {
     /**
      * Push the producer on queue
      *
-     * @param QueueJob $producer
+     * @param QueueTask $producer
      */
-    function queue(QueueJob $producer): void
+    function queue(QueueTask $producer): void
     {
         app("queue")->push($producer);
     }

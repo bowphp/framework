@@ -5,37 +5,182 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.2.990 - 2026-05-17
+
+### What's Changed
+
+* Fix retrieve data by queue by @papac in https://github.com/bowphp/framework/pull/390
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.98...5.2.990
+
+## 5.2.98 - 2026-05-16
+
+### What's Changed
+
+* Fix push the right queue name by @papac in https://github.com/bowphp/framework/pull/388
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.97...5.2.98
+
+## 5.2.96 - 2026-05-12
+
+### What's Changed
+
+* Fix migration by @papac in https://github.com/bowphp/framework/pull/384
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.95...5.2.96
+
+### What's Changed
+
+* Fix migration by @papac in https://github.com/bowphp/framework/pull/384
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/385
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.95...5.2.96
+
+## 5.2.95 - 2026-05-08
+
+### What's Changed
+
+* Fix data binding by @papac in https://github.com/bowphp/framework/pull/381
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/382
+* Optimize database query performance by @papac in https://github.com/bowphp/framework/pull/383
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.94...5.2.95
+
+## 5.2.94 - 2026-04-07
+
+### What's Changed
+
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/379
+* Fix many issues by @papac in https://github.com/bowphp/framework/pull/380
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.93...5.2.94
+
+## 5.2.93 - 2026-04-05
+
+### What's Changed
+
+* Fix query builder by @papac in https://github.com/bowphp/framework/pull/377
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/378
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.92...5.2.93
+
+## 5.2.92 - 2026-04-04
+
+### What's Changed
+
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/374
+* Add query and post method to request and fix nullable validator by @papac in https://github.com/bowphp/framework/pull/375
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.91...5.2.92
+
+## 5.2.91 - 2026-03-28
+
+### What's Changed
+
+* Refactoring magic method definition by @papac in https://github.com/bowphp/framework/pull/372
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/373
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.90...5.2.91
+
+## 5.2.90 - 2026-03-20
+
+### What's Changed
+
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/370
+* Fix query builder by @papac in https://github.com/bowphp/framework/pull/371
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.8...5.2.90
+
+## 5.2.8 - 2026-03-20
+
+### What's Changed
+
+* Fix belongs to by @papac in https://github.com/bowphp/framework/pull/368
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/369
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.7...5.2.8
+
+## 5.2.7 - 2026-03-08
+
+### What's Changed
+
+* Add scheduler features by @papac in https://github.com/bowphp/framework/pull/365
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/366
+* Add missing http methods by @papac in https://github.com/bowphp/framework/pull/367
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.6...5.2.7
+
+## 5.2.6 - 2026-02-27
+
+### What's Changed
+
+* Fix domain definition by @papac in https://github.com/bowphp/framework/pull/363
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/364
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.5...5.2.6
+
+## 5.2.5 - 2026-02-27
+
+### What's Changed
+
+* Fix database, validation, add rabbitmq/kafka queue adapter by @papac in https://github.com/bowphp/framework/pull/362
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.4...5.2.5
+
+## 5.2.3 - 2026-01-27
+
+### What's Changed
+
+* Refactoring queue adapter and add redis support by @papac in https://github.com/bowphp/framework/pull/358
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.2...5.2.3
+
 ## [Unreleased]
 
 ### Added
 
 - **SMTP Adapter**: Complete rewrite with RFC-compliant SMTP protocol implementation
+  
   - Expanded from 8 to 21 methods for better functionality separation
   - Added comprehensive configuration validation (hostname, port, timeout)
   - Implemented multi-exception handling (SmtpException | SocketException)
-  - Enhanced email address parsing supporting "Name <email@example.com>" format
+  - Enhanced email address parsing supporting "Name [email@example.com](mailto:email@example.com)" format
   - Added optional authentication support
   - Created comprehensive test suite with 21 tests and 35 assertions
+  
 - **FTP Service**: Connection retry logic with 3 attempts and configurable delays
+  
 - **FTP Service**: Configuration constants and validation for all required fields
+  
 - **FTP Service**: Automatic stream cleanup with try-finally blocks
+  
 - **FTP Service**: Destructor for proper resource cleanup
+  
 - **Database Notifications**: Enhanced test coverage with 4 additional comprehensive tests
+  
 - **Queue System**: Graceful logger fallback in BeanstalkdAdapter
+  
 
 ### Changed
 
 - **FTP Service**: Complete refactoring with improved error handling and resource management (651 lines)
+  
   - Enhanced all file operations methods (store, get, put, append, prepend, copy, move, delete)
   - Improved directory operations (files, directories, makeDirectory)
   - Better passive/active mode configuration
   - More specific and actionable error messages
   - Added connection state validation with `ensureConnection()` method
+  
 - **Environment Configuration**: Fixed path handling by removing unreliable `realpath()` usage
+  
 - **Configuration Loader**: Improved validation and error handling
-- **Messaging System**: Fixed PHPUnit mock issues and corrected type signatures
+  
+- **Notifier System**: Fixed PHPUnit mock issues and corrected type signatures
+  
 - **Test Suite**: Renamed test methods to snake_case for consistency
+  
 - **Database Tests**: Significantly expanded test coverage across connection, migration, pagination, and query builders
+  
 
 ### Fixed
 
@@ -44,7 +189,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FTP Service**: Fixed directory listing parser to handle filenames with spaces
 - **FTP Service**: Improved error messages with connection details
 - **Environment Configuration**: Fixed `Env::configure()` error handling
-- **Queue Tests**: Fixed mock configuration issues in MessagingTest
+- **Queue Tests**: Fixed mock configuration issues in NotifierTest
 - **Notification Tests**: Added missing timestamp columns in test schema
 
 ### Improved
@@ -90,8 +235,21 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
-```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
 Ref: #255
 
 ## 5.1.0 - 2023-06-07

@@ -4,9 +4,9 @@ Bow Framework's queue system help you to make a simple and powerful queue/job (c
 take a low of time.
 
 ```php
-use App\Queues\EmailQueue;
+use App\Queues\EmailQueueTask;
 
-queue(new EmailQueue($email));
+queue(new EmailQueueTask($email));
 ```
 
 Launch the worker/consumer.

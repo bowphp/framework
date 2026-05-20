@@ -474,4 +474,38 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
         );
         $this->assertTrue($validation->fails());
     }
+
+    // ==================== Nullable Rule ====================
+
+    public function test_nullable_rule_passes_with_null_value()
+    {
+        $validation = Validator::make(['name' => null], ['name' => 'nullable']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_nullable_rule_passes_with_missing_field()
+    {
+        $validation = Validator::make([], ['name' => 'nullable']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_nullable_rule_passes_with_value()
+    {
+        $validation = Validator::make(['name' => 'Bow'], ['name' => 'nullable']);
+
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_nullable_and_required_rule_fails_with_null()
+    {
+        $validation = Validator::make(['name' => null], ['name' => 'nullable|required']);
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_nullable_and_required_rule_passes_with_value()
+    {
+        $validation = Validator::make(['name' => 'Bow'], ['name' => 'nullable|required']);
+
+        $this->assertFalse($validation->fails());
+    }
 }

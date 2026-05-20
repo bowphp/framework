@@ -209,14 +209,9 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (
-            !preg_match(
-                "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
-                $sql_statement
-            )
-        ) {
+        if (!preg_match("/^\s*select\b/i", $sql_statement)) {
             throw new DatabaseException(
-                'Syntax Error on the Request',
+                'Syntax Error on the Request: ' . $sql_statement,
                 E_USER_ERROR
             );
         }
@@ -246,9 +241,9 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (!preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sql_statement)) {
+        if (!preg_match("/^\s*select\b/i", $sql_statement)) {
             throw new DatabaseException(
-                'Syntax Error on the Request',
+                'Syntax Error on the Request: ' . $sql_statement,
                 E_USER_ERROR
             );
         }
@@ -278,14 +273,9 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (
-            !preg_match(
-                "/^insert\s+into\s+[\w\d_-`]+\s*(\(.+\))?\s+(values\s*(\(.+\),?)+|\s?set\s+(.+)+);?$/ism",
-                $sql_statement
-            )
-        ) {
+        if (!preg_match("/^\s*insert\b/i", $sql_statement)) {
             throw new DatabaseException(
-                'Syntax Error on the Request',
+                'Syntax Error on the Request: ' . $sql_statement,
                 E_USER_ERROR
             );
         }
@@ -344,7 +334,7 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (!preg_match("/^delete\s+from\s+[\w\d_`]+\s+where\s+.+;?$/i", $sql_statement)) {
+        if (!preg_match("/^\s*delete\b/i", $sql_statement)) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -426,9 +416,17 @@ class Database
      */
     public static function commit(): void
     {
-        static::ensureDatabaseConnection();
+        static::commitTransaction();
+    }
 
-        static::$adapter->getConnection()->commit();
+    /**
+     * Validate a transaction
+     */
+    public static function commitTransaction(): void
+    {
+        if (static::inTransaction()) {
+            static::$adapter->getConnection()->commit();
+        }
     }
 
     /**
@@ -436,9 +434,17 @@ class Database
      */
     public static function rollback(): void
     {
-        static::ensureDatabaseConnection();
+        static::rollbackTransaction();
+    }
 
-        static::$adapter->getConnection()->rollBack();
+    /**
+     * Cancel a transaction
+     */
+    public static function rollbackTransaction(): void
+    {
+        if (static::inTransaction()) {
+            static::$adapter->getConnection()->rollBack();
+        }
     }
 
     /**

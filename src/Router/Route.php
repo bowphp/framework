@@ -10,49 +10,56 @@ use Bow\Container\Compass;
 class Route
 {
     /**
-     * The callback has launched if the url of the query has matched.
+     * The callback to execute if the route matches.
      *
      * @var mixed
      */
-    private mixed $cb;
+    private mixed $callback;
 
     /**
-     * The road on the road set by the user
+     * The route path pattern
      *
      * @var string
      */
-    private string $path;
+    private string $path = '';
+
+    /**
+     * The domain pattern for the route (optional)
+     *
+     * @var string|null
+     */
+    private ?string $domain = null;
 
     /**
      * The route name
      *
-     * @var string
+     * @var null|string
      */
-    private string $name;
+    private ?string $name = null;
 
     /**
-     * key
+     * Parameter keys extracted from the path
      *
      * @var array
      */
     private array $keys = [];
 
     /**
-     * The route parameter
+     * Route parameters
      *
      * @var array
      */
     private array $params = [];
 
     /**
-     * List of parameters that we match
+     * Matched values from the URI
      *
      * @var array
      */
     private array $match = [];
 
     /**
-     * Additional URL validation rule
+     * Additional URL validation rules
      *
      * @var array
      */
@@ -73,14 +80,11 @@ class Route
      *
      * @throws
      */
-    public function __construct(string $path, mixed $cb)
+    public function __construct(string $path, mixed $callback)
     {
         $this->config = Loader::getInstance();
-
-        $this->cb = $cb;
-
-        $this->path = str_replace('.', '\.', $path);
-
+        $this->callback = $callback;
+        $this->path = $path;
         $this->match = [];
     }
 
@@ -91,7 +95,7 @@ class Route
      */
     public function getAction(): mixed
     {
-        return $this->cb;
+        return $this->callback;
     }
 
     /**
@@ -103,19 +107,40 @@ class Route
     public function middleware(array|string $middleware): Route
     {
         $middleware = (array)$middleware;
-
-        if (!is_array($this->cb)) {
-            $this->cb = [
-                'controller' => $this->cb,
+        if (!is_array($this->callback)) {
+            $this->callback = [
+                'controller' => $this->callback,
                 'middleware' => $middleware
             ];
-
             return $this;
         }
+        $this->callback['middleware'] = !isset($this->callback['middleware'])
+            ? $middleware
+            : array_merge((array)$this->callback['middleware'], $middleware);
+        return $this;
+    }
 
-        $this->cb['middleware'] = !isset($this->cb['middleware']) ? $middleware : array_merge((array)$this->cb['middleware'], $middleware);
+    /**
+     * Set the domain pattern for the route
+     *
+     * @param string $domain_pattern
+     * @return $this
+     */
+    public function withDomain(string $domain_pattern): self
+    {
+        $this->domain = $domain_pattern;
 
         return $this;
+    }
+
+    /**
+     * Get the domain pattern for the route
+     *
+     * @return string|null
+     */
+    public function getDomain(): ?string
+    {
+        return $this->domain;
     }
 
     /**
@@ -144,7 +169,8 @@ class Route
     {
         // Association of parameters at the request
         foreach ($this->keys as $key => $value) {
-            if (!isset($this->match[$key])) {
+            if (!isset($this->match[$key]) || $this->match[$key] === null) {
+                $this->params[$value] = null;
                 continue;
             }
 
@@ -158,7 +184,10 @@ class Route
             $this->match[$key] = $tmp;
         }
 
-        return Compass::getInstance()->call($this->cb, $this->match);
+        // Filter out null values before passing to Compass
+        $args = array_filter($this->match, fn($v) => $v !== null);
+
+        return Compass::getInstance()->call($this->callback, $args);
     }
 
     /**
@@ -171,7 +200,7 @@ class Route
     {
         $this->name = $name;
 
-        $routes = (array)$this->config['app.routes'];
+        $routes = (array) $this->config['app.routes'];
 
         $this->config['app.routes'] = array_merge(
             $routes,
@@ -196,7 +225,7 @@ class Route
      *
      * @return string
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -229,8 +258,36 @@ class Route
      * @param  string $uri
      * @return bool
      */
-    public function match(string $uri): bool
+    public function match(string $uri, ?string $host = null): bool
     {
+        // If a domain constraint is set, check the host and capture params
+        if ($this->domain !== null && $host !== null) {
+            $domain_param_names = [];
+            $domain_pattern = $this->domain;
+            // Build regex for domain with parameter capture (supports :param and <param>)
+            $domain_pattern = preg_replace_callback(
+                '/(:([a-zA-Z0-9_]+)|<([a-zA-Z0-9_]+)>)/',
+                function ($m) use (&$domain_param_names) {
+                    $name = $m[2] !== '' ? $m[2] : $m[3];
+                    $domain_param_names[] = $name;
+                    return '([^.]+)';
+                },
+                $domain_pattern
+            );
+            // Escape dots and handle wildcards
+            $domain_pattern = str_replace(['.', '*'], ['\\.', '[^.]+'], $domain_pattern);
+            if (!preg_match('~^' . $domain_pattern . '$~i', $host, $domain_matches)) {
+                return false;
+            }
+            // Store domain params
+            array_shift($domain_matches);
+            foreach ($domain_param_names as $i => $name) {
+                if (isset($domain_matches[$i])) {
+                    $this->params[$name] = $domain_matches[$i];
+                }
+            }
+        }
+
         // Normalization of the url of the navigator.
         if (preg_match('~(.*)/$~', $uri, $match)) {
             $uri = end($match);
@@ -246,34 +303,59 @@ class Route
             return true;
         }
 
-        // We check the length of the path defined by the programmer
-        // with that of the current url in the user's browser.
-        $path = implode('', preg_split('/(\/:[a-z0-9-_]+\?)/', $this->path));
-
-        if (count(explode('/', $path)) != count(explode('/', $uri))) {
-            if (count(explode('/', $this->path)) != count(explode('/', $uri))) {
-                return false;
+        // Check segment count (accounting for optional params)
+        $route_segments = explode('/', trim($this->path, '/'));
+        $uri_segments = explode('/', trim($uri, '/'));
+        $optional_count = 0;
+        foreach ($route_segments as $seg) {
+            if (preg_match('/^(:[a-zA-Z0-9_]+\?|<[a-zA-Z0-9_]+\?>)$/', $seg)) {
+                $optional_count++;
             }
         }
+        $route_required = count($route_segments) - $optional_count;
+        $uri_count = count($uri_segments);
+        if ($uri_count < $route_required || $uri_count > count($route_segments)) {
+            return false;
+        }
 
-        // Copied of url
-        $path = $uri;
-
-        // In case the developer did not add of constraint on captured variables
+        // Robust regex builder for path parameters (supports :param, <param>, optional, required)
         if (empty($this->with)) {
-            $path = preg_replace('~:\w+(\?)?~', '([^\s]+)$1', $this->path);
-
-            preg_match_all('~:([a-z-0-9_-]+?)\?~', $this->path, $this->keys);
-
-            $this->keys = end($this->keys);
-
-            return $this->checkRequestUri($path, $uri);
+            $param_names = [];
+            $regex_parts = [];
+            foreach ($route_segments as $seg) {
+                /** Optional :param? or <param?> */
+                if (preg_match('/^:([a-zA-Z0-9_]+)\?$/', $seg, $m) || preg_match('/^<([a-zA-Z0-9_]+)\?>$/', $seg, $m)) {
+                    $param_names[] = $m[1];
+                    $regex_parts[] = '(?:/([^/]+))?';
+                }
+                // Required :param or <param>
+                elseif (preg_match('/^:([a-zA-Z0-9_]+)$/', $seg, $m) || preg_match('/^<([a-zA-Z0-9_]+)>$/', $seg, $m)) {
+                    $param_names[] = $m[1];
+                    $regex_parts[] = '/([^/]+)';
+                }
+                // Static segment
+                else {
+                    $regex_parts[] = '/' . preg_quote($seg, '~');
+                }
+            }
+            $regex = '~^' . implode('', $regex_parts) . '$~';
+            $this->keys = $param_names;
+            // Build URI with leading slash for matching
+            $normalized_uri = '/' . implode('/', $uri_segments);
+            if (!preg_match($regex, $normalized_uri, $matches)) {
+                return false;
+            }
+            array_shift($matches);
+            // Pad missing optionals with null
+            $matches = array_pad($matches, count($this->keys), null);
+            $this->match = $matches;
+            return true;
         }
 
         // In case the developer has added constraints
         // on the captured variables
         if (!preg_match_all('~:([\w]+)?~', $this->path, $match)) {
-            return $this->checkRequestUri($path, $uri);
+            return $this->checkRequestUri($this->path, $uri);
         }
 
         $tmp_path = $this->path;
@@ -321,7 +403,7 @@ class Route
 
         array_shift($match);
 
-        $this->match = str_replace('/', '', $match);
+        $this->match = array_map(fn($v) => is_string($v) ? str_replace('/', '', $v) : $v, $match);
 
         return true;
     }

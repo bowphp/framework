@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Tasks;
+
+use Bow\Queue\QueueTask;
+
+class FakeTask extends QueueTask
+{
+    /**
+     * FakeTask constructor
+     * 
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+	/**
+	 * Handle job action
+	 * 
+	 * @return void
+	 */
+    public function process(): void
+    {
+	    // Do Something
+    }
+}

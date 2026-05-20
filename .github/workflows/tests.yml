@@ -25,17 +25,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          host port: 3306
-          container port: 3306
-          character set server: 'utf8mb4'
-          collation server: 'utf8mb4_general_ci'
-          mysql version: '5.7'
-          mysql database: 'test_db'
-          mysql root password: 'password'
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -45,6 +34,30 @@ jobs:
 
       - name: Set Docker containers
         run: docker compose up -d
+
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          for i in {1..30}; do
+            if docker exec bowphp_mysql mysqladmin ping -h localhost -u root -ppassword --silent 2>/dev/null; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            if docker exec bowphp_postgres pg_isready -U postgres --silent 2>/dev/null; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "Waiting for PostgreSQL... ($i/30)"
+            sleep 2
+          done
 
       - name: Cache Composer packages
         id: composer-cache

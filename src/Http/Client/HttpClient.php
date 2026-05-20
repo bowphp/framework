@@ -46,6 +46,27 @@ class HttpClient
     private ?string $base_url = null;
 
     /**
+     * The request timeout in seconds
+     *
+     * @var int|null
+     */
+    private ?int $timeout = null;
+
+    /**
+     * The connection timeout in seconds
+     *
+     * @var int|null
+     */
+    private ?int $connect_timeout = null;
+
+    /**
+     * Whether to verify SSL certificates
+     *
+     * @var bool
+     */
+    private bool $verify_ssl = true;
+
+    /**
      * HttpClient Constructor.
      *
      * @param string|null $base_url
@@ -91,9 +112,7 @@ class HttpClient
 
         curl_setopt($this->ch, CURLOPT_HTTPGET, true);
 
-        $content = $this->execute();
-
-        return new Response($this->ch, $content);
+        return $this->execute();
     }
 
     /**
@@ -121,15 +140,28 @@ class HttpClient
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($this->ch, CURLOPT_AUTOREFERER, true);
+
+        if ($this->timeout !== null) {
+            curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
+        }
+
+        if ($this->connect_timeout !== null) {
+            curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        }
+
+        if (!$this->verify_ssl) {
+            curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
     }
 
     /**
-     * Execute request
+     * Execute request and return Response
      *
-     * @return string
+     * @return Response
      * @throws Exception
      */
-    private function execute(): string
+    private function execute(): Response
     {
         if ($this->headers) {
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
@@ -137,6 +169,9 @@ class HttpClient
 
         $content = curl_exec($this->ch);
         $errno = curl_errno($this->ch);
+
+        // Create response before closing to capture curl info
+        $response = new Response($this->ch, $content !== false ? $content : null);
 
         $this->close();
 
@@ -147,17 +182,40 @@ class HttpClient
             );
         }
 
-        return $content;
+        return $response;
     }
 
     /**
-     * Close connection
+     * Close connection and reset state
      *
      * @return void
      */
     private function close(): void
     {
-        curl_close($this->ch);
+        $this->ch = null;
+        $this->headers = [];
+        $this->attach = [];
+        $this->accept_json = false;
+    }
+
+    /**
+     * Send request with custom HTTP method
+     *
+     * @param  string $method
+     * @param  string $url
+     * @param  array  $data
+     * @return Response
+     * @throws Exception
+     */
+    private function sendWithMethod(string $method, string $url, array $data = []): Response
+    {
+        $this->init($url);
+        $this->addFields($data);
+        $this->applyCommonOptions();
+
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $method);
+
+        return $this->execute();
     }
 
     /**
@@ -187,9 +245,7 @@ class HttpClient
 
         curl_setopt($this->ch, CURLOPT_POST, true);
 
-        $content = $this->execute();
-
-        return new Response($this->ch, $content);
+        return $this->execute();
     }
 
     /**
@@ -204,7 +260,7 @@ class HttpClient
             return;
         }
 
-        if ($this->accept_json) {
+        if ($this->accept_json || $this->hasHeader('content-type', 'application/json')) {
             $payload = json_encode($data);
         } else {
             $payload = http_build_query($data);
@@ -223,15 +279,7 @@ class HttpClient
      */
     public function put(string $url, array $data = []): Response
     {
-        $this->init($url);
-        $this->addFields($data);
-        $this->applyCommonOptions();
-
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT");
-
-        $content = $this->execute();
-
-        return new Response($this->ch, $content);
+        return $this->sendWithMethod("PUT", $url, $data);
     }
 
     /**
@@ -244,15 +292,60 @@ class HttpClient
      */
     public function delete(string $url, array $data = []): Response
     {
+        return $this->sendWithMethod("DELETE", $url, $data);
+    }
+
+    /**
+     * Make PATCH request
+     *
+     * @param  string $url
+     * @param  array  $data
+     * @return Response
+     * @throws Exception
+     */
+    public function patch(string $url, array $data = []): Response
+    {
+        return $this->sendWithMethod("PATCH", $url, $data);
+    }
+
+    /**
+     * Make HEAD request (retrieves headers only, no body)
+     *
+     * @param  string $url
+     * @param  array  $data
+     * @return Response
+     * @throws Exception
+     */
+    public function head(string $url, array $data = []): Response
+    {
+        if (count($data) > 0) {
+            $url = $url . "?" . http_build_query($data);
+        }
+
         $this->init($url);
-        $this->addFields($data);
         $this->applyCommonOptions();
 
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($this->ch, CURLOPT_NOBODY, true);
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "HEAD");
 
-        $content = $this->execute();
+        return $this->execute();
+    }
 
-        return new Response($this->ch, $content);
+    /**
+     * Make OPTIONS request (retrieves allowed HTTP methods)
+     *
+     * @param  string $url
+     * @return Response
+     * @throws Exception
+     */
+    public function options(string $url): Response
+    {
+        $this->init($url);
+        $this->applyCommonOptions();
+
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "OPTIONS");
+
+        return $this->execute();
     }
 
     /**
@@ -284,9 +377,25 @@ class HttpClient
     /**
      * Configure client to accept and send JSON data
      *
+     * @deprecated 5.2.99
      * @return HttpClient
      */
     public function acceptJson(): HttpClient
+    {
+        $this->accept_json = true;
+
+        $this->withHeaders(["Content-Type" => "application/json"]);
+        $this->withHeaders(["Accept" => "application/json"]);
+
+        return $this;
+    }
+
+    /**
+     * Configure client to accept and send JSON data
+     *
+     * @return HttpClient
+     */
+    public function withJson(): HttpClient
     {
         $this->accept_json = true;
 
@@ -305,9 +414,106 @@ class HttpClient
     {
         foreach ($headers as $key => $value) {
             if (!in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers))) {
-                $this->headers[] = $key . ': ' . $value;
+                $this->headers[] = trim($key) . ': ' . $value;
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Check if header exists
+     *
+     * @param string $key
+     * @param string $value
+     * @return boolean
+     */
+    public function hasHeader(string $key, string $value): bool
+    {
+        return in_array(strtolower($key . ': ' . $value), array_map('strtolower', $this->headers));
+    }
+
+    /**
+     * Set HTTP authentication credentials
+     *
+     * @param  string $username
+     * @param  string $password
+     * @return HttpClient
+     */
+    public function auth(string $username, string $password): HttpClient
+    {
+        curl_setopt($this->ch, CURLOPT_USERPWD, $username . ":" . $password);
+
+        return $this;
+    }
+
+    /**
+     * Set Basic HTTP authentication
+     *
+     * @param  string $key
+     * @param  string $secret
+     * @return HttpClient
+     */
+    public function basicAuth(string $key, string $secret): HttpClient
+    {
+        $this->withHeaders([
+            'Authorization' => 'Basic ' . base64_encode($key . ':' . $secret)
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Set Bearer token authentication
+     *
+     * @param  string $token
+     * @return HttpClient
+     */
+    public function bearerAuth(string $token): HttpClient
+    {
+        $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Set the maximum time the request is allowed to take
+     *
+     * @param  int $seconds
+     * @return HttpClient
+     */
+    public function timeout(int $seconds): HttpClient
+    {
+        $this->timeout = $seconds;
+
+        return $this;
+    }
+
+    /**
+     * Set the maximum time to wait for a connection
+     *
+     * @param  int $seconds
+     * @return HttpClient
+     */
+    public function connectTimeout(int $seconds): HttpClient
+    {
+        $this->connect_timeout = $seconds;
+
+        return $this;
+    }
+
+    /**
+     * Disable SSL certificate verification
+     *
+     * Warning: This should only be used in development environments
+     *
+     * @return HttpClient
+     */
+    public function disableSslVerification(): HttpClient
+    {
+        $this->verify_ssl = false;
 
         return $this;
     }

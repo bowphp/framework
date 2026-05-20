@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
-use Bow\Application\Exception\ApplicationException;
 use ErrorException;
-use InvalidArgumentException;
 
 /**
  * Class Env
@@ -45,13 +43,17 @@ class Env
      *
      * @throws
      */
-    public function __construct(string $filename)
+    public function __construct(?string $filename = null)
     {
         if ($this->isLoaded()) {
             return;
         }
 
-        $this->envs = json_decode(file_get_contents($filename), true, 512, JSON_THROW_ON_ERROR);
+        if ($filename === null || !file_exists($filename)) {
+            $this->envs = [];
+        } else {
+            $this->envs = json_decode(file_get_contents($filename), true, 512, JSON_THROW_ON_ERROR);
+        }
 
         $this->envs = $this->bindVariables($this->envs);
 
@@ -78,16 +80,14 @@ class Env
     /**
      * Load env file
      *
-     * @param  string $filename
+     * @param  ?string $filename
      * @return void
      * @throws
      */
-    public static function configure(string $filename)
+    public static function configure(?string $filename = null): void
     {
-        if (!file_exists($filename)) {
-            throw new InvalidArgumentException(
-                "The application environment file [.env.json] cannot be empty or is not define."
-            );
+        if (static::$instance !== null) {
+            return;
         }
 
         static::$instance = new Env($filename);
@@ -114,9 +114,9 @@ class Env
             return static::$instance;
         }
 
-        throw new ApplicationException(
-            "The environment is not loaded. Please load it before using it."
-        );
+        static::$instance = new Env();
+
+        return static::$instance;
     }
 
     /**

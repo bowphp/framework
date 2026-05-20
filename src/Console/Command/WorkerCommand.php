@@ -17,11 +17,11 @@ class WorkerCommand extends AbstractCommand
      */
     public function run(?string $connection = null): void
     {
-        $tries = (int)$this->arg->getParameter('--tries', 3);
-        $default = $this->arg->getParameter('--queue', "default");
-        $memory = (int)$this->arg->getParameter('--memory', 126);
-        $timout = (int)$this->arg->getParameter('--timout', 60);
-        $sleep = (int)$this->arg->getParameter('--sleep', 60);
+        $tries = (int) $this->arg->getParameter('--tries', 3);
+        $queue_name = $this->arg->getParameter('--queue', "default");
+        $memory = (int) $this->arg->getParameter('--memory', 126);
+        $timout = (int) $this->arg->getParameter('--timout', 3);
+        $sleep = (int) $this->arg->getParameter('--sleep', 3);
 
         $queue = app("queue");
 
@@ -31,7 +31,7 @@ class WorkerCommand extends AbstractCommand
 
         $worker = $this->getWorderService();
         $worker->setConnection($queue->getAdapter());
-        $worker->run($default, $tries, $sleep, $timout, $memory);
+        $worker->run($queue_name, $tries, $sleep, $timout, $memory);
     }
 
     /**

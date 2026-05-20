@@ -489,6 +489,17 @@ class Str
     }
 
     /**
+     * Check if the string is empty
+     *
+     * @param  string $str
+     * @return bool
+     */
+    public static function isEmpty(string $str): bool
+    {
+        return trim($str) === '' || $str === '' || $str === null || strlen($str) === 0;
+    }
+
+    /**
      * __call
      *
      * @param  string $method

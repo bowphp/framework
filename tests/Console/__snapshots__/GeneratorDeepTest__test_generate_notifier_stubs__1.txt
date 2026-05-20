@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Notifiers;
+
+use Bow\Database\Barry\Model;
+use Bow\Mail\Envelop;
+use Bow\Notifier\Notifier;
+
+class WelcomeNotifier extends Notifier
+{
+    /**
+     * Returns the available channels to be used
+     *
+     * @param Model $notifiable
+     * @return array
+     */
+    public function channels(Model $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
+
+    /**
+     * Send notification to mail
+     *
+     * @param Model $notifiable
+     * @return Envelop|null
+     */
+    public function toMail(Model $notifiable): ?Envelop
+    {
+        return (new Envelop());
+    }
+
+    /**
+     * Send notification to database
+     *
+     * @param Model $notifiable
+     * @return array
+     */
+    public function toDatabase(Model $notifiable): array
+    {
+        return [];
+    }
+}

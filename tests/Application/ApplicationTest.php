@@ -17,24 +17,10 @@ use Mockery;
 
 class ApplicationTest extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * @var Response|Mockery\MockInterface
-     */
-    private $response;
-
-    /**
-     * @var Request|Mockery\MockInterface
-     */
-    private $request;
-
-    /**
-     * @var KernelTesting|Mockery\MockInterface
-     */
-    private $config;
-
     public static function setUpBeforeClass(): void
     {
         $config = TestingConfiguration::getConfig();
+        $config->boot();
     }
 
     public function setUp(): void
@@ -57,6 +43,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request->allows()->capture()->andReturns(null);
         $request->allows()->path()->andReturns($path);
         $request->allows()->get("_method")->andReturns("");
+        $request->allows()->domain()->andReturns("localhost");
 
         return $request;
     }

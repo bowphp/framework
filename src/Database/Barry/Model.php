@@ -22,11 +22,17 @@ use JsonSerializable;
 use ReflectionClass;
 
 /**
- * @method select(array|string[] $select)
- * @method whereIn(string $primary_key, array $id)
- * @method get()
- * @method where(string $column, mixed $value)
- * @method orderBy(string $latest, string $string)
+ * @method static as(string $as): Builder
+ * @method static whereRaw(string $where, array $data = []): Builder
+ * @method static join(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
+ * @method static leftJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
+ * @method static rightJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
+ * @method static innerJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
+ * @method static select(array|string[] $select): Builder
+ * @method static whereIn(string $primary_key, array $id): Builder
+ * @method static all(): Collection
+ * @method static where(string $column, mixed $comparator = '=', mixed $value = null): Builder
+ * @method static orderBy(string $latest, string $string): Builder
  */
 abstract class Model implements ArrayAccess, JsonSerializable
 {
@@ -188,7 +194,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Initialize the connection
      *
      * @return Builder
-     * @throws
      */
     public static function query(): Builder
     {
@@ -337,7 +342,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         }
 
         if ($model instanceof Collection) {
-            $model->dropAll();
+            $model->map(fn ($m) => $m->delete());
             return $model;
         }
 
@@ -374,7 +379,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Delete a record
      *
      * @return int
-     * @throws
      */
     public function delete(): int
     {
@@ -482,7 +486,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * persist aliases on insert action
      *
      * @return int
-     * @throws
      */
     public function persist(): int
     {
@@ -601,7 +604,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      *
      * @param  array $attributes
      * @return int|bool
-     * @throws
      */
     public function update(array $attributes): int|bool
     {
@@ -666,7 +668,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function deleted(callable $cb): void
     {
@@ -679,7 +680,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function deleting(callable $cb): void
     {
@@ -692,7 +692,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function creating(callable $cb): void
     {
@@ -705,7 +704,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function created(callable $cb): void
     {
@@ -718,7 +716,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function updating(callable $cb): void
     {
@@ -731,7 +728,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function updated(callable $cb): void
     {
@@ -760,7 +756,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      *
      * @param  string $name
      * @param  array  $arguments
-     * @return mixed
+     * @return Builder|Collection|Model|mixed
      */
     public static function __callStatic(string $name, array $arguments)
     {
@@ -861,9 +857,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         return array_filter(
             $this->attributes,
-            function ($key) {
-                return !in_array($key, $this->hidden);
-            },
+            fn ($key) => !in_array($key, $this->hidden),
             ARRAY_FILTER_USE_KEY
         );
     }
@@ -875,9 +869,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         return array_filter(
             $this->attributes,
-            function ($key) {
-                return !in_array($key, $this->hidden);
-            },
+            fn ($key) => !in_array($key, $this->hidden),
             ARRAY_FILTER_USE_KEY
         );
     }
@@ -894,66 +886,14 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
         if (!$attribute_exists && method_exists($this, $name)) {
             $result = $this->$name();
-            if ($result instanceof Relation) {
-                return $result->getResults();
-            }
-            return $result;
+            return $result instanceof Relation ? $result->getResults() : $result;
         }
 
         if (!$attribute_exists) {
             return null;
         }
 
-        if (in_array($name, $this->mutableDateAttributes())) {
-            return new Carbon($this->attributes[$name]);
-        }
-
-        if (array_key_exists($name, $this->casts)) {
-            $type = $this->casts[$name];
-            $value = $this->attributes[$name];
-            if ($type === "date") {
-                return new Carbon($value);
-            }
-            if ($type === "int") {
-                return (int)$value;
-            }
-            if ($type === "float") {
-                return (float)$value;
-            }
-            if ($type === "double") {
-                return (float)$value;
-            }
-            if ($type === "json") {
-                if (is_array($value)) {
-                    return (object)$value;
-                }
-                if (is_object($value)) {
-                    return (object)$value;
-                }
-                return json_decode(
-                    $value,
-                    false,
-                    512,
-                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
-                );
-            }
-            if ($type === "array") {
-                if (is_array($value)) {
-                    return (array)$value;
-                }
-                if (is_object($value)) {
-                    return (array)$value;
-                }
-                return json_decode(
-                    $value,
-                    true,
-                    512,
-                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
-                );
-            }
-        }
-
-        return $this->attributes[$name];
+        return $this->executeDataCasting($name);
     }
 
     /**
@@ -968,28 +908,29 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Lists of mutable properties
-     *
-     * @return array
-     */
-    private function mutableDateAttributes(): array
-    {
-        return array_merge(
-            $this->dates,
-            [
-            $this->created_at, $this->updated_at, 'expired_at', 'logged_at', 'signed_at'
-            ]
-        );
-    }
-
-    /**
      * __toString
      *
      * @return string
      */
     public function __toString(): string
     {
+        foreach ($this->attributes as $name => $value) {
+            $this->attributes[$name] = $this->executeDataCasting($name);
+        }
+
         return $this->toJson();
+    }
+
+    /**
+     * Lists of mutable properties
+     *
+     * @return array
+     */
+    private function mutableDateAttributes(): array
+    {
+        return array_merge($this->dates, [
+            $this->created_at, $this->updated_at, 'expired_at', 'logged_at', 'signed_at'
+        ]);
     }
 
     /**
@@ -999,13 +940,11 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function toJson(): string
     {
-        $data = array_filter(
-            $this->attributes,
-            function ($key) {
-                return !in_array($key, $this->hidden);
-            },
-            ARRAY_FILTER_USE_KEY
-        );
+        foreach ($this->attributes as $name => $value) {
+            $this->attributes[$name] = $this->executeDataCasting($name);
+        }
+
+        $data = array_filter($this->attributes, fn ($key) => !in_array($key, $this->hidden), ARRAY_FILTER_USE_KEY);
 
         return json_encode($data);
     }
@@ -1025,9 +964,84 @@ abstract class Model implements ArrayAccess, JsonSerializable
             return call_user_func_array([$model, $name], $arguments);
         }
 
-        throw new BadMethodCallException(
-            'method ' . $name . ' is not defined.',
-            E_ERROR
+        throw new BadMethodCallException('Method ' . $name . ' is not defined.', E_ERROR);
+    }
+
+    /**
+     * Executes data casting for a given attribute name
+     *
+     * @param string $name
+     * @return mixed
+     */
+    private function executeDataCasting(string $name): mixed
+    {
+        if (in_array($name, $this->mutableDateAttributes())) {
+            return new Carbon($this->attributes[$name]);
+        }
+
+        if (!array_key_exists($name, $this->casts)) {
+            return $this->attributes[$name];
+        }
+
+        $type = $this->casts[$name];
+        $value = $this->attributes[$name];
+
+        if ($type === "date") {
+            return new Carbon($value);
+        }
+
+        if ($type === "int") {
+            return (int) $value;
+        }
+
+        if ($type === "float") {
+            return (float) $value;
+        }
+
+        if ($type === "double") {
+            return (float) $value;
+        }
+
+        if ($type === "boolean" || $type === "bool") {
+            return (bool) $value;
+        }
+
+        if ($type === "json") {
+            if (is_array($value)) {
+                return (object) $value;
+            }
+            if (is_object($value)) {
+                return (object) $value;
+            }
+            return $this->parseToJson($value);
+        }
+
+        if ($type === "array") {
+            if (is_array($value)) {
+                return (array) $value;
+            }
+            if (is_object($value)) {
+                return (array) $value;
+            }
+            return $this->parseToJson($value);
+        }
+
+        return $this->attributes[$name];
+    }
+
+    /**
+     * Parse value to json
+     *
+     * @param string $value
+     * @return mixed
+     */
+    private function parseToJson($value): mixed
+    {
+        return json_decode(
+            $value,
+            false,
+            512,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
         );
     }
 }

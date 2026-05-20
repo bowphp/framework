@@ -137,11 +137,19 @@ class Setting
     private string $service_directory;
 
     /**
-     * The job directory
+     * The task directory
      *
      * @var string
      */
-    private string $job_directory;
+    private string $task_directory;
+
+    /**
+     * The scheduler directory
+     *
+     * @var string
+     */
+    private string $scheduler_directory;
+
     /**
      * The command directory
      *
@@ -171,11 +179,11 @@ class Setting
     private array $namespaces = [];
 
     /**
-     * The messaging directory
+     * The notifier directory
      *
      * @var string
      */
-    private string $messaging_directory;
+    private string $notifier_directory;
 
     /**
      * Command constructor.
@@ -402,24 +410,45 @@ class Setting
     }
 
     /**
-     * Get the job directory
+     * Get the task directory
      *
      * @return string
      */
-    public function getJobDirectory(): string
+    public function getTaskDirectory(): string
     {
-        return $this->job_directory;
+        return $this->task_directory;
     }
 
     /**
-     * Set the job directory
+     * Set the task directory
      *
-     * @param  string $job_directory
+     * @param  string $task_directory
      * @return void
      */
-    public function setJobDirectory(string $job_directory): void
+    public function setTaskDirectory(string $task_directory): void
     {
-        $this->job_directory = $job_directory;
+        $this->task_directory = $task_directory;
+    }
+
+    /**
+     * Get the scheduler directory
+     *
+     * @return string
+     */
+    public function getSchedulerDirectory(): string
+    {
+        return $this->scheduler_directory;
+    }
+
+    /**
+     * Set the scheduler directory
+     *
+     * @param  string $scheduler_directory
+     * @return void
+     */
+    public function setSchedulerDirectory(string $scheduler_directory): void
+    {
+        $this->scheduler_directory = $scheduler_directory;
     }
 
     /**
@@ -507,24 +536,24 @@ class Setting
     }
 
     /**
-     * Get the messaging directory
+     * Get the notifier directory
      *
      * @return string
      */
-    public function getMessagingDirectory(): string
+    public function getNotifierDirectory(): string
     {
-        return $this->messaging_directory;
+        return $this->notifier_directory;
     }
 
     /**
-     * Set the messaging directory
+     * Set the notifier directory
      *
-     * @param  string $messaging_directory
+     * @param  string $notifier_directory
      * @return void
      */
-    public function setMessagingDirectory(string $messaging_directory): void
+    public function setNotifierDirectory(string $notifier_directory): void
     {
-        $this->messaging_directory = $messaging_directory;
+        $this->notifier_directory = $notifier_directory;
     }
 
     /**

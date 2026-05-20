@@ -149,6 +149,12 @@ class Capsule implements ArrayAccess
             return $this->resolve($key);
         }
 
+        if (is_string($this->registers[$key])) {
+            return $this->instances[$key] = $this->resolve(
+                $this->registers[$key]
+            );
+        }
+
         if (is_callable($this->registers[$key])) {
             return $this->instances[$key] = call_user_func_array(
                 $this->registers[$key],
@@ -171,10 +177,10 @@ class Capsule implements ArrayAccess
      * Add to register
      *
      * @param  string   $key
-     * @param  callable $value
+     * @param  string|Closure|callable $value
      * @return Capsule
      */
-    public function bind(string $key, callable $value): Capsule
+    public function bind(string $key, string|Closure|callable $value): Capsule
     {
         $this->key[$key] = true;
 
@@ -187,10 +193,10 @@ class Capsule implements ArrayAccess
      * Register the instance of a class
      *
      * @param  string           $key
-     * @param  Closure|callable $value
+     * @param  string|Closure|callable $value
      * @return Capsule
      */
-    public function factory(string $key, Closure|callable $value): Capsule
+    public function factory(string $key, string|Closure|callable $value): Capsule
     {
         $this->factories[$key] = $value;
 

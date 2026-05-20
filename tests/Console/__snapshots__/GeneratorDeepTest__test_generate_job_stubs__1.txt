@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Tasks;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 
-class FakeJob extends QueueJob
+class FakeJob extends QueueTask
 {
     /**
      * FakeJob constructor

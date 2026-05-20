@@ -4,39 +4,57 @@ declare(strict_types=1);
 
 namespace Bow\Queue\Adapters;
 
-use Bow\Queue\QueueJob;
+use Bow\Queue\QueueTask;
 
 class SyncAdapter extends QueueAdapter
 {
     /**
-     * Define the config
+     * Adapter configuration
      *
      * @var array
      */
-    private array $config;
+    private array $config = [];
 
     /**
      * Configure SyncAdapter driver
      *
      * @param  array $config
-     * @return mixed
+     * @return $this
      */
-    public function configure(array $config): SyncAdapter
+    public function configure(array $config): self
     {
         $this->config = $config;
-
         return $this;
     }
 
     /**
-     * Queue a job
+     * Queue a task and execute it immediately (synchronously)
      *
-     * @param  QueueJob $job
+     * @param  QueueTask $task
      * @return bool
      */
-    public function push(QueueJob $job): bool
+    public function push(QueueTask $task): bool
     {
-        $job->process();
+        $task->setId($this->generateId());
+
+        try {
+            if (!method_exists($task, 'process')) {
+                throw new \RuntimeException('Task does not have a process or handle method.');
+            }
+            $this->logProcessingTask($task);
+
+            $task->process();
+
+            $this->logProcessedTask($task);
+        } catch (\Throwable $e) {
+            // Optionally log or handle error
+            $this->logFailedTask($task, $e);
+            throw $e;
+        }
+
+        if (method_exists($task, 'getDelay')) {
+            $this->sleep($task->getDelay());
+        }
 
         return true;
     }
