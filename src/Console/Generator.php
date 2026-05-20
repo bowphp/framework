@@ -19,6 +19,13 @@ class Generator
     private string $base_directory;
 
     /**
+     * Define the stub path
+     *
+     * @var string
+     */
+    private string $stub_path;
+
+    /**
      * The generate name
      *
      * @var string
@@ -90,9 +97,10 @@ class Generator
      *
      * @param  string $type
      * @param  array  $data
+     * @param  bool  $using_path
      * @return bool
      */
-    public function write(string $type, array $data = []): bool
+    public function write(string $type, array $data = [], bool $using_path = false): bool
     {
         $dirname = dirname($this->name);
 
@@ -114,13 +122,53 @@ class Generator
         );
 
         // Create the stub parsed content
+        $template_data = array_merge([
+            'namespace' => $namespace,
+            'className' => $classname
+        ], $data);
+
         $template = $this->makeStubContent(
             $type,
-            array_merge([
-                'namespace' => $namespace,
-                'className' => $classname
-            ], $data)
+            $template_data
         );
+
+        return (bool) file_put_contents($this->getPath(), $template);
+    }
+
+    /**
+     * Write file
+     *
+     * @param  array  $data
+     * @return bool
+     */
+    public function writeFromDefineStubeFile(array $data = []): bool
+    {
+        $dirname = dirname($this->name);
+
+        if (!is_dir($this->base_directory)) {
+            @mkdir($this->base_directory, 0777, true);
+        }
+
+        if ($dirname != '.') {
+            @mkdir($this->base_directory . '/' . trim($dirname, '/'), 0777, true);
+
+            $namespace = '\\' . str_replace('/', '\\', ucfirst(trim($dirname, '/')));
+        } else {
+            $namespace = '';
+        }
+
+        // Transform class to match the PSR-2 standard
+        $classname = ucfirst(
+            Str::camel(basename($this->name))
+        );
+
+        // Create the stub parsed content
+        $template_data = array_merge([
+            'namespace' => $namespace,
+            'className' => $classname
+        ], $data);
+
+        $template = $this->makeUsingStubPathContent($template_data);
 
         return (bool) file_put_contents($this->getPath(), $template);
     }
@@ -135,6 +183,34 @@ class Generator
     public function makeStubContent(string $type, array $data = []): string
     {
         $content = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
+
+        foreach ($data as $key => $value) {
+            $content = str_replace('{' . $key . '}', (string)$value, $content);
+        }
+
+        return $content;
+    }
+
+    /**
+     * Set the stub path
+     *
+     * @param string $path
+     * @return void
+     */
+    public function setStubPath(string $path)
+    {
+        $this->stub_path = $path;
+    }
+
+    /**
+     * Make stub using path
+     *
+     * @param array $data
+     * @return string
+     */
+    public function makeUsingStubPathContent(array $data = []): string
+    {
+        $content = file_get_contents($this->stub_path);
 
         foreach ($data as $key => $value) {
             $content = str_replace('{' . $key . '}', (string)$value, $content);
