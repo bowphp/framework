@@ -1,7 +1,7 @@
 # Roadmap BowPHP Framework
 
 > Document évolutif basé sur l'analyse du code source (branche 5.x) et le manifeste du projet.
-> Dernière mise à jour : Janvier 2026
+> Dernière mise à jour : Mai 2026
 
 ---
 
@@ -56,35 +56,89 @@
 
 ---
 
+## ✅ Récemment livré (printemps 2026)
+
+Faits saillants des dernières itérations — déjà mergés sur `5.x`. Tous les détails dans le CHANGELOG.
+
+### Routing
+
+-   Routage par attributs PHP 8 (cf. section dédiée plus bas).
+-   `Router::$routes` rendu instance (corrige les fuites d'état entre tests).
+-   Préfixe de nom du `#[Controller]` appliqué aux routes filles ; méthodes héritées ignorées au scan.
+
+### Barry ORM
+
+-   Trait `SoftDelete` (`delete` → `deleted_at`, `restore`, `forceDelete`, `withTrashed` / `onlyTrashed` / `withoutTrashed`, événements `model.restoring/restored/forceDeleting/forceDeleted`).
+-   Cast `array` réparé : ne renvoie plus un `stdClass`.
+-   Propriété morte `$soft_delete` supprimée (remplacée par le trait).
+-   Visibilité `EventTrait::fireEvent` / `formatEventName` élargie à `protected` pour les traits enfants.
+
+### Validation
+
+-   Nouvelles règles : `url`, `ip` (+ `ip:v4`, `ip:v6`), `boolean`, `json`, `uuid`, `confirmed`, `different:field`, `between:min,max`.
+-   Priorité corrigée : `nullable|required` laisse `required` s'exécuter (et l'inner-loop break utilise enfin la bonne variable).
+
+### Infrastructure de test
+
+-   `TestCase` refactoré : vrai DELETE/PATCH (plus de hack `_method`), `head()` / `options()`, factorisation via `newHttpClient()`, reset auto des attachements, port par défaut 8080.
+-   `Env::reset()` ajouté pour la propreté entre suites de tests.
+-   `SchedulerCommand` charge automatiquement `routes/scheduler.php` et tolère un Loader manquant.
+-   `addEnum` / `changeEnum` : messages d'erreur explicites (mentionnent la clé `size`).
+-   Bootstrap des tests filtre les `E_DEPRECATED` issus de `vendor/` (lcobucci/jwt v3.2.5, spatie 4.x).
+-   Pagination : tests appelaient `total()` au lieu de `totalPages()` — 24 cas corrigés.
+
+### Tintin (vendoré)
+
+-   Cache atomique (`rename`), `mkdir` récursif, invalidation par `filemtime` (au lieu de `fileatime`).
+-   `Compiler::compile` ne perd plus les lignes vides ; ajout d'un post-pass `?>\n\n` pour préserver l'indentation des snippets `<pre>/<code>`.
+-   `Tintin::renderString` utilise `tempnam()` + `try/finally` ; suppression du `trim()` destructif.
+-   Heuristique d'échappement `{{ ... }}` resserrée mais compatible Vue/Angular.
+-   `directivesProtected` enrichi (csrf, macro/endmacro, lang, flash, notempty…).
+
+### Documentation & READMEs
+
+-   Audit complet de `docs/docs/*.mdx` (ORM, Router, Validation, Migration, Mail, Storage, Messaging, Container, Pagination, Scheduler, Task, Testing, Configuration, Concept, Controller, CQRS, Database, Policier, Service, Session, SoAuth, Structure, Upload, View, Package, Contribution).
+-   README mis à jour (badges, compteurs de tests, soft delete, attribut routing, helpers de commande).
+-   `microservice` (sous-projet) : refactor de `MicroserviceConfiguration` (extends `Configuration`, PSR-4 propre), `microservice.php` Bow-intégré, namespace `Bow\Console\Command\Generator` corrigé.
+
+---
+
 ## 🔴 NOW — 0 à 3 mois (Stabilisation & Consolidation)
 
 ### Tests et CI/CD
 
-| Tâche                                               | Statut     | Priorité | Notes                                                  |
-| --------------------------------------------------- | ---------- | -------- | ------------------------------------------------------ |
-| Séparer les tests unitaires des tests d'intégration | ⏳ À faire | Haute    | Les tests DB/FTP/S3 nécessitent des services externes  |
-| Ajouter `@group` PHPUnit pour isoler les tests      | ⏳ À faire | Haute    | `@group unit`, `@group integration`, `@group database` |
-| Configurer GitHub Actions avec services Docker      | ⏳ À faire | Haute    | MySQL, PostgreSQL, Redis pour CI                       |
-| Augmenter couverture tests unitaires > 80%          | ⏳ À faire | Moyenne  | Focus sur modules critiques                            |
-| Intégrer PHPStan niveau 5+                          | ⏳ À faire | Moyenne  | Actuellement niveau 0.12.87                            |
+| Tâche                                               | Statut       | Priorité | Notes                                                  |
+| --------------------------------------------------- | ------------ | -------- | ------------------------------------------------------ |
+| Séparer les tests unitaires des tests d'intégration | ⏳ À faire   | Haute    | Les tests DB/FTP/S3 nécessitent des services externes  |
+| Ajouter `@group` PHPUnit pour isoler les tests      | ⏳ À faire   | Haute    | `@group unit`, `@group integration`, `@group database` |
+| Configurer GitHub Actions avec services Docker      | ⏳ À faire   | Haute    | MySQL, PostgreSQL, Redis pour CI                       |
+| Augmenter couverture tests unitaires                | 🔄 En cours  | Moyenne  | 1 600+ tests, 0 échec logique. Ajouts récents : SoftDelete, AttributeRouteRegistrar, nouvelles règles de validation, Pagination. |
+| Intégrer PHPStan niveau 5+                          | ⏳ À faire   | Moyenne  | Constraint actuel : `phpstan/phpstan: ^0.12.87` — bumper vers ^1.x avant de cibler un niveau plus élevé |
 
 ### Corrections de Code
 
-| Tâche                                           | Statut     | Priorité | Notes                                 |
-| ----------------------------------------------- | ---------- | -------- | ------------------------------------- |
-| Fixer les tests SQLite qui échouent (isolation) | ⏳ À faire | Haute    | Problème de state partagé entre tests |
-| Uniformiser les signatures de méthodes          | ✅ Fait    | -        | PHP 8.1+ nullable types               |
-| Fixer le cast `(double)` → `(float)`            | ✅ Fait    | -        | Model.php ligne 924                   |
-| Gérer `array_key_exists` avec clé null          | ✅ Fait    | -        | Console.php                           |
-| Créer le répertoire de test si inexistant       | ✅ Fait    | -        | CustomCommand.php                     |
+| Tâche                                                                | Statut     | Priorité | Notes                                                                  |
+| -------------------------------------------------------------------- | ---------- | -------- | ---------------------------------------------------------------------- |
+| Fixer le test d'attribut middleware (state partagé entre tests)      | ✅ Fait    | -        | `Router::$routes` rendue instance (n'était plus partagée entre tests)  |
+| Fixer les tests Pagination qui appelaient `total()` au lieu de `totalPages()` | ✅ Fait    | -        | 24 tests corrigés                                                      |
+| Fixer le cast `array` du modèle Barry qui renvoyait `stdClass`       | ✅ Fait    | -        | `Model::executeDataCasting` + `parseToJson($value, assoc: true)`       |
+| Fixer la priorité `nullable\|required` du Validator                  | ✅ Fait    | -        | `nullable` ne court-circuite plus `required`                           |
+| Fixer `EnvTest` (pollution du singleton entre tests)                 | ✅ Fait    | -        | `Env::reset()` ajouté                                                  |
+| Fixer `SchedulerCommand` (chargement de `routes/scheduler.php`)      | ✅ Fait    | -        | `loadSchedulerFile()` mis à jour, tolère un Loader manquant            |
+| Retirer la propriété morte `Model::$soft_delete`                     | ✅ Fait    | -        | Remplacée par un trait fonctionnel (cf. Soft delete plus bas)          |
+| Améliorer les messages d'erreur de `addEnum` / `changeEnum`          | ✅ Fait    | -        | Mentionnent explicitement la clé `size`                                |
+| Uniformiser les signatures de méthodes                               | ✅ Fait    | -        | PHP 8.1+ nullable types                                                |
+| Fixer le cast `(double)` → `(float)`                                 | ✅ Fait    | -        | Model.php                                                              |
+| Gérer `array_key_exists` avec clé null                               | ✅ Fait    | -        | Console.php                                                            |
+| Créer le répertoire de test si inexistant                            | ✅ Fait    | -        | CustomCommand.php                                                      |
 
 ### Documentation
 
-| Tâche                                        | Statut     | Priorité | Notes                      |
-| -------------------------------------------- | ---------- | -------- | -------------------------- |
-| Mettre à jour README avec exemples API-first | ⏳ À faire | Moyenne  | Aligner avec le manifeste  |
-| Documenter les configurations requises       | ⏳ À faire | Moyenne  | Chaque module              |
-| Créer guide de contribution détaillé         | ⏳ À faire | Basse    | Au-delà du CONTRIBUTING.md |
+| Tâche                                        | Statut       | Priorité | Notes                                                       |
+| -------------------------------------------- | ------------ | -------- | ----------------------------------------------------------- |
+| Mettre à jour README avec exemples API-first | ✅ Fait      | -        | Compteurs de tests, exemples corrigés (`User::retrieve`, `persist()`, `$app`), attribut routing et soft delete mis en avant |
+| Documenter les configurations requises       | ✅ Fait      | -        | Audit complet de `docs/docs/*.mdx` (ORM, Router, Validation, Migration, Storage, Mail, Notifier, Container, Pagination, Scheduler, Task, etc.) |
+| Créer guide de contribution détaillé         | ⏳ À faire   | Basse    | Au-delà du CONTRIBUTING.md                                  |
 
 ---
 
@@ -98,14 +152,16 @@
 | Implémenter delayed jobs avec Redis ZADD | ⏳ À faire | Haute    |                                |
 | Ajouter monitoring des queues via CLI    | ⏳ À faire | Moyenne  | `bow queue:status`             |
 
-### Router - Attributs PHP 8
+### Router - Attributs PHP 8 ✅ Livré
 
-| Tâche                                                  | Statut     | Priorité | Notes                 |
-| ------------------------------------------------------ | ---------- | -------- | --------------------- |
-| Créer namespace `Bow\Router\Attributes`                | ⏳ À faire | Haute    |                       |
-| Implémenter `#[Controller]`                            | ⏳ À faire | Haute    | prefix, middleware    |
-| Implémenter `#[Get]`, `#[Post]`, `#[Put]`, `#[Delete]` | ⏳ À faire | Haute    |                       |
-| Ajouter `$router->register(Controller::class)`         | ⏳ À faire | Haute    | Auto-discovery routes |
+| Tâche                                                  | Statut  | Priorité | Notes                                                                |
+| ------------------------------------------------------ | ------- | -------- | -------------------------------------------------------------------- |
+| Créer namespace `Bow\Router\Attributes`                | ✅ Fait | -        | `src/Router/Attributes/`                                              |
+| Implémenter `#[Controller]`                            | ✅ Fait | -        | `prefix`, `middleware`, `name` (préfixe de nom de route)              |
+| Implémenter `#[Get]`, `#[Post]`, `#[Put]`, `#[Delete]` | ✅ Fait | -        | + `#[Patch]`, `#[Options]`, `#[Route]` (multi-verbes), tous répétables |
+| Ajouter `$app->register(Controller::class)`            | ✅ Fait | -        | Accepte aussi un tableau de contrôleurs                              |
+| `AttributeRouteRegistrar`                              | ✅ Fait | -        | Refactoré : préfixe de nom appliqué, méthodes héritées ignorées, sous-classe d'attribut acceptée |
+| Tests + stubs                                          | ✅ Fait | -        | `tests/Routing/AttributeRouteIntegrationTest.php`                    |
 
 ### Cache - Adapter Memcached
 
