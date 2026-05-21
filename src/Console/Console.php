@@ -25,6 +25,126 @@ class Console
     private const VERSION = '5.x';
 
     /**
+     * Command aliases that share another topic's help body.
+     */
+    private const HELP_TOPIC_ALIASES = [
+        'gen' => 'generate',
+    ];
+
+    /**
+     * Per-topic help bodies, keyed by command (or alias). The "gen" alias
+     * shares the "generate" body via the aliases map below.
+     *
+     * Bodies use raw ANSI escape codes — they are pre-formatted templates
+     * rather than messages composed through Color::*.
+     */
+    private const HELP_TOPICS = [
+        'add' => <<<U
+\n\033[0;32mcreate\033[00m create a user class\n
+    [option]
+    --no-plain  Create a plain controller [available in add:controller]
+    -m          Create a migration [available in add:model]
+    --create    Create a migration for create table [available in add:migration]
+    --table     Create a migration for alter table [available in add:migration]
+
+    * you can use --no-plain --with-model in same command
+
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  Create a new controller
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           Create a new middleware
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name        Create a new configuration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              Create a new service
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:exception name            Create a new exception
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       Create a new model
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           Create a new validation
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    Create a new seeder
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            Create a new migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                Create a new event listener
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:task name                  Create a new queue task
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              Create a new console command
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:notifier name              Create a new messaging handler
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      Display this help
+
+U,
+        'generate' => <<<U
+    \n\033[0;32mgenerate\033[00m create a resource and app key
+    [option]
+    --model=[model_name] Define the usable model
+
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   Create a new REST controller
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:session-table            Generate the table for session
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:cache-table              Generate the table for cache
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:queue-table              Generate the table for queue
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:notification-table       Generate the table for notification
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      Generate a new APP KEY
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     Display this help
+    \033[0;33mgen\033[00m                                                           Alias of \033[0;33mgenerate\033[00m
+
+U,
+        'migration' => <<<U
+\n\033[0;32mmigration\033[00m apply a migration in user model\n
+
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:migrate   Run migrations
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:reset     Reset all migrations
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:rollback  Rollback to previous migration
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate             Alias of \033[0;33mmigration:migrate\033[00m
+    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration help      Display this help
+
+U,
+        'run' => <<<U
+\n\033[0;32mrun\033[00m for launch repl and local server\n
+    [option]
+    run:server [--port=8080] [--host=localhost] [--php-settings="display_errors=on"]
+    run:console [--include=filename.php] [--prompt=prompt_name]
+    run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console          Show PsySH PHP REPL for debugging code
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server [option]  Start local development server
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker [option]  Start worker to handle queue tasks
+
+U,
+        'clear' => <<<U
+\n\033[0;32mclear\033[00m for clear cache information\n
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:view             Clear view cached information
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:cache\033[00m    Clear cache information
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:all\033[00m      Clear all cache information
+
+U,
+        'seed' => <<<U
+\n\033[0;32mMake table seeding\033[00m\n
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:all\033[00m               Make seeding for all
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:file\033[00m class_name  Make seeding for one file
+
+U,
+        'flush' => <<<U
+\n\033[0;32mFlush all queues content\033[00m\n
+    [option]
+    flush:worker [connection] [--queue=queue_name]
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m flush:worker\033[00m           Flush all queues
+
+U,
+        'schedule' => <<<U
+\n\033[0;32mTask scheduling commands\033[00m\n
+    [commands]
+    schedule:run            Run the scheduler once (execute all due tasks)
+    schedule:work           Start the scheduler daemon (continuous loop)
+    schedule:list           List all registered scheduled tasks
+    schedule:next           Show the next run time for all tasks
+    schedule:test [class]   Test run a specific task by class name
+
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:run\033[00m           Run due tasks once
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:work\033[00m          Start scheduler daemon
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:list\033[00m          List all scheduled tasks
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:next\033[00m          Show next run times
+   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:test TaskClass\033[00m  Test a specific task
+
+U,
+    ];
+
+
+    /**
      * The command list
      *
      * @var array
@@ -156,13 +276,23 @@ class Console
      * Add a custom order to the store from the web env
      * This method work on web and cli env
      *
-     * @param  string          $command
-     * @param  callable|string $cb
+     * @param  string          $command     Command name (or `base:action` form)
+     * @param  callable|string $cb          Closure / function name / class string
+     * @param  string|null     $description One-liner shown in the global help index
+     * @param  string|null     $help        Full body shown by `php bow help <command>`
      * @return void
      */
-    public static function register(string $command, callable|string $cb): void
-    {
-        static::$registers[$command] = $cb;
+    public static function register(
+        string $command,
+        callable|string $cb,
+        ?string $description = null,
+        ?string $help = null,
+    ): void {
+        static::$registers[$command] = [
+            'cb'          => $cb,
+            'description' => $description,
+            'help'        => $help,
+        ];
     }
 
     /**
@@ -245,9 +375,14 @@ class Console
 
         if (!in_array($command, array_keys($commands))) {
             // Try to execute the custom command
-            $rawCommand = $this->arg->getRawCommand() ?? '';
-            if (($rawCommand !== '' && array_key_exists($rawCommand, static::$registers)) || array_key_exists($command, static::$registers)) {
-                return $this->executeCustomCommand($rawCommand ?: $command);
+            if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
+                // `php bow <custom> help` shows the registered help instead of running it.
+                if ($this->arg->getTarget() === 'help' && !$this->arg->getAction()) {
+                    $this->help($command);
+                    exit(0);
+                }
+
+                return $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
             }
         }
 
@@ -259,7 +394,8 @@ class Console
 
         if (!$this->arg->getAction()) {
             if ($target == 'help') {
-                return $this->help($command);
+                $this->help($command);
+                exit(0);
             }
         }
 
@@ -281,7 +417,7 @@ class Console
     private function executeCustomCommand(string $command): mixed
     {
         try {
-            $classname = static::$registers[$command];
+            $classname = static::$registers[$command]['cb'];
 
             if (is_callable($classname)) {
                 return $classname($this->arg, $this->setting);
@@ -309,11 +445,21 @@ class Console
      *
      * @param  string          $command
      * @param  callable|string $cb
+     * @param  string|null     $description One-liner shown in the global help index
+     * @param  string|null     $help        Full body shown by `php bow help <command>`
      * @return Console
      */
-    public function addCommand(string $command, callable|string $cb): Console
-    {
-        static::$registers[$command] = $cb;
+    public function addCommand(
+        string $command,
+        callable|string $cb,
+        ?string $description = null,
+        ?string $help = null,
+    ): Console {
+        static::$registers[$command] = [
+            'cb'          => $cb,
+            'description' => $description,
+            'help'        => $help,
+        ];
 
         return $this;
     }
@@ -520,18 +666,26 @@ USAGE;
     }
 
     /**
-     * Display global help or helper command.
-     *
-     * @param  string|null $command
-     * @return int
+     * Display global help or a single topic's help.
      */
-    private function help(?string $command = null): int
+    private function help(?string $command = null): void
     {
-        // Display the framework and php version
         $this->getVersion();
 
-        if ($command === null || $command == 'help') {
-            $usage = <<<USAGE
+        if ($command === null || $command === 'help') {
+            $this->printGlobalHelp();
+            return;
+        }
+
+        $this->printTopicHelp($command);
+    }
+
+    /**
+     * Print the top-level command index.
+     */
+    private function printGlobalHelp(): void
+    {
+        echo <<<USAGE
 
 Bow task runner usage: php bow command:action [name] --option
 
@@ -546,7 +700,6 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33mgenerate:queue-table\033[00m          Generate preset table for queue
    \033[0;33mgenerate:notification-table\033[00m   Generate preset table for notification
    \033[0;33mgenerate:key\033[00m                  Create new app key
-   \033[0;33mflush:worker\033[00m                  Flush all queues
 
  \033[0;32mADD\033[00m Create a user class
    \033[0;33madd:middleware\033[00m      Create new middleware
@@ -580,7 +733,10 @@ Bow task runner usage: php bow command:action [name] --option
  \033[0;32mSEED\033[00m Run database seeders
    \033[0;33mseed:file\033[00m [class_name] Run specific seeder file
    \033[0;33mseed:all\033[00m              Run all seeders
- 
+
+ \033[0;32mFLUSH\033[00m Drain queue workers
+   \033[0;33mflush:worker\033[00m        Flush all queues
+
  \033[0;32mRUN\033[00m Launch development tools
    \033[0;33mrun:console\033[00m Show PsySH PHP REPL for debugging code
    \033[0;33mrun:server\033[00m  Start local development server
@@ -594,142 +750,64 @@ Bow task runner usage: php bow command:action [name] --option
    \033[0;33mschedule:test\033[00m  Test run a specific task by class name
 
 USAGE;
-            echo $usage;
-            return 0;
+
+        $this->printCustomCommandsSection();
+    }
+
+    /**
+     * Append the CUSTOM section listing application-registered commands.
+     *
+     * Each entry shows the command name in yellow and, when available, the
+     * description supplied to register() / addCommand(). Pad the name column
+     * to the widest entry so descriptions align in the terminal.
+     */
+    private function printCustomCommandsSection(): void
+    {
+        if (static::$registers === []) {
+            return;
         }
 
-        switch ($command) {
-            case 'add':
-                echo <<<U
-\n\033[0;32mcreate\033[00m create a user class\n
-    [option]
-    --no-plain  Create a plain controller [available in add:controller]
-    -m          Create a migration [available in add:model]
-    --create    Create a migration for create table [available in add:migration]
-    --table     Create a migration for alter table [available in add:migration]
+        $names = array_keys(static::$registers);
+        $width = max(array_map('strlen', $names));
 
-    * you can use --no-plain --with-model in same command
+        echo "\n \033[0;32mCUSTOM\033[00m Application-registered commands\n";
 
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:controller name [option]  Create a new controller
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:middleware name           Create a new middleware
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:configuration name        Create a new configuration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:service name              Create a new service
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:exception name            Create a new exception
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:model name [option]       Create a new model
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:validation name           Create a new validation
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:seeder name [--seed=n]    Create a new seeder
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:migration name            Create a new migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:event name                Create a new event listener
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:task name                  Create a new queue task
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:command name              Create a new console command
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add:notifier name              Create a new messaging handler
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m add help                      Display this help
-
-U;
-
-                break;
-            case 'generate':
-            case 'gen':
-                echo <<<U
-    \n\033[0;32mgenerate\033[00m create a resource and app key
-    [option]
-    --model=[model_name] Define the usable model
-
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:resource name [option]   Create a new REST controller
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:session-table            Generate the table for session
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:cache-table              Generate the table for cache
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:queue-table              Generate the table for queue
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:notification-table       Generate the table for notification
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate:key                      Generate a new APP KEY
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m generate help                     Display this help
-    \033[0;33mgen\033[00m                                                           Alias of \033[0;33mgenerate\033[00m
-
-U;
-                break;
-            case 'migration':
-                echo <<<U
-\n\033[0;32mmigration\033[00m apply a migration in user model\n
-
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:migrate   Run migrations
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:reset     Reset all migrations
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration:rollback  Rollback to previous migration
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migrate             Alias of \033[0;33mmigration:migrate\033[00m
-    \033[0;33m$\033[00m php \033[0;34mbow\033[00m migration help      Display this help
-
-U;
-                break;
-
-            case 'run': // phpcs:disable
-                echo <<<U
-\n\033[0;32mrun\033[00m for launch repl and local server\n
-    [option]
-    run:server [--port=8080] [--host=localhost] [--php-settings="display_errors=on"]
-    run:console [--include=filename.php] [--prompt=prompt_name]
-    run:worker [--queue=default] [--connexion=beanstalkd,sqs,redis,database] [--tries=duration] [--sleep=duration] [--timeout=duration]
-
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:console          Show PsySH PHP REPL for debugging code
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:server [option]  Start local development server
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m run:worker [option]  Start worker to handle queue tasks
-
-U; // phpcs:enable
-                break;
-
-            case 'clear':
-                echo <<<U
-\n\033[0;32mclear\033[00m for clear cache information\n
-
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:view             Clear view cached information
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:cache\033[00m    Clear cache information
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m clear:all\033[00m      Clear all cache information
-
-U;
-                break;
-
-            case 'seed':
-                echo <<<U
-\n\033[0;32mMake table seeding\033[00m\n
-
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:all\033[00m               Make seeding for all
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m seed:file\033[00m class_name  Make seeding for one file
-
-U;
-                break;
-
-            case 'flush':
-                echo <<<U
-\n\033[0;32mFlush all queues content\033[00m\n
-    [option]
-    flush:worker [connection] [--queue=queue_name]
-
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m flush:worker\033[00m           Flush all queues
-
-U;
-                break;
-
-            case 'schedule':
-                echo <<<U
-\n\033[0;32mTask scheduling commands\033[00m\n
-    [commands]
-    schedule:run            Run the scheduler once (execute all due tasks)
-    schedule:work           Start the scheduler daemon (continuous loop)
-    schedule:list           List all registered scheduled tasks
-    schedule:next           Show the next run time for all tasks
-    schedule:test [class]   Test run a specific task by class name
-
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:run\033[00m           Run due tasks once
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:work\033[00m          Start scheduler daemon
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:list\033[00m          List all scheduled tasks
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:next\033[00m          Show next run times
-   \033[0;33m$\033[00m php \033[0;34mbow\033[00m schedule:test TaskClass\033[00m  Test a specific task
-
-U;
-                break;
-
-            default:
-                $this->throwFailsCommand("Please make php bow help for show whole docs !");
-                exit(1);
+        foreach (static::$registers as $name => $entry) {
+            $description = (string) ($entry['description'] ?? '');
+            echo sprintf(
+                "   \033[0;33m%s\033[00m  %s\n",
+                str_pad($name, $width),
+                $description,
+            );
         }
 
-        exit(0);
+        echo "\n";
+    }
+
+    /**
+     * Print help for a single topic. Resolution order:
+     *
+     *   1. Built-in topics in HELP_TOPICS (including HELP_TOPIC_ALIASES).
+     *   2. Application-registered commands that supplied a help body via
+     *      register()/addCommand().
+     *   3. Otherwise: error.
+     */
+    private function printTopicHelp(string $command): void
+    {
+        $topic = self::HELP_TOPIC_ALIASES[$command] ?? $command;
+
+        if (isset(self::HELP_TOPICS[$topic])) {
+            echo self::HELP_TOPICS[$topic];
+            return;
+        }
+
+        $registered = static::$registers[$command] ?? null;
+
+        if (is_array($registered) && is_string($registered['help'] ?? null)) {
+            echo $registered['help'];
+            return;
+        }
+
+        $this->throwFailsCommand('Please make php bow help for show whole docs !');
     }
 }

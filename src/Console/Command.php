@@ -32,6 +32,7 @@ use Bow\Console\Command\Generator\GenerateConfigurationCommand;
 use Bow\Console\Command\Generator\GenerateEventListenerCommand;
 use Bow\Console\Command\Generator\GenerateTaskCommand;
 use Bow\Console\Command\Generator\GenerateRouterResourceCommand;
+use Bow\Console\Exception\ConsoleException;
 
 class Command extends AbstractCommand
 {
@@ -40,7 +41,7 @@ class Command extends AbstractCommand
      *
      * @var array
      */
-    private array $commands = [
+    protected static array $commands = [
         "clear" => ClearCommand::class,
         "seed:file" => SeederCommand::class,
         "seed:all" => SeederCommand::class,
@@ -85,7 +86,24 @@ class Command extends AbstractCommand
      */
     public function getCommands(): array
     {
-        return $this->commands;
+        return static::$commands;
+    }
+
+    /**
+     * Push new command
+     *
+     * @param array $commands
+     * @return void
+     */
+    public static function pushCommand(array $commands)
+    {
+        foreach ($commands as $key => $command) {
+            if (isset(static::$commands[$key])) {
+                throw new ConsoleException("$key command already exists");
+            }
+
+            static::$commands[$key] = $command;
+        }
     }
 
     /**
@@ -99,7 +117,7 @@ class Command extends AbstractCommand
      */
     public function call(string $command, string $action, ...$rest): mixed
     {
-        $class = $this->commands[$command] ?? null;
+        $class = static::$commands[$command] ?? null;
 
         if (is_null($class)) {
             $this->throwFailsCommand("The command $command not found !");

@@ -55,7 +55,7 @@ class SeederCommand extends AbstractCommand
     /**
      * Launch targeted seeding
      *
-     * @param  string|null $seeder_name
+     * @param  string|null $seeder_class_name
      * @return void
      */
     public function file(?string $seeder_class_name = null): void

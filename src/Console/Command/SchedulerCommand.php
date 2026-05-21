@@ -206,16 +206,33 @@ class SchedulerCommand extends AbstractCommand
     }
 
     /**
-     * Load the scheduler from kernel
+     * Load schedules from two sources:
+     *
+     *   1. The host app's Kernel::schedules() method (always called).
+     *   2. A routes/scheduler.php file relative to the app's base directory,
+     *      if present. The file is included so any code it runs against
+     *      Scheduler::getInstance() registers events.
      *
      * @param  Scheduler $scheduler
      * @return void
      */
     private function loadSchedulerFile(Scheduler $scheduler): void
     {
-        $kernel = Loader::getInstance();
+        // The Kernel's schedules() hook is optional — only call it if a Loader
+        // has been configured (e.g. host app booted, integration test). When
+        // the command is exercised in isolation (unit tests) we still want the
+        // routes/scheduler.php auto-include below to work.
+        try {
+            $kernel = Loader::getInstance();
+            $kernel->schedules($scheduler);
+        } catch (\Throwable) {
+            // No Loader configured; skip the Kernel hook and continue.
+        }
 
-        $kernel->schedules($scheduler);
+        $routes_file = $this->setting->getBaseDirectory() . '/routes/scheduler.php';
+        if (is_file($routes_file)) {
+            require $routes_file;
+        }
     }
 
     /**

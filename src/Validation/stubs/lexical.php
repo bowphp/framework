@@ -22,4 +22,12 @@ return [
     'date' => 'The {attribute} field must use the format: yyyy-mm-dd',
     'datetime' => 'The {attribute} field must use the format: yyyy-mm-dd hh:mm:ss',
     'regex' => 'The {attribute} field does not match the pattern',
+    'url' => 'The {attribute} field must be a valid URL.',
+    'ip' => 'The {attribute} field must be a valid IP address.',
+    'boolean' => 'The {attribute} field must be true or false.',
+    'json' => 'The {attribute} field must be a valid JSON string.',
+    'uuid' => 'The {attribute} field must be a valid UUID.',
+    'confirmed' => 'The {attribute} field confirmation does not match.',
+    'different' => 'The {attribute} field must be different from {other}.',
+    'between' => 'The {attribute} field must be between {min} and {max}.',
 ];

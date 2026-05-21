@@ -9,11 +9,15 @@ use Bow\Router\Exception\RouterException;
 class Router
 {
     /**
-     * Route collection.
+     * Route collection (per Router instance).
+     *
+     * Was `protected static` before — that caused routes from one Router to
+     * leak into the next when `Router::configure()` was called multiple times
+     * (e.g. between tests), since the static array outlived instance recreation.
      *
      * @var array
      */
-    protected static array $routes = [];
+    protected array $routes = [];
 
     /**
      * Define the functions related to a http
@@ -303,7 +307,7 @@ class Router
         $route->middleware($this->middlewares);
 
         foreach ($methods as $method) {
-            static::$routes[$method][] = $route;
+            $this->routes[$method][] = $route;
 
             // We define the current route and current method
             $this->current = ['path' => $path, 'method' => $method];
@@ -486,7 +490,7 @@ class Router
      */
     public function getRoutes(): array
     {
-        return static::$routes;
+        return $this->routes;
     }
 
     /**

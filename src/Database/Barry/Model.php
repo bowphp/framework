@@ -22,17 +22,56 @@ use JsonSerializable;
 use ReflectionClass;
 
 /**
- * @method static as(string $as): Builder
- * @method static whereRaw(string $where, array $data = []): Builder
- * @method static join(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
- * @method static leftJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
- * @method static rightJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
- * @method static innerJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null): Builder
- * @method static select(array|string[] $select): Builder
- * @method static whereIn(string $primary_key, array $id): Builder
- * @method static all(): Collection
- * @method static where(string $column, mixed $comparator = '=', mixed $value = null): Builder
- * @method static orderBy(string $latest, string $string): Builder
+ * Static method hints for calls dispatched through __callStatic() to the
+ * underlying Builder (and its parent QueryBuilder). They let IDEs and
+ * static analysers type-check fluent chains such as
+ * `User::where('active', true)->orderBy('id')->paginate(15)`.
+ *
+ * Selection & aliasing
+ * @method static Builder as(string $as)
+ * @method static Builder select(array $select = [])
+ * @method static Builder distinct(string $column)
+ *
+ * WHERE clauses
+ * @method static Builder where(string $column, mixed $comparator = '=', mixed $value = null)
+ * @method static Builder whereRaw(string $where, array $data = [])
+ * @method static Builder whereNull(string $column)
+ * @method static Builder whereNotNull(string $column)
+ * @method static Builder whereBetween(string $column, array $range)
+ * @method static Builder whereNotBetween(string $column, array $range)
+ * @method static Builder whereDifferent(string $column, mixed $value)
+ * @method static Builder whereIn(string $column, array $range)
+ * @method static Builder whereNotIn(string $column, array $range)
+ *
+ * Joins
+ * @method static Builder join(string $table, string $first, mixed $comparator = '=', ?string $second = null)
+ * @method static Builder leftJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null)
+ * @method static Builder rightJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null)
+ *
+ * Grouping, ordering, limiting, locking
+ * @method static Builder orderBy(string $column, string $type = 'asc')
+ * @method static Builder take(int $limit)
+ * @method static Builder jump(int $offset = 0)
+ * @method static Builder lockForUpdate()
+ * @method static Builder sharedLock()
+ *
+ * Aggregates & terminal reads
+ * @method static int count(string $column = '*')
+ * @method static int|float max(string $column)
+ * @method static int|float min(string $column)
+ * @method static int|float avg(string $column)
+ * @method static int|float sum(string $column)
+ * @method static ?object last()
+ * @method static Model|Collection|null get(array $columns = [])
+ * @method static bool exists(?string $column = null, mixed $value = null)
+ * @method static string toSql()
+ *
+ * Write actions
+ * @method static int delete()
+ * @method static int remove(string $column, mixed $comparator = '=', mixed $value = null)
+ * @method static int increment(string $column, int $step = 1)
+ * @method static int decrement(string $column, int $step = 1)
+ * @method static bool truncate()
  */
 abstract class Model implements ArrayAccess, JsonSerializable
 {
@@ -75,13 +114,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * @var bool
      */
     protected bool $auto_increment = true;
-
-    /**
-     * Enable the soft deletion
-     *
-     * @var bool
-     */
-    protected bool $soft_delete = false;
 
     /**
      * Defines the column where the query construct will use for the last query
@@ -1023,23 +1055,26 @@ abstract class Model implements ArrayAccess, JsonSerializable
             if (is_object($value)) {
                 return (array) $value;
             }
-            return $this->parseToJson($value);
+            return $this->parseToJson($value, assoc: true);
         }
 
         return $this->attributes[$name];
     }
 
     /**
-     * Parse value to json
+     * Decode a JSON string. When $assoc is true the result is an associative
+     * array (used by the `array` cast); otherwise it is a stdClass (used by
+     * the `json` cast).
      *
-     * @param string $value
+     * @param  string $value
+     * @param  bool   $assoc
      * @return mixed
      */
-    private function parseToJson($value): mixed
+    private function parseToJson($value, bool $assoc = false): mixed
     {
         return json_decode(
             $value,
-            false,
+            $assoc,
             512,
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
         );

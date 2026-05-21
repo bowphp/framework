@@ -7,6 +7,8 @@ namespace Bow\Tests\Routing;
 use Bow\Router\AttributeRouteRegistrar;
 use Bow\Router\Router;
 use Bow\Tests\Config\TestingConfiguration;
+use Bow\Tests\Routing\Stubs\ChildControllerStub;
+use Bow\Tests\Routing\Stubs\NamedUserControllerStub;
 use Bow\Tests\Routing\Stubs\SimpleControllerStub;
 use Bow\Tests\Routing\Stubs\UserControllerStub;
 use PHPUnit\Framework\TestCase;
@@ -148,6 +150,47 @@ class AttributeRouteIntegrationTest extends TestCase
         $result = $this->router->register(UserControllerStub::class);
 
         $this->assertInstanceOf(Router::class, $result);
+    }
+
+    public function test_controller_name_prefixes_route_names(): void
+    {
+        $this->router->register(NamedUserControllerStub::class);
+
+        $names = [];
+        foreach ($this->router->getRoutes()['GET'] ?? [] as $route) {
+            if ($route->getName() !== null) {
+                $names[] = $route->getName();
+            }
+        }
+
+        $this->assertContains('users.index', $names);
+        $this->assertContains('users.show', $names);
+    }
+
+    public function test_inherited_methods_are_not_registered(): void
+    {
+        $this->router->register(ChildControllerStub::class);
+
+        $paths = array_map(
+            fn($route) => $route->getPath(),
+            $this->router->getRoutes()['GET'] ?? [],
+        );
+
+        $childPaths = array_filter(
+            $paths,
+            fn(string $path) => str_starts_with($path, '/child'),
+        );
+
+        // The parent's #[Get('/inherited')] must not be registered for the child.
+        foreach ($childPaths as $path) {
+            $this->assertStringNotContainsString('/inherited', $path);
+        }
+
+        // The child's own route must still be there.
+        $this->assertNotEmpty(array_filter(
+            $childPaths,
+            fn(string $path) => str_contains($path, '/own'),
+        ));
     }
 
     public function test_route_middleware_is_applied_correctly(): void

@@ -67,7 +67,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Pagination::class, $result);
         $this->assertCount(10, $result->items());
         $this->assertEquals(10, $result->perPage());
-        $this->assertEquals(3, $result->total());
+        $this->assertEquals(3, $result->totalPages());
         $this->assertEquals(1, $result->current());
         $this->assertEquals(1, $result->previous());
         $this->assertEquals(2, $result->next());
@@ -118,7 +118,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Pagination::class, $result);
         $this->assertCount(10, $result->items());
         $this->assertEquals(10, $result->perPage());
-        $this->assertEquals(3, $result->total());
+        $this->assertEquals(3, $result->totalPages());
         $this->assertEquals(2, $result->current());
         $this->assertEquals(1, $result->previous());
         $this->assertEquals(3, $result->next());
@@ -154,7 +154,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Pagination::class, $result);
         $this->assertCount(10, $result->items());
         $this->assertEquals(10, $result->perPage());
-        $this->assertEquals(3, $result->total());
+        $this->assertEquals(3, $result->totalPages());
         $this->assertEquals(3, $result->current());
         $this->assertEquals(2, $result->previous());
         $this->assertEquals(0, $result->next()); // No next page = 0
@@ -196,7 +196,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertCount(5, $result->items());
         $this->assertEquals(5, $result->perPage());
-        $this->assertEquals(6, $result->total()); // 30 / 5 = 6 pages
+        $this->assertEquals(6, $result->totalPages()); // 30 / 5 = 6 pages
     }
 
     /**
@@ -209,7 +209,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertCount(30, $result->items()); // Only 30 items total
         $this->assertEquals(50, $result->perPage());
-        $this->assertEquals(1, $result->total()); // Only 1 page
+        $this->assertEquals(1, $result->totalPages()); // Only 1 page
         $this->assertFalse($result->hasNext());
     }
 
@@ -221,7 +221,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $this->createTestingTable($name, 20); // Exactly 20 items
         $result = Database::connection($name)->table("pets")->paginate(10);
 
-        $this->assertEquals(2, $result->total()); // Exactly 2 pages
+        $this->assertEquals(2, $result->totalPages()); // Exactly 2 pages
 
         // Navigate to page 2
         $page2 = Database::connection($name)->table("pets")->paginate(10, 2);
@@ -281,7 +281,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
         $result = Database::connection($name)->table("pets")->paginate(10);
 
         $this->assertCount(5, $result->items());
-        $this->assertEquals(1, $result->total());
+        $this->assertEquals(1, $result->totalPages());
         $this->assertEquals(1, $result->current());
         $this->assertFalse($result->hasNext());
         // hasPrevious() is true if previous != 0, and previous is 1 on page 1
@@ -317,7 +317,7 @@ class PaginationTest extends \PHPUnit\Framework\TestCase
 
         // Just verify pagination works with WHERE clause
         $this->assertCount(10, $result->items());
-        $this->assertEquals(3, $result->total());
+        $this->assertEquals(3, $result->totalPages());
     }
 
     /**
