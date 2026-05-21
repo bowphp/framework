@@ -17,7 +17,7 @@ class Router
      *
      * @var array
      */
-    protected array $routes = [];
+    protected static array $routes = [];
 
     /**
      * Define the functions related to a http
@@ -307,7 +307,7 @@ class Router
         $route->middleware($this->middlewares);
 
         foreach ($methods as $method) {
-            $this->routes[$method][] = $route;
+            static::$routes[$method][] = $route;
 
             // We define the current route and current method
             $this->current = ['path' => $path, 'method' => $method];
@@ -490,7 +490,7 @@ class Router
      */
     public function getRoutes(): array
     {
-        return $this->routes;
+        return static::$routes;
     }
 
     /**
