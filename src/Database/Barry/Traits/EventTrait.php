@@ -13,7 +13,7 @@ trait EventTrait
      *
      * @param string $event
      */
-    private function fireEvent(string $event): void
+    protected function fireEvent(string $event): void
     {
         $env = static::formatEventName($event);
 
@@ -26,7 +26,7 @@ trait EventTrait
      * @param  string $event
      * @return string
      */
-    private static function formatEventName(string $event): string
+    protected static function formatEventName(string $event): string
     {
         $class_name = str_replace('\\', '', strtolower(Str::snake(static::class)));
 

@@ -94,6 +94,16 @@ class Env
     }
 
     /**
+     * Reset the singleton state. Intended for test setup/teardown so a fresh
+     * configure() can load a different env file; not meant for production code.
+     */
+    public static function reset(): void
+    {
+        static::$instance = null;
+        static::$loaded = false;
+    }
+
+    /**
      * Check if env is load
      *
      * @return bool

@@ -6,101 +6,138 @@ namespace Bow\Router;
 
 use Bow\Router\Attributes\Controller;
 use Bow\Router\Attributes\Route as RouteAttribute;
+use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 
 class AttributeRouteRegistrar
 {
     /**
-     * The router instance
-     *
-     * @var Router
-     */
-    private Router $router;
-
-    /**
      * @param Router $router
      */
-    public function __construct(Router $router)
+    public function __construct(private readonly Router $router)
     {
-        $this->router = $router;
     }
 
     /**
-     * Register routes from controller classes
+     * Register routes from one or many controller classes.
      *
-     * @param string|array $controllers
-     * @return void
+     * @param class-string|list<class-string> $controllers
      */
     public function register(string|array $controllers): void
     {
-        $controllers = is_array($controllers) ? $controllers : [$controllers];
-
-        foreach ($controllers as $controller) {
-            $this->registerController($controller);
+        foreach ((array) $controllers as $controllerClass) {
+            $this->registerController($controllerClass);
         }
     }
 
     /**
-     * Register routes from controller
-     *
-     * @param string $controllerClass
-     * @return void
+     * Scan a single controller class and register all of its attribute routes.
      */
     private function registerController(string $controllerClass): void
     {
         $reflection = new ReflectionClass($controllerClass);
+        $controllerAttribute = $this->resolveControllerAttribute($reflection);
 
-        // Get controller attribute
-        $controllerAttributes = $reflection->getAttributes(Controller::class);
-        $controllerAttribute = !empty($controllerAttributes) ? $controllerAttributes[0]->newInstance() : null;
-
-        $prefix = $controllerAttribute?->getPrefix() ?? '';
-        $controllerMiddleware = $controllerAttribute?->getMiddleware() ?? [];
-
-        // Scan methods
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if (str_starts_with($method->getName(), '__')) {
+            if ($this->shouldSkipMethod($method, $reflection)) {
                 continue;
             }
 
-            // Get route attributes
-            $routeAttributes = $method->getAttributes(
-                RouteAttribute::class,
-                \ReflectionAttribute::IS_INSTANCEOF
+            $this->registerMethodRoutes($method, $controllerClass, $controllerAttribute);
+        }
+    }
+
+    /**
+     * Resolve the `#[Controller]` attribute on the class, if present. Accepts
+     * subclasses of `Controller` via IS_INSTANCEOF.
+     */
+    private function resolveControllerAttribute(ReflectionClass $reflection): ?Controller
+    {
+        $attributes = $reflection->getAttributes(Controller::class, ReflectionAttribute::IS_INSTANCEOF);
+
+        return $attributes !== [] ? $attributes[0]->newInstance() : null;
+    }
+
+    /**
+     * Skip magic methods and methods inherited from parent classes (those
+     * belong to whichever parent declared them, not this controller).
+     */
+    private function shouldSkipMethod(ReflectionMethod $method, ReflectionClass $reflection): bool
+    {
+        if (str_starts_with($method->getName(), '__')) {
+            return true;
+        }
+
+        return $method->getDeclaringClass()->getName() !== $reflection->getName();
+    }
+
+    /**
+     * Register every `#[Route]`-derived attribute on a single controller method.
+     */
+    private function registerMethodRoutes(
+        ReflectionMethod $method,
+        string $controllerClass,
+        ?Controller $controllerAttribute,
+    ): void {
+        $routeAttributes = $method->getAttributes(
+            RouteAttribute::class,
+            ReflectionAttribute::IS_INSTANCEOF,
+        );
+
+        foreach ($routeAttributes as $attribute) {
+            /** @var RouteAttribute $routeAttr */
+            $routeAttr = $attribute->newInstance();
+
+            $route = $this->router->match(
+                $routeAttr->getMethods(),
+                $this->composePath($controllerAttribute, $routeAttr->getPath()),
+                [$controllerClass, $method->getName()],
             );
 
-            foreach ($routeAttributes as $attribute) {
-                /** @var RouteAttribute $routeAttr */
-                $routeAttr = $attribute->newInstance();
+            $this->applyRouteOptions($route, $routeAttr, $controllerAttribute);
+        }
+    }
 
-                // Build path
-                $routePath = $routeAttr->getPath();
-                $routePath = '/' . ltrim($routePath, '/');
-                $fullPath = $prefix !== '' ? rtrim($prefix, '/') . $routePath : $routePath;
+    /**
+     * Prepend the controller-level prefix to the route path, normalising
+     * leading/trailing slashes.
+     */
+    private function composePath(?Controller $controllerAttribute, string $routePath): string
+    {
+        $routePath = '/' . ltrim($routePath, '/');
+        $prefix = $controllerAttribute?->getPrefix() ?? '';
 
-                // Merge middleware
-                $middleware = array_merge($controllerMiddleware, $routeAttr->getMiddleware());
+        return $prefix !== '' ? rtrim($prefix, '/') . $routePath : $routePath;
+    }
 
-                // Register route
-                $route = $this->router->match(
-                    $routeAttr->getMethods(),
-                    $fullPath,
-                    [$controllerClass, $method->getName()]
-                );
+    /**
+     * Apply middleware, parameter constraints, and route name from both the
+     * controller-level and route-level attributes. The controller's name
+     * acts as a prefix and is concatenated verbatim — callers control the
+     * separator (e.g. `name: 'users.'` + `name: 'index'` => `users.index`).
+     */
+    private function applyRouteOptions(
+        Route $route,
+        RouteAttribute $routeAttr,
+        ?Controller $controllerAttribute,
+    ): void {
+        $middleware = array_merge(
+            $controllerAttribute?->getMiddleware() ?? [],
+            $routeAttr->getMiddleware(),
+        );
 
-                if (!empty($middleware)) {
-                    $route->middleware($middleware);
-                }
+        if ($middleware !== []) {
+            $route->middleware($middleware);
+        }
 
-                if (!empty($routeAttr->getWhere())) {
-                    $route->where($routeAttr->getWhere());
-                }
+        if ($routeAttr->getWhere() !== []) {
+            $route->where($routeAttr->getWhere());
+        }
 
-                if ($routeAttr->getName() !== null) {
-                    $route->name($routeAttr->getName());
-                }
-            }
+        if ($routeAttr->getName() !== null) {
+            $namePrefix = $controllerAttribute?->getName() ?? '';
+            $route->name($namePrefix . $routeAttr->getName());
         }
     }
 }
