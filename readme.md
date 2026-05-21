@@ -2,8 +2,7 @@
 
 [![docs](https://img.shields.io/badge/docs-read%20docs-blue.svg?style=flat-square)](https://github.com/bowphp/docs)
 [![version](https://img.shields.io/packagist/v/bowphp/framework.svg?style=flat-square)](https://packagist.org/packages/bowphp/framework)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/bowphp/framework/blob/main/LICENSE)
-[![Build Status](https://img.shields.io/travis/bowphp/framework/main.svg?style=flat-square)](https://travis-ci.org/bowphp/framework)
+[![license](https://img.shields.io/github/license/bowphp/framework.svg?style=flat-square)](https://github.com/bowphp/framework/blob/main/LICENSE)
 ![Build Status](https://github.com/bowphp/framework/actions/workflows/tests.yml/badge.svg)
 
 > A lightweight, modern PHP framework designed for building web applications with clean architecture and modular design.
@@ -26,7 +25,7 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - Modular architecture with 20+ independent components
 - Lightweight and fast with minimal dependencies
 - Full-stack framework with everything you need
-- Well-tested with 1,110+ tests and 94% success rate
+- Well-tested: 1,600+ tests, 3,300+ assertions, zero logical failures
 - Active development with regular updates
 
 ## Core Features
@@ -37,17 +36,20 @@ Bow Framework is a lightweight PHP framework created by Franck DAKIA that emphas
 - **Query Builder**: Fluent, expressive database queries
 - **Multi-database**: MySQL, PostgreSQL, SQLite support
 - **Migrations**: Version control for database schema
-- **Relationships**: BelongsTo, HasMany, ManyToMany
+- **Relationships**: HasOne, HasMany, BelongsTo, BelongsToMany
+- **Soft delete**: `SoftDelete` trait with `delete`/`restore`/`forceDelete` and `withTrashed`/`onlyTrashed` query scopes
 - **Pagination**: Built-in pagination support
 
 ### Routing System
 
-- Simple, expressive routing syntax
+- Simple, expressive routing syntax (`$app->get`, `$app->post`, ...)
+- **PHP 8 attribute routing**: `#[Controller]`, `#[Get]`, `#[Post]`, `#[Put]`, `#[Patch]`, `#[Delete]`, `#[Options]`, `#[Route]`
 - RESTful resource routing with automatic CRUD operations
 - Route naming for easy URL generation
 - Route parameters with regex constraints
-- Middleware support per route or route group
-- Route prefix support for grouping
+- Middleware support per route or route group, with `name:arg` parameter syntax
+- Route prefix and domain grouping
+- Custom HTTP error handlers via `code()`
 
 ### Mail System
 
@@ -186,16 +188,19 @@ php bow serve
 
 ```php
 // routes/app.php
-$route->get('/', function () {
+$app->get('/', function () {
     return 'Hello World!';
 });
 
-$route->get('/users/:id', function ($id) {
+$app->get('/users/:id', function ($id) {
     return "User ID: $id";
 });
 
 // RESTful resource routing
-$route->rest('/api/posts', PostController::class);
+$app->rest('/api/posts', 'PostController');
+
+// Attribute-based controllers (no central route file required)
+$app->register(\App\Controllers\PostController::class);
 ```
 
 **Create a Controller:**
@@ -215,7 +220,10 @@ class PostController
 
     public function store(Request $request)
     {
-        return Post::create($request->all());
+        $post = Post::create($request->all());
+        $post->persist();
+
+        return $post;
     }
 }
 ```
@@ -224,12 +232,13 @@ class PostController
 
 ```php
 use App\Models\User;
+use Bow\Database\Database;
 
 // Using Barry ORM
-$user = User::find(1);
+$user = User::retrieve(1);
 $users = User::where('active', true)->get();
 
-// Using Query Builder
+// Using the Query Builder
 $users = Database::table('users')
     ->where('role', 'admin')
     ->orderBy('created_at', 'desc')
@@ -238,21 +247,22 @@ $users = Database::table('users')
 
 ## Code Quality & Testing
 
-### Current Status (v5.1.7)
+### Current Status
 
-- **Test Suite**: 1,110+ tests with 2,498+ assertions
-- **Success Rate**: 94% (remaining failures are external service dependencies)
-- **Code Style**: PSR-12 compliant
+- **Test Suite**: 1,600+ tests with 3,300+ assertions
+- **Logical failures**: 0 — the only remaining errors require external services (FTP server, S3 endpoint) and are skipped by default
+- **Code Style**: PSR-12 (`composer phpcs` to check, `composer phpcbf` to fix)
+- **Static analysis**: PHPStan in `require-dev` (`vendor/bin/phpstan analyse src`)
 - **PHP Version**: 8.1+ with modern features
 
 ### Recent Improvements
 
-The framework is actively maintained with recent major refactoring:
-
-- **SMTP Adapter**: Complete rewrite (8 → 21 methods, RFC-compliant)  
-- **FTP Service**: Enhanced with retry logic and better error handling  
-- **Queue System**: Graceful logger fallback  
-- **Test Quality**: 39% fewer errors, 70% fewer failures  
+- **SMTP Adapter**: Complete rewrite (8 → 21 methods, RFC-compliant)
+- **FTP Service**: Enhanced with retry logic and better error handling
+- **Queue System**: Graceful logger fallback
+- **Attribute routing**: PHP 8 `#[Controller]` / `#[Get]` / `#[Post]` / ... wiring via `$app->register(...)`
+- **Barry soft delete**: trait + query scopes (`withTrashed`, `onlyTrashed`, `withoutTrashed`)
+- **Router**: instance-level route storage (no more cross-test leakage)
 - **PHP 8.x**: Modernized code style (arrow functions, union types)
 
 See [CHANGELOG.md](CHANGELOG.md) for full details.
