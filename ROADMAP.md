@@ -1,21 +1,21 @@
-# Roadmap BowPHP Framework
+# BowPHP Framework Roadmap
 
-> Document évolutif basé sur l'analyse du code source (branche 5.x) et le manifeste du projet.
-> Dernière mise à jour : Mai 2026
+> Living document based on source code analysis (5.x branch) and the project manifesto.
+> Last updated: May 2026
 
 ---
 
-## État Actuel du Framework
+## Current Framework State
 
-### Modules Existants (Analyse du `/src`)
+### Existing Modules (`/src` Analysis)
 
-| Module                 | Statut    | Description                                    |
-| ---------------------- | --------- | ---------------------------------------------- |
+| Module                 | Status   | Description                                    |
+| ---------------------- | -------- | ---------------------------------------------- |
 | **Application**        | ✅ Stable | Bootstrap, exception handling, kernel          |
 | **Auth**               | ✅ Stable | Guards (Session, JWT), Authentication          |
 | **Cache**              | ✅ Stable | Adapters: Database, Filesystem, Redis          |
 | **Configuration**      | ✅ Stable | Loader, Env, Logger configuration              |
-| **Console**            | ✅ Stable | 26 commandes, générateurs, stubs               |
+| **Console**            | ✅ Stable | 26 commands, generators, stubs                 |
 | **Container**          | ✅ Stable | DI container, middleware dispatcher            |
 | **Database/Barry ORM** | ✅ Stable | MySQL, PostgreSQL, SQLite + Relations          |
 | **Event**              | ✅ Stable | Event dispatcher, listeners, queue integration |
@@ -31,233 +31,233 @@
 | **Support**            | ✅ Stable | Helpers, Collection, Str, Log, Env             |
 | **Testing**            | ✅ Stable | TestCase, Assertions, KernelTesting            |
 | **Translate**          | ✅ Stable | i18n support                                   |
-| **Validation**         | ✅ Stable | Règles de validation, messages custom          |
+| **Validation**         | ✅ Stable | Validation rules, custom messages              |
 | **View**               | ✅ Stable | Tintin (default), Twig support                 |
 
-### Dépendances Actuelles
+### Current Dependencies
 
-**Requises :**
+**Required:**
 
--   PHP ^8.1
--   bowphp/tintin ^3.0 (template engine)
--   filp/whoops ^2.1 (error handling)
--   nesbot/carbon 3.8.4 (dates)
--   fakerphp/faker ^1.20 (testing data)
--   ramsey/uuid ^4.7 (UUIDs)
+* PHP ^8.1
+* bowphp/tintin ^3.0 (template engine)
+* filp/whoops ^2.1 (error handling)
+* nesbot/carbon 3.8.4 (dates)
+* fakerphp/faker ^1.20 (testing data)
+* ramsey/uuid ^4.7 (UUIDs)
 
-**Dev/Suggérées :**
+**Dev/Suggested:**
 
--   pda/pheanstalk ^5.0 (Beanstalkd)
--   aws/aws-sdk-php ^3.87 (S3)
--   bowphp/policier ^3.0 (JWT)
--   predis/predis ^2.1 (Redis)
--   twilio/sdk ^8.3 (SMS)
--   bowphp/slack-webhook ^1.0 (Slack)
+* pda/pheanstalk ^5.0 (Beanstalkd)
+* aws/aws-sdk-php ^3.87 (S3)
+* bowphp/policier ^3.0 (JWT)
+* predis/predis ^2.1 (Redis)
+* twilio/sdk ^8.3 (SMS)
+* bowphp/slack-webhook ^1.0 (Slack)
 
 ---
 
-## ✅ Récemment livré (printemps 2026)
+## ✅ Recently Delivered (Spring 2026)
 
-Faits saillants des dernières itérations — déjà mergés sur `5.x`. Tous les détails dans le CHANGELOG.
+Highlights from the latest iterations — already merged into `5.x`. Full details are available in the CHANGELOG.
 
 ### Routing
 
--   Routage par attributs PHP 8 (cf. section dédiée plus bas).
--   `Router::$routes` rendu instance (corrige les fuites d'état entre tests).
--   Préfixe de nom du `#[Controller]` appliqué aux routes filles ; méthodes héritées ignorées au scan.
+* PHP 8 attribute routing support (see dedicated section below).
+* `Router::$routes` converted to instance state (fixes shared state leaks between tests).
+* `#[Controller]` name prefix applied to child routes; inherited methods ignored during scanning.
 
 ### Barry ORM
 
--   Trait `SoftDelete` (`delete` → `deleted_at`, `restore`, `forceDelete`, `withTrashed` / `onlyTrashed` / `withoutTrashed`, événements `model.restoring/restored/forceDeleting/forceDeleted`).
--   Cast `array` réparé : ne renvoie plus un `stdClass`.
--   Propriété morte `$soft_delete` supprimée (remplacée par le trait).
--   Visibilité `EventTrait::fireEvent` / `formatEventName` élargie à `protected` pour les traits enfants.
+* `SoftDelete` trait (`delete` → `deleted_at`, `restore`, `forceDelete`, `withTrashed` / `onlyTrashed` / `withoutTrashed`, events `model.restoring/restored/forceDeleting/forceDeleted`).
+* Fixed `array` cast: no longer returns `stdClass`.
+* Removed dead `$soft_delete` property (replaced by the trait).
+* `EventTrait::fireEvent` / `formatEventName` visibility expanded to `protected` for child traits.
 
 ### Validation
 
--   Nouvelles règles : `url`, `ip` (+ `ip:v4`, `ip:v6`), `boolean`, `json`, `uuid`, `confirmed`, `different:field`, `between:min,max`.
--   Priorité corrigée : `nullable|required` laisse `required` s'exécuter (et l'inner-loop break utilise enfin la bonne variable).
+* New rules: `url`, `ip` (+ `ip:v4`, `ip:v6`), `boolean`, `json`, `uuid`, `confirmed`, `different:field`, `between:min,max`.
+* Fixed priority handling: `nullable|required` now allows `required` to execute properly (and the inner-loop break now uses the correct variable).
 
-### Infrastructure de test
+### Testing Infrastructure
 
--   `TestCase` refactoré : vrai DELETE/PATCH (plus de hack `_method`), `head()` / `options()`, factorisation via `newHttpClient()`, reset auto des attachements, port par défaut 8080.
--   `Env::reset()` ajouté pour la propreté entre suites de tests.
--   `SchedulerCommand` charge automatiquement `routes/scheduler.php` et tolère un Loader manquant.
--   `addEnum` / `changeEnum` : messages d'erreur explicites (mentionnent la clé `size`).
--   Bootstrap des tests filtre les `E_DEPRECATED` issus de `vendor/` (lcobucci/jwt v3.2.5, spatie 4.x).
--   Pagination : tests appelaient `total()` au lieu de `totalPages()` — 24 cas corrigés.
+* `TestCase` refactored: real DELETE/PATCH support (no more `_method` hack), `head()` / `options()`, shared logic through `newHttpClient()`, automatic attachment reset, default port 8080.
+* `Env::reset()` added for cleaner test isolation.
+* `SchedulerCommand` now automatically loads `routes/scheduler.php` and tolerates a missing Loader.
+* `addEnum` / `changeEnum`: explicit error messages (mention the `size` key).
+* Test bootstrap now filters `E_DEPRECATED` coming from `vendor/` (`lcobucci/jwt v3.2.5`, spatie 4.x).
+* Pagination: tests were calling `total()` instead of `totalPages()` — 24 test cases fixed.
 
-### Tintin (vendoré)
+### Tintin (vendored)
 
--   Cache atomique (`rename`), `mkdir` récursif, invalidation par `filemtime` (au lieu de `fileatime`).
--   `Compiler::compile` ne perd plus les lignes vides ; ajout d'un post-pass `?>\n\n` pour préserver l'indentation des snippets `<pre>/<code>`.
--   `Tintin::renderString` utilise `tempnam()` + `try/finally` ; suppression du `trim()` destructif.
--   Heuristique d'échappement `{{ ... }}` resserrée mais compatible Vue/Angular.
--   `directivesProtected` enrichi (csrf, macro/endmacro, lang, flash, notempty…).
+* Atomic cache (`rename`), recursive `mkdir`, invalidation based on `filemtime` (instead of `fileatime`).
+* `Compiler::compile` no longer removes empty lines; added `?>\n\n` post-pass to preserve indentation in `<pre>/<code>` snippets.
+* `Tintin::renderString` now uses `tempnam()` + `try/finally`; removed destructive `trim()`.
+* Tightened `{{ ... }}` escaping heuristic while remaining compatible with Vue/Angular.
+* Extended `directivesProtected` (`csrf`, `macro/endmacro`, `lang`, `flash`, `notempty`, etc.).
 
 ### Documentation & READMEs
 
--   Audit complet de `docs/docs/*.mdx` (ORM, Router, Validation, Migration, Mail, Storage, Messaging, Container, Pagination, Scheduler, Task, Testing, Configuration, Concept, Controller, CQRS, Database, Policier, Service, Session, SoAuth, Structure, Upload, View, Package, Contribution).
--   README mis à jour (badges, compteurs de tests, soft delete, attribut routing, helpers de commande).
--   `microservice` (sous-projet) : refactor de `MicroserviceConfiguration` (extends `Configuration`, PSR-4 propre), `microservice.php` Bow-intégré, namespace `Bow\Console\Command\Generator` corrigé.
+* Full audit of `docs/docs/*.mdx` (ORM, Router, Validation, Migration, Mail, Storage, Messaging, Container, Pagination, Scheduler, Task, Testing, Configuration, Concept, Controller, CQRS, Database, Policier, Service, Session, SoAuth, Structure, Upload, View, Package, Contribution).
+* Updated README (badges, test counters, soft delete, attribute routing, command helpers).
+* `microservice` (subproject): `MicroserviceConfiguration` refactor (`extends Configuration`, clean PSR-4), Bow-integrated `microservice.php`, fixed `Bow\Console\Command\Generator` namespace.
 
 ---
 
-## 🔴 NOW — 0 à 3 mois (Stabilisation & Consolidation)
+## 🔴 NOW — 0 to 3 Months (Stabilization & Consolidation)
 
-### Tests et CI/CD
+### Testing and CI/CD
 
-| Tâche                                               | Statut       | Priorité | Notes                                                  |
-| --------------------------------------------------- | ------------ | -------- | ------------------------------------------------------ |
-| Séparer les tests unitaires des tests d'intégration | ⏳ À faire   | Haute    | Les tests DB/FTP/S3 nécessitent des services externes  |
-| Ajouter `@group` PHPUnit pour isoler les tests      | ⏳ À faire   | Haute    | `@group unit`, `@group integration`, `@group database` |
-| Configurer GitHub Actions avec services Docker      | ⏳ À faire   | Haute    | MySQL, PostgreSQL, Redis pour CI                       |
-| Augmenter couverture tests unitaires                | 🔄 En cours  | Moyenne  | 1 600+ tests, 0 échec logique. Ajouts récents : SoftDelete, AttributeRouteRegistrar, nouvelles règles de validation, Pagination. |
-| Intégrer PHPStan niveau 5+                          | ⏳ À faire   | Moyenne  | Constraint actuel : `phpstan/phpstan: ^0.12.87` — bumper vers ^1.x avant de cibler un niveau plus élevé |
+| Task                                          | Status     | Priority | Notes                                                                                                                     |
+| --------------------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Separate unit tests from integration tests    | ⏳ Planned  | High     | DB/FTP/S3 tests require external services                                                                                 |
+| Add PHPUnit `@group` annotations              | ⏳ Planned  | High     | `@group unit`, `@group integration`, `@group database`                                                                    |
+| Configure GitHub Actions with Docker services | ⏳ Planned  | High     | MySQL, PostgreSQL, Redis for CI                                                                                           |
+| Increase unit test coverage                   | 🔄 Ongoing | Medium   | 1,600+ tests, 0 logical failures. Recent additions: SoftDelete, AttributeRouteRegistrar, new validation rules, Pagination |
+| Integrate PHPStan level 5+                    | ⏳ Planned  | Medium   | Current constraint: `phpstan/phpstan: ^0.12.87` — upgrade to ^1.x before targeting higher levels                          |
 
-### Corrections de Code
+### Code Fixes
 
-| Tâche                                                                | Statut     | Priorité | Notes                                                                  |
-| -------------------------------------------------------------------- | ---------- | -------- | ---------------------------------------------------------------------- |
-| Fixer le test d'attribut middleware (state partagé entre tests)      | ✅ Fait    | -        | `Router::$routes` rendue instance (n'était plus partagée entre tests)  |
-| Fixer les tests Pagination qui appelaient `total()` au lieu de `totalPages()` | ✅ Fait    | -        | 24 tests corrigés                                                      |
-| Fixer le cast `array` du modèle Barry qui renvoyait `stdClass`       | ✅ Fait    | -        | `Model::executeDataCasting` + `parseToJson($value, assoc: true)`       |
-| Fixer la priorité `nullable\|required` du Validator                  | ✅ Fait    | -        | `nullable` ne court-circuite plus `required`                           |
-| Fixer `EnvTest` (pollution du singleton entre tests)                 | ✅ Fait    | -        | `Env::reset()` ajouté                                                  |
-| Fixer `SchedulerCommand` (chargement de `routes/scheduler.php`)      | ✅ Fait    | -        | `loadSchedulerFile()` mis à jour, tolère un Loader manquant            |
-| Retirer la propriété morte `Model::$soft_delete`                     | ✅ Fait    | -        | Remplacée par un trait fonctionnel (cf. Soft delete plus bas)          |
-| Améliorer les messages d'erreur de `addEnum` / `changeEnum`          | ✅ Fait    | -        | Mentionnent explicitement la clé `size`                                |
-| Uniformiser les signatures de méthodes                               | ✅ Fait    | -        | PHP 8.1+ nullable types                                                |
-| Fixer le cast `(double)` → `(float)`                                 | ✅ Fait    | -        | Model.php                                                              |
-| Gérer `array_key_exists` avec clé null                               | ✅ Fait    | -        | Console.php                                                            |
-| Créer le répertoire de test si inexistant                            | ✅ Fait    | -        | CustomCommand.php                                                      |
+| Task                                                             | Status | Priority | Notes                                                            |
+| ---------------------------------------------------------------- | ------ | -------- | ---------------------------------------------------------------- |
+| Fix middleware attribute test (shared state between tests)       | ✅ Done | -        | `Router::$routes` converted to instance state                    |
+| Fix Pagination tests calling `total()` instead of `totalPages()` | ✅ Done | -        | 24 tests fixed                                                   |
+| Fix Barry model `array` cast returning `stdClass`                | ✅ Done | -        | `Model::executeDataCasting` + `parseToJson($value, assoc: true)` |
+| Fix Validator `nullable\|required` priority                      | ✅ Done | -        | `nullable` no longer short-circuits `required`                   |
+| Fix `EnvTest` singleton pollution between tests                  | ✅ Done | -        | `Env::reset()` added                                             |
+| Fix `SchedulerCommand` (`routes/scheduler.php` loading)          | ✅ Done | -        | `loadSchedulerFile()` updated, tolerates missing Loader          |
+| Remove dead `Model::$soft_delete` property                       | ✅ Done | -        | Replaced with a fully functional trait                           |
+| Improve `addEnum` / `changeEnum` error messages                  | ✅ Done | -        | Explicitly mention the `size` key                                |
+| Standardize method signatures                                    | ✅ Done | -        | PHP 8.1+ nullable types                                          |
+| Fix `(double)` → `(float)` cast                                  | ✅ Done | -        | `Model.php`                                                      |
+| Handle `array_key_exists` with null key                          | ✅ Done | -        | `Console.php`                                                    |
+| Create test directory if missing                                 | ✅ Done | -        | `CustomCommand.php`                                              |
 
 ### Documentation
 
-| Tâche                                        | Statut       | Priorité | Notes                                                       |
-| -------------------------------------------- | ------------ | -------- | ----------------------------------------------------------- |
-| Mettre à jour README avec exemples API-first | ✅ Fait      | -        | Compteurs de tests, exemples corrigés (`User::retrieve`, `persist()`, `$app`), attribut routing et soft delete mis en avant |
-| Documenter les configurations requises       | ✅ Fait      | -        | Audit complet de `docs/docs/*.mdx` (ORM, Router, Validation, Migration, Storage, Mail, Notifier, Container, Pagination, Scheduler, Task, etc.) |
-| Créer guide de contribution détaillé         | ⏳ À faire   | Basse    | Au-delà du CONTRIBUTING.md                                  |
+| Task                                  | Status    | Priority | Notes                                                                                                                                       |
+| ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Update README with API-first examples | ✅ Done    | -        | Test counters, corrected examples (`User::retrieve`, `persist()`, `$app`), attribute routing and soft delete highlighted                    |
+| Document required configurations      | ✅ Done    | -        | Full audit of `docs/docs/*.mdx` (ORM, Router, Validation, Migration, Storage, Mail, Notifier, Container, Pagination, Scheduler, Task, etc.) |
+| Create a detailed contribution guide  | ⏳ Planned | Low      | Beyond the current `CONTRIBUTING.md`                                                                                                        |
 
 ---
 
-## 🟠 NEXT — 3 à 6 mois (Nouvelles Fonctionnalités)
+## 🟠 NEXT — 3 to 6 Months (New Features)
 
-### Queue - Adapter Redis
+### Queue - Redis Adapter
 
-| Tâche                                    | Statut     | Priorité | Notes                          |
-| ---------------------------------------- | ---------- | -------- | ------------------------------ |
-| Créer `RedisAdapter` pour Queue          | ⏳ À faire | Haute    | predis/predis déjà en dev-deps |
-| Implémenter delayed jobs avec Redis ZADD | ⏳ À faire | Haute    |                                |
-| Ajouter monitoring des queues via CLI    | ⏳ À faire | Moyenne  | `bow queue:status`             |
+| Task                                   | Status    | Priority | Notes                                       |
+| -------------------------------------- | --------- | -------- | ------------------------------------------- |
+| Create `RedisAdapter` for Queue        | ⏳ Planned | High     | `predis/predis` already in dev dependencies |
+| Implement delayed jobs with Redis ZADD | ⏳ Planned | High     |                                             |
+| Add queue monitoring through CLI       | ⏳ Planned | Medium   | `bow queue:status`                          |
 
-### Router - Attributs PHP 8 ✅ Livré
+### Router - PHP 8 Attributes ✅ Delivered
 
-| Tâche                                                  | Statut  | Priorité | Notes                                                                |
-| ------------------------------------------------------ | ------- | -------- | -------------------------------------------------------------------- |
-| Créer namespace `Bow\Router\Attributes`                | ✅ Fait | -        | `src/Router/Attributes/`                                              |
-| Implémenter `#[Controller]`                            | ✅ Fait | -        | `prefix`, `middleware`, `name` (préfixe de nom de route)              |
-| Implémenter `#[Get]`, `#[Post]`, `#[Put]`, `#[Delete]` | ✅ Fait | -        | + `#[Patch]`, `#[Options]`, `#[Route]` (multi-verbes), tous répétables |
-| Ajouter `$app->register(Controller::class)`            | ✅ Fait | -        | Accepte aussi un tableau de contrôleurs                              |
-| `AttributeRouteRegistrar`                              | ✅ Fait | -        | Refactoré : préfixe de nom appliqué, méthodes héritées ignorées, sous-classe d'attribut acceptée |
-| Tests + stubs                                          | ✅ Fait | -        | `tests/Routing/AttributeRouteIntegrationTest.php`                    |
+| Task                                                 | Status | Priority | Notes                                                                                  |
+| ---------------------------------------------------- | ------ | -------- | -------------------------------------------------------------------------------------- |
+| Create namespace `Bow\Router\Attributes`             | ✅ Done | -        | `src/Router/Attributes/`                                                               |
+| Implement `#[Controller]`                            | ✅ Done | -        | `prefix`, `middleware`, `name` (route name prefix)                                     |
+| Implement `#[Get]`, `#[Post]`, `#[Put]`, `#[Delete]` | ✅ Done | -        | + `#[Patch]`, `#[Options]`, `#[Route]` (multi-verb), all repeatable                    |
+| Add `$app->register(Controller::class)`              | ✅ Done | -        | Also accepts an array of controllers                                                   |
+| `AttributeRouteRegistrar`                            | ✅ Done | -        | Refactored: name prefix applied, inherited methods ignored, attribute subclass support |
+| Tests + stubs                                        | ✅ Done | -        | `tests/Routing/AttributeRouteIntegrationTest.php`                                      |
 
-### Cache - Adapter Memcached
+### Cache - Memcached Adapter
 
-| Tâche                                         | Statut     | Priorité | Notes |
-| --------------------------------------------- | ---------- | -------- | ----- |
-| Créer `MemcachedAdapter`                      | ⏳ À faire | Moyenne  |       |
-| Améliorer résilience Redis (reconnexion auto) | ⏳ À faire | Moyenne  |       |
+| Task                                      | Status    | Priority | Notes |
+| ----------------------------------------- | --------- | -------- | ----- |
+| Create `MemcachedAdapter`                 | ⏳ Planned | Medium   |       |
+| Improve Redis resiliency (auto-reconnect) | ⏳ Planned | Medium   |       |
 
 ### Messaging - Push Notifications
 
-| Tâche                                | Statut     | Priorité | Notes         |
-| ------------------------------------ | ---------- | -------- | ------------- |
-| Créer `FcmChannelAdapter` (Firebase) | ⏳ À faire | Moyenne  |               |
-| Créer `ApnsChannelAdapter` (Apple)   | ⏳ À faire | Moyenne  |               |
-| Améliorer `TelegramChannelAdapter`   | ⏳ À faire | Basse    | Déjà existant |
-| Améliorer `SlackChannelAdapter`      | ⏳ À faire | Basse    | Déjà existant |
+| Task                                  | Status    | Priority | Notes          |
+| ------------------------------------- | --------- | -------- | -------------- |
+| Create `FcmChannelAdapter` (Firebase) | ⏳ Planned | Medium   |                |
+| Create `ApnsChannelAdapter` (Apple)   | ⏳ Planned | Medium   |                |
+| Improve `TelegramChannelAdapter`      | ⏳ Planned | Low      | Already exists |
+| Improve `SlackChannelAdapter`         | ⏳ Planned | Low      | Already exists |
 
 ### Database
 
-| Tâche                                     | Statut     | Priorité | Notes                        |
-| ----------------------------------------- | ---------- | -------- | ---------------------------- |
-| Ajouter support SQL Server                | ⏳ À faire | Moyenne  |                              |
-| Créer adapter Array/FileWriter pour tests | ⏳ À faire | Moyenne  | Évite dépendance DB en tests |
+| Task                                      | Status    | Priority | Notes                          |
+| ----------------------------------------- | --------- | -------- | ------------------------------ |
+| Add SQL Server support                    | ⏳ Planned | Medium   |                                |
+| Create Array/FileWriter adapter for tests | ⏳ Planned | Medium   | Removes DB dependency in tests |
 
 ---
 
-## 🟢 LATER — 6 à 12 mois (Vision Long Terme)
+## 🟢 LATER — 6 to 12 Months (Long-Term Vision)
 
-### Performance et Modernisation
+### Performance and Modernization
 
-| Tâche                                        | Statut     | Priorité | Notes                      |
-| -------------------------------------------- | ---------- | -------- | -------------------------- |
-| Support Swoole/FrankenPHP                    | ⏳ À faire | Moyenne  | Serveurs non-bloquants     |
-| Images Docker officielles                    | ⏳ À faire | Moyenne  | Optimisées pour production |
-| Support serverless (Lambda, Cloud Functions) | ⏳ À faire | Basse    | HTTP Handler adapté        |
+| Task                                         | Status    | Priority | Notes                  |
+| -------------------------------------------- | --------- | -------- | ---------------------- |
+| Swoole/FrankenPHP support                    | ⏳ Planned | Medium   | Non-blocking servers   |
+| Official Docker images                       | ⏳ Planned | Medium   | Production-optimized   |
+| Serverless support (Lambda, Cloud Functions) | ⏳ Planned | Low      | Dedicated HTTP handler |
 
-### Écosystème
+### Ecosystem
 
-| Tâche                                            | Statut     | Priorité | Notes                |
-| ------------------------------------------------ | ---------- | -------- | -------------------- |
-| Package `bowphp/payment`                         | ⏳ À faire | Haute    | Mobile money Afrique |
-| Package `bowphp/logviewer` ou `bowphp/telescope` | ⏳ À faire | Moyenne  | Observabilité        |
-| Adapter laravel-notify pour Bow                  | ⏳ À faire | Basse    | UI notifications     |
+| Task                                             | Status    | Priority | Notes                |
+| ------------------------------------------------ | --------- | -------- | -------------------- |
+| Package `bowphp/payment`                         | ⏳ Planned | High     | African mobile money |
+| Package `bowphp/logviewer` or `bowphp/telescope` | ⏳ Planned | Medium   | Observability        |
+| Adapt `laravel-notify` for Bow                   | ⏳ Planned | Low      | Notification UI      |
 
-### Observabilité
+### Observability
 
-| Tâche                          | Statut     | Priorité | Notes                           |
-| ------------------------------ | ---------- | -------- | ------------------------------- |
-| Module OpenTelemetry optionnel | ⏳ À faire | Moyenne  | Tracing requests, jobs, queries |
-| Intégration Prometheus/Grafana | ⏳ À faire | Basse    | Métriques production            |
-
----
-
-## Légende
-
--   ✅ **Fait** : Tâche complétée
--   ⏳ **À faire** : Tâche planifiée
--   🔄 **En cours** : Travail en progression
--   ❌ **Annulé** : Tâche abandonnée
+| Task                           | Status    | Priority | Notes                           |
+| ------------------------------ | --------- | -------- | ------------------------------- |
+| Optional OpenTelemetry module  | ⏳ Planned | Medium   | Request, job, and query tracing |
+| Prometheus/Grafana integration | ⏳ Planned | Low      | Production metrics              |
 
 ---
 
-## Comment Contribuer
+## Legend
 
-1. Choisir une tâche de la section **NOW** (priorité haute)
-2. Ouvrir une issue pour discuter de l'implémentation
-3. Créer une branche `feature/nom-de-la-tache`
-4. Suivre les conventions du projet (voir CONTRIBUTING.md)
-5. Soumettre une PR avec tests
+* ✅ **Done**: Completed task
+* ⏳ **Planned**: Scheduled task
+* 🔄 **Ongoing**: Work in progress
+* ❌ **Cancelled**: Abandoned task
 
 ---
 
-## Notes Importantes
+## How to Contribute
 
-### Concernant les Tests
+1. Pick a task from the **NOW** section (high priority)
+2. Open an issue to discuss the implementation
+3. Create a branch named `feature/task-name`
+4. Follow project conventions (see `CONTRIBUTING.md`)
+5. Submit a PR with tests
 
-Les erreurs actuelles lors de `composer test` sont principalement dues à :
+---
 
-1. **Services externes non disponibles** (pas des bugs du framework) :
+## Important Notes
 
-    - MySQL : Connection refused / Access denied
-    - PostgreSQL : Connection refused
-    - FTP : Connection refused
-    - S3 : Invalid endpoint
-    - Beanstalkd : Connection refused
+### About Testing
 
-2. **Isolation des tests SQLite** : Certains tests partagent l'état de la base, causant des échecs intermittents.
+Current failures during `composer test` are mainly caused by:
 
-**Solution recommandée** : Séparer les tests en groupes (`@group unit`, `@group integration`) et configurer CI avec Docker Compose pour les tests d'intégration.
+1. **Unavailable external services** (not framework bugs):
 
-### Philosophie du Projet
+   * MySQL: Connection refused / Access denied
+   * PostgreSQL: Connection refused
+   * FTP: Connection refused
+   * S3: Invalid endpoint
+   * Beanstalkd: Connection refused
 
-Toute contribution doit respecter le manifeste :
+2. **SQLite test isolation issues**: Some tests share database state, causing intermittent failures.
 
--   **Simplicité** > Sophistication
--   **Lisibilité** > Concision extrême
--   **API-first** : Priorité aux backends JSON
--   **Performance** : Bootstrap minimal, réponse rapide
--   **Contrôle** : Le développeur garde le contrôle de son architecture
+**Recommended solution**: Split tests into groups (`@group unit`, `@group integration`) and configure CI with Docker Compose for integration tests.
+
+### Project Philosophy
+
+Every contribution must respect the manifesto:
+
+* **Simplicity** > Sophistication
+* **Readability** > Extreme conciseness
+* **API-first**: JSON backends are the priority
+* **Performance**: Minimal bootstrap, fast response times
+* **Control**: Developers retain full control over their architecture
