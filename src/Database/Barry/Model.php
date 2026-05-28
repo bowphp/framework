@@ -887,9 +887,15 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function toArray(): array
     {
+        $attributes = $this->attributes;
+
+        foreach ($attributes as $name => $value) {
+            $attributes[$name] = $this->executeDataCasting($name);
+        }
+
         return array_filter(
-            $this->attributes,
-            fn ($key) => !in_array($key, $this->hidden),
+            $attributes,
+            fn($key) => !in_array($key, $this->hidden),
             ARRAY_FILTER_USE_KEY
         );
     }
@@ -899,11 +905,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return array_filter(
-            $this->attributes,
-            fn ($key) => !in_array($key, $this->hidden),
-            ARRAY_FILTER_USE_KEY
-        );
+        return $this->toArray();
     }
 
     /**
