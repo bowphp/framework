@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.11 - 2026-05-28
+
+### What's Changed
+
+* Update ROADMAP.md by @papac in https://github.com/bowphp/framework/pull/399
+* fix(db): make deep casting when toArray/toJson/_toString is called by @papac in https://github.com/bowphp/framework/pull/400
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/401
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.1...5.3.11
+
 ## 5.3.1 - 2026-05-21
 
 ### What's Changed
@@ -253,6 +263,7 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
+
 
 
 
