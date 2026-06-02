@@ -17,7 +17,6 @@ class HasMany extends Relation
      * @param Model $parent
      * @param string   $foreign_key
      * @param string   $local_key
-     * @param string   $relation
      */
     public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
     {

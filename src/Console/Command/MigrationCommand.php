@@ -58,12 +58,9 @@ class MigrationCommand extends AbstractCommand
      */
     private function factory(string $type): void
     {
-
         $migrations = $this->collectMigrationFiles();
 
-
         $connection = $this->arg->getParameter("--connection", config("database.default"));
-
 
         try {
             Database::connection($connection);

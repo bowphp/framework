@@ -38,7 +38,12 @@ class BelongsTo extends Relation
      */
     public function getResults(): mixed
     {
-        $key = $this->query->getTable() . ":" . $this->local_key . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
+        // Include the parent's foreign key value in the cache key so each parent
+        // resolves to its own related model. Without it the key is identical for
+        // every parent and a loop would always return the first cached result.
+        $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
+        $key = $this->query->getTable() . ":" . $this->local_key . ":belongsto:"
+            . $this->related->getTable() . ":" . $this->foreign_key . ":" . $foreign_key_value;
 
         $cache = Cache::store('file')->get($key);
 

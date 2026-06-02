@@ -1020,6 +1020,10 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $type = $this->casts[$name];
         $value = $this->attributes[$name];
 
+        if (is_null($value)) {
+            return $value;
+        }
+
         if ($type === "date") {
             return new Carbon($value);
         }

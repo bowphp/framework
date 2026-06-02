@@ -62,7 +62,12 @@ abstract class Relation
         $this->parent = $parent;
         $this->related = $related;
 
-        $this->query = $this->related::query();
+        // Clone the model's shared static query builder so the constraints we
+        // apply below stay local to this relation. Without the clone, a relation
+        // that builds constraints but does not execute the query (e.g. a cache
+        // hit in BelongsTo/HasOne) would leave a pending WHERE clause on the
+        // shared builder and corrupt the next relation query on the same model.
+        $this->query = clone $this->related::query();
 
         // Build the constraint effect
         if (static::$has_constraints) {
