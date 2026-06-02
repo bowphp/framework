@@ -33,7 +33,12 @@ class HasOne extends Relation
      */
     public function getResults(): ?Model
     {
-        $key = $this->query->getTable() . ":" . $this->local_key . ":hasone:" . $this->related->getTable() . ":" . $this->foreign_key;
+        // Include the parent's local key value in the cache key so each parent
+        // resolves to its own related model. Without it the key is identical for
+        // every parent and a loop would always return the first cached result.
+        $local_key_value = $this->parent->getAttribute($this->local_key);
+        $key = $this->query->getTable() . ":" . $this->local_key . ":hasone:"
+            . $this->related->getTable() . ":" . $this->foreign_key . ":" . $local_key_value;
 
         $cache = Cache::store('file')->get($key);
 
@@ -46,7 +51,7 @@ class HasOne extends Relation
         $result = $this->query->first();
 
         if (!is_null($result)) {
-            Cache::store('file')->add($key, $result->toArray(), 60);
+            Cache::store('file')->set($key, $result->toArray(), 60);
         }
 
         return $result;
