@@ -182,7 +182,6 @@ U,
         'exception',
         'event',
         'task',
-        'scheduler',
         'command',
         'listener',
         'notifier'
@@ -370,20 +369,15 @@ U,
             exit(0);
         }
 
-        // The built-in commands have priority
-        $commands = $this->command->getCommands();
-
-        if (!in_array($command, array_keys($commands))) {
-            // Try to execute the custom command
-            if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
-                // `php bow <custom> help` shows the registered help instead of running it.
-                if ($this->arg->getTarget() === 'help' && !$this->arg->getAction()) {
-                    $this->help($command);
-                    exit(0);
-                }
-
-                return $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
+        // Try to execute the custom command
+        if (array_key_exists($this->arg->getRawCommand(), static::$registers) || array_key_exists($command, static::$registers)) {
+            // `php bow <custom> help` shows the registered help instead of running it.
+            if ($this->arg->getTarget() === 'help' && !$this->arg->getAction()) {
+                $this->help($command);
+                exit(0);
             }
+
+            return $this->executeCustomCommand($this->arg->getRawCommand() ?? $command);
         }
 
         if (!in_array($command, static::COMMAND)) {
@@ -590,7 +584,15 @@ U,
             $this->throwFailsCommand('Bad command usage', 'help schedule');
         }
 
-        $this->command->call("schedule:{$action}", $action, $this->arg->getTarget());
+        $target = $this->arg->getTarget();
+
+        // schedule:test expects a 0-based integer index; getTarget() returns a
+        // ?string, which would trip the strict_types signature of test(int).
+        if ($action === 'test') {
+            $target = (int) $target;
+        }
+
+        $this->command->call("schedule:{$action}", $action, $target);
     }
 
     /**
