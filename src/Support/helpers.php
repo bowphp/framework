@@ -665,7 +665,10 @@ if (!function_exists('collect')) {
 
 if (!function_exists('encrypt')) {
     /**
-     * Encrypt data
+     * Encrypt data using the application security key.
+     *
+     * Returns an authenticated payload (random IV + HMAC), so encrypting the
+     * same value twice yields different ciphertexts.
      *
      * @param  string $data
      * @return string
@@ -678,12 +681,15 @@ if (!function_exists('encrypt')) {
 
 if (!function_exists('decrypt')) {
     /**
-     * Decrypt data
+     * Decrypt a value previously produced by encrypt().
+     *
+     * Fails closed: returns false when the payload has been tampered with or
+     * was encrypted with a different key.
      *
      * @param  string $data
-     * @return string
+     * @return string|bool
      */
-    function decrypt(string $data): string
+    function decrypt(string $data): string|bool
     {
         return Crypto::decrypt($data);
     }
