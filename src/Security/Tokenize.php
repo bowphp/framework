@@ -94,7 +94,8 @@ class Tokenize
 
         $csrf = Session::getInstance()->get('__bow.csrf');
 
-        if ($token !== $csrf['token']) {
+        // Constant-time comparison to avoid leaking the token via timing.
+        if (!hash_equals((string) $csrf['token'], $token)) {
             return false;
         }
 

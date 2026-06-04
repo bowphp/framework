@@ -6,7 +6,6 @@ namespace Bow\Session;
 
 use BadMethodCallException;
 use Bow\Contracts\CollectionInterface;
-use Bow\Security\Crypto;
 use Bow\Session\Adapters\ArrayAdapter;
 use Bow\Session\Adapters\DatabaseAdapter;
 use Bow\Session\Adapters\FilesystemAdapter;
@@ -75,7 +74,11 @@ class Session implements CollectionInterface
                 'path' => '/',
                 'domain' => null,
                 'secure' => false,
-                'httponly' => false,
+                // Keep the session cookie out of reach of JavaScript by default
+                // (mitigates session theft via XSS) and constrain cross-site
+                // sending (mitigates CSRF).
+                'httponly' => true,
+                'samesite' => 'Lax',
                 'save_path' => null,
             ],
             $config
@@ -115,6 +118,14 @@ class Session implements CollectionInterface
      */
     public function regenerate(): void
     {
+        $this->start();
+
+        // Rotate the underlying session ID and delete the previous record so a
+        // fixated/leaked ID can no longer be reused, then clear the values.
+        if (PHP_SESSION_ACTIVE === session_status()) {
+            session_regenerate_id(true);
+        }
+
         $this->flush();
         $this->start();
     }
@@ -162,11 +173,17 @@ class Session implements CollectionInterface
      */
     private function initializeDriver(): void
     {
+        // Reject uninitialized session IDs (anti session-fixation) and never
+        // accept the session ID from the URL/query string. Must be set before
+        // session_start().
+        @ini_set('session.use_strict_mode', '1');
+        @ini_set('session.use_only_cookies', '1');
+
         // We Apply session cookie name
         @session_name($this->config['name']);
 
         if (!isset($_COOKIE[$this->config['name']])) {
-            @session_id(hash("sha256", $this->generateId()));
+            @session_id($this->generateId());
         }
 
         // We create get driver
@@ -204,13 +221,17 @@ class Session implements CollectionInterface
     }
 
     /**
-     * Generate session ID
+     * Generate a cryptographically secure session ID.
+     *
+     * Uses the CSPRNG (random_bytes) instead of time-based primitives such as
+     * uniqid()/microtime(), which are predictable and would let an attacker
+     * guess or fixate session identifiers.
      *
      * @return string
      */
     private function generateId(): string
     {
-        return Crypto::encrypt(uniqid(microtime()));
+        return bin2hex(random_bytes(32));
     }
 
     /**
@@ -223,14 +244,16 @@ class Session implements CollectionInterface
         $domain = $this->config['domain'] ?? null;
         $secure = (bool)$this->config["secure"];
         $httponly = (bool)$this->config["httponly"];
+        $samesite = $this->config["samesite"] ?? 'Lax';
 
-        session_set_cookie_params(
-            (int)$this->config["lifetime"],
-            $this->config["path"],
-            $domain,
-            $secure,
-            $httponly
-        );
+        session_set_cookie_params([
+            'lifetime' => (int)$this->config["lifetime"],
+            'path' => $this->config["path"],
+            'domain' => $domain,
+            'secure' => $secure,
+            'httponly' => $httponly,
+            'samesite' => $samesite,
+        ]);
     }
 
     /**
