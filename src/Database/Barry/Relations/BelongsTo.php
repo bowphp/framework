@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
 use Bow\Database\Exception\QueryBuilderException;
@@ -38,28 +37,9 @@ class BelongsTo extends Relation
      */
     public function getResults(): mixed
     {
-        // Include the parent's foreign key value in the cache key so each parent
-        // resolves to its own related model. Without it the key is identical for
-        // every parent and a loop would always return the first cached result.
-        $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
-        $key = $this->query->getTable() . ":" . $this->local_key . ":belongsto:"
-            . $this->related->getTable() . ":" . $this->foreign_key . ":" . $foreign_key_value;
-
-        $cache = Cache::store('file')->get($key);
-
-        if (!is_null($cache)) {
-            $related = new $this->related();
-            $related->setAttributes($cache);
-            return $related;
-        }
-
-        $result = $this->query->first();
-
-        if (!is_null($result)) {
-            Cache::store('file')->set($key, $result->toArray(), 500);
-        }
-
-        return $result;
+        // The result is lazy-loaded once per parent model instance and kept in
+        // memory by the model itself, so a plain query is enough here.
+        return $this->query->first();
     }
 
     /**
@@ -79,5 +59,29 @@ class BelongsTo extends Relation
         // of the related models matching on the foreign key that's on a parent.
         $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
         $this->query->where($this->local_key, '=', $foreign_key_value);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerParentKey(): string
+    {
+        return $this->foreign_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerRelatedKey(): string
+    {
+        return $this->local_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerIsMany(): bool
+    {
+        return false;
     }
 }

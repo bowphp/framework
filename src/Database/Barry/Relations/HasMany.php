@@ -43,6 +43,33 @@ class HasMany extends Relation
      */
     public function addConstraints(): void
     {
-        $this->query = $this->query->where($this->foreign_key, $this->parent->getKeyValue());
+        // Match the related foreign key column against the parent's primary key.
+        // local_key holds the foreign key column name; foreign_key holds the
+        // parent primary key name, so filtering must use local_key here.
+        $this->query = $this->query->where($this->local_key, $this->parent->getKeyValue());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerParentKey(): string
+    {
+        return $this->parent->getKey();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerRelatedKey(): string
+    {
+        return $this->local_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerIsMany(): bool
+    {
+        return true;
     }
 }
