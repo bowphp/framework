@@ -1,7 +1,7 @@
 # BowPHP Framework Roadmap
 
 > Living document based on source code analysis (5.x branch) and the project manifesto.
-> Last updated: May 2026
+> Last updated: June 2026
 
 ---
 
@@ -68,6 +68,11 @@ Highlights from the latest iterations — already merged into `5.x`. Full detail
 
 ### Barry ORM
 
+* **Eager loading** via `Builder::eager(string|array $relations)` — batches related models in a single `WHERE IN` query (solves N+1), supports `hasOne` / `hasMany` / `belongsTo` / `belongsToMany`; the eager list is reset after each `get()` so it can't leak into the next query on the shared builder.
+* Relations now **lazy-load once per model instance** and keep the result in memory (`Model::setRelation` + private `$relations`), replacing the previous file-based cache in `BelongsTo` / `HasOne` (fixes stale and cross-parent cache bugs).
+* Fixed `belongsTo` resolution inside loops — each parent now resolves its own related model instead of always returning the first.
+* Fixed `HasMany::addConstraints()` to filter on the foreign-key column (was incorrectly using the parent primary key).
+* Deep casting now applied when `toArray()` / `toJson()` / `__toString()` are called.
 * `SoftDelete` trait (`delete` → `deleted_at`, `restore`, `forceDelete`, `withTrashed` / `onlyTrashed` / `withoutTrashed`, events `model.restoring/restored/forceDeleting/forceDeleted`).
 * Fixed `array` cast: no longer returns `stdClass`.
 * Removed dead `$soft_delete` property (replaced by the trait).
@@ -112,7 +117,7 @@ Highlights from the latest iterations — already merged into `5.x`. Full detail
 | Separate unit tests from integration tests    | ⏳ Planned  | High     | DB/FTP/S3 tests require external services                                                                                 |
 | Add PHPUnit `@group` annotations              | ⏳ Planned  | High     | `@group unit`, `@group integration`, `@group database`                                                                    |
 | Configure GitHub Actions with Docker services | ⏳ Planned  | High     | MySQL, PostgreSQL, Redis for CI                                                                                           |
-| Increase unit test coverage                   | 🔄 Ongoing | Medium   | 1,600+ tests, 0 logical failures. Recent additions: SoftDelete, AttributeRouteRegistrar, new validation rules, Pagination |
+| Increase unit test coverage                   | 🔄 Ongoing | Medium   | 1,600+ tests, 0 logical failures. Recent additions: eager loading (`EagerLoadingQueryTest`), SoftDelete, AttributeRouteRegistrar, new validation rules, Pagination |
 | Integrate PHPStan level 5+                    | ⏳ Planned  | Medium   | Current constraint: `phpstan/phpstan: ^0.12.87` — upgrade to ^1.x before targeting higher levels                          |
 
 ### Code Fixes
