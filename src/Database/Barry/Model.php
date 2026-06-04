@@ -192,6 +192,13 @@ abstract class Model implements ArrayAccess, JsonSerializable
     private array $original = [];
 
     /**
+     * The loaded relationships, resolved lazily once per model instance.
+     *
+     * @var array
+     */
+    private array $relations = [];
+
+    /**
      * Model constructor.
      *
      * @param array $attributes
@@ -881,6 +888,20 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
+     * Set a loaded relationship on the model's in-memory store.
+     *
+     * Used by eager loading to pre-populate a relation so a later access
+     * resolves from memory instead of issuing a query.
+     *
+     * @param string $name
+     * @param mixed  $value
+     */
+    public function setRelation(string $name, mixed $value): void
+    {
+        $this->relations[$name] = $value;
+    }
+
+    /**
      * Returns the data
      *
      * @return array
@@ -919,8 +940,20 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $attribute_exists = isset($this->attributes[$name]);
 
         if (!$attribute_exists && method_exists($this, $name)) {
+            // Lazy-load once: a relation is resolved a single time per model
+            // instance and its result kept in memory. Repeated access returns
+            // the same loaded object instead of re-querying or re-hydrating.
+            if (array_key_exists($name, $this->relations)) {
+                return $this->relations[$name];
+            }
+
             $result = $this->$name();
-            return $result instanceof Relation ? $result->getResults() : $result;
+
+            if ($result instanceof Relation) {
+                return $this->relations[$name] = $result->getResults();
+            }
+
+            return $result;
         }
 
         if (!$attribute_exists) {

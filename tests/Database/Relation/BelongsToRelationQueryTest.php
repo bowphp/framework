@@ -172,6 +172,10 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(PetMasterModelStub::class, $master2);
         $this->assertEquals($master1->id, $master2->id);
         $this->assertEquals($master1->name, $master2->name);
+
+        // Lazy-load once: repeated access on the same instance must resolve the
+        // relation a single time and return the very same loaded object.
+        $this->assertSame($master1, $master2);
     }
 
     /**

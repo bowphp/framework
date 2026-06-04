@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry;
 
+use Closure;
+use Bow\Database\Collection;
 use Bow\Database\QueryBuilder;
 
 abstract class Relation
@@ -139,4 +141,103 @@ abstract class Relation
      * @return mixed
      */
     abstract public function getResults(): mixed;
+
+    /**
+     * The parent attribute whose value is matched against the related models.
+     *
+     * @return string
+     */
+    abstract protected function eagerParentKey(): string;
+
+    /**
+     * The related column queried when eager loading the relation.
+     *
+     * @return string
+     */
+    abstract protected function eagerRelatedKey(): string;
+
+    /**
+     * Whether the relation resolves to many related models.
+     *
+     * @return bool
+     */
+    abstract protected function eagerIsMany(): bool;
+
+    /**
+     * Run the given callback with relation constraints disabled.
+     *
+     * Lets the eager loader build a relation without the single parent WHERE
+     * clause so it can be replaced by a batched whereIn over every parent.
+     *
+     * @param  Closure $callback
+     * @return mixed
+     */
+    public static function noConstraints(Closure $callback): mixed
+    {
+        $previous = static::$has_constraints;
+        static::$has_constraints = false;
+
+        try {
+            return $callback();
+        } finally {
+            static::$has_constraints = $previous;
+        }
+    }
+
+    /**
+     * Constrain the relation query to every parent key in a single whereIn.
+     *
+     * @param  Model[] $parents
+     * @return void
+     */
+    public function addEagerConstraints(array $parents): void
+    {
+        $keys = array_values(array_unique(array_filter(
+            array_map(fn (Model $parent) => $parent->getAttribute($this->eagerParentKey()), $parents),
+            fn ($value) => !is_null($value)
+        )));
+
+        // Fall back to an impossible match when no parent exposes a key so the
+        // query stays well-formed and returns nothing.
+        $this->query->whereIn($this->eagerRelatedKey(), count($keys) > 0 ? $keys : [0]);
+    }
+
+    /**
+     * Execute the eager query and return the related models.
+     *
+     * @return Collection
+     */
+    public function getEager(): Collection
+    {
+        $results = $this->query->get();
+
+        return $results instanceof Collection ? $results : new Collection([]);
+    }
+
+    /**
+     * Match the eager loaded related models back onto their parents.
+     *
+     * @param  Model[]    $parents
+     * @param  Collection $results
+     * @param  string     $name
+     * @return void
+     */
+    public function match(array $parents, Collection $results, string $name): void
+    {
+        $dictionary = [];
+
+        foreach ($results as $related) {
+            $dictionary[$related->getAttribute($this->eagerRelatedKey())][] = $related;
+        }
+
+        foreach ($parents as $parent) {
+            $key = $parent->getAttribute($this->eagerParentKey());
+            $matched = $dictionary[$key] ?? [];
+
+            $parent->setRelation(
+                $name,
+                $this->eagerIsMany() ? new Collection($matched) : ($matched[0] ?? null)
+            );
+        }
+    }
 }

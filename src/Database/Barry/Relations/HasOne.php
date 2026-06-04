@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
 
@@ -33,28 +32,9 @@ class HasOne extends Relation
      */
     public function getResults(): ?Model
     {
-        // Include the parent's local key value in the cache key so each parent
-        // resolves to its own related model. Without it the key is identical for
-        // every parent and a loop would always return the first cached result.
-        $local_key_value = $this->parent->getAttribute($this->local_key);
-        $key = $this->query->getTable() . ":" . $this->local_key . ":hasone:"
-            . $this->related->getTable() . ":" . $this->foreign_key . ":" . $local_key_value;
-
-        $cache = Cache::store('file')->get($key);
-
-        if (!is_null($cache)) {
-            $related = new $this->related();
-            $related->setAttributes($cache);
-            return $related;
-        }
-
-        $result = $this->query->first();
-
-        if (!is_null($result)) {
-            Cache::store('file')->set($key, $result->toArray(), 60);
-        }
-
-        return $result;
+        // The result is lazy-loaded once per parent model instance and kept in
+        // memory by the model itself, so a plain query is enough here.
+        return $this->query->first();
     }
 
     /**
@@ -69,5 +49,29 @@ class HasOne extends Relation
         }
 
         $this->query = $this->query->where($this->foreign_key, $this->parent->getAttribute($this->local_key));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerParentKey(): string
+    {
+        return $this->local_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerRelatedKey(): string
+    {
+        return $this->foreign_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerIsMany(): bool
+    {
+        return false;
     }
 }

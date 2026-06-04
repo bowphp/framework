@@ -55,4 +55,28 @@ class BelongsToMany extends Relation
         $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
         $this->query->where($this->local_key, '=', $foreign_key_value);
     }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerParentKey(): string
+    {
+        return $this->foreign_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerRelatedKey(): string
+    {
+        return $this->local_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerIsMany(): bool
+    {
+        return true;
+    }
 }
