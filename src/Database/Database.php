@@ -191,9 +191,11 @@ class Database
             Sanitize::make($data, true)
         );
 
+        $start_at = microtime(true);
         $pdo_statement->execute();
+        $ended_at = microtime(true);
 
-        static::triggerQueryEvent($sql_statement, $data);
+        static::triggerQueryEvent($sql_statement, $ended_at - $start_at, $data);
 
         return $pdo_statement->rowCount();
     }
@@ -490,12 +492,13 @@ class Database
      * Trigger the query executed event
      *
      * @param  string $sql
+     * @param  float $execution_time
      * @param  array  $bindings
      * @return void
      */
-    public static function triggerQueryEvent(string $sql, array $bindings = []): void
+    public static function triggerQueryEvent(string $sql, float $execution_time = 0, array $bindings = []): void
     {
-        $event = new QueryEvent($sql, $bindings);
+        $event = new QueryEvent($sql, $execution_time, $bindings);
 
         app_event($event);
     }

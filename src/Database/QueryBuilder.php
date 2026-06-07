@@ -1417,9 +1417,11 @@ class QueryBuilder implements JsonSerializable
 
         $this->last_query = $sql;
 
+        $start_at = microtime(true);
         $result = (bool) $this->connection->exec($sql);
+        $ended_at = microtime(true);
 
-        $this->triggerQueryEvent($sql, []);
+        $this->triggerQueryEvent($sql, $ended_at - $start_at);
 
         $this->last_query = $sql;
 
@@ -1523,9 +1525,11 @@ class QueryBuilder implements JsonSerializable
         $this->bind($statement, $bindings);
 
         try {
+            $start_at = microtime(true);
             $statement->execute();
+            $ended_at = microtime(true);
 
-            $this->triggerQueryEvent($sql, $bindings);
+            $this->triggerQueryEvent($sql, $ended_at - $start_at, $bindings);
         } catch (\Exception $e) {
             throw new QueryBuilderException(
                 'Error executing query: ' . $e->getMessage() . ' | Query: ' . $this->last_query,
@@ -1548,9 +1552,11 @@ class QueryBuilder implements JsonSerializable
 
         $this->last_query = $sql;
 
+        $start_at = microtime(true);
         $result = (bool) $this->connection->exec($sql);
+        $ended_at = microtime(true);
 
-        $this->triggerQueryEvent($sql, []);
+        $this->triggerQueryEvent($sql, $ended_at - $start_at);
 
         return $result;
     }
@@ -1668,12 +1674,13 @@ class QueryBuilder implements JsonSerializable
      * Trigger the query event
      *
      * @param  string $sql
+     * @param  float $execution_time
      * @param  array  $bindings
      * @return void
      */
-    private function triggerQueryEvent(string $sql, array $bindings): void
+    private function triggerQueryEvent(string $sql, float $execution_time = 0, array $bindings = []): void
     {
-        Database::triggerQueryEvent($sql, $bindings);
+        Database::triggerQueryEvent($sql, $execution_time, $bindings);
     }
 
     /**
