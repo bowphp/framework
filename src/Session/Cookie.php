@@ -123,14 +123,30 @@ class Cookie
     ): bool {
         $data = Crypto::encrypt(json_encode($data));
 
-        return setcookie(
-            $key,
-            $data,
-            time() + $expiration,
-            config('session.path'),
-            config('session.domain'),
-            config('session.secure'),
-            config('session.httponly')
-        );
+        return setcookie($key, $data, static::options($expiration));
+    }
+
+    /**
+     * Build the setcookie() options array from the session config.
+     *
+     * Every value is coerced to its declared type. config('session.domain') is
+     * null when SESSION_DOMAIN is unset; passing null straight to setcookie()
+     * is deprecated on PHP 8.x and a fatal TypeError on PHP 9, so cast here.
+     *
+     * @param  int $expiration
+     * @return array
+     */
+    private static function options(int $expiration): array
+    {
+        // config() with a second argument is a setter, not a getter-with-default,
+        // so read each value first and apply the fallback in PHP.
+        return [
+            'expires'  => time() + $expiration,
+            'path'     => (string) (config('session.path') ?? '/'),
+            'domain'   => (string) (config('session.domain') ?? ''),
+            'secure'   => (bool) config('session.secure'),
+            'httponly' => (bool) (config('session.httponly') ?? true),
+            'samesite' => (string) (config('session.samesite') ?? 'Lax'),
+        ];
     }
 }
