@@ -51,12 +51,14 @@ class JwtGuard extends GuardContract
      * Check if user is authenticated
      *
      * @param  array $credentials
+     * @param  bool  $remember
      * @return bool
      * @throws AuthenticationException
      * @throws Exception
      */
-    public function attempts(array $credentials): bool
+    public function attempts(array $credentials, bool $remember = false): bool
     {
+        // $remember is ignored: JWT is stateless, remember-me is a session concept.
         $user = $this->makeLogin($credentials);
 
         $this->token = null;
@@ -143,11 +145,13 @@ class JwtGuard extends GuardContract
      * Make direct login
      *
      * @param  Authentication $user
+     * @param  bool           $remember
      * @return bool
      * @throws Exception
      */
-    public function login(Authentication $user): bool
+    public function login(Authentication $user, bool $remember = false): bool
     {
+        // $remember is ignored: JWT is stateless, remember-me is a session concept.
         $attributes = array_merge(
             $user->customJwtAttributes(),
             [

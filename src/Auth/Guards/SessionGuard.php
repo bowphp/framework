@@ -8,6 +8,7 @@ use Bow\Auth\Authentication;
 use Bow\Auth\Exception\AuthenticationException;
 use Bow\Auth\Traits\LoginUserTrait;
 use Bow\Security\Hash;
+use Bow\Session\Cookie;
 use Bow\Session\Exception\SessionException;
 use Bow\Session\Session;
 
@@ -46,10 +47,11 @@ class SessionGuard extends GuardContract
      * Check if user is authenticated
      *
      * @param  array $credentials
+     * @param  bool  $remember
      * @return bool
      * @throws AuthenticationException|SessionException
      */
-    public function attempts(array $credentials): bool
+    public function attempts(array $credentials, bool $remember = false): bool
     {
         $user = $this->makeLogin($credentials);
 
@@ -62,6 +64,11 @@ class SessionGuard extends GuardContract
 
         if (Hash::check($password, $user->{$fields['password']})) {
             $this->getSession()->put($this->session_key, $user);
+
+            if ($remember) {
+                $this->setRememberCookie($user);
+            }
+
             return true;
         }
 
@@ -76,7 +83,8 @@ class SessionGuard extends GuardContract
      */
     public function check(): bool
     {
-        return $this->getSession()->exists($this->session_key);
+        return $this->getSession()->exists($this->session_key)
+            || $this->attemptRememberLogin();
     }
 
     /**
@@ -112,13 +120,18 @@ class SessionGuard extends GuardContract
     /**
      * Make direct login
      *
-     * @param  mixed $user
+     * @param  Authentication $user
+     * @param  bool  $remember
      * @return bool
      * @throws AuthenticationException|SessionException
      */
-    public function login(Authentication $user): bool
+    public function login(Authentication $user, bool $remember = false): bool
     {
         $this->getSession()->add($this->session_key, $user);
+
+        if ($remember) {
+            $this->setRememberCookie($user);
+        }
 
         return true;
     }
@@ -131,6 +144,13 @@ class SessionGuard extends GuardContract
      */
     public function logout(): bool
     {
+        $user = $this->getSession()->get($this->session_key);
+
+        if ($user instanceof Authentication) {
+            $user->setRememberToken($this->generateRememberToken());
+        }
+
+        $this->clearRememberCookie();
         $this->getSession()->remove($this->session_key);
 
         return true;
@@ -161,6 +181,109 @@ class SessionGuard extends GuardContract
      */
     public function user(): ?Authentication
     {
+        if (!$this->getSession()->exists($this->session_key)) {
+            $this->attemptRememberLogin();
+        }
+
         return $this->getSession()->get($this->session_key);
+    }
+
+    /**
+     * Attempt to restore the session from a valid remember-me cookie.
+     *
+     * Never throws on malformed input: a bad cookie is simply cleared.
+     *
+     * @return bool
+     * @throws AuthenticationException|SessionException
+     */
+    private function attemptRememberLogin(): bool
+    {
+        $cookie = Cookie::get($this->rememberCookieName());
+
+        if (!is_string($cookie) || !str_contains($cookie, '|')) {
+            if (!is_null($cookie)) {
+                $this->clearRememberCookie();
+            }
+            return false;
+        }
+
+        [$id, $token] = explode('|', $cookie, 2);
+
+        $user = $this->getUserById($id);
+
+        if (is_null($user)) {
+            $this->clearRememberCookie();
+            return false;
+        }
+
+        $stored = $user->getRememberToken();
+
+        if (is_null($stored) || !hash_equals($stored, $token)) {
+            $this->clearRememberCookie();
+            return false;
+        }
+
+        $this->getSession()->put($this->session_key, $user);
+
+        return true;
+    }
+
+    /**
+     * Generate a fresh remember token and persist it on the user, then
+     * write the encrypted remember cookie.
+     *
+     * @param  Authentication $user
+     * @return void
+     */
+    private function setRememberCookie(Authentication $user): void
+    {
+        $token = $this->generateRememberToken();
+        $user->setRememberToken($token);
+
+        Cookie::set(
+            $this->rememberCookieName(),
+            $user->getAuthenticateUserId() . '|' . $token,
+            $this->rememberLifetime()
+        );
+    }
+
+    /**
+     * Remove the remember cookie.
+     *
+     * @return void
+     */
+    private function clearRememberCookie(): void
+    {
+        Cookie::remove($this->rememberCookieName());
+    }
+
+    /**
+     * Get the remember cookie name for this guard.
+     *
+     * @return string
+     */
+    private function rememberCookieName(): string
+    {
+        return 'remember_' . $this->guard;
+    }
+
+    /**
+     * Generate a cryptographically strong remember token.
+     *
+     * @return string
+     */
+    private function generateRememberToken(): string
+    {
+        return bin2hex(random_bytes(30));
+    }
+
+    /**
+     * Get the configured remember-me cookie lifetime in seconds.
+     *
+     * @return int
+     */
+    private function rememberLifetime(): int
+    {
+        return (int) (config('auth.remember_lifetime') ?? 2592000);
     }
 }
