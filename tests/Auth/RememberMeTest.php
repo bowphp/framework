@@ -9,6 +9,7 @@ use Bow\Session\Session;
 use Bow\Tests\Auth\Stubs\UserModelStub;
 use Bow\Tests\Config\TestingConfiguration;
 use PHPUnit\Framework\TestCase;
+use Policier\Policier;
 
 class RememberMeTest extends TestCase
 {
@@ -17,6 +18,7 @@ class RememberMeTest extends TestCase
         $config = TestingConfiguration::getConfig();
 
         Auth::configure($config["auth"]);
+        Policier::configure($config["policier"]);
         Database::configure($config["database"]);
         Session::configure((array) $config["session"]);
 
@@ -112,5 +114,19 @@ class RememberMeTest extends TestCase
         $method->setAccessible(true);
 
         $this->assertNull($method->invoke($auth, 999999));
+    }
+
+    public function test_jwt_guard_accepts_but_ignores_remember_flag()
+    {
+        $auth = Auth::guard('api');
+
+        $result = $auth->attempts([
+            'username' => 'papac',
+            'password' => 'password',
+        ], true);
+
+        $this->assertTrue($result);
+        // The JWT guard must not set any cookie when remember=true.
+        $this->assertEmpty($_COOKIE);
     }
 }

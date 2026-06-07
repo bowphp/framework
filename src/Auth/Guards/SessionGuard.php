@@ -46,10 +46,11 @@ class SessionGuard extends GuardContract
      * Check if user is authenticated
      *
      * @param  array $credentials
+     * @param  bool  $remember
      * @return bool
      * @throws AuthenticationException|SessionException
      */
-    public function attempts(array $credentials): bool
+    public function attempts(array $credentials, bool $remember = false): bool
     {
         $user = $this->makeLogin($credentials);
 
@@ -112,11 +113,12 @@ class SessionGuard extends GuardContract
     /**
      * Make direct login
      *
-     * @param  mixed $user
+     * @param  Authentication $user
+     * @param  bool  $remember
      * @return bool
      * @throws AuthenticationException|SessionException
      */
-    public function login(Authentication $user): bool
+    public function login(Authentication $user, bool $remember = false): bool
     {
         $this->getSession()->add($this->session_key, $user);
 
