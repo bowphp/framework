@@ -87,4 +87,30 @@ class RememberMeTest extends TestCase
         $this->assertNull($user->getRememberToken());
         $this->assertNull(UserModelStub::first()->getRememberToken());
     }
+
+    public function test_get_user_by_id_returns_the_user()
+    {
+        $auth = Auth::guard('web');
+        $expected = UserModelStub::first();
+
+        $method = new \ReflectionMethod($auth, 'getUserById');
+        $method->setAccessible(true);
+        $user = $method->invoke($auth, $expected->getAuthenticateUserId());
+
+        $this->assertNotNull($user);
+        $this->assertSame(
+            $expected->getAuthenticateUserId(),
+            $user->getAuthenticateUserId()
+        );
+    }
+
+    public function test_get_user_by_id_returns_null_for_unknown_id()
+    {
+        $auth = Auth::guard('web');
+
+        $method = new \ReflectionMethod($auth, 'getUserById');
+        $method->setAccessible(true);
+
+        $this->assertNull($method->invoke($auth, 999999));
+    }
 }
