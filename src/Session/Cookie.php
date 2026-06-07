@@ -35,7 +35,21 @@ class Cookie
     public static function get(string $key, mixed $default = null): mixed
     {
         if (static::has($key)) {
-            return Crypto::decrypt($_COOKIE[$key]);
+            $value = Crypto::decrypt($_COOKIE[$key]);
+
+            // Cookie::set() json-encodes the payload before encrypting, so decode
+            // here to mirror it (and Cookie::all()). Fall back to the raw value
+            // when it is not the JSON we wrote — e.g. a tampered cookie decrypts
+            // to false, or a cookie was set outside the framework.
+            if (is_string($value)) {
+                $decoded = json_decode($value, true);
+
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $decoded;
+                }
+            }
+
+            return $value;
         }
 
         if (is_callable($default)) {

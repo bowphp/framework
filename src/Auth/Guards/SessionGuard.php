@@ -200,16 +200,6 @@ class SessionGuard extends GuardContract
     {
         $cookie = Cookie::get($this->rememberCookieName());
 
-        // Cookie::set() json-encodes its payload but Cookie::get() does not
-        // json-decode it, so recover the original "<id>|<token>" string here.
-        if (is_string($cookie)) {
-            $decoded = json_decode($cookie, true);
-
-            if (is_string($decoded)) {
-                $cookie = $decoded;
-            }
-        }
-
         if (!is_string($cookie) || !str_contains($cookie, '|')) {
             if (!is_null($cookie)) {
                 $this->clearRememberCookie();
