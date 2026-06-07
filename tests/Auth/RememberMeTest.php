@@ -4,6 +4,7 @@ namespace Bow\Tests\Auth;
 
 use Bow\Auth\Auth;
 use Bow\Database\Database;
+use Bow\Security\Crypto;
 use Bow\Security\Hash;
 use Bow\Session\Session;
 use Bow\Tests\Auth\Stubs\UserModelStub;
@@ -11,11 +12,22 @@ use Bow\Tests\Config\TestingConfiguration;
 use PHPUnit\Framework\TestCase;
 use Policier\Policier;
 
+/**
+ * Bow's native session relies on session_set_save_handler()/session_start(),
+ * which both fail once PHPUnit's default runner has emitted output
+ * (headers_sent() === true). Running the whole class in a dedicated process
+ * lets the session boot cleanly before any output is produced.
+ *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 class RememberMeTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
         $config = TestingConfiguration::getConfig();
+
+        Crypto::setKey($config['security']['key'], $config['security']['cipher']);
 
         Auth::configure($config["auth"]);
         Policier::configure($config["policier"]);
@@ -128,5 +140,111 @@ class RememberMeTest extends TestCase
         $this->assertTrue($result);
         // The JWT guard must not set any cookie when remember=true.
         $this->assertEmpty($_COOKIE);
+    }
+
+    private function rememberCookieValue(int $id, string $token): string
+    {
+        // Mirror Cookie::set()'s encoding (json_encode then Crypto::encrypt) so
+        // tests exercise the same payload shape attemptRememberLogin() will read.
+        return Crypto::encrypt(json_encode($id . '|' . $token));
+    }
+
+    public function test_attempts_with_remember_persists_token()
+    {
+        $auth = Auth::guard('web');
+
+        $result = $auth->attempts([
+            'username' => 'papac',
+            'password' => 'password',
+        ], true);
+
+        $this->assertTrue($result);
+        $this->assertNotNull(UserModelStub::first()->getRememberToken());
+    }
+
+    public function test_attempts_without_remember_leaves_token_null()
+    {
+        $auth = Auth::guard('web');
+
+        $auth->attempts([
+            'username' => 'papac',
+            'password' => 'password',
+        ], false);
+
+        $this->assertNull(UserModelStub::first()->getRememberToken());
+    }
+
+    public function test_check_restores_session_from_valid_remember_cookie()
+    {
+        $auth = Auth::guard('web');
+        $user = UserModelStub::first();
+        $user->setRememberToken('valid-token-123');
+
+        Session::getInstance()->remove('_auth_web');
+        $_COOKIE['remember_web'] = $this->rememberCookieValue(
+            (int) $user->getAuthenticateUserId(),
+            'valid-token-123'
+        );
+
+        $this->assertTrue($auth->check());
+        $this->assertSame('papac', $auth->user()->username);
+    }
+
+    public function test_check_rejects_tampered_token_and_clears_cookie()
+    {
+        $auth = Auth::guard('web');
+        $user = UserModelStub::first();
+        $user->setRememberToken('the-real-token');
+
+        Session::getInstance()->remove('_auth_web');
+        $_COOKIE['remember_web'] = $this->rememberCookieValue(
+            (int) $user->getAuthenticateUserId(),
+            'WRONG-token'
+        );
+
+        $this->assertFalse($auth->check());
+        $this->assertArrayNotHasKey('remember_web', $_COOKIE);
+    }
+
+    public function test_check_rejects_unknown_user_and_clears_cookie()
+    {
+        $auth = Auth::guard('web');
+
+        Session::getInstance()->remove('_auth_web');
+        $_COOKIE['remember_web'] = $this->rememberCookieValue(999999, 'whatever');
+
+        $this->assertFalse($auth->check());
+        $this->assertArrayNotHasKey('remember_web', $_COOKIE);
+    }
+
+    public function test_check_rejects_malformed_cookie_without_delimiter()
+    {
+        $auth = Auth::guard('web');
+
+        Session::getInstance()->remove('_auth_web');
+        // A well-encrypted cookie whose payload has no "<id>|<token>" delimiter.
+        $_COOKIE['remember_web'] = Crypto::encrypt(json_encode('garbage-no-pipe'));
+
+        $this->assertFalse($auth->check());
+        $this->assertArrayNotHasKey('remember_web', $_COOKIE);
+    }
+
+    public function test_logout_regenerates_token_and_removes_cookie()
+    {
+        $auth = Auth::guard('web');
+        $user = UserModelStub::first();
+        $user->setRememberToken('token-before');
+
+        Session::getInstance()->remove('_auth_web');
+        $_COOKIE['remember_web'] = $this->rememberCookieValue(
+            (int) $user->getAuthenticateUserId(),
+            'token-before'
+        );
+        $this->assertTrue($auth->check());
+
+        $this->assertTrue($auth->logout());
+
+        $this->assertArrayNotHasKey('remember_web', $_COOKIE);
+        $this->assertNotSame('token-before', UserModelStub::first()->getRememberToken());
     }
 }
