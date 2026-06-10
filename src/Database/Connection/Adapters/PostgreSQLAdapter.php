@@ -24,79 +24,79 @@ class PostgreSQLAdapter extends AbstractConnection
     protected ?string $name = 'pgsql';
 
     /**
-     * MysqlAdapter constructor.
+     * Validate the connection configuration.
      *
-     * @param array $config
+     * @param  array $config
+     * @return void
      */
-    public function __construct(array $config)
+    protected function validateConfig(array $config): void
     {
-        $this->config = $config;
-
-        $this->connection();
+        // Check the existence of database definition
+        if (!isset($config['database'])) {
+            throw new InvalidArgumentException("The database is not defined");
+        }
     }
 
     /**
-     * Make connexion
+     * Build a PDO instance from the given configuration.
      *
-     * @return void
+     * @param  array $config
+     * @return PDO
      */
-    public function connection(): void
+    protected function makePdo(array $config): PDO
     {
-        // Build of the mysql dsn
-        if (isset($this->config['socket']) && !is_null($this->config['socket']) && !empty($this->config['socket'])) {
-            $hostname = $this->config['socket'];
+        // Build of the pgsql dsn
+        if (isset($config['socket']) && !is_null($config['socket']) && !empty($config['socket'])) {
+            $hostname = $config['socket'];
             $port = '';
         } else {
-            $hostname = $this->config['hostname'] ?? null;
-            $port = (string)($this->config['port'] ?? self::PORT);
-        }
-
-        // Check the existence of database definition
-        if (!isset($this->config['database'])) {
-            throw new InvalidArgumentException("The database is not defined");
+            $hostname = $config['hostname'] ?? null;
+            $port = (string)($config['port'] ?? self::PORT);
         }
 
         // Formatting connection parameters
-        $dsn = sprintf("pgsql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
+        $dsn = sprintf("pgsql:host=%s;port=%s;dbname=%s", $hostname, $port, $config['database']);
 
-        if (isset($this->config['sslmode'])) {
-            $dsn .= ';sslmode=' . $this->config['sslmode'];
+        if (isset($config['sslmode'])) {
+            $dsn .= ';sslmode=' . $config['sslmode'];
         }
 
-        if (isset($this->config['sslrootcert'])) {
-            $dsn .= ';sslrootcert=' . $this->config['sslrootcert'];
+        if (isset($config['sslrootcert'])) {
+            $dsn .= ';sslrootcert=' . $config['sslrootcert'];
         }
 
-        if (isset($this->config['sslcert'])) {
-            $dsn .= ';sslcert=' . $this->config['sslcert'];
+        if (isset($config['sslcert'])) {
+            $dsn .= ';sslcert=' . $config['sslcert'];
         }
 
-        if (isset($this->config['sslkey'])) {
-            $dsn .= ';sslkey=' . $this->config['sslkey'];
+        if (isset($config['sslkey'])) {
+            $dsn .= ';sslkey=' . $config['sslkey'];
         }
 
-        if (isset($this->config['sslcrl'])) {
-            $dsn .= ';sslcrl=' . $this->config['sslcrl'];
+        if (isset($config['sslcrl'])) {
+            $dsn .= ';sslcrl=' . $config['sslcrl'];
         }
 
-        if (isset($this->config['application_name'])) {
-            $dsn .= ';application_name=' . $this->config['application_name'];
+        if (isset($config['application_name'])) {
+            $dsn .= ';application_name=' . $config['application_name'];
         }
 
-        $username = $this->config["username"];
-        $password = $this->config["password"];
+        $username = $config["username"];
+        $password = $config["password"];
 
         // Configuration the PDO attributes that we want to set
         $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => $this->config['fetch'] ?? $this->fetch,
+            PDO::ATTR_DEFAULT_FETCH_MODE => $config['fetch'] ?? $this->fetch,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ];
 
         // Build the PDO connection
-        $this->pdo = new PDO($dsn, $username, $password, $options);
+        $pdo = new PDO($dsn, $username, $password, $options);
 
-        if ($this->config["charset"]) {
-            $this->pdo->query('SET NAMES \'' . $this->config["charset"] . '\'');
+        if ($config["charset"]) {
+            $pdo->query('SET NAMES \'' . $config["charset"] . '\'');
         }
+
+        return $pdo;
     }
 }
