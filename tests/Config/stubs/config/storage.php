@@ -39,14 +39,15 @@ return [
         's3' => [
             "driver" => "s3",
             'credentials' => [
-                'key' => getenv('AWS_KEY'),
-                'secret' => getenv('AWS_SECRET'),
+                'key' => app_env('AWS_KEY', 'minioadmin'),
+                'secret' => app_env('AWS_SECRET', 'minioadmin'),
             ],
-            'bucket' => getenv('AWS_S3_BUCKET', 'tests'),
-            'region' => getenv('AWS_REGION', 'us-east-1'),
+            'bucket' => app_env('AWS_S3_BUCKET', 'tests'),
+            'region' => app_env('AWS_REGION', 'us-east-1'),
             'version' => 'latest',
-            // MinIO configuration (optional)
-            'endpoint' => getenv('AWS_ENDPOINT', false), // e.g., 'http://localhost:9000' for MinIO
+            // MinIO configuration. Defaults target the local docker-compose
+            // MinIO service; override via env for a real AWS S3 endpoint.
+            'endpoint' => app_env('AWS_ENDPOINT', 'http://127.0.0.1:9000'),
             'use_path_style_endpoint' => true, // Set to true for MinIO
         ]
     ],

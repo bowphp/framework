@@ -1470,7 +1470,7 @@ class QueryBuilder implements JsonSerializable
         $this->last_query = $sql;
 
         $start_at = microtime(true);
-        $result = (bool) $this->connection->exec($sql);
+        $result = (bool) $connection->exec($sql);
         $ended_at = microtime(true);
 
         $this->triggerQueryEvent($sql, $ended_at - $start_at);
@@ -1608,7 +1608,7 @@ class QueryBuilder implements JsonSerializable
         $this->last_query = $sql;
 
         $start_at = microtime(true);
-        $result = (bool) $this->connection->exec($sql);
+        $result = (bool) $this->writeConnection()->exec($sql);
         $ended_at = microtime(true);
 
         $this->triggerQueryEvent($sql, $ended_at - $start_at);
