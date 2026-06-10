@@ -41,8 +41,14 @@ class AttributeRouteIntegrationTest extends TestCase
     {
         parent::setUp();
 
-        // Reset the router for each test
         $this->router = Router::configure();
+
+        // The route collection is a global (static) registry that intentionally
+        // gathers routes across every Router instance. Clear it before each test
+        // so assertions are not polluted by routes registered by earlier tests.
+        $routes = new \ReflectionProperty(Router::class, 'routes');
+        $routes->setAccessible(true);
+        $routes->setValue(null, []);
     }
 
     public function test_registrar_registers_routes_from_controller(): void

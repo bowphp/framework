@@ -59,6 +59,11 @@ jobs:
             sleep 2
           done
 
+      - name: Wait for MinIO bucket initialization
+        run: |
+          echo "Waiting for MinIO bucket initialization..."
+          docker wait bowphp_minio_init || true
+
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v4
