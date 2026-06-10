@@ -25,53 +25,51 @@ class MysqlAdapter extends AbstractConnection
     protected ?string $name = 'mysql';
 
     /**
-     * MysqlAdapter constructor.
+     * Validate the connection configuration.
      *
-     * @param array $config
+     * @param  array $config
+     * @return void
      */
-    public function __construct(array $config)
+    protected function validateConfig(array $config): void
     {
-        $this->config = $config;
-
-        $this->connection();
+        // Check the existence of database definition
+        if (!isset($config['database'])) {
+            throw new InvalidArgumentException("The database is not defined");
+        }
     }
 
     /**
-     * Make connexion
+     * Build a PDO instance from the given configuration.
      *
-     * @return void
+     * @param  array $config
+     * @return PDO
      */
-    public function connection(): void
+    protected function makePdo(array $config): PDO
     {
         // Build of the mysql dsn
-        if (isset($this->config['socket']) && !empty($this->config['socket'])) {
-            $hostname = $this->config['socket'];
+        if (isset($config['socket']) && !empty($config['socket'])) {
+            $hostname = $config['socket'];
             $port = '';
         } else {
-            $hostname = $this->config['hostname'] ?? null;
-            $port = (string)($this->config['port'] ?? self::PORT);
-        }
-
-        // Check the existence of database definition
-        if (!isset($this->config['database'])) {
-            throw new InvalidArgumentException("The database is not defined");
+            $hostname = $config['hostname'] ?? null;
+            $port = (string)($config['port'] ?? self::PORT);
         }
 
         // Formatting connection parameters
-        $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s", $hostname, $port, $this->config['database']);
+        $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s", $hostname, $port, $config['database']);
 
-        $username = $this->config["username"];
-        $password = $this->config["password"];
+        $username = $config["username"];
+        $password = $config["password"];
 
         // Configuration the PDO attributes that we want to set
         $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => $this->config['fetch'] ?? $this->fetch,
+            PDO::ATTR_DEFAULT_FETCH_MODE => $config['fetch'] ?? $this->fetch,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . Str::upper($this->config["charset"]),
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . Str::upper($config["charset"]),
             PDO::ATTR_ORACLE_NULLS => PDO::NULL_EMPTY_STRING
         ];
 
         // Build the PDO connection
-        $this->pdo = new PDO($dsn, $username, $password, $options);
+        return new PDO($dsn, $username, $password, $options);
     }
 }

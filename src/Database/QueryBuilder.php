@@ -85,11 +85,22 @@ class QueryBuilder implements JsonSerializable
     protected ?string $as = null;
 
     /**
-     * The PDO instance
+     * The PDO instance.
+     *
+     * Only set when the builder is constructed from a raw PDO (no read/write
+     * splitting). When built from an adapter, the connection is resolved
+     * lazily through {@see QueryBuilder::$connection_adapter}.
      *
      * @var ?PDO
      */
     protected ?PDO $connection = null;
+
+    /**
+     * The connection adapter, when read/write splitting is available.
+     *
+     * @var ?AbstractConnection
+     */
+    protected ?AbstractConnection $connection_adapter = null;
 
     /**
      * Define whether to retrieve information from the list
@@ -142,14 +153,53 @@ class QueryBuilder implements JsonSerializable
     public function __construct(string $table, AbstractConnection|PDO $connection)
     {
         if ($connection instanceof AbstractConnection) {
+            $this->connection_adapter = $connection;
             $this->adapter = $connection->getName();
-            $connection = $connection->getConnection();
         } else {
+            $this->connection = $connection;
             $this->adapter = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
         }
 
-        $this->connection = $connection;
         $this->table = $table;
+    }
+
+    /**
+     * Resolve the write (primary) connection.
+     *
+     * @return PDO
+     */
+    private function writeConnection(): PDO
+    {
+        if ($this->connection_adapter !== null) {
+            return $this->connection_adapter->getWriteConnection();
+        }
+
+        return $this->connection;
+    }
+
+    /**
+     * Resolve the read (replica) connection.
+     *
+     * While a transaction is open on the primary, reads are routed to the
+     * primary so they observe their own uncommitted changes. Falls back to
+     * the single connection when read/write splitting is unavailable.
+     *
+     * @return PDO
+     */
+    private function readConnection(): PDO
+    {
+        if ($this->connection_adapter === null) {
+            return $this->connection;
+        }
+
+        if (
+            $this->connection_adapter->hasWriteConnection()
+            && $this->connection_adapter->getWriteConnection()->inTransaction()
+        ) {
+            return $this->connection_adapter->getWriteConnection();
+        }
+
+        return $this->connection_adapter->getReadConnection();
     }
 
     /**
@@ -169,7 +219,7 @@ class QueryBuilder implements JsonSerializable
      */
     public function getPdo(): PDO
     {
-        return $this->connection;
+        return $this->writeConnection();
     }
 
     /**
@@ -930,7 +980,7 @@ class QueryBuilder implements JsonSerializable
             }
         }
 
-        $statement = $this->execute($sql, $this->where_data_binding);
+        $statement = $this->execute($sql, $this->where_data_binding, false);
 
         $this->where_data_binding = [];
 
@@ -1174,7 +1224,7 @@ class QueryBuilder implements JsonSerializable
         // Execution of request.
         $sql = $this->toSql();
 
-        $statement = $this->execute($sql, $this->where_data_binding);
+        $statement = $this->execute($sql, $this->where_data_binding, false);
 
         $data = $statement->fetchAll();
 
@@ -1406,9 +1456,11 @@ class QueryBuilder implements JsonSerializable
      */
     public function truncate(): bool
     {
-        if ($this->connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+        $connection = $this->writeConnection();
+
+        if ($connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
             $sql = 'delete from ' . $this->table . ';';
-            if (!$this->connection->inTransaction()) {
+            if (!$connection->inTransaction()) {
                 $sql .= ' VACUUM;';
             }
         } else {
@@ -1418,7 +1470,7 @@ class QueryBuilder implements JsonSerializable
         $this->last_query = $sql;
 
         $start_at = microtime(true);
-        $result = (bool) $this->connection->exec($sql);
+        $result = (bool) $connection->exec($sql);
         $ended_at = microtime(true);
 
         $this->triggerQueryEvent($sql, $ended_at - $start_at);
@@ -1438,7 +1490,7 @@ class QueryBuilder implements JsonSerializable
     {
         $this->insert($values);
 
-        $result = $this->connection->lastInsertId();
+        $result = $this->writeConnection()->lastInsertId();
 
         return is_numeric($result) ? (int)$result : $result;
     }
@@ -1514,13 +1566,16 @@ class QueryBuilder implements JsonSerializable
      *
      * @param string $sql
      * @param array $bindings
+     * @param bool $write Whether the statement mutates data (routes to the primary).
      * @return PDOStatement
      */
-    private function execute(string $sql, array $bindings = []): PDOStatement
+    private function execute(string $sql, array $bindings = [], bool $write = true): PDOStatement
     {
         $this->last_query = $sql;
 
-        $statement = $this->connection->prepare($sql);
+        $connection = $write ? $this->writeConnection() : $this->readConnection();
+
+        $statement = $connection->prepare($sql);
 
         $this->bind($statement, $bindings);
 
@@ -1553,7 +1608,7 @@ class QueryBuilder implements JsonSerializable
         $this->last_query = $sql;
 
         $start_at = microtime(true);
-        $result = (bool) $this->connection->exec($sql);
+        $result = (bool) $this->writeConnection()->exec($sql);
         $ended_at = microtime(true);
 
         $this->triggerQueryEvent($sql, $ended_at - $start_at);
@@ -1645,7 +1700,7 @@ class QueryBuilder implements JsonSerializable
      */
     public function getLastInsertId(?string $name = null)
     {
-        return $this->connection->lastInsertId($name);
+        return $this->writeConnection()->lastInsertId($name);
     }
 
     /**

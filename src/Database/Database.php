@@ -102,11 +102,41 @@ class Database
             static::$adapter->setFetchMode(static::$config['fetch']);
         }
 
-        if (static::$adapter->getConnection() instanceof PDO && $name == static::$name) {
-            return static::getInstance();
+        return static::getInstance();
+    }
+
+    /**
+     * Resolve the write (primary) connection.
+     *
+     * @return PDO
+     */
+    private static function writeConnection(): PDO
+    {
+        static::ensureDatabaseConnection();
+
+        return static::$adapter->getWriteConnection();
+    }
+
+    /**
+     * Resolve the read (replica) connection.
+     *
+     * While a transaction is open on the primary, reads are routed to the
+     * primary so they observe their own uncommitted changes.
+     *
+     * @return PDO
+     */
+    private static function readConnection(): PDO
+    {
+        static::ensureDatabaseConnection();
+
+        if (
+            static::$adapter->hasWriteConnection()
+            && static::$adapter->getWriteConnection()->inTransaction()
+        ) {
+            return static::$adapter->getWriteConnection();
         }
 
-        return static::getInstance();
+        return static::$adapter->getReadConnection();
     }
 
     /**
@@ -182,8 +212,7 @@ class Database
      */
     private static function executePrepareQuery(string $sql_statement, array $data = []): int
     {
-        $pdo_statement = static::$adapter
-            ->getConnection()
+        $pdo_statement = static::writeConnection()
             ->prepare($sql_statement);
 
         static::$adapter->bind(
@@ -218,8 +247,7 @@ class Database
             );
         }
 
-        $pdo_statement = static::$adapter
-            ->getConnection()
+        $pdo_statement = static::readConnection()
             ->prepare($sql_statement);
 
         static::$adapter->bind(
@@ -251,8 +279,7 @@ class Database
         }
 
         // Prepare query
-        $pdo_statement = static::$adapter
-            ->getConnection()
+        $pdo_statement = static::readConnection()
             ->prepare($sql_statement);
 
         // Bind data
@@ -283,7 +310,7 @@ class Database
         }
 
         if (empty($data)) {
-            $pdo_statement = static::$adapter->getConnection()->prepare($sql_statement);
+            $pdo_statement = static::writeConnection()->prepare($sql_statement);
 
             $pdo_statement->execute();
 
@@ -320,8 +347,7 @@ class Database
 
         $sql_statement = trim($sql_statement);
 
-        return static::$adapter
-            ->getConnection()
+        return static::writeConnection()
             ->exec($sql_statement) === 0;
     }
 
@@ -360,7 +386,7 @@ class Database
 
         return new QueryBuilder(
             $table,
-            static::$adapter->getConnection()
+            static::$adapter
         );
     }
 
@@ -396,8 +422,8 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (!static::$adapter->getConnection()->inTransaction()) {
-            static::$adapter->getConnection()->beginTransaction();
+        if (!static::writeConnection()->inTransaction()) {
+            static::writeConnection()->beginTransaction();
         }
     }
 
@@ -410,7 +436,7 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        return static::$adapter->getConnection()->inTransaction();
+        return static::writeConnection()->inTransaction();
     }
 
     /**
@@ -427,7 +453,7 @@ class Database
     public static function commitTransaction(): void
     {
         if (static::inTransaction()) {
-            static::$adapter->getConnection()->commit();
+            static::writeConnection()->commit();
         }
     }
 
@@ -445,7 +471,7 @@ class Database
     public static function rollbackTransaction(): void
     {
         if (static::inTransaction()) {
-            static::$adapter->getConnection()->rollBack();
+            static::writeConnection()->rollBack();
         }
     }
 
@@ -460,10 +486,10 @@ class Database
         static::ensureDatabaseConnection();
 
         if ($name === null) {
-            return static::$adapter->getConnection();
+            return static::writeConnection();
         }
 
-        return static::$adapter->getConnection()->lastInsertId($name);
+        return static::writeConnection()->lastInsertId($name);
     }
 
     /**
@@ -473,9 +499,7 @@ class Database
      */
     public static function getPdo(): PDO
     {
-        static::ensureDatabaseConnection();
-
-        return static::$adapter->getConnection();
+        return static::writeConnection();
     }
 
     /**

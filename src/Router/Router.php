@@ -350,7 +350,6 @@ class Router
      * @param  string                $path
      * @param  callable|string|array $cb
      * @return Route
-     * @throws
      */
     public function any(string $path, callable|string|array $cb): Route
     {

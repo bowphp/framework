@@ -18,38 +18,40 @@ class SqliteAdapter extends AbstractConnection
     protected ?string $name = 'sqlite';
 
     /**
-     * SqliteAdapter constructor.
+     * Validate the connection configuration.
      *
-     * @param array $config
+     * @param  array $config
+     * @return void
      */
-    public function __construct(array $config)
+    protected function validateConfig(array $config): void
     {
-        $this->config = $config;
-
-        $this->connection();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function connection(): void
-    {
-        if (!isset($this->config['driver'])) {
+        if (!isset($config['driver'])) {
             throw new InvalidArgumentException("Please select the right sqlite driver");
         }
 
-        if (!isset($this->config['database'])) {
+        if (!isset($config['database'])) {
             throw new InvalidArgumentException('The database is not defined');
         }
+    }
 
+    /**
+     * Build a PDO instance from the given configuration.
+     *
+     * @param  array $config
+     * @return PDO
+     */
+    protected function makePdo(array $config): PDO
+    {
         // Build the PDO connection
-        $this->pdo = new PDO('sqlite:' . $this->config['database']);
+        $pdo = new PDO('sqlite:' . $config['database']);
 
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->pdo->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_EMPTY_STRING);
-        $this->pdo->setAttribute(
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_EMPTY_STRING);
+        $pdo->setAttribute(
             PDO::ATTR_DEFAULT_FETCH_MODE,
-            $this->config['fetch'] ?? $this->fetch
+            $config['fetch'] ?? $this->fetch
         );
+
+        return $pdo;
     }
 }
