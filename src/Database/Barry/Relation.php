@@ -16,42 +16,56 @@ abstract class Relation
      * @var bool
      */
     protected static bool $has_constraints = true;
+
     /**
      * Indicate whether the relationships use a pivot table.*.
      *
      * @var bool
      */
     protected static bool $has_pivot = false;
+
     /**
      * The foreign key of the parent model.
      *
      * @var string
      */
     protected string $foreign_key;
+
     /**
      * The associated key on the parent model.
      *
      * @var string
      */
     protected string $local_key;
+
     /**
      * The parent model instance
      *
      * @var Model
      */
     protected Model $parent;
+
     /**
      * The related model instance
      *
      * @var Model
      */
     protected Model $related;
+
     /**
      * The Bow Query builder
      *
      * @var QueryBuilder
      */
     protected QueryBuilder $query;
+
+    /**
+     * Whether no parent exposed a key during eager loading, in which case the
+     * relation resolves to nothing without querying the database.
+     *
+     * @var bool
+     */
+    protected bool $eager_has_no_keys = false;
 
     /**
      * Relation Contractor
@@ -85,57 +99,6 @@ abstract class Relation
     abstract public function addConstraints(): void;
 
     /**
-     * Get the parent model.
-     *
-     * @return Model
-     */
-    public function getParent(): Model
-    {
-        return $this->parent;
-    }
-
-    /**
-     * Get associated model class.
-     *
-     * @return Model
-     */
-    public function getRelated(): Model
-    {
-        return $this->related;
-    }
-
-    /**
-     * _Call
-     *
-     * @param  string $method
-     * @param  array  $args
-     * @return mixed
-     */
-    public function __call(string $method, array $args = [])
-    {
-        $result = call_user_func_array([$this->query, $method], (array)$args);
-
-        if ($result === $this->query) {
-            return $this;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create a new row of the related
-     *
-     * @param  array $attributes
-     * @return Model
-     */
-    public function create(array $attributes): Model
-    {
-        $attributes[$this->foreign_key] = $this->parent->getKeyValue();
-
-        return $this->related->create($attributes);
-    }
-
-    /**
      * Get the results of the relationship.
      *
      * @return mixed
@@ -162,6 +125,39 @@ abstract class Relation
      * @return bool
      */
     abstract protected function eagerIsMany(): bool;
+
+    /**
+     * Get the parent model.
+     *
+     * @return Model
+     */
+    public function getParent(): Model
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Get associated model class.
+     *
+     * @return Model
+     */
+    public function getRelated(): Model
+    {
+        return $this->related;
+    }
+
+    /**
+     * Create a new row of the related
+     *
+     * @param  array $attributes
+     * @return Model
+     */
+    public function create(array $attributes): Model
+    {
+        $attributes[$this->foreign_key] = $this->parent->getKeyValue();
+
+        return $this->related->create($attributes);
+    }
 
     /**
      * Run the given callback with relation constraints disabled.
@@ -197,9 +193,17 @@ abstract class Relation
             fn ($value) => !is_null($value)
         )));
 
-        // Fall back to an impossible match when no parent exposes a key so the
-        // query stays well-formed and returns nothing.
-        $this->query->whereIn($this->eagerRelatedKey(), count($keys) > 0 ? $keys : [0]);
+        // With no keys to match, skip the value-based constraint entirely.
+        // Injecting a placeholder value (such as 0) is rejected by strongly
+        // typed columns — e.g. a PostgreSQL uuid primary key raises
+        // "invalid input syntax for type uuid: 0". getEager() short-circuits.
+        if (count($keys) === 0) {
+            $this->eager_has_no_keys = true;
+
+            return;
+        }
+
+        $this->query->whereIn($this->eagerRelatedKey(), $keys);
     }
 
     /**
@@ -209,6 +213,11 @@ abstract class Relation
      */
     public function getEager(): Collection
     {
+        // No parent exposed a key, so there is nothing to fetch.
+        if ($this->eager_has_no_keys) {
+            return new Collection([]);
+        }
+
         $results = $this->query->get();
 
         return $results instanceof Collection ? $results : new Collection([]);
@@ -239,5 +248,23 @@ abstract class Relation
                 $this->eagerIsMany() ? new Collection($matched) : ($matched[0] ?? null)
             );
         }
+    }
+
+    /**
+     * _Call
+     *
+     * @param  string $method
+     * @param  array  $args
+     * @return mixed
+     */
+    public function __call(string $method, array $args = [])
+    {
+        $result = call_user_func_array([$this->query, $method], (array)$args);
+
+        if ($result === $this->query) {
+            return $this;
+        }
+
+        return $result;
     }
 }

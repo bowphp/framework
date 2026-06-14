@@ -41,13 +41,6 @@ trait Relationship
     }
 
     /**
-     * Get the table key
-     *
-     * @return string
-     */
-    abstract public function getKey(): string;
-
-    /**
      * The belongs to many relative
      *
      * @param  string      $related
@@ -128,4 +121,11 @@ trait Relationship
 
         return new HasOne($related_model, $this, $foreign_key, $primary_key);
     }
+
+    /**
+     * Get the table key
+     *
+     * @return string
+     */
+    abstract public function getKey(): string;
 }
