@@ -1587,7 +1587,7 @@ class QueryBuilder implements JsonSerializable
             $this->triggerQueryEvent($sql, $ended_at - $start_at, $bindings);
         } catch (\Exception $e) {
             throw new QueryBuilderException(
-                'Error executing query: ' . $e->getMessage() . ' | Query: ' . $this->last_query,
+                'message: ' . $e->getMessage() . '; query: ' . $this->last_query,
                 $this->last_query,
                 E_ERROR,
             );
