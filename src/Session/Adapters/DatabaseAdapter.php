@@ -21,13 +21,6 @@ class DatabaseAdapter implements SessionHandlerInterface
     private string $table;
 
     /**
-     * The current session session_id
-     *
-     * @var string
-     */
-    private string $session_id;
-
-    /**
      * The current user ip
      *
      * @var string
@@ -91,11 +84,11 @@ class DatabaseAdapter implements SessionHandlerInterface
      */
     public function gc(int $max_lifetime): int|false
     {
-        $this->sessions()
-            ->where('time', '<', $this->createTimestamp())
+        // The `time` column stores each session's expiry timestamp, so a
+        // session is collectable once that expiry is in the past.
+        return $this->sessions()
+            ->where('time', '<', date('Y-m-d H:i:s'))
             ->delete();
-
-        return 1;
     }
 
     /**
@@ -117,10 +110,14 @@ class DatabaseAdapter implements SessionHandlerInterface
      * @return string
      * @throws QueryBuilderException
      */
-    public function read(string $id): string
+    public function read(string $session_id): string
     {
+        // Only return live sessions: an expired row (expiry in the past) must
+        // be treated as absent, otherwise stale sessions stay usable until gc.
         $session = $this->sessions()
-            ->where('id', $id)->first();
+            ->where('id', $session_id)
+            ->where('time', '>=', date('Y-m-d H:i:s'))
+            ->first();
 
         if (is_null($session)) {
             return '';
@@ -147,11 +144,12 @@ class DatabaseAdapter implements SessionHandlerInterface
             return (bool)$insert;
         }
 
-        // Update the session information
+        // Update the session payload and slide the expiry forward so an active
+        // session does not expire a fixed window after its first request.
         $update = $this->sessions()->where('id', $id)->update(
             [
             'data' => $data,
-            'id' => $id
+            'time' => $this->createTimestamp()
             ]
         );
 
