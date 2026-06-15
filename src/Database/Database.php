@@ -102,11 +102,41 @@ class Database
             static::$adapter->setFetchMode(static::$config['fetch']);
         }
 
-        if (static::$adapter->getConnection() instanceof PDO && $name == static::$name) {
-            return static::getInstance();
+        return static::getInstance();
+    }
+
+    /**
+     * Resolve the write (primary) connection.
+     *
+     * @return PDO
+     */
+    private static function writeConnection(): PDO
+    {
+        static::ensureDatabaseConnection();
+
+        return static::$adapter->getWriteConnection();
+    }
+
+    /**
+     * Resolve the read (replica) connection.
+     *
+     * While a transaction is open on the primary, reads are routed to the
+     * primary so they observe their own uncommitted changes.
+     *
+     * @return PDO
+     */
+    private static function readConnection(): PDO
+    {
+        static::ensureDatabaseConnection();
+
+        if (
+            static::$adapter->hasWriteConnection()
+            && static::$adapter->getWriteConnection()->inTransaction()
+        ) {
+            return static::$adapter->getWriteConnection();
         }
 
-        return static::getInstance();
+        return static::$adapter->getReadConnection();
     }
 
     /**
@@ -182,8 +212,7 @@ class Database
      */
     private static function executePrepareQuery(string $sql_statement, array $data = []): int
     {
-        $pdo_statement = static::$adapter
-            ->getConnection()
+        $pdo_statement = static::writeConnection()
             ->prepare($sql_statement);
 
         static::$adapter->bind(
@@ -191,9 +220,11 @@ class Database
             Sanitize::make($data, true)
         );
 
+        $start_at = microtime(true);
         $pdo_statement->execute();
+        $ended_at = microtime(true);
 
-        static::triggerQueryEvent($sql_statement, $data);
+        static::triggerQueryEvent($sql_statement, $ended_at - $start_at, $data);
 
         return $pdo_statement->rowCount();
     }
@@ -209,20 +240,14 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (
-            !preg_match(
-                "/^(select\s.+?\sfrom\s.+;?|desc\s.+;?)$/i",
-                $sql_statement
-            )
-        ) {
+        if (!preg_match("/^\s*select\b/i", $sql_statement)) {
             throw new DatabaseException(
-                'Syntax Error on the Request',
+                'Syntax Error on the Request: ' . $sql_statement,
                 E_USER_ERROR
             );
         }
 
-        $pdo_statement = static::$adapter
-            ->getConnection()
+        $pdo_statement = static::readConnection()
             ->prepare($sql_statement);
 
         static::$adapter->bind(
@@ -246,16 +271,15 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (!preg_match("/^select\s.+?\sfrom\s.+;?$/i", $sql_statement)) {
+        if (!preg_match("/^\s*select\b/i", $sql_statement)) {
             throw new DatabaseException(
-                'Syntax Error on the Request',
+                'Syntax Error on the Request: ' . $sql_statement,
                 E_USER_ERROR
             );
         }
 
         // Prepare query
-        $pdo_statement = static::$adapter
-            ->getConnection()
+        $pdo_statement = static::readConnection()
             ->prepare($sql_statement);
 
         // Bind data
@@ -278,20 +302,15 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (
-            !preg_match(
-                "/^insert\s+into\s+[\w\d_-`]+\s*(\(.+\))?\s+(values\s*(\(.+\),?)+|\s?set\s+(.+)+);?$/ism",
-                $sql_statement
-            )
-        ) {
+        if (!preg_match("/^\s*insert\b/i", $sql_statement)) {
             throw new DatabaseException(
-                'Syntax Error on the Request',
+                'Syntax Error on the Request: ' . $sql_statement,
                 E_USER_ERROR
             );
         }
 
         if (empty($data)) {
-            $pdo_statement = static::$adapter->getConnection()->prepare($sql_statement);
+            $pdo_statement = static::writeConnection()->prepare($sql_statement);
 
             $pdo_statement->execute();
 
@@ -328,8 +347,7 @@ class Database
 
         $sql_statement = trim($sql_statement);
 
-        return static::$adapter
-            ->getConnection()
+        return static::writeConnection()
             ->exec($sql_statement) === 0;
     }
 
@@ -344,7 +362,7 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (!preg_match("/^delete\s+from\s+[\w\d_`]+\s+where\s+.+;?$/i", $sql_statement)) {
+        if (!preg_match("/^\s*delete\b/i", $sql_statement)) {
             throw new DatabaseException(
                 'Syntax Error on the Request',
                 E_USER_ERROR
@@ -368,7 +386,7 @@ class Database
 
         return new QueryBuilder(
             $table,
-            static::$adapter->getConnection()
+            static::$adapter
         );
     }
 
@@ -404,8 +422,8 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        if (!static::$adapter->getConnection()->inTransaction()) {
-            static::$adapter->getConnection()->beginTransaction();
+        if (!static::writeConnection()->inTransaction()) {
+            static::writeConnection()->beginTransaction();
         }
     }
 
@@ -418,7 +436,7 @@ class Database
     {
         static::ensureDatabaseConnection();
 
-        return static::$adapter->getConnection()->inTransaction();
+        return static::writeConnection()->inTransaction();
     }
 
     /**
@@ -426,8 +444,16 @@ class Database
      */
     public static function commit(): void
     {
+        static::commitTransaction();
+    }
+
+    /**
+     * Validate a transaction
+     */
+    public static function commitTransaction(): void
+    {
         if (static::inTransaction()) {
-            static::$adapter->getConnection()->commit();
+            static::writeConnection()->commit();
         }
     }
 
@@ -436,8 +462,16 @@ class Database
      */
     public static function rollback(): void
     {
+        static::rollbackTransaction();
+    }
+
+    /**
+     * Cancel a transaction
+     */
+    public static function rollbackTransaction(): void
+    {
         if (static::inTransaction()) {
-            static::$adapter->getConnection()->rollBack();
+            static::writeConnection()->rollBack();
         }
     }
 
@@ -452,10 +486,10 @@ class Database
         static::ensureDatabaseConnection();
 
         if ($name === null) {
-            return static::$adapter->getConnection();
+            return static::writeConnection();
         }
 
-        return static::$adapter->getConnection()->lastInsertId($name);
+        return static::writeConnection()->lastInsertId($name);
     }
 
     /**
@@ -465,9 +499,7 @@ class Database
      */
     public static function getPdo(): PDO
     {
-        static::ensureDatabaseConnection();
-
-        return static::$adapter->getConnection();
+        return static::writeConnection();
     }
 
     /**
@@ -484,12 +516,13 @@ class Database
      * Trigger the query executed event
      *
      * @param  string $sql
+     * @param  float $execution_time
      * @param  array  $bindings
      * @return void
      */
-    public static function triggerQueryEvent(string $sql, array $bindings = []): void
+    public static function triggerQueryEvent(string $sql, float $execution_time = 0, array $bindings = []): void
     {
-        $event = new QueryEvent($sql, $bindings);
+        $event = new QueryEvent($sql, $execution_time, $bindings);
 
         app_event($event);
     }

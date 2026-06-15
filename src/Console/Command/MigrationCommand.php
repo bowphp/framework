@@ -50,46 +50,46 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Create a migration in both directions
+     * Run migration action (up, rollback, reset)
      *
-     * @param  string $type
+     * @param string $type
      * @return void
      * @throws Exception
      */
     private function factory(string $type): void
     {
-        $migrations = [];
+        $migrations = $this->collectMigrationFiles();
 
-        // We include all migrations files and collect it for make great manage
-        foreach ($this->getMigrationFiles() as $file) {
-            $migrations[$file] = explode('.', basename($file))[0];
+        $connection = $this->arg->getParameter("--connection", config("database.default"));
+
+        try {
+            Database::connection($connection);
+        } catch (Exception $exception) {
+            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
         }
 
-        // We create the migration database status
-        $this->createMigrationTable();
+        try {
+            // We create the migration database status
+            $this->createMigrationTable();
 
-        $action = 'make' . strtoupper($type);
-
-        $this->$action($migrations);
+            $action = 'make' . ucfirst($type);
+            if (!method_exists($this, $action)) {
+                throw new MigrationException("Migration action '$action' not found.");
+            }
+            $this->$action($migrations);
+        } catch (Exception $exception) {
+            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
+        }
     }
 
     /**
-     * Create the migration status table
+     * Create the migration status table if it does not exist
      *
      * @return void
      * @throws ConnectionException
      */
     private function createMigrationTable(): void
     {
-        $connection = $this->arg->getParameter("--connection", config("database.default"));
-
-        try {
-            Database::connection($connection);
-        } catch (Exception $exception) {
-            echo Color::red("▶ Please check your database configuration on .env.json file\n");
-            throw new MigrationException($exception->getMessage(), (int)$exception->getCode());
-        }
-
         $adapter = Database::getConnectionAdapter();
 
         $table = $adapter->getTablePrefix() . config('database.migration', 'migrations');
@@ -121,9 +121,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Up migration
+     * Run all up migrations
      *
-     * @param  array $migrations
+     * @param array $migrations
      * @return void
      * @throws ConnectionException
      * @throws QueryBuilderException
@@ -153,6 +153,7 @@ class MigrationCommand extends AbstractCommand
                 (new $migration())->up();
             } catch (Exception $exception) {
                 $this->throwMigrationException($exception, $migration);
+                break;
             }
 
             // Create new migration status
@@ -209,7 +210,7 @@ class MigrationCommand extends AbstractCommand
         $message = Color::red($message);
         $migration = Color::yellow($migration);
 
-        exit(sprintf("\nOn %s\n\n%s\n\n", $migration, $message));
+        echo sprintf("\nOn %s\n\n%s\n\n", $migration, $message);
     }
 
     /**
@@ -249,9 +250,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Rollback migration
+     * Rollback all migrations in batch 1
      *
-     * @param  array $migrations
+     * @param array $migrations
      * @return void
      * @throws ConnectionException
      * @throws QueryBuilderException
@@ -288,6 +289,7 @@ class MigrationCommand extends AbstractCommand
                     (new $migration())->rollback();
                 } catch (Exception $exception) {
                     $this->throwMigrationException($exception, $migration);
+                    return;
                 }
 
                 break;
@@ -311,9 +313,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Reset migration
+     * Reset all migrations
      *
-     * @param  array $migrations
+     * @param array $migrations
      * @return void
      * @throws ConnectionException
      * @throws QueryBuilderException
@@ -347,6 +349,7 @@ class MigrationCommand extends AbstractCommand
                     (new $migration())->rollback();
                 } catch (Exception $exception) {
                     $this->throwMigrationException($exception, $migration);
+                    break;
                 }
 
                 $this->getMigrationTable()->where('migration', $migration)->delete();
@@ -358,15 +361,29 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Get migration pattern
+     * Get migration file paths
      *
      * @return array
      */
     private function getMigrationFiles(): array
     {
         $file_pattern = $this->setting->getMigrationDirectory() . strtolower("/*.php");
-
         return glob($file_pattern);
+    }
+
+    /**
+     * Collect migration files as [file => className]
+     *
+     * @return array
+     */
+    private function collectMigrationFiles(): array
+    {
+        $files = $this->getMigrationFiles();
+        $migrations = [];
+        foreach ($files as $file) {
+            $migrations[$file] = explode('.', basename($file))[0];
+        }
+        return $migrations;
     }
 
     /**

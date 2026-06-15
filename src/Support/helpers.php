@@ -44,12 +44,25 @@ use Bow\View\View;
 use Carbon\Carbon;
 use Monolog\Logger;
 
+/*
+ * Global helper functions.
+ *
+ * Each helper is wrapped in `if (!function_exists(...))` so an application may
+ * override any of them by declaring its own version before this file loads.
+ * Most helpers are thin shortcuts over a framework class; the section banners
+ * below mark where each topic begins.
+ */
+
 if (!function_exists('app')) {
     /**
-     * Application container
+     * Resolve the service container, or a binding out of it.
      *
-     * @param  ?string $key
-     * @param  array   $setting
+     * With no arguments the container instance itself is returned; with a key
+     * the matching binding is resolved (using `$setting` as constructor
+     * parameters when provided).
+     *
+     * @param  ?string $key     Binding name to resolve, or null for the container
+     * @param  array   $setting Parameters passed to makeWith() when resolving
      * @return mixed
      */
     function app(?string $key = null, array $setting = []): mixed
@@ -60,6 +73,7 @@ if (!function_exists('app')) {
             return $capsule;
         }
 
+        // No extra parameters: a plain resolution is enough.
         if (empty($setting)) {
             return $capsule->make($key);
         }
@@ -70,12 +84,15 @@ if (!function_exists('app')) {
 
 if (!function_exists('config')) {
     /**
-     * Application configuration
+     * Read or write application configuration.
      *
-     * @param  ?string|null $key
-     * @param  mixed|null   $setting
+     * No key returns the configuration loader; a key alone reads the value;
+     * a key with a value writes (and returns) it.
+     *
+     * @param  string|null $key     Dotted configuration key
+     * @param  mixed       $setting Value to set, or null to read
      * @return Loader|mixed
-     * @throws
+     * @throws Exception
      */
     function config(?string $key = null, mixed $setting = null): mixed
     {
@@ -95,7 +112,7 @@ if (!function_exists('config')) {
 
 if (!function_exists('response')) {
     /**
-     * Response object instance
+     * Get the shared Response instance from the container.
      *
      * @return Response
      */
@@ -112,7 +129,7 @@ if (!function_exists('response')) {
 
 if (!function_exists('request')) {
     /**
-     * Represents the Request class
+     * Get the shared Request instance from the container.
      *
      * @return Request
      */
@@ -129,10 +146,16 @@ if (!function_exists('request')) {
 
 if (!function_exists('db')) {
     /**
-     * Allows to connect to another database and return the instance of the DB
+     * Get the database manager, optionally on another connection.
      *
-     * @param  string|null   $name
-     * @param  callable|null $cb
+     * With no arguments the current connection is returned. When `$cb` is
+     * given it runs against `$name`, then the previous connection is restored.
+     *
+     * Note: registered under the `db` guard but the function is named
+     * `app_db()`; call it as `app_db(...)`.
+     *
+     * @param  string|null   $name Connection name to switch to
+     * @param  callable|null $cb   Work to run on that connection, then revert
      * @return DB
      * @throws ConnectionException
      */
@@ -163,15 +186,19 @@ if (!function_exists('db')) {
 
 if (!function_exists('view')) {
     /**
-     * View alias of View::parse
+     * Render a view template through View::parse().
      *
-     * @param  string    $template
-     * @param  array|int $data
-     * @param  int       $code
+     * `$data` may be passed as the status code directly (e.g. `view('404', 404)`),
+     * in which case it is treated as `$code` and the data set is left empty.
+     *
+     * @param  string    $template View name
+     * @param  array|int $data     View data, or the HTTP status code
+     * @param  int       $code     HTTP status code
      * @return View
      */
     function view(string $template, int|array $data = [], int $code = 200): View
     {
+        // Allow the status code to be supplied in the $data slot.
         if (is_int($data)) {
             $code = $data;
 
@@ -187,13 +214,14 @@ if (!function_exists('view')) {
 
 if (!function_exists('table')) {
     /**
-     * Table alias of DB::table
+     * Get a query builder for a table (optionally on another connection).
      *
-     * @param      string  $name
-     * @param      ?string $connexion
-     * @return     Bow\Database\QueryBuilder
+     * @param      string  $name      Table name
+     * @param      ?string $connexion Connection to switch to first
+     * @return     QueryBuilder
      * @throws     ConnectionException
-     * @deprecated
+     * @deprecated Use app_db_table() instead.
+     * @see        app_db_table()
      */
     function table(string $name, ?string $connexion = null): QueryBuilder
     {
@@ -207,12 +235,12 @@ if (!function_exists('table')) {
 
 if (!function_exists('app_db_table')) {
     /**
-     * Table alias of DB::table
+     * Get a query builder for a table (optionally on another connection).
      *
-     * @param      string  $name
-     * @param      ?string $connexion
-     * @return     Bow\Database\QueryBuilder
-     * @throws     ConnectionException
+     * @param  string  $name      Table name
+     * @param  ?string $connexion Connection to switch to first
+     * @return QueryBuilder
+     * @throws ConnectionException
      */
     function app_db_table(string $name, ?string $connexion = null): QueryBuilder
     {
@@ -229,7 +257,7 @@ if (!function_exists('get_last_insert_id')) {
      * Returns the last ID following an INSERT query
      * on a table whose ID is auto_increment.
      *
-     * @param  string|null $name
+     * @param  string|null $name Sequence/connection name, if required
      * @return int
      */
     function get_last_insert_id(?string $name = null): int
@@ -240,12 +268,12 @@ if (!function_exists('get_last_insert_id')) {
 
 if (!function_exists('app_db_select')) {
     /**
-     * Launches SELECT SQL Queries
+     * Run a raw SELECT query.
      *
      * app_db_select('SELECT * FROM users');
      *
-     * @param  string $sql
-     * @param  array  $data
+     * @param  string $sql  SQL statement, may contain bindings
+     * @param  array  $data Values bound to the statement
      * @return int|array|stdClass
      */
     function app_db_select(string $sql, array $data = []): array|int|stdClass
@@ -256,10 +284,10 @@ if (!function_exists('app_db_select')) {
 
 if (!function_exists('app_db_select_one')) {
     /**
-     * Launches SELECT SQL Queries
+     * Run a raw SELECT query and return a single row.
      *
-     * @param  string $sql
-     * @param  array  $data
+     * @param  string $sql  SQL statement, may contain bindings
+     * @param  array  $data Values bound to the statement
      * @return int|array|StdClass
      */
     function app_db_select_one(string $sql, array $data = []): array|int|StdClass
@@ -270,11 +298,11 @@ if (!function_exists('app_db_select_one')) {
 
 if (!function_exists('app_db_insert')) {
     /**
-     * Launches INSERT SQL Queries
+     * Run a raw INSERT query.
      *
-     * @param  string $sql
-     * @param  array  $data
-     * @return int
+     * @param  string $sql  SQL statement, may contain bindings
+     * @param  array  $data Values bound to the statement
+     * @return int Number of affected rows
      */
     function app_db_insert(string $sql, array $data = []): int
     {
@@ -284,11 +312,11 @@ if (!function_exists('app_db_insert')) {
 
 if (!function_exists('app_db_delete')) {
     /**
-     * Launches DELETE type SQL queries
+     * Run a raw DELETE query.
      *
-     * @param  string $sql
-     * @param  array  $data
-     * @return int
+     * @param  string $sql  SQL statement, may contain bindings
+     * @param  array  $data Values bound to the statement
+     * @return int Number of affected rows
      */
     function app_db_delete(string $sql, array $data = []): int
     {
@@ -298,11 +326,11 @@ if (!function_exists('app_db_delete')) {
 
 if (!function_exists('app_db_update')) {
     /**
-     * Launches UPDATE SQL Queries
+     * Run a raw UPDATE query.
      *
-     * @param  string $sql
-     * @param  array  $data
-     * @return int
+     * @param  string $sql  SQL statement, may contain bindings
+     * @param  array  $data Values bound to the statement
+     * @return int Number of affected rows
      */
     function app_db_update(string $sql, array $data = []): int
     {
@@ -312,9 +340,9 @@ if (!function_exists('app_db_update')) {
 
 if (!function_exists('app_db_statement')) {
     /**
-     * Launches CREATE TABLE, ALTER TABLE, RENAME, DROP TABLE SQL Query
+     * Run a schema/DDL statement (CREATE, ALTER, RENAME, DROP, ...).
      *
-     * @param  string $sql
+     * @param  string $sql SQL statement
      * @return int
      */
     function app_db_statement(string $sql): int
@@ -325,9 +353,10 @@ if (!function_exists('app_db_statement')) {
 
 if (!function_exists('debug')) {
     /**
-     * debug, variable debug function
-     * it allows you to have a color
-     * Synthetic data types.
+     * Dump one or more variables with colourised, typed output.
+     *
+     * Accepts any number of arguments; each is sanitised then handed to
+     * Util::debug().
      *
      * @return void
      */
@@ -344,7 +373,7 @@ if (!function_exists('debug')) {
 
 if (!function_exists("sep")) {
     /**
-     * Get the PHP OS separator
+     * Get the OS-specific directory separator.
      *
      * @return string
      */
@@ -356,10 +385,10 @@ if (!function_exists("sep")) {
 
 if (!function_exists('create_csrf_token')) {
     /**
-     * Create a new token
+     * Create (or fetch) the current CSRF token payload.
      *
-     * @param  int|null $time
-     * @return ?array
+     * @param  int|null $time Lifetime in seconds for the generated token
+     * @return ?array The token data (token, field, expire_at), or null
      * @throws SessionException
      */
     function create_csrf_token(?int $time = null): ?array
@@ -370,10 +399,10 @@ if (!function_exists('create_csrf_token')) {
 
 if (!function_exists('csrf_token')) {
     /**
-     * Get the generate token
+     * Get the current CSRF token string.
      *
      * @return string
-     * @throws HttpException
+     * @throws HttpException When no token could be generated
      * @throws SessionException
      */
     function csrf_token(): string
@@ -393,10 +422,11 @@ if (!function_exists('csrf_token')) {
 
 if (!function_exists('csrf_field')) {
     /**
-     * Get the input csrf field
+     * Get the ready-made hidden CSRF input field.
      *
      * @return string
-     * @throws HttpException|SessionException
+     * @throws HttpException When no token could be generated
+     * @throws SessionException
      */
     function csrf_field(): string
     {
@@ -415,9 +445,9 @@ if (!function_exists('csrf_field')) {
 
 if (!function_exists('method_field')) {
     /**
-     * Create hidden http method field
+     * Build a hidden input that spoofs the HTTP method (PUT, PATCH, DELETE).
      *
-     * @param  string $method
+     * @param  string $method HTTP verb to spoof
      * @return string
      */
     function method_field(string $method): string
@@ -430,7 +460,7 @@ if (!function_exists('method_field')) {
 
 if (!function_exists('gen_csrf_token')) {
     /**
-     * Generate token string
+     * Generate a fresh, standalone token string (not stored in the session).
      *
      * @return string
      */
@@ -442,10 +472,10 @@ if (!function_exists('gen_csrf_token')) {
 
 if (!function_exists('verify_csrf')) {
     /**
-     * Check the token value
+     * Verify a submitted CSRF token against the stored one.
      *
-     * @param  string $token
-     * @param  bool   $strict
+     * @param  string $token  Token received from the request
+     * @param  bool   $strict Also enforce token expiry when true
      * @return bool
      * @throws SessionException
      */
@@ -457,9 +487,9 @@ if (!function_exists('verify_csrf')) {
 
 if (!function_exists('csrf_time_is_expired')) {
     /**
-     * Check if token is expired by time
+     * Check whether the stored CSRF token has expired.
      *
-     * @param  string|null $time
+     * @param  string|null $time Reference time, defaults to now
      * @return bool
      * @throws SessionException
      */
@@ -471,11 +501,11 @@ if (!function_exists('csrf_time_is_expired')) {
 
 if (!function_exists('response_json')) {
     /**
-     * Make json response
+     * Send a JSON response.
      *
-     * @param  array|object $data
-     * @param  int          $code
-     * @param  array        $headers
+     * @param  array|object $data    Payload to encode
+     * @param  int          $code    HTTP status code
+     * @param  array        $headers Extra response headers
      * @return string
      */
     function response_json(array|object $data, int $code = 200, array $headers = []): string
@@ -486,11 +516,11 @@ if (!function_exists('response_json')) {
 
 if (!function_exists('response_download')) {
     /**
-     * Download file
+     * Send a file as a download response.
      *
-     * @param  string      $file
-     * @param  null|string $filename
-     * @param  array       $headers
+     * @param  string      $file     Path to the file on disk
+     * @param  null|string $filename Name presented to the client
+     * @param  array       $headers  Extra response headers
      * @return string
      */
     function response_download(string $file, ?string $filename = null, array $headers = []): string
@@ -501,7 +531,7 @@ if (!function_exists('response_download')) {
 
 if (!function_exists('set_response_status_code')) {
     /**
-     * Set status code
+     * Set the HTTP response status code.
      *
      * @param  int $code
      * @return mixed
@@ -514,7 +544,7 @@ if (!function_exists('set_response_status_code')) {
 
 if (!function_exists('sanitize')) {
     /**
-     * Sanitize data
+     * Sanitize a value (numeric values are returned untouched).
      *
      * @param  mixed $data
      * @return mixed
@@ -531,7 +561,7 @@ if (!function_exists('sanitize')) {
 
 if (!function_exists('secure')) {
     /**
-     * Secure data with sanitize it
+     * Sanitize a value in strict/secure mode (numeric values pass through).
      *
      * @param  mixed $data
      * @return mixed
@@ -548,7 +578,7 @@ if (!function_exists('secure')) {
 
 if (!function_exists('set_response_header')) {
     /**
-     * Update http headers
+     * Add a header to the outgoing response.
      *
      * @param  string $key
      * @param  string $value
@@ -562,7 +592,7 @@ if (!function_exists('set_response_header')) {
 
 if (!function_exists('get_response_header')) {
     /**
-     * Get http header
+     * Read a header from the incoming request.
      *
      * @param  string $key
      * @return string|null
@@ -575,9 +605,9 @@ if (!function_exists('get_response_header')) {
 
 if (!function_exists('redirect')) {
     /**
-     * Make redirect response
+     * Get the redirector, optionally redirecting straight to a path.
      *
-     * @param  string|null $path
+     * @param  string|null $path Target to redirect to, or null for the instance
      * @return Redirect
      */
     function redirect(?string $path = null): Redirect
@@ -594,16 +624,20 @@ if (!function_exists('redirect')) {
 
 if (!function_exists('url')) {
     /**
-     * Build url
+     * Build an absolute URL from the current request base.
      *
-     * @param  string|array|null $url
-     * @param  array             $parameters
+     * Passing an array as the first argument is treated as the query string
+     * parameters (the path is then the current URL).
+     *
+     * @param  string|array $url        Path to append, or query parameters
+     * @param  array        $parameters Query string parameters
      * @return string
      */
     function url(string|array $url = '', array $parameters = []): string
     {
         $current = trim(request()->url(), '/');
 
+        // First argument given as parameters: keep the current path.
         if (is_array($url)) {
             $parameters = $url;
 
@@ -624,7 +658,7 @@ if (!function_exists('url')) {
 
 if (!function_exists('pdo')) {
     /**
-     * Get database PDO instance
+     * Get the underlying PDO instance.
      *
      * @return PDO
      */
@@ -636,10 +670,10 @@ if (!function_exists('pdo')) {
 
 if (!function_exists('set_pdo')) {
     /**
-     * Set PDO instance
+     * Replace the underlying PDO instance.
      *
      * @param  PDO $pdo
-     * @return PDO
+     * @return PDO The newly set instance
      */
     function set_pdo(PDO $pdo): PDO
     {
@@ -650,9 +684,8 @@ if (!function_exists('set_pdo')) {
 }
 
 if (!function_exists('collect')) {
-
     /**
-     * Create new Collection instance
+     * Wrap an array in a Collection.
      *
      * @param  array $data
      * @return Collection
@@ -665,7 +698,10 @@ if (!function_exists('collect')) {
 
 if (!function_exists('encrypt')) {
     /**
-     * Encrypt data
+     * Encrypt data using the application security key.
+     *
+     * Returns an authenticated payload (random IV + HMAC), so encrypting the
+     * same value twice yields different ciphertexts.
      *
      * @param  string $data
      * @return string
@@ -678,20 +714,25 @@ if (!function_exists('encrypt')) {
 
 if (!function_exists('decrypt')) {
     /**
-     * Decrypt data
+     * Decrypt a value previously produced by encrypt().
+     *
+     * Fails closed: returns false when the payload has been tampered with or
+     * was encrypted with a different key.
      *
      * @param  string $data
-     * @return string
+     * @return string|bool
      */
-    function decrypt(string $data): string
+    function decrypt(string $data): string|bool
     {
         return Crypto::decrypt($data);
     }
 }
 
+// ===== Database: transactions =====
+
 if (!function_exists('app_db_transaction')) {
     /**
-     * Start Database transaction
+     * Begin a database transaction.
      *
      * @return void
      */
@@ -703,7 +744,7 @@ if (!function_exists('app_db_transaction')) {
 
 if (!function_exists('app_db_transaction_started')) {
     /**
-     * Check if database transaction
+     * Check whether a database transaction is currently open.
      *
      * @return bool
      */
@@ -715,7 +756,7 @@ if (!function_exists('app_db_transaction_started')) {
 
 if (!function_exists('app_db_rollback')) {
     /**
-     * Stop database transaction
+     * Roll back the current database transaction.
      *
      * @return void
      */
@@ -727,7 +768,7 @@ if (!function_exists('app_db_rollback')) {
 
 if (!function_exists('app_db_commit')) {
     /**
-     * Commit request after transaction
+     * Commit the current database transaction.
      *
      * @return void
      */
@@ -739,8 +780,12 @@ if (!function_exists('app_db_commit')) {
 
 if (!function_exists('event')) {
     /**
-     * Event
+     * Get the event dispatcher, or emit an event.
      *
+     * Called with no arguments it returns the dispatcher; otherwise the first
+     * argument is the event name and the rest are passed to its listeners.
+     *
+     * @param  mixed ...$args Event name followed by its payload
      * @return mixed
      */
     function event(): mixed
@@ -759,9 +804,11 @@ if (!function_exists('event')) {
 
 if (!function_exists('app_event')) {
     /**
-     * Event
+     * Get the event dispatcher, or emit an event.
      *
+     * @param  mixed ...$args Event name followed by its payload
      * @return mixed
+     * @see    event() Identical behaviour; event() is the preferred name.
      */
     function app_event(): mixed
     {
@@ -779,10 +826,10 @@ if (!function_exists('app_event')) {
 
 if (!function_exists('flash')) {
     /**
-     * Flash session
+     * Store a one-request flash message in the session.
      *
-     * @param  string $key
-     * @param  string $message
+     * @param  string $key     Flash key
+     * @param  string $message Message to store
      * @return mixed
      * @throws SessionException
      */
@@ -795,12 +842,13 @@ if (!function_exists('flash')) {
 
 if (!function_exists('app_flash')) {
     /**
-     * Flash session
+     * Store a one-request flash message in the session.
      *
-     * @param  string $key
-     * @param  string $message
+     * @param  string $key     Flash key
+     * @param  string $message Message to store
      * @return mixed
      * @throws SessionException
+     * @see    flash() Identical behaviour; flash() is the preferred name.
      */
     function app_flash(string $key, string $message): mixed
     {
@@ -811,11 +859,14 @@ if (!function_exists('app_flash')) {
 
 if (!function_exists('email')) {
     /**
-     * Send email
+     * Send an email, or get the mailer instance.
      *
-     * @param  null|string   $view
-     * @param  array         $data
-     * @param  callable|null $cb
+     * With no view the mailer instance is returned; otherwise the view is
+     * rendered and sent.
+     *
+     * @param  null|string   $view View name for the message body
+     * @param  array         $data Data bound to the view
+     * @param  callable|null $cb   Builder callback to configure the message
      * @return MailAdapterInterface|bool
      */
     function email(
@@ -833,12 +884,13 @@ if (!function_exists('email')) {
 
 if (!function_exists('app_email')) {
     /**
-     * Send email
+     * Send an email, or get the mailer instance.
      *
-     * @param  null|string   $view
-     * @param  array         $data
-     * @param  callable|null $cb
+     * @param  null|string   $view View name for the message body
+     * @param  array         $data Data bound to the view
+     * @param  callable|null $cb   Builder callback to configure the message
      * @return MailAdapterInterface|bool
+     * @see    email() Identical behaviour; email() is the preferred name.
      */
     function app_email(
         ?string $view = null,
@@ -855,12 +907,12 @@ if (!function_exists('app_email')) {
 
 if (!function_exists('raw_email')) {
     /**
-     * Send raw email
+     * Send a plain (non-templated) email.
      *
-     * @param  string $to
-     * @param  string $subject
-     * @param  string $message
-     * @param  array  $headers
+     * @param  string $to      Recipient address
+     * @param  string $subject Subject line
+     * @param  string $message Message body
+     * @param  array  $headers Extra mail headers
      * @return bool
      */
     function raw_email(string $to, string $subject, string $message, array $headers = []): bool
@@ -871,10 +923,10 @@ if (!function_exists('raw_email')) {
 
 if (!function_exists('session')) {
     /**
-     * Session help
+     * Get the session manager, or read a session value.
      *
-     * @param  array|string|null $value
-     * @param  mixed             $default
+     * @param  string|null $key     Key to read, or null for the manager
+     * @param  mixed       $default Value returned when the key is absent
      * @return mixed
      * @throws SessionException
      */
@@ -890,11 +942,14 @@ if (!function_exists('session')) {
 
 if (!function_exists('cookie')) {
     /**
-     * Cooke alias
+     * Read or write cookies.
      *
-     * @param  string|null $key
-     * @param  mixed       $data
-     * @param  int         $expiration
+     * No key returns all cookies; a key alone reads one; a key with data
+     * writes it.
+     *
+     * @param  string|null $key        Cookie name
+     * @param  mixed       $data       Value to write, or null to read
+     * @param  int         $expiration Lifetime in seconds when writing
      * @return string|array|object|null
      */
     function cookie(
@@ -916,11 +971,11 @@ if (!function_exists('cookie')) {
 
 if (!function_exists('validator')) {
     /**
-     * Validate the information on the well-defined criterion
+     * Validate input against a set of rules.
      *
-     * @param  array $inputs
-     * @param  array $rules
-     * @param  array $messages
+     * @param  array $inputs   Data to validate
+     * @param  array $rules    Validation rules keyed by field
+     * @param  array $messages Custom error messages
      * @return Validate
      */
     function validator(array $inputs, array $rules, array $messages = []): Validate
@@ -931,15 +986,21 @@ if (!function_exists('validator')) {
 
 if (!function_exists('route')) {
     /**
-     * Get Route by name
+     * Build a URL for a named route.
      *
-     * @param  string     $name
-     * @param  bool|array $data
-     * @param  bool       $absolute
+     * Named placeholders in the route are filled from `$data`; leftover
+     * entries become the query string. Passing a bool as `$data` is treated
+     * as the `$absolute` flag.
+     *
+     * @param  string     $name     Route name
+     * @param  bool|array $data     Placeholder values, or the absolute flag
+     * @param  bool       $absolute Prefix with APP_URL when true
      * @return string
+     * @throws InvalidArgumentException When the route or a placeholder is missing
      */
     function route(string $name, bool|array $data = [], bool $absolute = false): string
     {
+        // Allow route('name', true) to mean "absolute, no parameters".
         if (is_bool($data)) {
             $absolute = $data;
             $data = [];
@@ -954,6 +1015,7 @@ if (!function_exists('route')) {
             );
         }
 
+        // Substitute :placeholders (optional ones end with "?").
         if (preg_match_all('/:([a-zA-Z0-9_]+\??)/', $url, $matches)) {
             $keys = end($matches);
             foreach ($keys as $key) {
@@ -973,6 +1035,7 @@ if (!function_exists('route')) {
             }
         }
 
+        // Remaining data becomes the query string.
         if (count($data) > 0) {
             $url = $url . '?' . http_build_query($data);
         }
@@ -989,7 +1052,7 @@ if (!function_exists('route')) {
 
 if (!function_exists('e')) {
     /**
-     * Escape the HTML tags in the chain.
+     * Escape HTML special characters in a string.
      *
      * @param  ?string $value
      * @return string
@@ -1002,9 +1065,9 @@ if (!function_exists('e')) {
 
 if (!function_exists('storage_service')) {
     /**
-     * Service loader
+     * Resolve a remote storage service (FTP, S3, ...).
      *
-     * @param  string $service
+     * @param  string $service Service name
      * @return FTPService|S3Service
      * @throws ServiceConfigurationNotFoundException
      * @throws ServiceNotFoundException
@@ -1017,9 +1080,9 @@ if (!function_exists('storage_service')) {
 
 if (!function_exists('app_storage')) {
     /**
-     * Alias on the mount method
+     * Get a local filesystem disk.
      *
-     * @param  string $disk
+     * @param  string $disk Disk name
      * @return DiskFilesystemService
      * @throws DiskNotFoundException
      */
@@ -1031,11 +1094,14 @@ if (!function_exists('app_storage')) {
 
 if (!function_exists('cache')) {
     /**
-     * Cache help
+     * Get the cache instance, or read/write a cache entry.
      *
-     * @param  ?string $key
-     * @param  mixed  $value
-     * @param  ?int    $ttl
+     * No key returns the cache instance; a key alone reads it; a key with a
+     * value stores it for `$ttl` seconds.
+     *
+     * @param  ?string $key   Cache key
+     * @param  mixed   $value Value to store, or null to read
+     * @param  ?int    $ttl   Time-to-live in seconds when writing
      * @return mixed
      * @throws ErrorException
      */
@@ -1057,9 +1123,9 @@ if (!function_exists('cache')) {
 
 if (!function_exists('redirect_back')) {
     /**
-     * Make redirection to back
+     * Redirect to the previous page.
      *
-     * @param  int $status
+     * @param  int $status HTTP status code
      * @return Redirect
      */
     function redirect_back(int $status = 302): Redirect
@@ -1070,7 +1136,7 @@ if (!function_exists('redirect_back')) {
 
 if (!function_exists('app_now')) {
     /**
-     * Get the current carbon
+     * Get the current time as a Carbon instance.
      *
      * @return Carbon
      */
@@ -1082,11 +1148,14 @@ if (!function_exists('app_now')) {
 
 if (!function_exists('app_hash')) {
     /**
-     * Alias on the class Hash.
+     * Hash a value, or verify one against an existing hash.
      *
-     * @param  string $data
-     * @param  mixed  $hash_value
-     * @return bool|string
+     * With `$hash_value` it checks the value against the hash; otherwise it
+     * returns a new hash.
+     *
+     * @param  string $data       Value to hash or verify
+     * @param  string|null $hash_value Existing hash to verify against
+     * @return bool|string Boolean when verifying, string when hashing
      */
     function app_hash(string $data, ?string $hash_value = null): bool|string
     {
@@ -1100,12 +1169,13 @@ if (!function_exists('app_hash')) {
 
 if (!function_exists('bow_hash')) {
     /**
-     * Alias on the class Hash.
+     * Hash a value, or verify one against an existing hash.
      *
-     * @param      string $data
-     * @param      mixed  $hash_value
+     * @param      string $data       Value to hash or verify
+     * @param      string|null $hash_value Existing hash to verify against
      * @return     bool|string
-     * @deprecated
+     * @deprecated Use app_hash() instead.
+     * @see        app_hash()
      */
     function bow_hash(string $data, ?string $hash_value = null): bool|string
     {
@@ -1115,11 +1185,14 @@ if (!function_exists('bow_hash')) {
 
 if (!function_exists('app_trans')) {
     /**
-     * Make translation
+     * Translate a key, or get the translator instance.
      *
-     * @param  string|null $key
-     * @param  array       $data
-     * @param  bool        $choose
+     * No key returns the translator. Passing a bool as `$data` is treated as
+     * the `$choose` (pluralisation) flag.
+     *
+     * @param  string|null $key    Translation key
+     * @param  array       $data   Replacement values
+     * @param  bool        $choose Pluralisation flag
      * @return string|Translator
      */
     function app_trans(
@@ -1142,12 +1215,13 @@ if (!function_exists('app_trans')) {
 
 if (!function_exists('t')) {
     /**
-     * Alias of trans
+     * Translate a key.
      *
-     * @param  string $key
-     * @param  array  $data
-     * @param  bool   $choose
+     * @param  string $key    Translation key
+     * @param  array  $data   Replacement values
+     * @param  bool   $choose Pluralisation flag
      * @return string|Translator
+     * @see    app_trans()
      */
     function t(
         string $key,
@@ -1160,12 +1234,13 @@ if (!function_exists('t')) {
 
 if (!function_exists('__')) {
     /**
-     * Alias of trans
+     * Translate a key.
      *
-     * @param  string $key
-     * @param  array  $data
-     * @param  bool   $choose
+     * @param  string $key    Translation key
+     * @param  array  $data   Replacement values
+     * @param  bool   $choose Pluralisation flag
      * @return string|Translator
+     * @see    app_trans()
      */
     function __(
         string $key,
@@ -1178,18 +1253,24 @@ if (!function_exists('__')) {
 
 if (!function_exists('app_env')) {
     /**
-     * Gets the app environment variable
+     * Read an environment variable.
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * Returns `$default` when the environment has not been loaded yet.
+     *
+     * @param  string $key     Variable name
+     * @param  mixed  $default Fallback value
      * @return ?string
      */
     function app_env(string $key, mixed $default = null): ?string
     {
-        $env = Env::getInstance();
+        try {
+            $env = Env::getInstance();
 
-        if ($env->isLoaded()) {
-            return $env->get($key, $default);
+            if ($env->isLoaded()) {
+                return $env->get($key, $default);
+            }
+        } catch (\Bow\Application\Exception\ApplicationException $e) {
+            // Environment not loaded, return default
         }
 
         return $default;
@@ -1198,9 +1279,9 @@ if (!function_exists('app_env')) {
 
 if (!function_exists('app_assets')) {
     /**
-     * Gets the app assets
+     * Build a public URL for an asset under the asset prefix.
      *
-     * @param  string $filename
+     * @param  string $filename Asset path relative to the asset root
      * @return string
      */
     function app_assets(string $filename): string
@@ -1211,12 +1292,14 @@ if (!function_exists('app_assets')) {
 
 if (!function_exists('app_abort')) {
     /**
-     * Abort bow execution
+     * Abort the request with an HTTP error.
      *
-     * @param  int    $code
-     * @param  string $message
+     * Falls back to the standard status message when none is given.
+     *
+     * @param  int    $code    HTTP status code
+     * @param  string $message Error message
      * @return Response
-     * @throws HttpException
+     * @throws HttpException Always thrown to interrupt execution
      */
     function app_abort(int $code = 500, string $message = ''): Response
     {
@@ -1230,13 +1313,13 @@ if (!function_exists('app_abort')) {
 
 if (!function_exists('app_abort_if')) {
     /**
-     * Abort bow execution if condition is true
+     * Abort the request only when the given condition is true.
      *
-     * @param  boolean $boolean
-     * @param  int     $code
-     * @param  string  $message
-     * @return Response|null
-     * @throws HttpException
+     * @param  bool   $boolean Condition that triggers the abort
+     * @param  int    $code    HTTP status code
+     * @param  string $message Error message
+     * @return Response|null Null when the condition is false
+     * @throws HttpException When the condition is true
      */
     function app_abort_if(
         bool $boolean,
@@ -1253,7 +1336,7 @@ if (!function_exists('app_abort_if')) {
 
 if (!function_exists('app_mode')) {
     /**
-     * Get app environment mode
+     * Get the current application environment (lower-cased APP_ENV).
      *
      * @return string
      */
@@ -1265,7 +1348,7 @@ if (!function_exists('app_mode')) {
 
 if (!function_exists('app_in_debug')) {
     /**
-     * Get app environment mode
+     * Determine whether debug mode (APP_DEBUG) is enabled.
      *
      * @return bool
      */
@@ -1277,7 +1360,7 @@ if (!function_exists('app_in_debug')) {
 
 if (!function_exists('client_locale')) {
     /**
-     * Get client request language
+     * Get the client's preferred request language.
      *
      * @return ?string
      */
@@ -1289,10 +1372,10 @@ if (!function_exists('client_locale')) {
 
 if (!function_exists('old')) {
     /**
-     * Get old request value
+     * Get a value submitted on the previous request.
      *
-     * @param  string $key
-     * @param  mixed  $fullback
+     * @param  string $key      Input field name
+     * @param  mixed  $fullback Value returned when the field is absent
      * @return mixed
      */
     function old(string $key, mixed $fullback = null): mixed
@@ -1303,12 +1386,13 @@ if (!function_exists('old')) {
 
 if (!function_exists('auth')) {
     /**
-     * Recovery of the guard
+     * Get the auth manager, or a specific guard.
      *
-     * @param      string|null $guard
+     * @param      string|null $guard Guard name, or null for the manager
      * @return     GuardContract
      * @throws     AuthenticationException
-     * @deprecated
+     * @deprecated Use app_auth() instead.
+     * @see        app_auth()
      */
     function auth(?string $guard = null): GuardContract
     {
@@ -1324,9 +1408,9 @@ if (!function_exists('auth')) {
 
 if (!function_exists('app_auth')) {
     /**
-     * Recovery of the guard
+     * Get the auth manager, or a specific guard.
      *
-     * @param  string|null $guard
+     * @param  string|null $guard Guard name, or null for the manager
      * @return GuardContract
      * @throws AuthenticationException
      */
@@ -1344,7 +1428,7 @@ if (!function_exists('app_auth')) {
 
 if (!function_exists('logger')) {
     /**
-     * Log error message
+     * Get the application logger.
      *
      * @return Logger
      */
@@ -1356,9 +1440,10 @@ if (!function_exists('logger')) {
 
 if (!function_exists('app_logger')) {
     /**
-     * Log error message
+     * Get the application logger.
      *
      * @return Logger
+     * @see    logger() Identical behaviour; logger() is the preferred name.
      */
     function app_logger(): Logger
     {
@@ -1369,10 +1454,10 @@ if (!function_exists('app_logger')) {
 
 if (!function_exists('str_slug')) {
     /**
-     * Slugify
+     * Convert a string into a URL-friendly slug.
      *
-     * @param  string $str
-     * @param  string $sep
+     * @param  string $str String to slugify
+     * @param  string $sep Word separator
      * @return string
      */
     function str_slug(string $str, string $sep = '-'): string
@@ -1383,7 +1468,7 @@ if (!function_exists('str_slug')) {
 
 if (!function_exists('str_is_mail')) {
     /**
-     * Check if the email is valid
+     * Check whether a string is a valid email address.
      *
      * @param  string $email
      * @return bool
@@ -1396,7 +1481,7 @@ if (!function_exists('str_is_mail')) {
 
 if (!function_exists('str_uuid')) {
     /**
-     * Get str uuid
+     * Generate a UUID string.
      *
      * @return string
      */
@@ -1408,11 +1493,11 @@ if (!function_exists('str_uuid')) {
 
 if (!function_exists('str_is_domain')) {
     /**
-     * Check if the string is domain
+     * Check whether a string is a valid domain name.
      *
      * @param  string $domain
      * @return bool
-     * @throws
+     * @throws Exception
      */
     function str_is_domain(string $domain): bool
     {
@@ -1422,7 +1507,7 @@ if (!function_exists('str_is_domain')) {
 
 if (!function_exists('str_is_slug')) {
     /**
-     * Check if string is slug
+     * Check whether a string is a valid slug.
      *
      * @param  string $slug
      * @return string
@@ -1435,11 +1520,11 @@ if (!function_exists('str_is_slug')) {
 
 if (!function_exists('str_is_alpha')) {
     /**
-     * Check if the string is alpha
+     * Check whether a string contains only alphabetic characters.
      *
      * @param  string $string
      * @return bool
-     * @throws
+     * @throws Exception
      */
     function str_is_alpha(string $string): bool
     {
@@ -1449,7 +1534,7 @@ if (!function_exists('str_is_alpha')) {
 
 if (!function_exists('str_is_lower')) {
     /**
-     * Check if the string is lower
+     * Check whether a string is entirely lower-case.
      *
      * @param  string $string
      * @return bool
@@ -1462,7 +1547,7 @@ if (!function_exists('str_is_lower')) {
 
 if (!function_exists('str_is_upper')) {
     /**
-     * Check if the string is upper
+     * Check whether a string is entirely upper-case.
      *
      * @param  string $string
      * @return bool
@@ -1475,11 +1560,11 @@ if (!function_exists('str_is_upper')) {
 
 if (!function_exists('str_is_alpha_num')) {
     /**
-     * Check if string is alphanumeric
+     * Check whether a string is alphanumeric.
      *
      * @param  string $slug
      * @return bool
-     * @throws
+     * @throws Exception
      */
     function str_is_alpha_num(string $slug): bool
     {
@@ -1489,7 +1574,7 @@ if (!function_exists('str_is_alpha_num')) {
 
 if (!function_exists('str_shuffle_words')) {
     /**
-     * Shuffle words
+     * Randomly shuffle the words of a string.
      *
      * @param  string $words
      * @return string
@@ -1502,10 +1587,10 @@ if (!function_exists('str_shuffle_words')) {
 
 if (!function_exists('str_wordily')) {
     /**
-     * Return the array contains the word of the passed string
+     * Split a string into an array of its words.
      *
-     * @param  string $words
-     * @param  string $sep
+     * @param  string $words String to split
+     * @param  string $sep   Separator to split on
      * @return array
      */
     function str_wordily(string $words, string $sep = ''): array
@@ -1516,7 +1601,7 @@ if (!function_exists('str_wordily')) {
 
 if (!function_exists('str_plural')) {
     /**
-     * Transform text to str_plural
+     * Pluralise a word.
      *
      * @param  string $slug
      * @return string
@@ -1529,7 +1614,7 @@ if (!function_exists('str_plural')) {
 
 if (!function_exists('str_camel')) {
     /**
-     * Transform text to camel case
+     * Convert a string to camelCase.
      *
      * @param  string $slug
      * @return string
@@ -1542,7 +1627,7 @@ if (!function_exists('str_camel')) {
 
 if (!function_exists('str_snake')) {
     /**
-     * Transform text to snake case
+     * Convert a string to snake_case.
      *
      * @param  string $slug
      * @return string
@@ -1555,10 +1640,10 @@ if (!function_exists('str_snake')) {
 
 if (!function_exists('str_contains')) {
     /**
-     * Check if string contain another string
+     * Check whether a string contains another string.
      *
-     * @param  string $search
-     * @param  string $string
+     * @param  string $search Needle to look for
+     * @param  string $string Haystack to search in
      * @return bool
      */
     function str_contains(string $search, string $string): bool
@@ -1569,7 +1654,7 @@ if (!function_exists('str_contains')) {
 
 if (!function_exists('str_capitalize')) {
     /**
-     * Capitalize
+     * Capitalise a string.
      *
      * @param  string $slug
      * @return string
@@ -1582,9 +1667,9 @@ if (!function_exists('str_capitalize')) {
 
 if (!function_exists('str_random')) {
     /**
-     * Random string
+     * Generate a random string.
      *
-     * @param  string $string
+     * @param  string $string Length or seed forwarded to Str::random()
      * @return string
      */
     function str_random(string $string): string
@@ -1595,7 +1680,7 @@ if (!function_exists('str_random')) {
 
 if (!function_exists('str_force_in_utf8')) {
     /**
-     * Force output string to utf8
+     * Force string output to UTF-8 globally.
      *
      * @return void
      */
@@ -1607,7 +1692,7 @@ if (!function_exists('str_force_in_utf8')) {
 
 if (!function_exists('str_fix_utf8')) {
     /**
-     * Force output string to utf8
+     * Repair a malformed UTF-8 string.
      *
      * @param  string $string
      * @return string
@@ -1620,15 +1705,20 @@ if (!function_exists('str_fix_utf8')) {
 
 if (!function_exists('app_db_seed')) {
     /**
-     * Make programmatic seeding
+     * Seed data programmatically.
      *
-     * @param  string $name
-     * @param  array  $data
-     * @return int|array
-     * @throws ErrorException
+     * When `$name` is a Model class, `$data` is inserted into its table.
+     * Otherwise `$name` is resolved to a seeder file whose returned map of
+     * table => rows is inserted (each row merged with `$data`).
+     *
+     * @param  string $name Model class name or seeder file name
+     * @param  array  $data Rows to insert, or values merged into each row
+     * @return int|array Affected rows, or one result per seeded table
+     * @throws ErrorException When the seeder file cannot be found
      */
     function app_db_seed(string $name, array $data = []): int|array
     {
+        // A model class: insert straight into its table.
         if (class_exists($name)) {
             $instance = app($name);
 
@@ -1648,6 +1738,7 @@ if (!function_exists('app_db_seed')) {
         $seeds = array_merge($seeds, []);
         $collections = [];
 
+        // Each entry maps a table (or model class) to its rows.
         foreach ($seeds as $table => $payload) {
             if (class_exists($table)) {
                 $instance = app($table);
@@ -1666,6 +1757,9 @@ if (!function_exists('app_db_seed')) {
 if (!function_exists('is_blank')) {
     /**
      * Determine if the given value is "blank".
+     *
+     * Null, an empty/whitespace string, and an empty Countable are blank;
+     * numbers and booleans never are.
      *
      * @param  mixed $value
      * @return bool
@@ -1694,9 +1788,10 @@ if (!function_exists('is_blank')) {
 
 if (!function_exists("queue")) {
     /**
-     * Push the producer on queue
+     * Push a task onto the queue.
      *
-     * @param QueueTask $producer
+     * @param  QueueTask $producer Task to enqueue
+     * @return void
      */
     function queue(QueueTask $producer): void
     {

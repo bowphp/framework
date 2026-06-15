@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Bow\Support;
 
-use Bow\Application\Exception\ApplicationException;
 use ErrorException;
-use InvalidArgumentException;
 
 /**
  * Class Env
@@ -82,17 +80,27 @@ class Env
     /**
      * Load env file
      *
-     * @param  string $filename
+     * @param  ?string $filename
      * @return void
      * @throws
      */
-    public static function configure(string $filename)
+    public static function configure(?string $filename = null): void
     {
         if (static::$instance !== null) {
             return;
         }
 
         static::$instance = new Env($filename);
+    }
+
+    /**
+     * Reset the singleton state. Intended for test setup/teardown so a fresh
+     * configure() can load a different env file; not meant for production code.
+     */
+    public static function reset(): void
+    {
+        static::$instance = null;
+        static::$loaded = false;
     }
 
     /**

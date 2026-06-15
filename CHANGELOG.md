@@ -5,6 +5,158 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.40 - 2026-06-10
+
+### What's Changed
+
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/413
+* feat(database): Add write/read database configuration by @papac in https://github.com/bowphp/framework/pull/414
+* chore(ci): Remove envs by @papac in https://github.com/bowphp/framework/pull/415
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.31...5.3.40
+
+## 5.3.31 - 2026-06-07
+
+### What's Changed
+
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/411
+* feat(database): implement query execution performance metric mesurement by @papac in https://github.com/bowphp/framework/pull/412
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.30...5.3.31
+
+## 5.3.30 - 2026-06-07
+
+### What's Changed
+
+* Implementing the remember token by @papac in https://github.com/bowphp/framework/pull/409
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/410
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.21...5.3.30
+
+## 5.3.21 - 2026-06-04
+
+### What's Changed
+
+* fix(console): fix execute custom command prefexed by native command by @papac in https://github.com/bowphp/framework/pull/406
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/407
+* fix(session): fix session security by @papac in https://github.com/bowphp/framework/pull/408
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.20...5.3.21
+
+## 5.3.20 - 2026-06-04
+
+### What's Changed
+
+* feat(orm): add eager loading process by @papac in https://github.com/bowphp/framework/pull/404
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/405
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.12...5.3.20
+
+## 5.3.12 - 2026-06-02
+
+### What's Changed
+
+* fix(database): fix retrieve belongTo into loop execution by @papac in https://github.com/bowphp/framework/pull/402
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/403
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.11...5.3.12
+
+## 5.3.11 - 2026-05-28
+
+### What's Changed
+
+* Update ROADMAP.md by @papac in https://github.com/bowphp/framework/pull/399
+* fix(db): make deep casting when toArray/toJson/_toString is called by @papac in https://github.com/bowphp/framework/pull/400
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/401
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.1...5.3.11
+
+## 5.3.1 - 2026-05-21
+
+### What's Changed
+
+* fix(route) when load the middlware we lose the route chain by @papac in https://github.com/bowphp/framework/pull/397
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.3.0...5.3.1
+
+## 5.3.0 - 2026-05-21
+
+### What's Changed
+
+* feat(router): add php 8 attributes support for route definition by @gessyken in https://github.com/bowphp/framework/pull/349
+* Update console and adding new features and fix many issues by @papac in https://github.com/bowphp/framework/pull/394
+* Update readme by @papac in https://github.com/bowphp/framework/pull/395
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.991...5.3.0
+
+## 5.2.990 - 2026-05-17
+
+### What's Changed
+
+* Fix retrieve data by queue by @papac in https://github.com/bowphp/framework/pull/390
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.98...5.2.990
+
+## 5.2.98 - 2026-05-16
+
+### What's Changed
+
+* Fix push the right queue name by @papac in https://github.com/bowphp/framework/pull/388
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.97...5.2.98
+
+## 5.2.96 - 2026-05-12
+
+### What's Changed
+
+* Fix migration by @papac in https://github.com/bowphp/framework/pull/384
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.95...5.2.96
+
+### What's Changed
+
+* Fix migration by @papac in https://github.com/bowphp/framework/pull/384
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/385
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.95...5.2.96
+
+## 5.2.95 - 2026-05-08
+
+### What's Changed
+
+* Fix data binding by @papac in https://github.com/bowphp/framework/pull/381
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/382
+* Optimize database query performance by @papac in https://github.com/bowphp/framework/pull/383
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.94...5.2.95
+
+## 5.2.94 - 2026-04-07
+
+### What's Changed
+
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/379
+* Fix many issues by @papac in https://github.com/bowphp/framework/pull/380
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.93...5.2.94
+
+## 5.2.93 - 2026-04-05
+
+### What's Changed
+
+* Fix query builder by @papac in https://github.com/bowphp/framework/pull/377
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/378
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.92...5.2.93
+
+## 5.2.92 - 2026-04-04
+
+### What's Changed
+
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/374
+* Add query and post method to request and fix nullable validator by @papac in https://github.com/bowphp/framework/pull/375
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.2.91...5.2.92
+
 ## 5.2.91 - 2026-03-28
 
 ### What's Changed
@@ -167,6 +319,22 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
 use Bow\Database\Exception\QueryBuilderException;
@@ -17,15 +16,15 @@ class BelongsTo extends Relation
      * @param Model  $related
      * @param Model  $parent
      * @param string $foreign_key
-     * @param string $local_key
+     * @param string $primary_key
      */
     public function __construct(
         Model $related,
         Model $parent,
         string $foreign_key,
-        string $local_key
+        string $primary_key
     ) {
-        $this->local_key = $local_key;
+        $this->primary_key = $primary_key;
         $this->foreign_key = $foreign_key;
 
         parent::__construct($related, $parent);
@@ -38,23 +37,9 @@ class BelongsTo extends Relation
      */
     public function getResults(): mixed
     {
-        $key = $this->query->getTable() . ":" . $this->local_key . ":belongsto:" . $this->related->getTable() . ":" . $this->foreign_key;
-
-        $cache = Cache::store('file')->get($key);
-
-        if (!is_null($cache)) {
-            $related = new $this->related();
-            $related->setAttributes($cache);
-            return $related;
-        }
-
-        $result = $this->query->first();
-
-        if (!is_null($result)) {
-            Cache::store('file')->set($key, $result->toArray(), 500);
-        }
-
-        return $result;
+        // The result is lazy-loaded once per parent model instance and kept in
+        // memory by the model itself, so a plain query is enough here.
+        return $this->query->first();
     }
 
     /**
@@ -73,6 +58,30 @@ class BelongsTo extends Relation
         // or has many relationships, we need to actually query on the primary key
         // of the related models matching on the foreign key that's on a parent.
         $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
-        $this->query->where($this->local_key, '=', $foreign_key_value);
+        $this->query->where($this->primary_key, '=', $foreign_key_value);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerParentKey(): string
+    {
+        return $this->foreign_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerRelatedKey(): string
+    {
+        return $this->primary_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerIsMany(): bool
+    {
+        return false;
     }
 }

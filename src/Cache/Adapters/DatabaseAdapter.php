@@ -49,21 +49,20 @@ class DatabaseAdapter implements CacheAdapterInterface
             return $this->update($key_name, $data, $time);
         }
 
-        if (is_callable($data)) {
-            $content = $data();
-        } else {
-            $content = $data;
-        }
+        $content = is_callable($data) ? $data() : $data;
 
-        $current_time = time();
+        // A null (or negative) TTL means the entry never expires, stored as a
+        // NULL expire column. Storing time() here instead would make the entry
+        // expire on the very next second, dropping freshly-set values.
+        $expire = (is_null($time) || $time < 0)
+            ? null
+            : date("Y-m-d H:i:s", time() + $time);
 
-        if (!is_null($time)) {
-            $time += $current_time;
-        } else {
-            $time = $current_time;
-        }
-
-        return $this->query->insert(['key_name' => $key_name, "data" => serialize($content), "expire" => date("Y-m-d H:i:s", $time)]);
+        return $this->query->insert([
+            'key_name' => $key_name,
+            "data" => serialize($content),
+            "expire" => $expire,
+        ]);
     }
 
     /**
@@ -82,18 +81,17 @@ class DatabaseAdapter implements CacheAdapterInterface
      */
     private function update(string $key, mixed $data, ?int $time = null): mixed
     {
-        if (is_callable($data)) {
-            $content = $data();
-        } else {
-            $content = $data;
-        }
+        $content = is_callable($data) ? $data() : $data;
 
         $result = $this->query->where("key_name", $key)->first();
         $result->data = serialize($content);
 
-        if (!is_null($time)) {
-            $result->expire = date("Y-m-d H:i:s", strtotime($result->expire) + $time);
-        }
+        // Rewrite the expiry from scratch: a null/negative TTL clears it (never
+        // expires), otherwise it is now + TTL. Leaving the old value in place
+        // would let a stale, already-past timestamp survive a fresh set().
+        $result->expire = (is_null($time) || $time < 0)
+            ? null
+            : date("Y-m-d H:i:s", time() + $time);
 
         return $this->query->where("key_name", $key)->update((array) $result);
     }
@@ -199,7 +197,9 @@ class DatabaseAdapter implements CacheAdapterInterface
 
         $result = $this->query->where("key_name", $key)->first();
 
-        $result->expire = date("Y-m-d H:i:s", strtotime($result->expire) + $time);
+        // For a never-expiring entry, count the added time from now.
+        $base = is_null($result->expire) ? time() : strtotime($result->expire);
+        $result->expire = date("Y-m-d H:i:s", $base + $time);
 
         return (bool) $this->query->where("key_name", $key)->update((array) $result);
     }
@@ -216,6 +216,11 @@ class DatabaseAdapter implements CacheAdapterInterface
         }
 
         $result = $this->query->where("key_name", $key)->first();
+
+        // No expiry set: the entry never expires, so it has no remaining time.
+        if (is_null($result->expire)) {
+            return 0;
+        }
 
         $current_time = time();
 
@@ -253,7 +258,8 @@ class DatabaseAdapter implements CacheAdapterInterface
 
         $result = $this->query->where("key_name", $key)->first();
 
-        if (strtotime($result->expire) < time()) {
+        // A NULL expire means the entry never expires.
+        if (!is_null($result->expire) && strtotime($result->expire) < time()) {
             $this->forget($key);
             return is_callable($default) ? $default() : $default;
         }

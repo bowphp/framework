@@ -49,12 +49,13 @@ abstract class GuardContract
     abstract public function logout(): bool;
 
     /**
-     * Logout
+     * Login
      *
      * @param  Authentication $user
+     * @param  bool           $remember
      * @return bool
      */
-    abstract public function login(Authentication $user): bool;
+    abstract public function login(Authentication $user, bool $remember = false): bool;
 
     /**
      * Get authenticated user
@@ -67,9 +68,10 @@ abstract class GuardContract
      * Check if user is authenticated
      *
      * @param  array $credentials
+     * @param  bool  $remember
      * @return bool
      */
-    abstract public function attempts(array $credentials): bool;
+    abstract public function attempts(array $credentials, bool $remember = false): bool;
 
     /**
      * Get the guard name

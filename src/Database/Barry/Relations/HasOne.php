@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bow\Database\Barry\Relations;
 
-use Bow\Cache\Cache;
 use Bow\Database\Barry\Model;
 use Bow\Database\Barry\Relation;
 
@@ -16,11 +15,11 @@ class HasOne extends Relation
      * @param Model $related
      * @param Model $parent
      * @param string  $foreign_key
-     * @param string  $local_key
+     * @param string  $primary_key
      */
-    public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
+    public function __construct(Model $related, Model $parent, string $foreign_key, string $primary_key)
     {
-        $this->local_key = $local_key;
+        $this->primary_key = $primary_key;
         $this->foreign_key = $foreign_key;
 
         parent::__construct($related, $parent);
@@ -33,23 +32,9 @@ class HasOne extends Relation
      */
     public function getResults(): ?Model
     {
-        $key = $this->query->getTable() . ":" . $this->local_key . ":hasone:" . $this->related->getTable() . ":" . $this->foreign_key;
-
-        $cache = Cache::store('file')->get($key);
-
-        if (!is_null($cache)) {
-            $related = new $this->related();
-            $related->setAttributes($cache);
-            return $related;
-        }
-
-        $result = $this->query->first();
-
-        if (!is_null($result)) {
-            Cache::store('file')->add($key, $result->toArray(), 60);
-        }
-
-        return $result;
+        // The result is lazy-loaded once per parent model instance and kept in
+        // memory by the model itself, so a plain query is enough here.
+        return $this->query->first();
     }
 
     /**
@@ -63,6 +48,30 @@ class HasOne extends Relation
             return;
         }
 
-        $this->query = $this->query->where($this->foreign_key, $this->parent->getAttribute($this->local_key));
+        $this->query = $this->query->where($this->foreign_key, $this->parent->getAttribute($this->primary_key));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerParentKey(): string
+    {
+        return $this->primary_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerRelatedKey(): string
+    {
+        return $this->foreign_key;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function eagerIsMany(): bool
+    {
+        return false;
     }
 }

@@ -19,6 +19,26 @@ class Builder extends QueryBuilder
     protected ?string $model = null;
 
     /**
+     * The relationships to eager load.
+     *
+     * @var array
+     */
+    protected array $eager_loads = [];
+
+    /**
+     * Register relationships to eager load on the query result.
+     *
+     * @param  string|array $relations
+     * @return Builder
+     */
+    public function eager(string|array $relations): Builder
+    {
+        $this->eager_loads = array_merge($this->eager_loads, (array)$relations);
+
+        return $this;
+    }
+
+    /**
      * Get information
      *
      * @param  array $columns
@@ -27,6 +47,11 @@ class Builder extends QueryBuilder
     public function get(array $columns = []): Model|Collection|null
     {
         $data = parent::get($columns);
+
+        // Read and reset the eager loads now: query() memoizes a shared Builder
+        // instance, so the list must not leak into the next query on this model.
+        $eager_loads = $this->eager_loads;
+        $this->eager_loads = [];
 
         if (is_null($data)) {
             return null;
@@ -41,7 +66,34 @@ class Builder extends QueryBuilder
             $data[$key] = new $this->model((array)$value);
         }
 
+        if (count($eager_loads) > 0) {
+            $this->eagerLoadRelations($data, $eager_loads);
+        }
+
         return new Collection($data);
+    }
+
+    /**
+     * Eager load the given relationships onto a set of parent models.
+     *
+     * @param  Model[] $models
+     * @param  array   $relations
+     * @return void
+     */
+    protected function eagerLoadRelations(array $models, array $relations): void
+    {
+        if (count($models) === 0) {
+            return;
+        }
+
+        foreach ($relations as $name) {
+            // Build the relation without the single parent constraint so it can
+            // be batched across every parent with one whereIn query.
+            $relation = Relation::noConstraints(fn () => $models[0]->$name());
+
+            $relation->addEagerConstraints($models);
+            $relation->match($models, $relation->getEager(), $name);
+        }
     }
 
     /**

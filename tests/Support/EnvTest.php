@@ -11,6 +11,9 @@ class EnvTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
+        // Other test classes may have already booted Env with a different
+        // (or empty) config; reset so this suite's env.json actually loads.
+        Env::reset();
         Env::configure(__DIR__ . '/../Config/stubs/env.json');
     }
 

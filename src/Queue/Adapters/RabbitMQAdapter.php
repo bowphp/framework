@@ -66,7 +66,7 @@ class RabbitMQAdapter extends QueueAdapter
         $msg = new AMQPMessage($body, [
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
         ]);
-        $this->channel->basic_publish($msg, '', $this->queue);
+        $this->channel->basic_publish($msg, '', $task->getQueue());
         return true;
     }
 

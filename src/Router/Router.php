@@ -9,7 +9,11 @@ use Bow\Router\Exception\RouterException;
 class Router
 {
     /**
-     * Route collection.
+     * Route collection (per Router instance).
+     *
+     * Was `protected static` before — that caused routes from one Router to
+     * leak into the next when `Router::configure()` was called multiple times
+     * (e.g. between tests), since the static array outlived instance recreation.
      *
      * @var array
      */
@@ -346,7 +350,6 @@ class Router
      * @param  string                $path
      * @param  callable|string|array $cb
      * @return Route
-     * @throws
      */
     public function any(string $path, callable|string|array $cb): Route
     {
@@ -517,5 +520,19 @@ class Router
     public function setCurrentPath(string $path): void
     {
         $this->current['path'] = $path;
+    }
+
+    /**
+     * Register routes from controller classes
+     *
+     * @param string|array $controllers
+     * @return Router
+     */
+    public function register(string|array $controllers): Router
+    {
+        $registrar = new AttributeRouteRegistrar($this);
+        $registrar->register($controllers);
+
+        return $this;
     }
 }

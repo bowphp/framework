@@ -9,4 +9,5 @@ composer.lock
 .phpunit.result.cache
 bob
 .phpunit.cache
-.vscode/
+.vscode
+.idea

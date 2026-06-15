@@ -22,11 +22,56 @@ use JsonSerializable;
 use ReflectionClass;
 
 /**
- * @method select(array|string[] $select)
- * @method whereIn(string $primary_key, array $id)
- * @method get()
- * @method where(string $column, mixed $value)
- * @method orderBy(string $latest, string $string)
+ * Static method hints for calls dispatched through __callStatic() to the
+ * underlying Builder (and its parent QueryBuilder). They let IDEs and
+ * static analysers type-check fluent chains such as
+ * `User::where('active', true)->orderBy('id')->paginate(15)`.
+ *
+ * Selection & aliasing
+ * @method static Builder as(string $as)
+ * @method static Builder select(array $select = [])
+ * @method static Builder distinct(string $column)
+ *
+ * WHERE clauses
+ * @method static Builder where(string $column, mixed $comparator = '=', mixed $value = null)
+ * @method static Builder whereRaw(string $where, array $data = [])
+ * @method static Builder whereNull(string $column)
+ * @method static Builder whereNotNull(string $column)
+ * @method static Builder whereBetween(string $column, array $range)
+ * @method static Builder whereNotBetween(string $column, array $range)
+ * @method static Builder whereDifferent(string $column, mixed $value)
+ * @method static Builder whereIn(string $column, array $range)
+ * @method static Builder whereNotIn(string $column, array $range)
+ *
+ * Joins
+ * @method static Builder join(string $table, string $first, mixed $comparator = '=', ?string $second = null)
+ * @method static Builder leftJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null)
+ * @method static Builder rightJoin(string $table, string $first, mixed $comparator = '=', ?string $second = null)
+ *
+ * Grouping, ordering, limiting, locking
+ * @method static Builder orderBy(string $column, string $type = 'asc')
+ * @method static Builder take(int $limit)
+ * @method static Builder jump(int $offset = 0)
+ * @method static Builder lockForUpdate()
+ * @method static Builder sharedLock()
+ *
+ * Aggregates & terminal reads
+ * @method static int count(string $column = '*')
+ * @method static int|float max(string $column)
+ * @method static int|float min(string $column)
+ * @method static int|float avg(string $column)
+ * @method static int|float sum(string $column)
+ * @method static ?object last()
+ * @method static Model|Collection|null get(array $columns = [])
+ * @method static bool exists(?string $column = null, mixed $value = null)
+ * @method static string toSql()
+ *
+ * Write actions
+ * @method static int delete()
+ * @method static int remove(string $column, mixed $comparator = '=', mixed $value = null)
+ * @method static int increment(string $column, int $step = 1)
+ * @method static int decrement(string $column, int $step = 1)
+ * @method static bool truncate()
  */
 abstract class Model implements ArrayAccess, JsonSerializable
 {
@@ -69,13 +114,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * @var bool
      */
     protected bool $auto_increment = true;
-
-    /**
-     * Enable the soft deletion
-     *
-     * @var bool
-     */
-    protected bool $soft_delete = false;
 
     /**
      * Defines the column where the query construct will use for the last query
@@ -154,6 +192,13 @@ abstract class Model implements ArrayAccess, JsonSerializable
     private array $original = [];
 
     /**
+     * The loaded relationships, resolved lazily once per model instance.
+     *
+     * @var array
+     */
+    private array $relations = [];
+
+    /**
      * Model constructor.
      *
      * @param array $attributes
@@ -188,7 +233,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Initialize the connection
      *
      * @return Builder
-     * @throws
      */
     public static function query(): Builder
     {
@@ -374,7 +418,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Delete a record
      *
      * @return int
-     * @throws
      */
     public function delete(): int
     {
@@ -482,7 +525,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * persist aliases on insert action
      *
      * @return int
-     * @throws
      */
     public function persist(): int
     {
@@ -601,7 +643,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      *
      * @param  array $attributes
      * @return int|bool
-     * @throws
      */
     public function update(array $attributes): int|bool
     {
@@ -666,7 +707,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function deleted(callable $cb): void
     {
@@ -679,7 +719,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function deleting(callable $cb): void
     {
@@ -692,7 +731,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function creating(callable $cb): void
     {
@@ -705,7 +743,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function created(callable $cb): void
     {
@@ -718,7 +755,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function updating(callable $cb): void
     {
@@ -731,7 +767,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * Allows to associate a listener
      *
      * @param  callable $cb
-     * @throws
      */
     public static function updated(callable $cb): void
     {
@@ -760,7 +795,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      *
      * @param  string $name
      * @param  array  $arguments
-     * @return mixed
+     * @return Builder|Collection|Model|mixed
      */
     public static function __callStatic(string $name, array $arguments)
     {
@@ -853,15 +888,35 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
+     * Set a loaded relationship on the model's in-memory store.
+     *
+     * Used by eager loading to pre-populate a relation so a later access
+     * resolves from memory instead of issuing a query.
+     *
+     * @param string $name
+     * @param mixed  $value
+     */
+    public function setRelation(string $name, mixed $value): void
+    {
+        $this->relations[$name] = $value;
+    }
+
+    /**
      * Returns the data
      *
      * @return array
      */
     public function toArray(): array
     {
+        $attributes = $this->attributes;
+
+        foreach ($attributes as $name => $value) {
+            $attributes[$name] = $this->executeDataCasting($name);
+        }
+
         return array_filter(
-            $this->attributes,
-            fn ($key) => !in_array($key, $this->hidden),
+            $attributes,
+            fn($key) => !in_array($key, $this->hidden),
             ARRAY_FILTER_USE_KEY
         );
     }
@@ -871,11 +926,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return array_filter(
-            $this->attributes,
-            fn ($key) => !in_array($key, $this->hidden),
-            ARRAY_FILTER_USE_KEY
-        );
+        return $this->toArray();
     }
 
     /**
@@ -889,10 +940,19 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $attribute_exists = isset($this->attributes[$name]);
 
         if (!$attribute_exists && method_exists($this, $name)) {
-            $result = $this->$name();
-            if ($result instanceof Relation) {
-                return $result->getResults();
+            // Lazy-load once: a relation is resolved a single time per model
+            // instance and its result kept in memory. Repeated access returns
+            // the same loaded object instead of re-querying or re-hydrating.
+            if (array_key_exists($name, $this->relations)) {
+                return $this->relations[$name];
             }
+
+            $result = $this->$name();
+
+            if ($result instanceof Relation) {
+                return $this->relations[$name] = $result->getResults();
+            }
+
             return $result;
         }
 
@@ -993,35 +1053,38 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $type = $this->casts[$name];
         $value = $this->attributes[$name];
 
+        if (is_null($value)) {
+            return $value;
+        }
+
         if ($type === "date") {
             return new Carbon($value);
         }
 
         if ($type === "int") {
-            return (int)$value;
+            return (int) $value;
         }
 
         if ($type === "float") {
-            return (float)$value;
+            return (float) $value;
         }
 
         if ($type === "double") {
-            return (float)$value;
+            return (float) $value;
+        }
+
+        if ($type === "boolean" || $type === "bool") {
+            return (bool) $value;
         }
 
         if ($type === "json") {
             if (is_array($value)) {
-                return (object)$value;
+                return (object) $value;
             }
             if (is_object($value)) {
-                return (object)$value;
+                return (object) $value;
             }
-            return json_decode(
-                $value,
-                false,
-                512,
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
-            );
+            return $this->parseToJson($value);
         }
 
         if ($type === "array") {
@@ -1031,14 +1094,28 @@ abstract class Model implements ArrayAccess, JsonSerializable
             if (is_object($value)) {
                 return (array) $value;
             }
-            return json_decode(
-                $value,
-                true,
-                512,
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
-            );
+            return $this->parseToJson($value, assoc: true);
         }
 
         return $this->attributes[$name];
+    }
+
+    /**
+     * Decode a JSON string. When $assoc is true the result is an associative
+     * array (used by the `array` cast); otherwise it is a stdClass (used by
+     * the `json` cast).
+     *
+     * @param  string $value
+     * @param  bool   $assoc
+     * @return mixed
+     */
+    private function parseToJson($value, bool $assoc = false): mixed
+    {
+        return json_decode(
+            $value,
+            $assoc,
+            512,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE
+        );
     }
 }

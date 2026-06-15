@@ -5,13 +5,21 @@ declare(strict_types=1);
 namespace Bow\Validation;
 
 use Bow\Support\Str;
+use Bow\Validation\Rules\BetweenRule;
+use Bow\Validation\Rules\BooleanRule;
+use Bow\Validation\Rules\ConfirmedRule;
 use Bow\Validation\Rules\DatabaseRule;
 use Bow\Validation\Rules\DatetimeRule;
+use Bow\Validation\Rules\DifferentRule;
 use Bow\Validation\Rules\EmailRule;
+use Bow\Validation\Rules\IpRule;
+use Bow\Validation\Rules\JsonRule;
 use Bow\Validation\Rules\NullableRule;
 use Bow\Validation\Rules\NumericRule;
 use Bow\Validation\Rules\RegexRule;
 use Bow\Validation\Rules\StringRule;
+use Bow\Validation\Rules\UrlRule;
+use Bow\Validation\Rules\UuidRule;
 
 class Validator
 {
@@ -23,6 +31,14 @@ class Validator
     use StringRule;
     use RegexRule;
     use NullableRule;
+    use UrlRule;
+    use IpRule;
+    use BooleanRule;
+    use JsonRule;
+    use UuidRule;
+    use ConfirmedRule;
+    use DifferentRule;
+    use BetweenRule;
 
     /**
      * The Fails flag
@@ -87,6 +103,14 @@ class Validator
         'NotExists',
         'Unique',
         'Exists',
+        'Url',
+        'Ip',
+        'Boolean',
+        'Json',
+        'Uuid',
+        'Confirmed',
+        'Different',
+        'Between',
     ];
 
     /**
@@ -170,20 +194,28 @@ class Validator
      */
     private function checkRule(string $rule, string $field): void
     {
-        foreach (explode("|", $rule) as $masque) {
+        $masques = explode("|", $rule);
+        // `required` always runs, even when `nullable` matched — an explicit
+        // `required` is an unconditional contract.
+        $required_declared = in_array('required', $masques, true);
+
+        foreach ($masques as $masque) {
             // In the box there is a | super flux.
             if (is_int($masque) || Str::len($masque) == "") {
                 continue;
             }
 
             if ($masque == "nullable" && $this->compileNullable($field, $masque)) {
+                if ($required_declared) {
+                    continue;
+                }
                 break;
             }
 
             // Mask on the required rule
-            foreach ($this->rules as $rule) {
-                $this->{'compile' . $rule}($field, $masque);
-                if ($rule == 'Required' && $this->fails) {
+            foreach ($this->rules as $rule_item) {
+                $this->{'compile' . $rule_item}($field, $masque);
+                if ($rule_item == 'Required' && $this->fails) {
                     break;
                 }
             }

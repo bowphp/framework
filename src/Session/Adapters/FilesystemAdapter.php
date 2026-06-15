@@ -90,7 +90,9 @@ class FilesystemAdapter implements SessionHandlerInterface
     public function open(string $path, string $name): bool
     {
         if (!is_dir($this->save_path)) {
-            mkdir($this->save_path);
+            // 0700: session files contain authentication state and must not be
+            // readable by other users on a shared host.
+            mkdir($this->save_path, 0700, true);
         }
 
         return true;

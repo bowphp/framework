@@ -508,4 +508,199 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertFalse($validation->fails());
     }
+
+    // ==================== Url Rule ====================
+
+    public function test_url_rule_passes_with_valid_url()
+    {
+        $validation = Validator::make(['site' => 'https://example.com/path?x=1'], ['site' => 'url']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_url_rule_fails_with_invalid_url()
+    {
+        $validation = Validator::make(['site' => 'not-a-url'], ['site' => 'url']);
+        $this->assertTrue($validation->fails());
+    }
+
+    // ==================== Ip Rule ====================
+
+    public function test_ip_rule_passes_with_ipv4()
+    {
+        $validation = Validator::make(['addr' => '192.168.1.1'], ['addr' => 'ip']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_ip_rule_passes_with_ipv6()
+    {
+        $validation = Validator::make(['addr' => '::1'], ['addr' => 'ip']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_ip_rule_v4_rejects_ipv6()
+    {
+        $validation = Validator::make(['addr' => '::1'], ['addr' => 'ip:v4']);
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_ip_rule_v6_rejects_ipv4()
+    {
+        $validation = Validator::make(['addr' => '192.168.1.1'], ['addr' => 'ip:v6']);
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_ip_rule_fails_with_garbage()
+    {
+        $validation = Validator::make(['addr' => '999.999.999.999'], ['addr' => 'ip']);
+        $this->assertTrue($validation->fails());
+    }
+
+    // ==================== Boolean Rule ====================
+
+    public function test_boolean_rule_passes_with_boolean_values()
+    {
+        foreach ([true, false, 0, 1, '0', '1', 'true', 'false'] as $value) {
+            $validation = Validator::make(['flag' => $value], ['flag' => 'boolean']);
+            $this->assertFalse($validation->fails(), 'Failed for ' . var_export($value, true));
+        }
+    }
+
+    public function test_boolean_rule_accepts_bool_alias()
+    {
+        $validation = Validator::make(['flag' => true], ['flag' => 'bool']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_boolean_rule_fails_with_non_boolean()
+    {
+        $validation = Validator::make(['flag' => 'yes'], ['flag' => 'boolean']);
+        $this->assertTrue($validation->fails());
+    }
+
+    // ==================== Json Rule ====================
+
+    public function test_json_rule_passes_with_valid_json()
+    {
+        $validation = Validator::make(['payload' => '{"a":1,"b":[2,3]}'], ['payload' => 'json']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_json_rule_fails_with_invalid_json()
+    {
+        $validation = Validator::make(['payload' => '{not json}'], ['payload' => 'json']);
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_json_rule_fails_with_empty_string()
+    {
+        $validation = Validator::make(['payload' => ''], ['payload' => 'json']);
+        $this->assertTrue($validation->fails());
+    }
+
+    // ==================== Uuid Rule ====================
+
+    public function test_uuid_rule_passes_with_valid_uuid_v4()
+    {
+        $validation = Validator::make(
+            ['id' => '550e8400-e29b-41d4-a716-446655440000'],
+            ['id' => 'uuid']
+        );
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_uuid_rule_fails_with_invalid_uuid()
+    {
+        $validation = Validator::make(['id' => 'not-a-uuid'], ['id' => 'uuid']);
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_uuid_rule_fails_with_wrong_format()
+    {
+        $validation = Validator::make(
+            ['id' => '550e8400e29b41d4a716446655440000'], // no dashes
+            ['id' => 'uuid']
+        );
+        $this->assertTrue($validation->fails());
+    }
+
+    // ==================== Confirmed Rule ====================
+
+    public function test_confirmed_rule_passes_when_matching()
+    {
+        $validation = Validator::make(
+            ['password' => 'secret', 'password_confirmation' => 'secret'],
+            ['password' => 'confirmed']
+        );
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_confirmed_rule_fails_when_mismatched()
+    {
+        $validation = Validator::make(
+            ['password' => 'secret', 'password_confirmation' => 'other'],
+            ['password' => 'confirmed']
+        );
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_confirmed_rule_fails_when_confirmation_missing()
+    {
+        $validation = Validator::make(['password' => 'secret'], ['password' => 'confirmed']);
+        $this->assertTrue($validation->fails());
+    }
+
+    // ==================== Different Rule ====================
+
+    public function test_different_rule_passes_when_values_differ()
+    {
+        $validation = Validator::make(
+            ['username' => 'alice', 'email' => 'alice@example.com'],
+            ['username' => 'different:email']
+        );
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_different_rule_fails_when_values_match()
+    {
+        $validation = Validator::make(
+            ['old_password' => 'secret', 'new_password' => 'secret'],
+            ['new_password' => 'different:old_password']
+        );
+        $this->assertTrue($validation->fails());
+    }
+
+    // ==================== Between Rule ====================
+
+    public function test_between_rule_passes_for_string_length_in_range()
+    {
+        $validation = Validator::make(['name' => 'Milou'], ['name' => 'between:3,10']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_between_rule_fails_for_string_length_too_short()
+    {
+        $validation = Validator::make(['name' => 'Mi'], ['name' => 'between:3,10']);
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_between_rule_fails_for_string_length_too_long()
+    {
+        $validation = Validator::make(
+            ['name' => 'A very, very long name indeed'],
+            ['name' => 'between:3,10']
+        );
+        $this->assertTrue($validation->fails());
+    }
+
+    public function test_between_rule_passes_for_numeric_value_in_range()
+    {
+        $validation = Validator::make(['age' => 25], ['age' => 'between:18,65']);
+        $this->assertFalse($validation->fails());
+    }
+
+    public function test_between_rule_fails_for_numeric_value_out_of_range()
+    {
+        $validation = Validator::make(['age' => 5], ['age' => 'between:18,65']);
+        $this->assertTrue($validation->fails());
+    }
 }

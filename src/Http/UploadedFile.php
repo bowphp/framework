@@ -38,6 +38,10 @@ class UploadedFile
      */
     public function getExtension(): ?string
     {
+        if (!$this->isUploaded()) {
+            return null;
+        }
+
         if (!isset($this->file['name'])) {
             return null;
         }
@@ -71,7 +75,7 @@ class UploadedFile
     }
 
     /**
-     * Check if the file is uploader
+     * Check if the file is uploaded
      *
      * @return bool
      */
@@ -91,6 +95,10 @@ class UploadedFile
      */
     public function getFilename(): ?string
     {
+        if (!$this->isUploaded()) {
+            return null;
+        }
+
         return $this->file['name'] ?? null;
     }
 
@@ -101,6 +109,10 @@ class UploadedFile
      */
     public function getContent(): ?string
     {
+        if (!$this->isUploaded()) {
+            return null;
+        }
+
         if (!isset($this->file['tmp_name'])) {
             return null;
         }
@@ -109,15 +121,19 @@ class UploadedFile
     }
 
     /**
-     * Move the uploader file to a directory.
+     * Move the uploaded file to a directory.
      *
      * @param  string  $to
      * @param  ?string $filename
      * @return bool
-     * @throws
+     * @throws \RuntimeException
      */
     public function moveTo(string $to, ?string $filename = null): bool
     {
+        if (!$this->isUploaded()) {
+            return false;
+        }
+
         if (!isset($this->file['tmp_name'])) {
             return false;
         }

@@ -85,11 +85,22 @@ class QueryBuilder implements JsonSerializable
     protected ?string $as = null;
 
     /**
-     * The PDO instance
+     * The PDO instance.
+     *
+     * Only set when the builder is constructed from a raw PDO (no read/write
+     * splitting). When built from an adapter, the connection is resolved
+     * lazily through {@see QueryBuilder::$connection_adapter}.
      *
      * @var ?PDO
      */
     protected ?PDO $connection = null;
+
+    /**
+     * The connection adapter, when read/write splitting is available.
+     *
+     * @var ?AbstractConnection
+     */
+    protected ?AbstractConnection $connection_adapter = null;
 
     /**
      * Define whether to retrieve information from the list
@@ -113,6 +124,27 @@ class QueryBuilder implements JsonSerializable
     protected string $adapter = '';
 
     /**
+     * Determine the last sql query
+     *
+     * @var string|null
+     */
+    protected ?string $last_query = null;
+
+    /**
+     * Lock rows for update
+     *
+     * @var bool
+     */
+    protected bool $lock_for_update = false;
+
+    /**
+     * Lock rows in share mode
+     *
+     * @var bool
+     */
+    protected bool $shared_lock = false;
+
+    /**
      * QueryBuilder Constructor
      *
      * @param string                 $table
@@ -121,14 +153,53 @@ class QueryBuilder implements JsonSerializable
     public function __construct(string $table, AbstractConnection|PDO $connection)
     {
         if ($connection instanceof AbstractConnection) {
+            $this->connection_adapter = $connection;
             $this->adapter = $connection->getName();
-            $connection = $connection->getConnection();
         } else {
+            $this->connection = $connection;
             $this->adapter = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
         }
 
-        $this->connection = $connection;
         $this->table = $table;
+    }
+
+    /**
+     * Resolve the write (primary) connection.
+     *
+     * @return PDO
+     */
+    private function writeConnection(): PDO
+    {
+        if ($this->connection_adapter !== null) {
+            return $this->connection_adapter->getWriteConnection();
+        }
+
+        return $this->connection;
+    }
+
+    /**
+     * Resolve the read (replica) connection.
+     *
+     * While a transaction is open on the primary, reads are routed to the
+     * primary so they observe their own uncommitted changes. Falls back to
+     * the single connection when read/write splitting is unavailable.
+     *
+     * @return PDO
+     */
+    private function readConnection(): PDO
+    {
+        if ($this->connection_adapter === null) {
+            return $this->connection;
+        }
+
+        if (
+            $this->connection_adapter->hasWriteConnection()
+            && $this->connection_adapter->getWriteConnection()->inTransaction()
+        ) {
+            return $this->connection_adapter->getWriteConnection();
+        }
+
+        return $this->connection_adapter->getReadConnection();
     }
 
     /**
@@ -148,7 +219,7 @@ class QueryBuilder implements JsonSerializable
      */
     public function getPdo(): PDO
     {
-        return $this->connection;
+        return $this->writeConnection();
     }
 
     /**
@@ -170,14 +241,19 @@ class QueryBuilder implements JsonSerializable
      * WHERE column1 $comparator $value|column
      *
      * @param  string $where
+     * @param  array  $data
      * @return QueryBuilder
      */
-    public function whereRaw(string $where): QueryBuilder
+    public function whereRaw(string $where, array $data = []): QueryBuilder
     {
         if ($this->where == null) {
             $this->where = $where;
         } else {
             $this->where .= ' and ' . $where;
+        }
+
+        if (!empty($data)) {
+            $this->where_data_binding = array_merge($this->where_data_binding, array_values($data));
         }
 
         return $this;
@@ -189,14 +265,19 @@ class QueryBuilder implements JsonSerializable
      * WHERE column1 $comparator $value|column
      *
      * @param  string $where
+     * @param  array  $data
      * @return QueryBuilder
      */
-    public function orWhereRaw(string $where): QueryBuilder
+    public function orWhereRaw(string $where, array $data = []): QueryBuilder
     {
         if ($this->where == null) {
             $this->where = $where;
         } else {
             $this->where .= ' or ' . $where;
+        }
+
+        if (!empty($data)) {
+            $this->where_data_binding = array_merge($this->where_data_binding, array_values($data));
         }
 
         return $this;
@@ -217,8 +298,7 @@ class QueryBuilder implements JsonSerializable
     {
         if (is_null($this->where)) {
             throw new QueryBuilderException(
-                'This function can not be used without a where before.',
-                E_ERROR
+                'This function can not be used without a where before.'
             );
         }
 
@@ -252,13 +332,12 @@ class QueryBuilder implements JsonSerializable
         }
 
         if ($value === null) {
-            throw new QueryBuilderException('Unresolved comparison value', E_ERROR);
+            throw new QueryBuilderException('Unresolved comparison value');
         }
 
         if (!in_array(Str::lower($boolean), ['and', 'or'])) {
             throw new QueryBuilderException(
-                'The bool ' . $boolean . ' not accepted',
-                E_ERROR
+                'The bool ' . $boolean . ' not accepted'
             );
         }
 
@@ -291,10 +370,37 @@ class QueryBuilder implements JsonSerializable
         }
 
         return in_array(Str::upper($comparator), [
-            '=', '>', '<', '>=', '=<', '<>', '!=', 'LIKE', 'NOT', 'IS NOT', "IN", "NOT IN",
-            'ILIKE', '&', '|', '<<', '>>', 'NOT LIKE',
-            '&&', '@>', '<@', '?', '?|', '?&', '||', '-', '@?', '@@', '#-',
-            'IS DISTINCT FROM', 'IS NOT DISTINCT FROM',
+            '=',
+            '>',
+            '<',
+            '>=',
+            '=<',
+            '<>',
+            '!=',
+            'LIKE',
+            'NOT',
+            'IS NOT',
+            "IN",
+            "NOT IN",
+            'ILIKE',
+            '&',
+            '|',
+            '<<',
+            '>>',
+            'NOT LIKE',
+            '&&',
+            '@>',
+            '<@',
+            '?',
+            '?|',
+            '?&',
+            '||',
+            '-',
+            '@?',
+            '@@',
+            '#-',
+            'IS DISTINCT FROM',
+            'IS NOT DISTINCT FROM',
         ], true);
     }
 
@@ -359,6 +465,20 @@ class QueryBuilder implements JsonSerializable
             if (!is_null($this->having)) {
                 $sql .= ' having ' . $this->having;
             }
+        }
+
+        // Adding the lock for update clause
+        if ($this->lock_for_update) {
+            $sql .= ' for update';
+
+            $this->lock_for_update = false;
+        }
+
+        // Adding the shared lock clause
+        if ($this->shared_lock) {
+            $sql .= $this->adapter === 'pgsql' ? ' for share' : ' lock in share mode';
+
+            $this->shared_lock = false;
         }
 
         return $sql;
@@ -692,8 +812,7 @@ class QueryBuilder implements JsonSerializable
     {
         if (is_null($this->join)) {
             throw new QueryBuilderException(
-                'The inner join clause is already initialized.',
-                E_ERROR
+                'The inner join clause is already initialized.'
             );
         }
 
@@ -723,7 +842,6 @@ class QueryBuilder implements JsonSerializable
         if (is_null($this->join)) {
             throw new QueryBuilderException(
                 'The inner join clause is already initialized.',
-                E_ERROR
             );
         }
 
@@ -745,7 +863,7 @@ class QueryBuilder implements JsonSerializable
      * @return  QueryBuilder
      * @deprecated
      */
-    public function group($column)
+    public function group(string $column)
     {
         return $this->groupBy($column);
     }
@@ -862,13 +980,8 @@ class QueryBuilder implements JsonSerializable
             }
         }
 
-        $statement = $this->connection->prepare($sql);
+        $statement = $this->execute($sql, $this->where_data_binding, false);
 
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
-
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         if ($statement->rowCount() > 1) {
@@ -899,12 +1012,18 @@ class QueryBuilder implements JsonSerializable
             // Named placeholders
             foreach ($bindings as $key => $value) {
                 $param = PDO::PARAM_STR;
-                if (is_null($value) || strtolower((string) $value) === 'null') {
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                } elseif (is_null($value) || strtolower((string) $value) === 'null') {
                     $param = PDO::PARAM_NULL;
                 } elseif (is_int($value)) {
                     $param = PDO::PARAM_INT;
                 } elseif (is_resource($value)) {
                     $param = PDO::PARAM_LOB;
+                } elseif (is_bool($value)) {
+                    $param = PDO::PARAM_BOOL;
+                } elseif (is_string($value)) {
+                    $param = PDO::PARAM_STR;
                 }
                 $key_binding = is_string($key) ? ":$key" : $key + 1;
                 $pdo_statement->bindValue($key_binding, $value, $param);
@@ -914,12 +1033,18 @@ class QueryBuilder implements JsonSerializable
             $i = 1;
             foreach ($bindings as $value) {
                 $param = PDO::PARAM_STR;
-                if (is_null($value) || strtolower((string) $value) === 'null') {
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                } elseif (is_null($value) || strtolower((string) $value) === 'null') {
                     $param = PDO::PARAM_NULL;
                 } elseif (is_int($value)) {
                     $param = PDO::PARAM_INT;
                 } elseif (is_resource($value)) {
                     $param = PDO::PARAM_LOB;
+                } elseif (is_bool($value)) {
+                    $param = PDO::PARAM_BOOL;
+                } elseif (is_string($value)) {
+                    $param = PDO::PARAM_STR;
                 }
                 $pdo_statement->bindValue($i, $value, $param);
                 $i++;
@@ -1036,6 +1161,30 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
+     * Lock the selected rows for update
+     *
+     * @return QueryBuilder
+     */
+    public function lockForUpdate(): QueryBuilder
+    {
+        $this->lock_for_update = true;
+
+        return $this;
+    }
+
+    /**
+     * Lock the selected rows in share mode
+     *
+     * @return QueryBuilder
+     */
+    public function sharedLock(): QueryBuilder
+    {
+        $this->shared_lock = true;
+
+        return $this;
+    }
+
+    /**
      * Take = Limit
      *
      * @param  int $limit
@@ -1075,17 +1224,12 @@ class QueryBuilder implements JsonSerializable
         // Execution of request.
         $sql = $this->toSql();
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding, false);
 
         $data = $statement->fetchAll();
 
         $statement->closeCursor();
 
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         if (!$this->first) {
@@ -1180,20 +1324,14 @@ class QueryBuilder implements JsonSerializable
             $sql .= ' where ' . $this->where;
 
             $this->where = null;
-
-            $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
         }
 
-        $statement = $this->connection->prepare($sql);
+        $this->where_data_binding = array_merge(array_values($data), $this->where_data_binding);
 
-        $this->bind($statement, $this->where_data_binding);
-
-        // Execution of the request
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding);
 
         $result = $statement->rowCount();
 
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         return (int) $result;
@@ -1230,15 +1368,10 @@ class QueryBuilder implements JsonSerializable
             $this->where = null;
         }
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding);
 
         $result = $statement->rowCount();
 
-        $this->triggerQueryEvent($sql, $this->where_data_binding);
         $this->where_data_binding = [];
 
         return (int) $result;
@@ -1255,6 +1388,18 @@ class QueryBuilder implements JsonSerializable
     public function increment(string $column, int $step = 1): int
     {
         return $this->incrementAction($column, $step);
+    }
+
+    /**
+     * Decrement column
+     *
+     * @param  string $column
+     * @param  int    $step
+     * @return int
+     */
+    public function decrement(string $column, int $step = 1): int
+    {
+        return $this->incrementAction($column, $step, '-');
     }
 
     /**
@@ -1275,25 +1420,9 @@ class QueryBuilder implements JsonSerializable
             $this->where = null;
         }
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $this->where_data_binding);
-
-        $statement->execute();
+        $statement = $this->execute($sql, $this->where_data_binding);
 
         return (int)$statement->rowCount();
-    }
-
-    /**
-     * Decrement column
-     *
-     * @param  string $column
-     * @param  int    $step
-     * @return int
-     */
-    public function decrement(string $column, int $step = 1): int
-    {
-        return $this->incrementAction($column, $step, '-');
     }
 
     /**
@@ -1327,18 +1456,26 @@ class QueryBuilder implements JsonSerializable
      */
     public function truncate(): bool
     {
-        if ($this->connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+        $connection = $this->writeConnection();
+
+        if ($connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
             $sql = 'delete from ' . $this->table . ';';
-            if (!$this->connection->inTransaction()) {
+            if (!$connection->inTransaction()) {
                 $sql .= ' VACUUM;';
             }
         } else {
             $sql = 'truncate table ' . $this->table . ';';
         }
 
-        $result = (bool) $this->connection->exec($sql);
+        $this->last_query = $sql;
 
-        $this->triggerQueryEvent($sql, []);
+        $start_at = microtime(true);
+        $result = (bool) $connection->exec($sql);
+        $ended_at = microtime(true);
+
+        $this->triggerQueryEvent($sql, $ended_at - $start_at);
+
+        $this->last_query = $sql;
 
         return $result;
     }
@@ -1353,7 +1490,7 @@ class QueryBuilder implements JsonSerializable
     {
         $this->insert($values);
 
-        $result = $this->connection->lastInsertId();
+        $result = $this->writeConnection()->lastInsertId();
 
         return is_numeric($result) ? (int)$result : $result;
     }
@@ -1387,7 +1524,6 @@ class QueryBuilder implements JsonSerializable
         if ($single_item_structure_detected && $mixture_item_structure_detected) {
             throw new QueryBuilderException(
                 'Mixed structure detected in insert data. Cannot mix single and multiple row inserts.',
-                E_ERROR
             );
         }
 
@@ -1420,15 +1556,44 @@ class QueryBuilder implements JsonSerializable
 
         $sql .= '(' . implode(', ', $this->add2points($fields, true)) . ');';
 
-        $statement = $this->connection->prepare($sql);
-
-        $this->bind($statement, $values);
-
-        $statement->execute();
-
-        $this->triggerQueryEvent($sql, $values);
+        $statement = $this->execute($sql, $values);
 
         return (int) $statement->rowCount();
+    }
+
+    /**
+     * Execute statement
+     *
+     * @param string $sql
+     * @param array $bindings
+     * @param bool $write Whether the statement mutates data (routes to the primary).
+     * @return PDOStatement
+     */
+    private function execute(string $sql, array $bindings = [], bool $write = true): PDOStatement
+    {
+        $this->last_query = $sql;
+
+        $connection = $write ? $this->writeConnection() : $this->readConnection();
+
+        $statement = $connection->prepare($sql);
+
+        $this->bind($statement, $bindings);
+
+        try {
+            $start_at = microtime(true);
+            $statement->execute();
+            $ended_at = microtime(true);
+
+            $this->triggerQueryEvent($sql, $ended_at - $start_at, $bindings);
+        } catch (\Exception $e) {
+            throw new QueryBuilderException(
+                'message: ' . $e->getMessage() . '; query: ' . $this->last_query,
+                $this->last_query,
+                E_ERROR,
+            );
+        }
+
+        return $statement;
     }
 
     /**
@@ -1440,9 +1605,13 @@ class QueryBuilder implements JsonSerializable
     {
         $sql = 'drop table ' . $this->table;
 
-        $result = (bool) $this->connection->exec($sql);
+        $this->last_query = $sql;
 
-        $this->triggerQueryEvent($sql, []);
+        $start_at = microtime(true);
+        $result = (bool) $this->writeConnection()->exec($sql);
+        $ended_at = microtime(true);
+
+        $this->triggerQueryEvent($sql, $ended_at - $start_at);
 
         return $result;
     }
@@ -1450,12 +1619,12 @@ class QueryBuilder implements JsonSerializable
     /**
      * Paginate, make pagination system
      *
-     * @param  int $number_of_page
+     * @param  int $per_page
      * @param  int $current
      * @param  int $chunk
      * @return Pagination
      */
-    public function paginate(int $number_of_page, int $current = 0, ?int $chunk = null): Pagination
+    public function paginate(int $per_page, int $current = 0, ?int $chunk = null): Pagination
     {
         // We go to back page
         --$current;
@@ -1465,7 +1634,7 @@ class QueryBuilder implements JsonSerializable
             $jump = 0;
             $current = 1;
         } else {
-            $jump = $number_of_page * $current;
+            $jump = $per_page * $current;
             $current++;
         }
 
@@ -1474,7 +1643,7 @@ class QueryBuilder implements JsonSerializable
         $join = $this->join;
         $data_bind = $this->where_data_binding;
 
-        $data = $this->jump($jump)->take($number_of_page)->get();
+        $data = $this->jump($jump)->take($per_page)->get();
 
         if (is_array($data)) {
             $data = collect($data);
@@ -1486,7 +1655,9 @@ class QueryBuilder implements JsonSerializable
         $this->where_data_binding = $data_bind;
 
         // We count the number of pages that remain
-        $rest_of_page = ceil($this->count() / $number_of_page) - $current;
+        $total = $this->count();
+        $total_of_page = (int) ceil($total / $per_page);
+        $rest_of_page = $total_of_page - $current;
 
         // Grouped data
         if (is_int($chunk)) {
@@ -1495,12 +1666,12 @@ class QueryBuilder implements JsonSerializable
 
         // Enables automatic paging.
         return new Pagination(
-            $current >= 1 && $rest_of_page > 0 ? $current + 1 : 0,
-            ($current - 1) <= 0 ? 1 : ($current - 1),
-            (int)($rest_of_page + $current),
-            $number_of_page,
-            $current,
-            $data
+            next: $current >= 1 && $rest_of_page > 0 ? $current + 1 : 0,
+            previous: ($current - 1) <= 0 ? 1 : ($current - 1),
+            total: $total,
+            perPage: $per_page,
+            current: $current,
+            data: $data,
         );
     }
 
@@ -1529,7 +1700,7 @@ class QueryBuilder implements JsonSerializable
      */
     public function getLastInsertId(?string $name = null)
     {
-        return $this->connection->lastInsertId($name);
+        return $this->writeConnection()->lastInsertId($name);
     }
 
     /**
@@ -1558,12 +1729,13 @@ class QueryBuilder implements JsonSerializable
      * Trigger the query event
      *
      * @param  string $sql
+     * @param  float $execution_time
      * @param  array  $bindings
      * @return void
      */
-    private function triggerQueryEvent(string $sql, array $bindings): void
+    private function triggerQueryEvent(string $sql, float $execution_time = 0, array $bindings = []): void
     {
-        Database::triggerQueryEvent($sql, $bindings);
+        Database::triggerQueryEvent($sql, $execution_time, $bindings);
     }
 
     /**

@@ -3,12 +3,7 @@ name: bowphp
 on: [ push, pull_request ]
 
 env:
-  AWS_KEY: ${{ secrets.AWS_KEY }}
-  AWS_SECRET: ${{ secrets.AWS_SECRET }}
-  AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
 jobs:
   lunix-tests:
@@ -58,6 +53,11 @@ jobs:
             echo "Waiting for PostgreSQL... ($i/30)"
             sleep 2
           done
+
+      - name: Wait for MinIO bucket initialization
+        run: |
+          echo "Waiting for MinIO bucket initialization..."
+          docker wait bowphp_minio_init || true
 
       - name: Cache Composer packages
         id: composer-cache

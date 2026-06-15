@@ -22,6 +22,8 @@ class QueueTableMigration extends Migration
             $table->addDatetime('available_at');
             $table->addDatetime('reserved_at', ["nullable" => true, "default" => null]);
             $table->addDatetime('created_at');
+            $table->addIndex('queue');
+            $table->addIndex('status');
         });
     }
 

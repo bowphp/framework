@@ -19,6 +19,13 @@ final class QueryEvent implements AppEvent
     public string $sql;
 
     /**
+     * Define the query execution time
+     *
+     * @var mixed
+     */
+    public float $execution_time;
+
+    /**
      * The query bindings
      *
      * @var array
@@ -28,11 +35,14 @@ final class QueryEvent implements AppEvent
     /**
      * QueryEvent constructor.
      *
-     * @param array $data
+     * @param string $sql
+     * @param float $execution_time
+     * @param array $bindings
      */
-    public function __construct(string $sql, array $bindings = [])
+    public function __construct(string $sql, float $execution_time = 0, array $bindings = [])
     {
         $this->sql = $sql;
+        $this->execution_time = $execution_time;
         $this->bindings = $bindings;
     }
 
@@ -51,7 +61,7 @@ final class QueryEvent implements AppEvent
      * @param  mixed  $value
      * @throws \Exception
      */
-    public function __set($name, $value)
+    final public function __set($name, $value)
     {
         throw new \Exception("Cannot set property $name on QueryEvent");
     }

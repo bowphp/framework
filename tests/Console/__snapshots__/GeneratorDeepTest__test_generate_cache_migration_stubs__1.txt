@@ -14,6 +14,7 @@ class FakeCacheMigration extends Migration
             $table->addString('key_name', ['primary' => true, 'size' => 500]);
             $table->addText('data');
             $table->addDatetime('expire', ['nullable' => true]);
+            $table->addIndex('expire');
             $table->addTimestamps();
         });
     }

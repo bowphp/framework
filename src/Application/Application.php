@@ -178,7 +178,7 @@ class Application
 
         // Error management
         if ($resolved) {
-            $this->send($response);
+            $this->sendResponse($response);
             return true;
         }
 
@@ -193,13 +193,27 @@ class Application
     }
 
     /**
+     * Launch the application and send the answer to the customer.
+     *
+     * Public alias of {@see Application::run()}.
+     *
+     * @return bool
+     * @throws ReflectionException
+     * @throws RouterException
+     */
+    public function send(): bool
+    {
+        return $this->run();
+    }
+
+    /**
      * Send the answer to the customer
      *
      * @param  mixed $response
      * @param  int   $code
      * @return void
      */
-    private function send(mixed $response, int $code = 200): void
+    private function sendResponse(mixed $response, int $code = 200): void
     {
         if ($response instanceof ResponseInterface) {
             $response->sendContent();

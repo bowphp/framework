@@ -55,4 +55,17 @@ trait LoginUserTrait
 
         return $model::where($key, $value)->first();
     }
+
+    /**
+     * Get a user by primary key value.
+     *
+     * @param  float|int|string $id
+     * @return ?Authentication
+     */
+    private function getUserById(float|int|string $id): ?Authentication
+    {
+        $model = $this->provider['model'];
+
+        return $this->getUserBy((new $model())->getKey(), $id);
+    }
 }

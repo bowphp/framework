@@ -166,15 +166,15 @@ trait MixedColumn
     public function addEnum(string $column, array $attribute = []): Table
     {
         if (!isset($attribute['size'])) {
-            throw new SQLGeneratorException("The enum values should be define!");
+            throw new SQLGeneratorException("Enum values are required: pass them under the 'size' key, e.g. ['size' => ['draft', 'published']].");
         }
 
         if (!is_array($attribute['size'])) {
-            throw new SQLGeneratorException("The enum values should be array");
+            throw new SQLGeneratorException("Enum values under 'size' must be an array.");
         }
 
         if (count($attribute['size']) === 0) {
-            throw new SQLGeneratorException("The enum values cannot be empty.");
+            throw new SQLGeneratorException("Enum values under 'size' cannot be empty.");
         }
 
         return $this->addColumn($column, 'enum', $attribute);
@@ -345,15 +345,15 @@ trait MixedColumn
     public function changeEnum(string $column, array $attribute = []): Table
     {
         if (!isset($attribute['size'])) {
-            throw new SQLGeneratorException("The enum values should be define!");
+            throw new SQLGeneratorException("Enum values are required: pass them under the 'size' key, e.g. ['size' => ['draft', 'published']].");
         }
 
         if (!is_array($attribute['size'])) {
-            throw new SQLGeneratorException("The enum values should be array");
+            throw new SQLGeneratorException("Enum values under 'size' must be an array.");
         }
 
         if (count($attribute['size']) === 0) {
-            throw new SQLGeneratorException("The enum values cannot be empty.");
+            throw new SQLGeneratorException("Enum values under 'size' cannot be empty.");
         }
 
         return $this->changeColumn($column, 'enum', $attribute);

@@ -243,6 +243,123 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @dataProvider connectionNameProvider
+     */
+    public function test_lock_for_update_generates_correct_sql(string $name)
+    {
+        $this->createTestingTable($name);
+        $table = Database::connection($name)->table('pets');
+
+        $table->lockForUpdate();
+        $sql = $table->toSql();
+
+        $this->assertStringEndsWith('for update', $sql);
+    }
+
+    /**
+     * @dataProvider connectionNameProvider
+     */
+    public function test_lock_for_update_executes_query(string $name)
+    {
+        if ($name === 'sqlite') {
+            $this->markTestSkipped('SQLite does not support FOR UPDATE locking.');
+        }
+
+        $this->createTestingTable($name);
+        $table = Database::connection($name)->table('pets');
+        $table->insert([
+            ['id' => 1, 'name' => 'Milou'],
+            ['id' => 2, 'name' => 'Foli'],
+        ]);
+
+        Database::connection($name)->startTransaction();
+
+        $pets = Database::connection($name)->table('pets')->lockForUpdate()->get();
+
+        Database::connection($name)->rollback();
+
+        $this->assertIsArray($pets);
+        $this->assertCount(2, $pets);
+    }
+
+    /**
+     * @dataProvider connectionNameProvider
+     */
+    public function test_lock_for_update_flag_resets_after_to_sql(string $name)
+    {
+        $this->createTestingTable($name);
+        $table = Database::connection($name)->table('pets');
+
+        $table->lockForUpdate();
+        $table->toSql();
+
+        $sql = $table->toSql();
+
+        $this->assertStringNotContainsString('for update', $sql);
+    }
+
+    /**
+     * @dataProvider connectionNameProvider
+     */
+    public function test_shared_lock_generates_correct_sql(string $name)
+    {
+        $this->createTestingTable($name);
+        $table = Database::connection($name)->table('pets');
+
+        $table->sharedLock();
+        $sql = $table->toSql();
+
+        if ($name === 'pgsql') {
+            $this->assertStringEndsWith('for share', $sql);
+        } else {
+            $this->assertStringEndsWith('lock in share mode', $sql);
+        }
+    }
+
+    /**
+     * @dataProvider connectionNameProvider
+     */
+    public function test_shared_lock_executes_query(string $name)
+    {
+        if ($name === 'sqlite') {
+            $this->markTestSkipped('SQLite does not support shared locking.');
+        }
+
+        $this->createTestingTable($name);
+        $table = Database::connection($name)->table('pets');
+        $table->insert([
+            ['id' => 1, 'name' => 'Milou'],
+            ['id' => 2, 'name' => 'Foli'],
+        ]);
+
+        Database::connection($name)->startTransaction();
+
+        $pets = Database::connection($name)->table('pets')->sharedLock()->get();
+
+        Database::connection($name)->rollback();
+
+        $this->assertIsArray($pets);
+        $this->assertCount(2, $pets);
+    }
+
+    /**
+     * @dataProvider connectionNameProvider
+     */
+    public function test_shared_lock_flag_resets_after_to_sql(string $name)
+    {
+        $this->createTestingTable($name);
+        $table = Database::connection($name)->table('pets');
+
+        $table->sharedLock();
+        $table->toSql();
+
+        $sql = $table->toSql();
+
+        $this->assertStringNotContainsString('for share', $sql);
+        $this->assertStringNotContainsString('lock in share mode', $sql);
+    }
+
+    /**
      * @return array
      */
     public function connectionNameProvider(): array

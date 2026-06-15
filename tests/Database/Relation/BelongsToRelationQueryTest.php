@@ -172,6 +172,44 @@ class BelongsToRelationQueryTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(PetMasterModelStub::class, $master2);
         $this->assertEquals($master1->id, $master2->id);
         $this->assertEquals($master1->name, $master2->name);
+
+        // Lazy-load once: repeated access on the same instance must resolve the
+        // relation a single time and return the very same loaded object.
+        $this->assertSame($master1, $master2);
+    }
+
+    /**
+     * @dataProvider connectionNames
+     */
+    public function test_relationship_in_loop_returns_correct_owner_per_pet(string $name)
+    {
+        $this->executeMigration($name);
+        $this->seedTestData($name);
+
+        // Ensure no stale relation cache leaks between pets
+        Cache::store('file')->clear();
+
+        $expected = [
+            1 => 'didi', // fluffy -> master 1
+            2 => 'didi', // dolly  -> master 1
+            3 => 'john', // rex    -> master 2
+            4 => 'john', // max    -> master 2
+            5 => 'jane', // bella  -> master 3
+        ];
+
+        $pets = PetModelStub::connection($name)->all();
+
+        foreach ($pets as $pet) {
+            $master = $pet->master;
+
+            $this->assertInstanceOf(PetMasterModelStub::class, $master);
+            $this->assertEquals(
+                $expected[$pet->id],
+                $master->name,
+                "Pet #{$pet->id} should belong to master '{$expected[$pet->id]}'"
+            );
+            $this->assertEquals($pet->master_id, $master->id);
+        }
     }
 
     // ===== Relationship Data Integrity Tests =====
