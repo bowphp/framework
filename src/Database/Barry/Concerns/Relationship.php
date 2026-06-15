@@ -17,19 +17,19 @@ trait Relationship
      *
      * @param  string      $related
      * @param  string|null $foreign_key
-     * @param  string|null $local_key
+     * @param  string|null $primary_key
      * @return BelongsTo
      */
     public function belongsTo(
         string $related,
         ?string $foreign_key = null,
-        ?string $local_key = null
+        ?string $primary_key = null
     ): BelongsTo {
         // Create the new instance of model from container
         $related_model = app()->make($related);
 
-        if (is_null($local_key)) {
-            $local_key = $this->getKey();
+        if (is_null($primary_key)) {
+            $primary_key = $this->getKey();
         }
 
         // We build here the foreign key name
@@ -37,7 +37,7 @@ trait Relationship
             $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
         }
 
-        return new BelongsTo($related_model, $this, $foreign_key, $local_key);
+        return new BelongsTo($related_model, $this, $foreign_key, $primary_key);
     }
 
     /**
@@ -71,15 +71,15 @@ trait Relationship
      * The has many relative
      *
      * @param  string      $related
-     * @param  string|null $primary_key
      * @param  string|null $foreign_key
+     * @param  string|null $primary_key
      * @return HasMany
      * @throws QueryBuilderException
      */
     public function hasMany(
         string $related,
-        ?string $primary_key = null,
-        ?string $foreign_key = null
+        ?string $foreign_key = null,
+        ?string $primary_key = null
     ): HasMany {
         $related_model = app()->make($related);
 
@@ -87,12 +87,14 @@ trait Relationship
             $primary_key = $this->getKey();
         }
 
-        // We build the foreign key name
+        // The foreign key lives on the related table but is named after the
+        // parent (e.g. User hasMany Post => posts.user_id), so derive it from
+        // $this, not from the related model.
         if (is_null($foreign_key)) {
-            $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
+            $foreign_key = rtrim($this->getTable(), 's') . '_id';
         }
 
-        return new HasMany($related_model, $this, $primary_key, $foreign_key);
+        return new HasMany($related_model, $this, $foreign_key, $primary_key);
     }
 
     /**
@@ -114,9 +116,11 @@ trait Relationship
             $primary_key = $this->getKey();
         }
 
-        // We build the foreign key name
+        // The foreign key lives on the related table but is named after the
+        // parent (e.g. User hasOne Profile => profiles.user_id), so derive it
+        // from $this, not from the related model.
         if (is_null($foreign_key)) {
-            $foreign_key = rtrim($related_model->getTable(), 's') . '_id';
+            $foreign_key = rtrim($this->getTable(), 's') . '_id';
         }
 
         return new HasOne($related_model, $this, $foreign_key, $primary_key);

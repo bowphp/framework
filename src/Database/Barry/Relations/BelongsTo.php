@@ -16,15 +16,15 @@ class BelongsTo extends Relation
      * @param Model  $related
      * @param Model  $parent
      * @param string $foreign_key
-     * @param string $local_key
+     * @param string $primary_key
      */
     public function __construct(
         Model $related,
         Model $parent,
         string $foreign_key,
-        string $local_key
+        string $primary_key
     ) {
-        $this->local_key = $local_key;
+        $this->primary_key = $primary_key;
         $this->foreign_key = $foreign_key;
 
         parent::__construct($related, $parent);
@@ -58,7 +58,7 @@ class BelongsTo extends Relation
         // or has many relationships, we need to actually query on the primary key
         // of the related models matching on the foreign key that's on a parent.
         $foreign_key_value = $this->parent->getAttribute($this->foreign_key);
-        $this->query->where($this->local_key, '=', $foreign_key_value);
+        $this->query->where($this->primary_key, '=', $foreign_key_value);
     }
 
     /**
@@ -74,7 +74,7 @@ class BelongsTo extends Relation
      */
     protected function eagerRelatedKey(): string
     {
-        return $this->local_key;
+        return $this->primary_key;
     }
 
     /**
