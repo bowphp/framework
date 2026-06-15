@@ -30,7 +30,7 @@ class PetMasterModelStub extends \Bow\Database\Barry\Model
      */
     public function pets(): HasMany
     {
-        return $this->hasMany(PetModelStub::class, 'id', 'master_id');
+        return $this->hasMany(PetModelStub::class, 'master_id', 'id');
     }
 
     /**

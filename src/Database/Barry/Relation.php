@@ -36,7 +36,7 @@ abstract class Relation
      *
      * @var string
      */
-    protected string $local_key;
+    protected string $primary_key;
 
     /**
      * The parent model instance

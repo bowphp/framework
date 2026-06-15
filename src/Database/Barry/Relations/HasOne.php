@@ -15,11 +15,11 @@ class HasOne extends Relation
      * @param Model $related
      * @param Model $parent
      * @param string  $foreign_key
-     * @param string  $local_key
+     * @param string  $primary_key
      */
-    public function __construct(Model $related, Model $parent, string $foreign_key, string $local_key)
+    public function __construct(Model $related, Model $parent, string $foreign_key, string $primary_key)
     {
-        $this->local_key = $local_key;
+        $this->primary_key = $primary_key;
         $this->foreign_key = $foreign_key;
 
         parent::__construct($related, $parent);
@@ -48,7 +48,7 @@ class HasOne extends Relation
             return;
         }
 
-        $this->query = $this->query->where($this->foreign_key, $this->parent->getAttribute($this->local_key));
+        $this->query = $this->query->where($this->foreign_key, $this->parent->getAttribute($this->primary_key));
     }
 
     /**
@@ -56,7 +56,7 @@ class HasOne extends Relation
      */
     protected function eagerParentKey(): string
     {
-        return $this->local_key;
+        return $this->primary_key;
     }
 
     /**
