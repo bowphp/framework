@@ -120,30 +120,32 @@ class Request
      * Retrieve query variables
      *
      * @param string|null $key
-     * @return array
+     * @param mixed        $default
+     * @return mixed
      */
-    public function query(?string $key = null): array
+    public function query(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->query;
         }
 
-        return $this->query[$key] ?? [];
+        return $this->query[$key] ?? $default;
     }
 
     /**
      * Get posted data
      *
      * @param string|null $key
-     * @return array
+     * @param mixed        $default
+     * @return mixed
      */
-    public function post(?string $key = null): array
+    public function post(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->post;
         }
 
-        return $this->post[$key] ?? [];
+        return $this->post[$key] ?? $default;
     }
 
     /**
@@ -211,6 +213,17 @@ class Request
     }
 
     /**
+     * Check that the request method matches the given one.
+     *
+     * @param  string $method
+     * @return bool
+     */
+    public function isMethod(string $method): bool
+    {
+        return strtoupper($method) === $this->method();
+    }
+
+    /**
      * Retrieve a value or a collection of values.
      *
      * @param  string     $key
@@ -226,6 +239,36 @@ class Request
         }
 
         return $value;
+    }
+
+    /**
+     * Alias of get, retrieve an input value.
+     *
+     * @param  string     $key
+     * @param  mixed|null $default
+     * @return mixed
+     */
+    public function input(string $key, mixed $default = null): mixed
+    {
+        return $this->get($key, $default);
+    }
+
+    /**
+     * Retrieve an input value as a boolean.
+     *
+     * Truthy values are 1, "1", true, "true", "on" and "yes".
+     *
+     * @param  string $key
+     * @param  bool   $default
+     * @return bool
+     */
+    public function boolean(string $key, bool $default = false): bool
+    {
+        if (!$this->has($key)) {
+            return $default;
+        }
+
+        return filter_var($this->get($key), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -317,7 +360,7 @@ class Request
      */
     public function hostname(): string
     {
-        return $_SERVER['HTTP_HOST'];
+        return $_SERVER['HTTP_HOST'] ?? '';
     }
 
     /**
@@ -327,9 +370,9 @@ class Request
      */
     public function domain(): string
     {
-        $part = explode(':', $this->hostname() ?? '');
+        $part = explode(':', $this->hostname());
 
-        return $part[0] ?? 'unknown';
+        return $part[0] ?: 'unknown';
     }
 
     /**
@@ -339,25 +382,24 @@ class Request
      */
     public function path(): string
     {
-        $position = strpos($_SERVER['REQUEST_URI'], '?');
+        $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $position = strpos($request_uri, '?');
 
-        if ($position) {
-            $uri = substr($_SERVER['REQUEST_URI'], 0, $position);
-        } else {
-            $uri = $_SERVER['REQUEST_URI'];
+        if ($position !== false) {
+            return substr($request_uri, 0, $position);
         }
 
-        return $uri;
+        return $request_uri;
     }
 
     /**
-     * Get path sent by client.
+     * Get the request time as a UNIX timestamp.
      *
-     * @return string
+     * @return int
      */
-    public function time(): string
+    public function time(): int
     {
-        return $_SESSION['REQUEST_TIME'];
+        return (int) ($_SERVER['REQUEST_TIME'] ?? time());
     }
 
     /**
@@ -402,7 +444,7 @@ class Request
             return null;
         }
 
-        if (!is_uploaded_file($_FILES[$key]['tmp_name']) === UPLOAD_ERR_OK) {
+        if (!is_array($_FILES[$key]['tmp_name']) && !is_uploaded_file($_FILES[$key]['tmp_name'])) {
             return null;
         }
 
@@ -430,14 +472,14 @@ class Request
      * Get previous request data
      *
      * @param  string $key
-     * @param  mixed  $fullback
+     * @param  mixed  $fallback
      * @return mixed
      */
-    public function old(string $key, mixed $fullback): mixed
+    public function old(string $key, mixed $fallback = null): mixed
     {
         $old = Session::getInstance()->get('__bow.old', []);
 
-        return $old[$key] ?? $fullback;
+        return $old[$key] ?? $fallback;
     }
 
     /**
@@ -531,7 +573,23 @@ class Request
      */
     public function ip(): ?string
     {
-        return $_SERVER['REMOTE_ADDR'] ?? null;
+        $candidates = [
+            $_SERVER['HTTP_CF_CONNECTING_IP'] ?? null,
+            isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+                ? explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]
+                : null,
+            $_SERVER['HTTP_X_REAL_IP'] ?? null,
+            $_SERVER['REMOTE_ADDR'] ?? null,
+        ];
+
+        foreach ($candidates as $candidate) {
+            $ip = trim((string) $candidate);
+            if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+                return $ip;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -557,9 +615,15 @@ class Request
     {
         $accept_language = $this->getHeader('accept-language');
 
+        if (!$accept_language) {
+            return null;
+        }
+
         $tmp = explode(';', $accept_language)[0];
 
-        preg_match('^([a-z]+)[-_]?/i', $tmp, $match);
+        if (!preg_match('/([a-z]+)[-_]?/i', $tmp, $match)) {
+            return null;
+        }
 
         return end($match);
     }
@@ -642,6 +706,22 @@ class Request
     public function userAgent(): ?string
     {
         return $this->getHeader('USER_AGENT');
+    }
+
+    /**
+     * Get the Bearer token from the Authorization header.
+     *
+     * @return ?string
+     */
+    public function bearerToken(): ?string
+    {
+        $authorization = $this->getHeader('authorization');
+
+        if ($authorization && str_starts_with($authorization, 'Bearer ')) {
+            return substr($authorization, 7);
+        }
+
+        return null;
     }
 
     /**
