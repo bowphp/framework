@@ -7,6 +7,7 @@ namespace Bow\Queue\Adapters;
 use Bow\Queue\QueueTask;
 use Pheanstalk\Contract\JobIdInterface;
 use Pheanstalk\Contract\PheanstalkPublisherInterface;
+use Pheanstalk\Exception\ConnectionException;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\Values\Job;
 use Pheanstalk\Values\Timeout;
@@ -25,6 +26,17 @@ class BeanstalkdAdapter extends QueueAdapter
      * Cache key for storing queue names
      */
     private const QUEUE_CACHE_KEY = "beanstalkd:queues";
+
+    /**
+     * Seconds the server is allowed to hold a reserve before answering
+     *
+     * Pheanstalk 8 adds this to the socket receive timeout while it waits, so
+     * any value is safe there. Pheanstalk 5 does not, and reads with the plain
+     * receive timeout, which defaults to 10 seconds: past that the socket read
+     * expires before beanstalkd answers and an idle tube surfaces as a
+     * connection error instead of "no job". Stay below it to support both.
+     */
+    private const RESERVE_TIMEOUT = 5;
 
     /**
      * The Pheanstalk client instance
@@ -144,14 +156,17 @@ class BeanstalkdAdapter extends QueueAdapter
      */
     public function run(?string $queue = null): void
     {
-        $queueName = $this->getQueue($queue);
-        $this->pheanstalk->watch(new TubeName($queueName));
+        $job = $this->reserveNextJob($this->getQueue($queue));
+
+        // The tube stayed empty for the whole reserve window, or the server is
+        // unreachable. Neither is a task failure, so there is nothing to report.
+        if (is_null($job)) {
+            return;
+        }
 
         $task = null;
-        $job = null;
 
         try {
-            $job = $this->pheanstalk->reserve();
             $task = $this->unserializeProducer($job->getData());
 
             $this->executeTask($task);
@@ -160,6 +175,36 @@ class BeanstalkdAdapter extends QueueAdapter
             $this->updateProcessingTimeout();
         } catch (Throwable $e) {
             $this->handleTaskFailure($job, $task, $e);
+        }
+    }
+
+    /**
+     * Reserve the next job to process on the given tube
+     *
+     * An idle tube is not a failure and must not be reported as one. A plain
+     * reserve() blocks server side until a job shows up, so the socket read
+     * expires first and an empty queue surfaces as "Socket error 35: Resource
+     * temporarily unavailable" logged as a failed task on every idle window.
+     * reserveWithTimeout() lets beanstalkd answer TIMED_OUT instead, which
+     * Pheanstalk reports as null.
+     *
+     * @param  string $queueName
+     * @return Job|null
+     */
+    private function reserveNextJob(string $queueName): ?Job
+    {
+        try {
+            $this->pheanstalk->watch(new TubeName($queueName));
+
+            return $this->pheanstalk->reserveWithTimeout(self::RESERVE_TIMEOUT);
+        } catch (ConnectionException $exception) {
+            // The server is unreachable, which says nothing about any task.
+            // Pheanstalk drops the socket on this and reconnects on the next
+            // command, so back off rather than spin on reconnect attempts.
+            $this->logError($exception);
+            $this->sleep(1);
+
+            return null;
         }
     }
 
