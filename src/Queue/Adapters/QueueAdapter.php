@@ -387,15 +387,23 @@ abstract class QueueAdapter
     /**
      * Log failed task
      *
-     * @param QueueTask $task
+     * The task is nullable because a failure can occur before the task is
+     * resolved, typically when the payload cannot be unserialized.
+     *
+     * @param QueueTask|null $task
      * @param \Throwable $e
      * @return void
      */
-    protected function logFailedTask(QueueTask $task, \Throwable $e): void
+    protected function logFailedTask(?QueueTask $task, \Throwable $e): void
     {
         if (static::$suppressLogging) {
             return;
         }
-        error_log('Task failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+
+        $description = is_null($task)
+            ? 'unresolved task'
+            : get_class($task) . ' with ID: ' . $task->getId();
+
+        error_log('Task failed: ' . $description . ', ' . $e->getMessage() . "\n" . $e->getTraceAsString());
     }
 }

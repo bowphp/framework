@@ -8,6 +8,7 @@ use Bow\Queue\QueueTask;
 use Pheanstalk\Contract\JobIdInterface;
 use Pheanstalk\Contract\PheanstalkPublisherInterface;
 use Pheanstalk\Pheanstalk;
+use Pheanstalk\Values\Job;
 use Pheanstalk\Values\Timeout;
 use Pheanstalk\Values\TubeName;
 use RuntimeException;
@@ -180,12 +181,12 @@ class BeanstalkdAdapter extends QueueAdapter
     /**
      * Handle task failure
      *
-     * @param  JobIdInterface|null $job
+     * @param  Job|null $job
      * @param  QueueTask|null $task
      * @param  Throwable $exception
      * @return void
      */
-    private function handleTaskFailure(?JobIdInterface $job, ?QueueTask $task, Throwable $exception): void
+    private function handleTaskFailure(?Job $job, ?QueueTask $task, Throwable $exception): void
     {
         $this->logError($exception);
 
@@ -195,22 +196,81 @@ class BeanstalkdAdapter extends QueueAdapter
             return;
         }
 
-        cache("task:failed:" . $task->getId(), method_exists($task, 'getData') ? $task->getData() : "");
-
+        // Poison message: the reserved body could not be unserialized into a
+        // QueueTask ($task is null), so there is no task id to key on and no
+        // task to retry. Keep the raw body for inspection, then delete the job
+        // BEFORE dereferencing $task below — leaving it would redeliver on TTR
+        // and crash-loop the worker.
         if (is_null($task)) {
+            $this->recordFailedPayload("task:failed:job:" . $job->getId(), $job->getData());
             $this->pheanstalk->delete($job);
             return;
         }
 
-        $task->onException($exception);
-
-        if ($task->taskShouldBeDelete()) {
+        if ($this->resolveFailedTask($job, $task, $exception)) {
             $this->pheanstalk->delete($job);
         } else {
             $this->releaseTask($job, $task);
         }
 
         $this->sleep(1);
+    }
+
+    /**
+     * Run the task defined failure handling and decide whether to drop the job
+     *
+     * Everything the task exposes here is overridable, so it is user code:
+     * getId(), getData(), onException() and taskShouldBeDelete() may all throw.
+     * A throw must not escape, otherwise the job is never deleted nor released,
+     * it redelivers on TTR and the worker crash-loops on it. getPriority() and
+     * getDelay(), used when releasing, are final and cannot throw.
+     *
+     * @param  Job $job
+     * @param  QueueTask $task
+     * @param  Throwable $exception
+     * @return bool Whether the job should be deleted
+     */
+    private function resolveFailedTask(Job $job, QueueTask $task, Throwable $exception): bool
+    {
+        try {
+            $this->recordFailedPayload(
+                "task:failed:" . $task->getId(),
+                method_exists($task, 'getData') ? $task->getData() : ""
+            );
+
+            $task->onException($exception);
+
+            return $task->taskShouldBeDelete();
+        } catch (Throwable $taskException) {
+            $this->logError($taskException);
+
+            // The task cannot handle its own failure, so retrying it would most
+            // likely break the same way. Keep the raw body under the job id,
+            // since the task id may be exactly what failed, then drop the job.
+            $this->recordFailedPayload("task:failed:job:" . $job->getId(), $job->getData());
+
+            return true;
+        }
+    }
+
+    /**
+     * Store the failed payload for later inspection
+     *
+     * Recording is best effort: the cache is not guaranteed to be configured in
+     * a worker process, and a throw here would escape the failure handler and
+     * kill the worker before the job is deleted, making it redeliver on TTR.
+     *
+     * @param  string $key
+     * @param  mixed $payload
+     * @return void
+     */
+    private function recordFailedPayload(string $key, mixed $payload): void
+    {
+        try {
+            cache($key, $payload);
+        } catch (Throwable $exception) {
+            $this->logError($exception);
+        }
     }
 
     /**
