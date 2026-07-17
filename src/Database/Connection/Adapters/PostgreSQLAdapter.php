@@ -29,7 +29,7 @@ class PostgreSQLAdapter extends AbstractConnection
      * @param  array $config
      * @return void
      */
-    protected function validateConfig(array $config): void
+    protected function validateConfig(#[\SensitiveParameter] array $config): void
     {
         // Check the existence of database definition
         if (!isset($config['database'])) {
@@ -43,7 +43,7 @@ class PostgreSQLAdapter extends AbstractConnection
      * @param  array $config
      * @return PDO
      */
-    protected function makePdo(array $config): PDO
+    protected function makePdo(#[\SensitiveParameter] array $config): PDO
     {
         // Build of the pgsql dsn
         if (isset($config['socket']) && !is_null($config['socket']) && !empty($config['socket'])) {

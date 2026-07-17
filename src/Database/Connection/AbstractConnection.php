@@ -67,7 +67,7 @@ abstract class AbstractConnection
      *
      * @param array $config
      */
-    public function __construct(array $config)
+    public function __construct(#[\SensitiveParameter] array $config)
     {
         $this->config = $config;
 
@@ -95,7 +95,7 @@ abstract class AbstractConnection
      * @param  array $config
      * @return void
      */
-    abstract protected function validateConfig(array $config): void;
+    abstract protected function validateConfig(#[\SensitiveParameter] array $config): void;
 
     /**
      * Build a PDO instance from the given configuration.
@@ -103,7 +103,7 @@ abstract class AbstractConnection
      * @param  array $config
      * @return PDO
      */
-    abstract protected function makePdo(array $config): PDO;
+    abstract protected function makePdo(#[\SensitiveParameter] array $config): PDO;
 
     /**
      * Build (eagerly) the write connection.

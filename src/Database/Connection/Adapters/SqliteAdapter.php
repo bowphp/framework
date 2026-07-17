@@ -23,7 +23,7 @@ class SqliteAdapter extends AbstractConnection
      * @param  array $config
      * @return void
      */
-    protected function validateConfig(array $config): void
+    protected function validateConfig(#[\SensitiveParameter] array $config): void
     {
         if (!isset($config['driver'])) {
             throw new InvalidArgumentException("Please select the right sqlite driver");
@@ -40,7 +40,7 @@ class SqliteAdapter extends AbstractConnection
      * @param  array $config
      * @return PDO
      */
-    protected function makePdo(array $config): PDO
+    protected function makePdo(#[\SensitiveParameter] array $config): PDO
     {
         // Build the PDO connection
         $pdo = new PDO('sqlite:' . $config['database']);
