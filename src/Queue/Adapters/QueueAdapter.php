@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\QueueTask;
+use Bow\Security\Crypto;
+use RuntimeException;
 use Throwable;
 
 abstract class QueueAdapter
@@ -97,7 +99,12 @@ abstract class QueueAdapter
      */
     public function serializeProducer(QueueTask $task): string
     {
-        return serialize($task);
+        // Authenticate the payload (encrypt-then-MAC) so a worker will only ever
+        // unserialize bytes this application produced. Without this, anyone able
+        // to write to the queue backend could deliver a crafted serialized
+        // object and trigger PHP object injection (RCE via a POP chain) when the
+        // worker deserializes it.
+        return Crypto::encrypt(serialize($task));
     }
 
     /**
@@ -108,7 +115,19 @@ abstract class QueueAdapter
      */
     public function unserializeProducer(string $task): QueueTask
     {
-        return unserialize($task);
+        // Verify integrity BEFORE unserialize(). Crypto::decrypt fails closed
+        // (returns false) on a tampered, forged or wrong-key payload, so crafted
+        // bytes never reach unserialize(). Only payloads produced by
+        // serializeProducer() with this application's key get past this point.
+        $plain = Crypto::decrypt($task);
+
+        if ($plain === false) {
+            throw new RuntimeException(
+                'Queue payload failed integrity verification and was rejected.'
+            );
+        }
+
+        return unserialize($plain);
     }
 
     /**
