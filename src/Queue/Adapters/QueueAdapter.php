@@ -65,6 +65,14 @@ abstract class QueueAdapter
     protected static bool $suppressLogging = false;
 
     /**
+     * Cached queue payload protection mode ('encrypt' | 'sign'), resolved once
+     * from config on first use. Null until resolved.
+     *
+     * @var ?string
+     */
+    private ?string $payload_protection = null;
+
+    /**
      * Enable or disable logging suppression
      *
      * @param bool $suppress
@@ -99,12 +107,43 @@ abstract class QueueAdapter
      */
     public function serializeProducer(QueueTask $task): string
     {
-        // Authenticate the payload (encrypt-then-MAC) so a worker will only ever
-        // unserialize bytes this application produced. Without this, anyone able
-        // to write to the queue backend could deliver a crafted serialized
-        // object and trigger PHP object injection (RCE via a POP chain) when the
-        // worker deserializes it.
-        return Crypto::encrypt(serialize($task));
+        // Authenticate the payload so a worker will only ever unserialize bytes
+        // this application produced. Without this, anyone able to write to the
+        // queue backend could deliver a crafted serialized object and trigger PHP
+        // object injection (RCE via a POP chain) when the worker deserializes it.
+        //
+        // 'encrypt' (default) also keeps the payload confidential in the broker;
+        // 'sign' leaves it readable for debugging while staying tamper-proof.
+        $serialized = serialize($task);
+
+        return $this->payloadProtection() === 'sign'
+            ? Crypto::sign($serialized)
+            : Crypto::encrypt($serialized);
+    }
+
+    /**
+     * Resolve the configured queue payload protection mode.
+     *
+     * 'encrypt' (confidential + tamper-proof) is the secure default; only an
+     * explicit config('queue.payload_protection') === 'sign' opts into the
+     * readable-but-signed format. Falls back to 'encrypt' when config is not
+     * booted, so the secure behaviour holds in every context.
+     *
+     * @return string
+     */
+    private function payloadProtection(): string
+    {
+        if ($this->payload_protection === null) {
+            try {
+                $mode = config('queue.payload_protection');
+            } catch (Throwable) {
+                $mode = null;
+            }
+
+            $this->payload_protection = $mode === 'sign' ? 'sign' : 'encrypt';
+        }
+
+        return $this->payload_protection;
     }
 
     /**
@@ -115,11 +154,16 @@ abstract class QueueAdapter
      */
     public function unserializeProducer(string $task): QueueTask
     {
-        // Verify integrity BEFORE unserialize(). Crypto::decrypt fails closed
-        // (returns false) on a tampered, forged or wrong-key payload, so crafted
-        // bytes never reach unserialize(). Only payloads produced by
-        // serializeProducer() with this application's key get past this point.
-        $plain = Crypto::decrypt($task);
+        // Verify integrity BEFORE unserialize(). Both schemes fail closed
+        // (return false) on a tampered, forged or wrong-key payload, so crafted
+        // bytes never reach unserialize(). We accept either the signed or the
+        // encrypted format regardless of the configured mode, so flipping
+        // queue.payload_protection during a rollout never drops in-flight jobs.
+        $plain = Crypto::verify($task);
+
+        if ($plain === false) {
+            $plain = Crypto::decrypt($task);
+        }
 
         if ($plain === false) {
             throw new RuntimeException(
