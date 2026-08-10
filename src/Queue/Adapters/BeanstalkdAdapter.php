@@ -299,26 +299,6 @@ class BeanstalkdAdapter extends QueueAdapter
     }
 
     /**
-     * Store the failed payload for later inspection
-     *
-     * Recording is best effort: the cache is not guaranteed to be configured in
-     * a worker process, and a throw here would escape the failure handler and
-     * kill the worker before the job is deleted, making it redeliver on TTR.
-     *
-     * @param  string $key
-     * @param  mixed $payload
-     * @return void
-     */
-    private function recordFailedPayload(string $key, mixed $payload): void
-    {
-        try {
-            cache($key, $payload);
-        } catch (Throwable $exception) {
-            $this->logError($exception);
-        }
-    }
-
-    /**
      * Release the task back to the queue for retry
      *
      * @param  JobIdInterface $job

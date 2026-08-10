@@ -171,7 +171,48 @@ abstract class QueueAdapter
             );
         }
 
-        return unserialize($plain);
+        $producer = unserialize($plain);
+
+        // The payload is authentic but names a class this process cannot load:
+        // the task was renamed or removed, the worker runs an older revision than
+        // the producer, or another application shares the broker. PHP hands back a
+        // __PHP_Incomplete_Class, which the QueueTask return type would surface as
+        // an opaque TypeError. Name the class instead so the poison payload the
+        // adapters record points straight at the missing task.
+        if (!$producer instanceof QueueTask) {
+            throw new RuntimeException(sprintf(
+                'Queue payload does not hold a %s, got %s.',
+                QueueTask::class,
+                $this->describeProducer($producer)
+            ));
+        }
+
+        return $producer;
+    }
+
+    /**
+     * Describe what came out of the payload for the rejection message
+     *
+     * A __PHP_Incomplete_Class keeps the original class name in a magic property,
+     * which get_class() does not expose, so read it out to report the task the
+     * worker is missing rather than the placeholder type.
+     *
+     * @param  mixed $producer
+     * @return string
+     */
+    private function describeProducer(mixed $producer): string
+    {
+        if (!is_object($producer)) {
+            return get_debug_type($producer);
+        }
+
+        if (!$producer instanceof \__PHP_Incomplete_Class) {
+            return $producer::class;
+        }
+
+        $name = ((array) $producer)['__PHP_Incomplete_Class_Name'] ?? 'unknown';
+
+        return sprintf('the unloadable class %s', $name);
     }
 
     /**
@@ -416,6 +457,26 @@ abstract class QueueAdapter
     final protected function generateId(): string
     {
         return md5(uniqid((string) time(), true) . bin2hex(random_bytes(10)) . str_uuid() . microtime(true));
+    }
+
+    /**
+     * Store the failed payload for later inspection
+     *
+     * Recording is best effort: the cache is not guaranteed to be configured in
+     * a worker process, and a throw here would escape the failure handler and
+     * kill the worker before the message is settled, making it redeliver.
+     *
+     * @param  string $key
+     * @param  mixed $payload
+     * @return void
+     */
+    protected function recordFailedPayload(string $key, mixed $payload): void
+    {
+        try {
+            cache($key, $payload);
+        } catch (Throwable $exception) {
+            $this->logError($exception);
+        }
     }
 
     /**

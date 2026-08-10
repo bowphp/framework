@@ -146,6 +146,18 @@ class Application
 
         $this->router->setPrefix('');
 
+        // Raised here rather than from Request::capture(), which runs during
+        // this class's constructor — too early for the container or the error
+        // handler to turn it into a response. By now both are up, so a bad
+        // payload is a rendered 400 instead of an uncaught PHP fatal.
+        $invalid_json_payload = $this->request->getInvalidJsonPayload();
+
+        if (!is_null($invalid_json_payload)) {
+            throw new BadRequestException(
+                "The request json payload is invalid: " . $invalid_json_payload,
+            );
+        }
+
         $method = $this->request->method();
 
         // We verify the existence of the method of the request in
@@ -213,12 +225,17 @@ class Application
      * @param  int   $code
      * @return void
      */
-    private function sendResponse(mixed $response, int $code = 200): void
+    private function sendResponse(mixed $response, ?int $code = null): void
     {
         if ($response instanceof ResponseInterface) {
             $response->sendContent();
         } else {
-            echo $this->response->send($response, $code);
+            // Carry the status the response already holds. A controller that
+            // returned response()->json($data, 404) has set it on this very
+            // instance, and passing a hardcoded 200 here overwrote it — every
+            // json() error answered 200 with an error body, so clients could
+            // not tell success from failure.
+            echo $this->response->send($response, $code ?? $this->response->getCode());
         }
     }
 
