@@ -6,6 +6,7 @@ use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
+use Bow\Security\CryptoConfiguration;
 use Bow\Mail\MailConfiguration;
 use Bow\Notifier\Notifier;
 use Bow\Notifier\NotifierQueueTask;
@@ -33,6 +34,7 @@ class NotifierQueueTest extends TestCase
             DatabaseConfiguration::class,
             QueueConfiguration::class,
             EnvConfiguration::class,
+            CryptoConfiguration::class,
             LoggerConfiguration::class,
             MailConfiguration::class,
             ViewConfiguration::class,

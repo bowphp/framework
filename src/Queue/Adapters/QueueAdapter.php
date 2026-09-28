@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Bow\Queue\Adapters;
 
 use Bow\Queue\QueueTask;
+use Bow\Security\Crypto;
+use RuntimeException;
 use Throwable;
 
 abstract class QueueAdapter
@@ -63,6 +65,14 @@ abstract class QueueAdapter
     protected static bool $suppressLogging = false;
 
     /**
+     * Cached queue payload protection mode ('encrypt' | 'sign'), resolved once
+     * from config on first use. Null until resolved.
+     *
+     * @var ?string
+     */
+    private ?string $payload_protection = null;
+
+    /**
      * Enable or disable logging suppression
      *
      * @param bool $suppress
@@ -97,7 +107,43 @@ abstract class QueueAdapter
      */
     public function serializeProducer(QueueTask $task): string
     {
-        return serialize($task);
+        // Authenticate the payload so a worker will only ever unserialize bytes
+        // this application produced. Without this, anyone able to write to the
+        // queue backend could deliver a crafted serialized object and trigger PHP
+        // object injection (RCE via a POP chain) when the worker deserializes it.
+        //
+        // 'encrypt' (default) also keeps the payload confidential in the broker;
+        // 'sign' leaves it readable for debugging while staying tamper-proof.
+        $serialized = serialize($task);
+
+        return $this->payloadProtection() === 'sign'
+            ? Crypto::sign($serialized)
+            : Crypto::encrypt($serialized);
+    }
+
+    /**
+     * Resolve the configured queue payload protection mode.
+     *
+     * 'encrypt' (confidential + tamper-proof) is the secure default; only an
+     * explicit config('queue.payload_protection') === 'sign' opts into the
+     * readable-but-signed format. Falls back to 'encrypt' when config is not
+     * booted, so the secure behaviour holds in every context.
+     *
+     * @return string
+     */
+    private function payloadProtection(): string
+    {
+        if ($this->payload_protection === null) {
+            try {
+                $mode = config('queue.payload_protection');
+            } catch (Throwable) {
+                $mode = null;
+            }
+
+            $this->payload_protection = $mode === 'sign' ? 'sign' : 'encrypt';
+        }
+
+        return $this->payload_protection;
     }
 
     /**
@@ -108,7 +154,65 @@ abstract class QueueAdapter
      */
     public function unserializeProducer(string $task): QueueTask
     {
-        return unserialize($task);
+        // Verify integrity BEFORE unserialize(). Both schemes fail closed
+        // (return false) on a tampered, forged or wrong-key payload, so crafted
+        // bytes never reach unserialize(). We accept either the signed or the
+        // encrypted format regardless of the configured mode, so flipping
+        // queue.payload_protection during a rollout never drops in-flight jobs.
+        $plain = Crypto::verify($task);
+
+        if ($plain === false) {
+            $plain = Crypto::decrypt($task);
+        }
+
+        if ($plain === false) {
+            throw new RuntimeException(
+                'Queue payload failed integrity verification and was rejected.'
+            );
+        }
+
+        $producer = unserialize($plain);
+
+        // The payload is authentic but names a class this process cannot load:
+        // the task was renamed or removed, the worker runs an older revision than
+        // the producer, or another application shares the broker. PHP hands back a
+        // __PHP_Incomplete_Class, which the QueueTask return type would surface as
+        // an opaque TypeError. Name the class instead so the poison payload the
+        // adapters record points straight at the missing task.
+        if (!$producer instanceof QueueTask) {
+            throw new RuntimeException(sprintf(
+                'Queue payload does not hold a %s, got %s.',
+                QueueTask::class,
+                $this->describeProducer($producer)
+            ));
+        }
+
+        return $producer;
+    }
+
+    /**
+     * Describe what came out of the payload for the rejection message
+     *
+     * A __PHP_Incomplete_Class keeps the original class name in a magic property,
+     * which get_class() does not expose, so read it out to report the task the
+     * worker is missing rather than the placeholder type.
+     *
+     * @param  mixed $producer
+     * @return string
+     */
+    private function describeProducer(mixed $producer): string
+    {
+        if (!is_object($producer)) {
+            return get_debug_type($producer);
+        }
+
+        if (!$producer instanceof \__PHP_Incomplete_Class) {
+            return $producer::class;
+        }
+
+        $name = ((array) $producer)['__PHP_Incomplete_Class_Name'] ?? 'unknown';
+
+        return sprintf('the unloadable class %s', $name);
     }
 
     /**
@@ -353,6 +457,26 @@ abstract class QueueAdapter
     final protected function generateId(): string
     {
         return md5(uniqid((string) time(), true) . bin2hex(random_bytes(10)) . str_uuid() . microtime(true));
+    }
+
+    /**
+     * Store the failed payload for later inspection
+     *
+     * Recording is best effort: the cache is not guaranteed to be configured in
+     * a worker process, and a throw here would escape the failure handler and
+     * kill the worker before the message is settled, making it redeliver.
+     *
+     * @param  string $key
+     * @param  mixed $payload
+     * @return void
+     */
+    protected function recordFailedPayload(string $key, mixed $payload): void
+    {
+        try {
+            cache($key, $payload);
+        } catch (Throwable $exception) {
+            $this->logError($exception);
+        }
     }
 
     /**

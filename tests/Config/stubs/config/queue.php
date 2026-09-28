@@ -7,6 +7,14 @@ return [
     "default" => "sync",
 
     /**
+     * How queue payloads are protected on the wire:
+     *   "encrypt" — confidential + tamper-proof (default, recommended)
+     *   "sign"    — tamper-proof but readable in the broker (easier to debug)
+     * Both require security.key to be configured.
+     */
+    "payload_protection" => "encrypt",
+
+    /**
      * The queue drive connection
      */
     "connections" => [

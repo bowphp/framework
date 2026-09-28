@@ -65,6 +65,13 @@ class Request
     private bool $capture = false;
 
     /**
+     * Why the JSON payload could not be decoded, when it could not be.
+     *
+     * @var string|null
+     */
+    private ?string $invalid_json_payload = null;
+
+    /**
      * Check if file exists
      *
      * @param  mixed $file
@@ -91,12 +98,30 @@ class Request
         $this->id = "req_" . sha1(uniqid() . time());
 
         if ($this->getHeader('content-type') == 'application/json') {
-            try {
-                $data = json_decode(file_get_contents("php://input"), true, 1024, JSON_THROW_ON_ERROR);
-            } catch (Throwable $e) {
-                throw new BadRequestException(
-                    "The request json payload is invalid: " . $e->getMessage(),
-                );
+            $raw = (string) file_get_contents("php://input");
+
+            // A bodyless request is not a malformed one. Clients routinely send
+            // "Content-Type: application/json" on a POST/DELETE that carries no
+            // payload, and json_decode('') throws — a throw this early cannot be
+            // rendered, because capture() runs from Application::__construct
+            // before the container binds "response", which BadRequestException
+            // needs. The client would get a raw PHP fatal instead of a 400.
+            if (trim($raw) === '') {
+                $data = [];
+            } else {
+                try {
+                    $data = json_decode($raw, true, 1024, JSON_THROW_ON_ERROR);
+                } catch (Throwable $e) {
+                    // Recorded, not thrown. capture() runs from
+                    // Application::__construct, which is too early for ANY
+                    // exception to be rendered: the container has not bound
+                    // "response" yet and the error handler is installed later
+                    // in the boot, so a throw here reaches the client as a raw
+                    // PHP fatal instead of a 400. Application::run() raises it
+                    // once both are in place.
+                    $this->invalid_json_payload = $e->getMessage();
+                    $data = [];
+                }
             }
         } else {
             $data = $_POST ?? [];
@@ -114,6 +139,17 @@ class Request
         }
 
         $this->capture = true;
+    }
+
+    /**
+     * The JSON decoding error for this request, or null when the payload was
+     * absent or well-formed.
+     *
+     * @return string|null
+     */
+    public function getInvalidJsonPayload(): ?string
+    {
+        return $this->invalid_json_payload;
     }
 
     /**
@@ -234,7 +270,12 @@ class Request
     {
         $value = $this->input[$key] ?? $default;
 
-        if (is_callable($value)) {
+        // Only a callable *default* may be resolved — a closure or an invokable
+        // object. Never a string or an array: those can come straight from the
+        // request, and is_callable() is true for the name of any defined
+        // function, so `?field=phpinfo` would call it and return its result in
+        // place of the input the caller asked for.
+        if (is_object($value) && is_callable($value)) {
             return $value();
         }
 

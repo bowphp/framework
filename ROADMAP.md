@@ -124,18 +124,18 @@ Highlights from the latest iterations — already merged into `5.x`. Full detail
 
 | Task                                                             | Status | Priority | Notes                                                            |
 | ---------------------------------------------------------------- | ------ | -------- | ---------------------------------------------------------------- |
-| Fix middleware attribute test (shared state between tests)       | ✅ Done | -        | `Router::$routes` converted to instance state                    |
+| Fix middleware attribute test (shared state between tests)       | ✅ Done | -        | `Router::$routes` converted to instance state                   |
 | Fix Pagination tests calling `total()` instead of `totalPages()` | ✅ Done | -        | 24 tests fixed                                                   |
-| Fix Barry model `array` cast returning `stdClass`                | ✅ Done | -        | `Model::executeDataCasting` + `parseToJson($value, assoc: true)` |
-| Fix Validator `nullable\|required` priority                      | ✅ Done | -        | `nullable` no longer short-circuits `required`                   |
-| Fix `EnvTest` singleton pollution between tests                  | ✅ Done | -        | `Env::reset()` added                                             |
-| Fix `SchedulerCommand` (`routes/scheduler.php` loading)          | ✅ Done | -        | `loadSchedulerFile()` updated, tolerates missing Loader          |
-| Remove dead `Model::$soft_delete` property                       | ✅ Done | -        | Replaced with a fully functional trait                           |
-| Improve `addEnum` / `changeEnum` error messages                  | ✅ Done | -        | Explicitly mention the `size` key                                |
-| Standardize method signatures                                    | ✅ Done | -        | PHP 8.1+ nullable types                                          |
-| Fix `(double)` → `(float)` cast                                  | ✅ Done | -        | `Model.php`                                                      |
-| Handle `array_key_exists` with null key                          | ✅ Done | -        | `Console.php`                                                    |
-| Create test directory if missing                                 | ✅ Done | -        | `CustomCommand.php`                                              |
+| Fix Barry model `array` cast returning `stdClass`                | ✅ Done | -        | `Model::executeDataCasting` + `parseToJson($value, assoc: true)`|
+| Fix Validator `nullable\|required` priority                      | ✅ Done | -        | `nullable` no longer short-circuits `required`                  |
+| Fix `EnvTest` singleton pollution between tests                  | ✅ Done | -        | `Env::reset()` added                                            |
+| Fix `SchedulerCommand` (`routes/scheduler.php` loading)          | ✅ Done | -        | `loadSchedulerFile()` updated, tolerates missing Loader         |
+| Remove dead `Model::$soft_delete` property                       | ✅ Done | -        | Replaced with a fully functional trait                          |
+| Improve `addEnum` / `changeEnum` error messages                  | ✅ Done | -        | Explicitly mention the `size` key                               |
+| Standardize method signatures                                    | ✅ Done | -        | PHP 8.1+ nullable types                                         |
+| Fix `(double)` → `(float)` cast                                   | ✅ Done | -        | `Model.php`                                                     |
+| Handle `array_key_exists` with null key                          | ✅ Done | -        | `Console.php`                                                   |
+| Create test directory if missing                                 | ✅ Done | -        | `CustomCommand.php`                                             |
 
 ### Documentation
 

@@ -6,6 +6,7 @@ use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
+use Bow\Security\CryptoConfiguration;
 use Bow\Event\EventQueueTask;
 use Bow\Mail\MailConfiguration;
 use Bow\Queue\Adapters\QueueAdapter;
@@ -33,6 +34,7 @@ class EventQueueTest extends TestCase
             QueueConfiguration::class,
             DatabaseConfiguration::class,
             EnvConfiguration::class,
+            CryptoConfiguration::class,
             LoggerConfiguration::class,
             MailConfiguration::class,
             ViewConfiguration::class,

@@ -44,6 +44,8 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $request->allows()->path()->andReturns($path);
         $request->allows()->get("_method")->andReturns("");
         $request->allows()->domain()->andReturns("localhost");
+        // run() asks whether the JSON body failed to decode; null = it did not.
+        $request->allows()->getInvalidJsonPayload()->andReturns(null);
 
         return $request;
     }
@@ -57,6 +59,9 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $response->allows()->withHeader('X-Powered-By', 'Bow Framework');
         $response->allows()->status($expectedStatus);
         $response->allows()->send(Mockery::any(), Mockery::any())->andReturn('');
+        // sendResponse() now reads the status already held by the response
+        // instead of overwriting it with a hardcoded 200.
+        $response->allows()->getCode()->andReturns($expectedStatus);
 
         return $response;
     }
@@ -146,6 +151,7 @@ class ApplicationTest extends \PHPUnit\Framework\TestCase
         $response->shouldNotReceive('withHeader')->with('X-Powered-By', Mockery::any());
         $response->allows()->status(200);
         $response->allows()->send(Mockery::any(), Mockery::any())->andReturn('');
+        $response->allows()->getCode()->andReturns(200);
 
         $config = $this->createConfigMock();
 

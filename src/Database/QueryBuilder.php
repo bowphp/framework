@@ -71,6 +71,17 @@ class QueryBuilder implements JsonSerializable
     protected ?string $having = null;
 
     /**
+     * Bound values for the having clause.
+     *
+     * Kept separate from where bindings because having placeholders appear
+     * after where placeholders in the assembled SQL; they are merged in the
+     * correct positional order when the having clause is appended.
+     *
+     * @var array
+     */
+    protected array $having_data_binding = [];
+
+    /**
      * Order By statement collector
      *
      * @var ?string
@@ -405,6 +416,34 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
+     * Guard a column/identifier that is interpolated straight into SQL.
+     *
+     * Clauses like order by, group by and having name a column instead of
+     * binding a value, so the identifier cannot be a placeholder and is
+     * concatenated into the statement. Restrict it to a plain (optionally
+     * table-qualified) identifier so it can never carry an injected fragment.
+     * Raw expressions are intentionally not accepted here.
+     *
+     * @param  string $identifier
+     * @param  string $clause
+     * @return string
+     * @throws QueryBuilderException
+     */
+    private static function assertSafeIdentifier(string $identifier, string $clause): string
+    {
+        $trimmed = trim($identifier);
+
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$/', $trimmed)) {
+            throw new QueryBuilderException(
+                "Unsafe identifier passed to {$clause}: [{$identifier}]. "
+                . "Only a plain or table-qualified column name is allowed."
+            );
+        }
+
+        return $trimmed;
+    }
+
+    /**
      * Formats the select request
      *
      * @return string
@@ -464,6 +503,15 @@ class QueryBuilder implements JsonSerializable
 
             if (!is_null($this->having)) {
                 $sql .= ' having ' . $this->having;
+
+                // having placeholders come after where placeholders in the SQL,
+                // so appending their values here keeps the positional order.
+                $this->where_data_binding = array_merge(
+                    $this->where_data_binding,
+                    $this->having_data_binding
+                );
+                $this->having_data_binding = [];
+                $this->having = null;
             }
         }
 
@@ -877,7 +925,7 @@ class QueryBuilder implements JsonSerializable
     public function groupBy(string $column): QueryBuilder
     {
         if (is_null($this->group)) {
-            $this->group = $column;
+            $this->group = static::assertSafeIdentifier($column, 'groupBy');
         }
 
         return $this;
@@ -904,10 +952,21 @@ class QueryBuilder implements JsonSerializable
             $comparator = '=';
         }
 
-        if (is_null($this->having)) {
-            $this->having = $column . ' ' . $comparator . ' ' . $value;
+        $column = static::assertSafeIdentifier($column, 'having');
+
+        // Bind the value with a placeholder, exactly like where(). A subquery
+        // is inlined; any scalar is parameterised so it can never be injected.
+        if ($value instanceof QueryBuilder) {
+            $indicator = '(' . $value->toSql() . ')';
         } else {
-            $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' ' . $value;
+            $indicator = '?';
+            $this->having_data_binding[] = $value;
+        }
+
+        if (is_null($this->having)) {
+            $this->having = $column . ' ' . $comparator . ' ' . $indicator;
+        } else {
+            $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' ' . $indicator;
         }
 
         return $this;
@@ -925,6 +984,8 @@ class QueryBuilder implements JsonSerializable
         if (!in_array($type, ['asc', 'desc'])) {
             $type = 'asc';
         }
+
+        $column = static::assertSafeIdentifier($column, 'orderBy');
 
         if (is_null($this->order)) {
             $this->order = 'order by ' . $column . ' ' . strtolower($type);
@@ -977,6 +1038,14 @@ class QueryBuilder implements JsonSerializable
 
             if (!is_null($this->having)) {
                 $sql .= ' having ' . $this->having;
+
+                // Keep having values positionally after where values.
+                $this->where_data_binding = array_merge(
+                    $this->where_data_binding,
+                    $this->having_data_binding
+                );
+                $this->having_data_binding = [];
+                $this->having = null;
             }
         }
 

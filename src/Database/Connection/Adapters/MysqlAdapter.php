@@ -30,7 +30,7 @@ class MysqlAdapter extends AbstractConnection
      * @param  array $config
      * @return void
      */
-    protected function validateConfig(array $config): void
+    protected function validateConfig(#[\SensitiveParameter] array $config): void
     {
         // Check the existence of database definition
         if (!isset($config['database'])) {
@@ -44,7 +44,7 @@ class MysqlAdapter extends AbstractConnection
      * @param  array $config
      * @return PDO
      */
-    protected function makePdo(array $config): PDO
+    protected function makePdo(#[\SensitiveParameter] array $config): PDO
     {
         // Build of the mysql dsn
         if (isset($config['socket']) && !empty($config['socket'])) {
