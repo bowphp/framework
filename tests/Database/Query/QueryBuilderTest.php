@@ -360,6 +360,37 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * SQL-injection guard: a malicious column name must be rejected.
+     *
+     * Uses a local in-memory SQLite PDO so it needs no external connection.
+     */
+    public function test_where_rejects_unsafe_column_identifier()
+    {
+        $builder = new QueryBuilder('users', new \PDO('sqlite::memory:'));
+
+        $this->expectException(QueryBuilderException::class);
+
+        $builder->where('1=1 UNION SELECT password FROM admins -- ', '=', 'x');
+    }
+
+    /**
+     * SQL-injection guard: whereBetween must bind both bounds as placeholders
+     * instead of concatenating them into the statement.
+     */
+    public function test_where_between_binds_both_bounds()
+    {
+        $builder = new QueryBuilder('users', new \PDO('sqlite::memory:'));
+        $builder->whereBetween('price', ['0', '100 OR 1=1 -- ']);
+
+        $this->assertStringContainsString('price between ? and ?', $builder->toSql());
+
+        $property = (new \ReflectionObject($builder))->getProperty('where_data_binding');
+        $property->setAccessible(true);
+
+        $this->assertSame(['0', '100 OR 1=1 -- '], $property->getValue($builder));
+    }
+
+    /**
      * @return array
      */
     public function connectionNameProvider(): array

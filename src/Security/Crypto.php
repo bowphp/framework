@@ -23,6 +23,15 @@ class Crypto
     private static string $cipher = 'AES-256-CBC';
 
     /**
+     * Whether decrypt() may fall back to the unauthenticated legacy format
+     * (static IV, no MAC) for values lacking the BOW2: header. Disabled by
+     * default so decrypt() fails closed; opt in only to read old ciphertexts.
+     *
+     * @var bool
+     */
+    private static bool $allow_legacy = false;
+
+    /**
      * Header tagging the authenticated (random-IV + HMAC) payload format.
      *
      * The ':' is not part of the base64 alphabet, so a value carrying this
@@ -54,6 +63,17 @@ class Crypto
         if (!is_null($cipher)) {
             static::$cipher = $cipher;
         }
+    }
+
+    /**
+     * Allow or forbid decrypt() from falling back to the unauthenticated legacy
+     * format. Off by default; enable only while migrating old ciphertexts.
+     *
+     * @param bool $allow
+     */
+    public static function allowLegacy(bool $allow = true): void
+    {
+        static::$allow_legacy = $allow;
     }
 
     /**
@@ -107,6 +127,12 @@ class Crypto
         $key = static::resolveKey();
 
         if (!str_starts_with($data, self::HEADER)) {
+            // Fail closed on non-authenticated input unless the legacy format
+            // has been explicitly re-enabled for migration.
+            if (!static::$allow_legacy) {
+                return false;
+            }
+
             return static::decryptLegacy($data, $key);
         }
 

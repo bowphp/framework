@@ -140,6 +140,10 @@ class UploadedFile
 
         if (is_null($filename)) {
             $filename = $this->getHashName();
+        } else {
+            // Strip any directory component from an explicit filename to prevent
+            // path traversal outside of the destination directory.
+            $filename = basename($filename);
         }
 
         if (!is_dir($to)) {

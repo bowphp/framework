@@ -108,6 +108,9 @@ class Response implements ResponseInterface
     /**
      * Download the given file as an argument
      *
+     * Note: $file is expected to be a trusted, caller-controlled path. Never
+     * pass unsanitized user input as $file, as it is read directly from disk.
+     *
      * @param  string  $file
      * @param  ?string $filename
      * @param  array   $headers
@@ -124,9 +127,13 @@ class Response implements ResponseInterface
             $filename = basename($file);
         }
 
+        // Sanitize the filename used in the Content-Disposition header to prevent
+        // header injection and path disclosure (strip directory, CR/LF and quotes).
+        $filename = str_replace(["\r", "\n", '"'], '', basename($filename));
+
         $disposition = $headers["disposition"] ?? 'attachment';
 
-        $this->withHeader('Content-Disposition', $disposition . '; filename=' . $filename);
+        $this->withHeader('Content-Disposition', $disposition . '; filename="' . $filename . '"');
         $this->withHeader('Content-Type', $type);
 
         $file_size = filesize($file);

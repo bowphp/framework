@@ -25,8 +25,14 @@ class CsrfMiddleware implements BaseMiddleware
             }
         }
 
+        $session = (string) $request->session()->get('_token');
+
         if ($request->isAjax()) {
-            if ($request->getHeader('x-csrf-token') === session('_token')) {
+            $provided = (string) $request->getHeader('x-csrf-token');
+
+            // Reject empties then constant-time compare, so an unset session
+            // token can no longer be matched by an absent/empty header.
+            if ($session !== '' && hash_equals($session, $provided)) {
                 return $next($request);
             }
 
@@ -37,7 +43,11 @@ class CsrfMiddleware implements BaseMiddleware
             );
         }
 
-        if ($request->get('_token') == $request->session()->get('_token')) {
+        $provided = (string) $request->get('_token');
+
+        // Reject empties then constant-time compare, so an unset session token
+        // can no longer be matched by an absent/empty form token.
+        if ($session !== '' && hash_equals($session, $provided)) {
             return $next($request);
         }
 
