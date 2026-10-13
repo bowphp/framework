@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.4.15 - 2026-10-13
+
+### What's Changed
+
+* Validator JSON types, empty whereIn, pgsql emulate_prepares, string traces by @papac in https://github.com/bowphp/framework/pull/431
+* Update CHANGELOG by @papac in https://github.com/bowphp/framework/pull/432
+* CI: replace the removed MinIO images so docker compose starts again by @papac in https://github.com/bowphp/framework/pull/433
+
+**Full Changelog**: https://github.com/bowphp/framework/compare/5.4.14...5.4.15
+
 ## 5.4.13 - 2026-09-28
 
 ### What's Changed
@@ -367,6 +377,7 @@ This method aims to execute an SQL transaction around a passed arrow function.
 
 ```php
 Database::transaction(fn() => $user->update(['name' => '']));
+
 
 
 
