@@ -23,12 +23,39 @@ trait NullableRule
             return false;
         }
 
-        if (isset($this->inputs[$key]) && !Str::isEmpty($this->inputs[$key])) {
+        if (!$this->isBlankInput($this->inputs[$key] ?? null)) {
             return false;
         }
 
         $this->inputs[$key] = null;
 
         return true;
+    }
+
+    /**
+     * Whether a submitted value counts as "nothing was sent".
+     *
+     * Inputs arrive with their native type when the request body is JSON, so
+     * false, 0 and 0.0 are real values and must be validated by the rules that
+     * follow; only null, a blank string and an empty array are absent.
+     *
+     * @param  mixed $value
+     * @return bool
+     */
+    private function isBlankInput(mixed $value): bool
+    {
+        if ($value === null) {
+            return true;
+        }
+
+        if (is_string($value)) {
+            return Str::isEmpty($value);
+        }
+
+        if (is_array($value)) {
+            return $value === [];
+        }
+
+        return false;
     }
 }
