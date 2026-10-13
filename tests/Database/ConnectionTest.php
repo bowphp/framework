@@ -186,6 +186,30 @@ class ConnectionTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('pgsql', $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
     }
 
+    public function test_pgsql_emulate_prepares_is_off_by_default()
+    {
+        $pdo = static::$pgsqlAdapter->getConnection();
+
+        $this->assertFalse((bool) $pdo->getAttribute(PDO::ATTR_EMULATE_PREPARES));
+    }
+
+    /**
+     * Behind a connection pooler a server-side prepared statement can outlive a
+     * schema change and fail with SQLSTATE 0A000 "cached plan must not change
+     * result type". `emulate_prepares` lets a connection opt out of
+     * server-side prepares; PDO then quotes the values itself.
+     */
+    public function test_pgsql_emulate_prepares_can_be_enabled_per_connection()
+    {
+        $config = static::$config["database"]['connections']['pgsql'];
+        $config['emulate_prepares'] = true;
+
+        $pdo = (new PostgreSQLAdapter($config))->getConnection();
+
+        $this->assertTrue((bool) $pdo->getAttribute(PDO::ATTR_EMULATE_PREPARES));
+        $this->assertEquals('pgsql', $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+    }
+
     public function test_pgsql_adapter_name()
     {
         $this->assertEquals('pgsql', static::$pgsqlAdapter->getName());

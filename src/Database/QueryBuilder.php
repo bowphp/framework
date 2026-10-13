@@ -723,7 +723,9 @@ class QueryBuilder implements JsonSerializable
             $this->where_data_binding = array_merge($this->where_data_binding, $range);
 
             $map = array_map(fn() => '?', $range);
-            $in = implode(', ', $map);
+            // An empty list is `in (null)`: valid SQL that matches no row,
+            // where `in ()` is a syntax error (SQLSTATE 42601).
+            $in = $range === [] ? 'null' : implode(', ', $map);
         } else {
             $in = (string) $range;
         }

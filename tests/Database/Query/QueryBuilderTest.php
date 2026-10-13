@@ -374,6 +374,30 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * whereIn() with an empty list used to build `column in ()`, which is
+     * invalid SQL (SQLSTATE 42601). An empty list means "match nothing", and
+     * `in (null)` is valid everywhere and matches no row.
+     */
+    public function test_where_in_with_empty_list_matches_nothing()
+    {
+        $pdo = new \PDO('sqlite::memory:');
+        $pdo->exec('create table users (id integer primary key, name text)');
+        $pdo->exec("insert into users (id, name) values (1, 'a'), (2, 'b')");
+
+        $builder = new QueryBuilder('users', $pdo);
+        $builder->whereIn('id', []);
+
+        $this->assertStringContainsString('id in (null)', $builder->toSql());
+
+        $property = (new \ReflectionObject($builder))->getProperty('where_data_binding');
+        $property->setAccessible(true);
+        $this->assertSame([], $property->getValue($builder));
+
+        $this->assertSame([], (array) (new QueryBuilder('users', $pdo))->whereIn('id', [])->get());
+        $this->assertCount(1, (array) (new QueryBuilder('users', $pdo))->whereIn('id', [2])->get());
+    }
+
+    /**
      * SQL-injection guard: whereBetween must bind both bounds as placeholders
      * instead of concatenating them into the statement.
      */
