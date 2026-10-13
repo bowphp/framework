@@ -54,10 +54,17 @@ jobs:
             sleep 2
           done
 
-      - name: Wait for MinIO bucket initialization
+      - name: Wait for the MinIO test bucket
         run: |
-          echo "Waiting for MinIO bucket initialization..."
-          docker wait bowphp_minio_init || true
+          echo "Waiting for the public 'tests' bucket on MinIO..."
+          for i in {1..30}; do
+            if [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:9000/tests/)" = "200" ]; then
+              echo "MinIO bucket is ready!"
+              break
+            fi
+            echo "Waiting for MinIO... ($i/30)"
+            sleep 2
+          done
 
       - name: Cache Composer packages
         id: composer-cache
