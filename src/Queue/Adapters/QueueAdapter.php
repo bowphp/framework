@@ -443,7 +443,11 @@ abstract class QueueAdapter
         error_log($exception->getMessage());
 
         try {
-            logger()->error($exception->getMessage(), $exception->getTrace());
+            logger()->error($exception->getMessage(), [
+                'exception' => $exception::class,
+                'file' => $exception->getFile() . ':' . $exception->getLine(),
+                'trace' => $exception->getTraceAsString(),
+            ]);
         } catch (Throwable $loggerException) {
             // Logger not available, already logged to error_log
         }

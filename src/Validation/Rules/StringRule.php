@@ -132,7 +132,7 @@ trait StringRule
             return;
         }
 
-        if (Str::isAlphaNum($this->inputs[$key])) {
+        if (is_string($this->inputs[$key] ?? null) && Str::isAlphaNum($this->inputs[$key])) {
             return;
         }
 
@@ -205,7 +205,9 @@ trait StringRule
 
         $length = (int)end($match);
 
-        if (Str::len($this->inputs[$key]) == $length) {
+        $size = $this->inputSize($key);
+
+        if ($size !== null && $size == $length) {
             return;
         }
 
@@ -240,7 +242,7 @@ trait StringRule
             return;
         }
 
-        if (Str::isLower($this->inputs[$key])) {
+        if (is_string($this->inputs[$key] ?? null) && Str::isLower($this->inputs[$key])) {
             return;
         }
 
@@ -269,7 +271,7 @@ trait StringRule
             return;
         }
 
-        if (Str::isUpper($this->inputs[$key])) {
+        if (is_string($this->inputs[$key] ?? null) && Str::isUpper($this->inputs[$key])) {
             return;
         }
 
@@ -298,7 +300,7 @@ trait StringRule
             return;
         }
 
-        if (Str::isAlpha($this->inputs[$key])) {
+        if (is_string($this->inputs[$key] ?? null) && Str::isAlpha($this->inputs[$key])) {
             return;
         }
 
@@ -330,7 +332,9 @@ trait StringRule
 
         $length = (int)end($match);
 
-        if (Str::len($this->inputs[$key]) >= $length) {
+        $size = $this->inputSize($key);
+
+        if ($size !== null && $size >= $length) {
             return;
         }
 
@@ -368,7 +372,9 @@ trait StringRule
 
         $length = (int)end($match);
 
-        if (Str::len($this->inputs[$key]) <= $length) {
+        $size = $this->inputSize($key);
+
+        if ($size !== null && $size <= $length) {
             return;
         }
 
@@ -422,5 +428,29 @@ trait StringRule
             "masque" => $masque,
             "message" => $this->last_message
         ];
+    }
+
+    /**
+     * The quantity that min, max and size compare against their bound.
+     *
+     * Mirrors the convention documented by the between rule: a native number
+     * (as decoded from a JSON body) is compared by value, a string by its
+     * character length. Numeric strings keep length semantics so form inputs
+     * such as phone numbers or postal codes behave as before. Anything else
+     * (bool, array, object) yields null and fails the rule instead of
+     * throwing a TypeError from the string-typed Str helpers.
+     *
+     * @param  string $key
+     * @return int|float|null
+     */
+    private function inputSize(string $key): int|float|null
+    {
+        $value = $this->inputs[$key] ?? null;
+
+        return match (true) {
+            is_int($value) || is_float($value) => $value,
+            is_string($value)                   => Str::len($value),
+            default                             => null,
+        };
     }
 }
