@@ -3,6 +3,8 @@
 namespace Bow\Tests\Container;
 
 use Bow\Container\Capsule;
+use Bow\Container\Exception\ContainerException;
+use Bow\Tests\Container\Stubs\AbstractRepository;
 use Bow\Tests\Container\Stubs\FileLogger;
 use Bow\Tests\Container\Stubs\LoggerInterface;
 use Bow\Tests\Container\Stubs\MyClass;
@@ -215,6 +217,52 @@ class CapsuleTest extends \PHPUnit\Framework\TestCase
         // Attempting to resolve will try to instantiate "removable" as a class
         $this->expectException(\ReflectionException::class);
         $capsule->make('removable');
+    }
+
+    /**
+     * Regression: make() on an interface with no binding used to return the
+     * interface *name* (a string), which then blew up far away as
+     * "Compass::getInjectParameter(): Return value must be of type ?object,
+     * string returned" when a controller depended on that interface.
+     */
+    public function test_make_unbound_interface_throws_a_clear_exception()
+    {
+        $capsule = new Capsule();
+
+        $this->expectException(ContainerException::class);
+        $this->expectExceptionMessage(PaymentGatewayInterface::class);
+
+        $capsule->make(PaymentGatewayInterface::class);
+    }
+
+    public function test_make_unbound_abstract_class_throws_a_clear_exception()
+    {
+        $capsule = new Capsule();
+
+        $this->expectException(ContainerException::class);
+        $this->expectExceptionMessage('abstract class');
+
+        $capsule->make(AbstractRepository::class);
+    }
+
+    public function test_make_with_unbound_interface_throws_a_clear_exception()
+    {
+        $capsule = new Capsule();
+
+        $this->expectException(ContainerException::class);
+
+        $capsule->makeWith(PaymentGatewayInterface::class, []);
+    }
+
+    public function test_dependency_on_unbound_interface_throws_a_clear_exception()
+    {
+        // OrderService needs a PaymentGatewayInterface; nothing is bound.
+        $capsule = new Capsule();
+
+        $this->expectException(ContainerException::class);
+        $this->expectExceptionMessage(PaymentGatewayInterface::class);
+
+        $capsule->make(OrderService::class);
     }
 
     public function test_make_with_parameters()
