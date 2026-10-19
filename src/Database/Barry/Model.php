@@ -236,19 +236,15 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public static function query(): Builder
     {
-        if (
-            static::$builder instanceof Builder
-            && static::$builder->getModel() == static::class
-        ) {
-            if (DB::getConnectionName() == static::$builder->getAdapterName()) {
-                return static::$builder;
-            }
-        }
+        // A new builder on every call: one
+        // builder reused for the whole process replayed what a failed or
+        // half-built query left in it into the next query on the model. Only
+        // the class's default properties are cached. static::$builder is
+        // still assigned below: create() and writeRows() read it.
+        static $default_properties = [];
 
-        // Reflection action
-        $reflection = new ReflectionClass(static::class);
-
-        $properties = $reflection->getDefaultProperties();
+        $properties = $default_properties[static::class]
+            ??= (new ReflectionClass(static::class))->getDefaultProperties();
 
         if (!isset($properties['table']) || $properties['table'] == null) {
             $parts = explode('\\', static::class);
@@ -356,10 +352,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public static function retrieveBy(string $column, mixed $value): Collection
     {
-        $model = new static();
-        $model->where($column, $value);
-
-        return $model->get();
+        // One chain on one builder: query() no longer shares a builder between
+        // separate calls.
+        return static::query()->where($column, $value)->get();
     }
 
     /**
@@ -404,14 +399,16 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $id = (array) $id;
 
         $model = new static();
-        $model->select($select);
-        $model->whereIn($model->primary_key, $id);
+
+        // One chain on one builder: query() no longer shares a builder between
+        // separate calls.
+        $query = static::query()->select($select)->whereIn($model->primary_key, $id);
 
         if (count($id) != 1) {
-            return $model->get();
+            return $query->get();
         }
 
-        return $model->first();
+        return $query->first();
     }
 
     /**
@@ -591,14 +588,14 @@ abstract class Model implements ArrayAccess, JsonSerializable
         // Insert information in the database
         $row_affected = $builder->insert($this->attributes);
 
-        // We get a last insertion id value
-        if (static::$builder->getAdapterName() == 'pgsql') {
+        // We get a last insertion id value from the builder that inserted
+        if ($builder->getAdapterName() == 'pgsql') {
             if ($this->auto_increment) {
                 $sequence = $this->table . "_" . $this->primary_key . '_seq';
-                $primary_key_value = static::$builder->getPdo()->lastInsertId($sequence);
+                $primary_key_value = $builder->getPdo()->lastInsertId($sequence);
             }
         } else {
-            $primary_key_value = static::$builder->getPdo()->lastInsertId();
+            $primary_key_value = $builder->getPdo()->lastInsertId();
         }
 
         if ((int)$primary_key_value == 0) {
