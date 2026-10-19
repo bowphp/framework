@@ -46,12 +46,14 @@ class Builder extends QueryBuilder
      */
     public function get(array $columns = []): Model|Collection|null
     {
-        $data = parent::get($columns);
-
-        // Read and reset the eager loads now: query() memoizes a shared Builder
-        // instance, so the list must not leak into the next query on this model.
-        $eager_loads = $this->eager_loads;
-        $this->eager_loads = [];
+        // Read and reset the eager loads even when the query throws, so the
+        // list never reaches the next query on this builder.
+        try {
+            $data = parent::get($columns);
+        } finally {
+            $eager_loads = $this->eager_loads;
+            $this->eager_loads = [];
+        }
 
         if (is_null($data)) {
             return null;

@@ -1049,6 +1049,22 @@ class QueryBuilder implements JsonSerializable
      */
     private function aggregate($aggregate, $column): mixed
     {
+        try {
+            return $this->runAggregate($aggregate, $column);
+        } finally {
+            $this->resetState();
+        }
+    }
+
+    /**
+     * The aggregate itself; aggregate() resets the builder around it.
+     *
+     * @param  $aggregate
+     * @param  string $column
+     * @return mixed
+     */
+    private function runAggregate($aggregate, $column): mixed
+    {
         $column = $this->assertSafeIdentifier($column, 'aggregate', true);
         $sql = 'select ' . $aggregate . '(' . $column . ') from ' . $this->table;
 
@@ -1228,8 +1244,13 @@ class QueryBuilder implements JsonSerializable
 
         $where_data_binding = $this->where_data_binding;
 
+        // count() resets the whole builder: keep what the final select needs.
+        $kept = [$this->select, $this->order, $this->limit, $this->as, $this->lock_for_update, $this->shared_lock];
+
         // We count all.
         $count = $this->count();
+
+        [$this->select, $this->order, $this->limit, $this->as, $this->lock_for_update, $this->shared_lock] = $kept;
 
         $this->where = $where;
 
@@ -1319,6 +1340,45 @@ class QueryBuilder implements JsonSerializable
      * @throws
      */
     public function get(array $columns = []): array|object|null
+    {
+        try {
+            return $this->runGet($columns);
+        } finally {
+            $this->resetState();
+        }
+    }
+
+    /**
+     * Clear every clause, binding and flag a statement consumes, so nothing a
+     * statement left behind (failed or not) reaches the next one built on
+     * this builder.
+     *
+     * @return void
+     */
+    private function resetState(): void
+    {
+        $this->select = null;
+        $this->where = null;
+        $this->where_data_binding = [];
+        $this->join = null;
+        $this->limit = null;
+        $this->group = null;
+        $this->having = null;
+        $this->having_data_binding = [];
+        $this->order = null;
+        $this->as = null;
+        $this->first = false;
+        $this->lock_for_update = false;
+        $this->shared_lock = false;
+    }
+
+    /**
+     * The select itself; get() resets the builder around it.
+     *
+     * @param  array $columns
+     * @return array|object|null
+     */
+    private function runGet(array $columns): array|object|null
     {
         if (count($columns) > 0) {
             $this->select($columns);
@@ -1422,6 +1482,21 @@ class QueryBuilder implements JsonSerializable
      */
     public function update(array $data = []): int
     {
+        try {
+            return $this->runUpdate($data);
+        } finally {
+            $this->resetState();
+        }
+    }
+
+    /**
+     * The update itself; update() resets the builder around it.
+     *
+     * @param  array $data
+     * @return int
+     */
+    private function runUpdate(array $data): int
+    {
         $columns = array_keys($data);
 
         foreach ($columns as $column) {
@@ -1470,6 +1545,20 @@ class QueryBuilder implements JsonSerializable
      * @return int
      */
     public function delete(): int
+    {
+        try {
+            return $this->runDelete();
+        } finally {
+            $this->resetState();
+        }
+    }
+
+    /**
+     * The delete itself; delete() resets the builder around it.
+     *
+     * @return int
+     */
+    private function runDelete(): int
     {
         $sql = 'delete from ' . $this->table;
 
@@ -1522,6 +1611,24 @@ class QueryBuilder implements JsonSerializable
      * @return int
      */
     private function incrementAction(string $column, int $step = 1, string $direction = '+')
+    {
+        // The bindings were never cleared here before, even on success.
+        try {
+            return $this->runIncrementAction($column, $step, $direction);
+        } finally {
+            $this->resetState();
+        }
+    }
+
+    /**
+     * The increment itself; incrementAction() resets the builder around it.
+     *
+     * @param  string $column
+     * @param  int    $step
+     * @param  string $direction
+     * @return int
+     */
+    private function runIncrementAction(string $column, int $step, string $direction): int
     {
         $column = $this->assertSafeIdentifier($column, 'incrementAction');
         $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $direction . ' ' . $step;
