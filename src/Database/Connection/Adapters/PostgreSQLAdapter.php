@@ -29,7 +29,7 @@ class PostgreSQLAdapter extends AbstractConnection
      * @param  array $config
      * @return void
      */
-    protected function validateConfig(array $config): void
+    protected function validateConfig(#[\SensitiveParameter] array $config): void
     {
         // Check the existence of database definition
         if (!isset($config['database'])) {
@@ -43,7 +43,7 @@ class PostgreSQLAdapter extends AbstractConnection
      * @param  array $config
      * @return PDO
      */
-    protected function makePdo(array $config): PDO
+    protected function makePdo(#[\SensitiveParameter] array $config): PDO
     {
         // Build of the pgsql dsn
         if (isset($config['socket']) && !is_null($config['socket']) && !empty($config['socket'])) {
@@ -88,6 +88,11 @@ class PostgreSQLAdapter extends AbstractConnection
         $options = [
             PDO::ATTR_DEFAULT_FETCH_MODE => $config['fetch'] ?? $this->fetch,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            // Opt-in per connection. Behind a pooler a server-side prepared
+            // statement can outlive a schema change and fail with SQLSTATE
+            // 0A000 "cached plan must not change result type"; with emulated
+            // prepares nothing is cached on the server and PDO quotes values.
+            PDO::ATTR_EMULATE_PREPARES => (bool) ($config['emulate_prepares'] ?? false),
         ];
 
         // Build the PDO connection

@@ -6,6 +6,7 @@ namespace Bow\Storage\Service;
 
 use Bow\Http\UploadedFile;
 use Bow\Storage\Contracts\FilesystemInterface;
+use Bow\Storage\Exception\ResourceException;
 use RuntimeException;
 
 class DiskFilesystemService implements FilesystemInterface
@@ -108,11 +109,38 @@ class DiskFilesystemService implements FilesystemInterface
      */
     public function path(string $file): string
     {
-        if (preg_match('#^' . $this->base_directory . '#', $file)) {
-            return $file;
+        $base = rtrim($this->base_directory, DIRECTORY_SEPARATOR);
+
+        // Join the file to the base directory unless it is already an absolute
+        // path located inside the base directory (plain prefix check, not regex).
+        if ($file === $base || str_starts_with($file, $base . DIRECTORY_SEPARATOR)) {
+            $path = $file;
+        } else {
+            $path = $base . DIRECTORY_SEPARATOR . ltrim($file, '/');
         }
 
-        return rtrim($this->base_directory, '/') . '/' . ltrim($file, '/');
+        // Reject any parent-directory traversal segment before touching the disk.
+        if (in_array('..', explode('/', str_replace('\\', '/', $path)), true)) {
+            throw new ResourceException(
+                sprintf('The path "%s" is outside of the base directory.', $file)
+            );
+        }
+
+        // Resolve the target (or its parent, for files that do not exist yet) and
+        // make sure the result stays confined to the base directory, guarding
+        // against symlink escapes.
+        $resolved = realpath($path) ?: realpath(dirname($path));
+
+        if ($resolved !== false
+            && $resolved !== $base
+            && !str_starts_with($resolved . DIRECTORY_SEPARATOR, $base . DIRECTORY_SEPARATOR)
+        ) {
+            throw new ResourceException(
+                sprintf('The path "%s" is outside of the base directory.', $file)
+            );
+        }
+
+        return $path;
     }
 
     /**

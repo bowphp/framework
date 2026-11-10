@@ -71,6 +71,17 @@ class QueryBuilder implements JsonSerializable
     protected ?string $having = null;
 
     /**
+     * Bound values for the having clause.
+     *
+     * Kept separate from where bindings because having placeholders appear
+     * after where placeholders in the assembled SQL; they are merged in the
+     * correct positional order when the having clause is appended.
+     *
+     * @var array
+     */
+    protected array $having_data_binding = [];
+
+    /**
      * Order By statement collector
      *
      * @var ?string
@@ -341,6 +352,8 @@ class QueryBuilder implements JsonSerializable
             );
         }
 
+        $column = $this->assertSafeIdentifier($column, 'where');
+
         if ($value instanceof QueryBuilder) {
             $indicator = "(" . $value->toSql() . ")";
         } else {
@@ -405,6 +418,40 @@ class QueryBuilder implements JsonSerializable
     }
 
     /**
+     * Guard a column/identifier that is interpolated straight into SQL.
+     *
+     * Clauses like order by, group by and having name a column instead of
+     * binding a value, so the identifier cannot be a placeholder and is
+     * concatenated into the statement. Restrict it to a plain (optionally
+     * table-qualified) identifier so it can never carry an injected fragment.
+     * Raw expressions are intentionally not accepted here.
+     *
+     * @param  string $identifier
+     * @param  string $clause
+     * @return string
+     * @throws QueryBuilderException
+     */
+    private function assertSafeIdentifier(string $identifier, string $clause, bool $allowWildcard = false): string
+    {
+        $trimmed = trim($identifier);
+
+        // Aggregates and SELECT lists may legitimately use "*" (and
+        // "table.*"); WHERE/JOIN/ORDER BY/GROUP BY identifiers may not.
+        $pattern = $allowWildcard
+            ? '/^(\*|[A-Za-z_][A-Za-z0-9_]*(\.(\*|[A-Za-z_][A-Za-z0-9_]*))?)$/'
+            : '/^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$/';
+
+        if (!preg_match($pattern, $trimmed)) {
+            throw new QueryBuilderException(
+                "Unsafe identifier passed to {$clause}: [{$identifier}]. "
+                . "Only a plain or table-qualified column name is allowed."
+            );
+        }
+
+        return $trimmed;
+    }
+
+    /**
      * Formats the select request
      *
      * @return string
@@ -464,6 +511,15 @@ class QueryBuilder implements JsonSerializable
 
             if (!is_null($this->having)) {
                 $sql .= ' having ' . $this->having;
+
+                // having placeholders come after where placeholders in the SQL,
+                // so appending their values here keeps the positional order.
+                $this->where_data_binding = array_merge(
+                    $this->where_data_binding,
+                    $this->having_data_binding
+                );
+                $this->having_data_binding = [];
+                $this->having = null;
             }
         }
 
@@ -517,6 +573,8 @@ class QueryBuilder implements JsonSerializable
      */
     public function whereNull(string $column): QueryBuilder
     {
+        $column = $this->assertSafeIdentifier($column, 'whereNull');
+
         if (is_null($this->where)) {
             $this->where = $column . ' is null';
         } else {
@@ -536,6 +594,8 @@ class QueryBuilder implements JsonSerializable
      */
     public function whereNotNull(string $column): QueryBuilder
     {
+        $column = $this->assertSafeIdentifier($column, 'whereNotNull');
+
         if (is_null($this->where)) {
             $this->where = $column . ' is not null';
         } else {
@@ -554,14 +614,17 @@ class QueryBuilder implements JsonSerializable
      */
     public function whereNotBetween(string $column, array $range): QueryBuilder
     {
+        $column = $this->assertSafeIdentifier($column, 'whereNotBetween');
         $range = (array) $range;
-        $between = implode(' and ', $range);
 
         if (is_null($this->where)) {
-            $this->where = $column . ' not between ' . $between;
+            $this->where = $column . ' not between ? and ?';
         } else {
-            $this->where .= ' and ' . $column . ' not between ' . $between;
+            $this->where .= ' and ' . $column . ' not between ? and ?';
         }
+
+        $this->where_data_binding[] = $range[0];
+        $this->where_data_binding[] = $range[1];
 
         return $this;
     }
@@ -577,14 +640,17 @@ class QueryBuilder implements JsonSerializable
      */
     public function whereBetween(string $column, array $range): QueryBuilder
     {
+        $column = $this->assertSafeIdentifier($column, 'whereBetween');
         $range = (array) $range;
-        $between = implode(' and ', $range);
 
         if (is_null($this->where)) {
-            $this->where = $column . ' between ' . $between;
+            $this->where = $column . ' between ? and ?';
         } else {
-            $this->where .= ' and ' . $column . ' between ' . $between;
+            $this->where .= ' and ' . $column . ' between ? and ?';
         }
+
+        $this->where_data_binding[] = $range[0];
+        $this->where_data_binding[] = $range[1];
 
         return $this;
     }
@@ -627,6 +693,8 @@ class QueryBuilder implements JsonSerializable
             $in = (string) $range;
         }
 
+        $column = $this->assertSafeIdentifier($column, 'whereNotIn');
+
         if (is_null($this->where)) {
             $this->where = $column . ' not in (' . $in . ')';
         } else {
@@ -655,10 +723,14 @@ class QueryBuilder implements JsonSerializable
             $this->where_data_binding = array_merge($this->where_data_binding, $range);
 
             $map = array_map(fn() => '?', $range);
-            $in = implode(', ', $map);
+            // An empty list is `in (null)`: valid SQL that matches no row,
+            // where `in ()` is a syntax error (SQLSTATE 42601).
+            $in = $range === [] ? 'null' : implode(', ', $map);
         } else {
             $in = (string) $range;
         }
+
+        $column = $this->assertSafeIdentifier($column, 'whereIn');
 
         if (is_null($this->where)) {
             $this->where = $column . ' in (' . $in . ')';
@@ -684,7 +756,7 @@ class QueryBuilder implements JsonSerializable
         mixed $comparator = '=',
         ?string $second = null
     ): QueryBuilder {
-        $table = $this->getPrefix() . $table;
+        $table = $this->getPrefix() . $this->assertSafeIdentifier($table, 'join');
 
         if (is_null($this->join)) {
             $this->join = '';
@@ -697,6 +769,9 @@ class QueryBuilder implements JsonSerializable
             $second = $comparator;
             $comparator = '=';
         }
+
+        $first = $this->assertSafeIdentifier($first, 'join');
+        $second = $this->assertSafeIdentifier($second, 'join');
 
         // Building the join query
         $this->join .= 'inner join ' . $table . ' on ' . $first . ' ' . $comparator . ' ' . $second;
@@ -743,7 +818,7 @@ class QueryBuilder implements JsonSerializable
         mixed $comparator = '=',
         ?string $second = null
     ): QueryBuilder {
-        $table = $this->getPrefix() . $table;
+        $table = $this->getPrefix() . $this->assertSafeIdentifier($table, 'join');
 
         if (is_null($this->join)) {
             $this->join = '';
@@ -756,6 +831,9 @@ class QueryBuilder implements JsonSerializable
             $second = $comparator;
             $comparator = '=';
         }
+
+        $first = $this->assertSafeIdentifier($first, 'join');
+        $second = $this->assertSafeIdentifier($second, 'join');
 
         // Building the join query
         $this->join .= 'left join ' . $table . ' on ' . $first . ' ' . $comparator . ' ' . $second . ' ';
@@ -779,7 +857,7 @@ class QueryBuilder implements JsonSerializable
         mixed $comparator = '=',
         ?string $second = null
     ): QueryBuilder {
-        $table = $this->getPrefix() . $table;
+        $table = $this->getPrefix() . $this->assertSafeIdentifier($table, 'join');
 
         if (is_null($this->join)) {
             $this->join = '';
@@ -792,6 +870,9 @@ class QueryBuilder implements JsonSerializable
             $second = $comparator;
             $comparator = '=';
         }
+
+        $first = $this->assertSafeIdentifier($first, 'join');
+        $second = $this->assertSafeIdentifier($second, 'join');
 
         $this->join .= 'right join ' . $table . ' on ' . $first . ' ' . $comparator . ' ' . $second;
 
@@ -877,7 +958,7 @@ class QueryBuilder implements JsonSerializable
     public function groupBy(string $column): QueryBuilder
     {
         if (is_null($this->group)) {
-            $this->group = $column;
+            $this->group = $this->assertSafeIdentifier($column, 'groupBy');
         }
 
         return $this;
@@ -904,10 +985,21 @@ class QueryBuilder implements JsonSerializable
             $comparator = '=';
         }
 
-        if (is_null($this->having)) {
-            $this->having = $column . ' ' . $comparator . ' ' . $value;
+        $column = $this->assertSafeIdentifier($column, 'having');
+
+        // Bind the value with a placeholder, exactly like where(). A subquery
+        // is inlined; any scalar is parameterised so it can never be injected.
+        if ($value instanceof QueryBuilder) {
+            $indicator = '(' . $value->toSql() . ')';
         } else {
-            $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' ' . $value;
+            $indicator = '?';
+            $this->having_data_binding[] = $value;
+        }
+
+        if (is_null($this->having)) {
+            $this->having = $column . ' ' . $comparator . ' ' . $indicator;
+        } else {
+            $this->having .= ' ' . $boolean . ' ' . $column . ' ' . $comparator . ' ' . $indicator;
         }
 
         return $this;
@@ -925,6 +1017,8 @@ class QueryBuilder implements JsonSerializable
         if (!in_array($type, ['asc', 'desc'])) {
             $type = 'asc';
         }
+
+        $column = $this->assertSafeIdentifier($column, 'orderBy');
 
         if (is_null($this->order)) {
             $this->order = 'order by ' . $column . ' ' . strtolower($type);
@@ -955,6 +1049,7 @@ class QueryBuilder implements JsonSerializable
      */
     private function aggregate($aggregate, $column): mixed
     {
+        $column = $this->assertSafeIdentifier($column, 'aggregate', true);
         $sql = 'select ' . $aggregate . '(' . $column . ') from ' . $this->table;
 
         // Adding the join clause
@@ -977,6 +1072,14 @@ class QueryBuilder implements JsonSerializable
 
             if (!is_null($this->having)) {
                 $sql .= ' having ' . $this->having;
+
+                // Keep having values positionally after where values.
+                $this->where_data_binding = array_merge(
+                    $this->where_data_binding,
+                    $this->having_data_binding
+                );
+                $this->having_data_binding = [];
+                $this->having = null;
             }
         }
 
@@ -1275,6 +1378,8 @@ class QueryBuilder implements JsonSerializable
         foreach ($select as $key => $value) {
             if ($value instanceof QueryBuilder) {
                 $select[$key] = '(' . $value->toSql() . ')';
+            } else {
+                $select[$key] = $this->assertSafeIdentifier((string) $value, 'select', true);
             }
         }
 
@@ -1317,8 +1422,14 @@ class QueryBuilder implements JsonSerializable
      */
     public function update(array $data = []): int
     {
+        $columns = array_keys($data);
+
+        foreach ($columns as $column) {
+            $this->assertSafeIdentifier((string) $column, 'update');
+        }
+
         $sql = 'update ' . $this->table . ' set ';
-        $sql .= implode(' = ?, ', array_keys($data)) . ' = ?';
+        $sql .= implode(' = ?, ', $columns) . ' = ?';
 
         if (!is_null($this->where)) {
             $sql .= ' where ' . $this->where;
@@ -1412,6 +1523,7 @@ class QueryBuilder implements JsonSerializable
      */
     private function incrementAction(string $column, int $step = 1, string $direction = '+')
     {
+        $column = $this->assertSafeIdentifier($column, 'incrementAction');
         $sql = 'update ' . $this->table . ' set ' . $column . ' = ' . $column . ' ' . $direction . ' ' . $step;
 
         if (!is_null($this->where)) {
@@ -1436,6 +1548,8 @@ class QueryBuilder implements JsonSerializable
      */
     public function distinct(string $column)
     {
+        $column = $this->assertSafeIdentifier($column, 'distinct', true);
+
         if (!is_null($this->select)) {
             $this->select .= ", distinct $column";
         } else {
@@ -1550,6 +1664,11 @@ class QueryBuilder implements JsonSerializable
     private function insertOne(array $values): int
     {
         $fields = array_keys($values);
+
+        foreach ($fields as $field) {
+            $this->assertSafeIdentifier((string) $field, 'insertOne');
+        }
+
         $column = implode(', ', $fields);
 
         $sql = 'insert into ' . $this->table . '(' . $column . ') values';

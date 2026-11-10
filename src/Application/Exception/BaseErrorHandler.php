@@ -77,7 +77,7 @@ class BaseErrorHandler
         }
 
         if (app_env("APP_ENV") != "production") {
-            $response["trace"] = $exception->getTrace();
+            $response["trace"] = $exception->getTraceAsString();
         }
 
         response()->status($status);

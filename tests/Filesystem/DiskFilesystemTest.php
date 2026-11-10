@@ -3,6 +3,7 @@
 namespace Bow\Tests\Filesystem;
 
 use Bow\Http\UploadedFile;
+use Bow\Storage\Exception\ResourceException;
 use Bow\Storage\Service\DiskFilesystemService;
 use Bow\Storage\Storage;
 use Bow\Tests\Config\TestingConfiguration;
@@ -80,6 +81,26 @@ class DiskFilesystemTest extends \PHPUnit\Framework\TestCase
         $path = sprintf("%s/%s", $this->storage->getBaseDirectory(), "filename.txt");
 
         $this->assertEquals($this->storage->path($path), $path);
+    }
+
+    public function test_path_rejects_traversal()
+    {
+        $this->expectException(ResourceException::class);
+
+        $this->storage->path('../../x');
+    }
+
+    public function test_get_does_not_leak_outside_base_directory()
+    {
+        $secret = dirname($this->storage->getBaseDirectory()) . '/secret_regression.txt';
+        file_put_contents($secret, 'TOP-SECRET');
+
+        try {
+            $this->expectException(ResourceException::class);
+            $this->storage->get('../secret_regression.txt');
+        } finally {
+            @unlink($secret);
+        }
     }
 
     public function test_is_directory()

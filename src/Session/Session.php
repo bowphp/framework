@@ -121,13 +121,12 @@ class Session implements CollectionInterface
         $this->start();
 
         // Rotate the underlying session ID and delete the previous record so a
-        // fixated/leaked ID can no longer be reused, then clear the values.
+        // fixated/leaked ID can no longer be reused. session_regenerate_id(true)
+        // deletes the old file while PRESERVING $_SESSION, so authenticated data
+        // survives the rotation (do NOT flush/destroy here).
         if (PHP_SESSION_ACTIVE === session_status()) {
             session_regenerate_id(true);
         }
-
-        $this->flush();
-        $this->start();
     }
 
     /**

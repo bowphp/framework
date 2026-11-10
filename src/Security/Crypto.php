@@ -23,12 +23,27 @@ class Crypto
     private static string $cipher = 'AES-256-CBC';
 
     /**
+     * Whether decrypt() may fall back to the unauthenticated legacy format
+     * (static IV, no MAC) for values lacking the BOW2: header. Disabled by
+     * default so decrypt() fails closed; opt in only to read old ciphertexts.
+     *
+     * @var bool
+     */
+    private static bool $allow_legacy = false;
+
+    /**
      * Header tagging the authenticated (random-IV + HMAC) payload format.
      *
      * The ':' is not part of the base64 alphabet, so a value carrying this
      * prefix can never be confused with a legacy (base64-only) ciphertext.
      */
     private const HEADER = 'BOW2:';
+
+    /**
+     * Header tagging an authenticated-but-unencrypted (signed) payload. The ':'
+     * keeps it distinguishable from an encrypted (BOW2:) or base64 value.
+     */
+    private const SIGN_HEADER = 'BOWS1:';
 
     /**
      * The authentication tag length in bytes (HMAC-SHA256).
@@ -48,6 +63,17 @@ class Crypto
         if (!is_null($cipher)) {
             static::$cipher = $cipher;
         }
+    }
+
+    /**
+     * Allow or forbid decrypt() from falling back to the unauthenticated legacy
+     * format. Off by default; enable only while migrating old ciphertexts.
+     *
+     * @param bool $allow
+     */
+    public static function allowLegacy(bool $allow = true): void
+    {
+        static::$allow_legacy = $allow;
     }
 
     /**
@@ -101,6 +127,12 @@ class Crypto
         $key = static::resolveKey();
 
         if (!str_starts_with($data, self::HEADER)) {
+            // Fail closed on non-authenticated input unless the legacy format
+            // has been explicitly re-enabled for migration.
+            if (!static::$allow_legacy) {
+                return false;
+            }
+
             return static::decryptLegacy($data, $key);
         }
 
@@ -134,6 +166,59 @@ class Crypto
             OPENSSL_RAW_DATA,
             $iv
         );
+    }
+
+    /**
+     * Produce a tamper-proof but *readable* payload.
+     *
+     * Unlike encrypt(), the data is not enciphered — only a detached
+     * HMAC-SHA256 tag is prepended — so the payload stays inspectable in transit
+     * (e.g. a queue backend) while still being protected against tampering and
+     * forgery. Use when integrity matters but confidentiality does not.
+     *
+     * @param  string $data
+     * @return string
+     */
+    public static function sign(string $data): string
+    {
+        $mac = hash_hmac('sha256', $data, static::deriveKey('sign', static::resolveKey()), true);
+
+        return self::SIGN_HEADER . base64_encode($mac) . '.' . $data;
+    }
+
+    /**
+     * Verify a signed payload, returning the original data or false on a bad tag.
+     *
+     * Fails closed (false) on a wrong header, truncation, tampering or wrong key,
+     * exactly like decrypt().
+     *
+     * @param  string $data
+     * @return string|bool
+     */
+    public static function verify(string $data): string|bool
+    {
+        if (!str_starts_with($data, self::SIGN_HEADER)) {
+            return false;
+        }
+
+        $body = substr($data, strlen(self::SIGN_HEADER));
+        $dot = strpos($body, '.');
+
+        if ($dot === false) {
+            return false;
+        }
+
+        $mac = base64_decode(substr($body, 0, $dot), true);
+
+        if ($mac === false || strlen($mac) !== self::MAC_LENGTH) {
+            return false;
+        }
+
+        $payload = substr($body, $dot + 1);
+        $calculated = hash_hmac('sha256', $payload, static::deriveKey('sign', static::resolveKey()), true);
+
+        // Constant-time compare; reject before the caller trusts the payload.
+        return hash_equals($calculated, $mac) ? $payload : false;
     }
 
     /**

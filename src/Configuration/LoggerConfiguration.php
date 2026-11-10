@@ -78,7 +78,14 @@ class LoggerConfiguration extends Configuration
 
         $handler = new CallbackHandler(
             function ($exception, $inspector, $run) use ($monolog, $error_handler) {
-                $monolog->error($exception->getMessage(), $exception->getTrace());
+                $monolog->error($exception->getMessage(), [
+                    'exception' => $exception::class,
+                    'file' => $exception->getFile() . ':' . $exception->getLine(),
+                    // A string trace: never serialize the frame args, which may
+                    // hold objects whose jsonSerialize() runs a query (and would
+                    // throw here on an already-aborted transaction).
+                    'trace' => $exception->getTraceAsString(),
+                ]);
 
                 $result = call_user_func_array([new $error_handler(), 'handle'], [$exception]);
 

@@ -63,6 +63,10 @@ class SessionGuard extends GuardContract
         $password = $credentials[$fields['password']];
 
         if (Hash::check($password, $user->{$fields['password']})) {
+            // Rotate the session ID on privilege elevation (anti session
+            // fixation). regenerate() preserves data, so the stored user below
+            // lives under the new ID.
+            $this->getSession()->regenerate();
             $this->getSession()->put($this->session_key, $user);
 
             if ($remember) {
@@ -127,6 +131,10 @@ class SessionGuard extends GuardContract
      */
     public function login(Authentication $user, bool $remember = false): bool
     {
+        // Rotate the session ID on privilege elevation (anti session fixation).
+        // regenerate() preserves data, so the stored user below lives under the
+        // new ID.
+        $this->getSession()->regenerate();
         $this->getSession()->add($this->session_key, $user);
 
         if ($remember) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bow\Container;
 
 use ArrayAccess;
+use Bow\Container\Exception\ContainerException;
 use Closure;
 use InvalidArgumentException;
 use ReflectionClass;
@@ -86,14 +87,19 @@ class Capsule implements ArrayAccess
      *
      * @param  string $key
      * @return mixed
-     * @throws
+     * @throws ContainerException when $key is an interface or abstract class without a binding
+     * @throws \ReflectionException when $key is not a class at all
      */
     private function resolve(string $key): mixed
     {
         $reflection = new ReflectionClass($key);
 
+        // An interface or abstract class with no binding cannot be built.
+        // Returning the key here handed a *string* to every caller expecting
+        // an instance, which surfaced far away as a TypeError in the
+        // controller injector. Fail here, naming the missing binding.
         if (!$reflection->isInstantiable()) {
-            return $key;
+            throw ContainerException::notInstantiable($key);
         }
 
         $constructor = $reflection->getConstructor();

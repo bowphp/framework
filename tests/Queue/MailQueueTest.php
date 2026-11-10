@@ -6,6 +6,7 @@ use Bow\Cache\CacheConfiguration;
 use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\DatabaseConfiguration;
+use Bow\Security\CryptoConfiguration;
 use Bow\Mail\Envelop;
 use Bow\Mail\MailConfiguration;
 use Bow\Mail\MailQueueTask;
@@ -30,6 +31,7 @@ class MailQueueTest extends TestCase
             QueueConfiguration::class,
             DatabaseConfiguration::class,
             EnvConfiguration::class,
+            CryptoConfiguration::class,
             LoggerConfiguration::class,
             MailConfiguration::class,
             ViewConfiguration::class,

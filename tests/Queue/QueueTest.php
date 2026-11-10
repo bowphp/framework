@@ -7,6 +7,7 @@ use Bow\Configuration\EnvConfiguration;
 use Bow\Configuration\LoggerConfiguration;
 use Bow\Database\Database;
 use Bow\Database\DatabaseConfiguration;
+use Bow\Security\CryptoConfiguration;
 use Bow\Mail\Mail;
 use Bow\Queue\Adapters\BeanstalkdAdapter;
 use Bow\Queue\Adapters\DatabaseAdapter;
@@ -50,6 +51,8 @@ class QueueTest extends TestCase
             DatabaseConfiguration::class,
             CacheConfiguration::class,
             EnvConfiguration::class,
+            // Queue payloads are now authenticated, so the worker needs the key.
+            CryptoConfiguration::class,
         ]);
 
         $config = TestingConfiguration::getConfig();

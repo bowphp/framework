@@ -65,17 +65,17 @@ class Tokenize
     }
 
     /**
-     * GGenerate an encrypted key
+     * Generate a cryptographically strong token.
+     *
+     * Drawn from 32 bytes (256 bits) of CSPRNG output. The previous version
+     * seeded only 6 random bytes mixed with a time/uniqid/rand() salt, so the
+     * real entropy floor was ~48 bits and the salt (non-CSPRNG) added none.
      *
      * @return string
      */
     public static function make(): string
     {
-        $salt = date('Y-m-d H:i:s', time() - 10000) . uniqid((string)rand(), true);
-
-        $token = base64_encode(base64_encode(openssl_random_pseudo_bytes(6)) . $salt);
-
-        return Str::slice(hash('sha256', $token), 1, 62);
+        return Str::slice(hash('sha256', random_bytes(32)), 1, 62);
     }
 
     /**

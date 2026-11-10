@@ -23,7 +23,7 @@ trait EmailRule
             return;
         }
 
-        if (Str::isMail($this->inputs[$key])) {
+        if (is_string($this->inputs[$key] ?? null) && Str::isMail($this->inputs[$key])) {
             return;
         }
 

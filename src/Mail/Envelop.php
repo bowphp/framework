@@ -137,9 +137,23 @@ class Envelop
      */
     public function withHeader(string $key, string $value): Envelop
     {
+        $key = $this->sanitizeHeaderValue($key);
+        $value = $this->sanitizeHeaderValue($value);
+
         $this->headers[] = "$key: $value";
 
         return $this;
+    }
+
+    /**
+     * Strip CR/LF/NUL from a header-bound value to prevent header injection
+     *
+     * @param  string $value
+     * @return string
+     */
+    private function sanitizeHeaderValue(string $value): string
+    {
+        return str_replace(["\r", "\n", "\0"], '', $value);
     }
 
     /**
@@ -151,10 +165,10 @@ class Envelop
      */
     public function to(string|array $to): Envelop
     {
-        $recipients = (array)$to;
+        $recipients = (array) $to;
 
-        foreach ($recipients as $to) {
-            $this->to[] = $this->formatEmail($to);
+        foreach ($recipients as $item) {
+            $this->to[] = $this->formatEmail($item);
         }
 
         return $this;
@@ -236,7 +250,7 @@ class Envelop
      */
     public function subject(string $subject): Envelop
     {
-        $this->subject = $subject;
+        $this->subject = $this->sanitizeHeaderValue($subject);
 
         return $this;
     }
@@ -250,6 +264,9 @@ class Envelop
      */
     public function from(string $from, ?string $name = null): Envelop
     {
+        $from = $this->sanitizeHeaderValue($from);
+        $name = ($name !== null) ? $this->sanitizeHeaderValue($name) : null;
+
         $this->from = ($name !== null) ? (ucwords($name) . " <{$from}>") : $from;
 
         return $this;
@@ -305,6 +322,9 @@ class Envelop
      */
     public function addBcc(string $mail, ?string $name = null): Envelop
     {
+        $mail = $this->sanitizeHeaderValue($mail);
+        $name = ($name !== null) ? $this->sanitizeHeaderValue($name) : null;
+
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
         $this->headers[] = "Bcc: $mail";
@@ -335,6 +355,9 @@ class Envelop
      */
     public function addCc(string $mail, ?string $name = null): Envelop
     {
+        $mail = $this->sanitizeHeaderValue($mail);
+        $name = ($name !== null) ? $this->sanitizeHeaderValue($name) : null;
+
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
         $this->headers[] = "Cc: $mail";
@@ -364,6 +387,9 @@ class Envelop
      */
     public function addReplyTo(string $mail, ?string $name = null): Envelop
     {
+        $mail = $this->sanitizeHeaderValue($mail);
+        $name = ($name !== null) ? $this->sanitizeHeaderValue($name) : null;
+
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
         $this->headers[] = "Replay-To: $mail";
@@ -393,6 +419,9 @@ class Envelop
      */
     public function addReturnPath(string $mail, ?string $name = null): Envelop
     {
+        $mail = $this->sanitizeHeaderValue($mail);
+        $name = ($name !== null) ? $this->sanitizeHeaderValue($name) : null;
+
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
         $this->headers[] = "Return-Path: $mail";
@@ -410,6 +439,9 @@ class Envelop
      */
     public function returnPath(string $mail, ?string $name = null): Envelop
     {
+        $mail = $this->sanitizeHeaderValue($mail);
+        $name = ($name !== null) ? $this->sanitizeHeaderValue($name) : null;
+
         $mail = ($name !== null) ? (ucwords($name) . " <{$mail}>") : $mail;
 
         $this->headers[] = "Return-Path: $mail";
